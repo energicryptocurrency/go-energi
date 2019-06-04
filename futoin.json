@@ -1,0 +1,27 @@
+{
+    "name": "energi3",
+    "version": "0.0.1",
+    "vcs": "git",
+    "tools": {
+        "go": "1.11",
+        "make": true
+    },
+    "package": [
+        "bin"
+    ],
+    "actions": {
+        "build": [
+            "@cid tool exec make -- all"
+        ],
+        "check": [
+            "lint",
+            "test"
+        ],
+        "lint": "@cid tool exec make -- lint",
+        "test": "@cid tool exec make -- test",
+        "package": [
+            "/bin/rm -rf bin && /bin/cp -ra build/bin bin",
+            "@default"
+        ]
+    }
+}
