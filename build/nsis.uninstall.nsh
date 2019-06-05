@@ -17,9 +17,9 @@ Section "Uninstall"
   rmDir "$SMPROGRAMS\${APPNAME}"
 
   # Firewall - remove rules if exists
-  SimpleFC::AdvRemoveRule "EnergiNode incoming peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "EnergiNode outgoing peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "EnergiNode UDP discovery (UDP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Core incoming peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Core outgoing peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Core UDP discovery (UDP:39797)"
 
   # Remove IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
   ${un.EnvVarUpdate} $0 "ETHEREUM_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"

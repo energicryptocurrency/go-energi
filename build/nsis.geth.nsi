@@ -30,7 +30,7 @@
 CRCCheck on
 
 !define GROUPNAME "Energi"
-!define APPNAME "EnergiNode"
+!define APPNAME "Energi Core"
 !define DESCRIPTION "Official Go implementation of the Energi protocol"
 !addplugindir .\
 

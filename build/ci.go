@@ -766,7 +766,7 @@ func doWindowsInstaller(cmdline []string) {
 	// first section contains the geth binary, second section holds the dev tools.
 	templateData := map[string]interface{}{
 		"License":    "COPYING",
-		"EnergiNode": gethTool,
+		"EnergiCore": gethTool,
 		"DevTools":   devTools,
 	}
 	build.Render("build/nsis.geth.nsi", filepath.Join(*workdir, "geth.nsi"), 0644, nil)
@@ -969,8 +969,8 @@ func doXCodeFramework(cmdline []string) {
 	// Prepare and upload a PodSpec to CocoaPods
 	if *deploy != "" {
 		meta := newPodMetadata(env, archive)
-		build.Render("build/pod.podspec", "EnergiNode.podspec", 0755, meta)
-		build.MustRunCommand("pod", *deploy, "push", "EnergiNode.podspec", "--allow-warnings", "--verbose")
+		build.Render("build/pod.podspec", "EnergiCore.podspec", 0755, meta)
+		build.MustRunCommand("pod", *deploy, "push", "EnergiCore.podspec", "--allow-warnings", "--verbose")
 	}
 }
 

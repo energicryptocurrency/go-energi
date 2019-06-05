@@ -101,14 +101,14 @@ invoking methods with the following info:
       * the total amount
       * the number of unique recipients
 
-* Energi Node todos
+* Energi Core todos
     - The signer should pass the `Origin` header as call-info to the UI. As of right now, the way that info about the request is
 put together is a bit of a hack into the http server. This could probably be greatly improved
-    - Relay: Energi Node should be started in `energi3 --external_signer localhost:8550`.
-    - Currently, the Energi Node APIs use `common.Address` in the arguments to transaction submission (e.g `to` field). This
+    - Relay: Energi Core should be started in `energi3 --external_signer localhost:8550`.
+    - Currently, the Energi Core APIs use `common.Address` in the arguments to transaction submission (e.g `to` field). This
   type is 20 `bytes`, and is incapable of carrying checksum information. The signer uses `common.MixedcaseAddress`, which
   retains the original input.
-    - The Energi Node api should switch to use the same type, and relay `to`-account verbatim to the external api.
+    - The Energi Core api should switch to use the same type, and relay `to`-account verbatim to the external api.
 
 * [x] Storage
     * [x] An encrypted key-value storage should be implemented
@@ -125,7 +125,7 @@ put together is a bit of a hack into the http server. This could probably be gre
 
 ### External API
 
-The signer listens to HTTP requests on `rpcaddr`:`rpcport`, with the same JSONRPC standard as Energi Node. The messages are
+The signer listens to HTTP requests on `rpcaddr`:`rpcport`, with the same JSONRPC standard as Energi Core. The messages are
 expected to be JSON [jsonrpc 2.0 standard](http://www.jsonrpc.org/specification).
 
 Some of these call can require user interaction. Clients must be aware that responses

@@ -13,9 +13,9 @@ PageEx license
 PageExEnd
 
 # Install energi3 binary
-Section "EnergiNode" GETH_IDX
+Section "Energi Core" GETH_IDX
   SetOutPath $INSTDIR
-  file {{.EnergiNode}}
+  file {{.EnergiCore}}
 
   # Create start menu launcher
   createDirectory "$SMPROGRAMS\${APPNAME}"
@@ -24,14 +24,14 @@ Section "EnergiNode" GETH_IDX
   createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "" ""
 
   # Firewall - remove rules (if exists)
-  SimpleFC::AdvRemoveRule "EnergiNode incoming peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "EnergiNode outgoing peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "EnergiNode UDP discovery (UDP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Core incoming peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Core outgoing peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Core UDP discovery (UDP:39797)"
 
   # Firewall - add rules
-  SimpleFC::AdvAddRule "EnergiNode incoming peers (TCP:39797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 39797 "" "" ""
-  SimpleFC::AdvAddRule "EnergiNode outgoing peers (TCP:39797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
-  SimpleFC::AdvAddRule "EnergiNode UDP discovery (UDP:39797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
+  SimpleFC::AdvAddRule "Energi Core incoming peers (TCP:39797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 39797 "" "" ""
+  SimpleFC::AdvAddRule "Energi Core outgoing peers (TCP:39797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
+  SimpleFC::AdvAddRule "Energi Core UDP discovery (UDP:39797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
 
   # Set default IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
   ${EnvVarUpdate} $0 "ETHEREUM_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"

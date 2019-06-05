@@ -144,7 +144,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if !config.SkipBcVersionCheck {
 		bcVersion := rawdb.ReadDatabaseVersion(chainDb)
 		if bcVersion != nil && *bcVersion > core.BlockChainVersion {
-			return nil, fmt.Errorf("database version is v%d, EnergiNode %s only supports v%d", *bcVersion, params.VersionWithMeta, core.BlockChainVersion)
+			return nil, fmt.Errorf("database version is v%d, Energi Core %s only supports v%d", *bcVersion, params.VersionWithMeta, core.BlockChainVersion)
 		} else if bcVersion != nil && *bcVersion < core.BlockChainVersion {
 			log.Warn("Upgrade blockchain database version", "from", *bcVersion, "to", core.BlockChainVersion)
 		}

@@ -55,7 +55,7 @@ var (
 		ArgsUsage: " ",
 		Category:  "MONITOR COMMANDS",
 		Description: `
-The EnergiNode monitor is a tool to collect and visualize various internal metrics
+The Energi Core monitor is a tool to collect and visualize various internal metrics
 gathered by the node, supporting different chart types as well as the capacity
 to display multiple metrics simultaneously.
 `,

@@ -30,7 +30,7 @@ The Energi Core project comes with several wrappers/executables found in the `cm
 Going through all the possible command line flags is out of scope here (please consult upstream
 [CLI Wiki page](https://github.com/ethereum/go-ethereum/wiki/Command-Line-Options)), but we've
 enumerated a few common parameter combos to get you up to speed quickly on how you can run your
-own Energi Node instance.
+own Energi Core instance.
 
 ### Full node on the main Energi network
 
@@ -48,10 +48,10 @@ This command will:
  * Start energi3 in fast sync mode (default, can be changed with the `--syncmode` flag), causing it to
    download more data in exchange for avoiding processing the entire history of the Energi network,
    which is very CPU intensive.
- * Start up Energi Node's built-in interactive [JavaScript console](https://github.com/ethereum/go-ethereum/wiki/JavaScript-Console),
+ * Start up Energi Core's built-in interactive [JavaScript console](https://github.com/ethereum/go-ethereum/wiki/JavaScript-Console),
    (via the trailing `console` subcommand) through which you can invoke all official [`web3` methods](https://github.com/ethereum/wiki/wiki/JavaScript-API)
-   as well as Energi Node's own [management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs).
-   This tool is optional and if you leave it out you can always attach to an already running Energi Node instance
+   as well as Energi Core's own [management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs).
+   This tool is optional and if you leave it out you can always attach to an already running Energi Core instance
    with `energi3 attach`.
 
 ### Full node on the Energi test network
@@ -68,9 +68,9 @@ $ energi3 --testnet console
 The `console` subcommand have the exact same meaning as above and they are equally useful on the
 testnet too. Please see above for their explanations if you've skipped to here.
 
-Specifying the `--testnet` flag however will reconfigure your Energi Node instance a bit:
+Specifying the `--testnet` flag however will reconfigure your Energi Core instance a bit:
 
- * Instead of using the default data directory (`~/.ethereum` on Linux for example), Energi Node will nest
+ * Instead of using the default data directory (`~/.ethereum` on Linux for example), Energi Core will nest
    itself one level deeper into a `testnet` subfolder (`~/.ethereum/testnet` on Linux). Note, on OSX
    and Linux this also means that attaching to a running testnet node requires the use of a custom
    endpoint since `energi3 attach` will try to attach to a production node endpoint by default. E.g.
@@ -80,7 +80,7 @@ Specifying the `--testnet` flag however will reconfigure your Energi Node instan
    
 *Note: Although there are some internal protective measures to prevent transactions from crossing
 over between the main network and test network, you should make sure to always use separate accounts
-for play-money and real-money. Unless you manually move accounts, Energi Node will by default correctly
+for play-money and real-money. Unless you manually move accounts, Energi Core will by default correctly
 separate the two networks and will not make any accounts available between them.*
 `
 
@@ -114,15 +114,15 @@ This will start energi3 in fast-sync mode with a DB memory allowance of 1GB just
 
 Do not forget `--rpcaddr 0.0.0.0`, if you want to access RPC from other containers and/or hosts. By default, `energi3` binds to the local interface and RPC endpoints is not accessible from the outside.
 
-### Programatically interfacing Energi Node nodes
+### Programatically interfacing Energi Core nodes
 
-As a developer, sooner rather than later you'll want to start interacting with Energi Node and the Energi
-network via your own programs and not manually through the console. To aid this, Energi Node has built-in
+As a developer, sooner rather than later you'll want to start interacting with Energi Core and the Energi
+network via your own programs and not manually through the console. To aid this, Energi Core has built-in
 support for a JSON-RPC based APIs ([standard APIs](https://github.com/ethereum/wiki/wiki/JSON-RPC) and
-[Energi Node specific APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs)). These can be
+[Energi Core specific APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs)). These can be
 exposed via HTTP, WebSockets and IPC (unix sockets on unix based platforms, and named pipes on Windows).
 
-The IPC interface is enabled by default and exposes all the APIs supported by Energi Node, whereas the HTTP
+The IPC interface is enabled by default and exposes all the APIs supported by Energi Core, whereas the HTTP
 and WS interfaces need to manually be enabled and only expose a subset of APIs due to security reasons.
 These can be turned on/off and configured as you'd expect.
 
@@ -143,7 +143,7 @@ HTTP based JSON-RPC API options:
   * `--ipcpath` Filename for IPC socket/pipe within the datadir (explicit paths escape it)
 
 You'll need to use your own programming environments' capabilities (libraries, tools, etc) to connect
-via HTTP, WS or IPC to a Energi Node node configured with the above flags and you'll need to speak [JSON-RPC](https://www.jsonrpc.org/specification)
+via HTTP, WS or IPC to a Energi Core node configured with the above flags and you'll need to speak [JSON-RPC](https://www.jsonrpc.org/specification)
 on all transports. You can reuse the same connection for multiple requests!
 
 **Note: Please understand the security implications of opening up an HTTP/WS based transport before
@@ -193,7 +193,7 @@ configs:
 }
 ```
 
-With the genesis state defined in the above JSON file, you'll need to initialize **every** Energi Node node
+With the genesis state defined in the above JSON file, you'll need to initialize **every** Energi Core node
 with it prior to starting it up to ensure all blockchain parameters are correctly set:
 
 ```
@@ -216,12 +216,12 @@ that other nodes can use to connect to it and exchange peer information. Make su
 displayed IP address information (most probably `[::]`) with your externally accessible IP to get the
 actual `enode` URL.
 
-*Note: You could also use a full fledged Energi Node node as a bootnode, but it's the less recommended way.*
+*Note: You could also use a full fledged Energi Core node as a bootnode, but it's the less recommended way.*
 
 #### Starting up your member nodes
 
 With the bootnode operational and externally reachable (you can try `telnet <ip> <port>` to ensure
-it's indeed reachable), start every subsequent Energi Node node pointed to the bootnode for peer discovery
+it's indeed reachable), start every subsequent Energi Core node pointed to the bootnode for peer discovery
 via the `--bootnodes` flag. It will probably also be desirable to keep the data directory of your
 private network separated, so do also specify a custom `--datadir` flag.
 

@@ -6,7 +6,7 @@ For general questions please use the Discord server: https://discordapp.com/invi
 
 #### System information
 
-EnergiNode version: `energi3 version`
+Energi Core version: `energi3 version`
 OS & Version: Windows/Linux/OSX
 Commit hash : (if `develop`)
 
