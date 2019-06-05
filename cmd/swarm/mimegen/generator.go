@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+
 package main
 
 // Standard "mime" package rely on system-settings, see mime.osInitMime
