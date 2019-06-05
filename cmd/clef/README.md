@@ -760,7 +760,7 @@ Invoked when a request for account listing has been made.
     {
       "address": "0x123409812340981234098123409812deadbeef42",
       "raw_data": "0x01020304",
-      "message": "\u0019Ethereum Signed Message:\n4\u0001\u0002\u0003\u0004",
+      "message": "\u0017Energi Signed Message:\n4\u0001\u0002\u0003\u0004",
       "hash": "0x7e3a4e7a9d1744bc5c675c25e1234ca8ed9162bd17f78b9085e48047c15ac310",
       "meta": {
         "remote": "signer binary",

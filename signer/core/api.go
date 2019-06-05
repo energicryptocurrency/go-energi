@@ -511,7 +511,7 @@ func (api *SignerAPI) SignTransaction(ctx context.Context, args SendTxArgs, meth
 }
 
 // Sign calculates an Ethereum ECDSA signature for:
-// keccack256("\x19Ethereum Signed Message:\n" + len(message) + message))
+// keccack256("\x17Energi Signed Message:\n" + len(message) + message))
 //
 // Note, the produced signature conforms to the secp256k1 curve R, S and V values,
 // where the V value will be 27 or 28 for legacy reasons.
@@ -552,11 +552,11 @@ func (api *SignerAPI) Sign(ctx context.Context, addr common.MixedcaseAddress, da
 // safely used to calculate a signature from.
 //
 // The hash is calculated as
-//   keccak256("\x19Ethereum Signed Message:\n"${message length}${message}).
+//   keccak256("\x17Energi Signed Message:\n"${message length}${message}).
 //
 // This gives context to the signed message and prevents signing of transactions.
 func SignHash(data []byte) ([]byte, string) {
-	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), data)
+	msg := fmt.Sprintf("\x17Energi Signed Message:\n%d%s", len(data), data)
 	return crypto.Keccak256([]byte(msg)), msg
 }
 
