@@ -66,7 +66,7 @@ var (
 	apiPortFlag = flag.Int("apiport", 8080, "Listener port for the HTTP API connection")
 	ethPortFlag = flag.Int("ethport", 39797, "Listener port for the devp2p connection")
 	bootFlag    = flag.String("bootnodes", "", "Comma separated bootnode enode URLs to seed with")
-	netFlag     = flag.Uint64("network", 0, "Network ID to use for the Ethereum protocol")
+	netFlag     = flag.Uint64("network", 0, "Network ID to use for the Energi protocol")
 	statsFlag   = flag.String("ethstats", "", "Ethstats network monitoring auth string")
 
 	netnameFlag = flag.String("faucet.name", "", "Network name to assign to the faucet")
@@ -81,7 +81,7 @@ var (
 	captchaSecret = flag.String("captcha.secret", "", "Recaptcha secret key to authenticate server side")
 
 	noauthFlag = flag.Bool("noauth", false, "Enables funding requests without authentication")
-	logFlag    = flag.Int("loglevel", 3, "Log level to use for Ethereum and the faucet")
+	logFlag    = flag.Int("loglevel", 3, "Log level to use for Energi and the faucet")
 )
 
 var (
@@ -160,7 +160,7 @@ func main() {
 	// Delete trailing newline in password
 	pass := strings.TrimSuffix(string(blob), "\n")
 
-	ks := keystore.NewKeyStore(filepath.Join(os.Getenv("HOME"), ".faucet", "keys"), keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(filepath.Join(os.Getenv("HOME"), ".energifaucet", "keys"), keystore.StandardScryptN, keystore.StandardScryptP)
 	if blob, err = ioutil.ReadFile(*accJSONFlag); err != nil {
 		log.Crit("Failed to read account key contents", "file", *accJSONFlag, "err", err)
 	}
@@ -215,9 +215,9 @@ type faucet struct {
 func newFaucet(genesis *core.Genesis, port int, enodes []*discv5.Node, network uint64, stats string, ks *keystore.KeyStore, index []byte) (*faucet, error) {
 	// Assemble the raw devp2p protocol stack
 	stack, err := node.New(&node.Config{
-		Name:    "geth",
+		Name:    "energi3",
 		Version: params.VersionWithMeta,
-		DataDir: filepath.Join(os.Getenv("HOME"), ".faucet"),
+		DataDir: filepath.Join(os.Getenv("HOME"), ".energifaucet"),
 		P2P: p2p.Config{
 			NAT:              nat.Any(),
 			NoDiscovery:      true,
@@ -690,7 +690,7 @@ func authTwitter(url string) (string, string, common.Address, error) {
 	}
 	address := common.HexToAddress(string(regexp.MustCompile("0x[0-9a-fA-F]{40}").Find(body)))
 	if address == (common.Address{}) {
-		return "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", common.Address{}, errors.New("No Energi address found to fund")
 	}
 	var avatar string
 	if parts = regexp.MustCompile("src=\"([^\"]+twimg.com/profile_images[^\"]+)\"").FindStringSubmatch(string(body)); len(parts) == 2 {
@@ -724,7 +724,7 @@ func authGooglePlus(url string) (string, string, common.Address, error) {
 	}
 	address := common.HexToAddress(string(regexp.MustCompile("0x[0-9a-fA-F]{40}").Find(body)))
 	if address == (common.Address{}) {
-		return "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", common.Address{}, errors.New("No Energi address found to fund")
 	}
 	var avatar string
 	if parts = regexp.MustCompile("src=\"([^\"]+googleusercontent.com[^\"]+photo.jpg)\"").FindStringSubmatch(string(body)); len(parts) == 2 {
@@ -758,7 +758,7 @@ func authFacebook(url string) (string, string, common.Address, error) {
 	}
 	address := common.HexToAddress(string(regexp.MustCompile("0x[0-9a-fA-F]{40}").Find(body)))
 	if address == (common.Address{}) {
-		return "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", common.Address{}, errors.New("No Energi address found to fund")
 	}
 	var avatar string
 	if parts = regexp.MustCompile("src=\"([^\"]+fbcdn.net[^\"]+)\"").FindStringSubmatch(string(body)); len(parts) == 2 {
@@ -773,7 +773,7 @@ func authFacebook(url string) (string, string, common.Address, error) {
 func authNoAuth(url string) (string, string, common.Address, error) {
 	address := common.HexToAddress(regexp.MustCompile("0x[0-9a-fA-F]{40}").FindString(url))
 	if address == (common.Address{}) {
-		return "", "", common.Address{}, errors.New("No Ethereum address found to fund")
+		return "", "", common.Address{}, errors.New("No Energi address found to fund")
 	}
 	return address.Hex() + "@noauth", "", address, nil
 }

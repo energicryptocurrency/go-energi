@@ -42,7 +42,7 @@ import (
 )
 
 const (
-	clientIdentifier = "geth" // Client identifier to advertise over the network
+	clientIdentifier = "energi3" // Client identifier to advertise over the network
 )
 
 var (
@@ -340,7 +340,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		}
 		var ethereum *eth.Ethereum
 		if err := stack.Service(&ethereum); err != nil {
-			utils.Fatalf("Ethereum service not running: %v", err)
+			utils.Fatalf("Energi service not running: %v", err)
 		}
 		// Set the gas price to the limits from the CLI and start mining
 		gasprice := utils.GlobalBig(ctx, utils.MinerLegacyGasPriceFlag.Name)

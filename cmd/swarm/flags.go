@@ -52,7 +52,7 @@ var (
 	}
 	SwarmSwapAPIFlag = cli.StringFlag{
 		Name:   "swap-api",
-		Usage:  "URL of the Ethereum API provider to use to settle SWAP payments",
+		Usage:  "URL of the Energi API provider to use to settle SWAP payments",
 		EnvVar: SWARM_ENV_SWAP_API,
 	}
 	SwarmSyncDisabledFlag = cli.BoolTFlag{

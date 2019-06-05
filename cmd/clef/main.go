@@ -176,7 +176,7 @@ remove any stored credential for that address (keyfile)
 
 func init() {
 	app.Name = "Clef"
-	app.Usage = "Manage Ethereum account operations"
+	app.Usage = "Manage Energi account operations"
 	app.Flags = []cli.Flag{
 		logLevelFlag,
 		keystoreFlag,

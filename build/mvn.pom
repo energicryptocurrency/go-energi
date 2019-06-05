@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.ethereum</groupId>
-  <artifactId>geth</artifactId>
+  <artifactId>energi3</artifactId>
   <version>{{.Version}}</version>
   <packaging>aar</packaging>
 
-  <name>Android Ethereum Client</name>
+  <name>Android Energi Client</name>
   <description>Android port of the go-ethereum libraries and node</description>
   <url>https://github.com/ethereum/go-ethereum</url>
   <inceptionYear>2015</inceptionYear>
@@ -23,7 +23,7 @@
   </licenses>
 
   <organization>
-    <name>Ethereum</name>
+    <name>Energi</name>
     <url>https://ethereum.org</url>
   </organization>
 

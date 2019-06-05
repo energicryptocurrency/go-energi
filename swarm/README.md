@@ -35,9 +35,9 @@ Building Swarm requires Go (version 1.10 or later).
 
 Going through all the possible command line flags is out of scope here, but we've enumerated a few common parameter combos to get you up to speed quickly on how you can run your own Swarm node.
 
-To run Swarm you need an Ethereum account. You can create a new account by running the following command:
+To run Swarm you need an Energi account. You can create a new account by running the following command:
 
-    geth account new
+    energi3 account new
 
 You will be prompted for a password:
 
@@ -45,7 +45,7 @@ You will be prompted for a password:
     Passphrase:
     Repeat passphrase:
 
-Once you have specified the password, the output will be the Ethereum address representing that account. For example:
+Once you have specified the password, the output will be the Energi address representing that account. For example:
 
     Address: {2f1cd699b0bf461dcfbf0098ad8f5587b038f0f1}
 
@@ -64,17 +64,17 @@ When running, Swarm is accessible through an HTTP API on port 8500.
 
 Confirm that it is up and running by pointing your browser to http://localhost:8500
 
-### Ethereum Name Service resolution
+### Energi Name Service resolution
 
-The Ethereum Name Service is the Ethereum equivalent of DNS in the classic web. In order to use ENS to resolve names to Swarm content hashes (e.g. `bzz://theswarm.eth`), `swarm` has to connect to a `geth` instance, which is synced with the Ethereum mainnet. This is done using the `--ens-api` flag.
+The Energi Name Service is the Energi equivalent of DNS in the classic web. In order to use ENS to resolve names to Swarm content hashes (e.g. `bzz://theswarm.eth`), `swarm` has to connect to a `energi3` instance, which is synced with the Energi mainnet. This is done using the `--ens-api` flag.
 
     swarm --bzzaccount <your-account-here> \
-          --ens-api '$HOME/.ethereum/geth.ipc'
+          --ens-api '$HOME/.ethereum/energi3.ipc'
 
     # in our example
 
     swarm --bzzaccount 2f1cd699b0bf461dcfbf0098ad8f5587b038f0f1 \
-          --ens-api '$HOME/.ethereum/geth.ipc'
+          --ens-api '$HOME/.ethereum/energi3.ipc'
 
 For more information on usage, features or command line flags, please consult the Documentation.
 

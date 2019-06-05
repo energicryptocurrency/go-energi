@@ -49,7 +49,7 @@ var feedCommand = cli.Command{
 					* use --name to set the topic to a human-readable name.
 					    For example --name could be set to "profile-picture", meaning this feed allows to get this user's current profile picture.
 					* use both --topic and --name to create named subtopics. 
-						For example, --topic could be set to an Ethereum contract address and --name could be set to "comments", meaning
+						For example, --topic could be set to an Energi contract address and --name could be set to "comments", meaning
 						this feed tracks a discussion about that contract.
 					The --user flag allows to have this manifest refer to a user other than yourself. If not specified,
 					it will then default to your local account (--bzzaccount)`,
@@ -67,7 +67,7 @@ var feedCommand = cli.Command{
 					* use --name to set the topic to a human-readable name.
 					    For example --name could be set to "profile-picture", meaning this feed allows to get this user's current profile picture.
 					* use both --topic and --name to create named subtopics. 
-						For example, --topic could be set to an Ethereum contract address and --name could be set to "comments", meaning
+						For example, --topic could be set to an Energi contract address and --name could be set to "comments", meaning
 						this feed tracks a discussion about that contract.
 					
 					If you have a manifest, you can specify it with --manifest to refer to the feed,

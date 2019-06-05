@@ -239,7 +239,7 @@ func (c *Config) NodeName() string {
 	name := c.name()
 	// Backwards compatibility: previous versions used title-cased "Geth", keep that.
 	if name == "geth" || name == "geth-testnet" {
-		name = "Geth"
+		name = "EnergiNode"
 	}
 	if c.UserIdent != "" {
 		name += "/" + c.UserIdent
@@ -284,12 +284,12 @@ func (c *Config) ResolvePath(path string) string {
 	// by geth 1.4 are used if they exist.
 	if warn, isOld := isOldGethResource[path]; isOld {
 		oldpath := ""
-		if c.name() == "geth" {
+		if c.name() == "energi3" {
 			oldpath = filepath.Join(c.DataDir, path)
 		}
 		if oldpath != "" && common.FileExist(oldpath) {
 			if warn {
-				c.warnOnce(&c.oldGethResourceWarning, "Using deprecated resource file %s, please move this file to the 'geth' subdirectory of datadir.", oldpath)
+				c.warnOnce(&c.oldGethResourceWarning, "Using deprecated resource file %s, please move this file to the 'energi3' subdirectory of datadir.", oldpath)
 			}
 			return oldpath
 		}

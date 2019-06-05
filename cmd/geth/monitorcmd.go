@@ -55,7 +55,7 @@ var (
 		ArgsUsage: " ",
 		Category:  "MONITOR COMMANDS",
 		Description: `
-The Geth monitor is a tool to collect and visualize various internal metrics
+The EnergiNode monitor is a tool to collect and visualize various internal metrics
 gathered by the node, supporting different chart types as well as the capacity
 to display multiple metrics simultaneously.
 `,
@@ -76,7 +76,7 @@ func monitor(ctx *cli.Context) error {
 	// Attach to an Ethereum node over IPC or RPC
 	endpoint := ctx.String(monitorCommandAttachFlag.Name)
 	if client, err = dialRPC(endpoint); err != nil {
-		utils.Fatalf("Unable to attach to geth node: %v", err)
+		utils.Fatalf("Unable to attach to energi3 node: %v", err)
 	}
 	defer client.Close()
 
@@ -93,7 +93,7 @@ func monitor(ctx *cli.Context) error {
 		if len(list) > 0 {
 			utils.Fatalf("No metrics specified.\n\nAvailable:\n - %s", strings.Join(list, "\n - "))
 		} else {
-			utils.Fatalf("No metrics collected by geth (--%s).\n", utils.MetricsEnabledFlag.Name)
+			utils.Fatalf("No metrics collected by energi3 (--%s).\n", utils.MetricsEnabledFlag.Name)
 		}
 	}
 	sort.Strings(monitored)

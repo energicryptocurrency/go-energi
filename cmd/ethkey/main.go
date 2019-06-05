@@ -34,7 +34,7 @@ var gitCommit = ""
 var app *cli.App
 
 func init() {
-	app = utils.NewApp(gitCommit, "an Ethereum key manager")
+	app = utils.NewApp(gitCommit, "an Energi key manager")
 	app.Commands = []cli.Command{
 		commandGenerate,
 		commandInspect,

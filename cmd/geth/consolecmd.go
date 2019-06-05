@@ -41,7 +41,7 @@ var (
 		Flags:    append(append(append(nodeFlags, rpcFlags...), consoleFlags...), whisperFlags...),
 		Category: "CONSOLE COMMANDS",
 		Description: `
-The Geth console is an interactive shell for the JavaScript runtime environment
+The EnergiNode console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
 See https://github.com/ethereum/go-ethereum/wiki/JavaScript-Console.`,
 	}
@@ -54,10 +54,10 @@ See https://github.com/ethereum/go-ethereum/wiki/JavaScript-Console.`,
 		Flags:     append(consoleFlags, utils.DataDirFlag),
 		Category:  "CONSOLE COMMANDS",
 		Description: `
-The Geth console is an interactive shell for the JavaScript runtime environment
+The EnergiNode console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
 See https://github.com/ethereum/go-ethereum/wiki/JavaScript-Console.
-This command allows to open a console on a running geth node.`,
+This command allows to open a console on a running energi3 node.`,
 	}
 
 	javascriptCommand = cli.Command{
@@ -84,7 +84,7 @@ func localConsole(ctx *cli.Context) error {
 	// Attach to the newly started node and start the JavaScript console
 	client, err := node.Attach()
 	if err != nil {
-		utils.Fatalf("Failed to attach to the inproc geth: %v", err)
+		utils.Fatalf("Failed to attach to the inproc energi3: %v", err)
 	}
 	config := console.Config{
 		DataDir: utils.MakeDataDir(ctx),
@@ -128,11 +128,11 @@ func remoteConsole(ctx *cli.Context) error {
 				path = filepath.Join(path, "rinkeby")
 			}
 		}
-		endpoint = fmt.Sprintf("%s/geth.ipc", path)
+		endpoint = fmt.Sprintf("%s/energi3.ipc", path)
 	}
 	client, err := dialRPC(endpoint)
 	if err != nil {
-		utils.Fatalf("Unable to attach to remote geth: %v", err)
+		utils.Fatalf("Unable to attach to remote energi3: %v", err)
 	}
 	config := console.Config{
 		DataDir: utils.MakeDataDir(ctx),
@@ -185,7 +185,7 @@ func ephemeralConsole(ctx *cli.Context) error {
 	// Attach to the newly started node and start the JavaScript console
 	client, err := node.Attach()
 	if err != nil {
-		utils.Fatalf("Failed to attach to the inproc geth: %v", err)
+		utils.Fatalf("Failed to attach to the inproc energi3: %v", err)
 	}
 	config := console.Config{
 		DataDir: utils.MakeDataDir(ctx),

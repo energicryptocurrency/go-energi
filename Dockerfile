@@ -10,7 +10,7 @@ RUN cd /go-ethereum && make geth
 FROM alpine:latest
 
 RUN apk add --no-cache ca-certificates
-COPY --from=builder /go-ethereum/build/bin/geth /usr/local/bin/
+COPY --from=builder /go-ethereum/build/bin/energi3 /usr/local/bin/
 
 EXPOSE 39796 39795 39797 39797/udp
-ENTRYPOINT ["geth"]
+ENTRYPOINT ["energi3"]

@@ -229,7 +229,7 @@ func testManifestChange(t *testing.T, encrypt bool) {
 
 	// upload a new file and use its manifest to change the file it the original manifest.
 	t.Run("update", func(t *testing.T) {
-		indexData := []byte("<h1>Ethereum Swarm</h1>")
+		indexData := []byte("<h1>Energi Swarm</h1>")
 		indexDataFilename := filepath.Join(tmp, "index.html")
 		err = ioutil.WriteFile(indexDataFilename, indexData, 0666)
 		if err != nil {
@@ -476,7 +476,7 @@ func testNestedDefaultEntryUpdate(t *testing.T, encrypt bool) {
 
 	client := swarm.NewClient(srv.URL)
 
-	newIndexData := []byte("<h1>Ethereum Swarm</h1>")
+	newIndexData := []byte("<h1>Energi Swarm</h1>")
 	newIndexDataFilename := filepath.Join(tmp, "index.html")
 	err = ioutil.WriteFile(newIndexDataFilename, newIndexData, 0666)
 	if err != nil {
