@@ -72,7 +72,7 @@ class Header extends Component<Props> {
 						</Icon>
 					</IconButton>
 					<Typography type='title' color='inherit' noWrap className={classes.title}>
-						Go Ethereum Dashboard
+						Energi Core Dashboard
 					</Typography>
 				</Toolbar>
 			</AppBar>

@@ -1,4 +1,4 @@
-## Go Ethereum Dashboard
+## Energi Core Dashboard
 
 The dashboard is a data visualizer integrated into geth, intended to collect and visualize useful information of an Ethereum node. It consists of two parts:
 

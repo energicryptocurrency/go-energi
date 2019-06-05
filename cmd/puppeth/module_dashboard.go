@@ -84,9 +84,9 @@ var dashboardContent = `
 									{{if .FaucetPage}}<li id="faucet_menu"><a onclick="load('#faucet')"><i class="fa fa-bath"></i> Crypto Faucet</a></li>{{end}}
 									<li id="connect_menu"><a><i class="fa fa-plug"></i> Connect Yourself</a>
 										<ul id="connect_list" class="nav child_menu">
-											<li><a onclick="$('#connect_menu').removeClass('active'); $('#connect_list').toggle(); load('#geth')">Go Ethereum: Geth</a></li>
-											<li><a onclick="$('#connect_menu').removeClass('active'); $('#connect_list').toggle(); load('#mist')">Go Ethereum: Wallet & Mist</a></li>
-											<li><a onclick="$('#connect_menu').removeClass('active'); $('#connect_list').toggle(); load('#mobile')">Go Ethereum: Android & iOS</a></li>{{if .Ethash}}
+											<li><a onclick="$('#connect_menu').removeClass('active'); $('#connect_list').toggle(); load('#geth')">Energi Core: Node</a></li>
+											<li><a onclick="$('#connect_menu').removeClass('active'); $('#connect_list').toggle(); load('#mist')">Energi Core: Wallet & Mist</a></li>
+											<li><a onclick="$('#connect_menu').removeClass('active'); $('#connect_list').toggle(); load('#mobile')">Energi Core: Android & iOS</a></li>{{if .Ethash}}
 											<li><a onclick="$('#connect_menu').removeClass('active'); $('#connect_list').toggle(); load('#other')">Other Ethereum Clients</a></li>{{end}}
 										</ul>
 									</li>
@@ -100,7 +100,7 @@ var dashboardContent = `
 					<div id="geth" hidden style="padding: 16px;">
 						<div class="page-title">
 							<div class="title_left">
-								<h3>Connect Yourself &ndash; Go Ethereum: Geth</h3>
+								<h3>Connect Yourself &ndash; Energi Core: Node</h3>
 							</div>
 						</div>
 						<div class="clearfix"></div>
@@ -189,7 +189,7 @@ var dashboardContent = `
 					<div id="mist" hidden style="padding: 16px;">
 						<div class="page-title">
 							<div class="title_left">
-								<h3>Connect Yourself &ndash; Go Ethereum: Wallet &amp; Mist</h3>
+								<h3>Connect Yourself &ndash; Energi Core: Wallet &amp; Mist</h3>
 							</div>
 						</div>
 						<div class="clearfix"></div>
@@ -241,7 +241,7 @@ var dashboardContent = `
 					<div id="mobile" hidden style="padding: 16px;">
 						<div class="page-title">
 							<div class="title_left">
-								<h3>Connect Yourself &ndash; Go Ethereum: Android &amp; iOS</h3>
+								<h3>Connect Yourself &ndash; Energi Core: Android &amp; iOS</h3>
 							</div>
 						</div>
 						<div class="clearfix"></div>
