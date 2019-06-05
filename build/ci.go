@@ -237,7 +237,7 @@ func doInstall(cmdline []string) {
 			fmt.Println(">>> Renaming ", geth, " to ", energi3)
 			os.Rename(geth, energi3)
 		}
-	}();
+	}()
 
 	// Compile packages given as arguments, or everything if there are no arguments.
 	packages := []string{"./..."}
@@ -765,9 +765,9 @@ func doWindowsInstaller(cmdline []string) {
 	// Render NSIS scripts: Installer NSIS contains two installer sections,
 	// first section contains the geth binary, second section holds the dev tools.
 	templateData := map[string]interface{}{
-		"License":  "COPYING",
-		"EnergiNode":     gethTool,
-		"DevTools": devTools,
+		"License":    "COPYING",
+		"EnergiNode": gethTool,
+		"DevTools":   devTools,
 	}
 	build.Render("build/nsis.geth.nsi", filepath.Join(*workdir, "geth.nsi"), 0644, nil)
 	build.Render("build/nsis.install.nsh", filepath.Join(*workdir, "install.nsh"), 0644, templateData)
