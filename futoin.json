@@ -23,8 +23,7 @@
                 "@cid tool exec make -- test"
         ],
         "package": [
-            "/bin/rm -rf bin && /bin/cp -ra build/bin bin",
-            "@default"
+            "@cid tool exec make -- package"
         ]
     }
 }

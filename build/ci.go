@@ -479,6 +479,10 @@ func archiveUpload(archive string, blobstore string, signer string) error {
 
 // skips archiving for some build configurations.
 func maybeSkipArchive(env build.Environment) {
+	// Energi: We build packages for all builds
+	// TODO: update CI build package names to clearly reflect unofficial nature
+	return
+
 	if env.IsPullRequest {
 		log.Printf("skipping because this is a PR build")
 		os.Exit(0)
@@ -487,7 +491,7 @@ func maybeSkipArchive(env build.Environment) {
 		log.Printf("skipping because this is a cron job")
 		os.Exit(0)
 	}
-	if env.Branch != "master" && !strings.HasPrefix(env.Tag, "v1.") {
+	if env.Branch != "master" && !strings.HasPrefix(env.Tag, "v") {
 		log.Printf("skipping because branch %q, tag %q is not on the whitelist", env.Branch, env.Tag)
 		os.Exit(0)
 	}

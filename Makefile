@@ -24,6 +24,10 @@ swarm:
 all:
 	build/env.sh go run build/ci.go install
 
+package: all
+	build/env.sh go run build/ci.go archive
+	# TODO: architecture-specific packaging
+
 android:
 	build/env.sh go run build/ci.go aar --local
 	@echo "Done building."
