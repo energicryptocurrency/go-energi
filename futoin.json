@@ -18,7 +18,10 @@
             "test"
         ],
         "lint": "@cid tool exec make -- lint",
-        "test": "@cid tool exec make -- test",
+        "test": [
+                "@cid tool exec git -- submodule update --init --recursive",
+                "@cid tool exec make -- test"
+        ],
         "package": [
             "/bin/rm -rf bin && /bin/cp -ra build/bin bin",
             "@default"
