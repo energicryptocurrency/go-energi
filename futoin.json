@@ -24,6 +24,7 @@
         ],
         "package": [
             "@cid tool exec make -- package"
-        ]
+        ],
+        "autoformat": "@cid tool envexec go -- gofmt -s -w"
     }
 }
