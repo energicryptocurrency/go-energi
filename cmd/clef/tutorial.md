@@ -148,7 +148,7 @@ In this example:
     * auto-rejected if it does not.
 * Any other signing-requests will be passed along for manual approve/reject.
 
-_Note: make sure that `0x694...` is an account you have access to. You can create it either via the clef or the traditional account cli tool. If the latter was chosen, make sure both clef and geth use the same keystore by specifing `--keystore path/to/your/keystore` when running clef._
+_Note: make sure that `0x694...` is an account you have access to. You can create it either via the clef or the traditional account cli tool. If the latter was chosen, make sure both clef and energi3 use the same keystore by specifing `--keystore path/to/your/keystore` when running clef._
 
 Attest the new file...
 ```text

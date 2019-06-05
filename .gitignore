@@ -15,7 +15,8 @@
 */**/*dapps*
 build/_vendor/pkg
 /.package.checksums
-/energi3-*.txz
+/energi3-*.*
+/swarm-*.*
 /bin
 
 #*

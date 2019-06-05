@@ -1,18 +1,19 @@
+// Copyright 2018 The Energi Core Authors
 // Copyright 2018 The go-ethereum Authors
-// This file is part of go-ethereum.
+// This file is part of Energi Core.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// Energi Core is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// Energi Core is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with Energi Core. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -229,7 +230,7 @@ func testManifestChange(t *testing.T, encrypt bool) {
 
 	// upload a new file and use its manifest to change the file it the original manifest.
 	t.Run("update", func(t *testing.T) {
-		indexData := []byte("<h1>Ethereum Swarm</h1>")
+		indexData := []byte("<h1>Energi Swarm</h1>")
 		indexDataFilename := filepath.Join(tmp, "index.html")
 		err = ioutil.WriteFile(indexDataFilename, indexData, 0666)
 		if err != nil {
@@ -476,7 +477,7 @@ func testNestedDefaultEntryUpdate(t *testing.T, encrypt bool) {
 
 	client := swarm.NewClient(srv.URL)
 
-	newIndexData := []byte("<h1>Ethereum Swarm</h1>")
+	newIndexData := []byte("<h1>Energi Swarm</h1>")
 	newIndexDataFilename := filepath.Join(tmp, "index.html")
 	err = ioutil.WriteFile(newIndexDataFilename, newIndexData, 0666)
 	if err != nil {

@@ -1,18 +1,19 @@
+// Copyright 2018 The Energi Core Authors
 // Copyright 2015 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// This file is part of the Energi Core library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The Energi Core library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The Energi Core library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
 
 package node
 
@@ -73,15 +74,15 @@ func TestIPCPathResolution(t *testing.T) {
 	}{
 		{"", "", false, ""},
 		{"data", "", false, ""},
-		{"", "geth.ipc", false, filepath.Join(os.TempDir(), "geth.ipc")},
-		{"data", "geth.ipc", false, "data/geth.ipc"},
-		{"data", "./geth.ipc", false, "./geth.ipc"},
-		{"data", "/geth.ipc", false, "/geth.ipc"},
+		{"", "energi3.ipc", false, filepath.Join(os.TempDir(), "energi3.ipc")},
+		{"data", "energi3.ipc", false, "data/energi3.ipc"},
+		{"data", "./energi3.ipc", false, "./energi3.ipc"},
+		{"data", "/energi3.ipc", false, "/energi3.ipc"},
 		{"", "", true, ``},
 		{"data", "", true, ``},
-		{"", "geth.ipc", true, `\\.\pipe\geth.ipc`},
-		{"data", "geth.ipc", true, `\\.\pipe\geth.ipc`},
-		{"data", `\\.\pipe\geth.ipc`, true, `\\.\pipe\geth.ipc`},
+		{"", "energi3.ipc", true, `\\.\pipe\energi3.ipc`},
+		{"data", "energi3.ipc", true, `\\.\pipe\energi3.ipc`},
+		{"data", `\\.\pipe\energi3.ipc`, true, `\\.\pipe\energi3.ipc`},
 	}
 	for i, test := range tests {
 		// Only run when platform/test match

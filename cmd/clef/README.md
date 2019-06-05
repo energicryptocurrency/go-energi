@@ -1,13 +1,13 @@
 Clef
 ----
-Clef can be used to sign transactions and data and is meant as a replacement for geth's account management.
-This allows DApps not to depend on geth's account management. When a DApp wants to sign data it can send the data to
+Clef can be used to sign transactions and data and is meant as a replacement for energi3's account management.
+This allows DApps not to depend on energi3's account management. When a DApp wants to sign data it can send the data to
 the signer, the signer will then provide the user with context and asks the user for permission to sign the data. If
 the users grants the signing request the signer will send the signature back to the DApp.
   
-This setup allows a DApp to connect to a remote Ethereum node and send transactions that are locally signed. This can
-help in situations when a DApp is connected to a remote node because a local Ethereum node is not available, not
-synchronised with the chain or a particular Ethereum node that has no built-in (or limited) account management.
+This setup allows a DApp to connect to a remote Energi node and send transactions that are locally signed. This can
+help in situations when a DApp is connected to a remote node because a local Energi node is not available, not
+synchronised with the chain or a particular Energi node that has no built-in (or limited) account management.
   
 Clef can run as a daemon on the same machine, or off a usb-stick like [usb armory](https://inversepath.com/usbarmory),
 or a separate VM in a [QubesOS](https://www.qubes-os.org/) type os setup.
@@ -31,7 +31,7 @@ GLOBAL OPTIONS:
    --loglevel value        log level to emit to the screen (default: 4)
    --keystore value        Directory for the keystore (default: "$HOME/.ethereum/keystore")
    --configdir value       Directory for clef configuration (default: "$HOME/.clef")
-   --networkid value       Network identifier (integer, 1=Frontier, 2=Morden (disused), 3=Ropsten, 4=Rinkeby) (default: 1)
+   --networkid value       Network identifier (integer, 39797=EnergiMain, 49797=EnergiTest) (default: 39797)
    --lightkdf              Reduce key-derivation RAM & CPU usage at some expense of KDF strength
    --nousb                 Disables monitoring for and managing USB hardware wallets
    --rpcaddr value         HTTP-RPC server listening interface (default: "localhost")
@@ -65,10 +65,10 @@ The security model of the signer is as follows:
 * The signer binary also communicates with whatever process that invoked the binary, via stdin/stdout.
   * This channel is considered 'trusted'. Over this channel, approvals and passwords are communicated.
 
-The general flow for signing a transaction using e.g. geth is as follows:
+The general flow for signing a transaction using e.g. energi3 is as follows:
 ![image](sign_flow.png)
 
-In this case, `geth` would be started with `--externalsigner=http://localhost:8550` and would relay requests to `eth.sendTransaction`.
+In this case, `energi3` would be started with `--externalsigner=http://localhost:8550` and would relay requests to `eth.sendTransaction`.
 
 ## TODOs
 
@@ -101,14 +101,14 @@ invoking methods with the following info:
       * the total amount
       * the number of unique recipients
 
-* Geth todos
+* Energi Core todos
     - The signer should pass the `Origin` header as call-info to the UI. As of right now, the way that info about the request is
 put together is a bit of a hack into the http server. This could probably be greatly improved
-    - Relay: Geth should be started in `geth --external_signer localhost:8550`.
-    - Currently, the Geth APIs use `common.Address` in the arguments to transaction submission (e.g `to` field). This
+    - Relay: Energi Core should be started in `energi3 --external_signer localhost:8550`.
+    - Currently, the Energi Core APIs use `common.Address` in the arguments to transaction submission (e.g `to` field). This
   type is 20 `bytes`, and is incapable of carrying checksum information. The signer uses `common.MixedcaseAddress`, which
   retains the original input.
-    - The Geth api should switch to use the same type, and relay `to`-account verbatim to the external api.
+    - The Energi Core api should switch to use the same type, and relay `to`-account verbatim to the external api.
 
 * [x] Storage
     * [x] An encrypted key-value storage should be implemented
@@ -116,7 +116,7 @@ put together is a bit of a hack into the http server. This could probably be gre
 
 * Another potential thing to introduce is pairing.
   * To prevent spurious requests which users just accept, implement a way to "pair" the caller with the signer (external API).
-  * Thus geth/mist/cpp would cryptographically handshake and afterwards the caller would be allowed to make signing requests.
+  * Thus energi3/mist/cpp would cryptographically handshake and afterwards the caller would be allowed to make signing requests.
   * This feature would make the addition of rules less dangerous.
 
 * Wallets / accounts. Add API methods for wallets.
@@ -125,7 +125,7 @@ put together is a bit of a hack into the http server. This could probably be gre
 
 ### External API
 
-The signer listens to HTTP requests on `rpcaddr`:`rpcport`, with the same JSONRPC standard as Geth. The messages are
+The signer listens to HTTP requests on `rpcaddr`:`rpcport`, with the same JSONRPC standard as Energi Core. The messages are
 expected to be JSON [jsonrpc 2.0 standard](http://www.jsonrpc.org/specification).
 
 Some of these call can require user interaction. Clients must be aware that responses
@@ -760,7 +760,7 @@ Invoked when a request for account listing has been made.
     {
       "address": "0x123409812340981234098123409812deadbeef42",
       "raw_data": "0x01020304",
-      "message": "\u0019Ethereum Signed Message:\n4\u0001\u0002\u0003\u0004",
+      "message": "\u0017Energi Signed Message:\n4\u0001\u0002\u0003\u0004",
       "hash": "0x7e3a4e7a9d1744bc5c675c25e1234ca8ed9162bd17f78b9085e48047c15ac310",
       "meta": {
         "remote": "signer binary",

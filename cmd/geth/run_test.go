@@ -1,18 +1,19 @@
+// Copyright 2018 The Energi Core Authors
 // Copyright 2016 The go-ethereum Authors
-// This file is part of go-ethereum.
+// This file is part of Energi Core.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// Energi Core is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// Energi Core is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with Energi Core. If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -27,7 +28,7 @@ import (
 )
 
 func tmpdir(t *testing.T) string {
-	dir, err := ioutil.TempDir("", "geth-test")
+	dir, err := ioutil.TempDir("", "energi3-test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +45,7 @@ type testgeth struct {
 
 func init() {
 	// Run the app if we've been exec'd as "geth-test" in runGeth.
-	reexec.Register("geth-test", func() {
+	reexec.Register("energi3-test", func() {
 		if err := app.Run(os.Args); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -92,7 +93,7 @@ func runGeth(t *testing.T, args ...string) *testgeth {
 
 	// Boot "geth". This actually runs the test binary but the TestMain
 	// function will prevent any tests from running.
-	tt.Run("geth-test", args...)
+	tt.Run("energi3-test", args...)
 
 	return tt
 }

@@ -23,8 +23,9 @@
                 "@cid tool exec make -- test"
         ],
         "package": [
-            "/bin/rm -rf bin && /bin/cp -ra build/bin bin",
-            "@default"
-        ]
+            "@cid tool exec make -- package"
+        ],
+        "autoformat": "@cid tool envexec go -- gofmt -s -w",
+        "update-license": "@cid tool exec go -- run ./build/update-license.go"
     }
 }

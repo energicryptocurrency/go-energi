@@ -55,7 +55,7 @@ var _indexHtml = []byte(`<!DOCTYPE html>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Go Ethereum Dashboard</title>
+        <title>Energi Core Dashboard</title>
         <link rel="shortcut icon" type="image/ico" href="https://ethereum.org/favicon.ico" />
         <style>
             ::-webkit-scrollbar {
@@ -29962,7 +29962,7 @@ var _bundleJs = []byte((((((((((`!function(modules) {
                     color: "inherit",
                     noWrap: !0,
                     className: classes.title
-                }, "Go Ethereum Dashboard")));
+                }, "Energi Core Dashboard")));
             }
         } ]), Header;
     }(_react.Component);
@@ -32721,7 +32721,7 @@ var _bundleJs = []byte((((((((((`!function(modules) {
                     color: "inherit"
                 }, _react2.default.createElement("span", {
                     style: _common.styles.light
-                }, "Geth"), " ", general.version), general.commit && _react2.default.createElement(_Typography2.default, {
+                }, "Energi Core"), " ", general.version), general.commit && _react2.default.createElement(_Typography2.default, {
                     type: "caption",
                     color: "inherit"
                 }, _react2.default.createElement("span", {

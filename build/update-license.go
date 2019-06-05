@@ -85,6 +85,19 @@ var (
 
 	// this text appears at the start of AUTHORS
 	authorsFileHeader = "# This is the official list of go-ethereum authors for copyright purposes.\n\n"
+
+	//
+	energiAuthorsFileHeader = "# This is the official list of Energi Core authors for copyright purposes.\n\n"
+	energiAuthorsRE         = regexp.MustCompile(`@(energi.team|futoin)`)
+
+	// The commit after which the Energi source starts
+	//energiForkPoint = "4bcc0a37ab70cb79b16893556cffdaad6974e7d8"
+
+	// Date of Energi fork refactoring start
+	energiForkDate = "2019-06-01"
+
+	// The year when work on the initial project "ETHFork" has started
+	energiStartYear int64 = 2018
 )
 
 // this template generates the license comment.
@@ -108,9 +121,33 @@ var licenseT = template.Must(template.New("").Parse(`
 
 `[1:]))
 
+// this template generates the license comment.
+// its input is an info structure.
+var energiLicenseT = template.Must(template.New("").Parse(`
+// Copyright {{.YearEnergi}} The Energi Core Authors
+// Copyright {{.Year}} The go-ethereum Authors
+// This file is part of {{.WholeEnergi false}}.
+//
+// {{.WholeEnergi true}} is free software: you can redistribute it and/or modify
+// it under the terms of the GNU {{.License}} as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// {{.WholeEnergi true}} is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU {{.License}} for more details.
+//
+// You should have received a copy of the GNU {{.License}}
+// along with {{.WholeEnergi false}}. If not, see <http://www.gnu.org/licenses/>.
+
+`[1:]))
+
 type info struct {
-	file string
-	Year int64
+	file       string
+	Year       int64
+	YearEnergi int64
+	IsEnergi   bool
 }
 
 func (i info) License() string {
@@ -135,6 +172,16 @@ func (i info) Whole(startOfSentence bool) string {
 		return "The go-ethereum library"
 	}
 	return "the go-ethereum library"
+}
+
+func (i info) WholeEnergi(startOfSentence bool) string {
+	if i.gpl() {
+		return "Energi Core"
+	}
+	if startOfSentence {
+		return "The Energi Core library"
+	}
+	return "the Energi Core library"
 }
 
 func (i info) gpl() bool {
@@ -277,12 +324,24 @@ func writeAuthors(files []string) {
 		merge[a] = true
 	}
 	// Write sorted list of authors back to the file.
+	var energi_result []string
 	var result []string
 	for a := range merge {
-		result = append(result, a)
+		if m := energiAuthorsRE.FindStringIndex(a); m != nil {
+			energi_result = append(energi_result, a)
+		} else {
+			result = append(result, a)
+		}
 	}
+	sort.Strings(energi_result)
 	sort.Strings(result)
 	content := new(bytes.Buffer)
+	content.WriteString(energiAuthorsFileHeader)
+	for _, a := range energi_result {
+		content.WriteString(a)
+		content.WriteString("\n")
+	}
+	content.WriteString("\n")
 	content.WriteString(authorsFileHeader)
 	for _, a := range result {
 		content.WriteString(a)
@@ -336,9 +395,13 @@ func isGenerated(file string) bool {
 
 // fileInfo finds the lowest year in which the given file was committed.
 func fileInfo(file string) (*info, error) {
-	info := &info{file: file, Year: int64(time.Now().Year())}
+	info := &info{file: file, Year: int64(time.Now().Year()), IsEnergi: false}
 	cmd := exec.Command("git", "log", "--follow", "--find-renames=80", "--find-copies=80", "--pretty=format:%ai", "--", file)
 	err := doLines(cmd, func(line string) {
+		// Character comparison should be OK for ISO format
+		if line[:len(energiForkDate)] >= energiForkDate {
+			info.IsEnergi = true
+		}
 		y, err := strconv.ParseInt(line[:4], 10, 64)
 		if err != nil {
 			fmt.Printf("cannot parse year: %q", line[:4])
@@ -347,6 +410,13 @@ func fileInfo(file string) (*info, error) {
 			info.Year = y
 		}
 	})
+	if info.Year >= energiStartYear {
+		info.YearEnergi = info.Year
+		// TODO: revise on cherry-picks
+		info.Year = energiStartYear
+	} else {
+		info.YearEnergi = energiStartYear
+	}
 	return info, err
 }
 
@@ -371,7 +441,11 @@ func writeLicense(info *info) {
 	}
 	// Construct new file content.
 	buf := new(bytes.Buffer)
-	licenseT.Execute(buf, info)
+	if info.IsEnergi {
+		energiLicenseT.Execute(buf, info)
+	} else {
+		licenseT.Execute(buf, info)
+	}
 	if m := licenseCommentRE.FindIndex(content); m != nil && m[0] == 0 {
 		buf.Write(content[:m[0]])
 		buf.Write(content[m[1]:])

@@ -12,7 +12,7 @@ if [ "$PASSWORD" == "" ]; then echo "Password must be set, in order to use swarm
 echo $PASSWORD > /password
 
 KEYFILE=`find $DATADIR | grep UTC | head -n 1` || true
-if [ ! -f "$KEYFILE" ]; then echo "No keyfile found. Generating..." && /geth --datadir $DATADIR --password /password account new; fi
+if [ ! -f "$KEYFILE" ]; then echo "No keyfile found. Generating..." && /energi3 --datadir $DATADIR --password /password account new; fi
 KEYFILE=`find $DATADIR | grep UTC | head -n 1` || true
 if [ ! -f "$KEYFILE" ]; then echo "Could not find nor generate a BZZ keyfile." && exit 1; else echo "Found keyfile $KEYFILE"; fi
 

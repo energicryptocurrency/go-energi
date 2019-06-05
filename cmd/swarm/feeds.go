@@ -1,18 +1,19 @@
-// Copyright 2016 The go-ethereum Authors
-// This file is part of go-ethereum.
+// Copyright 2018 The Energi Core Authors
+// Copyright 2018 The go-ethereum Authors
+// This file is part of Energi Core.
 //
-// go-ethereum is free software: you can redistribute it and/or modify
+// Energi Core is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// go-ethereum is distributed in the hope that it will be useful,
+// Energi Core is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with go-ethereum. If not, see <http://www.gnu.org/licenses/>.
+// along with Energi Core. If not, see <http://www.gnu.org/licenses/>.
 
 // Command feed allows the user to create and update signed Swarm feeds
 package main
@@ -49,7 +50,7 @@ var feedCommand = cli.Command{
 					* use --name to set the topic to a human-readable name.
 					    For example --name could be set to "profile-picture", meaning this feed allows to get this user's current profile picture.
 					* use both --topic and --name to create named subtopics. 
-						For example, --topic could be set to an Ethereum contract address and --name could be set to "comments", meaning
+						For example, --topic could be set to an Energi contract address and --name could be set to "comments", meaning
 						this feed tracks a discussion about that contract.
 					The --user flag allows to have this manifest refer to a user other than yourself. If not specified,
 					it will then default to your local account (--bzzaccount)`,
@@ -67,7 +68,7 @@ var feedCommand = cli.Command{
 					* use --name to set the topic to a human-readable name.
 					    For example --name could be set to "profile-picture", meaning this feed allows to get this user's current profile picture.
 					* use both --topic and --name to create named subtopics. 
-						For example, --topic could be set to an Ethereum contract address and --name could be set to "comments", meaning
+						For example, --topic could be set to an Energi contract address and --name could be set to "comments", meaning
 						this feed tracks a discussion about that contract.
 					
 					If you have a manifest, you can specify it with --manifest to refer to the feed,

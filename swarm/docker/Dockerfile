@@ -11,7 +11,7 @@ RUN mkdir -p $GOPATH/src/github.com/ethereum && \
     go install -ldflags "-X main.gitCommit=${VERSION}" ./cmd/swarm && \
     go install -ldflags "-X main.gitCommit=${VERSION}" ./cmd/swarm/swarm-smoke && \
     go install -ldflags "-X main.gitCommit=${VERSION}" ./cmd/swarm/global-store && \
-    go install -ldflags "-X main.gitCommit=${VERSION}" ./cmd/geth
+    go install -ldflags "-X main.gitCommit=${VERSION}" ./cmd/energi3
 
 
 FROM alpine:3.8 as swarm-smoke
@@ -27,6 +27,6 @@ ENTRYPOINT ["/global-store"]
 
 FROM alpine:3.8 as swarm
 WORKDIR /
-COPY --from=builder /go/bin/swarm /go/bin/geth /
+COPY --from=builder /go/bin/swarm /go/bin/energi3 /
 ADD run.sh /run.sh
 ENTRYPOINT ["/run.sh"]
