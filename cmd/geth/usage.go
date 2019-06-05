@@ -33,6 +33,7 @@ import (
 var AppHelpTemplate = `NAME:
    {{.App.Name}} - {{.App.Usage}}
 
+   Copyright 2018-2019 The Energi Core Authors
    Copyright 2013-2018 The go-ethereum Authors
 
 USAGE:
@@ -53,7 +54,7 @@ COMMANDS:
 {{end}}{{end}}{{if .App.Copyright }}
 COPYRIGHT:
    {{.App.Copyright}}
-   {{end}}
+{{end}}
 `
 
 // flagGroup is a collection of flags belonging to a single topic.

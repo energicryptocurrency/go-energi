@@ -66,7 +66,11 @@ DESCRIPTION:
 
 OPTIONS:
 {{range .VisibleFlags}}{{.}}
-{{end}}{{end}}
+{{end}}
+
+COPYRIGHT:
+   {{.App.Copyright}}
+{{end}}
 `
 
 // Git SHA1 commit hash of the release (set via linker flags)
@@ -108,7 +112,10 @@ var app = utils.NewApp("", "Energi Swarm")
 func init() {
 	app.Action = bzzd
 	app.Version = sv.ArchiveVersion(gitCommit)
-	app.Copyright = "Copyright 2013-2016 The go-ethereum Authors"
+	app.Copyright = strings.Join([]string{
+		"Copyright 2018-2019 The Energi Core Authors",
+		"Copyright 2013-2016 The go-ethereum Authors",
+	}, "\n   ")
 	app.Commands = []cli.Command{
 		{
 			Action:             version,

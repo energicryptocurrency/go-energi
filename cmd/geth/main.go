@@ -174,7 +174,10 @@ func init() {
 	// Initialize the CLI app and start Geth
 	app.Action = geth
 	app.HideVersion = true // we have a command to print the version
-	app.Copyright = "Copyright 2013-2018 The go-ethereum Authors"
+	app.Copyright = strings.Join([]string{
+		"Copyright 2018-2019 The Energi Core Authors",
+		"Copyright 2013-2018 The go-ethereum Authors",
+	}, "\n   ")
 	app.Commands = []cli.Command{
 		// See chaincmd.go:
 		initCommand,
