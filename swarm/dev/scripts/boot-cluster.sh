@@ -39,7 +39,7 @@ BOOTNODE_URL="enode://${BOOTNODE_PUBKEY}@${BOOTNODE_IP}:${BOOTNODE_PORT}"
 
 # static geth configuration
 GETH_IP="192.168.33.3"
-GETH_RPC_PORT="8545"
+GETH_RPC_PORT="39796"
 GETH_RPC_URL="http://${GETH_IP}:${GETH_RPC_PORT}"
 
 usage() {

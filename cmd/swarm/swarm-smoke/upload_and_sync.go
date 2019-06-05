@@ -77,7 +77,7 @@ func trackChunks(testData []byte) error {
 
 	// has-chunks
 	for _, host := range hosts {
-		httpHost := fmt.Sprintf("ws://%s:%d", host, 8546)
+		httpHost := fmt.Sprintf("ws://%s:%d", host, 39795)
 		log.Trace("Calling `Has` on host", "httpHost", httpHost)
 		rpcClient, err := rpc.Dial(httpHost)
 		if err != nil {

@@ -70,7 +70,7 @@ func main() {
 		},
 		cli.IntFlag{
 			Name:        "ws-port",
-			Value:       8546,
+			Value:       39795,
 			Usage:       "ws port",
 			Destination: &wsPort,
 		},
