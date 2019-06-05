@@ -512,11 +512,11 @@ func DefaultConfigDir() string {
 	home := homeDir()
 	if home != "" {
 		if runtime.GOOS == "darwin" {
-			return filepath.Join(home, "Library", "Signer")
+			return filepath.Join(home, "Library", "EnergiSigner")
 		} else if runtime.GOOS == "windows" {
-			return filepath.Join(home, "AppData", "Roaming", "Signer")
+			return filepath.Join(home, "AppData", "Roaming", "EnergiSigner")
 		} else {
-			return filepath.Join(home, ".clef")
+			return filepath.Join(home, ".energiclef")
 		}
 	}
 	// As we cannot guess a stable location, return empty and handle later
