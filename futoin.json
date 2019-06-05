@@ -25,6 +25,7 @@
         "package": [
             "@cid tool exec make -- package"
         ],
-        "autoformat": "@cid tool envexec go -- gofmt -s -w"
+        "autoformat": "@cid tool envexec go -- gofmt -s -w",
+        "update-license": "@cid tool exec go -- run ./build/update-license.go"
     }
 }
