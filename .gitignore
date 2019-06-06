@@ -18,6 +18,8 @@ build/_vendor/pkg
 /energi3-*.*
 /swarm-*.*
 /bin
+/node_modules/
+/build/contracts/
 
 #*
 .#*

@@ -4,7 +4,9 @@
     "vcs": "git",
     "tools": {
         "go": "1.11",
-        "make": true
+        "make": true,
+        "node": "8",
+        "yarn": true
     },
     "package": [
         "bin"
@@ -17,8 +19,12 @@
             "lint",
             "test"
         ],
-        "lint": "@cid tool exec make -- lint",
-        "test": [
+        "lint": [ "lint-go", "lint-sol" ],
+        "lint-go": "@cid tool exec make -- lint",
+        "lint-sol": "@cid tool exec yarn -- run solium -d contracts/",
+
+        "test": [ "test-go" ],
+        "test-go": [
                 "@cid tool exec git -- submodule update --init --recursive",
                 "@cid tool exec make -- test"
         ],
