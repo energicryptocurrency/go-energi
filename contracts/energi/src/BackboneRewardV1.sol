@@ -21,9 +21,16 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IGovernedContract, IBlockReward } from "./common.sol";
+import {
+    GlobalConstants,
+    IGovernedContract,
+    IBlockReward
+} from "./common.sol";
 
-contract BackboneRewardV1 is IGovernedContract, IBlockReward
+contract BackboneRewardV1 is
+    GlobalConstants,
+    IGovernedContract,
+    IBlockReward
 {
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract) external {}
@@ -34,7 +41,7 @@ contract BackboneRewardV1 is IGovernedContract, IBlockReward
 
     function getReward(uint block_number) external view returns(uint amount) {
         if (block_number > 0) {
-            amount = 2.28 ether;
+            amount = REWARD_BACKBONE_V1;
         }
     }
 }

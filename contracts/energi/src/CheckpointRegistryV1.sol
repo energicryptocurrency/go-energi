@@ -21,9 +21,12 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import "./common.sol";
+import {
+    IGovernedContract
+} from "./common.sol";
 
-contract CheckpointRegistryV1 is IGovernedContract
+contract CheckpointRegistryV1 is
+    IGovernedContract
 {
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract) external {}

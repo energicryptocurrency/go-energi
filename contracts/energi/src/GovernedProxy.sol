@@ -21,15 +21,25 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import {
+    GlobalConstants,
+    IGovernedContract
+} from "./common.sol";
 import { GlobalConstants, IGovernedContract } from "./common.sol";
-import { IProposal, ISporkRegistry } from "./SporkRegistryV1.sol";
+
+import {
+    IProposal,
+    ISporkRegistry
+} from "./SporkRegistryV1.sol";
 
 /**
  * This contract has no chance of being updated. It must be stupid simple.
  *
  * If another upgrade logic is required in the future - it can be done as proxy stage II.
  */
-contract GovernedProxy is GlobalConstants {
+contract GovernedProxy is
+    GlobalConstants
+{
     IGovernedContract public current_impl;
     mapping(address => IGovernedContract) public upgrade_proposals;
 

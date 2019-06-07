@@ -21,8 +21,15 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants, IGovernedContract } from "./common.sol";
-import { IProposal, GenericProposal } from "./GenericProposal.sol";
+import {
+    GlobalConstants,
+    IGovernedContract
+} from "./common.sol";
+
+import {
+    IProposal,
+    GenericProposal
+} from "./GenericProposal.sol";
 
 interface ISporkRegistry {
     function createUpgradeProposal(IGovernedContract impl, uint period)

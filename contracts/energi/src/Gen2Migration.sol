@@ -21,8 +21,6 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import "./common.sol";
-
 contract Gen2Migration
 {
 }

@@ -21,9 +21,14 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IBlockReward, IGovernedContract } from "./common.sol";
+import {
+    GlobalConstants,
+    IGovernedContract,
+    IBlockReward
+} from "./common.sol";
 
 contract TreasuryV1 is
+    GlobalConstants,
     IGovernedContract,
     IBlockReward
 {
@@ -36,7 +41,7 @@ contract TreasuryV1 is
 
     function getReward(uint block_number) external view returns(uint amount) {
         if (block_number > 0) {
-            amount = 184000 ether;
+            amount = REWARD_TREASURY_V1;
         }
     }
 }
