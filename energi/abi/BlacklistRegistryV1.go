@@ -28,10 +28,10 @@ var (
 )
 
 // BlacklistRegistryV1ABI is the input ABI used to generate the binding from.
-const BlacklistRegistryV1ABI = "[{\"constant\":false,\"inputs\":[],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const BlacklistRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // BlacklistRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const BlacklistRegistryV1Bin = `6080604052348015600f57600080fd5b50606c80601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80638fd3ab8014602d575b600080fd5b60336035565b005b56fea265627a7a723058206888153a6f2cc83a1dd8c598fbf901e90566ea8ea61f064f42e5d624fc7331d464736f6c63430005090032`
+const BlacklistRegistryV1Bin = `6080604052348015600f57600080fd5b5060808061001e6000396000f3fe60806040526004361060255760003560e01c8062f55d9d146027578063ce5494bb146027575b005b348015603257600080fd5b50602560048036036020811015604757600080fd5b505056fea265627a7a723058205c6bb1a58e96338936a0532ad27d1b486cf0d475eebf6aafebb6fd58176d4fec64736f6c63430005090032`
 
 // DeployBlacklistRegistryV1 deploys a new Ethereum contract, binding an instance of BlacklistRegistryV1 to it.
 func DeployBlacklistRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *BlacklistRegistryV1, error) {
@@ -188,23 +188,44 @@ func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorRaw) Transact(opts *bin
 	return _BlacklistRegistryV1.Contract.contract.Transact(opts, method, params...)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_BlacklistRegistryV1 *BlacklistRegistryV1Transactor) Migrate(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _BlacklistRegistryV1.contract.Transact(opts, "migrate")
+// Solidity: function destroy(address ) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.contract.Transact(opts, "destroy", arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_BlacklistRegistryV1 *BlacklistRegistryV1Session) Migrate() (*types.Transaction, error) {
-	return _BlacklistRegistryV1.Contract.Migrate(&_BlacklistRegistryV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.Contract.Destroy(&_BlacklistRegistryV1.TransactOpts, arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorSession) Migrate() (*types.Transaction, error) {
-	return _BlacklistRegistryV1.Contract.Migrate(&_BlacklistRegistryV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.Contract.Destroy(&_BlacklistRegistryV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.contract.Transact(opts, "migrate", arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.Contract.Migrate(&_BlacklistRegistryV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.Contract.Migrate(&_BlacklistRegistryV1.TransactOpts, arg0)
 }

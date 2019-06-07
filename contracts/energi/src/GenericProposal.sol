@@ -21,20 +21,33 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import "./common.sol";
+interface IProposal {
+    function isAccepted() external view returns(bool);
+    function () external payable;
+}
 
-contract StakerRewardV1 is IGovernedContract, IBlockReward
-{
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+contract GenericProposal is IProposal {
+    uint public fee;
+    uint public deadline;
+    address payable public fee_payer;
+    uint8 public quorum;
+
+    constructor(
+        uint8 _quorum,
+        uint _period,
+        address payable _fee_payer,
+        uint _fee
+    ) public {
+        fee = _fee;
+        // solium-disable-next-line security/no-block-members
+        deadline = block.timestamp + _period;
+        fee_payer = _fee_payer;
+        quorum = _quorum;
+    }
+
+    function isAccepted() external view returns(bool) {
+        return false;
+    }
+
     function () external payable {}
-
-    function reward(uint amount) external payable {
-    }
-
-    function getReward(uint block_number) external view returns(uint amount) {
-        if (block_number > 0) {
-            amount = 2.18 ether;
-        }
-    }
 }

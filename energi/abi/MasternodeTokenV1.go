@@ -28,10 +28,10 @@ var (
 )
 
 // MasternodeTokenV1ABI is the input ABI used to generate the binding from.
-const MasternodeTokenV1ABI = "[{\"constant\":false,\"inputs\":[],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const MasternodeTokenV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // MasternodeTokenV1Bin is the compiled bytecode used for deploying new contracts.
-const MasternodeTokenV1Bin = `6080604052348015600f57600080fd5b50606c80601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80638fd3ab8014602d575b600080fd5b60336035565b005b56fea265627a7a7230582069dd8e57b2373e23a50764122a784fd263decc41b8cafde5e63d23d0f4dc4c6c64736f6c63430005090032`
+const MasternodeTokenV1Bin = `6080604052348015600f57600080fd5b5060808061001e6000396000f3fe60806040526004361060255760003560e01c8062f55d9d146027578063ce5494bb146027575b005b348015603257600080fd5b50602560048036036020811015604757600080fd5b505056fea265627a7a723058204581a66454b2558a1a515e5e34ef963fc0ec1265009811e48f8f3e2805b8ffc764736f6c63430005090032`
 
 // DeployMasternodeTokenV1 deploys a new Ethereum contract, binding an instance of MasternodeTokenV1 to it.
 func DeployMasternodeTokenV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *MasternodeTokenV1, error) {
@@ -188,23 +188,44 @@ func (_MasternodeTokenV1 *MasternodeTokenV1TransactorRaw) Transact(opts *bind.Tr
 	return _MasternodeTokenV1.Contract.contract.Transact(opts, method, params...)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_MasternodeTokenV1 *MasternodeTokenV1Transactor) Migrate(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _MasternodeTokenV1.contract.Transact(opts, "migrate")
+// Solidity: function destroy(address ) returns()
+func (_MasternodeTokenV1 *MasternodeTokenV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _MasternodeTokenV1.contract.Transact(opts, "destroy", arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_MasternodeTokenV1 *MasternodeTokenV1Session) Migrate() (*types.Transaction, error) {
-	return _MasternodeTokenV1.Contract.Migrate(&_MasternodeTokenV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_MasternodeTokenV1 *MasternodeTokenV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _MasternodeTokenV1.Contract.Destroy(&_MasternodeTokenV1.TransactOpts, arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_MasternodeTokenV1 *MasternodeTokenV1TransactorSession) Migrate() (*types.Transaction, error) {
-	return _MasternodeTokenV1.Contract.Migrate(&_MasternodeTokenV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_MasternodeTokenV1 *MasternodeTokenV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _MasternodeTokenV1.Contract.Destroy(&_MasternodeTokenV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_MasternodeTokenV1 *MasternodeTokenV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _MasternodeTokenV1.contract.Transact(opts, "migrate", arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_MasternodeTokenV1 *MasternodeTokenV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _MasternodeTokenV1.Contract.Migrate(&_MasternodeTokenV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_MasternodeTokenV1 *MasternodeTokenV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _MasternodeTokenV1.Contract.Migrate(&_MasternodeTokenV1.TransactOpts, arg0)
 }

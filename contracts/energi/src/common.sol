@@ -19,9 +19,11 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
+//pragma experimental SMTChecker;
 
 /**
  * Global constants with no storage space.
+ * NOTE: it could be a library, but Solidity does not support such case.
  */
 contract GlobalConstants {
     address constant internal TREASURY = address(0x301);
@@ -34,18 +36,40 @@ contract GlobalConstants {
     address constant internal MIGRATION_CONTRACT = address(0x308);
     address constant internal MASTERNODE_TOKEN = address(0x309);
     address constant internal GEN2_ADDR_RECOVERY = address(0x310);
+
+    uint constant internal FEE_UPGRADE_V1 = 10000 ether;
+    uint constant internal FEE_BUDGET_V1 = 100 ether;
+    uint constant internal FEE_CHECKPOINT_V1 = 1000 ether;
+    uint constant internal FEE_BLACKLIST_V1 = 1000 ether;
+
+    uint constant internal PERIOD_UPGRADE_MIN = 2 weeks;
+    uint constant internal PERIOD_UPGRADE_MAX = 365 days;
+    uint constant internal PERIOD_BUDGET_MIN = 2 weeks;
+    uint constant internal PERIOD_BUDGET_MAX = 365 days;
+    uint constant internal PERIOD_CHECKPOINT = 1 weeks;
+    uint constant internal PERIOD_BLACKLIST = 1 weeks;
+
+    uint8 constant internal QUORUM_MAJORITY = 51;
+
+    uint constant internal REWARD_STAKER_V1 = 2.28 ether;
+    uint constant internal REWARD_BACKBONE_V1 = 2.28 ether;
+    uint constant internal REWARD_MASTERNODE_V1 = 9.14 ether;
+    uint constant internal REWARD_TREASURY_V1 = 184000 ether;
 }
 
 /**
  * Base interface for upgradable contracts
  */
 interface IGovernedContract {
-    // It must check that the caller is the new instance,
-    // and self destruct to the caller address.
-    //
-    // NOTE: all data migration is assumed to be done at
-    //       the new instance construction time.
-    function migrate() external;
+    // It must check that the caller is the proxy
+    // and copy all required data from the old address.
+    function migrate(IGovernedContract old_impl) external;
+
+    // It must check that the caller is the proxy
+    // and self destruct to the new address.
+    function destroy(IGovernedContract new_impl) external;
+
+    function () external payable;
 }
 
 /**

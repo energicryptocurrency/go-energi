@@ -28,7 +28,23 @@ var (
 )
 
 // Gen2MigrationABI is the input ABI used to generate the binding from.
-const Gen2MigrationABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"}]"
+const Gen2MigrationABI = "[]"
+
+// Gen2MigrationBin is the compiled bytecode used for deploying new contracts.
+const Gen2MigrationBin = `6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723058208f6e3a5d66b12cc6a160f0fae73dd1923adde39308e8ac8b866b69120d4b4e4664736f6c63430005090032`
+
+// DeployGen2Migration deploys a new Ethereum contract, binding an instance of Gen2Migration to it.
+func DeployGen2Migration(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Gen2Migration, error) {
+	parsed, err := abi.JSON(strings.NewReader(Gen2MigrationABI))
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(Gen2MigrationBin), backend)
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+	return address, tx, &Gen2Migration{Gen2MigrationCaller: Gen2MigrationCaller{contract: contract}, Gen2MigrationTransactor: Gen2MigrationTransactor{contract: contract}, Gen2MigrationFilterer: Gen2MigrationFilterer{contract: contract}}, nil
+}
 
 // Gen2Migration is an auto generated Go binding around an Ethereum contract.
 type Gen2Migration struct {
@@ -170,72 +186,4 @@ func (_Gen2Migration *Gen2MigrationTransactorRaw) Transfer(opts *bind.TransactOp
 // Transact invokes the (paid) contract method with params as input values.
 func (_Gen2Migration *Gen2MigrationTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _Gen2Migration.Contract.contract.Transact(opts, method, params...)
-}
-
-// GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
-//
-// Solidity: function getReward(uint256 block_number) constant returns(uint256)
-func (_Gen2Migration *Gen2MigrationCaller) GetReward(opts *bind.CallOpts, block_number *big.Int) (*big.Int, error) {
-	var (
-		ret0 = new(*big.Int)
-	)
-	out := ret0
-	err := _Gen2Migration.contract.Call(opts, out, "getReward", block_number)
-	return *ret0, err
-}
-
-// GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
-//
-// Solidity: function getReward(uint256 block_number) constant returns(uint256)
-func (_Gen2Migration *Gen2MigrationSession) GetReward(block_number *big.Int) (*big.Int, error) {
-	return _Gen2Migration.Contract.GetReward(&_Gen2Migration.CallOpts, block_number)
-}
-
-// GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
-//
-// Solidity: function getReward(uint256 block_number) constant returns(uint256)
-func (_Gen2Migration *Gen2MigrationCallerSession) GetReward(block_number *big.Int) (*big.Int, error) {
-	return _Gen2Migration.Contract.GetReward(&_Gen2Migration.CallOpts, block_number)
-}
-
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
-//
-// Solidity: function migrate() returns()
-func (_Gen2Migration *Gen2MigrationTransactor) Migrate(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _Gen2Migration.contract.Transact(opts, "migrate")
-}
-
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
-//
-// Solidity: function migrate() returns()
-func (_Gen2Migration *Gen2MigrationSession) Migrate() (*types.Transaction, error) {
-	return _Gen2Migration.Contract.Migrate(&_Gen2Migration.TransactOpts)
-}
-
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
-//
-// Solidity: function migrate() returns()
-func (_Gen2Migration *Gen2MigrationTransactorSession) Migrate() (*types.Transaction, error) {
-	return _Gen2Migration.Contract.Migrate(&_Gen2Migration.TransactOpts)
-}
-
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
-//
-// Solidity: function reward(uint256 amount) returns()
-func (_Gen2Migration *Gen2MigrationTransactor) Reward(opts *bind.TransactOpts, amount *big.Int) (*types.Transaction, error) {
-	return _Gen2Migration.contract.Transact(opts, "reward", amount)
-}
-
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
-//
-// Solidity: function reward(uint256 amount) returns()
-func (_Gen2Migration *Gen2MigrationSession) Reward(amount *big.Int) (*types.Transaction, error) {
-	return _Gen2Migration.Contract.Reward(&_Gen2Migration.TransactOpts, amount)
-}
-
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
-//
-// Solidity: function reward(uint256 amount) returns()
-func (_Gen2Migration *Gen2MigrationTransactorSession) Reward(amount *big.Int) (*types.Transaction, error) {
-	return _Gen2Migration.Contract.Reward(&_Gen2Migration.TransactOpts, amount)
 }

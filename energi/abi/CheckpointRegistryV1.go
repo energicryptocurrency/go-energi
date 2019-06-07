@@ -28,10 +28,10 @@ var (
 )
 
 // CheckpointRegistryV1ABI is the input ABI used to generate the binding from.
-const CheckpointRegistryV1ABI = "[{\"constant\":false,\"inputs\":[],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const CheckpointRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // CheckpointRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const CheckpointRegistryV1Bin = `6080604052348015600f57600080fd5b50606c80601d6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80638fd3ab8014602d575b600080fd5b60336035565b005b56fea265627a7a72305820ca567eccce6ff05b362b2597e11b5fe6952b1c6526c22ff92bc6ecc0c6476de864736f6c63430005090032`
+const CheckpointRegistryV1Bin = `6080604052348015600f57600080fd5b5060808061001e6000396000f3fe60806040526004361060255760003560e01c8062f55d9d146027578063ce5494bb146027575b005b348015603257600080fd5b50602560048036036020811015604757600080fd5b505056fea265627a7a72305820546f7472a91634a90162b93f5ccef7392a45c2df37fc8d48461c0649777d84bf64736f6c63430005090032`
 
 // DeployCheckpointRegistryV1 deploys a new Ethereum contract, binding an instance of CheckpointRegistryV1 to it.
 func DeployCheckpointRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *CheckpointRegistryV1, error) {
@@ -188,23 +188,44 @@ func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorRaw) Transact(opts *b
 	return _CheckpointRegistryV1.Contract.contract.Transact(opts, method, params...)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1Transactor) Migrate(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _CheckpointRegistryV1.contract.Transact(opts, "migrate")
+// Solidity: function destroy(address ) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.contract.Transact(opts, "destroy", arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) Migrate() (*types.Transaction, error) {
-	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Destroy(&_CheckpointRegistryV1.TransactOpts, arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorSession) Migrate() (*types.Transaction, error) {
-	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Destroy(&_CheckpointRegistryV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.contract.Transact(opts, "migrate", arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts, arg0)
 }

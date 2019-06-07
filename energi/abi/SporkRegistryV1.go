@@ -28,7 +28,23 @@ var (
 )
 
 // SporkRegistryV1ABI is the input ABI used to generate the binding from.
-const SporkRegistryV1ABI = "[{\"constant\":false,\"inputs\":[],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const SporkRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"},{\"name\":\"period\",\"type\":\"uint256\"}],\"name\":\"createUpgradeProposal\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+
+// SporkRegistryV1Bin is the compiled bytecode used for deploying new contracts.
+const SporkRegistryV1Bin = `608060405234801561001057600080fd5b50610582806100206000396000f3fe6080604052600436106100335760003560e01c8062f55d9d146100355780631684f69f14610075578063ce5494bb14610035575b005b34801561004157600080fd5b506100336004803603602081101561005857600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166100d7565b6100ae6004803603604081101561008b57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356100da565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b50565b600069021e19e0c9bab2400000341461015457604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f46656520616d6f756e7400000000000000000000000000000000000000000000604482015290519081900360640190fd5b621275008210156101c657604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f506572696f64206d696e00000000000000000000000000000000000000000000604482015290519081900360640190fd5b6301e1338082111561023957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f506572696f64206d617800000000000000000000000000000000000000000000604482015290519081900360640190fd5b6000603383323460405161024c906102ee565b60ff9094168452602084019290925273ffffffffffffffffffffffffffffffffffffffff1660408084019190915260608301919091525190819003608001906000f0801580156102a0573d6000803e3d6000fd5b5060405190915073ffffffffffffffffffffffffffffffffffffffff8216903480156108fc02916000818181858888f193505050501580156102e6573d6000803e3d6000fd5b509392505050565b610252806102fc8339019056fe608060405234801561001057600080fd5b506040516102523803806102528339818101604052608081101561003357600080fd5b5080516020820151604083015160609093015160005542016001556002805460ff909216740100000000000000000000000000000000000000000260ff60a01b196001600160a01b039094166001600160a01b031990931692909217929092161790556101ad806100a56000396000f3fe60806040526004361061005a5760003560e01c80635051a5ec116100435780635051a5ec146100ae578063c40a70f8146100d7578063ddca3f43146101155761005a565b80631703a0181461005c57806329dcb0cf14610087575b005b34801561006857600080fd5b5061007161012a565b6040805160ff9092168252519081900360200190f35b34801561009357600080fd5b5061009c61014b565b60408051918252519081900360200190f35b3480156100ba57600080fd5b506100c3610151565b604080519115158252519081900360200190f35b3480156100e357600080fd5b506100ec610156565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561012157600080fd5b5061009c610172565b60025474010000000000000000000000000000000000000000900460ff1681565b60015481565b600090565b60025473ffffffffffffffffffffffffffffffffffffffff1681565b6000548156fea265627a7a723058202c36fc05f8683895af5d0e9f063271e4ebb6dc1b1a07c1f4ec5bc996f2677f5864736f6c63430005090032a265627a7a7230582015a60b9f0faa648cbdd1f683091d11bb90e838353c385a449255522f7c5f9d3c64736f6c63430005090032`
+
+// DeploySporkRegistryV1 deploys a new Ethereum contract, binding an instance of SporkRegistryV1 to it.
+func DeploySporkRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *SporkRegistryV1, error) {
+	parsed, err := abi.JSON(strings.NewReader(SporkRegistryV1ABI))
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(SporkRegistryV1Bin), backend)
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+	return address, tx, &SporkRegistryV1{SporkRegistryV1Caller: SporkRegistryV1Caller{contract: contract}, SporkRegistryV1Transactor: SporkRegistryV1Transactor{contract: contract}, SporkRegistryV1Filterer: SporkRegistryV1Filterer{contract: contract}}, nil
+}
 
 // SporkRegistryV1 is an auto generated Go binding around an Ethereum contract.
 type SporkRegistryV1 struct {
@@ -172,23 +188,65 @@ func (_SporkRegistryV1 *SporkRegistryV1TransactorRaw) Transact(opts *bind.Transa
 	return _SporkRegistryV1.Contract.contract.Transact(opts, method, params...)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// CreateUpgradeProposal is a paid mutator transaction binding the contract method 0x1684f69f.
 //
-// Solidity: function migrate() returns()
-func (_SporkRegistryV1 *SporkRegistryV1Transactor) Migrate(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _SporkRegistryV1.contract.Transact(opts, "migrate")
+// Solidity: function createUpgradeProposal(address , uint256 period) returns(address)
+func (_SporkRegistryV1 *SporkRegistryV1Transactor) CreateUpgradeProposal(opts *bind.TransactOpts, arg0 common.Address, period *big.Int) (*types.Transaction, error) {
+	return _SporkRegistryV1.contract.Transact(opts, "createUpgradeProposal", arg0, period)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// CreateUpgradeProposal is a paid mutator transaction binding the contract method 0x1684f69f.
 //
-// Solidity: function migrate() returns()
-func (_SporkRegistryV1 *SporkRegistryV1Session) Migrate() (*types.Transaction, error) {
-	return _SporkRegistryV1.Contract.Migrate(&_SporkRegistryV1.TransactOpts)
+// Solidity: function createUpgradeProposal(address , uint256 period) returns(address)
+func (_SporkRegistryV1 *SporkRegistryV1Session) CreateUpgradeProposal(arg0 common.Address, period *big.Int) (*types.Transaction, error) {
+	return _SporkRegistryV1.Contract.CreateUpgradeProposal(&_SporkRegistryV1.TransactOpts, arg0, period)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// CreateUpgradeProposal is a paid mutator transaction binding the contract method 0x1684f69f.
 //
-// Solidity: function migrate() returns()
-func (_SporkRegistryV1 *SporkRegistryV1TransactorSession) Migrate() (*types.Transaction, error) {
-	return _SporkRegistryV1.Contract.Migrate(&_SporkRegistryV1.TransactOpts)
+// Solidity: function createUpgradeProposal(address , uint256 period) returns(address)
+func (_SporkRegistryV1 *SporkRegistryV1TransactorSession) CreateUpgradeProposal(arg0 common.Address, period *big.Int) (*types.Transaction, error) {
+	return _SporkRegistryV1.Contract.CreateUpgradeProposal(&_SporkRegistryV1.TransactOpts, arg0, period)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address ) returns()
+func (_SporkRegistryV1 *SporkRegistryV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _SporkRegistryV1.contract.Transact(opts, "destroy", arg0)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address ) returns()
+func (_SporkRegistryV1 *SporkRegistryV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _SporkRegistryV1.Contract.Destroy(&_SporkRegistryV1.TransactOpts, arg0)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address ) returns()
+func (_SporkRegistryV1 *SporkRegistryV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _SporkRegistryV1.Contract.Destroy(&_SporkRegistryV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_SporkRegistryV1 *SporkRegistryV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _SporkRegistryV1.contract.Transact(opts, "migrate", arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_SporkRegistryV1 *SporkRegistryV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _SporkRegistryV1.Contract.Migrate(&_SporkRegistryV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_SporkRegistryV1 *SporkRegistryV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _SporkRegistryV1.Contract.Migrate(&_SporkRegistryV1.TransactOpts, arg0)
 }

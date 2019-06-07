@@ -21,20 +21,16 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import "./common.sol";
+import { IGovernedContract } from "./common.sol";
 
-contract StakerRewardV1 is IGovernedContract, IBlockReward
+contract GovernedProxyTest is IGovernedContract
 {
     function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+    function destroy(IGovernedContract new_impl) external {
+        selfdestruct(address(new_impl));
+    }
+    function getAddress() external view returns (address) {
+        return address(this);
+    }
     function () external payable {}
-
-    function reward(uint amount) external payable {
-    }
-
-    function getReward(uint block_number) external view returns(uint amount) {
-        if (block_number > 0) {
-            amount = 2.18 ether;
-        }
-    }
 }

@@ -28,7 +28,23 @@ var (
 )
 
 // StakerRewardV1ABI is the input ABI used to generate the binding from.
-const StakerRewardV1ABI = "[{\"constant\":true,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"}]"
+const StakerRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+
+// StakerRewardV1Bin is the compiled bytecode used for deploying new contracts.
+const StakerRewardV1Bin = `608060405234801561001057600080fd5b50610115806100206000396000f3fe60806040526004361060395760003560e01c8062f55d9d14603b5780631c4b774b146077578063a9fb763c1460af578063ce5494bb14603b575b005b348015604657600080fd5b50603960048036036020811015605b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1660c6565b348015608257600080fd5b50609d60048036036020811015609757600080fd5b503560c9565b60408051918252519081900360200190f35b60396004803603602081101560c357600080fd5b50355b50565b6000811560db5750671e40ea732a5a00005b91905056fea265627a7a7230582081ffd2970fc8aa6df8a6e209d0bd0ec9d1909faf4b3fe83c0275c8d67e6a8c8164736f6c63430005090032`
+
+// DeployStakerRewardV1 deploys a new Ethereum contract, binding an instance of StakerRewardV1 to it.
+func DeployStakerRewardV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *StakerRewardV1, error) {
+	parsed, err := abi.JSON(strings.NewReader(StakerRewardV1ABI))
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(StakerRewardV1Bin), backend)
+	if err != nil {
+		return common.Address{}, nil, nil, err
+	}
+	return address, tx, &StakerRewardV1{StakerRewardV1Caller: StakerRewardV1Caller{contract: contract}, StakerRewardV1Transactor: StakerRewardV1Transactor{contract: contract}, StakerRewardV1Filterer: StakerRewardV1Filterer{contract: contract}}, nil
+}
 
 // StakerRewardV1 is an auto generated Go binding around an Ethereum contract.
 type StakerRewardV1 struct {
@@ -198,25 +214,46 @@ func (_StakerRewardV1 *StakerRewardV1CallerSession) GetReward(block_number *big.
 	return _StakerRewardV1.Contract.GetReward(&_StakerRewardV1.CallOpts, block_number)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_StakerRewardV1 *StakerRewardV1Transactor) Migrate(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _StakerRewardV1.contract.Transact(opts, "migrate")
+// Solidity: function destroy(address ) returns()
+func (_StakerRewardV1 *StakerRewardV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _StakerRewardV1.contract.Transact(opts, "destroy", arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_StakerRewardV1 *StakerRewardV1Session) Migrate() (*types.Transaction, error) {
-	return _StakerRewardV1.Contract.Migrate(&_StakerRewardV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_StakerRewardV1 *StakerRewardV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _StakerRewardV1.Contract.Destroy(&_StakerRewardV1.TransactOpts, arg0)
 }
 
-// Migrate is a paid mutator transaction binding the contract method 0x8fd3ab80.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function migrate() returns()
-func (_StakerRewardV1 *StakerRewardV1TransactorSession) Migrate() (*types.Transaction, error) {
-	return _StakerRewardV1.Contract.Migrate(&_StakerRewardV1.TransactOpts)
+// Solidity: function destroy(address ) returns()
+func (_StakerRewardV1 *StakerRewardV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _StakerRewardV1.Contract.Destroy(&_StakerRewardV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_StakerRewardV1 *StakerRewardV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _StakerRewardV1.contract.Transact(opts, "migrate", arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_StakerRewardV1 *StakerRewardV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _StakerRewardV1.Contract.Migrate(&_StakerRewardV1.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_StakerRewardV1 *StakerRewardV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _StakerRewardV1.Contract.Migrate(&_StakerRewardV1.TransactOpts, arg0)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.

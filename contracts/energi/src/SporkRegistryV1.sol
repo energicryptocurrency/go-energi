@@ -19,9 +19,46 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
+//pragma experimental SMTChecker;
 
-import "./common.sol";
+import { GlobalConstants, IGovernedContract } from "./common.sol";
+import { IProposal, GenericProposal } from "./GenericProposal.sol";
 
-contract SporkRegistryV1 is IGovernedContract
+interface ISporkRegistry {
+    function createUpgradeProposal(IGovernedContract impl, uint period)
+        external payable
+        returns (IProposal);
+}
+
+contract SporkRegistryV1 is
+    GlobalConstants,
+    ISporkRegistry,
+    IGovernedContract
 {
+    function migrate(IGovernedContract) external {}
+    function destroy(IGovernedContract) external {}
+    function () external payable {}
+
+    function createUpgradeProposal(IGovernedContract, uint period)
+        external payable
+        returns (IProposal)
+    {
+        require(msg.value == FEE_UPGRADE_V1, "Fee amount");
+        require(period >= PERIOD_UPGRADE_MIN, "Period min");
+        require(period <= PERIOD_UPGRADE_MAX, "Period max");
+
+        address payable proposal = address(
+            new GenericProposal(
+                QUORUM_MAJORITY,
+                period,
+                // solium-disable-next-line security/no-tx-origin
+                tx.origin,
+                msg.value
+            )
+        );
+
+        proposal.transfer(msg.value);
+
+        return IProposal(proposal);
+    }
 }

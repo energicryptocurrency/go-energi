@@ -2,5 +2,5 @@ build
 node_modules
 contracts/chequebook
 contracts/ens
-
+Migrations.sol
 

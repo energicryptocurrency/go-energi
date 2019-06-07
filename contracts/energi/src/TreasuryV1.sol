@@ -19,11 +19,18 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
+//pragma experimental SMTChecker;
 
-import "./common.sol";
+import { IBlockReward, IGovernedContract } from "./common.sol";
 
-contract TreasuryV1 is IGovernedContract, IBlockReward
+contract TreasuryV1 is
+    IGovernedContract,
+    IBlockReward
 {
+    function migrate(IGovernedContract) external {}
+    function destroy(IGovernedContract) external {}
+    function () external payable {}
+
     function reward(uint amount) external payable {
     }
 

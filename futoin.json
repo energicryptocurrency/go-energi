@@ -33,6 +33,7 @@
         ],
         "autoformat": "@cid tool envexec go -- gofmt -s -w",
         "update-license": "@cid tool exec go -- run ./build/update-license.go",
-        "cigo": "./build/env.sh go run ./build/ci.go"
+        "cigo": "./build/env.sh go run ./build/ci.go",
+        "truffle": "cid tool envexec npm -- truffle"
     }
 }

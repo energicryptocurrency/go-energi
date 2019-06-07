@@ -19,11 +19,10 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
+//pragma experimental SMTChecker;
 
 import "./common.sol";
 
-contract Gen2Migration is IGovernedContract, IBlockReward
+contract Gen2Migration
 {
-    function migrate() external {
-    }
 }

@@ -19,14 +19,15 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
+//pragma experimental SMTChecker;
 
-import "./common.sol";
-import "./GovernedProxy.sol";
+import { IGovernedContract, IBlockReward } from "./common.sol";
 
 contract BackboneRewardV1 is IGovernedContract, IBlockReward
 {
-    function migrate() external {
-    }
+    function migrate(IGovernedContract) external {}
+    function destroy(IGovernedContract) external {}
+    function () external payable {}
 
     function reward(uint amount) external payable {
     }

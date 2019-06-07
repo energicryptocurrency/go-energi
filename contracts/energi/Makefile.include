@@ -5,6 +5,8 @@
 SOLC_VERSION := 0.5.9
 SOLC ?= build/_workspace/bin/solc-$(SOLC_VERSION)
 SOLC_OPTIONS := \
+  --asm \
+  --asm-json \
   --bin \
   --abi \
   --optimize \
@@ -39,6 +41,7 @@ ENERGI_CONTRACTS := \
   BlacklistRegistryV1.sol \
   CheckpointRegistryV1.sol \
   Gen2Migration.sol \
+  GenericProposal.sol \
   GovernedProxy.sol \
   MasternodeTokenV1.sol \
   MasternodeRegistryV1.sol \
