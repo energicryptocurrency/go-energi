@@ -79,3 +79,24 @@ $(ENERGI_CONTRACT_BUILD_DIR)/%.$(SOLC_BIN_EXT): $(ENERGI_CONTRACT_SRC_DIR)/%.sol
 # Built with bin files
 $(ENERGI_CONTRACT_BUILD_DIR)/%.$(SOLC_ABI_EXT): $(ENERGI_CONTRACT_SRC_DIR)/%.sol
 	@true
+
+# ---
+.PHONY: test-sol
+
+test-sol:
+	@which ganache-cli 2&>1 >/dev/null || npm install -g ganache-cli
+	@which truffle 2&>1 >/dev/null || npm install -g truffle
+	@ganache-cli \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef,1000000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdff,200000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcfff,100000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abffff,10000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890afffff,1000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890ffffff,1000000000' \
+	    2>&1 >build/contracts/ganache.log & \
+	  sleep 5; \
+	  truffle test; \
+	  res=$$?; \
+	  kill $$!; \
+	  fg; \
+	  exit $$res
