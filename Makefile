@@ -7,9 +7,14 @@
 .PHONY: geth-linux-arm geth-linux-arm-5 geth-linux-arm-6 geth-linux-arm-7 geth-linux-arm64
 .PHONY: geth-darwin geth-darwin-386 geth-darwin-amd64
 .PHONY: geth-windows geth-windows-386 geth-windows-amd64
+.PHONY: prebuild
+
+include contracts/energi/Makefile.include
 
 GOBIN = $(shell pwd)/build/bin
 GO ?= latest
+
+prebuild:
 
 geth:
 	build/env.sh go run build/ci.go install ./cmd/geth
@@ -21,7 +26,7 @@ swarm:
 	@echo "Done building."
 	@echo "Run \"$(GOBIN)/swarm\" to launch swarm."
 
-all:
+all: prebuild
 	build/env.sh go run build/ci.go install
 
 package: all

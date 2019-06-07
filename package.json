@@ -1,0 +1,9 @@
+{
+  "name": "energi3",
+  "version": "0.0.1",
+  "author": "Andrey Galkin <andrey@futoin.org>",
+  "license": "GPL-3.0+",
+  "devDependencies": {
+    "ethlint": "^1.2.4"
+  }
+}

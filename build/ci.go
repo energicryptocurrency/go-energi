@@ -333,6 +333,8 @@ func goToolArch(arch string, cc string, subcmd string, args ...string) *exec.Cmd
 
 func doTest(cmdline []string) {
 	coverage := flag.Bool("coverage", false, "Whether to record code coverage")
+	verbose := flag.Bool("v", false, "Whether to create verbose test output")
+	swarm := flag.Bool("swarm", false, "Whether to test swarm")
 	flag.CommandLine.Parse(cmdline)
 	env := build.Env()
 
@@ -342,6 +344,16 @@ func doTest(cmdline []string) {
 	}
 	packages = build.ExpandPackagesNoVendor(packages)
 
+	if !*swarm {
+		tmp := []string{}
+		for _, p := range packages {
+			if !strings.Contains(p, "swarm") {
+				tmp = append(tmp, p)
+			}
+		}
+		packages = tmp
+	}
+
 	// Run the actual tests.
 	// Test a single package at a time. CI builders are slow
 	// and some tests run into timeouts under load.
@@ -349,6 +361,9 @@ func doTest(cmdline []string) {
 	gotest.Args = append(gotest.Args, "-p", "1", "-timeout", "5m")
 	if *coverage {
 		gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
+	}
+	if *verbose {
+		gotest.Args = append(gotest.Args, "-v")
 	}
 
 	gotest.Args = append(gotest.Args, packages...)
