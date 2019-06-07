@@ -31,7 +31,7 @@ var (
 const BlacklistRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // BlacklistRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const BlacklistRegistryV1Bin = `6080604052348015600f57600080fd5b5060808061001e6000396000f3fe60806040526004361060255760003560e01c8062f55d9d146027578063ce5494bb146027575b005b348015603257600080fd5b50602560048036036020811015604757600080fd5b505056fea265627a7a7230582033d4b55ff7a9b94ab599d8b27ef87ce8be70c8074440d37b47b0e8bca9ffc74964736f6c63430005090032`
+const BlacklistRegistryV1Bin = `6080604052348015600f57600080fd5b5060808061001e6000396000f3fe60806040526004361060255760003560e01c8062f55d9d146027578063ce5494bb146027575b005b348015603257600080fd5b50602560048036036020811015604757600080fd5b505056fea265627a7a72305820ff7273885b02f1e85980413681ba3a9e9381a34ef97d84d01f0c414c1e385e0564736f6c63430005090032`
 
 // DeployBlacklistRegistryV1 deploys a new Ethereum contract, binding an instance of BlacklistRegistryV1 to it.
 func DeployBlacklistRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *BlacklistRegistryV1, error) {

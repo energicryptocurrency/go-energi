@@ -37,13 +37,13 @@ contract GenericProposalV1 is IProposal {
     constructor(
         uint8 _quorum,
         uint _period,
-        address payable _fee_payer,
+        address payable _feePayer,
         uint _fee
     ) public {
         fee = _fee;
         // solium-disable-next-line security/no-block-members
         deadline = block.timestamp + _period;
-        fee_payer = _fee_payer;
+        fee_payer = _feePayer;
         quorum = _quorum;
     }
 

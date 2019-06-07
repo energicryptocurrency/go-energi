@@ -33,11 +33,11 @@ pragma solidity 0.5.9;
 interface IGovernedContract {
     // It must check that the caller is the proxy
     // and copy all required data from the old address.
-    function migrate(IGovernedContract old_impl) external;
+    function migrate(IGovernedContract _oldImpl) external;
 
     // It must check that the caller is the proxy
     // and self destruct to the new address.
-    function destroy(IGovernedContract new_impl) external;
+    function destroy(IGovernedContract _newImpl) external;
 
     function () external payable;
 }

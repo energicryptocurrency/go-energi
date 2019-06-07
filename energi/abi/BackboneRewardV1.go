@@ -28,10 +28,10 @@ var (
 )
 
 // BackboneRewardV1ABI is the input ABI used to generate the binding from.
-const BackboneRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const BackboneRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // BackboneRewardV1Bin is the compiled bytecode used for deploying new contracts.
-const BackboneRewardV1Bin = `608060405234801561001057600080fd5b50610115806100206000396000f3fe60806040526004361060395760003560e01c8062f55d9d14603b5780631c4b774b146077578063a9fb763c1460af578063ce5494bb14603b575b005b348015604657600080fd5b50603960048036036020811015605b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1660c6565b348015608257600080fd5b50609d60048036036020811015609757600080fd5b503560c9565b60408051918252519081900360200190f35b60396004803603602081101560c357600080fd5b50355b50565b6000811560db5750671fa42feb87e400005b91905056fea265627a7a723058208b9de641107c7b50cd53f3287a5ca34641f84964257708810462a455dac2dc3264736f6c63430005090032`
+const BackboneRewardV1Bin = `608060405234801561001057600080fd5b50610115806100206000396000f3fe60806040526004361060395760003560e01c8062f55d9d14603b5780631c4b774b146077578063a9fb763c1460af578063ce5494bb14603b575b005b348015604657600080fd5b50603960048036036020811015605b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1660c6565b348015608257600080fd5b50609d60048036036020811015609757600080fd5b503560c9565b60408051918252519081900360200190f35b60396004803603602081101560c357600080fd5b50355b50565b6000811560db5750671fa42feb87e400005b91905056fea265627a7a723058200e2074a0235137773883872c8f628ee330d14d49e424681a600f6e982b20e59664736f6c63430005090032`
 
 // DeployBackboneRewardV1 deploys a new Ethereum contract, binding an instance of BackboneRewardV1 to it.
 func DeployBackboneRewardV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *BackboneRewardV1, error) {
@@ -190,28 +190,28 @@ func (_BackboneRewardV1 *BackboneRewardV1TransactorRaw) Transact(opts *bind.Tran
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 block_number) constant returns(uint256 amount)
-func (_BackboneRewardV1 *BackboneRewardV1Caller) GetReward(opts *bind.CallOpts, block_number *big.Int) (*big.Int, error) {
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+func (_BackboneRewardV1 *BackboneRewardV1Caller) GetReward(opts *bind.CallOpts, _blockNumber *big.Int) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
 	)
 	out := ret0
-	err := _BackboneRewardV1.contract.Call(opts, out, "getReward", block_number)
+	err := _BackboneRewardV1.contract.Call(opts, out, "getReward", _blockNumber)
 	return *ret0, err
 }
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 block_number) constant returns(uint256 amount)
-func (_BackboneRewardV1 *BackboneRewardV1Session) GetReward(block_number *big.Int) (*big.Int, error) {
-	return _BackboneRewardV1.Contract.GetReward(&_BackboneRewardV1.CallOpts, block_number)
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+func (_BackboneRewardV1 *BackboneRewardV1Session) GetReward(_blockNumber *big.Int) (*big.Int, error) {
+	return _BackboneRewardV1.Contract.GetReward(&_BackboneRewardV1.CallOpts, _blockNumber)
 }
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 block_number) constant returns(uint256 amount)
-func (_BackboneRewardV1 *BackboneRewardV1CallerSession) GetReward(block_number *big.Int) (*big.Int, error) {
-	return _BackboneRewardV1.Contract.GetReward(&_BackboneRewardV1.CallOpts, block_number)
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+func (_BackboneRewardV1 *BackboneRewardV1CallerSession) GetReward(_blockNumber *big.Int) (*big.Int, error) {
+	return _BackboneRewardV1.Contract.GetReward(&_BackboneRewardV1.CallOpts, _blockNumber)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
@@ -258,21 +258,21 @@ func (_BackboneRewardV1 *BackboneRewardV1TransactorSession) Migrate(arg0 common.
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 amount) returns()
-func (_BackboneRewardV1 *BackboneRewardV1Transactor) Reward(opts *bind.TransactOpts, amount *big.Int) (*types.Transaction, error) {
-	return _BackboneRewardV1.contract.Transact(opts, "reward", amount)
+// Solidity: function reward(uint256 _amount) returns()
+func (_BackboneRewardV1 *BackboneRewardV1Transactor) Reward(opts *bind.TransactOpts, _amount *big.Int) (*types.Transaction, error) {
+	return _BackboneRewardV1.contract.Transact(opts, "reward", _amount)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 amount) returns()
-func (_BackboneRewardV1 *BackboneRewardV1Session) Reward(amount *big.Int) (*types.Transaction, error) {
-	return _BackboneRewardV1.Contract.Reward(&_BackboneRewardV1.TransactOpts, amount)
+// Solidity: function reward(uint256 _amount) returns()
+func (_BackboneRewardV1 *BackboneRewardV1Session) Reward(_amount *big.Int) (*types.Transaction, error) {
+	return _BackboneRewardV1.Contract.Reward(&_BackboneRewardV1.TransactOpts, _amount)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 amount) returns()
-func (_BackboneRewardV1 *BackboneRewardV1TransactorSession) Reward(amount *big.Int) (*types.Transaction, error) {
-	return _BackboneRewardV1.Contract.Reward(&_BackboneRewardV1.TransactOpts, amount)
+// Solidity: function reward(uint256 _amount) returns()
+func (_BackboneRewardV1 *BackboneRewardV1TransactorSession) Reward(_amount *big.Int) (*types.Transaction, error) {
+	return _BackboneRewardV1.Contract.Reward(&_BackboneRewardV1.TransactOpts, _amount)
 }

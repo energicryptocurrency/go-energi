@@ -39,12 +39,15 @@ contract StakerRewardV1 is
     function destroy(IGovernedContract) external {}
     function () external payable {}
 
-    function reward(uint amount) external payable {
+    function reward(uint) external payable {
     }
 
-    function getReward(uint block_number) external view returns(uint amount) {
-        if (block_number > 0) {
-            amount = REWARD_STAKER_V1;
+    function getReward(uint _blockNumber)
+        external view
+        returns(uint _amount)
+    {
+        if (_blockNumber > 0) {
+            _amount = REWARD_STAKER_V1;
         }
     }
 }

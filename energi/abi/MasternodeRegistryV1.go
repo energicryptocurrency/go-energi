@@ -28,10 +28,10 @@ var (
 )
 
 // MasternodeRegistryV1ABI is the input ABI used to generate the binding from.
-const MasternodeRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const MasternodeRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // MasternodeRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const MasternodeRegistryV1Bin = `608060405234801561001057600080fd5b50610115806100206000396000f3fe60806040526004361060395760003560e01c8062f55d9d14603b5780631c4b774b146077578063a9fb763c1460af578063ce5494bb14603b575b005b348015604657600080fd5b50603960048036036020811015605b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1660c6565b348015608257600080fd5b50609d60048036036020811015609757600080fd5b503560c9565b60408051918252519081900360200190f35b60396004803603602081101560c357600080fd5b50355b50565b6000811560db5750677ed7cd92ff1200005b91905056fea265627a7a72305820409806e394443dfe3b40251cf093521672123f4528a3ae49205cebaa3f9f19bc64736f6c63430005090032`
+const MasternodeRegistryV1Bin = `608060405234801561001057600080fd5b50610115806100206000396000f3fe60806040526004361060395760003560e01c8062f55d9d14603b5780631c4b774b146077578063a9fb763c1460af578063ce5494bb14603b575b005b348015604657600080fd5b50603960048036036020811015605b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1660c6565b348015608257600080fd5b50609d60048036036020811015609757600080fd5b503560c9565b60408051918252519081900360200190f35b60396004803603602081101560c357600080fd5b50355b50565b6000811560db5750677ed7cd92ff1200005b91905056fea265627a7a723058203044a4fa2eaa0cd6d207802f6c86320dfc11aa35b5a80c8d0a3317cd0e9fe9eb64736f6c63430005090032`
 
 // DeployMasternodeRegistryV1 deploys a new Ethereum contract, binding an instance of MasternodeRegistryV1 to it.
 func DeployMasternodeRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *MasternodeRegistryV1, error) {
@@ -190,28 +190,28 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorRaw) Transact(opts *b
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 block_number) constant returns(uint256 amount)
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) GetReward(opts *bind.CallOpts, block_number *big.Int) (*big.Int, error) {
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) GetReward(opts *bind.CallOpts, _blockNumber *big.Int) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
 	)
 	out := ret0
-	err := _MasternodeRegistryV1.contract.Call(opts, out, "getReward", block_number)
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "getReward", _blockNumber)
 	return *ret0, err
 }
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 block_number) constant returns(uint256 amount)
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) GetReward(block_number *big.Int) (*big.Int, error) {
-	return _MasternodeRegistryV1.Contract.GetReward(&_MasternodeRegistryV1.CallOpts, block_number)
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) GetReward(_blockNumber *big.Int) (*big.Int, error) {
+	return _MasternodeRegistryV1.Contract.GetReward(&_MasternodeRegistryV1.CallOpts, _blockNumber)
 }
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 block_number) constant returns(uint256 amount)
-func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) GetReward(block_number *big.Int) (*big.Int, error) {
-	return _MasternodeRegistryV1.Contract.GetReward(&_MasternodeRegistryV1.CallOpts, block_number)
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) GetReward(_blockNumber *big.Int) (*big.Int, error) {
+	return _MasternodeRegistryV1.Contract.GetReward(&_MasternodeRegistryV1.CallOpts, _blockNumber)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
@@ -258,21 +258,21 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Migrate(arg0
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 amount) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Reward(opts *bind.TransactOpts, amount *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.contract.Transact(opts, "reward", amount)
+// Solidity: function reward(uint256 ) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Reward(opts *bind.TransactOpts, arg0 *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "reward", arg0)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 amount) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Reward(amount *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, amount)
+// Solidity: function reward(uint256 ) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Reward(arg0 *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, arg0)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 amount) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Reward(amount *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, amount)
+// Solidity: function reward(uint256 ) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Reward(arg0 *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, arg0)
 }

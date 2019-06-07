@@ -26,15 +26,15 @@ pragma solidity 0.5.9;
  * NOTE: it could be a library, but Solidity does not support such case.
  */
 contract GlobalConstants {
-    address constant internal TREASURY = address(0x301);
-    address constant internal MASTERNODE_REGISTRY = address(0x302);
-    address constant internal STAKE_REWARD = address(0x303);
-    address constant internal BACKBONE_REWARD = address(0x304);
-    address constant internal SPORK_REGISTRY = address(0x305);
-    address constant internal CHECKPOINT_REGISTRY = address(0x306);
-    address constant internal BLACKLIST_REGISTRY = address(0x307);
+    address payable constant internal TREASURY = address(0x301);
+    address payable constant internal MASTERNODE_REGISTRY = address(0x302);
+    address payable constant internal STAKE_REWARD = address(0x303);
+    address payable constant internal BACKBONE_REWARD = address(0x304);
+    address payable constant internal SPORK_REGISTRY = address(0x305);
+    address payable constant internal CHECKPOINT_REGISTRY = address(0x306);
+    address payable constant internal BLACKLIST_REGISTRY = address(0x307);
     address constant internal MIGRATION_CONTRACT = address(0x308);
-    address constant internal MASTERNODE_TOKEN = address(0x309);
+    address payable constant internal MASTERNODE_TOKEN = address(0x309);
     address constant internal GEN2_ADDR_RECOVERY = address(0x310);
 
     uint constant internal FEE_UPGRADE_V1 = 10000 ether;

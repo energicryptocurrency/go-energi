@@ -46,21 +46,21 @@ contract GovernedProxy is
      * Pre-create a new contract first.
      * Then propose upgrade based on that.
      */
-    function proposeUpgrade(IGovernedContract new_impl, uint period) external payable
-        returns(IProposal proposal)
+    function proposeUpgrade(IGovernedContract _newImpl, uint _period) external payable
+        returns(IProposal _proposal)
     {
-        require(new_impl != current_impl, "Already active!");
-        return ISporkRegistry(SPORK_REGISTRY).createUpgradeProposal.value(msg.value)(new_impl, period);
+        require(_newImpl != current_impl, "Already active!");
+        return ISporkRegistry(SPORK_REGISTRY).createUpgradeProposal.value(msg.value)(_newImpl, _period);
     }
 
     /**
      * Once proposal is accepted, anyone can activate that.
      */
-    function upgrade(IProposal proposal) external {
-        IGovernedContract new_impl = upgrade_proposals[address(proposal)];
+    function upgrade(IProposal _proposal) external {
+        IGovernedContract new_impl = upgrade_proposals[address(_proposal)];
         require(new_impl != current_impl, "Already active!"); // in case it changes in the flight
         require(address(new_impl) != address(0), "Not registered!");
-        require(proposal.isAccepted(), "Not accepted!");
+        require(_proposal.isAccepted(), "Not accepted!");
 
         IGovernedContract old_impl = current_impl;
 

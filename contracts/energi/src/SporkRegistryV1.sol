@@ -41,18 +41,18 @@ contract SporkRegistryV1 is
     function destroy(IGovernedContract) external {}
     function () external payable {}
 
-    function createUpgradeProposal(IGovernedContract, uint period)
+    function createUpgradeProposal(IGovernedContract, uint _period)
         external payable
         returns (IProposal)
     {
         require(msg.value == FEE_UPGRADE_V1, "Fee amount");
-        require(period >= PERIOD_UPGRADE_MIN, "Period min");
-        require(period <= PERIOD_UPGRADE_MAX, "Period max");
+        require(_period >= PERIOD_UPGRADE_MIN, "Period min");
+        require(_period <= PERIOD_UPGRADE_MAX, "Period max");
 
         address payable proposal = address(
             new GenericProposalV1(
                 QUORUM_MAJORITY,
-                period,
+                _period,
                 // solium-disable-next-line security/no-tx-origin
                 tx.origin,
                 msg.value
