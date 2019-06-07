@@ -33,5 +33,23 @@ contract("GovernedProxy", async accounts => {
         }
     });
 
+    it('should refuse migrate()', async () => {
+        try {
+            await proxy.migrate.call(second.address, { from: accounts[0] });
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.equal(e.message, "Returned error: VM Exception while processing transaction: revert Good try");
+        }
+    });
+
+    it('should refuse destroy()', async () => {
+        try {
+            await proxy.destroy.call(second.address, { from: accounts[0] });
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.equal(e.message, "Returned error: VM Exception while processing transaction: revert Good try");
+        }
+    });
+
     // TODO: full test suite
 });

@@ -32,7 +32,8 @@ import { ISporkRegistry } from "./ISporkRegistry.sol";
  * If another upgrade logic is required in the future - it can be done as proxy stage II.
  */
 contract GovernedProxy is
-    GlobalConstants
+    GlobalConstants,
+    IGovernedContract
 {
     IGovernedContract public current_impl;
     mapping(address => IGovernedContract) public upgrade_proposals;
@@ -66,6 +67,20 @@ contract GovernedProxy is
         new_impl.migrate(old_impl);
         current_impl = new_impl;
         old_impl.destroy(new_impl);
+    }
+
+    /**
+     * SECURITY: prevent on-behalf-of calls
+     */
+    function migrate(IGovernedContract) external {
+        revert("Good try");
+    }
+
+    /**
+     * SECURITY: prevent on-behalf-of calls
+     */
+    function destroy(IGovernedContract) external {
+        revert("Good try");
     }
 
     /**
