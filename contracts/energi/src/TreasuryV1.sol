@@ -21,16 +21,21 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import {
-    GlobalConstants,
-    IGovernedContract,
-    IBlockReward
-} from "./common.sol";
+import { GlobalConstants } from "./constants.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IBlockReward } from "./IBlockReward.sol";
+import { ITreasury } from "./ITreasury.sol";
 
+/**
+ * Genesis hardcoded version of Treasury
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract TreasuryV1 is
     GlobalConstants,
     IGovernedContract,
-    IBlockReward
+    IBlockReward,
+    ITreasury
 {
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract) external {}

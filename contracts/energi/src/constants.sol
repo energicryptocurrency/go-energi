@@ -57,29 +57,3 @@ contract GlobalConstants {
     uint constant internal REWARD_TREASURY_V1 = 184000 ether;
 }
 
-/**
- * Base interface for upgradable contracts
- */
-interface IGovernedContract {
-    // It must check that the caller is the proxy
-    // and copy all required data from the old address.
-    function migrate(IGovernedContract old_impl) external;
-
-    // It must check that the caller is the proxy
-    // and self destruct to the new address.
-    function destroy(IGovernedContract new_impl) external;
-
-    function () external payable;
-}
-
-/**
- * Base interface for constructs which receive block rewards
- */
-interface IBlockReward {
-    // NOTE: it must NEVER fail
-    function reward(uint amount) external payable;
-
-    // NOTE: it must NEVER fail
-    function getReward(uint block_number) external view returns(uint);
-}
-

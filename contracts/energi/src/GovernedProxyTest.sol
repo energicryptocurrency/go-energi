@@ -21,7 +21,7 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IGovernedContract } from "./common.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
 
 contract GovernedProxyTest is IGovernedContract
 {

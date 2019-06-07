@@ -21,12 +21,15 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import {
-    GlobalConstants,
-    IGovernedContract,
-    IBlockReward
-} from "./common.sol";
+import { GlobalConstants } from "./constants.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IBlockReward } from "./IBlockReward.sol";
 
+/**
+ * Genesis hardcoded version of BackboneReward
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract BackboneRewardV1 is
     GlobalConstants,
     IGovernedContract,

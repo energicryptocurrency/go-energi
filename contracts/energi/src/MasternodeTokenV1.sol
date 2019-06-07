@@ -21,10 +21,14 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import {
-    IGovernedContract
-} from "./common.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IMasternodeToken } from "./IMasternodeToken.sol";
 
+/**
+ * Genesis hardcoded version of MasternodeToken
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract MasternodeTokenV1 is
     IGovernedContract
 {

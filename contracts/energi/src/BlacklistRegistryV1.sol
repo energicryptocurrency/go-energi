@@ -21,12 +21,17 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import {
-    IGovernedContract
-} from "./common.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IBlacklistRegistry } from "./IBlacklistRegistry.sol";
 
+/**
+ * Genesis hardcoded version of BlacklistRegistry.
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract BlacklistRegistryV1 is
-    IGovernedContract
+    IGovernedContract,
+    IBlacklistRegistry
 {
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract) external {}

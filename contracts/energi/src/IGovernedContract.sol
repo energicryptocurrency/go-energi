@@ -21,32 +21,25 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract } from "./IGovernedContract.sol";
-import { IBlockReward } from "./IBlockReward.sol";
-import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
-
 /**
- * Genesis hardcoded version of MasternodeRegistry
+ * Genesis version of CheckpointRegistry interface.
+ *
+ * Base Consensus interface for upgradable contracts.
+ * Unlike common approach, the implementation is NOT expected to be
+ * called through delegatecall() to minimize risks of shared storage.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract MasternodeRegistryV1 is
-    GlobalConstants,
-    IGovernedContract,
-    IBlockReward,
-    IMasternodeRegistry
-{
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
-    function () external payable {}
+interface IGovernedContract {
+    // It must check that the caller is the proxy
+    // and copy all required data from the old address.
+    function migrate(IGovernedContract old_impl) external;
 
-    function reward(uint amount) external payable {
-    }
+    // It must check that the caller is the proxy
+    // and self destruct to the new address.
+    function destroy(IGovernedContract new_impl) external;
 
-    function getReward(uint block_number) external view returns(uint amount) {
-        if (block_number > 0) {
-            amount = REWARD_MASTERNODE_V1;
-        }
-    }
+    function () external payable;
 }
+
+

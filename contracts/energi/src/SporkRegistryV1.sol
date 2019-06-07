@@ -21,22 +21,17 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import {
-    GlobalConstants,
-    IGovernedContract
-} from "./common.sol";
+import { GlobalConstants } from "./constants.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IProposal } from "./IProposal.sol";
+import { ISporkRegistry } from "./ISporkRegistry.sol";
+import { GenericProposalV1 } from "./GenericProposalV1.sol";
 
-import {
-    IProposal,
-    GenericProposal
-} from "./GenericProposal.sol";
-
-interface ISporkRegistry {
-    function createUpgradeProposal(IGovernedContract impl, uint period)
-        external payable
-        returns (IProposal);
-}
-
+/**
+ * Genesis hardcoded version of SporkRegistry
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract SporkRegistryV1 is
     GlobalConstants,
     ISporkRegistry,
@@ -55,7 +50,7 @@ contract SporkRegistryV1 is
         require(period <= PERIOD_UPGRADE_MAX, "Period max");
 
         address payable proposal = address(
-            new GenericProposal(
+            new GenericProposalV1(
                 QUORUM_MAJORITY,
                 period,
                 // solium-disable-next-line security/no-tx-origin

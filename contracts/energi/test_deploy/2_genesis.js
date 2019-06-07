@@ -4,7 +4,6 @@ const BackboneRewardV1 = artifacts.require('BackboneRewardV1');
 const BlacklistRegistryV1 = artifacts.require('BlacklistRegistryV1');
 const CheckpointRegistryV1 = artifacts.require('CheckpointRegistryV1');
 const Gen2Migration = artifacts.require('Gen2Migration');
-const GenericProposal = artifacts.require('GenericProposal');
 const GovernedProxy = artifacts.require('GovernedProxy');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');

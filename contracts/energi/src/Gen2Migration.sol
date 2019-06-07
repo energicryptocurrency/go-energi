@@ -21,6 +21,11 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+/**
+ * Genesis hardcoded version of Gen 2 Migration
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract Gen2Migration
 {
 }

@@ -21,12 +21,17 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import {
-    IGovernedContract
-} from "./common.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { ICheckpointRegistry } from "./ICheckpointRegistry.sol";
 
+/**
+ * Genesis hardcoded version of CheckpointRegistry
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract CheckpointRegistryV1 is
-    IGovernedContract
+    IGovernedContract,
+    ICheckpointRegistry
 {
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract) external {}

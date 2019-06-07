@@ -21,16 +21,10 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import {
-    GlobalConstants,
-    IGovernedContract
-} from "./common.sol";
-import { GlobalConstants, IGovernedContract } from "./common.sol";
-
-import {
-    IProposal,
-    ISporkRegistry
-} from "./SporkRegistryV1.sol";
+import { GlobalConstants } from "./constants.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IProposal } from "./IProposal.sol";
+import { ISporkRegistry } from "./ISporkRegistry.sol";
 
 /**
  * This contract has no chance of being updated. It must be stupid simple.

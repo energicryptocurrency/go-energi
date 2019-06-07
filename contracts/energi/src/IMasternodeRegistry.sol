@@ -21,33 +21,5 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-interface IProposal {
-    function isAccepted() external view returns(bool);
-    function () external payable;
-}
-
-contract GenericProposal is IProposal {
-    uint public fee;
-    uint public deadline;
-    address payable public fee_payer;
-    uint8 public quorum;
-
-    constructor(
-        uint8 _quorum,
-        uint _period,
-        address payable _fee_payer,
-        uint _fee
-    ) public {
-        fee = _fee;
-        // solium-disable-next-line security/no-block-members
-        deadline = block.timestamp + _period;
-        fee_payer = _fee_payer;
-        quorum = _quorum;
-    }
-
-    function isAccepted() external view returns(bool) {
-        return false;
-    }
-
-    function () external payable {}
+interface IMasternodeRegistry {
 }

@@ -41,7 +41,6 @@ ENERGI_CONTRACTS := \
   BlacklistRegistryV1.sol \
   CheckpointRegistryV1.sol \
   Gen2Migration.sol \
-  GenericProposal.sol \
   GovernedProxy.sol \
   MasternodeTokenV1.sol \
   MasternodeRegistryV1.sol \
@@ -74,7 +73,7 @@ $(ENERGI_CONTRACT_ABIGEN_DIR)/%.go: $(ENERGI_CONTRACT_BUILD_DIR)/%.bin \
 	$(ABIGEN) -out $@ -bin $< -abi ${<:.bin=.abi} -type $* -pkg abi
 
 $(ENERGI_CONTRACT_BUILD_DIR)/%.$(SOLC_BIN_EXT): $(ENERGI_CONTRACT_SRC_DIR)/%.sol \
-  $(ENERGI_CONTRACT_SRC_DIR)/common.sol $(SOLC) $(ENERGI_CONTRACT_BUILD_DIR)
+  $(ENERGI_CONTRACT_SRC_DIR)/*.sol $(SOLC) $(ENERGI_CONTRACT_BUILD_DIR)
 	$(SOLC) $(SOLC_OPTIONS) -o $(ENERGI_CONTRACT_BUILD_DIR)/ $<
 
 # Built with bin files

@@ -21,32 +21,35 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract } from "./IGovernedContract.sol";
-import { IBlockReward } from "./IBlockReward.sol";
-import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
+import { IProposal } from "./IProposal.sol";
 
 /**
- * Genesis hardcoded version of MasternodeRegistry
+ * Genesis hardcoded version of GenericProposal
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract MasternodeRegistryV1 is
-    GlobalConstants,
-    IGovernedContract,
-    IBlockReward,
-    IMasternodeRegistry
-{
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+contract GenericProposalV1 is IProposal {
+    uint public fee;
+    uint public deadline;
+    address payable public fee_payer;
+    uint8 public quorum;
+
+    constructor(
+        uint8 _quorum,
+        uint _period,
+        address payable _fee_payer,
+        uint _fee
+    ) public {
+        fee = _fee;
+        // solium-disable-next-line security/no-block-members
+        deadline = block.timestamp + _period;
+        fee_payer = _fee_payer;
+        quorum = _quorum;
+    }
+
+    function isAccepted() external view returns(bool) {
+        return false;
+    }
+
     function () external payable {}
-
-    function reward(uint amount) external payable {
-    }
-
-    function getReward(uint block_number) external view returns(uint amount) {
-        if (block_number > 0) {
-            amount = REWARD_MASTERNODE_V1;
-        }
-    }
 }
