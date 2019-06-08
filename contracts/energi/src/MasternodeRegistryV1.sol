@@ -54,10 +54,10 @@ contract MasternodeRegistryV1 is
 
     function getReward(uint _blockNumber)
         external view
-        returns(uint _amount)
+        returns(uint amount)
     {
         if (_blockNumber > 0) {
-            _amount = REWARD_MASTERNODE_V1;
+            amount = REWARD_MASTERNODE_V1;
         }
     }
 }

@@ -45,10 +45,10 @@ contract BackboneRewardV1 is
 
     function getReward(uint _blockNumber)
         external view
-        returns(uint _amount)
+        returns(uint amount)
     {
         if (_blockNumber > 0) {
-            _amount = REWARD_BACKBONE_V1;
+            amount = REWARD_BACKBONE_V1;
         }
     }
 }

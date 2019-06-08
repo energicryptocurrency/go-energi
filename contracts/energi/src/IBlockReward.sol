@@ -33,6 +33,6 @@ interface IBlockReward {
     function reward(uint _amount) external payable;
 
     // NOTE: it must NEVER fail
-    function getReward(uint _blockNumber) external view returns(uint);
+    function getReward(uint _blockNumber) external view returns(uint amount);
 }
 
