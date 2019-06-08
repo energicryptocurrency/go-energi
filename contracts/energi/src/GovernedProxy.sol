@@ -26,7 +26,7 @@ import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 
 /**
- * This contract has no chance of being updated. It must be stupid simple.
+ * SC-9: This contract has no chance of being updated. It must be stupid simple.
  *
  * If another upgrade logic is required in the future - it can be done as proxy stage II.
  */

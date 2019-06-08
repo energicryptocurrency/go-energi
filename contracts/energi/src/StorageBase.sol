@@ -1,4 +1,3 @@
-// Copyright 2019 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -21,25 +20,30 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
-import { IBlacklistRegistry } from "./IBlacklistRegistry.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
 
 /**
- * Genesis hardcoded version of BlacklistRegistry.
+ * Base for contract storage (SC-14).
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract BlacklistRegistryV1 is
-    GovernedContract,
-    IBlacklistRegistry
-{
-    // IGovernedContract
-    //---------------------------------
-    constructor(address _proxy) public GovernedContract(_proxy) {}
+contract StorageBase {
+    IGovernedContract internal owner;
 
-    // Safety
-    //---------------------------------
-    function () external payable {
-        revert("Not supported");
+    modifier requireOwner {
+        require(msg.sender == address(owner), "Not owner!");
+        _;
+    }
+
+    constructor(IGovernedContract _owner) public {
+        owner = _owner;
+    }
+
+    function setOwner(IGovernedContract _newOwner) external requireOwner {
+        owner = _newOwner;
+    }
+
+    function kill() external requireOwner {
+        selfdestruct(msg.sender);
     }
 }

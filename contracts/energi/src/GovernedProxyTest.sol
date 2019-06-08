@@ -27,6 +27,7 @@ import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { GovernedProxy } from "./GovernedProxy.sol";
+import { StorageBase } from "./StorageBase.sol";
 
 contract MockContract is GovernedContract
 {
@@ -37,6 +38,9 @@ contract MockContract is GovernedContract
     }
     function getAddress() external view returns (address) {
         return address(this);
+    }
+    function killStorage(StorageBase _storage) external {
+        _storage.kill();
     }
     function () external payable {}
 }

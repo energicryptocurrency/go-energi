@@ -40,7 +40,6 @@ contract TreasuryV1 is
     // IGovernedContract
     //---------------------------------
     constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
 
     // IBlockReward
     //---------------------------------

@@ -23,6 +23,7 @@ const MockContract = artifacts.require('MockContract');
 const MockProposal = artifacts.require('MockProposal');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const IMasternodeToken = artifacts.require('IMasternodeToken');
+const StorageMasternodeTokenV1 = artifacts.require('StorageMasternodeTokenV1');
 
 contract("MasternodeTokenV1", async accounts => {
     let orig;
@@ -30,6 +31,7 @@ contract("MasternodeTokenV1", async accounts => {
     let proxy;
     let proxy_abi;
     let token_abi;
+    let storage;
 
     // NOTE: some BigNumber issues with Truffle exposed web3...
     const COLLATERAL_1 = web3.utils.toWei('10000', 'ether');
@@ -51,6 +53,7 @@ contract("MasternodeTokenV1", async accounts => {
         proxy_abi = await MasternodeTokenV1.at(proxy.address);
         token_abi = await IMasternodeToken.at(proxy.address);
         await proxy.setImpl(orig.address);
+        storage = await StorageMasternodeTokenV1.at(await proxy_abi.v1storage());
     });
 
     it('should refuse migrate() through proxy', async () => {
@@ -276,6 +279,16 @@ contract("MasternodeTokenV1", async accounts => {
         }
     });
 
+    it('should refuse setBalance() on storage', async () => {
+        try {
+            await storage.setBalance(fake.address, COLLATERAL_1, COLLATERAL_1);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not owner/);
+        }
+    });
+
+
     // Safety & Cleanup
     //---
     it('should refuse to accept funds', async () => {
@@ -284,6 +297,33 @@ contract("MasternodeTokenV1", async accounts => {
             assert.fail("It must fail");
         } catch (e) {
             assert.match(e.message, /Not supported/);
+        }
+    });
+    
+    it('should refuse to accept funds to storage', async () => {
+        try {
+            await storage.send(web3.utils.toWei('1', "ether"));
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /revert/);
+        }
+    });
+
+    it('should refuse kill() storage', async () => {
+        try {
+            await storage.kill();
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not owner/);
+        }
+    });
+
+    it('should refuse setOwner() on storage', async () => {
+        try {
+            await storage.setOwner(proxy.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not owner/);
         }
     });
 
@@ -304,5 +344,9 @@ contract("MasternodeTokenV1", async accounts => {
         } catch (e) {
             assert.match(e.message, /did it run Out of Gas/);
         }
+    });
+
+    it('should transfer storage & allow to kill() it', async () => {
+        await fake.killStorage(storage.address);
     });
 });

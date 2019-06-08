@@ -27,7 +27,7 @@ import { IBlockReward } from "./IBlockReward.sol";
 import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
 
 /**
- * Genesis hardcoded version of MasternodeRegistry
+ * MN-2: Genesis hardcoded version of MasternodeRegistry
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */

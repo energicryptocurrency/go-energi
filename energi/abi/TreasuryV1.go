@@ -28,10 +28,10 @@ var (
 )
 
 // TreasuryV1ABI is the input ABI used to generate the binding from.
-const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // TreasuryV1Bin is the compiled bytecode used for deploying new contracts.
-const TreasuryV1Bin = `608060405234801561001057600080fd5b506040516103d13803806103d18339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031990921691909117905561036c806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c1461013e578063ce5494bb1461015b578063ec5568891461019b57610059565b8062f55d9d146100c05780631c4b774b14610102575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100cc57600080fd5b50610100600480360360208110156100e357600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101d9565b005b34801561010e57600080fd5b5061012c6004803603602081101561012557600080fd5b5035610278565b60408051918252519081900360200190f35b6101006004803603602081101561015457600080fd5b5035610292565b34801561016757600080fd5b506101006004803603602081101561017e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610295565b3480156101a757600080fd5b506101b061031b565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461025f57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000811561028d57506926f6a8f4e638030000005b919050565b50565b60005473ffffffffffffffffffffffffffffffffffffffff16331461029257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a72305820170c9ad091be369dd4d3abf9329cc95c6b824a826f0f132eb38e683f9b8599ed64736f6c63430005090032`
+const TreasuryV1Bin = `608060405234801561001057600080fd5b506040516103e33803806103e38339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031990921691909117905561037e806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c1461013e578063ce5494bb1461015b578063ec5568891461019b57610059565b8062f55d9d146100c05780631c4b774b14610102575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100cc57600080fd5b50610100600480360360208110156100e357600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101d9565b005b34801561010e57600080fd5b5061012c6004803603602081101561012557600080fd5b5035610281565b60408051918252519081900360200190f35b6101006004803603602081101561015457600080fd5b503561029b565b34801561016757600080fd5b506101006004803603602081101561017e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661029e565b3480156101a757600080fd5b506101b061032d565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461025f57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6102688161029b565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000811561029657506926f6a8f4e638030000005b919050565b50565b60005473ffffffffffffffffffffffffffffffffffffffff16331461032457604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61029b8161029b565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a72305820231c1116c9d3e64f91b7a15a9551868913f2aa7e6679b2b78ba8ff932ba7bb9364736f6c63430005090032`
 
 // DeployTreasuryV1 deploys a new Ethereum contract, binding an instance of TreasuryV1 to it.
 func DeployTreasuryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *TreasuryV1, error) {
@@ -263,23 +263,23 @@ func (_TreasuryV1 *TreasuryV1TransactorSession) Destroy(_newImpl common.Address)
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_TreasuryV1 *TreasuryV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.contract.Transact(opts, "migrate", arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_TreasuryV1 *TreasuryV1Transactor) Migrate(opts *bind.TransactOpts, _oldImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.contract.Transact(opts, "migrate", _oldImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_TreasuryV1 *TreasuryV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_TreasuryV1 *TreasuryV1Session) Migrate(_oldImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, _oldImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_TreasuryV1 *TreasuryV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_TreasuryV1 *TreasuryV1TransactorSession) Migrate(_oldImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, _oldImpl)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.

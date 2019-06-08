@@ -24,9 +24,43 @@ pragma solidity 0.5.9;
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IMasternodeToken } from "./IMasternodeToken.sol";
+import { StorageBase }  from "./StorageBase.sol";
 
 /**
- * Genesis hardcoded version of MasternodeToken
+ * Permanent storage of Masternode Token V1 data.
+ */
+contract StorageMasternodeTokenV1 is
+    StorageBase
+{
+    struct Balance {
+        uint256 amount;
+        uint256 last_change;
+    }
+    mapping(address => Balance) public balances;
+
+    constructor(IGovernedContract _owner) public StorageBase(_owner) {}
+
+    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
+    function balanceOnly(address _account)
+        external view
+        returns(uint256 amount)
+    {
+        return balances[_account].amount;
+    }
+
+    function setBalance(address _account, uint256 _amount, uint256 _last_change)
+        external
+        requireOwner
+    {
+        // NOTE: DO NOT process last_change as part of storage logic!
+        Balance storage item = balances[_account];
+        item.amount = _amount;
+        item.last_change = _last_change;
+    }
+}
+
+/**
+ * MN-1: Genesis hardcoded version of MasternodeToken.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
@@ -35,22 +69,29 @@ contract MasternodeTokenV1 is
     GovernedContract,
     IMasternodeToken
 {
+    // Data for migration
+    //---------------------------------
+    uint256 public totalSupply;
+    StorageMasternodeTokenV1 public v1storage;
+    //---------------------------------
+
     constructor(address _proxy) public GovernedContract(_proxy) {
+        v1storage = new StorageMasternodeTokenV1(this);
+
         // ERC20
         emit Transfer(address(0), address(0), 0);
     }
 
     // IGovernedContract
     //---------------------------------
-    // solium-disable-next-line no-empty-blocks
-    function migrate(IGovernedContract) external requireProxy {
-        // pass
+    function _destroy(IGovernedContract _newImpl) internal {
+        v1storage.setOwner(_newImpl);
     }
 
     // MasternodeTokenV1
     //---------------------------------
-    uint256 public totalSupply;
-    mapping(address => uint256) public owners;
+
+    // See totalSupply as storage above
 
     function name() external view returns (string memory) {
         return "Masternode Collateral";
@@ -65,7 +106,7 @@ contract MasternodeTokenV1 is
     }
 
     function balanceOf(address _owner) external view returns (uint256) {
-        return owners[_owner];
+        return v1storage.balanceOnly(_owner);
     }
 
     function transfer(address, uint256) external returns (bool) {
@@ -89,58 +130,55 @@ contract MasternodeTokenV1 is
 
     // solium-disable security/no-block-members
 
-    struct Balance {
-        uint256 amount;
-        uint256 last_change;
-    }
-    mapping(address => Balance) public balances;
-
     function balanceInfo(address _tokenOwner)
         external view
         returns (uint256 balance, uint256 age)
     {
-        Balance storage item = balances[_tokenOwner];
+        (balance, age) = v1storage.balances(_tokenOwner);
 
-        assert(block.timestamp >= item.last_change);
+        assert(block.timestamp >= age);
 
-        balance = item.amount;
-        age = block.timestamp - item.last_change;
+        age = block.timestamp - age;
     }
 
     function withdrawCollateral(uint256 _amount) external {
-        address payable owner = _ownerAddress();
-        Balance storage item = balances[owner];
-        uint256 balance = item.amount;
+        // Retrieve
+        address payable tokenOwner = _ownerAddress();
+        uint256 balance = v1storage.balanceOnly(tokenOwner);
 
+        // Process
         if (balance < _amount) {
             revert("Not enough");
         }
 
         balance -= _amount;
-        totalSupply -= _amount;
-
         _validateBalance(balance);
 
-        item.amount = balance;
-        item.last_change = block.timestamp;
+        // Store
+        v1storage.setBalance(tokenOwner, balance, block.timestamp);
+        totalSupply -= _amount;
 
-        emit Transfer(owner, address(0), _amount);
+        // Events
+        emit Transfer(tokenOwner, address(0), _amount);
 
-        owner.transfer(_amount);
+        tokenOwner.transfer(_amount);
     }
 
     function depositCollateral() external payable {
-        address payable owner = _ownerAddress();
-        Balance storage item = balances[owner];
-        uint256 balance = item.amount + msg.value;
+        // Retrieve
+        address payable tokenOwner = _ownerAddress();
+        uint256 balance = v1storage.balanceOnly(tokenOwner);
 
+        // Process
+        balance += msg.value;
         _validateBalance(balance);
 
-        item.amount = balance;
-        item.last_change = block.timestamp;
+        // Store
+        v1storage.setBalance(tokenOwner, balance, block.timestamp);
         totalSupply += msg.value;
 
-        emit Transfer(address(0), owner, msg.value);
+        // Events
+        emit Transfer(address(0), tokenOwner, msg.value);
     }
 
     function _validateBalance(uint256 _amount) internal pure {
