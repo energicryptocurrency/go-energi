@@ -50,7 +50,7 @@ contract GovernedProxy is
         returns(IProposal _proposal)
     {
         require(_newImpl != current_impl, "Already active!");
-        require(_newImpl.proxy() == address(this), "Invalid proxy");
+        require(_newImpl.proxy() == address(this), "Wrong proxy!");
         return spork_registry.createUpgradeProposal.value(msg.value)(_newImpl, _period);
     }
 
@@ -68,6 +68,9 @@ contract GovernedProxy is
         new_impl.migrate(old_impl);
         current_impl = new_impl;
         old_impl.destroy(new_impl);
+
+        // SECURITY: prevent downgrade attack
+        delete upgrade_proposals[address(_proposal)];
     }
 
     /**

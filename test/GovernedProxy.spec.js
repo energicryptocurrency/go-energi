@@ -25,6 +25,9 @@ contract("GovernedProxy", async accounts => {
         assert.equal(first.address.valueOf(), res.valueOf());
     });
 
+    it('should accept proposal', function(){ this.skip(); });
+    it('should accept upgrade', function(){ this.skip(); });
+
     it('should refuse proposal - same impl', async () => {
         try {
             await proxy.proposeUpgrade(
@@ -33,6 +36,17 @@ contract("GovernedProxy", async accounts => {
             assert.fail("It must fail");
         } catch (e) {
             assert.match(e.message, /Already active!/);
+        }
+    });
+
+    it('should refuse proposal - wrong proxy', async () => {
+        try {
+            await proxy.proposeUpgrade(
+                    registry.address, 2 * weeks,
+                    { from: accounts[0], value: web3.utils.toWei('10000', 'ether') });
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Wrong proxy!/);
         }
     });
 
@@ -54,5 +68,9 @@ contract("GovernedProxy", async accounts => {
         }
     });
 
-    // TODO: full test suite
+    it('should refuse proposal - wrong fee', function(){ this.skip(); });
+    it('should refuse upgrade - Already active!', function(){ this.skip(); });
+    it('should refuse upgrade - Not accepted!', function(){ this.skip(); });
+    it('should refuse upgrade - Not registered!', function(){ this.skip(); });
+    it('should refuse upgrade AFTER upgrade - Not registered!', function(){ this.skip(); });
 });
