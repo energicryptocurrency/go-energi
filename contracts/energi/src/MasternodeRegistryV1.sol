@@ -21,20 +21,43 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import "./common.sol";
+import { GlobalConstants } from "./constants.sol";
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { IBlockReward } from "./IBlockReward.sol";
+import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
 
-contract MasternodeRegistryV1 is IGovernedContract, IBlockReward
+/**
+ * Genesis hardcoded version of MasternodeRegistry
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
+contract MasternodeRegistryV1 is
+    GlobalConstants,
+    GovernedContract,
+    IBlockReward,
+    IMasternodeRegistry
 {
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+    // IMasternodeRegistry
+    //---------------------------------
+
+    // IGovernedContract
+    //---------------------------------
+    constructor(address _proxy) public GovernedContract(_proxy) {}
+    function migrate(IGovernedContract) external requireProxy {}
+    function destroy(IGovernedContract) external requireProxy {}
     function () external payable {}
 
-    function reward(uint amount) external payable {
+    // IBlockReward
+    //---------------------------------
+    function reward(uint) external payable {
     }
 
-    function getReward(uint block_number) external view returns(uint amount) {
-        if (block_number > 0) {
-            amount = 9.14 ether;
+    function getReward(uint _blockNumber)
+        external view
+        returns(uint _amount)
+    {
+        if (_blockNumber > 0) {
+            _amount = REWARD_MASTERNODE_V1;
         }
     }
 }

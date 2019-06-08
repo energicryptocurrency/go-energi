@@ -23,17 +23,27 @@
         "lint-go": "@cid tool exec make -- lint",
         "lint-sol": "@cid tool exec yarn -- run solium -d contracts/",
 
-        "test": [ "test-go" ],
+        "test": [ "test-go", "test-sol" ],
         "test-go": [
-                "@cid tool exec git -- submodule update --init --recursive",
-                "@cid tool exec make -- test"
+            "@cid tool exec git -- submodule update --init --recursive",
+            "@cid tool exec make -- test"
+        ],
+        "test-sol": [
+            "@cid tool exec make -- test-sol"
         ],
         "package": [
             "@cid tool exec make -- package"
         ],
+
         "autoformat": "@cid tool envexec go -- gofmt -s -w",
         "update-license": "@cid tool exec go -- run ./build/update-license.go",
         "cigo": "./build/env.sh go run ./build/ci.go",
-        "truffle": "cid tool envexec npm -- truffle"
+        "ganache": "cid tool envexec npm -- ganache-cli",
+        "truffle": "cid tool envexec npm -- truffle",
+        "validate-contracts": [
+            "@cid tool exec make -- prebuild",
+            "lint-sol",
+            "test-sol"
+        ]
     }
 }

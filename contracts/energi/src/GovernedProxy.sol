@@ -21,58 +21,108 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants, IGovernedContract } from "./common.sol";
-import { IProposal, ISporkRegistry } from "./SporkRegistryV1.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IProposal } from "./IProposal.sol";
+import { ISporkRegistry } from "./ISporkRegistry.sol";
 
 /**
  * This contract has no chance of being updated. It must be stupid simple.
  *
  * If another upgrade logic is required in the future - it can be done as proxy stage II.
  */
-contract GovernedProxy is GlobalConstants {
+contract GovernedProxy is
+    IGovernedContract
+{
+    event UpgradeProposal(
+        address indexed newImpl,
+        address proposal
+    );
+    event Upgraded(
+        address indexed newImpl,
+        address proposal
+    );
+
+    modifier senderOrigin {
+        // Internal calls are expected to use current_impl directly.
+        // That's due to use of call() instead of delegatecall() on purpose.
+        // solium-disable-next-line security/no-tx-origin
+        require(tx.origin == msg.sender, "Only direct calls are allowed!");
+        _;
+    }
+
     IGovernedContract public current_impl;
+    ISporkRegistry public spork_registry;
     mapping(address => IGovernedContract) public upgrade_proposals;
 
-    constructor(IGovernedContract impl) public {
-        current_impl = impl;
+    constructor(IGovernedContract _impl, ISporkRegistry _sporkRegistry) public {
+        current_impl = _impl;
+        spork_registry = _sporkRegistry;
     }
 
     /**
      * Pre-create a new contract first.
      * Then propose upgrade based on that.
      */
-    function proposeUpgrade(IGovernedContract new_impl, uint period) external payable
-        returns(IProposal proposal)
+    function proposeUpgrade(IGovernedContract _newImpl, uint _period)
+        external payable
+        senderOrigin
     {
-        require(new_impl != current_impl, "Already active!");
-        return ISporkRegistry(SPORK_REGISTRY).createUpgradeProposal.value(msg.value)(new_impl, period);
+        require(_newImpl != current_impl, "Already active!");
+        require(_newImpl.proxy() == address(this), "Wrong proxy!");
+        IProposal proposal = spork_registry.createUpgradeProposal.value(msg.value)(_newImpl, _period);
+
+        upgrade_proposals[address(proposal)] = _newImpl;
+
+        emit UpgradeProposal(address(_newImpl), address(proposal));
     }
 
     /**
      * Once proposal is accepted, anyone can activate that.
      */
-    function upgrade(IProposal proposal) external {
-        IGovernedContract new_impl = upgrade_proposals[address(proposal)];
+    function upgrade(IProposal _proposal) external {
+        IGovernedContract new_impl = upgrade_proposals[address(_proposal)];
         require(new_impl != current_impl, "Already active!"); // in case it changes in the flight
         require(address(new_impl) != address(0), "Not registered!");
-        require(proposal.isAccepted(), "Not accepted!");
+        require(_proposal.isAccepted(), "Not accepted!");
 
         IGovernedContract old_impl = current_impl;
 
         new_impl.migrate(old_impl);
         current_impl = new_impl;
         old_impl.destroy(new_impl);
+
+        // SECURITY: prevent downgrade attack
+        delete upgrade_proposals[address(_proposal)];
+
+        emit Upgraded(address(new_impl), address(_proposal));
+    }
+
+    /**
+     * Related to above
+     */
+    function proxy() external returns (address) {
+        return address(this);
+    }
+
+    /**
+     * SECURITY: prevent on-behalf-of calls
+     */
+    function migrate(IGovernedContract) external {
+        revert("Good try");
+    }
+
+    /**
+     * SECURITY: prevent on-behalf-of calls
+     */
+    function destroy(IGovernedContract) external {
+        revert("Good try");
     }
 
     /**
      * Proxy all other calls to implementation.
      */
-    function () external payable {
-        // Internal calls are expected to use current_impl directly.
-        // That's due to use of call() instead of delegatecall() on purpose.
-        // solium-disable-next-line security/no-tx-origin
-        require(tx.origin == msg.sender, "Only direct calls are allowed!");
-
+    function () external payable senderOrigin {
+        // SECURITY: senderOrigin() modifier is mandatory
         IGovernedContract impl = current_impl;
 
         // solium-disable-next-line security/no-inline-assembly

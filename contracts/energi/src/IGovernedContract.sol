@@ -21,35 +21,28 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
-import { IBlockReward } from "./IBlockReward.sol";
-
 /**
- * Genesis hardcoded version of BackboneReward
+ * Genesis version of GovernedContract interface.
+ *
+ * Base Consensus interface for upgradable contracts.
+ * Unlike common approach, the implementation is NOT expected to be
+ * called through delegatecall() to minimize risks of shared storage.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract BackboneRewardV1 is
-    GlobalConstants,
-    GovernedContract,
-    IBlockReward
-{
-    constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
+interface IGovernedContract {
+    // Return actual proxy address for secure validation
+    function proxy() external returns(address);
 
-    function reward(uint _amount) external payable {
-    }
+    // It must check that the caller is the proxy
+    // and copy all required data from the old address.
+    function migrate(IGovernedContract _oldImpl) external;
 
-    function getReward(uint _blockNumber)
-        external view
-        returns(uint _amount)
-    {
-        if (_blockNumber > 0) {
-            _amount = REWARD_BACKBONE_V1;
-        }
-    }
+    // It must check that the caller is the proxy
+    // and self destruct to the new address.
+    function destroy(IGovernedContract _newImpl) external;
+
+    function () external payable;
 }
+
 

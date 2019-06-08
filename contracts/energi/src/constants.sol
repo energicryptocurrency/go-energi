@@ -26,15 +26,15 @@ pragma solidity 0.5.9;
  * NOTE: it could be a library, but Solidity does not support such case.
  */
 contract GlobalConstants {
-    address constant internal TREASURY = address(0x301);
-    address constant internal MASTERNODE_REGISTRY = address(0x302);
-    address constant internal STAKE_REWARD = address(0x303);
-    address constant internal BACKBONE_REWARD = address(0x304);
-    address constant internal SPORK_REGISTRY = address(0x305);
-    address constant internal CHECKPOINT_REGISTRY = address(0x306);
-    address constant internal BLACKLIST_REGISTRY = address(0x307);
+    address payable constant internal TREASURY = address(0x301);
+    address payable constant internal MASTERNODE_REGISTRY = address(0x302);
+    address payable constant internal STAKE_REWARD = address(0x303);
+    address payable constant internal BACKBONE_REWARD = address(0x304);
+    address payable constant internal SPORK_REGISTRY = address(0x305);
+    address payable constant internal CHECKPOINT_REGISTRY = address(0x306);
+    address payable constant internal BLACKLIST_REGISTRY = address(0x307);
     address constant internal MIGRATION_CONTRACT = address(0x308);
-    address constant internal MASTERNODE_TOKEN = address(0x309);
+    address payable constant internal MASTERNODE_TOKEN = address(0x309);
     address constant internal GEN2_ADDR_RECOVERY = address(0x310);
 
     uint constant internal FEE_UPGRADE_V1 = 10000 ether;
@@ -55,31 +55,8 @@ contract GlobalConstants {
     uint constant internal REWARD_BACKBONE_V1 = 2.28 ether;
     uint constant internal REWARD_MASTERNODE_V1 = 9.14 ether;
     uint constant internal REWARD_TREASURY_V1 = 184000 ether;
-}
 
-/**
- * Base interface for upgradable contracts
- */
-interface IGovernedContract {
-    // It must check that the caller is the proxy
-    // and copy all required data from the old address.
-    function migrate(IGovernedContract old_impl) external;
-
-    // It must check that the caller is the proxy
-    // and self destruct to the new address.
-    function destroy(IGovernedContract new_impl) external;
-
-    function () external payable;
-}
-
-/**
- * Base interface for constructs which receive block rewards
- */
-interface IBlockReward {
-    // NOTE: it must NEVER fail
-    function reward(uint amount) external payable;
-
-    // NOTE: it must NEVER fail
-    function getReward(uint block_number) external view returns(uint);
+    uint constant internal MN_COLLATERAL_MIN = 10000 ether;
+    uint constant internal MN_COLLATERAL_MAX = 100000 ether;
 }
 

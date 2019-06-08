@@ -21,36 +21,39 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants, IGovernedContract } from "./common.sol";
-import { IProposal, GenericProposal } from "./GenericProposal.sol";
+import { GlobalConstants } from "./constants.sol";
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { IProposal } from "./IProposal.sol";
+import { ISporkRegistry } from "./ISporkRegistry.sol";
+import { GenericProposalV1 } from "./GenericProposalV1.sol";
 
-interface ISporkRegistry {
-    function createUpgradeProposal(IGovernedContract impl, uint period)
-        external payable
-        returns (IProposal);
-}
-
+/**
+ * Genesis hardcoded version of SporkRegistry
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 contract SporkRegistryV1 is
     GlobalConstants,
     ISporkRegistry,
-    IGovernedContract
+    GovernedContract
 {
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+    constructor(address _proxy) public GovernedContract(_proxy) {}
+    function migrate(IGovernedContract) external requireProxy {}
+    function destroy(IGovernedContract) external requireProxy {}
     function () external payable {}
 
-    function createUpgradeProposal(IGovernedContract, uint period)
+    function createUpgradeProposal(IGovernedContract, uint _period)
         external payable
         returns (IProposal)
     {
         require(msg.value == FEE_UPGRADE_V1, "Fee amount");
-        require(period >= PERIOD_UPGRADE_MIN, "Period min");
-        require(period <= PERIOD_UPGRADE_MAX, "Period max");
+        require(_period >= PERIOD_UPGRADE_MIN, "Period min");
+        require(_period <= PERIOD_UPGRADE_MAX, "Period max");
 
         address payable proposal = address(
-            new GenericProposal(
+            new GenericProposalV1(
                 QUORUM_MAJORITY,
-                period,
+                _period,
                 // solium-disable-next-line security/no-tx-origin
                 tx.origin,
                 msg.value

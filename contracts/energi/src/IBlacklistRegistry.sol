@@ -21,35 +21,13 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
-import { IBlockReward } from "./IBlockReward.sol";
-
 /**
- * Genesis hardcoded version of BackboneReward
+ * Genesis version of BlacklistRegistry interface.
+ *
+ * Base Consensus interface for blocking outgoing transactions from
+ * blacklisted accounts.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract BackboneRewardV1 is
-    GlobalConstants,
-    GovernedContract,
-    IBlockReward
-{
-    constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
-
-    function reward(uint _amount) external payable {
-    }
-
-    function getReward(uint _blockNumber)
-        external view
-        returns(uint _amount)
-    {
-        if (_blockNumber > 0) {
-            _amount = REWARD_BACKBONE_V1;
-        }
-    }
+interface IBlacklistRegistry {
 }
-

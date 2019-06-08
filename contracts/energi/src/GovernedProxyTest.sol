@@ -21,10 +21,16 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IGovernedContract } from "./common.sol";
+// solium-disable no-empty-blocks
 
-contract GovernedProxyTest is IGovernedContract
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { IProposal } from "./IProposal.sol";
+import { ISporkRegistry } from "./ISporkRegistry.sol";
+import { GovernedProxy } from "./GovernedProxy.sol";
+
+contract MockContract is GovernedContract
 {
+    constructor(address _proxy) public GovernedContract(_proxy) {}
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract new_impl) external {
         selfdestruct(address(new_impl));
@@ -34,3 +40,43 @@ contract GovernedProxyTest is IGovernedContract
     }
     function () external payable {}
 }
+
+contract MockProxy is GovernedProxy
+{
+    constructor() public GovernedProxy(
+        IGovernedContract(address(0)),
+        ISporkRegistry(new MockSporkRegistry())
+    ) {}
+
+    function setImpl(IGovernedContract _impl) external {
+        current_impl = _impl;
+    }
+
+    function setSporkRegistry(ISporkRegistry _registry) external {
+        spork_registry = _registry;
+    }
+}
+
+contract MockSporkRegistry is ISporkRegistry {
+    function createUpgradeProposal(IGovernedContract, uint)
+        external payable
+        returns (IProposal)
+    {
+        return new MockProposal();
+    }
+}
+
+contract MockProposal is IProposal {
+    bool accepted;
+
+    function isAccepted() external view returns(bool) {
+        return accepted;
+    }
+
+    function setAccepted() external {
+        accepted = true;
+    }
+
+    function () external payable {}
+}
+

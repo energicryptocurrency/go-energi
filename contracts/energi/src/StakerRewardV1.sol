@@ -21,20 +21,34 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import "./common.sol";
+import { GlobalConstants } from "./constants.sol";
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { IBlockReward } from "./IBlockReward.sol";
 
-contract StakerRewardV1 is IGovernedContract, IBlockReward
+/**
+ * Genesis hardcoded version of SporkReward
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
+contract StakerRewardV1 is
+    GlobalConstants,
+    GovernedContract,
+    IBlockReward
 {
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+    constructor(address _proxy) public GovernedContract(_proxy) {}
+    function migrate(IGovernedContract) external requireProxy {}
+    function destroy(IGovernedContract) external requireProxy {}
     function () external payable {}
 
-    function reward(uint amount) external payable {
+    function reward(uint) external payable {
     }
 
-    function getReward(uint block_number) external view returns(uint amount) {
-        if (block_number > 0) {
-            amount = 2.18 ether;
+    function getReward(uint _blockNumber)
+        external view
+        returns(uint _amount)
+    {
+        if (_blockNumber > 0) {
+            _amount = REWARD_STAKER_V1;
         }
     }
 }

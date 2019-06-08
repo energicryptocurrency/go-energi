@@ -28,18 +28,18 @@ var (
 )
 
 // BlacklistRegistryV1ABI is the input ABI used to generate the binding from.
-const BlacklistRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const BlacklistRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // BlacklistRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const BlacklistRegistryV1Bin = `6080604052348015600f57600080fd5b5060808061001e6000396000f3fe60806040526004361060255760003560e01c8062f55d9d146027578063ce5494bb146027575b005b348015603257600080fd5b50602560048036036020811015604757600080fd5b505056fea265627a7a723058205c6bb1a58e96338936a0532ad27d1b486cf0d475eebf6aafebb6fd58176d4fec64736f6c63430005090032`
+const BlacklistRegistryV1Bin = `608060405234801561001057600080fd5b506040516101f23803806101f28339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031990921691909117905561018d806100656000396000f3fe6080604052600436106100335760003560e01c8062f55d9d14610035578063ce5494bb14610035578063ec55688914610075575b005b34801561004157600080fd5b506100336004803603602081101561005857600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166100b3565b34801561008157600080fd5b5061008a61013c565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461013957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a72305820804e1db1bc970600bab2131a3d9ab02100e5f18b396ff9675b91aefc28e965b264736f6c63430005090032`
 
 // DeployBlacklistRegistryV1 deploys a new Ethereum contract, binding an instance of BlacklistRegistryV1 to it.
-func DeployBlacklistRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *BlacklistRegistryV1, error) {
+func DeployBlacklistRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *BlacklistRegistryV1, error) {
 	parsed, err := abi.JSON(strings.NewReader(BlacklistRegistryV1ABI))
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(BlacklistRegistryV1Bin), backend)
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(BlacklistRegistryV1Bin), backend, _proxy)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -186,6 +186,32 @@ func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorRaw) Transfer(opts *bin
 // Transact invokes the (paid) contract method with params as input values.
 func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _BlacklistRegistryV1.Contract.contract.Transact(opts, method, params...)
+}
+
+// Proxy is a free data retrieval call binding the contract method 0xec556889.
+//
+// Solidity: function proxy() constant returns(address)
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Caller) Proxy(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _BlacklistRegistryV1.contract.Call(opts, out, "proxy")
+	return *ret0, err
+}
+
+// Proxy is a free data retrieval call binding the contract method 0xec556889.
+//
+// Solidity: function proxy() constant returns(address)
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Session) Proxy() (common.Address, error) {
+	return _BlacklistRegistryV1.Contract.Proxy(&_BlacklistRegistryV1.CallOpts)
+}
+
+// Proxy is a free data retrieval call binding the contract method 0xec556889.
+//
+// Solidity: function proxy() constant returns(address)
+func (_BlacklistRegistryV1 *BlacklistRegistryV1CallerSession) Proxy() (common.Address, error) {
+	return _BlacklistRegistryV1.Contract.Proxy(&_BlacklistRegistryV1.CallOpts)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.

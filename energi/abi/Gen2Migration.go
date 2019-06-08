@@ -31,7 +31,7 @@ var (
 const Gen2MigrationABI = "[]"
 
 // Gen2MigrationBin is the compiled bytecode used for deploying new contracts.
-const Gen2MigrationBin = `6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a723058208f6e3a5d66b12cc6a160f0fae73dd1923adde39308e8ac8b866b69120d4b4e4664736f6c63430005090032`
+const Gen2MigrationBin = `6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a72305820a1cecd2b6ea3c88ab10298231e3600c2a3ad132169a38d743e074a7515ecc77864736f6c63430005090032`
 
 // DeployGen2Migration deploys a new Ethereum contract, binding an instance of Gen2Migration to it.
 func DeployGen2Migration(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Gen2Migration, error) {

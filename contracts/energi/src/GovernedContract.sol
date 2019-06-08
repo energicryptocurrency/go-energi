@@ -21,33 +21,28 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-interface IProposal {
-    function isAccepted() external view returns(bool);
-    function () external payable;
-}
+import { IGovernedContract } from "./IGovernedContract.sol";
 
-contract GenericProposal is IProposal {
-    uint public fee;
-    uint public deadline;
-    address payable public fee_payer;
-    uint8 public quorum;
+/**
+ * Genesis version of GovernedContract common base.
+ *
+ * Base Consensus interface for upgradable contracts.
+ * Unlike common approach, the implementation is NOT expected to be
+ * called through delegatecall() to minimize risks of shared storage.
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
+contract GovernedContract is IGovernedContract {
+    address public proxy;
 
-    constructor(
-        uint8 _quorum,
-        uint _period,
-        address payable _fee_payer,
-        uint _fee
-    ) public {
-        fee = _fee;
-        // solium-disable-next-line security/no-block-members
-        deadline = block.timestamp + _period;
-        fee_payer = _fee_payer;
-        quorum = _quorum;
+    constructor(address _proxy) public {
+        proxy = _proxy;
     }
 
-    function isAccepted() external view returns(bool) {
-        return false;
+    modifier requireProxy {
+        require(msg.sender == proxy, "Not proxy");
+        _;
     }
-
-    function () external payable {}
 }
+
+

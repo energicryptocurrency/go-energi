@@ -28,18 +28,18 @@ var (
 )
 
 // GovernedProxyABI is the input ABI used to generate the binding from.
-const GovernedProxyABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"upgrade_proposals\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"new_impl\",\"type\":\"address\"},{\"name\":\"period\",\"type\":\"uint256\"}],\"name\":\"proposeUpgrade\",\"outputs\":[{\"name\":\"proposal\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"current_impl\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"impl\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const GovernedProxyABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"upgrade_proposals\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"},{\"name\":\"_period\",\"type\":\"uint256\"}],\"name\":\"proposeUpgrade\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"current_impl\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"spork_registry\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_impl\",\"type\":\"address\"},{\"name\":\"_sporkRegistry\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"newImpl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"UpgradeProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"newImpl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"}]"
 
 // GovernedProxyBin is the compiled bytecode used for deploying new contracts.
-const GovernedProxyBin = `608060405234801561001057600080fd5b5060405161073b38038061073b8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b03199092169190911790556106d6806100656000396000f3fe60806040526004361061003f5760003560e01c80630900f010146100f257806332e3a905146101345780635b6dee4c1461019d578063ad797cdd146101d6575b3233146100ad57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f4f6e6c79206469726563742063616c6c732061726520616c6c6f776564210000604482015290519081900360640190fd5b6000805460405173ffffffffffffffffffffffffffffffffffffffff9091169136908237600080368334866127105a03f13d6000833e8080156100ee573d83f35b3d83fd5b3480156100fe57600080fd5b506101326004803603602081101561011557600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101eb565b005b34801561014057600080fd5b506101746004803603602081101561015757600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610525565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b610174600480360360408110156101b357600080fd5b5073ffffffffffffffffffffffffffffffffffffffff813516906020013561054d565b3480156101e257600080fd5b50610174610685565b73ffffffffffffffffffffffffffffffffffffffff8082166000908152600160205260408120549054908216911681141561028757604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff811661030957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f4e6f742072656769737465726564210000000000000000000000000000000000604482015290519081900360640190fd5b8173ffffffffffffffffffffffffffffffffffffffff16635051a5ec6040518163ffffffff1660e01b815260040160206040518083038186803b15801561034f57600080fd5b505afa158015610363573d6000803e3d6000fd5b505050506040513d602081101561037957600080fd5b50516103e657604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f742061636365707465642100000000000000000000000000000000000000604482015290519081900360640190fd5b60008054604080517fce5494bb00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff92831660048201819052915191939285169263ce5494bb9260248084019382900301818387803b15801561045957600080fd5b505af115801561046d573d6000803e3d6000fd5b5050600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff8681169182178355604080517ef55d9d000000000000000000000000000000000000000000000000000000008152600481019390935251908616945062f55d9d93506024808301939282900301818387803b15801561050857600080fd5b505af115801561051c573d6000803e3d6000fd5b50505050505050565b60016020526000908152604090205473ffffffffffffffffffffffffffffffffffffffff1681565b6000805473ffffffffffffffffffffffffffffffffffffffff848116911614156105d857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b604080517f1684f69f00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8516600482015260248101849052905161030591631684f69f91349160448082019260209290919082900301818588803b15801561065157600080fd5b505af1158015610665573d6000803e3d6000fd5b50505050506040513d602081101561067c57600080fd5b50519392505050565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a723058205c3cc8fb4be59991fe3e54b3380c1f3a4d6aae457763ad9000b329d2e97fa12e64736f6c63430005090032`
+const GovernedProxyBin = `608060405234801561001057600080fd5b50604051610b0c380380610b0c8339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b039384166001600160a01b03199182161790915560018054939092169216919091179055610a928061007a6000396000f3fe60806040526004361061007a5760003560e01c8063ad797cdd1161004e578063ad797cdd14610251578063c55beaeb14610266578063ce5494bb1461012d578063ec5568891461027b5761007a565b8062f55d9d1461012d5780630900f0101461016f57806332e3a905146101af5780635b6dee4c14610218575b3233146100e857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f4f6e6c79206469726563742063616c6c732061726520616c6c6f776564210000604482015290519081900360640190fd5b6000805460405173ffffffffffffffffffffffffffffffffffffffff9091169136908237600080368334866127105a03f13d6000833e808015610129573d83f35b3d83fd5b34801561013957600080fd5b5061016d6004803603602081101561015057600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610290565b005b34801561017b57600080fd5b5061016d6004803603602081101561019257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166102f7565b3480156101bb57600080fd5b506101ef600480360360208110156101d257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166106b5565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b61016d6004803603604081101561022e57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356106dd565b34801561025d57600080fd5b506101ef610a21565b34801561027257600080fd5b506101ef610a3d565b34801561028757600080fd5b506101ef610a59565b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600860248201527f476f6f6420747279000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff8082166000908152600260205260408120549054908216911681141561039357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff811661041557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f4e6f742072656769737465726564210000000000000000000000000000000000604482015290519081900360640190fd5b8173ffffffffffffffffffffffffffffffffffffffff16635051a5ec6040518163ffffffff1660e01b815260040160206040518083038186803b15801561045b57600080fd5b505afa15801561046f573d6000803e3d6000fd5b505050506040513d602081101561048557600080fd5b50516104f257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f742061636365707465642100000000000000000000000000000000000000604482015290519081900360640190fd5b60008054604080517fce5494bb00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff92831660048201819052915191939285169263ce5494bb9260248084019382900301818387803b15801561056557600080fd5b505af1158015610579573d6000803e3d6000fd5b5050600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff8681169182178355604080517ef55d9d000000000000000000000000000000000000000000000000000000008152600481019390935251908616945062f55d9d93506024808301939282900301818387803b15801561061457600080fd5b505af1158015610628573d6000803e3d6000fd5b50505073ffffffffffffffffffffffffffffffffffffffff80851660008181526002602090815260409182902080547fffffffffffffffffffffffff00000000000000000000000000000000000000001690558151928352905192861693507f5d611f318680d00598bb735d61bacf0c514c6b50e1e5ad30040a4df2b12791c792918290030190a2505050565b60026020526000908152604090205473ffffffffffffffffffffffffffffffffffffffff1681565b32331461074b57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f4f6e6c79206469726563742063616c6c732061726520616c6c6f776564210000604482015290519081900360640190fd5b60005473ffffffffffffffffffffffffffffffffffffffff838116911614156107d557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b3073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff1663ec5568896040518163ffffffff1660e01b8152600401602060405180830381600087803b15801561083457600080fd5b505af1158015610848573d6000803e3d6000fd5b505050506040513d602081101561085e57600080fd5b505173ffffffffffffffffffffffffffffffffffffffff16146108e257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600c60248201527f57726f6e672070726f7879210000000000000000000000000000000000000000604482015290519081900360640190fd5b600154604080517f1684f69f00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff85811660048301526024820185905291516000939290921691631684f69f913491604480830192602092919082900301818588803b15801561096257600080fd5b505af1158015610976573d6000803e3d6000fd5b50505050506040513d602081101561098d57600080fd5b505173ffffffffffffffffffffffffffffffffffffffff80821660008181526002602090815260409182902080547fffffffffffffffffffffffff00000000000000000000000000000000000000001694891694851790558151928352905193945091927f812eb2689eecf94cfb55caf4a123ea76c6d93eef07dd54a5273b7a4949f7d763929181900390910190a2505050565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b60015473ffffffffffffffffffffffffffffffffffffffff1681565b309056fea265627a7a72305820acda5c02536015da4770ee6f00d50ed4b1bd34e461ad678492c109775192ac3564736f6c63430005090032`
 
 // DeployGovernedProxy deploys a new Ethereum contract, binding an instance of GovernedProxy to it.
-func DeployGovernedProxy(auth *bind.TransactOpts, backend bind.ContractBackend, impl common.Address) (common.Address, *types.Transaction, *GovernedProxy, error) {
+func DeployGovernedProxy(auth *bind.TransactOpts, backend bind.ContractBackend, _impl common.Address, _sporkRegistry common.Address) (common.Address, *types.Transaction, *GovernedProxy, error) {
 	parsed, err := abi.JSON(strings.NewReader(GovernedProxyABI))
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(GovernedProxyBin), backend, impl)
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(GovernedProxyBin), backend, _impl, _sporkRegistry)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -214,6 +214,32 @@ func (_GovernedProxy *GovernedProxyCallerSession) CurrentImpl() (common.Address,
 	return _GovernedProxy.Contract.CurrentImpl(&_GovernedProxy.CallOpts)
 }
 
+// SporkRegistry is a free data retrieval call binding the contract method 0xc55beaeb.
+//
+// Solidity: function spork_registry() constant returns(address)
+func (_GovernedProxy *GovernedProxyCaller) SporkRegistry(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _GovernedProxy.contract.Call(opts, out, "spork_registry")
+	return *ret0, err
+}
+
+// SporkRegistry is a free data retrieval call binding the contract method 0xc55beaeb.
+//
+// Solidity: function spork_registry() constant returns(address)
+func (_GovernedProxy *GovernedProxySession) SporkRegistry() (common.Address, error) {
+	return _GovernedProxy.Contract.SporkRegistry(&_GovernedProxy.CallOpts)
+}
+
+// SporkRegistry is a free data retrieval call binding the contract method 0xc55beaeb.
+//
+// Solidity: function spork_registry() constant returns(address)
+func (_GovernedProxy *GovernedProxyCallerSession) SporkRegistry() (common.Address, error) {
+	return _GovernedProxy.Contract.SporkRegistry(&_GovernedProxy.CallOpts)
+}
+
 // UpgradeProposals is a free data retrieval call binding the contract method 0x32e3a905.
 //
 // Solidity: function upgrade_proposals(address ) constant returns(address)
@@ -240,44 +266,373 @@ func (_GovernedProxy *GovernedProxyCallerSession) UpgradeProposals(arg0 common.A
 	return _GovernedProxy.Contract.UpgradeProposals(&_GovernedProxy.CallOpts, arg0)
 }
 
-// ProposeUpgrade is a paid mutator transaction binding the contract method 0x5b6dee4c.
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function proposeUpgrade(address new_impl, uint256 period) returns(address proposal)
-func (_GovernedProxy *GovernedProxyTransactor) ProposeUpgrade(opts *bind.TransactOpts, new_impl common.Address, period *big.Int) (*types.Transaction, error) {
-	return _GovernedProxy.contract.Transact(opts, "proposeUpgrade", new_impl, period)
+// Solidity: function destroy(address ) returns()
+func (_GovernedProxy *GovernedProxyTransactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.contract.Transact(opts, "destroy", arg0)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address ) returns()
+func (_GovernedProxy *GovernedProxySession) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Destroy(&_GovernedProxy.TransactOpts, arg0)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address ) returns()
+func (_GovernedProxy *GovernedProxyTransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Destroy(&_GovernedProxy.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_GovernedProxy *GovernedProxyTransactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.contract.Transact(opts, "migrate", arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_GovernedProxy *GovernedProxySession) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Migrate(&_GovernedProxy.TransactOpts, arg0)
+}
+
+// Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
+//
+// Solidity: function migrate(address ) returns()
+func (_GovernedProxy *GovernedProxyTransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Migrate(&_GovernedProxy.TransactOpts, arg0)
 }
 
 // ProposeUpgrade is a paid mutator transaction binding the contract method 0x5b6dee4c.
 //
-// Solidity: function proposeUpgrade(address new_impl, uint256 period) returns(address proposal)
-func (_GovernedProxy *GovernedProxySession) ProposeUpgrade(new_impl common.Address, period *big.Int) (*types.Transaction, error) {
-	return _GovernedProxy.Contract.ProposeUpgrade(&_GovernedProxy.TransactOpts, new_impl, period)
+// Solidity: function proposeUpgrade(address _newImpl, uint256 _period) returns()
+func (_GovernedProxy *GovernedProxyTransactor) ProposeUpgrade(opts *bind.TransactOpts, _newImpl common.Address, _period *big.Int) (*types.Transaction, error) {
+	return _GovernedProxy.contract.Transact(opts, "proposeUpgrade", _newImpl, _period)
 }
 
 // ProposeUpgrade is a paid mutator transaction binding the contract method 0x5b6dee4c.
 //
-// Solidity: function proposeUpgrade(address new_impl, uint256 period) returns(address proposal)
-func (_GovernedProxy *GovernedProxyTransactorSession) ProposeUpgrade(new_impl common.Address, period *big.Int) (*types.Transaction, error) {
-	return _GovernedProxy.Contract.ProposeUpgrade(&_GovernedProxy.TransactOpts, new_impl, period)
+// Solidity: function proposeUpgrade(address _newImpl, uint256 _period) returns()
+func (_GovernedProxy *GovernedProxySession) ProposeUpgrade(_newImpl common.Address, _period *big.Int) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.ProposeUpgrade(&_GovernedProxy.TransactOpts, _newImpl, _period)
+}
+
+// ProposeUpgrade is a paid mutator transaction binding the contract method 0x5b6dee4c.
+//
+// Solidity: function proposeUpgrade(address _newImpl, uint256 _period) returns()
+func (_GovernedProxy *GovernedProxyTransactorSession) ProposeUpgrade(_newImpl common.Address, _period *big.Int) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.ProposeUpgrade(&_GovernedProxy.TransactOpts, _newImpl, _period)
+}
+
+// Proxy is a paid mutator transaction binding the contract method 0xec556889.
+//
+// Solidity: function proxy() returns(address)
+func (_GovernedProxy *GovernedProxyTransactor) Proxy(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _GovernedProxy.contract.Transact(opts, "proxy")
+}
+
+// Proxy is a paid mutator transaction binding the contract method 0xec556889.
+//
+// Solidity: function proxy() returns(address)
+func (_GovernedProxy *GovernedProxySession) Proxy() (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Proxy(&_GovernedProxy.TransactOpts)
+}
+
+// Proxy is a paid mutator transaction binding the contract method 0xec556889.
+//
+// Solidity: function proxy() returns(address)
+func (_GovernedProxy *GovernedProxyTransactorSession) Proxy() (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Proxy(&_GovernedProxy.TransactOpts)
 }
 
 // Upgrade is a paid mutator transaction binding the contract method 0x0900f010.
 //
-// Solidity: function upgrade(address proposal) returns()
-func (_GovernedProxy *GovernedProxyTransactor) Upgrade(opts *bind.TransactOpts, proposal common.Address) (*types.Transaction, error) {
-	return _GovernedProxy.contract.Transact(opts, "upgrade", proposal)
+// Solidity: function upgrade(address _proposal) returns()
+func (_GovernedProxy *GovernedProxyTransactor) Upgrade(opts *bind.TransactOpts, _proposal common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.contract.Transact(opts, "upgrade", _proposal)
 }
 
 // Upgrade is a paid mutator transaction binding the contract method 0x0900f010.
 //
-// Solidity: function upgrade(address proposal) returns()
-func (_GovernedProxy *GovernedProxySession) Upgrade(proposal common.Address) (*types.Transaction, error) {
-	return _GovernedProxy.Contract.Upgrade(&_GovernedProxy.TransactOpts, proposal)
+// Solidity: function upgrade(address _proposal) returns()
+func (_GovernedProxy *GovernedProxySession) Upgrade(_proposal common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Upgrade(&_GovernedProxy.TransactOpts, _proposal)
 }
 
 // Upgrade is a paid mutator transaction binding the contract method 0x0900f010.
 //
-// Solidity: function upgrade(address proposal) returns()
-func (_GovernedProxy *GovernedProxyTransactorSession) Upgrade(proposal common.Address) (*types.Transaction, error) {
-	return _GovernedProxy.Contract.Upgrade(&_GovernedProxy.TransactOpts, proposal)
+// Solidity: function upgrade(address _proposal) returns()
+func (_GovernedProxy *GovernedProxyTransactorSession) Upgrade(_proposal common.Address) (*types.Transaction, error) {
+	return _GovernedProxy.Contract.Upgrade(&_GovernedProxy.TransactOpts, _proposal)
+}
+
+// GovernedProxyUpgradeProposalIterator is returned from FilterUpgradeProposal and is used to iterate over the raw logs and unpacked data for UpgradeProposal events raised by the GovernedProxy contract.
+type GovernedProxyUpgradeProposalIterator struct {
+	Event *GovernedProxyUpgradeProposal // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *GovernedProxyUpgradeProposalIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(GovernedProxyUpgradeProposal)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(GovernedProxyUpgradeProposal)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *GovernedProxyUpgradeProposalIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *GovernedProxyUpgradeProposalIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// GovernedProxyUpgradeProposal represents a UpgradeProposal event raised by the GovernedProxy contract.
+type GovernedProxyUpgradeProposal struct {
+	NewImpl  common.Address
+	Proposal common.Address
+	Raw      types.Log // Blockchain specific contextual infos
+}
+
+// FilterUpgradeProposal is a free log retrieval operation binding the contract event 0x812eb2689eecf94cfb55caf4a123ea76c6d93eef07dd54a5273b7a4949f7d763.
+//
+// Solidity: event UpgradeProposal(address indexed newImpl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) FilterUpgradeProposal(opts *bind.FilterOpts, newImpl []common.Address) (*GovernedProxyUpgradeProposalIterator, error) {
+
+	var newImplRule []interface{}
+	for _, newImplItem := range newImpl {
+		newImplRule = append(newImplRule, newImplItem)
+	}
+
+	logs, sub, err := _GovernedProxy.contract.FilterLogs(opts, "UpgradeProposal", newImplRule)
+	if err != nil {
+		return nil, err
+	}
+	return &GovernedProxyUpgradeProposalIterator{contract: _GovernedProxy.contract, event: "UpgradeProposal", logs: logs, sub: sub}, nil
+}
+
+// WatchUpgradeProposal is a free log subscription operation binding the contract event 0x812eb2689eecf94cfb55caf4a123ea76c6d93eef07dd54a5273b7a4949f7d763.
+//
+// Solidity: event UpgradeProposal(address indexed newImpl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) WatchUpgradeProposal(opts *bind.WatchOpts, sink chan<- *GovernedProxyUpgradeProposal, newImpl []common.Address) (event.Subscription, error) {
+
+	var newImplRule []interface{}
+	for _, newImplItem := range newImpl {
+		newImplRule = append(newImplRule, newImplItem)
+	}
+
+	logs, sub, err := _GovernedProxy.contract.WatchLogs(opts, "UpgradeProposal", newImplRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(GovernedProxyUpgradeProposal)
+				if err := _GovernedProxy.contract.UnpackLog(event, "UpgradeProposal", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// GovernedProxyUpgradedIterator is returned from FilterUpgraded and is used to iterate over the raw logs and unpacked data for Upgraded events raised by the GovernedProxy contract.
+type GovernedProxyUpgradedIterator struct {
+	Event *GovernedProxyUpgraded // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *GovernedProxyUpgradedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(GovernedProxyUpgraded)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(GovernedProxyUpgraded)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *GovernedProxyUpgradedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *GovernedProxyUpgradedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// GovernedProxyUpgraded represents a Upgraded event raised by the GovernedProxy contract.
+type GovernedProxyUpgraded struct {
+	NewImpl  common.Address
+	Proposal common.Address
+	Raw      types.Log // Blockchain specific contextual infos
+}
+
+// FilterUpgraded is a free log retrieval operation binding the contract event 0x5d611f318680d00598bb735d61bacf0c514c6b50e1e5ad30040a4df2b12791c7.
+//
+// Solidity: event Upgraded(address indexed newImpl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) FilterUpgraded(opts *bind.FilterOpts, newImpl []common.Address) (*GovernedProxyUpgradedIterator, error) {
+
+	var newImplRule []interface{}
+	for _, newImplItem := range newImpl {
+		newImplRule = append(newImplRule, newImplItem)
+	}
+
+	logs, sub, err := _GovernedProxy.contract.FilterLogs(opts, "Upgraded", newImplRule)
+	if err != nil {
+		return nil, err
+	}
+	return &GovernedProxyUpgradedIterator{contract: _GovernedProxy.contract, event: "Upgraded", logs: logs, sub: sub}, nil
+}
+
+// WatchUpgraded is a free log subscription operation binding the contract event 0x5d611f318680d00598bb735d61bacf0c514c6b50e1e5ad30040a4df2b12791c7.
+//
+// Solidity: event Upgraded(address indexed newImpl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) WatchUpgraded(opts *bind.WatchOpts, sink chan<- *GovernedProxyUpgraded, newImpl []common.Address) (event.Subscription, error) {
+
+	var newImplRule []interface{}
+	for _, newImplItem := range newImpl {
+		newImplRule = append(newImplRule, newImplItem)
+	}
+
+	logs, sub, err := _GovernedProxy.contract.WatchLogs(opts, "Upgraded", newImplRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(GovernedProxyUpgraded)
+				if err := _GovernedProxy.contract.UnpackLog(event, "Upgraded", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
 }

@@ -21,35 +21,35 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
-import { IBlockReward } from "./IBlockReward.sol";
+import { IProposal } from "./IProposal.sol";
 
 /**
- * Genesis hardcoded version of BackboneReward
+ * Genesis hardcoded version of GenericProposal
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract BackboneRewardV1 is
-    GlobalConstants,
-    GovernedContract,
-    IBlockReward
-{
-    constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
+contract GenericProposalV1 is IProposal {
+    uint public fee;
+    uint public deadline;
+    address payable public fee_payer;
+    uint8 public quorum;
+
+    constructor(
+        uint8 _quorum,
+        uint _period,
+        address payable _feePayer,
+        uint _fee
+    ) public {
+        fee = _fee;
+        // solium-disable-next-line security/no-block-members
+        deadline = block.timestamp + _period;
+        fee_payer = _feePayer;
+        quorum = _quorum;
+    }
+
+    function isAccepted() external view returns(bool) {
+        return false;
+    }
+
     function () external payable {}
-
-    function reward(uint _amount) external payable {
-    }
-
-    function getReward(uint _blockNumber)
-        external view
-        returns(uint _amount)
-    {
-        if (_blockNumber > 0) {
-            _amount = REWARD_BACKBONE_V1;
-        }
-    }
 }
-
