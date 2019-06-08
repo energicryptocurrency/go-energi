@@ -35,8 +35,11 @@ contract GovernedProxy is
 {
     event UpgradeProposal(
         address indexed newImpl,
-        address proposal,
-        address fee_payer
+        address proposal
+    );
+    event Upgraded(
+        address indexed newImpl,
+        address proposal
     );
 
     modifier senderOrigin {
@@ -70,7 +73,7 @@ contract GovernedProxy is
 
         upgrade_proposals[address(proposal)] = _newImpl;
 
-        emit UpgradeProposal(address(_newImpl), address(proposal), msg.sender);
+        emit UpgradeProposal(address(_newImpl), address(proposal));
     }
 
     /**
@@ -90,6 +93,8 @@ contract GovernedProxy is
 
         // SECURITY: prevent downgrade attack
         delete upgrade_proposals[address(_proposal)];
+
+        emit Upgraded(address(new_impl), address(_proposal));
     }
 
     /**

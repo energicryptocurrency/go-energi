@@ -109,10 +109,13 @@ contract("GovernedProxy", async accounts => {
         const { logs } = await proxy.proposeUpgrade(
                 second.address, 2 * weeks,
                 { from: accounts[0], value: '1' });
+        assert.equal(logs.length, 1);
         const proposal = await MockProposal.at(logs[0].args['1']);
 
         await proposal.setAccepted();
-        await proxy.upgrade(proposal.address);
+
+        const res = await proxy.upgrade(proposal.address);
+        assert.equal(res.logs.length, 1);
     });
 
     it('should refuse upgrade AFTER upgrade - Not registered!', async () => {

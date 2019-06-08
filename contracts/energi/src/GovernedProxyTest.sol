@@ -45,7 +45,7 @@ contract MockProxy is GovernedProxy
 {
     constructor() public GovernedProxy(
         IGovernedContract(address(0)),
-        ISporkRegistry(address(0))
+        ISporkRegistry(new MockSporkRegistry())
     ) {}
 
     function setImpl(IGovernedContract _impl) external {
