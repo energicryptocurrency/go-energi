@@ -159,6 +159,7 @@ contract MasternodeTokenV1 is
         // Events
         emit Transfer(tokenOwner, address(0), _amount);
 
+        // TODO: we may need to allow more gas here for shared masternode contracts!
         tokenOwner.transfer(_amount);
     }
 

@@ -22,6 +22,7 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 import { IProposal } from "./IProposal.sol";
+import { StorageBase }  from "./StorageBase.sol";
 
 /**
  * Genesis hardcoded version of GenericProposal

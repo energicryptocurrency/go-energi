@@ -20,18 +20,20 @@
 
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
-const MockProposal = artifacts.require('MockProposal');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const IMasternodeToken = artifacts.require('IMasternodeToken');
 const StorageMasternodeTokenV1 = artifacts.require('StorageMasternodeTokenV1');
 
+const common = require('./common');
+
 contract("MasternodeTokenV1", async accounts => {
-    let orig;
-    let fake;
-    let proxy;
-    let proxy_abi;
-    let token_abi;
-    let storage;
+    const s = {
+        artifacts,
+        accounts,
+        assert,
+        it,
+        web3,
+    };
 
     // NOTE: some BigNumber issues with Truffle exposed web3...
     const COLLATERAL_1 = web3.utils.toWei('10000', 'ether');
@@ -47,330 +49,236 @@ contract("MasternodeTokenV1", async accounts => {
     };
 
     before(async () => {
-        orig = await MasternodeTokenV1.deployed();
-        proxy = await MockProxy.at(await orig.proxy());
-        fake = await MockContract.new(proxy.address);
-        proxy_abi = await MasternodeTokenV1.at(proxy.address);
-        token_abi = await IMasternodeToken.at(proxy.address);
-        await proxy.setImpl(orig.address);
-        storage = await StorageMasternodeTokenV1.at(await proxy_abi.v1storage());
+        s.orig = await MasternodeTokenV1.deployed();
+        s.proxy = await MockProxy.at(await s.orig.proxy());
+        s.fake = await MockContract.new(s.proxy.address);
+        s.proxy_abi = await MasternodeTokenV1.at(s.proxy.address);
+        s.token_abi = await IMasternodeToken.at(s.proxy.address);
+        await s.proxy.setImpl(s.orig.address);
+        s.storage = await StorageMasternodeTokenV1.at(await s.proxy_abi.v1storage());
+        Object.freeze(s);
     });
 
-    it('should refuse migrate() through proxy', async () => {
-        try {
-            await proxy_abi.migrate(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Good try/);
-        }
-    });
+    describe('common pre', () => common.govPreTests(s) );
 
-    it('should refuse destroy() through proxy', async () => {
-        try {
-            await proxy_abi.destroy(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Good try/);
-        }
-    });
-
-    it('should refuse migrate() directly', async () => {
-        try {
-            await orig.migrate(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not proxy/);
-        }
-    });
-
-    it('should refuse destroy() directly', async () => {
-        try {
-            await orig.destroy(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not proxy/);
-        }
-    });
-
-    // ERC20 stuff
     //---
-    it.skip('should emit Transfer in c-tor', async () => {});
+    describe('ERC20', () => {
+        it.skip('should emit Transfer in c-tor', async () => {});
 
-    it('should support totalSupply()', async () => {
-        const res = await token_abi.totalSupply();
-        assert.equal(res.valueOf(), 0);
+        it('should support totalSupply()', async () => {
+            const res = await s.token_abi.totalSupply();
+            assert.equal(res.valueOf(), 0);
+        });
+
+        it('should support name()', async () => {
+            const res = await s.token_abi.name();
+            assert.equal(res, "Masternode Collateral");
+        });
+
+        it('should support symbol()', async () => {
+            const res = await s.token_abi.symbol();
+            assert.equal(res, "MNGR");
+        });
+
+        it('should support decimals()', async () => {
+            const res = await s.token_abi.decimals();
+            assert.equal(res.valueOf(), 22);
+        });
+
+        it('should support balanceOf()', async () => {
+            const res = await s.token_abi.balanceOf(s.fake.address);
+            assert.equal(res.valueOf(), 0);
+        });
+
+        it('should support allowance()', async () => {
+            const res = await s.token_abi.allowance(s.fake.address, s.fake.address);
+            assert.equal(res.valueOf(), 0);
+        });
+
+        it('should refuse transfer()', async () => {
+            try {
+                await s.token_abi.transfer(s.fake.address, '0');
+                assert.fail("It must fail");
+            } catch (e) {
+                assert.match(e.message, /Not allowed/);
+            }
+        });
+
+        it('should refuse transferFrom()', async () => {
+            try {
+                await s.token_abi.transferFrom(s.fake.address, s.fake.address, '0');
+                assert.fail("It must fail");
+            } catch (e) {
+                assert.match(e.message, /Not allowed/);
+            }
+        });
+
+        it('should refuse approve()', async () => {
+            try {
+                await s.token_abi.approve(s.fake.address, '0');
+                assert.fail("It must fail");
+            } catch (e) {
+                assert.match(e.message, /Not allowed/);
+            }
+        });
     });
 
-    it('should support name()', async () => {
-        const res = await token_abi.name();
-        assert.equal(res, "Masternode Collateral");
-    });
-
-    it('should support symbol()', async () => {
-        const res = await token_abi.symbol();
-        assert.equal(res, "MNGR");
-    });
-
-    it('should support decimals()', async () => {
-        const res = await token_abi.decimals();
-        assert.equal(res.valueOf(), 22);
-    });
-
-    it('should support balanceOf()', async () => {
-        const res = await token_abi.balanceOf(fake.address);
-        assert.equal(res.valueOf(), 0);
-    });
-
-    it('should support allowance()', async () => {
-        const res = await token_abi.allowance(fake.address, fake.address);
-        assert.equal(res.valueOf(), 0);
-    });
-
-    it('should refuse transfer()', async () => {
-        try {
-            await token_abi.transfer(fake.address, '0');
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not allowed/);
-        }
-    });
-
-    it('should refuse transferFrom()', async () => {
-        try {
-            await token_abi.transferFrom(fake.address, fake.address, '0');
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not allowed/);
-        }
-    });
-
-    it('should refuse approve()', async () => {
-        try {
-            await token_abi.approve(fake.address, '0');
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not allowed/);
-        }
-    });
-
-    // Energi stuff
     //---
-    it('should support balanceInfo()', async () => {
-        const res = await token_abi.balanceInfo(fake.address);
-        assert.equal(res['0'].valueOf(), 0);
-    });
-
-    it('should allow depositCollateral()', async () => {
-        const { logs } = await token_abi.depositCollateral({
-            from: accounts[0],
-            value: COLLATERAL_1,
+    describe('Primary', () => {
+        it('should support balanceInfo()', async () => {
+            const res = await s.token_abi.balanceInfo(s.fake.address);
+            assert.equal(res['0'].valueOf(), 0);
         });
-        assert.equal(logs.length, 1);
-        const res = await token_abi.balanceInfo(accounts[0]);
-        assert.equal(res['0'].valueOf(), COLLATERAL_1);
-        check_age(res['1']);
 
-        const res2 = await token_abi.balanceOf(accounts[0]);
-        assert.equal(res2.valueOf(), COLLATERAL_1);
-
-        const res3 = await token_abi.totalSupply();
-        assert.equal(res2.valueOf(), COLLATERAL_1);
-    });
-
-    it('should correctly reflect age', async () => {
-        await new Promise((resolve, reject) => {
-            web3.currentProvider.send({
-                jsonrpc: "2.0",
-                method: "evm_increaseTime",
-                params: [3600],
-                id: new Date().getSeconds()
-            }, resolve);
-        });
-        await new Promise((resolve, reject) => {
-            web3.currentProvider.send({
-                jsonrpc: "2.0",
-                method: "evm_mine",
-                params: [],
-                id: new Date().getSeconds() + 1
-            }, resolve);
-        });
-        const res = await token_abi.balanceInfo(accounts[0]);
-        assert.equal(res['0'].valueOf(), COLLATERAL_1);
-        assert.isAtLeast(parseInt(res['1'].valueOf()), 3600);
-    });
-    
-    it('should allow depositCollateral() direct', async () => {
-        const { logs } = await orig.depositCollateral({
-            from: accounts[0],
-            value: COLLATERAL_2,
-        });
-        assert.equal(logs.length, 1);
-        const res = await token_abi.balanceInfo(accounts[0]);
-        assert.equal(res['0'].valueOf(), COLLATERAL_3);
-        check_age(res['1']);
-
-        const res2 = await token_abi.balanceOf(accounts[0]);
-        assert.equal(res2.valueOf(), COLLATERAL_3);
-
-        const total = await token_abi.totalSupply();
-        assert.equal(total.valueOf(), COLLATERAL_3);
-    });
-
-    it('should refuse depositCollateral() not a multiple of', async () => {
-        try {
-            await token_abi.depositCollateral({
+        it('should allow depositCollateral()', async () => {
+            const { logs } = await s.token_abi.depositCollateral({
                 from: accounts[0],
-                value: web3.utils.toWei('10001', 'ether'),
+                value: COLLATERAL_1,
             });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not a multiple/);
-        }
-    });
+            assert.equal(logs.length, 1);
+            const res = await s.token_abi.balanceInfo(accounts[0]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_1);
+            check_age(res['1']);
 
-    it('should allow depositCollateral() - max', async () => {
-        const { logs } = await token_abi.depositCollateral({
-            from: accounts[0],
-            value: COLLATERAL_7,
+            const res2 = await s.token_abi.balanceOf(accounts[0]);
+            assert.equal(res2.valueOf(), COLLATERAL_1);
+
+            const res3 = await s.token_abi.totalSupply();
+            assert.equal(res2.valueOf(), COLLATERAL_1);
         });
-        assert.equal(logs.length, 1);
-        const res = await token_abi.balanceInfo(accounts[0]);
-        assert.equal(res['0'].valueOf(), COLLATERAL_10);
-        check_age(res['1']);
 
-        const res2 = await token_abi.balanceOf(accounts[0]);
-        assert.equal(res2.valueOf(), COLLATERAL_10);
-
-        const total = await token_abi.totalSupply();
-        assert.equal(total.valueOf(), COLLATERAL_10);
-    });
-
-    it('should refuse to depositCollateral() over max', async () => {
-        try {
-            await token_abi.depositCollateral({
-                from: accounts[0],
-                value: web3.utils.toWei(COLLATERAL_1, 'ether'),
+        it('should correctly reflect age', async () => {
+            await new Promise((resolve, reject) => {
+                web3.currentProvider.send({
+                    jsonrpc: "2.0",
+                    method: "evm_increaseTime",
+                    params: [3600],
+                    id: new Date().getSeconds()
+                }, resolve);
             });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Too much/);
-        }
-    });
-
-    it('should allow depositCollateral() another account', async () => {
-        const { logs } = await orig.depositCollateral({
-            from: accounts[1],
-            value: COLLATERAL_3,
-        });
-        assert.equal(logs.length, 1);
-
-        const res = await token_abi.balanceInfo(accounts[1]);
-        assert.equal(res['0'].valueOf(), COLLATERAL_3);
-        check_age(res['1']);
-
-        const res2 = await token_abi.balanceOf(accounts[1]);
-        assert.equal(res2.valueOf(), COLLATERAL_3);
-
-        const total = await token_abi.totalSupply();
-        assert.equal(total.valueOf(), COLLATERAL_13);
-    });
-
-    it('should allow withdrawCollateral()', async () => {
-        const { logs } = await token_abi.withdrawCollateral(COLLATERAL_9, {
-            from: accounts[0],
-        });
-        assert.equal(logs.length, 1);
-        const res = await token_abi.balanceInfo(accounts[0]);
-        assert.equal(res['0'].valueOf(), COLLATERAL_1);
-        check_age(res['1']);
-
-        const total = await token_abi.totalSupply();
-        assert.equal(total.valueOf(), COLLATERAL_4);
-    });
-
-    it('should refuse withdrawCollateral() over balance', async () => {
-        try {
-            await token_abi.withdrawCollateral(COLLATERAL_2, {
-                from: accounts[0],
+            await new Promise((resolve, reject) => {
+                web3.currentProvider.send({
+                    jsonrpc: "2.0",
+                    method: "evm_mine",
+                    params: [],
+                    id: new Date().getSeconds() + 1
+                }, resolve);
             });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not enough/);
-        }
-    });
-
-    it('should refuse setBalance() on storage', async () => {
-        try {
-            await storage.setBalance(fake.address, COLLATERAL_1, COLLATERAL_1);
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not owner/);
-        }
-    });
-
-
-    // Safety & Cleanup
-    //---
-    it('should refuse to accept funds', async () => {
-        try {
-            await token_abi.send(web3.utils.toWei('1', "ether"));
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not supported/);
-        }
-    });
-    
-    it('should refuse to accept funds to storage', async () => {
-        try {
-            await storage.send(web3.utils.toWei('1', "ether"));
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /revert/);
-        }
-    });
-
-    it('should refuse kill() storage', async () => {
-        try {
-            await storage.kill();
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not owner/);
-        }
-    });
-
-    it('should refuse setOwner() on storage', async () => {
-        try {
-            await storage.setOwner(proxy.address);
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not owner/);
-        }
-    });
-
-    it('should destroy() after upgrade', async () => {
-        const orig_balance = await web3.eth.getBalance(orig.address)
-        const { logs } = await proxy.proposeUpgrade(
-                fake.address, 0,
-                { from: accounts[0], value: '1' });
-
-        assert.equal(logs.length, 1);
-        const proposal = await MockProposal.at(logs[0].args['1']);
+            const res = await s.token_abi.balanceInfo(accounts[0]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_1);
+            assert.isAtLeast(parseInt(res['1'].valueOf()), 3600);
+        });
         
-        await proposal.setAccepted();
-        await proxy.upgrade(proposal.address);
+        it('should allow depositCollateral() direct', async () => {
+            const { logs } = await s.orig.depositCollateral({
+                from: accounts[0],
+                value: COLLATERAL_2,
+            });
+            assert.equal(logs.length, 1);
+            const res = await s.token_abi.balanceInfo(accounts[0]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_3);
+            check_age(res['1']);
 
-        const fake_balance = await web3.eth.getBalance(fake.address)
-        assert.equal(orig_balance.valueOf(), fake_balance.valueOf());
+            const res2 = await s.token_abi.balanceOf(accounts[0]);
+            assert.equal(res2.valueOf(), COLLATERAL_3);
 
-        try {
-            await orig.proxy();
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /did it run Out of Gas/);
-        }
+            const total = await s.token_abi.totalSupply();
+            assert.equal(total.valueOf(), COLLATERAL_3);
+        });
+
+        it('should refuse depositCollateral() not a multiple of', async () => {
+            try {
+                await s.token_abi.depositCollateral({
+                    from: accounts[0],
+                    value: web3.utils.toWei('10001', 'ether'),
+                });
+                assert.fail("It must fail");
+            } catch (e) {
+                assert.match(e.message, /Not a multiple/);
+            }
+        });
+
+        it('should allow depositCollateral() - max', async () => {
+            const { logs } = await s.token_abi.depositCollateral({
+                from: accounts[0],
+                value: COLLATERAL_7,
+            });
+            assert.equal(logs.length, 1);
+            const res = await s.token_abi.balanceInfo(accounts[0]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_10);
+            check_age(res['1']);
+
+            const res2 = await s.token_abi.balanceOf(accounts[0]);
+            assert.equal(res2.valueOf(), COLLATERAL_10);
+
+            const total = await s.token_abi.totalSupply();
+            assert.equal(total.valueOf(), COLLATERAL_10);
+        });
+
+        it('should refuse to depositCollateral() over max', async () => {
+            try {
+                await s.token_abi.depositCollateral({
+                    from: accounts[0],
+                    value: web3.utils.toWei(COLLATERAL_1, 'ether'),
+                });
+                assert.fail("It must fail");
+            } catch (e) {
+                assert.match(e.message, /Too much/);
+            }
+        });
+
+        it('should allow depositCollateral() another account', async () => {
+            const { logs } = await s.orig.depositCollateral({
+                from: accounts[1],
+                value: COLLATERAL_3,
+            });
+            assert.equal(logs.length, 1);
+
+            const res = await s.token_abi.balanceInfo(accounts[1]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_3);
+            check_age(res['1']);
+
+            const res2 = await s.token_abi.balanceOf(accounts[1]);
+            assert.equal(res2.valueOf(), COLLATERAL_3);
+
+            const total = await s.token_abi.totalSupply();
+            assert.equal(total.valueOf(), COLLATERAL_13);
+        });
+
+        it('should allow withdrawCollateral()', async () => {
+            const { logs } = await s.token_abi.withdrawCollateral(COLLATERAL_9, {
+                from: accounts[0],
+            });
+            assert.equal(logs.length, 1);
+            const res = await s.token_abi.balanceInfo(accounts[0]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_1);
+            check_age(res['1']);
+
+            const total = await s.token_abi.totalSupply();
+            assert.equal(total.valueOf(), COLLATERAL_4);
+        });
+
+        it('should refuse withdrawCollateral() over balance', async () => {
+            try {
+                await s.token_abi.withdrawCollateral(COLLATERAL_2, {
+                    from: accounts[0],
+                });
+                assert.fail("It must fail");
+            } catch (e) {
+                assert.match(e.message, /Not enough/);
+            }
+        });
+
+        it('should refuse setBalance() on s.storage', async () => {
+            try {
+                await s.storage.setBalance(s.fake.address, COLLATERAL_1, COLLATERAL_1);
+                assert.fail("It must fail");
+            } catch (e) {
+                assert.match(e.message, /Not owner/);
+            }
+        });
     });
 
-    it('should transfer storage & allow to kill() it', async () => {
-        await fake.killStorage(storage.address);
-    });
+    //---
+    describe('common post', () => common.govPostTests(s) );
 });

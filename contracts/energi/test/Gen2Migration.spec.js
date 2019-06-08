@@ -18,9 +18,6 @@
 
 'use strict';
 
-const MockProxy = artifacts.require('MockProxy');
-const MockContract = artifacts.require('MockContract');
-const MockProposal = artifacts.require('MockProposal');
 const Gen2Migration = artifacts.require('Gen2Migration');
 
 contract("Gen2Migration", async accounts => {

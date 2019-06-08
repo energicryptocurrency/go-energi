@@ -25,6 +25,16 @@ import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
 import { ITreasury } from "./ITreasury.sol";
+import { StorageBase }  from "./StorageBase.sol";
+
+/**
+ * Permanent storage of Treasury V1 data.
+ */
+contract StorageTreasuryV1 is
+    StorageBase
+{
+    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
+}
 
 /**
  * Genesis hardcoded version of Treasury
@@ -37,9 +47,23 @@ contract TreasuryV1 is
     IBlockReward,
     ITreasury
 {
+    // Data for migration
+    //---------------------------------
+    StorageTreasuryV1 public v1storage;
+    //---------------------------------
+
+    constructor(address _proxy) public GovernedContract(_proxy) {
+        v1storage = new StorageTreasuryV1();
+    }
+
     // IGovernedContract
     //---------------------------------
-    constructor(address _proxy) public GovernedContract(_proxy) {}
+    function _destroy(IGovernedContract _newImpl) internal {
+        v1storage.setOwner(_newImpl);
+    }
+
+    // IBlockReward
+    //---------------------------------
 
     // IBlockReward
     //---------------------------------

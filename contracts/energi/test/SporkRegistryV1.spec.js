@@ -20,94 +20,37 @@
 
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
-const MockProposal = artifacts.require('MockProposal');
 const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const ISporkRegistry = artifacts.require('ISporkRegistry');
 
+const common = require('./common');
+
 contract("SporkRegistryV1", async accounts => {
-    let orig;
-    let fake;
-    let proxy;
-    let proxy_abi;
-    let token_abi;
+    const s = {
+        artifacts,
+        accounts,
+        assert,
+        it,
+        web3,
+    };
 
     before(async () => {
-        orig = await SporkRegistryV1.deployed();
-        proxy = await MockProxy.at(await orig.proxy());
-        fake = await MockContract.new(proxy.address);
-        proxy_abi = await SporkRegistryV1.at(proxy.address);
-        token_abi = await ISporkRegistry.at(proxy.address);
-        await proxy.setImpl(orig.address);
+        s.orig = await SporkRegistryV1.deployed();
+        s.proxy = await MockProxy.at(await s.orig.proxy());
+        s.fake = await MockContract.new(s.proxy.address);
+        s.proxy_abi = await SporkRegistryV1.at(s.proxy.address);
+        s.token_abi = await ISporkRegistry.at(s.proxy.address);
+        await s.proxy.setImpl(s.orig.address);
+        Object.freeze(s);
     });
 
-    it('should refuse migrate() through proxy', async () => {
-        try {
-            await proxy_abi.migrate(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Good try/);
-        }
-    });
+    describe('common pre', () => common.govPreTests(s) );
 
-    it('should refuse destroy() through proxy', async () => {
-        try {
-            await proxy_abi.destroy(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Good try/);
-        }
-    });
-
-    it('should refuse migrate() directly', async () => {
-        try {
-            await orig.migrate(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not proxy/);
-        }
-    });
-
-    it('should refuse destroy() directly', async () => {
-        try {
-            await orig.destroy(fake.address, { from: accounts[0] });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not proxy/);
-        }
-    });
-
-
-    // Primary stuff
     //---
+    describe('Primary', () => {
+    });
 
-
-    // Safety & Cleanup
     //---
-    it('should refuse to accept funds', async () => {
-        try {
-            await token_abi.send(web3.utils.toWei('1', "ether"));
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Not supported/);
-        }
-    });
-
-    it('should destroy() after upgrade', async () => {
-        const { logs } = await proxy.proposeUpgrade(
-                fake.address, 0,
-                { from: accounts[0], value: '1' });
-
-        assert.equal(logs.length, 1);
-        const proposal = await MockProposal.at(logs[0].args['1']);
-
-        await proposal.setAccepted();
-        await proxy.upgrade(proposal.address);
-
-        try {
-            await orig.proxy();
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /did it run Out of Gas/);
-        }
-    });
+    describe('common post', () => common.govPostTests(s) );
 });
+
