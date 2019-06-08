@@ -35,11 +35,13 @@ contract StakerRewardV1 is
     GovernedContract,
     IBlockReward
 {
+    // IGovernedContract
+    //---------------------------------
     constructor(address _proxy) public GovernedContract(_proxy) {}
     function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
 
+    // IBlockReward
+    //---------------------------------
     function reward(uint) external payable {
     }
 
@@ -50,5 +52,11 @@ contract StakerRewardV1 is
         if (_blockNumber > 0) {
             amount = REWARD_STAKER_V1;
         }
+    }
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
     }
 }

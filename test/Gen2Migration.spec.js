@@ -16,21 +16,32 @@
 
 // Energi Governance system is the fundamental part of Energi Core.
 
-// NOTE: It's not allowed to change the compiler due to byte-to-byte
-//       match requirement.
-pragma solidity 0.5.9;
-//pragma experimental SMTChecker;
+'use strict';
 
-/**
- * Genesis hardcoded version of Gen 2 Migration
- *
- * NOTE: it MUST NOT change after blockchain launch!
- */
-contract Gen2Migration
-{
-    // Safety
-    //---------------------------------
-    function () external payable {
-        revert("Not supported");
-    }
-}
+const MockProxy = artifacts.require('MockProxy');
+const MockContract = artifacts.require('MockContract');
+const MockProposal = artifacts.require('MockProposal');
+const Gen2Migration = artifacts.require('Gen2Migration');
+
+contract("Gen2Migration", async accounts => {
+    let orig;
+
+    before(async () => {
+        orig = await Gen2Migration.deployed();
+    });
+
+    // Primary stuff
+    //---
+
+
+    // Safety & Cleanup
+    //---
+    it('should refuse to accept funds', async () => {
+        try {
+            await orig.send(web3.utils.toWei('1', "ether"));
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not supported/);
+        }
+    });
+});

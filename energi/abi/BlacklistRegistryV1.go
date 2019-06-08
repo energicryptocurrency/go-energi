@@ -28,10 +28,10 @@ var (
 )
 
 // BlacklistRegistryV1ABI is the input ABI used to generate the binding from.
-const BlacklistRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const BlacklistRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // BlacklistRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const BlacklistRegistryV1Bin = `608060405234801561001057600080fd5b506040516101f23803806101f28339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031990921691909117905561018d806100656000396000f3fe6080604052600436106100335760003560e01c8062f55d9d14610035578063ce5494bb14610035578063ec55688914610075575b005b34801561004157600080fd5b506100336004803603602081101561005857600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166100b3565b34801561008157600080fd5b5061008a61013c565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461013957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a72305820804e1db1bc970600bab2131a3d9ab02100e5f18b396ff9675b91aefc28e965b264736f6c63430005090032`
+const BlacklistRegistryV1Bin = `608060405234801561001057600080fd5b506040516103383803806103388339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b03199092169190911790556102d3806100656000396000f3fe6080604052600436106100335760003560e01c8062f55d9d1461009a578063ce5494bb146100dc578063ec5568891461011c575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100a657600080fd5b506100da600480360360208110156100bd57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661015a565b005b3480156100e857600080fd5b506100da600480360360208110156100ff57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101f9565b34801561012857600080fd5b50610131610282565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff1633146101e057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b8073ffffffffffffffffffffffffffffffffffffffff16ff5b60005473ffffffffffffffffffffffffffffffffffffffff16331461027f57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a72305820062a7e9b640f5df9f44bef158e3d158382093a455fdef502c4b608f37ff69a0364736f6c63430005090032`
 
 // DeployBlacklistRegistryV1 deploys a new Ethereum contract, binding an instance of BlacklistRegistryV1 to it.
 func DeployBlacklistRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *BlacklistRegistryV1, error) {
@@ -216,23 +216,23 @@ func (_BlacklistRegistryV1 *BlacklistRegistryV1CallerSession) Proxy() (common.Ad
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_BlacklistRegistryV1 *BlacklistRegistryV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _BlacklistRegistryV1.contract.Transact(opts, "destroy", arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Transactor) Destroy(opts *bind.TransactOpts, _newImpl common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.contract.Transact(opts, "destroy", _newImpl)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_BlacklistRegistryV1 *BlacklistRegistryV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _BlacklistRegistryV1.Contract.Destroy(&_BlacklistRegistryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1Session) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.Contract.Destroy(&_BlacklistRegistryV1.TransactOpts, _newImpl)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _BlacklistRegistryV1.Contract.Destroy(&_BlacklistRegistryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_BlacklistRegistryV1 *BlacklistRegistryV1TransactorSession) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _BlacklistRegistryV1.Contract.Destroy(&_BlacklistRegistryV1.TransactOpts, _newImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.

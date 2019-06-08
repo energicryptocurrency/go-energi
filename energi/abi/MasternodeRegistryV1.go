@@ -28,10 +28,10 @@ var (
 )
 
 // MasternodeRegistryV1ABI is the input ABI used to generate the binding from.
-const MasternodeRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const MasternodeRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"name\":\"active\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"invalidate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isValid\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // MasternodeRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const MasternodeRegistryV1Bin = `608060405234801561001057600080fd5b506040516102893803806102898339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b0319909216919091179055610224806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c146100d7578063ce5494bb1461005b578063ec556889146100f457610059565b8062f55d9d1461005b5780631c4b774b1461009b575b005b34801561006757600080fd5b506100596004803603602081101561007e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610132565b3480156100a757600080fd5b506100c5600480360360208110156100be57600080fd5b50356101bb565b60408051918252519081900360200190f35b610059600480360360208110156100ed57600080fd5b50356101b8565b34801561010057600080fd5b506101096101d3565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff1633146101b857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b600081156101ce5750677ed7cd92ff1200005b919050565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a723058205501475f4fbdeee5aedc3ef13b4c0b3e64edc6decc801ce821df159b4b5cf78464736f6c63430005090032`
+const MasternodeRegistryV1Bin = `608060405234801561001057600080fd5b5060405161059d38038061059d8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b0319909216919091179055610538806100656000396000f3fe6080604052600436106100c65760003560e01c80636e029ad111610074578063a9fb763c1161004e578063a9fb763c146102fd578063ce5494bb14610313578063ec55688914610353576100c6565b80636e029ad11461026a5780637cc27d45146102945780638b1b925f146102a9576100c6565b8063207c64fb116100a5578063207c64fb146101de57806337a3931f146101de5780633e3e4ac31461021e576100c6565b8062f55d9d1461012d57806306661abd1461016f5780631c4b774b146101a2575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b34801561013957600080fd5b5061016d6004803603602081101561015057600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610391565b005b34801561017b57600080fd5b50610184610430565b60408051938452602084019290925282820152519081900360600190f35b3480156101ae57600080fd5b506101cc600480360360208110156101c557600080fd5b503561043a565b60408051918252519081900360200190f35b3480156101ea57600080fd5b5061016d6004803603602081101561020157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610452565b34801561022a57600080fd5b5061016d6004803603604081101561024157600080fd5b50803573ffffffffffffffffffffffffffffffffffffffff16906020013563ffffffff16610455565b34801561027657600080fd5b5061016d6004803603602081101561028d57600080fd5b5035610452565b3480156102a057600080fd5b5061016d610459565b3480156102b557600080fd5b506102e9600480360360208110156102cc57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661045b565b604080519115158252519081900360200190f35b61016d6004803603602081101561028d57600080fd5b34801561031f57600080fd5b5061016d6004803603602081101561033657600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610461565b34801561035f57600080fd5b506103686104e7565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461041757604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000806000909192565b6000811561044d5750677ed7cd92ff1200005b919050565b50565b5050565b565b50600090565b60005473ffffffffffffffffffffffffffffffffffffffff16331461045257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a723058200aa35e2cde5a5771e137df951cc4406195cf975fb84bdc73dd7fd7bf3eb3339664736f6c63430005090032`
 
 // DeployMasternodeRegistryV1 deploys a new Ethereum contract, binding an instance of MasternodeRegistryV1 to it.
 func DeployMasternodeRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *MasternodeRegistryV1, error) {
@@ -188,6 +188,46 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorRaw) Transact(opts *b
 	return _MasternodeRegistryV1.Contract.contract.Transact(opts, method, params...)
 }
 
+// Count is a free data retrieval call binding the contract method 0x06661abd.
+//
+// Solidity: function count() constant returns(uint256 active, uint256 total, uint256 max_of_all_times)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) Count(opts *bind.CallOpts) (struct {
+	Active        *big.Int
+	Total         *big.Int
+	MaxOfAllTimes *big.Int
+}, error) {
+	ret := new(struct {
+		Active        *big.Int
+		Total         *big.Int
+		MaxOfAllTimes *big.Int
+	})
+	out := ret
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "count")
+	return *ret, err
+}
+
+// Count is a free data retrieval call binding the contract method 0x06661abd.
+//
+// Solidity: function count() constant returns(uint256 active, uint256 total, uint256 max_of_all_times)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Count() (struct {
+	Active        *big.Int
+	Total         *big.Int
+	MaxOfAllTimes *big.Int
+}, error) {
+	return _MasternodeRegistryV1.Contract.Count(&_MasternodeRegistryV1.CallOpts)
+}
+
+// Count is a free data retrieval call binding the contract method 0x06661abd.
+//
+// Solidity: function count() constant returns(uint256 active, uint256 total, uint256 max_of_all_times)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) Count() (struct {
+	Active        *big.Int
+	Total         *big.Int
+	MaxOfAllTimes *big.Int
+}, error) {
+	return _MasternodeRegistryV1.Contract.Count(&_MasternodeRegistryV1.CallOpts)
+}
+
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
 // Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 amount)
@@ -212,6 +252,32 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) GetReward(_blockNumber
 // Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 amount)
 func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) GetReward(_blockNumber *big.Int) (*big.Int, error) {
 	return _MasternodeRegistryV1.Contract.GetReward(&_MasternodeRegistryV1.CallOpts, _blockNumber)
+}
+
+// IsValid is a free data retrieval call binding the contract method 0x8b1b925f.
+//
+// Solidity: function isValid(address masternode) constant returns(bool)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) IsValid(opts *bind.CallOpts, masternode common.Address) (bool, error) {
+	var (
+		ret0 = new(bool)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "isValid", masternode)
+	return *ret0, err
+}
+
+// IsValid is a free data retrieval call binding the contract method 0x8b1b925f.
+//
+// Solidity: function isValid(address masternode) constant returns(bool)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) IsValid(masternode common.Address) (bool, error) {
+	return _MasternodeRegistryV1.Contract.IsValid(&_MasternodeRegistryV1.CallOpts, masternode)
+}
+
+// IsValid is a free data retrieval call binding the contract method 0x8b1b925f.
+//
+// Solidity: function isValid(address masternode) constant returns(bool)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) IsValid(masternode common.Address) (bool, error) {
+	return _MasternodeRegistryV1.Contract.IsValid(&_MasternodeRegistryV1.CallOpts, masternode)
 }
 
 // Proxy is a free data retrieval call binding the contract method 0xec556889.
@@ -240,25 +306,109 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) Proxy() (common.
 	return _MasternodeRegistryV1.Contract.Proxy(&_MasternodeRegistryV1.CallOpts)
 }
 
-// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+// Announce is a paid mutator transaction binding the contract method 0x3e3e4ac3.
 //
-// Solidity: function destroy(address ) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.contract.Transact(opts, "destroy", arg0)
+// Solidity: function announce(address masternode, uint32 ipv4address) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Announce(opts *bind.TransactOpts, masternode common.Address, ipv4address uint32) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "announce", masternode, ipv4address)
+}
+
+// Announce is a paid mutator transaction binding the contract method 0x3e3e4ac3.
+//
+// Solidity: function announce(address masternode, uint32 ipv4address) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Announce(masternode common.Address, ipv4address uint32) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Announce(&_MasternodeRegistryV1.TransactOpts, masternode, ipv4address)
+}
+
+// Announce is a paid mutator transaction binding the contract method 0x3e3e4ac3.
+//
+// Solidity: function announce(address masternode, uint32 ipv4address) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Announce(masternode common.Address, ipv4address uint32) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Announce(&_MasternodeRegistryV1.TransactOpts, masternode, ipv4address)
+}
+
+// Denounce is a paid mutator transaction binding the contract method 0x7cc27d45.
+//
+// Solidity: function denounce() returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Denounce(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "denounce")
+}
+
+// Denounce is a paid mutator transaction binding the contract method 0x7cc27d45.
+//
+// Solidity: function denounce() returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Denounce() (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Denounce(&_MasternodeRegistryV1.TransactOpts)
+}
+
+// Denounce is a paid mutator transaction binding the contract method 0x7cc27d45.
+//
+// Solidity: function denounce() returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Denounce() (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Denounce(&_MasternodeRegistryV1.TransactOpts)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Destroy(&_MasternodeRegistryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Destroy(opts *bind.TransactOpts, _newImpl common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "destroy", _newImpl)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Destroy(&_MasternodeRegistryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Destroy(&_MasternodeRegistryV1.TransactOpts, _newImpl)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address _newImpl) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Destroy(&_MasternodeRegistryV1.TransactOpts, _newImpl)
+}
+
+// Heartbeat is a paid mutator transaction binding the contract method 0x6e029ad1.
+//
+// Solidity: function heartbeat(uint256 sw_features) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Heartbeat(opts *bind.TransactOpts, sw_features *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "heartbeat", sw_features)
+}
+
+// Heartbeat is a paid mutator transaction binding the contract method 0x6e029ad1.
+//
+// Solidity: function heartbeat(uint256 sw_features) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Heartbeat(sw_features *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Heartbeat(&_MasternodeRegistryV1.TransactOpts, sw_features)
+}
+
+// Heartbeat is a paid mutator transaction binding the contract method 0x6e029ad1.
+//
+// Solidity: function heartbeat(uint256 sw_features) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Heartbeat(sw_features *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Heartbeat(&_MasternodeRegistryV1.TransactOpts, sw_features)
+}
+
+// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
+//
+// Solidity: function invalidate(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Invalidate(opts *bind.TransactOpts, masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "invalidate", masternode)
+}
+
+// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
+//
+// Solidity: function invalidate(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Invalidate(masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Invalidate(&_MasternodeRegistryV1.TransactOpts, masternode)
+}
+
+// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
+//
+// Solidity: function invalidate(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Invalidate(masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Invalidate(&_MasternodeRegistryV1.TransactOpts, masternode)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
@@ -301,4 +451,25 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Reward(arg0 *big.Int) 
 // Solidity: function reward(uint256 ) returns()
 func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Reward(arg0 *big.Int) (*types.Transaction, error) {
 	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, arg0)
+}
+
+// Validate is a paid mutator transaction binding the contract method 0x207c64fb.
+//
+// Solidity: function validate(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Validate(opts *bind.TransactOpts, masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "validate", masternode)
+}
+
+// Validate is a paid mutator transaction binding the contract method 0x207c64fb.
+//
+// Solidity: function validate(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Validate(masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Validate(&_MasternodeRegistryV1.TransactOpts, masternode)
+}
+
+// Validate is a paid mutator transaction binding the contract method 0x207c64fb.
+//
+// Solidity: function validate(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Validate(masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Validate(&_MasternodeRegistryV1.TransactOpts, masternode)
 }

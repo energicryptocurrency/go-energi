@@ -37,11 +37,13 @@ contract TreasuryV1 is
     IBlockReward,
     ITreasury
 {
+    // IGovernedContract
+    //---------------------------------
     constructor(address _proxy) public GovernedContract(_proxy) {}
     function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
 
+    // IBlockReward
+    //---------------------------------
     function reward(uint) external payable {
     }
 
@@ -52,6 +54,12 @@ contract TreasuryV1 is
         if (_blockNumber > 0) {
             amount = REWARD_TREASURY_V1;
         }
+    }
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
     }
 }
 

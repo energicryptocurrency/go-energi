@@ -21,5 +21,21 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+/**
+ * Genesis version of MasternodeRegistry interface.
+ *
+ * Base Consensus interface for masternodes.
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
 interface IMasternodeRegistry {
+    function announce(address masternode, uint32 ipv4address) external;
+    function denounce() external;
+    function heartbeat(uint sw_features) external;
+    function invalidate(address masternode) external;
+    function validate(address masternode) external;
+    function isValid(address masternode) external view
+        returns(bool);
+    function count() external view
+        returns(uint active, uint total, uint max_of_all_times);
 }

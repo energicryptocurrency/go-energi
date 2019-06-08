@@ -43,6 +43,10 @@ contract GovernedContract is IGovernedContract {
         require(msg.sender == proxy, "Not proxy");
         _;
     }
+
+    function destroy(IGovernedContract _newImpl) external requireProxy {
+        selfdestruct(address(_newImpl));
+    }
 }
 
 

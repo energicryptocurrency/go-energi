@@ -39,13 +39,18 @@ contract MasternodeRegistryV1 is
 {
     // IMasternodeRegistry
     //---------------------------------
+    function announce(address masternode, uint32 ipv4address) external {}
+    function denounce() external {}
+    function heartbeat(uint sw_features) external {}
+    function invalidate(address masternode) external {}
+    function validate(address masternode) external {}
+    function isValid(address masternode) external view returns(bool) {}
+    function count() external view returns(uint active, uint total, uint max_of_all_times) {}
 
     // IGovernedContract
     //---------------------------------
     constructor(address _proxy) public GovernedContract(_proxy) {}
     function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
 
     // IBlockReward
     //---------------------------------
@@ -59,5 +64,11 @@ contract MasternodeRegistryV1 is
         if (_blockNumber > 0) {
             amount = REWARD_MASTERNODE_V1;
         }
+    }
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
     }
 }

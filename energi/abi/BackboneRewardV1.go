@@ -28,10 +28,10 @@ var (
 )
 
 // BackboneRewardV1ABI is the input ABI used to generate the binding from.
-const BackboneRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const BackboneRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // BackboneRewardV1Bin is the compiled bytecode used for deploying new contracts.
-const BackboneRewardV1Bin = `608060405234801561001057600080fd5b506040516102893803806102898339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b0319909216919091179055610224806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c146100d7578063ce5494bb1461005b578063ec556889146100f457610059565b8062f55d9d1461005b5780631c4b774b1461009b575b005b34801561006757600080fd5b506100596004803603602081101561007e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610132565b3480156100a757600080fd5b506100c5600480360360208110156100be57600080fd5b50356101bb565b60408051918252519081900360200190f35b610059600480360360208110156100ed57600080fd5b50356101b8565b34801561010057600080fd5b506101096101d3565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff1633146101b857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b600081156101ce5750671fa42feb87e400005b919050565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a723058203c8ed4c6d8ceaef146fd76a307fa39e54d6125b3a3267a17a9e06265603279f464736f6c63430005090032`
+const BackboneRewardV1Bin = `608060405234801561001057600080fd5b506040516103cf3803806103cf8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031990921691909117905561036a806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c1461013e578063ce5494bb1461015b578063ec5568891461019b57610059565b8062f55d9d146100c05780631c4b774b14610102575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100cc57600080fd5b50610100600480360360208110156100e357600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101d9565b005b34801561010e57600080fd5b5061012c6004803603602081101561012557600080fd5b5035610278565b60408051918252519081900360200190f35b6101006004803603602081101561015457600080fd5b5035610290565b34801561016757600080fd5b506101006004803603602081101561017e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610293565b3480156101a757600080fd5b506101b0610319565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461025f57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000811561028b5750671fa42feb87e400005b919050565b50565b60005473ffffffffffffffffffffffffffffffffffffffff16331461029057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a723058206356a33a94fd337d19a1cef450acffe38d81d5f55de711cae8b56720472b95ad64736f6c63430005090032`
 
 // DeployBackboneRewardV1 deploys a new Ethereum contract, binding an instance of BackboneRewardV1 to it.
 func DeployBackboneRewardV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *BackboneRewardV1, error) {
@@ -242,23 +242,23 @@ func (_BackboneRewardV1 *BackboneRewardV1CallerSession) Proxy() (common.Address,
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_BackboneRewardV1 *BackboneRewardV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _BackboneRewardV1.contract.Transact(opts, "destroy", arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_BackboneRewardV1 *BackboneRewardV1Transactor) Destroy(opts *bind.TransactOpts, _newImpl common.Address) (*types.Transaction, error) {
+	return _BackboneRewardV1.contract.Transact(opts, "destroy", _newImpl)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_BackboneRewardV1 *BackboneRewardV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _BackboneRewardV1.Contract.Destroy(&_BackboneRewardV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_BackboneRewardV1 *BackboneRewardV1Session) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _BackboneRewardV1.Contract.Destroy(&_BackboneRewardV1.TransactOpts, _newImpl)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_BackboneRewardV1 *BackboneRewardV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _BackboneRewardV1.Contract.Destroy(&_BackboneRewardV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_BackboneRewardV1 *BackboneRewardV1TransactorSession) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _BackboneRewardV1.Contract.Destroy(&_BackboneRewardV1.TransactOpts, _newImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.

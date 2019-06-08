@@ -37,11 +37,13 @@ contract SporkRegistryV1 is
     ISporkRegistry,
     GovernedContract
 {
+    // IGovernedContract
+    //---------------------------------
     constructor(address _proxy) public GovernedContract(_proxy) {}
     function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
 
+    // ISporkRegistry
+    //---------------------------------
     function createUpgradeProposal(IGovernedContract, uint _period)
         external payable
         returns (IProposal)
@@ -63,5 +65,11 @@ contract SporkRegistryV1 is
         proposal.transfer(msg.value);
 
         return IProposal(proposal);
+    }
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
     }
 }

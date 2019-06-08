@@ -47,10 +47,6 @@ contract MasternodeTokenV1 is
         // pass
     }
 
-    function destroy(IGovernedContract _newImpl) external requireProxy {
-        selfdestruct(address(_newImpl));
-    }
-
     // MasternodeTokenV1
     //---------------------------------
     uint256 public totalSupply;
@@ -172,8 +168,9 @@ contract MasternodeTokenV1 is
         }
     }
 
+    // Safety
+    //---
     function () external payable {
         revert("Not supported");
     }
-
 }

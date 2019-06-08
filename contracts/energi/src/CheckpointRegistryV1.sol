@@ -33,8 +33,14 @@ contract CheckpointRegistryV1 is
     GovernedContract,
     ICheckpointRegistry
 {
+    // IGovernedContract
+    //---------------------------------
     constructor(address _proxy) public GovernedContract(_proxy) {}
     function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
+    }
 }

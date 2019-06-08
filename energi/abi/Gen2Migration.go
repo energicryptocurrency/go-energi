@@ -28,10 +28,10 @@ var (
 )
 
 // Gen2MigrationABI is the input ABI used to generate the binding from.
-const Gen2MigrationABI = "[]"
+const Gen2MigrationABI = "[{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // Gen2MigrationBin is the compiled bytecode used for deploying new contracts.
-const Gen2MigrationBin = `6080604052348015600f57600080fd5b50603e80601d6000396000f3fe6080604052600080fdfea265627a7a72305820a1cecd2b6ea3c88ab10298231e3600c2a3ad132169a38d743e074a7515ecc77864736f6c63430005090032`
+const Gen2MigrationBin = `6080604052348015600f57600080fd5b50609180601d6000396000f3fe608060408190527f08c379a00000000000000000000000000000000000000000000000000000000081526020608452600d60a4527f4e6f7420737570706f727465640000000000000000000000000000000000000060c452606490fdfea265627a7a72305820353989573febeec44616d1fef614eadf4d5a2b2a4726eb9a1a0cf506f64ce09e64736f6c63430005090032`
 
 // DeployGen2Migration deploys a new Ethereum contract, binding an instance of Gen2Migration to it.
 func DeployGen2Migration(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *Gen2Migration, error) {
