@@ -21,6 +21,8 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+// solium-disable no-empty-blocks
+
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";

@@ -43,7 +43,7 @@ contract("GovernedProxy", async accounts => {
     });
 
 
-    it('should proxy', async () => {
+    it('should proxy calls', async () => {
         const res = await proxy_abi.getAddress({ from: accounts[0] });
         assert.equal(first.address.valueOf(), res.valueOf());
     });
