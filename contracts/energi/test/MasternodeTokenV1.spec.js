@@ -169,6 +169,12 @@ contract("MasternodeTokenV1", async accounts => {
         const res = await token_abi.balanceInfo(accounts[0]);
         assert.equal(res['0'].valueOf(), COLLATERAL_1);
         check_age(res['1']);
+
+        const res2 = await token_abi.balanceOf(accounts[0]);
+        assert.equal(res2.valueOf(), COLLATERAL_1);
+
+        const res3 = await token_abi.totalSupply();
+        assert.equal(res2.valueOf(), COLLATERAL_1);
     });
 
     it('should correctly reflect age', async () => {
@@ -202,6 +208,12 @@ contract("MasternodeTokenV1", async accounts => {
         const res = await token_abi.balanceInfo(accounts[0]);
         assert.equal(res['0'].valueOf(), COLLATERAL_3);
         check_age(res['1']);
+
+        const res2 = await token_abi.balanceOf(accounts[0]);
+        assert.equal(res2.valueOf(), COLLATERAL_3);
+
+        const total = await token_abi.totalSupply();
+        assert.equal(total.valueOf(), COLLATERAL_3);
     });
 
     it('should refuse depositCollateral() not a multiple of', async () => {
@@ -225,6 +237,12 @@ contract("MasternodeTokenV1", async accounts => {
         const res = await token_abi.balanceInfo(accounts[0]);
         assert.equal(res['0'].valueOf(), COLLATERAL_10);
         check_age(res['1']);
+
+        const res2 = await token_abi.balanceOf(accounts[0]);
+        assert.equal(res2.valueOf(), COLLATERAL_10);
+
+        const total = await token_abi.totalSupply();
+        assert.equal(total.valueOf(), COLLATERAL_10);
     });
 
     it('should refuse to depositCollateral() over max', async () => {
@@ -250,9 +268,11 @@ contract("MasternodeTokenV1", async accounts => {
         assert.equal(res['0'].valueOf(), COLLATERAL_3);
         check_age(res['1']);
 
+        const res2 = await token_abi.balanceOf(accounts[1]);
+        assert.equal(res2.valueOf(), COLLATERAL_3);
+
         const total = await token_abi.totalSupply();
         assert.equal(total.valueOf(), COLLATERAL_13);
-
     });
 
     it('should allow withdrawCollateral()', async () => {
@@ -328,6 +348,7 @@ contract("MasternodeTokenV1", async accounts => {
     });
 
     it('should destroy() after upgrade', async () => {
+        const orig_balance = await web3.eth.getBalance(orig.address)
         const { logs } = await proxy.proposeUpgrade(
                 fake.address, 0,
                 { from: accounts[0], value: '1' });
@@ -337,6 +358,9 @@ contract("MasternodeTokenV1", async accounts => {
         
         await proposal.setAccepted();
         await proxy.upgrade(proposal.address);
+
+        const fake_balance = await web3.eth.getBalance(fake.address)
+        assert.equal(orig_balance.valueOf(), fake_balance.valueOf());
 
         try {
             await orig.proxy();

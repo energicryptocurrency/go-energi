@@ -23,6 +23,7 @@ const MockContract = artifacts.require('MockContract');
 const MockProposal = artifacts.require('MockProposal');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 const IMasternodeRegistry = artifacts.require('IMasternodeRegistry');
+const StorageMasternodeRegistryV1 = artifacts.require('StorageMasternodeRegistryV1');
 
 contract("MasternodeRegistryV1", async accounts => {
     let orig;
@@ -30,6 +31,7 @@ contract("MasternodeRegistryV1", async accounts => {
     let proxy;
     let proxy_abi;
     let token_abi;
+    let storage;
 
     before(async () => {
         orig = await MasternodeRegistryV1.deployed();
@@ -38,6 +40,7 @@ contract("MasternodeRegistryV1", async accounts => {
         proxy_abi = await MasternodeRegistryV1.at(proxy.address);
         token_abi = await IMasternodeRegistry.at(proxy.address);
         await proxy.setImpl(orig.address);
+        storage = await StorageMasternodeRegistryV1.at(await proxy_abi.v1storage());
     });
 
     it('should refuse migrate() through proxy', async () => {
@@ -91,17 +94,48 @@ contract("MasternodeRegistryV1", async accounts => {
             assert.match(e.message, /Not supported/);
         }
     });
+    
+    it('should refuse to accept funds to storage', async () => {
+        try {
+            await storage.send(web3.utils.toWei('1', "ether"));
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /revert/);
+        }
+    });
+
+    it('should refuse kill() storage', async () => {
+        try {
+            await storage.kill();
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not owner/);
+        }
+    });
+
+    it('should refuse setOwner() on storage', async () => {
+        try {
+            await storage.setOwner(proxy.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not owner/);
+        }
+    });
 
     it('should destroy() after upgrade', async () => {
+        const orig_balance = await web3.eth.getBalance(orig.address)
         const { logs } = await proxy.proposeUpgrade(
                 fake.address, 0,
                 { from: accounts[0], value: '1' });
 
         assert.equal(logs.length, 1);
         const proposal = await MockProposal.at(logs[0].args['1']);
-
+        
         await proposal.setAccepted();
         await proxy.upgrade(proposal.address);
+
+        const fake_balance = await web3.eth.getBalance(fake.address)
+        assert.equal(orig_balance.valueOf(), fake_balance.valueOf());
 
         try {
             await orig.proxy();
@@ -109,5 +143,9 @@ contract("MasternodeRegistryV1", async accounts => {
         } catch (e) {
             assert.match(e.message, /did it run Out of Gas/);
         }
+    });
+
+    it('should transfer storage & allow to kill() it', async () => {
+        await fake.killStorage(storage.address);
     });
 });
