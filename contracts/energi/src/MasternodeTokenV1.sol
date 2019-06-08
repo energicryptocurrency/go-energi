@@ -38,8 +38,6 @@ contract StorageMasternodeTokenV1 is
     }
     mapping(address => Balance) public balances;
 
-    constructor(IGovernedContract _owner) public StorageBase(_owner) {}
-
     // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
     function balanceOnly(address _account)
         external view
@@ -71,12 +69,11 @@ contract MasternodeTokenV1 is
 {
     // Data for migration
     //---------------------------------
-    uint256 public totalSupply;
     StorageMasternodeTokenV1 public v1storage;
     //---------------------------------
 
     constructor(address _proxy) public GovernedContract(_proxy) {
-        v1storage = new StorageMasternodeTokenV1(this);
+        v1storage = new StorageMasternodeTokenV1();
 
         // ERC20
         emit Transfer(address(0), address(0), 0);
@@ -91,7 +88,9 @@ contract MasternodeTokenV1 is
     // MasternodeTokenV1
     //---------------------------------
 
-    // See totalSupply as storage above
+    function totalSupply() external view returns (uint256) {
+        return address(this).balance;
+    }
 
     function name() external view returns (string memory) {
         return "Masternode Collateral";
@@ -156,7 +155,6 @@ contract MasternodeTokenV1 is
 
         // Store
         v1storage.setBalance(tokenOwner, balance, block.timestamp);
-        totalSupply -= _amount;
 
         // Events
         emit Transfer(tokenOwner, address(0), _amount);
@@ -175,7 +173,6 @@ contract MasternodeTokenV1 is
 
         // Store
         v1storage.setBalance(tokenOwner, balance, block.timestamp);
-        totalSupply += msg.value;
 
         // Events
         emit Transfer(address(0), tokenOwner, msg.value);

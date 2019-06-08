@@ -28,19 +28,19 @@ import { IGovernedContract } from "./IGovernedContract.sol";
  * NOTE: it MUST NOT change after blockchain launch!
  */
 contract StorageBase {
-    IGovernedContract internal owner;
+    address payable internal owner;
 
     modifier requireOwner {
         require(msg.sender == address(owner), "Not owner!");
         _;
     }
 
-    constructor(IGovernedContract _owner) public {
-        owner = _owner;
+    constructor() public {
+        owner = msg.sender;
     }
 
     function setOwner(IGovernedContract _newOwner) external requireOwner {
-        owner = _newOwner;
+        owner = address(_newOwner);
     }
 
     function kill() external requireOwner {

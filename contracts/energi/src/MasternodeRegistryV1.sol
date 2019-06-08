@@ -25,6 +25,18 @@ import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
 import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
+import { StorageBase }  from "./StorageBase.sol";
+
+
+/**
+ * Permanent storage of Masternode Registry V1 data.
+ */
+contract StorageMasternodeRegistryV1 is
+    StorageBase
+{
+    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
+}
+
 
 /**
  * MN-2: Genesis hardcoded version of MasternodeRegistry
@@ -37,6 +49,15 @@ contract MasternodeRegistryV1 is
     IBlockReward,
     IMasternodeRegistry
 {
+    // Data for migration
+    //---------------------------------
+    StorageMasternodeRegistryV1 public v1storage;
+    //---------------------------------
+
+    constructor(address _proxy) public GovernedContract(_proxy) {
+        v1storage = new StorageMasternodeRegistryV1();
+    }
+
     // IMasternodeRegistry
     //---------------------------------
     function announce(address masternode, uint32 ipv4address) external {}
@@ -49,8 +70,9 @@ contract MasternodeRegistryV1 is
 
     // IGovernedContract
     //---------------------------------
-    constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
+    function _destroy(IGovernedContract _newImpl) internal {
+        v1storage.setOwner(_newImpl);
+    }
 
     // IBlockReward
     //---------------------------------
