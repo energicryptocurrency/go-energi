@@ -21,7 +21,6 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract } from "./IGovernedContract.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
@@ -32,14 +31,15 @@ import { ISporkRegistry } from "./ISporkRegistry.sol";
  * If another upgrade logic is required in the future - it can be done as proxy stage II.
  */
 contract GovernedProxy is
-    GlobalConstants,
     IGovernedContract
 {
     IGovernedContract public current_impl;
+    ISporkRegistry public spork_registry;
     mapping(address => IGovernedContract) public upgrade_proposals;
 
-    constructor(IGovernedContract impl) public {
-        current_impl = impl;
+    constructor(IGovernedContract _impl, ISporkRegistry _sporkRegistry) public {
+        current_impl = _impl;
+        spork_registry = _sporkRegistry;
     }
 
     /**
@@ -50,7 +50,8 @@ contract GovernedProxy is
         returns(IProposal _proposal)
     {
         require(_newImpl != current_impl, "Already active!");
-        return ISporkRegistry(SPORK_REGISTRY).createUpgradeProposal.value(msg.value)(_newImpl, _period);
+        require(_newImpl.proxy() == address(this), "Invalid proxy");
+        return spork_registry.createUpgradeProposal.value(msg.value)(_newImpl, _period);
     }
 
     /**
@@ -67,6 +68,13 @@ contract GovernedProxy is
         new_impl.migrate(old_impl);
         current_impl = new_impl;
         old_impl.destroy(new_impl);
+    }
+
+    /**
+     * Related to above
+     */
+    function proxy() external returns (address) {
+        return address(this);
     }
 
     /**

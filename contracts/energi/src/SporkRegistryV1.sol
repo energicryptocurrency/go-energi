@@ -22,7 +22,7 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract } from "./IGovernedContract.sol";
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { GenericProposalV1 } from "./GenericProposalV1.sol";
@@ -35,10 +35,11 @@ import { GenericProposalV1 } from "./GenericProposalV1.sol";
 contract SporkRegistryV1 is
     GlobalConstants,
     ISporkRegistry,
-    IGovernedContract
+    GovernedContract
 {
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+    constructor(address _proxy) public GovernedContract(_proxy) {}
+    function migrate(IGovernedContract) external requireProxy {}
+    function destroy(IGovernedContract) external requireProxy {}
     function () external payable {}
 
     function createUpgradeProposal(IGovernedContract, uint _period)

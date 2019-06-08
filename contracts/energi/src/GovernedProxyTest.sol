@@ -21,10 +21,13 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IGovernedContract } from "./IGovernedContract.sol";
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { ISporkRegistry } from "./ISporkRegistry.sol";
+import { GovernedProxy } from "./GovernedProxy.sol";
 
-contract GovernedProxyTest is IGovernedContract
+contract MockContract is GovernedContract
 {
+    constructor(address _proxy) public GovernedContract(_proxy) {}
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract new_impl) external {
         selfdestruct(address(new_impl));
@@ -34,3 +37,20 @@ contract GovernedProxyTest is IGovernedContract
     }
     function () external payable {}
 }
+
+contract MockProxy is GovernedProxy
+{
+    constructor() public GovernedProxy(
+        IGovernedContract(address(0)),
+        ISporkRegistry(address(0))
+    ) {}
+
+    function setImpl(IGovernedContract _impl) external {
+        current_impl = _impl;
+    }
+
+    function setSporkRegistry(ISporkRegistry _registry) external {
+        spork_registry = _registry;
+    }
+}
+

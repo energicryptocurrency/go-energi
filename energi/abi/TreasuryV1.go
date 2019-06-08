@@ -28,18 +28,18 @@ var (
 )
 
 // TreasuryV1ABI is the input ABI used to generate the binding from.
-const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // TreasuryV1Bin is the compiled bytecode used for deploying new contracts.
-const TreasuryV1Bin = `608060405234801561001057600080fd5b50610117806100206000396000f3fe60806040526004361060395760003560e01c8062f55d9d14603b5780631c4b774b146077578063a9fb763c1460af578063ce5494bb14603b575b005b348015604657600080fd5b50603960048036036020811015605b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1660c6565b348015608257600080fd5b50609d60048036036020811015609757600080fd5b503560c9565b60408051918252519081900360200190f35b60396004803603602081101560c357600080fd5b50355b50565b6000811560dd57506926f6a8f4e638030000005b91905056fea265627a7a72305820ea964661f905ef2a1db322458db483eb04075b6c9950482bbc4de21f91d5eb2264736f6c63430005090032`
+const TreasuryV1Bin = `608060405234801561001057600080fd5b5060405161028b38038061028b8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b0319909216919091179055610226806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c146100d7578063ce5494bb1461005b578063ec556889146100f457610059565b8062f55d9d1461005b5780631c4b774b1461009b575b005b34801561006757600080fd5b506100596004803603602081101561007e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610132565b3480156100a757600080fd5b506100c5600480360360208110156100be57600080fd5b50356101bb565b60408051918252519081900360200190f35b610059600480360360208110156100ed57600080fd5b50356101b8565b34801561010057600080fd5b506101096101d5565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff1633146101b857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b600081156101d057506926f6a8f4e638030000005b919050565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a7230582081e3c68a06b2da26fb2946696ef9cd8c43d2a05a6d09ea27e8789a0e6a9150c064736f6c63430005090032`
 
 // DeployTreasuryV1 deploys a new Ethereum contract, binding an instance of TreasuryV1 to it.
-func DeployTreasuryV1(auth *bind.TransactOpts, backend bind.ContractBackend) (common.Address, *types.Transaction, *TreasuryV1, error) {
+func DeployTreasuryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *TreasuryV1, error) {
 	parsed, err := abi.JSON(strings.NewReader(TreasuryV1ABI))
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(TreasuryV1Bin), backend)
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(TreasuryV1Bin), backend, _proxy)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -212,6 +212,32 @@ func (_TreasuryV1 *TreasuryV1Session) GetReward(_blockNumber *big.Int) (*big.Int
 // Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
 func (_TreasuryV1 *TreasuryV1CallerSession) GetReward(_blockNumber *big.Int) (*big.Int, error) {
 	return _TreasuryV1.Contract.GetReward(&_TreasuryV1.CallOpts, _blockNumber)
+}
+
+// Proxy is a free data retrieval call binding the contract method 0xec556889.
+//
+// Solidity: function proxy() constant returns(address)
+func (_TreasuryV1 *TreasuryV1Caller) Proxy(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _TreasuryV1.contract.Call(opts, out, "proxy")
+	return *ret0, err
+}
+
+// Proxy is a free data retrieval call binding the contract method 0xec556889.
+//
+// Solidity: function proxy() constant returns(address)
+func (_TreasuryV1 *TreasuryV1Session) Proxy() (common.Address, error) {
+	return _TreasuryV1.Contract.Proxy(&_TreasuryV1.CallOpts)
+}
+
+// Proxy is a free data retrieval call binding the contract method 0xec556889.
+//
+// Solidity: function proxy() constant returns(address)
+func (_TreasuryV1 *TreasuryV1CallerSession) Proxy() (common.Address, error) {
+	return _TreasuryV1.Contract.Proxy(&_TreasuryV1.CallOpts)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.

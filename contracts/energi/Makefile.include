@@ -94,7 +94,7 @@ test-sol:
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890afffff,1000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890ffffff,1000000000' \
 	    2>&1 >build/contracts/ganache.log & \
-	  sleep 5; \
+	  sleep 1; \
 	  truffle test; \
 	  res=$$?; \
 	  kill $$!; \

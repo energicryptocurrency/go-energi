@@ -55,5 +55,8 @@ contract GlobalConstants {
     uint constant internal REWARD_BACKBONE_V1 = 2.28 ether;
     uint constant internal REWARD_MASTERNODE_V1 = 9.14 ether;
     uint constant internal REWARD_TREASURY_V1 = 184000 ether;
+
+    uint constant internal MN_COLLATERAL_MIN = 10000 ether;
+    uint constant internal MN_COLLATERAL_MAX = 100000 ether;
 }
 

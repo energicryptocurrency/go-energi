@@ -22,7 +22,7 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 /**
- * Genesis version of CheckpointRegistry interface.
+ * Genesis version of GovernedContract interface.
  *
  * Base Consensus interface for upgradable contracts.
  * Unlike common approach, the implementation is NOT expected to be
@@ -31,6 +31,9 @@ pragma solidity 0.5.9;
  * NOTE: it MUST NOT change after blockchain launch!
  */
 interface IGovernedContract {
+    // Return actual proxy address for secure validation
+    function proxy() external returns(address);
+
     // It must check that the caller is the proxy
     // and copy all required data from the old address.
     function migrate(IGovernedContract _oldImpl) external;

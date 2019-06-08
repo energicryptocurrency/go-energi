@@ -22,7 +22,7 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract } from "./IGovernedContract.sol";
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
 
 /**
@@ -32,11 +32,12 @@ import { IBlockReward } from "./IBlockReward.sol";
  */
 contract BackboneRewardV1 is
     GlobalConstants,
-    IGovernedContract,
+    GovernedContract,
     IBlockReward
 {
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+    constructor(address _proxy) public GovernedContract(_proxy) {}
+    function migrate(IGovernedContract) external requireProxy {}
+    function destroy(IGovernedContract) external requireProxy {}
     function () external payable {}
 
     function reward(uint _amount) external payable {

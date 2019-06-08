@@ -21,7 +21,7 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IGovernedContract } from "./IGovernedContract.sol";
+import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlacklistRegistry } from "./IBlacklistRegistry.sol";
 
 /**
@@ -30,10 +30,11 @@ import { IBlacklistRegistry } from "./IBlacklistRegistry.sol";
  * NOTE: it MUST NOT change after blockchain launch!
  */
 contract BlacklistRegistryV1 is
-    IGovernedContract,
+    GovernedContract,
     IBlacklistRegistry
 {
-    function migrate(IGovernedContract) external {}
-    function destroy(IGovernedContract) external {}
+    constructor(address _proxy) public GovernedContract(_proxy) {}
+    function migrate(IGovernedContract) external requireProxy {}
+    function destroy(IGovernedContract) external requireProxy {}
     function () external payable {}
 }
