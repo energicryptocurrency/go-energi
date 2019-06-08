@@ -33,6 +33,20 @@ import { ISporkRegistry } from "./ISporkRegistry.sol";
 contract GovernedProxy is
     IGovernedContract
 {
+    event UpgradeProposal(
+        address indexed newImpl,
+        address proposal,
+        address fee_payer
+    );
+
+    modifier senderOrigin {
+        // Internal calls are expected to use current_impl directly.
+        // That's due to use of call() instead of delegatecall() on purpose.
+        // solium-disable-next-line security/no-tx-origin
+        require(tx.origin == msg.sender, "Only direct calls are allowed!");
+        _;
+    }
+
     IGovernedContract public current_impl;
     ISporkRegistry public spork_registry;
     mapping(address => IGovernedContract) public upgrade_proposals;
@@ -46,12 +60,17 @@ contract GovernedProxy is
      * Pre-create a new contract first.
      * Then propose upgrade based on that.
      */
-    function proposeUpgrade(IGovernedContract _newImpl, uint _period) external payable
-        returns(IProposal _proposal)
+    function proposeUpgrade(IGovernedContract _newImpl, uint _period)
+        external payable
+        senderOrigin
     {
         require(_newImpl != current_impl, "Already active!");
         require(_newImpl.proxy() == address(this), "Wrong proxy!");
-        return spork_registry.createUpgradeProposal.value(msg.value)(_newImpl, _period);
+        IProposal proposal = spork_registry.createUpgradeProposal.value(msg.value)(_newImpl, _period);
+
+        upgrade_proposals[address(proposal)] = _newImpl;
+
+        emit UpgradeProposal(address(_newImpl), address(proposal), msg.sender);
     }
 
     /**
@@ -97,12 +116,8 @@ contract GovernedProxy is
     /**
      * Proxy all other calls to implementation.
      */
-    function () external payable {
-        // Internal calls are expected to use current_impl directly.
-        // That's due to use of call() instead of delegatecall() on purpose.
-        // solium-disable-next-line security/no-tx-origin
-        require(tx.origin == msg.sender, "Only direct calls are allowed!");
-
+    function () external payable senderOrigin {
+        // SECURITY: senderOrigin() modifier is mandatory
         IGovernedContract impl = current_impl;
 
         // solium-disable-next-line security/no-inline-assembly

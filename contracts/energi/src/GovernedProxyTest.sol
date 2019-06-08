@@ -22,6 +22,7 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { GovernedProxy } from "./GovernedProxy.sol";
 
@@ -52,5 +53,28 @@ contract MockProxy is GovernedProxy
     function setSporkRegistry(ISporkRegistry _registry) external {
         spork_registry = _registry;
     }
+}
+
+contract MockSporkRegistry is ISporkRegistry {
+    function createUpgradeProposal(IGovernedContract, uint)
+        external payable
+        returns (IProposal)
+    {
+        return new MockProposal();
+    }
+}
+
+contract MockProposal is IProposal {
+    bool accepted;
+
+    function isAccepted() external view returns(bool) {
+        return accepted;
+    }
+
+    function setAccepted() external {
+        accepted = true;
+    }
+
+    function () external payable {}
 }
 

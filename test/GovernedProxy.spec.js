@@ -1,55 +1,29 @@
-
+'use strict';
 
 const GovernedProxy = artifacts.require('GovernedProxy');
-const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const MockContract = artifacts.require('MockContract');
+const MockSporkRegistry = artifacts.require('MockSporkRegistry');
+const MockProposal = artifacts.require('MockProposal');
 
 contract("GovernedProxy", async accounts => {
     let first;
     let second;
+    let third;
+    let fourth;
     let proxy;
     let proxy_abi;
     let registry;
     const weeks = 60*60*24*7;
 
     before(async () => {
-        registry = await SporkRegistryV1.deployed();
+        registry = await MockSporkRegistry.deployed();
         first = await MockContract.new(registry.address);
         proxy = await GovernedProxy.new(first.address, registry.address);
         second = await MockContract.new(proxy.address);
+        third = await MockContract.new(proxy.address);
+        fourth = await MockContract.new(proxy.address);
         proxy_abi = await MockContract.at(proxy.address);
     });
-
-    it('should proxy', async () => {
-        const res = await proxy_abi.getAddress({ from: accounts[0] });
-        assert.equal(first.address.valueOf(), res.valueOf());
-    });
-
-    it('should accept proposal', function(){ this.skip(); });
-    it('should accept upgrade', function(){ this.skip(); });
-
-    it('should refuse proposal - same impl', async () => {
-        try {
-            await proxy.proposeUpgrade(
-                    first.address, 2 * weeks,
-                    { from: accounts[0], value: web3.utils.toWei('10000', 'ether') });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Already active!/);
-        }
-    });
-
-    it('should refuse proposal - wrong proxy', async () => {
-        try {
-            await proxy.proposeUpgrade(
-                    registry.address, 2 * weeks,
-                    { from: accounts[0], value: web3.utils.toWei('10000', 'ether') });
-            assert.fail("It must fail");
-        } catch (e) {
-            assert.match(e.message, /Wrong proxy!/);
-        }
-    });
-
     it('should refuse migrate()', async () => {
         try {
             await proxy.migrate(second.address, { from: accounts[0] });
@@ -68,9 +42,114 @@ contract("GovernedProxy", async accounts => {
         }
     });
 
-    it('should refuse proposal - wrong fee', function(){ this.skip(); });
-    it('should refuse upgrade - Already active!', function(){ this.skip(); });
-    it('should refuse upgrade - Not accepted!', function(){ this.skip(); });
-    it('should refuse upgrade - Not registered!', function(){ this.skip(); });
-    it('should refuse upgrade AFTER upgrade - Not registered!', function(){ this.skip(); });
+
+    it('should proxy', async () => {
+        const res = await proxy_abi.getAddress({ from: accounts[0] });
+        assert.equal(first.address.valueOf(), res.valueOf());
+    });
+
+    it('should refuse proposal - same impl', async () => {
+        try {
+            await proxy.proposeUpgrade(
+                    first.address, 2 * weeks,
+                    { from: accounts[0], value: web3.utils.toWei('1', 'ether') });
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Already active!/);
+        }
+    });
+
+    it('should refuse proposal - wrong proxy', async () => {
+        try {
+            await proxy.proposeUpgrade(
+                    registry.address, 2 * weeks,
+                    { from: accounts[0], value: web3.utils.toWei('1', 'ether') });
+            assert.fail("It must fail");
+        } catch (e) {
+            //assert.match(e.message, /Wrong proxy!/);
+            assert.match(e.message, /revert/);
+        }
+    });
+
+    it('should accept proposal', async () => {
+        await proxy.proposeUpgrade(
+                second.address, 2 * weeks,
+                // NOTE: it's mock registry - no fee check
+                { from: accounts[0], value: '1' });
+    });
+
+    it('should refuse upgrade - Not accepted!', async () => {
+        const { logs } = await proxy.proposeUpgrade(
+                second.address, 2 * weeks,
+                { from: accounts[0], value: '1' });
+
+        assert.equal(logs.length, 1);
+        const proposal = logs[0].args['1'];
+
+        try {
+            await proxy.upgrade(proposal);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not accepted!/);
+        }
+    });
+
+    it('should refuse upgrade - Not registered!', async () => {
+        let proposal = await MockProposal.new();
+
+        try {
+            await proxy.upgrade(proposal.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not registered!/);
+        }
+    });
+
+    it('should accept upgrade', async () => {
+        const { logs } = await proxy.proposeUpgrade(
+                second.address, 2 * weeks,
+                { from: accounts[0], value: '1' });
+        const proposal = await MockProposal.at(logs[0].args['1']);
+
+        await proposal.setAccepted();
+        await proxy.upgrade(proposal.address);
+    });
+
+    it('should refuse upgrade AFTER upgrade - Not registered!', async () => {
+        const { logs } = await proxy.proposeUpgrade(
+                third.address, 2 * weeks,
+                { from: accounts[0], value: '1' });
+        const proposal = await MockProposal.at(logs[0].args['1']);
+
+        await proposal.setAccepted();
+        await proxy.upgrade(proposal.address);
+
+        try {
+            await proxy.upgrade(proposal.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not registered!/);
+        }
+    });
+
+    it('should refuse upgrade - Already active!', async () => {
+        let proposal1 = await proxy.proposeUpgrade(
+                fourth.address, 2 * weeks,
+                { from: accounts[0], value: '1' });
+        let proposal2 = await proxy.proposeUpgrade(
+                fourth.address, 2 * weeks,
+                { from: accounts[0], value: '1' });
+        proposal1 = await MockProposal.at(proposal1.logs[0].args['1']);
+        proposal2 = await MockProposal.at(proposal2.logs[0].args['1']);
+        await proposal1.setAccepted();
+        await proposal2.setAccepted();
+        await proxy.upgrade(proposal1.address);
+
+        try {
+            await proxy.upgrade(proposal2.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Already active!/);
+        }
+    });
 });

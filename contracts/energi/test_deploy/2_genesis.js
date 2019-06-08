@@ -13,6 +13,8 @@ const TreasuryV1 = artifacts.require('TreasuryV1');
 
 const MockProxy = artifacts.require("MockProxy");
 const MockContract = artifacts.require("MockContract");
+const MockSporkRegistry = artifacts.require("MockSporkRegistry");
+const MockProposal = artifacts.require("MockProposal");
 
 module.exports = async (deployer) => {
     // V1 instances
@@ -37,5 +39,8 @@ module.exports = async (deployer) => {
 
     // For unit test
     await deployer.deploy(GovernedProxy, BackboneRewardV1.address, SporkRegistryV1.address);
+    await deployer.deploy(MockProxy);
     await deployer.deploy(MockContract, MockProxy.address);
+    await deployer.deploy(MockSporkRegistry, MockProxy.address);
+    await deployer.deploy(MockProposal);
 };
