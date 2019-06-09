@@ -27,9 +27,10 @@ module.exports = async (deployer) => {
     await deployer.deploy(MockProxy);
     await deployer.deploy(Gen2Migration, MockProxy.address);
     await deployer.deploy(MockProxy);
-    await deployer.deploy(MasternodeTokenV1, MockProxy.address);
+    const mn_token_proxy = MockProxy.address;
+    await deployer.deploy(MasternodeTokenV1, mn_token_proxy);
     await deployer.deploy(MockProxy);
-    await deployer.deploy(MasternodeRegistryV1, MockProxy.address);
+    await deployer.deploy(MasternodeRegistryV1, MockProxy.address, mn_token_proxy);
     await deployer.deploy(MockProxy);
     await deployer.deploy(SporkRegistryV1, MockProxy.address);
     await deployer.deploy(MockProxy);

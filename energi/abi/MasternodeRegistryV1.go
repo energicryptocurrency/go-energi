@@ -28,23 +28,7 @@ var (
 )
 
 // MasternodeRegistryV1ABI is the input ABI used to generate the binding from.
-const MasternodeRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"name\":\"active\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"v1storage\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"invalidate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isValid\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
-
-// MasternodeRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const MasternodeRegistryV1Bin = `608060405234801561001057600080fd5b506040516108f83803806108f88339818101604052602081101561003357600080fd5b5051600080546001600160a01b0319166001600160a01b03831617905560405161005c9061009f565b604051809103906000f080158015610078573d6000803e3d6000fd5b50600180546001600160a01b0319166001600160a01b0392909216919091179055506100ac565b610228806106d083390190565b610615806100bb6000396000f3fe6080604052600436106100d15760003560e01c80633e3e4ac31161007f5780638b1b925f116100595780638b1b925f146102f2578063a9fb763c14610346578063ce5494bb1461035c578063ec5568891461039c576100d1565b80633e3e4ac3146102675780636e029ad1146102b35780637cc27d45146102dd576100d1565b8063207c64fb116100b0578063207c64fb146101e95780632d0593051461022957806337a3931f146101e9576100d1565b8062f55d9d1461013857806306661abd1461017a5780631c4b774b146101ad575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b34801561014457600080fd5b506101786004803603602081101561015b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166103b1565b005b34801561018657600080fd5b5061018f610459565b60408051938452602084019290925282820152519081900360600190f35b3480156101b957600080fd5b506101d7600480360360208110156101d057600080fd5b5035610463565b60408051918252519081900360200190f35b3480156101f557600080fd5b506101786004803603602081101561020c57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661047b565b34801561023557600080fd5b5061023e61047e565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561027357600080fd5b506101786004803603604081101561028a57600080fd5b50803573ffffffffffffffffffffffffffffffffffffffff16906020013563ffffffff1661049a565b3480156102bf57600080fd5b50610178600480360360208110156102d657600080fd5b503561047b565b3480156102e957600080fd5b5061017861049e565b3480156102fe57600080fd5b506103326004803603602081101561031557600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166104a0565b604080519115158252519081900360200190f35b610178600480360360208110156102d657600080fd5b34801561036857600080fd5b506101786004803603602081101561037f57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166104a6565b3480156103a857600080fd5b5061023e610535565b60005473ffffffffffffffffffffffffffffffffffffffff16331461043757604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61044081610551565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000806000909192565b600081156104765750677ed7cd92ff1200005b919050565b50565b60015473ffffffffffffffffffffffffffffffffffffffff1681565b5050565b565b50600090565b60005473ffffffffffffffffffffffffffffffffffffffff16331461052c57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61047b8161047b565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b600154604080517f13af403500000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8481166004830152915191909216916313af403591602480830192600092919082900301818387803b1580156105c557600080fd5b505af11580156105d9573d6000803e3d6000fd5b505050505056fea265627a7a72305820602a083721ac706f89cc4de61b396cf5ebdd24bd2a33398fd7a6ebbb3fd6cbfb64736f6c634300050900326080604052600080546001600160a01b03191633179055610203806100256000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806313af40351461003b57806341c0e1b514610070575b600080fd5b61006e6004803603602081101561005157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610078565b005b61006e610145565b60005473ffffffffffffffffffffffffffffffffffffffff1633146100fe57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff92909216919091179055565b60005473ffffffffffffffffffffffffffffffffffffffff1633146101cb57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b33fffea265627a7a72305820237fccb5090be0ba010002eea14bb8cf27dfbfc93ce92e777de365edb5aea37064736f6c63430005090032`
-
-// DeployMasternodeRegistryV1 deploys a new Ethereum contract, binding an instance of MasternodeRegistryV1 to it.
-func DeployMasternodeRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *MasternodeRegistryV1, error) {
-	parsed, err := abi.JSON(strings.NewReader(MasternodeRegistryV1ABI))
-	if err != nil {
-		return common.Address{}, nil, nil, err
-	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(MasternodeRegistryV1Bin), backend, _proxy)
-	if err != nil {
-		return common.Address{}, nil, nil, err
-	}
-	return address, tx, &MasternodeRegistryV1{MasternodeRegistryV1Caller: MasternodeRegistryV1Caller{contract: contract}, MasternodeRegistryV1Transactor: MasternodeRegistryV1Transactor{contract: contract}, MasternodeRegistryV1Filterer: MasternodeRegistryV1Filterer{contract: contract}}, nil
-}
+const MasternodeRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"name\":\"active\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"current_masternode\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"v1storage\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"mn_status\",\"outputs\":[{\"name\":\"sw_features\",\"type\":\"uint256\"},{\"name\":\"last_heartbeat\",\"type\":\"uint64\"},{\"name\":\"validations\",\"type\":\"uint32\"},{\"name\":\"is_active\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mn_active\",\"outputs\":[{\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isValid\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"current_payouts\",\"outputs\":[{\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mn_announced\",\"outputs\":[{\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mn_total_ever\",\"outputs\":[{\"name\":\"\",\"type\":\"uint64\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"},{\"name\":\"_token_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"collateral\",\"type\":\"uint256\"}],\"name\":\"Announced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Denounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"Validation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"Heartbeat\",\"type\":\"event\"}]"
 
 // MasternodeRegistryV1 is an auto generated Go binding around an Ethereum contract.
 type MasternodeRegistryV1 struct {
@@ -228,6 +212,58 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) Count() (struct 
 	return _MasternodeRegistryV1.Contract.Count(&_MasternodeRegistryV1.CallOpts)
 }
 
+// CurrentMasternode is a free data retrieval call binding the contract method 0x1a26763c.
+//
+// Solidity: function current_masternode() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) CurrentMasternode(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "current_masternode")
+	return *ret0, err
+}
+
+// CurrentMasternode is a free data retrieval call binding the contract method 0x1a26763c.
+//
+// Solidity: function current_masternode() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) CurrentMasternode() (common.Address, error) {
+	return _MasternodeRegistryV1.Contract.CurrentMasternode(&_MasternodeRegistryV1.CallOpts)
+}
+
+// CurrentMasternode is a free data retrieval call binding the contract method 0x1a26763c.
+//
+// Solidity: function current_masternode() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) CurrentMasternode() (common.Address, error) {
+	return _MasternodeRegistryV1.Contract.CurrentMasternode(&_MasternodeRegistryV1.CallOpts)
+}
+
+// CurrentPayouts is a free data retrieval call binding the contract method 0x9c5e8ae2.
+//
+// Solidity: function current_payouts() constant returns(uint8)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) CurrentPayouts(opts *bind.CallOpts) (uint8, error) {
+	var (
+		ret0 = new(uint8)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "current_payouts")
+	return *ret0, err
+}
+
+// CurrentPayouts is a free data retrieval call binding the contract method 0x9c5e8ae2.
+//
+// Solidity: function current_payouts() constant returns(uint8)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) CurrentPayouts() (uint8, error) {
+	return _MasternodeRegistryV1.Contract.CurrentPayouts(&_MasternodeRegistryV1.CallOpts)
+}
+
+// CurrentPayouts is a free data retrieval call binding the contract method 0x9c5e8ae2.
+//
+// Solidity: function current_payouts() constant returns(uint8)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) CurrentPayouts() (uint8, error) {
+	return _MasternodeRegistryV1.Contract.CurrentPayouts(&_MasternodeRegistryV1.CallOpts)
+}
+
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
 // Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 amount)
@@ -280,6 +316,128 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) IsValid(masterno
 	return _MasternodeRegistryV1.Contract.IsValid(&_MasternodeRegistryV1.CallOpts, masternode)
 }
 
+// MnActive is a free data retrieval call binding the contract method 0x521f284d.
+//
+// Solidity: function mn_active() constant returns(uint32)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) MnActive(opts *bind.CallOpts) (uint32, error) {
+	var (
+		ret0 = new(uint32)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "mn_active")
+	return *ret0, err
+}
+
+// MnActive is a free data retrieval call binding the contract method 0x521f284d.
+//
+// Solidity: function mn_active() constant returns(uint32)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) MnActive() (uint32, error) {
+	return _MasternodeRegistryV1.Contract.MnActive(&_MasternodeRegistryV1.CallOpts)
+}
+
+// MnActive is a free data retrieval call binding the contract method 0x521f284d.
+//
+// Solidity: function mn_active() constant returns(uint32)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) MnActive() (uint32, error) {
+	return _MasternodeRegistryV1.Contract.MnActive(&_MasternodeRegistryV1.CallOpts)
+}
+
+// MnAnnounced is a free data retrieval call binding the contract method 0xab00fdc4.
+//
+// Solidity: function mn_announced() constant returns(uint32)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) MnAnnounced(opts *bind.CallOpts) (uint32, error) {
+	var (
+		ret0 = new(uint32)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "mn_announced")
+	return *ret0, err
+}
+
+// MnAnnounced is a free data retrieval call binding the contract method 0xab00fdc4.
+//
+// Solidity: function mn_announced() constant returns(uint32)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) MnAnnounced() (uint32, error) {
+	return _MasternodeRegistryV1.Contract.MnAnnounced(&_MasternodeRegistryV1.CallOpts)
+}
+
+// MnAnnounced is a free data retrieval call binding the contract method 0xab00fdc4.
+//
+// Solidity: function mn_announced() constant returns(uint32)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) MnAnnounced() (uint32, error) {
+	return _MasternodeRegistryV1.Contract.MnAnnounced(&_MasternodeRegistryV1.CallOpts)
+}
+
+// MnStatus is a free data retrieval call binding the contract method 0x4d1b4dae.
+//
+// Solidity: function mn_status(address ) constant returns(uint256 sw_features, uint64 last_heartbeat, uint32 validations, bool is_active)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) MnStatus(opts *bind.CallOpts, arg0 common.Address) (struct {
+	SwFeatures    *big.Int
+	LastHeartbeat uint64
+	Validations   uint32
+	IsActive      bool
+}, error) {
+	ret := new(struct {
+		SwFeatures    *big.Int
+		LastHeartbeat uint64
+		Validations   uint32
+		IsActive      bool
+	})
+	out := ret
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "mn_status", arg0)
+	return *ret, err
+}
+
+// MnStatus is a free data retrieval call binding the contract method 0x4d1b4dae.
+//
+// Solidity: function mn_status(address ) constant returns(uint256 sw_features, uint64 last_heartbeat, uint32 validations, bool is_active)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) MnStatus(arg0 common.Address) (struct {
+	SwFeatures    *big.Int
+	LastHeartbeat uint64
+	Validations   uint32
+	IsActive      bool
+}, error) {
+	return _MasternodeRegistryV1.Contract.MnStatus(&_MasternodeRegistryV1.CallOpts, arg0)
+}
+
+// MnStatus is a free data retrieval call binding the contract method 0x4d1b4dae.
+//
+// Solidity: function mn_status(address ) constant returns(uint256 sw_features, uint64 last_heartbeat, uint32 validations, bool is_active)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) MnStatus(arg0 common.Address) (struct {
+	SwFeatures    *big.Int
+	LastHeartbeat uint64
+	Validations   uint32
+	IsActive      bool
+}, error) {
+	return _MasternodeRegistryV1.Contract.MnStatus(&_MasternodeRegistryV1.CallOpts, arg0)
+}
+
+// MnTotalEver is a free data retrieval call binding the contract method 0xdb937a82.
+//
+// Solidity: function mn_total_ever() constant returns(uint64)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) MnTotalEver(opts *bind.CallOpts) (uint64, error) {
+	var (
+		ret0 = new(uint64)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "mn_total_ever")
+	return *ret0, err
+}
+
+// MnTotalEver is a free data retrieval call binding the contract method 0xdb937a82.
+//
+// Solidity: function mn_total_ever() constant returns(uint64)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) MnTotalEver() (uint64, error) {
+	return _MasternodeRegistryV1.Contract.MnTotalEver(&_MasternodeRegistryV1.CallOpts)
+}
+
+// MnTotalEver is a free data retrieval call binding the contract method 0xdb937a82.
+//
+// Solidity: function mn_total_ever() constant returns(uint64)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) MnTotalEver() (uint64, error) {
+	return _MasternodeRegistryV1.Contract.MnTotalEver(&_MasternodeRegistryV1.CallOpts)
+}
+
 // Proxy is a free data retrieval call binding the contract method 0xec556889.
 //
 // Solidity: function proxy() constant returns(address)
@@ -304,6 +462,58 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Proxy() (common.Addres
 // Solidity: function proxy() constant returns(address)
 func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) Proxy() (common.Address, error) {
 	return _MasternodeRegistryV1.Contract.Proxy(&_MasternodeRegistryV1.CallOpts)
+}
+
+// TokenProxy is a free data retrieval call binding the contract method 0x84afd47f.
+//
+// Solidity: function token_proxy() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) TokenProxy(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "token_proxy")
+	return *ret0, err
+}
+
+// TokenProxy is a free data retrieval call binding the contract method 0x84afd47f.
+//
+// Solidity: function token_proxy() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) TokenProxy() (common.Address, error) {
+	return _MasternodeRegistryV1.Contract.TokenProxy(&_MasternodeRegistryV1.CallOpts)
+}
+
+// TokenProxy is a free data retrieval call binding the contract method 0x84afd47f.
+//
+// Solidity: function token_proxy() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) TokenProxy() (common.Address, error) {
+	return _MasternodeRegistryV1.Contract.TokenProxy(&_MasternodeRegistryV1.CallOpts)
+}
+
+// TreasuryProxy is a free data retrieval call binding the contract method 0xa2731784.
+//
+// Solidity: function treasury_proxy() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Caller) TreasuryProxy(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _MasternodeRegistryV1.contract.Call(opts, out, "treasury_proxy")
+	return *ret0, err
+}
+
+// TreasuryProxy is a free data retrieval call binding the contract method 0xa2731784.
+//
+// Solidity: function treasury_proxy() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) TreasuryProxy() (common.Address, error) {
+	return _MasternodeRegistryV1.Contract.TreasuryProxy(&_MasternodeRegistryV1.CallOpts)
+}
+
+// TreasuryProxy is a free data retrieval call binding the contract method 0xa2731784.
+//
+// Solidity: function treasury_proxy() constant returns(address)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1CallerSession) TreasuryProxy() (common.Address, error) {
+	return _MasternodeRegistryV1.Contract.TreasuryProxy(&_MasternodeRegistryV1.CallOpts)
 }
 
 // V1storage is a free data retrieval call binding the contract method 0x2d059305.
@@ -353,25 +563,25 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Announce(mas
 	return _MasternodeRegistryV1.Contract.Announce(&_MasternodeRegistryV1.TransactOpts, masternode, ipv4address)
 }
 
-// Denounce is a paid mutator transaction binding the contract method 0x7cc27d45.
+// Denounce is a paid mutator transaction binding the contract method 0xca0e551f.
 //
-// Solidity: function denounce() returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Denounce(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.contract.Transact(opts, "denounce")
+// Solidity: function denounce(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Denounce(opts *bind.TransactOpts, masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "denounce", masternode)
 }
 
-// Denounce is a paid mutator transaction binding the contract method 0x7cc27d45.
+// Denounce is a paid mutator transaction binding the contract method 0xca0e551f.
 //
-// Solidity: function denounce() returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Denounce() (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Denounce(&_MasternodeRegistryV1.TransactOpts)
+// Solidity: function denounce(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Denounce(masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Denounce(&_MasternodeRegistryV1.TransactOpts, masternode)
 }
 
-// Denounce is a paid mutator transaction binding the contract method 0x7cc27d45.
+// Denounce is a paid mutator transaction binding the contract method 0xca0e551f.
 //
-// Solidity: function denounce() returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Denounce() (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Denounce(&_MasternodeRegistryV1.TransactOpts)
+// Solidity: function denounce(address masternode) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Denounce(masternode common.Address) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Denounce(&_MasternodeRegistryV1.TransactOpts, masternode)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
@@ -395,46 +605,25 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Destroy(_new
 	return _MasternodeRegistryV1.Contract.Destroy(&_MasternodeRegistryV1.TransactOpts, _newImpl)
 }
 
-// Heartbeat is a paid mutator transaction binding the contract method 0x6e029ad1.
+// Heartbeat is a paid mutator transaction binding the contract method 0x91ceac96.
 //
-// Solidity: function heartbeat(uint256 sw_features) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Heartbeat(opts *bind.TransactOpts, sw_features *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.contract.Transact(opts, "heartbeat", sw_features)
+// Solidity: function heartbeat(uint256 block_number, bytes32 block_hash, uint256 sw_features) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Heartbeat(opts *bind.TransactOpts, block_number *big.Int, block_hash [32]byte, sw_features *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "heartbeat", block_number, block_hash, sw_features)
 }
 
-// Heartbeat is a paid mutator transaction binding the contract method 0x6e029ad1.
+// Heartbeat is a paid mutator transaction binding the contract method 0x91ceac96.
 //
-// Solidity: function heartbeat(uint256 sw_features) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Heartbeat(sw_features *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Heartbeat(&_MasternodeRegistryV1.TransactOpts, sw_features)
+// Solidity: function heartbeat(uint256 block_number, bytes32 block_hash, uint256 sw_features) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Heartbeat(block_number *big.Int, block_hash [32]byte, sw_features *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Heartbeat(&_MasternodeRegistryV1.TransactOpts, block_number, block_hash, sw_features)
 }
 
-// Heartbeat is a paid mutator transaction binding the contract method 0x6e029ad1.
+// Heartbeat is a paid mutator transaction binding the contract method 0x91ceac96.
 //
-// Solidity: function heartbeat(uint256 sw_features) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Heartbeat(sw_features *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Heartbeat(&_MasternodeRegistryV1.TransactOpts, sw_features)
-}
-
-// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
-//
-// Solidity: function invalidate(address masternode) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Invalidate(opts *bind.TransactOpts, masternode common.Address) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.contract.Transact(opts, "invalidate", masternode)
-}
-
-// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
-//
-// Solidity: function invalidate(address masternode) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Invalidate(masternode common.Address) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Invalidate(&_MasternodeRegistryV1.TransactOpts, masternode)
-}
-
-// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
-//
-// Solidity: function invalidate(address masternode) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Invalidate(masternode common.Address) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Invalidate(&_MasternodeRegistryV1.TransactOpts, masternode)
+// Solidity: function heartbeat(uint256 block_number, bytes32 block_hash, uint256 sw_features) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Heartbeat(block_number *big.Int, block_hash [32]byte, sw_features *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Heartbeat(&_MasternodeRegistryV1.TransactOpts, block_number, block_hash, sw_features)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
@@ -460,23 +649,23 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Migrate(_old
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Reward(opts *bind.TransactOpts, arg0 *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.contract.Transact(opts, "reward", arg0)
+// Solidity: function reward(uint256 amount) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Transactor) Reward(opts *bind.TransactOpts, amount *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.contract.Transact(opts, "reward", amount)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Reward(arg0 *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, arg0)
+// Solidity: function reward(uint256 amount) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Reward(amount *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, amount)
 }
 
 // Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Reward(arg0 *big.Int) (*types.Transaction, error) {
-	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, arg0)
+// Solidity: function reward(uint256 amount) returns()
+func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Reward(amount *big.Int) (*types.Transaction, error) {
+	return _MasternodeRegistryV1.Contract.Reward(&_MasternodeRegistryV1.TransactOpts, amount)
 }
 
 // Validate is a paid mutator transaction binding the contract method 0x207c64fb.
@@ -498,4 +687,552 @@ func (_MasternodeRegistryV1 *MasternodeRegistryV1Session) Validate(masternode co
 // Solidity: function validate(address masternode) returns()
 func (_MasternodeRegistryV1 *MasternodeRegistryV1TransactorSession) Validate(masternode common.Address) (*types.Transaction, error) {
 	return _MasternodeRegistryV1.Contract.Validate(&_MasternodeRegistryV1.TransactOpts, masternode)
+}
+
+// MasternodeRegistryV1AnnouncedIterator is returned from FilterAnnounced and is used to iterate over the raw logs and unpacked data for Announced events raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1AnnouncedIterator struct {
+	Event *MasternodeRegistryV1Announced // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *MasternodeRegistryV1AnnouncedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(MasternodeRegistryV1Announced)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(MasternodeRegistryV1Announced)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *MasternodeRegistryV1AnnouncedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *MasternodeRegistryV1AnnouncedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// MasternodeRegistryV1Announced represents a Announced event raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1Announced struct {
+	Masternode common.Address
+	Owner      common.Address
+	Collateral *big.Int
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterAnnounced is a free log retrieval operation binding the contract event 0x5fc4086a510706fb705f95d9eab5c5aeb798ead7091e5817dae8c837a63ea43d.
+//
+// Solidity: event Announced(address indexed masternode, address indexed owner, uint256 collateral)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) FilterAnnounced(opts *bind.FilterOpts, masternode []common.Address, owner []common.Address) (*MasternodeRegistryV1AnnouncedIterator, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.FilterLogs(opts, "Announced", masternodeRule, ownerRule)
+	if err != nil {
+		return nil, err
+	}
+	return &MasternodeRegistryV1AnnouncedIterator{contract: _MasternodeRegistryV1.contract, event: "Announced", logs: logs, sub: sub}, nil
+}
+
+// WatchAnnounced is a free log subscription operation binding the contract event 0x5fc4086a510706fb705f95d9eab5c5aeb798ead7091e5817dae8c837a63ea43d.
+//
+// Solidity: event Announced(address indexed masternode, address indexed owner, uint256 collateral)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) WatchAnnounced(opts *bind.WatchOpts, sink chan<- *MasternodeRegistryV1Announced, masternode []common.Address, owner []common.Address) (event.Subscription, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.WatchLogs(opts, "Announced", masternodeRule, ownerRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(MasternodeRegistryV1Announced)
+				if err := _MasternodeRegistryV1.contract.UnpackLog(event, "Announced", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// MasternodeRegistryV1DenouncedIterator is returned from FilterDenounced and is used to iterate over the raw logs and unpacked data for Denounced events raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1DenouncedIterator struct {
+	Event *MasternodeRegistryV1Denounced // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *MasternodeRegistryV1DenouncedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(MasternodeRegistryV1Denounced)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(MasternodeRegistryV1Denounced)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *MasternodeRegistryV1DenouncedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *MasternodeRegistryV1DenouncedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// MasternodeRegistryV1Denounced represents a Denounced event raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1Denounced struct {
+	Masternode common.Address
+	Owner      common.Address
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterDenounced is a free log retrieval operation binding the contract event 0x55faf8e51ab442f8d8510476317b2e313144c3db60adc284affef64140fe8552.
+//
+// Solidity: event Denounced(address indexed masternode, address indexed owner)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) FilterDenounced(opts *bind.FilterOpts, masternode []common.Address, owner []common.Address) (*MasternodeRegistryV1DenouncedIterator, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.FilterLogs(opts, "Denounced", masternodeRule, ownerRule)
+	if err != nil {
+		return nil, err
+	}
+	return &MasternodeRegistryV1DenouncedIterator{contract: _MasternodeRegistryV1.contract, event: "Denounced", logs: logs, sub: sub}, nil
+}
+
+// WatchDenounced is a free log subscription operation binding the contract event 0x55faf8e51ab442f8d8510476317b2e313144c3db60adc284affef64140fe8552.
+//
+// Solidity: event Denounced(address indexed masternode, address indexed owner)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) WatchDenounced(opts *bind.WatchOpts, sink chan<- *MasternodeRegistryV1Denounced, masternode []common.Address, owner []common.Address) (event.Subscription, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.WatchLogs(opts, "Denounced", masternodeRule, ownerRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(MasternodeRegistryV1Denounced)
+				if err := _MasternodeRegistryV1.contract.UnpackLog(event, "Denounced", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// MasternodeRegistryV1HeartbeatIterator is returned from FilterHeartbeat and is used to iterate over the raw logs and unpacked data for Heartbeat events raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1HeartbeatIterator struct {
+	Event *MasternodeRegistryV1Heartbeat // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *MasternodeRegistryV1HeartbeatIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(MasternodeRegistryV1Heartbeat)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(MasternodeRegistryV1Heartbeat)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *MasternodeRegistryV1HeartbeatIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *MasternodeRegistryV1HeartbeatIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// MasternodeRegistryV1Heartbeat represents a Heartbeat event raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1Heartbeat struct {
+	Masternode common.Address
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterHeartbeat is a free log retrieval operation binding the contract event 0x76fd25e9b1ccb2a2eb85da234dd15c82d9eec18877d3e6fc916eb7330fe04a64.
+//
+// Solidity: event Heartbeat(address indexed masternode)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) FilterHeartbeat(opts *bind.FilterOpts, masternode []common.Address) (*MasternodeRegistryV1HeartbeatIterator, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.FilterLogs(opts, "Heartbeat", masternodeRule)
+	if err != nil {
+		return nil, err
+	}
+	return &MasternodeRegistryV1HeartbeatIterator{contract: _MasternodeRegistryV1.contract, event: "Heartbeat", logs: logs, sub: sub}, nil
+}
+
+// WatchHeartbeat is a free log subscription operation binding the contract event 0x76fd25e9b1ccb2a2eb85da234dd15c82d9eec18877d3e6fc916eb7330fe04a64.
+//
+// Solidity: event Heartbeat(address indexed masternode)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) WatchHeartbeat(opts *bind.WatchOpts, sink chan<- *MasternodeRegistryV1Heartbeat, masternode []common.Address) (event.Subscription, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.WatchLogs(opts, "Heartbeat", masternodeRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(MasternodeRegistryV1Heartbeat)
+				if err := _MasternodeRegistryV1.contract.UnpackLog(event, "Heartbeat", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// MasternodeRegistryV1ValidationIterator is returned from FilterValidation and is used to iterate over the raw logs and unpacked data for Validation events raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1ValidationIterator struct {
+	Event *MasternodeRegistryV1Validation // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *MasternodeRegistryV1ValidationIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(MasternodeRegistryV1Validation)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(MasternodeRegistryV1Validation)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *MasternodeRegistryV1ValidationIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *MasternodeRegistryV1ValidationIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// MasternodeRegistryV1Validation represents a Validation event raised by the MasternodeRegistryV1 contract.
+type MasternodeRegistryV1Validation struct {
+	Masternode common.Address
+	Validator  common.Address
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterValidation is a free log retrieval operation binding the contract event 0xecf3d22a6c5bee8410ef008f28f974ab2b99754941406d83f2e79834bab78b6d.
+//
+// Solidity: event Validation(address indexed masternode, address validator)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) FilterValidation(opts *bind.FilterOpts, masternode []common.Address) (*MasternodeRegistryV1ValidationIterator, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.FilterLogs(opts, "Validation", masternodeRule)
+	if err != nil {
+		return nil, err
+	}
+	return &MasternodeRegistryV1ValidationIterator{contract: _MasternodeRegistryV1.contract, event: "Validation", logs: logs, sub: sub}, nil
+}
+
+// WatchValidation is a free log subscription operation binding the contract event 0xecf3d22a6c5bee8410ef008f28f974ab2b99754941406d83f2e79834bab78b6d.
+//
+// Solidity: event Validation(address indexed masternode, address validator)
+func (_MasternodeRegistryV1 *MasternodeRegistryV1Filterer) WatchValidation(opts *bind.WatchOpts, sink chan<- *MasternodeRegistryV1Validation, masternode []common.Address) (event.Subscription, error) {
+
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+
+	logs, sub, err := _MasternodeRegistryV1.contract.WatchLogs(opts, "Validation", masternodeRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(MasternodeRegistryV1Validation)
+				if err := _MasternodeRegistryV1.contract.UnpackLog(event, "Validation", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
 }

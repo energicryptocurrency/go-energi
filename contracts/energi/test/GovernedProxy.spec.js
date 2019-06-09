@@ -19,6 +19,7 @@
 'use strict';
 
 const GovernedProxy = artifacts.require('GovernedProxy');
+const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
 const MockSporkRegistry = artifacts.require('MockSporkRegistry');
 const MockProposal = artifacts.require('MockProposal');
@@ -35,8 +36,10 @@ contract("GovernedProxy", async accounts => {
 
     before(async () => {
         registry = await MockSporkRegistry.deployed();
+        const registry_proxy = await MockProxy.new();
+        await registry_proxy.setImpl(registry.address);
         first = await MockContract.new(registry.address);
-        proxy = await GovernedProxy.new(first.address, registry.address);
+        proxy = await GovernedProxy.new(first.address, registry_proxy.address);
         second = await MockContract.new(proxy.address);
         third = await MockContract.new(proxy.address);
         fourth = await MockContract.new(proxy.address);
