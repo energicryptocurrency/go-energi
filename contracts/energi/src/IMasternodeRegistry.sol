@@ -57,7 +57,11 @@ interface IMasternodeRegistry {
     function count() external view
         returns(uint active, uint total, uint max_of_all_times);
     function info(address masternode) external view
-        returns(address owner, uint32 ipv4address, bytes32[2] memory enode, uint collateral);
+        returns(address owner, uint32 ipv4address, bytes32[2] memory enode,
+                uint collateral, uint announced_block);
+    function ownerInfo(address owner) external view
+        returns(address masternode, uint32 ipv4address, bytes32[2] memory enode,
+                uint collateral, uint announced_block);
     function onCollateralUpdate(address owner) external;
     function enumerate() external view returns(address[] memory masternodes);
 }

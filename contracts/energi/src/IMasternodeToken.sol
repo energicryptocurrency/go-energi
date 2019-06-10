@@ -39,7 +39,7 @@ interface IMasternodeToken /* is ERC20 */ {
     //---------------------------------
     function balanceInfo(address _tokenOwner)
         external view
-        returns (uint256 balance, uint256 age);
+        returns (uint256 balance, uint256 last_block);
     function withdrawCollateral(uint256 _amount) external;
     function depositCollateral() external payable;
 

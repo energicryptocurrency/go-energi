@@ -211,6 +211,15 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
+            it('should handle ownerInfo()', async () => {
+                try {
+                    await s.token_abi.ownerInfo(owner1);
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Unknown owner/);
+                }
+            });
+
             it('should process reward() to Treasury', async () => {
                 const treasury_before = toBN(await web3.eth.getBalance(s.treasury_impl.address));
 
@@ -252,6 +261,8 @@ contract("MasternodeRegistryV1", async accounts => {
         });
 
         describe('Single MN', () => {
+            let announced_block;
+
             it('should refuse announce() without collateral', async () => {
                 try {
                     await s.token_abi.announce(
@@ -321,6 +332,8 @@ contract("MasternodeRegistryV1", async accounts => {
                     'masternode': masternode1,
                     'owner': owner1,
                 });
+
+                announced_block = await web3.eth.getBlockNumber();
             });
 
             it('should refuse announce() another owner\'s MN', async () => {
@@ -409,7 +422,19 @@ contract("MasternodeRegistryV1", async accounts => {
                     owner: owner1,
                     ipv4address: toBN(ip1).toString(),
                     enode: enode1,
-                    collateral: toBN(collateral1).toString()
+                    collateral: toBN(collateral1).toString(),
+                });
+            });
+
+            it('should produce ownerInfo()', async () => {
+                const info = await s.token_abi.ownerInfo(owner1);
+                common.stringifyBN(web3, info);
+                expect(info).deep.include({
+                    masternode: masternode1,
+                    ipv4address: toBN(ip1).toString(),
+                    enode: enode1,
+                    collateral: toBN(collateral1).toString(),
+                    announced_block: announced_block.toString(),
                 });
             });
 

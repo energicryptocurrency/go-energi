@@ -38,15 +38,14 @@ contract StorageMasternodeRegistryV1 is
     StorageBase
 {
     struct Info {
-        address payable owner;
-        uint64 last_announced;
-        uint32 ipv4address;
+        uint announced_block;
+        uint collateral;
         bytes32 enode_0;
         bytes32 enode_1;
-        uint collateral;
-
+        address payable owner;
         address prev;
         address next;
+        uint32 ipv4address;
     }
 
     mapping(address => Info) public masternodes;
@@ -60,10 +59,10 @@ contract StorageMasternodeRegistryV1 is
     function setMasternode(
         address _masternode,
         address payable _owner,
-        uint64 _last_announced,
         uint32 _ipv4address,
         bytes32[2] calldata _enode,
         uint _collateral,
+        uint _announced_block,
         address _prev,
         address _next
     ) external {
@@ -76,11 +75,11 @@ contract StorageMasternodeRegistryV1 is
         }
 
         item.owner = _owner;
-        item.last_announced = _last_announced;
         item.ipv4address = _ipv4address;
         item.enode_0 = _enode[0];
         item.enode_1 = _enode[1];
         item.collateral = _collateral;
+        item.announced_block = _announced_block;
         item.prev = _prev;
         item.next = _next;
     }
@@ -213,10 +212,10 @@ contract MasternodeRegistryV1 is
         mn_storage.setMasternode(
             masternode,
             address(uint160(owner)),
-            uint64(block.timestamp),
             ipv4address,
             enode,
             balance,
+            block.number,
             prev,
             next
         );
@@ -412,13 +411,13 @@ contract MasternodeRegistryV1 is
         internal view
         returns(ValidationStatus)
     {
-        (uint balance, uint age) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(mninfo.owner);
+        (uint balance, uint last_block) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(mninfo.owner);
 
         if (balance != mninfo.collateral) {
             return ValidationStatus.MNCollaterIssue;
         }
 
-        if ((block.timestamp - age) > mninfo.last_announced) {
+        if (last_block > mninfo.announced_block) {
             return ValidationStatus.MNCollaterIssue;
         }
 
@@ -435,16 +434,20 @@ contract MasternodeRegistryV1 is
 
     //===
 
-    function count() external view returns(uint active, uint total, uint max_of_all_times) {
+    function count() external view returns(
+        uint active, uint total, uint max_of_all_times
+    ) {
         active = mn_active;
         total = mn_announced;
         max_of_all_times = mn_total_ever;
     }
 
     //===
-
     function info(address masternode) external view
-        returns(address owner, uint32 ipv4address, bytes32[2] memory enode, uint collateral)
+        returns(
+            address owner, uint32 ipv4address, bytes32[2] memory enode,
+            uint collateral, uint announced_block
+        )
     {
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
         require(mninfo.owner != address(0), "Unknown masternode");
@@ -452,6 +455,26 @@ contract MasternodeRegistryV1 is
         ipv4address = mninfo.ipv4address;
         enode = [ mninfo.enode_0, mninfo.enode_1 ];
         collateral = mninfo.collateral;
+        announced_block = mninfo.announced_block;
+    }
+
+    function ownerInfo(address owner) external view
+        returns(
+            address masternode, uint32 ipv4address, bytes32[2] memory enode,
+            uint collateral, uint announced_block
+        )
+    {
+        StorageMasternodeRegistryV1 mnstorage = v1storage;
+
+        masternode = mnstorage.owner_masternodes(owner);
+        require(masternode != address(0), "Unknown owner");
+
+        StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(mnstorage, masternode);
+        masternode = masternode;
+        ipv4address = mninfo.ipv4address;
+        enode = [ mninfo.enode_0, mninfo.enode_1 ];
+        collateral = mninfo.collateral;
+        announced_block = mninfo.announced_block;
     }
 
     function _mnInfo(
@@ -463,14 +486,14 @@ contract MasternodeRegistryV1 is
     {
         // NOTE: no ABIv2 encoding is enabled
         (
-            mninfo.owner,
-            mninfo.last_announced,
-            mninfo.ipv4address,
+            mninfo.announced_block,
+            mninfo.collateral,
             mninfo.enode_0,
             mninfo.enode_1,
-            mninfo.collateral,
+            mninfo.owner,
             mninfo.prev,
-            mninfo.next
+            mninfo.next,
+            mninfo.ipv4address
         ) = v1info.masternodes(masternode);
     }
 

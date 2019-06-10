@@ -36,7 +36,7 @@ contract StorageMasternodeTokenV1 is
 {
     struct Balance {
         uint256 amount;
-        uint256 last_change;
+        uint256 last_block;
     }
     mapping(address => Balance) public balances;
 
@@ -48,14 +48,14 @@ contract StorageMasternodeTokenV1 is
         return balances[_account].amount;
     }
 
-    function setBalance(address _account, uint256 _amount, uint256 _last_change)
+    function setBalance(address _account, uint256 _amount, uint256 _last_block)
         external
         requireOwner
     {
-        // NOTE: DO NOT process last_change as part of storage logic!
+        // NOTE: DO NOT process last_block as part of storage logic!
         Balance storage item = balances[_account];
         item.amount = _amount;
-        item.last_change = _last_change;
+        item.last_block = _last_block;
     }
 }
 
@@ -75,7 +75,7 @@ contract MasternodeTokenV1 is
     IGovernedProxy public registry_proxy;
     //---------------------------------
 
-    constructor(address _proxy, IGovernedProxy _registry_proxy) 
+    constructor(address _proxy, IGovernedProxy _registry_proxy)
         public
         GovernedContract(_proxy)
     {
@@ -138,13 +138,9 @@ contract MasternodeTokenV1 is
 
     function balanceInfo(address _tokenOwner)
         external view
-        returns (uint256 balance, uint256 age)
+        returns (uint256 balance, uint256 last_block)
     {
-        (balance, age) = v1storage.balances(_tokenOwner);
-
-        assert(block.timestamp >= age);
-
-        age = block.timestamp - age;
+        (balance, last_block) = v1storage.balances(_tokenOwner);
     }
 
     function withdrawCollateral(uint256 _amount) external {
@@ -161,7 +157,7 @@ contract MasternodeTokenV1 is
         _validateBalance(balance);
 
         // Store
-        v1storage.setBalance(tokenOwner, balance, block.timestamp);
+        v1storage.setBalance(tokenOwner, balance, block.number);
 
         // Events
         emit Transfer(tokenOwner, address(0), _amount);
@@ -183,7 +179,7 @@ contract MasternodeTokenV1 is
         _validateBalance(balance);
 
         // Store
-        v1storage.setBalance(tokenOwner, balance, block.timestamp);
+        v1storage.setBalance(tokenOwner, balance, block.number);
 
         // Events
         emit Transfer(address(0), tokenOwner, msg.value);
