@@ -16,31 +16,49 @@ const MockContract = artifacts.require("MockContract");
 const MockSporkRegistry = artifacts.require("MockSporkRegistry");
 const MockProposal = artifacts.require("MockProposal");
 
-module.exports = async (deployer) => {
-    // V1 instances
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(BackboneRewardV1, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(BlacklistRegistryV1, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(CheckpointRegistryV1, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(Gen2Migration, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(MasternodeTokenV1, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(MasternodeRegistryV1, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(SporkRegistryV1, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(StakerRewardV1, MockProxy.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(TreasuryV1, MockProxy.address);
+const common = require('../test/common');
 
-    // For unit test
-    await deployer.deploy(GovernedProxy, BackboneRewardV1.address, SporkRegistryV1.address);
-    await deployer.deploy(MockProxy);
-    await deployer.deploy(MockContract, MockProxy.address);
-    await deployer.deploy(MockSporkRegistry, MockProxy.address);
-    await deployer.deploy(MockProposal);
+module.exports = async (deployer) => {
+    try {
+        // V1 instances
+        await deployer.deploy(MockProxy);
+        const mn_token_proxy = MockProxy.address;
+        await deployer.deploy(MockProxy);
+        const treasury_proxy = MockProxy.address;
+        await deployer.deploy(MockProxy);
+        const mn_registry_proxy = MockProxy.address;
+
+        const deploy_common = async (type, proxy, ...args) => {
+            if (!proxy) {
+                await deployer.deploy(MockProxy);
+                proxy = MockProxy.address;
+            }
+
+            const instance = await deployer.deploy(type, proxy, ...args);
+            (await MockProxy.at(proxy)).setImpl(instance.address);
+        };
+
+        await deployer.deploy(Gen2Migration);
+
+        await deploy_common(BlacklistRegistryV1);
+        await deploy_common(BackboneRewardV1);
+        await deploy_common(CheckpointRegistryV1);
+        await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
+        await deploy_common(MasternodeRegistryV1,
+                            mn_registry_proxy, mn_token_proxy, treasury_proxy,
+                            common.mnregistry_config);
+        await deploy_common(SporkRegistryV1);
+        await deploy_common(StakerRewardV1);
+        await deploy_common(TreasuryV1, treasury_proxy, common.superblock_cycles);
+
+        // For unit test
+        await deployer.deploy(GovernedProxy, BackboneRewardV1.address, SporkRegistryV1.address);
+        await deployer.deploy(MockProxy);
+        await deployer.deploy(MockContract, MockProxy.address);
+        await deployer.deploy(MockSporkRegistry, MockProxy.address);
+        await deployer.deploy(MockProposal);
+    } catch (e) {
+        console.dir(e);
+        throw e;
+    }
 };

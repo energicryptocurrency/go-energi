@@ -1,4 +1,3 @@
-// Copyright 2019 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -21,18 +20,30 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IGovernedContract } from "./IGovernedContract.sol";
+
 /**
- * Genesis version of BlacklistRegistry interface.
- *
- * Base Consensus interface for constructs which receive block rewards.
+ * Base for contract storage (SC-14).
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-interface IBlockReward {
-    // NOTE: it must NEVER fail
-    function reward() external payable;
+contract StorageBase {
+    address payable internal owner;
 
-    // NOTE: it must NEVER fail
-    function getReward(uint _blockNumber) external view returns(uint amount);
+    modifier requireOwner {
+        require(msg.sender == address(owner), "Not owner!");
+        _;
+    }
+
+    constructor() public {
+        owner = msg.sender;
+    }
+
+    function setOwner(IGovernedContract _newOwner) external requireOwner {
+        owner = address(_newOwner);
+    }
+
+    function kill() external requireOwner {
+        selfdestruct(msg.sender);
+    }
 }
-

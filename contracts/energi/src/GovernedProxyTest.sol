@@ -26,7 +26,8 @@ pragma solidity 0.5.9;
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
-import { GovernedProxy } from "./GovernedProxy.sol";
+import { IGovernedProxy, GovernedProxy } from "./GovernedProxy.sol";
+import { StorageBase } from "./StorageBase.sol";
 
 contract MockContract is GovernedContract
 {
@@ -38,6 +39,19 @@ contract MockContract is GovernedContract
     function getAddress() external view returns (address) {
         return address(this);
     }
+    function killStorage(StorageBase _storage) external {
+        _storage.kill();
+    }
+    function testDrain() external {
+        selfdestruct(msg.sender);
+    }
+    function testDrain(uint amount) external {
+        msg.sender.transfer(amount);
+    }
+    function callProxy() external payable {
+        address payable p = address(uint160(proxy));
+        p.transfer(msg.value);
+    }
     function () external payable {}
 }
 
@@ -45,19 +59,24 @@ contract MockProxy is GovernedProxy
 {
     constructor() public GovernedProxy(
         IGovernedContract(address(0)),
-        ISporkRegistry(new MockSporkRegistry())
+        new GovernedProxy(
+            new MockSporkRegistry(address(0)),
+            IGovernedProxy(address(0))
+        )
     ) {}
 
     function setImpl(IGovernedContract _impl) external {
-        current_impl = _impl;
+        impl = _impl;
     }
 
-    function setSporkRegistry(ISporkRegistry _registry) external {
-        spork_registry = _registry;
+    function setSporkProxy(IGovernedProxy _proxy) external {
+        spork_proxy = _proxy;
     }
 }
 
-contract MockSporkRegistry is ISporkRegistry {
+contract MockSporkRegistry is MockContract, ISporkRegistry {
+    constructor(address _proxy) public MockContract(_proxy) {}
+
     function createUpgradeProposal(IGovernedContract, uint)
         external payable
         returns (IProposal)

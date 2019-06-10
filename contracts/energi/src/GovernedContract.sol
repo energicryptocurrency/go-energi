@@ -43,6 +43,34 @@ contract GovernedContract is IGovernedContract {
         require(msg.sender == proxy, "Not proxy");
         _;
     }
+
+    function migrate(IGovernedContract _oldImpl) external requireProxy {
+        _migrate(_oldImpl);
+    }
+
+    function destroy(IGovernedContract _newImpl) external requireProxy {
+        _destroy(_newImpl);
+        selfdestruct(address(_newImpl));
+    }
+
+    // solium-disable-next-line no-empty-blocks
+    function _migrate(IGovernedContract) internal {}
+
+    // solium-disable-next-line no-empty-blocks
+    function _destroy(IGovernedContract) internal {}
+
+    function _callerAddress()
+        internal view
+        returns (address payable)
+    {
+        if (msg.sender == proxy) {
+            // This is guarantee of the GovernedProxy
+            // solium-disable-next-line security/no-tx-origin
+            return tx.origin;
+        } else {
+            return msg.sender;
+        }
+    }
 }
 
 

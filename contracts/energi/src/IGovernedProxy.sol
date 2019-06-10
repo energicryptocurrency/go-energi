@@ -21,18 +21,33 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IGovernedContract } from "./IGovernedContract.sol";
+import { IProposal } from "./IProposal.sol";
+
 /**
- * Genesis version of BlacklistRegistry interface.
+ * Genesis version of IGovernedProxy interface.
  *
- * Base Consensus interface for constructs which receive block rewards.
+ * Base Consensus interface for upgradable contracts proxy.
+ * Unlike common approach, the implementation is NOT expected to be
+ * called through delegatecall() to minimize risks of shared storage.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-interface IBlockReward {
-    // NOTE: it must NEVER fail
-    function reward() external payable;
+interface IGovernedProxy {
+    event UpgradeProposal(
+        address indexed impl,
+        address proposal
+    );
+    event Upgraded(
+        address indexed impl,
+        address proposal
+    );
 
-    // NOTE: it must NEVER fail
-    function getReward(uint _blockNumber) external view returns(uint amount);
+    function impl() external view returns(IGovernedContract);
+    function proposeUpgrade(IGovernedContract _newImpl, uint _period) external payable;
+    function upgrade(IProposal _proposal) external;
+
+    function () external payable;
 }
+
 

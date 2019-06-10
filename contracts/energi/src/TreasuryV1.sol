@@ -25,6 +25,16 @@ import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
 import { ITreasury } from "./ITreasury.sol";
+import { StorageBase }  from "./StorageBase.sol";
+
+/**
+ * Permanent storage of Treasury V1 data.
+ */
+contract StorageTreasuryV1 is
+    StorageBase
+{
+    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
+}
 
 /**
  * Genesis hardcoded version of Treasury
@@ -37,21 +47,54 @@ contract TreasuryV1 is
     IBlockReward,
     ITreasury
 {
-    constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
+    // Data for migration
+    //---------------------------------
+    StorageTreasuryV1 public v1storage;
+    uint public superblock_cycle;
+    //---------------------------------
 
-    function reward(uint) external payable {
+    constructor(address _proxy, uint _superblock_cycle)
+        public
+        GovernedContract(_proxy)
+    {
+        v1storage = new StorageTreasuryV1();
+        superblock_cycle = _superblock_cycle;
+        assert(superblock_cycle > 0);
+    }
+
+    // IGovernedContract
+    //---------------------------------
+    function _destroy(IGovernedContract _newImpl) internal {
+        v1storage.setOwner(_newImpl);
+    }
+
+    // ITreasury
+    //---------------------------------
+    function isSuperblock(uint _blockNumber)
+        external view
+        returns(bool)
+    {
+        return (_blockNumber % superblock_cycle) == 0;
+    }
+
+    // IBlockReward
+    //---------------------------------
+    function reward() external payable {
     }
 
     function getReward(uint _blockNumber)
         external view
-        returns(uint _amount)
+        returns(uint amount)
     {
         if (_blockNumber > 0) {
-            _amount = REWARD_TREASURY_V1;
+            amount = REWARD_TREASURY_V1;
         }
+    }
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
     }
 }
 

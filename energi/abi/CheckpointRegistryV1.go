@@ -28,10 +28,10 @@ var (
 )
 
 // CheckpointRegistryV1ABI is the input ABI used to generate the binding from.
-const CheckpointRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const CheckpointRegistryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"v1storage\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // CheckpointRegistryV1Bin is the compiled bytecode used for deploying new contracts.
-const CheckpointRegistryV1Bin = `608060405234801561001057600080fd5b506040516101f23803806101f28339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031990921691909117905561018d806100656000396000f3fe6080604052600436106100335760003560e01c8062f55d9d14610035578063ce5494bb14610035578063ec55688914610075575b005b34801561004157600080fd5b506100336004803603602081101561005857600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166100b3565b34801561008157600080fd5b5061008a61013c565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461013957604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a7230582001071666336324d383469b9c7ed63ef546d666a700124b42db8e10c4ec3ced3964736f6c63430005090032`
+const CheckpointRegistryV1Bin = `608060405234801561001057600080fd5b5060405161068f38038061068f8339818101604052602081101561003357600080fd5b5051600080546001600160a01b0319166001600160a01b03831617905560405161005c9061009f565b604051809103906000f080158015610078573d6000803e3d6000fd5b50600180546001600160a01b0319166001600160a01b0392909216919091179055506100ac565b6102288061046783390190565b6103ac806100bb6000396000f3fe60806040526004361061003e5760003560e01c8062f55d9d146100a55780632d059305146100e7578063ce5494bb14610125578063ec55688914610165575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100b157600080fd5b506100e5600480360360208110156100c857600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661017a565b005b3480156100f357600080fd5b506100fc610222565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561013157600080fd5b506100e56004803603602081101561014857600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661023e565b34801561017157600080fd5b506100fc6102cc565b60005473ffffffffffffffffffffffffffffffffffffffff16331461020057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b610209816102e8565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b60015473ffffffffffffffffffffffffffffffffffffffff1681565b60005473ffffffffffffffffffffffffffffffffffffffff1633146102c457604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6102c9815b50565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b600154604080517f13af403500000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8481166004830152915191909216916313af403591602480830192600092919082900301818387803b15801561035c57600080fd5b505af1158015610370573d6000803e3d6000fd5b505050505056fea265627a7a723058205cfffd5f27899062817af0fb37511a4c2a87f894980d76be8b4996a528e6760e64736f6c634300050900326080604052600080546001600160a01b03191633179055610203806100256000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806313af40351461003b57806341c0e1b514610070575b600080fd5b61006e6004803603602081101561005157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610078565b005b61006e610145565b60005473ffffffffffffffffffffffffffffffffffffffff1633146100fe57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff92909216919091179055565b60005473ffffffffffffffffffffffffffffffffffffffff1633146101cb57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b33fffea265627a7a723058209992f7632209d7a295c70c817742f86492833e40fb94c3edda35a17a5c26129b64736f6c63430005090032`
 
 // DeployCheckpointRegistryV1 deploys a new Ethereum contract, binding an instance of CheckpointRegistryV1 to it.
 func DeployCheckpointRegistryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *CheckpointRegistryV1, error) {
@@ -214,44 +214,70 @@ func (_CheckpointRegistryV1 *CheckpointRegistryV1CallerSession) Proxy() (common.
 	return _CheckpointRegistryV1.Contract.Proxy(&_CheckpointRegistryV1.CallOpts)
 }
 
-// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+// V1storage is a free data retrieval call binding the contract method 0x2d059305.
 //
-// Solidity: function destroy(address ) returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _CheckpointRegistryV1.contract.Transact(opts, "destroy", arg0)
+// Solidity: function v1storage() constant returns(address)
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Caller) V1storage(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _CheckpointRegistryV1.contract.Call(opts, out, "v1storage")
+	return *ret0, err
+}
+
+// V1storage is a free data retrieval call binding the contract method 0x2d059305.
+//
+// Solidity: function v1storage() constant returns(address)
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) V1storage() (common.Address, error) {
+	return _CheckpointRegistryV1.Contract.V1storage(&_CheckpointRegistryV1.CallOpts)
+}
+
+// V1storage is a free data retrieval call binding the contract method 0x2d059305.
+//
+// Solidity: function v1storage() constant returns(address)
+func (_CheckpointRegistryV1 *CheckpointRegistryV1CallerSession) V1storage() (common.Address, error) {
+	return _CheckpointRegistryV1.Contract.V1storage(&_CheckpointRegistryV1.CallOpts)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _CheckpointRegistryV1.Contract.Destroy(&_CheckpointRegistryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Transactor) Destroy(opts *bind.TransactOpts, _newImpl common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.contract.Transact(opts, "destroy", _newImpl)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _CheckpointRegistryV1.Contract.Destroy(&_CheckpointRegistryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Destroy(&_CheckpointRegistryV1.TransactOpts, _newImpl)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address _newImpl) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorSession) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Destroy(&_CheckpointRegistryV1.TransactOpts, _newImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _CheckpointRegistryV1.contract.Transact(opts, "migrate", arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Transactor) Migrate(opts *bind.TransactOpts, _oldImpl common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.contract.Transact(opts, "migrate", _oldImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
-	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts, arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1Session) Migrate(_oldImpl common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts, _oldImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
-	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts, arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_CheckpointRegistryV1 *CheckpointRegistryV1TransactorSession) Migrate(_oldImpl common.Address) (*types.Transaction, error) {
+	return _CheckpointRegistryV1.Contract.Migrate(&_CheckpointRegistryV1.TransactOpts, _oldImpl)
 }

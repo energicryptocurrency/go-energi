@@ -35,21 +35,28 @@ contract BackboneRewardV1 is
     GovernedContract,
     IBlockReward
 {
+    // IGovernedContract
+    //---------------------------------
     constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
 
-    function reward(uint _amount) external payable {
+    // IBlockReward
+    //---------------------------------
+    function reward() external payable {
     }
 
     function getReward(uint _blockNumber)
         external view
-        returns(uint _amount)
+        returns(uint amount)
     {
         if (_blockNumber > 0) {
-            _amount = REWARD_BACKBONE_V1;
+            amount = REWARD_BACKBONE_V1;
         }
+    }
+
+    // Safety
+    //---
+    function () external payable {
+        revert("Not supported");
     }
 }
 

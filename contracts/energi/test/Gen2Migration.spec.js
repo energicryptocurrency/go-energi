@@ -16,23 +16,29 @@
 
 // Energi Governance system is the fundamental part of Energi Core.
 
-// NOTE: It's not allowed to change the compiler due to byte-to-byte
-//       match requirement.
-pragma solidity 0.5.9;
-//pragma experimental SMTChecker;
+'use strict';
 
-/**
- * Genesis version of BlacklistRegistry interface.
- *
- * Base Consensus interface for constructs which receive block rewards.
- *
- * NOTE: it MUST NOT change after blockchain launch!
- */
-interface IBlockReward {
-    // NOTE: it must NEVER fail
-    function reward() external payable;
+const Gen2Migration = artifacts.require('Gen2Migration');
 
-    // NOTE: it must NEVER fail
-    function getReward(uint _blockNumber) external view returns(uint amount);
-}
+contract("Gen2Migration", async accounts => {
+    let orig;
 
+    before(async () => {
+        orig = await Gen2Migration.deployed();
+    });
+
+    // Primary stuff
+    //---
+
+
+    // Safety & Cleanup
+    //---
+    it('should refuse to accept funds', async () => {
+        try {
+            await orig.send(web3.utils.toWei('1', "ether"));
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not supported/);
+        }
+    });
+});

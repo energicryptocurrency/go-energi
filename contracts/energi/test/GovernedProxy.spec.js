@@ -1,9 +1,30 @@
+// Copyright 2019 The Energi Core Authors
+// This file is part of Energi Core.
+//
+// Energi Core is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Energi Core is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Energi Core. If not, see <http://www.gnu.org/licenses/>.
+
+// Energi Governance system is the fundamental part of Energi Core.
+
 'use strict';
 
 const GovernedProxy = artifacts.require('GovernedProxy');
+const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
 const MockSporkRegistry = artifacts.require('MockSporkRegistry');
 const MockProposal = artifacts.require('MockProposal');
+
+const common = require('./common');
 
 contract("GovernedProxy", async accounts => {
     let first;
@@ -17,8 +38,10 @@ contract("GovernedProxy", async accounts => {
 
     before(async () => {
         registry = await MockSporkRegistry.deployed();
+        const registry_proxy = await MockProxy.new();
+        await registry_proxy.setImpl(registry.address);
         first = await MockContract.new(registry.address);
-        proxy = await GovernedProxy.new(first.address, registry.address);
+        proxy = await GovernedProxy.new(first.address, registry_proxy.address);
         second = await MockContract.new(proxy.address);
         third = await MockContract.new(proxy.address);
         fourth = await MockContract.new(proxy.address);
@@ -69,6 +92,9 @@ contract("GovernedProxy", async accounts => {
             //assert.match(e.message, /Wrong proxy!/);
             assert.match(e.message, /revert/);
         }
+
+        const evt = await proxy.getPastEvents('UpgradeProposal', common.evt_last_block);
+        expect(evt).lengthOf(0);
     });
 
     it('should accept proposal', async () => {
@@ -76,6 +102,10 @@ contract("GovernedProxy", async accounts => {
                 second.address, 2 * weeks,
                 // NOTE: it's mock registry - no fee check
                 { from: accounts[0], value: '1' });
+
+        const evt = await proxy.getPastEvents('UpgradeProposal', common.evt_last_block);
+        expect(evt).lengthOf(1);
+        expect(evt[0].args).include.keys('impl', 'proposal');
     });
 
     it('should refuse upgrade - Not accepted!', async () => {
@@ -103,6 +133,9 @@ contract("GovernedProxy", async accounts => {
         } catch (e) {
             assert.match(e.message, /Not registered!/);
         }
+
+        const evt = await proxy.getPastEvents('Upgraded', common.evt_last_block);
+        expect(evt).lengthOf(0);
     });
 
     it('should accept upgrade', async () => {
@@ -116,6 +149,10 @@ contract("GovernedProxy", async accounts => {
 
         const res = await proxy.upgrade(proposal.address);
         assert.equal(res.logs.length, 1);
+
+        const evt = await proxy.getPastEvents('Upgraded', common.evt_last_block);
+        expect(evt).lengthOf(1);
+        expect(evt[0].args).include.keys('impl', 'proposal');
     });
 
     it('should refuse upgrade AFTER upgrade - Not registered!', async () => {

@@ -22,41 +22,34 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 import { IGovernedContract } from "./IGovernedContract.sol";
+import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 
 /**
- * This contract has no chance of being updated. It must be stupid simple.
+ * SC-9: This contract has no chance of being updated. It must be stupid simple.
  *
  * If another upgrade logic is required in the future - it can be done as proxy stage II.
  */
 contract GovernedProxy is
-    IGovernedContract
+    IGovernedContract,
+    IGovernedProxy
 {
-    event UpgradeProposal(
-        address indexed newImpl,
-        address proposal
-    );
-    event Upgraded(
-        address indexed newImpl,
-        address proposal
-    );
-
     modifier senderOrigin {
-        // Internal calls are expected to use current_impl directly.
+        // Internal calls are expected to use impl directly.
         // That's due to use of call() instead of delegatecall() on purpose.
         // solium-disable-next-line security/no-tx-origin
         require(tx.origin == msg.sender, "Only direct calls are allowed!");
         _;
     }
 
-    IGovernedContract public current_impl;
-    ISporkRegistry public spork_registry;
+    IGovernedContract public impl;
+    IGovernedProxy public spork_proxy;
     mapping(address => IGovernedContract) public upgrade_proposals;
 
-    constructor(IGovernedContract _impl, ISporkRegistry _sporkRegistry) public {
-        current_impl = _impl;
-        spork_registry = _sporkRegistry;
+    constructor(IGovernedContract _impl, IGovernedProxy _sporkProxy) public {
+        impl = _impl;
+        spork_proxy = _sporkProxy;
     }
 
     /**
@@ -67,9 +60,11 @@ contract GovernedProxy is
         external payable
         senderOrigin
     {
-        require(_newImpl != current_impl, "Already active!");
+        require(_newImpl != impl, "Already active!");
         require(_newImpl.proxy() == address(this), "Wrong proxy!");
-        IProposal proposal = spork_registry.createUpgradeProposal.value(msg.value)(_newImpl, _period);
+
+        ISporkRegistry spork_reg = ISporkRegistry(address(spork_proxy.impl()));
+        IProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period);
 
         upgrade_proposals[address(proposal)] = _newImpl;
 
@@ -81,14 +76,14 @@ contract GovernedProxy is
      */
     function upgrade(IProposal _proposal) external {
         IGovernedContract new_impl = upgrade_proposals[address(_proposal)];
-        require(new_impl != current_impl, "Already active!"); // in case it changes in the flight
+        require(new_impl != impl, "Already active!"); // in case it changes in the flight
         require(address(new_impl) != address(0), "Not registered!");
         require(_proposal.isAccepted(), "Not accepted!");
 
-        IGovernedContract old_impl = current_impl;
+        IGovernedContract old_impl = impl;
 
         new_impl.migrate(old_impl);
-        current_impl = new_impl;
+        impl = new_impl;
         old_impl.destroy(new_impl);
 
         // SECURITY: prevent downgrade attack
@@ -123,14 +118,14 @@ contract GovernedProxy is
      */
     function () external payable senderOrigin {
         // SECURITY: senderOrigin() modifier is mandatory
-        IGovernedContract impl = current_impl;
+        IGovernedContract impl_m = impl;
 
         // solium-disable-next-line security/no-inline-assembly
         assembly {
             let ptr := mload(0x40)
             calldatacopy(ptr, 0, calldatasize)
 
-            let res := call(sub(gas, 10000), impl, callvalue, ptr, calldatasize, 0, 0)
+            let res := call(sub(gas, 10000), impl_m, callvalue, ptr, calldatasize, 0, 0)
             // NOTE: returndatasize should allow repeatable calls
             //       what should save one opcode.
             returndatacopy(ptr, 0, returndatasize)

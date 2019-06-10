@@ -87,16 +87,20 @@ test-sol:
 	@which ganache-cli 2>&1 >/dev/null || npm install -g ganache-cli
 	@which truffle 2>&1 >/dev/null || npm install -g truffle
 	@ganache-cli \
-	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef,1000000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef,10000000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdff,200000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcfff,100000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abffff,10000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890afffff,1000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890ffffff,1000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef123456789fffffff,0' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef12345678ffffffff,1000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567fffffffff,1000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef123456ffffffffff,1000000000000000000000' \
 	    2>&1 >build/contracts/ganache.log & \
 	  sleep 1; \
 	  truffle test; \
 	  res=$$?; \
 	  kill $$!; \
-	  fg; \
+	  wait; \
 	  exit $$res

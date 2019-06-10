@@ -23,6 +23,17 @@ pragma solidity 0.5.9;
 
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlacklistRegistry } from "./IBlacklistRegistry.sol";
+import { StorageBase }  from "./StorageBase.sol";
+
+/**
+ * Permanent storage of Blacklist Registry V1 data.
+ */
+contract StorageBlacklistRegistryV1 is
+    StorageBase
+{
+    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
+}
+
 
 /**
  * Genesis hardcoded version of BlacklistRegistry.
@@ -33,8 +44,27 @@ contract BlacklistRegistryV1 is
     GovernedContract,
     IBlacklistRegistry
 {
-    constructor(address _proxy) public GovernedContract(_proxy) {}
-    function migrate(IGovernedContract) external requireProxy {}
-    function destroy(IGovernedContract) external requireProxy {}
-    function () external payable {}
+    // Data for migration
+    //---------------------------------
+    StorageBlacklistRegistryV1 public v1storage;
+    //---------------------------------
+
+    constructor(address _proxy) public GovernedContract(_proxy) {
+        v1storage = new StorageBlacklistRegistryV1();
+    }
+
+    // IGovernedContract
+    //---------------------------------
+    function _destroy(IGovernedContract _newImpl) internal {
+        v1storage.setOwner(_newImpl);
+    }
+
+    // IBlacklistRegistry
+    //---------------------------------
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
+    }
 }

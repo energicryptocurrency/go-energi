@@ -28,18 +28,18 @@ var (
 )
 
 // TreasuryV1ABI is the input ABI used to generate the binding from.
-const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"_amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"superblock_cycle\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"v1storage\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"isSuperblock\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"},{\"name\":\"_superblock_cycle\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // TreasuryV1Bin is the compiled bytecode used for deploying new contracts.
-const TreasuryV1Bin = `608060405234801561001057600080fd5b5060405161028b38038061028b8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b0319909216919091179055610226806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c146100d7578063ce5494bb1461005b578063ec556889146100f457610059565b8062f55d9d1461005b5780631c4b774b1461009b575b005b34801561006757600080fd5b506100596004803603602081101561007e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610132565b3480156100a757600080fd5b506100c5600480360360208110156100be57600080fd5b50356101bb565b60408051918252519081900360200190f35b610059600480360360208110156100ed57600080fd5b50356101b8565b34801561010057600080fd5b506101096101d5565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff1633146101b857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b50565b600081156101d057506926f6a8f4e638030000005b919050565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a7230582081e3c68a06b2da26fb2946696ef9cd8c43d2a05a6d09ea27e8789a0e6a9150c064736f6c63430005090032`
+const TreasuryV1Bin = `608060405234801561001057600080fd5b506040516107ad3803806107ad8339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b0319166001600160a01b038416179055604051610063906100b3565b604051809103906000f08015801561007f573d6000803e3d6000fd5b50600180546001600160a01b0319166001600160a01b03929092169190911790556002819055806100ac57fe5b50506100c0565b6102288061058583390190565b6104b6806100cf6000396000f3fe60806040526004361061007a5760003560e01c80632d0593051161004e5780632d0593051461017c57806352782d86146101ba578063ce5494bb146101f8578063ec556889146102385761007a565b8062f55d9d146100e15780630ef34745146101235780631c4b774b1461014a578063228cb73314610174575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100ed57600080fd5b506101216004803603602081101561010457600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661024d565b005b34801561012f57600080fd5b506101386102f5565b60408051918252519081900360200190f35b34801561015657600080fd5b506101386004803603602081101561016d57600080fd5b50356102fb565b610121610315565b34801561018857600080fd5b50610191610317565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b3480156101c657600080fd5b506101e4600480360360208110156101dd57600080fd5b5035610333565b604080519115158252519081900360200190f35b34801561020457600080fd5b506101216004803603602081101561021b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610348565b34801561024457600080fd5b506101916103d6565b60005473ffffffffffffffffffffffffffffffffffffffff1633146102d357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6102dc816103f2565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b60025481565b6000811561031057506926f6a8f4e638030000005b919050565b565b60015473ffffffffffffffffffffffffffffffffffffffff1681565b6000600254828161034057fe5b061592915050565b60005473ffffffffffffffffffffffffffffffffffffffff1633146103ce57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6103d3815b50565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b600154604080517f13af403500000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8481166004830152915191909216916313af403591602480830192600092919082900301818387803b15801561046657600080fd5b505af115801561047a573d6000803e3d6000fd5b505050505056fea265627a7a72305820a9f3d9795efdbd059dedba0d6b0be030c1f7931f622dd5ec7b8bdf9e674a669464736f6c634300050900326080604052600080546001600160a01b03191633179055610203806100256000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806313af40351461003b57806341c0e1b514610070575b600080fd5b61006e6004803603602081101561005157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610078565b005b61006e610145565b60005473ffffffffffffffffffffffffffffffffffffffff1633146100fe57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff92909216919091179055565b60005473ffffffffffffffffffffffffffffffffffffffff1633146101cb57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b33fffea265627a7a723058207b05c108059409986123a397489da27379264c3009c659a142ec87fa82338cbb64736f6c63430005090032`
 
 // DeployTreasuryV1 deploys a new Ethereum contract, binding an instance of TreasuryV1 to it.
-func DeployTreasuryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *TreasuryV1, error) {
+func DeployTreasuryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address, _superblock_cycle *big.Int) (common.Address, *types.Transaction, *TreasuryV1, error) {
 	parsed, err := abi.JSON(strings.NewReader(TreasuryV1ABI))
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(TreasuryV1Bin), backend, _proxy)
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(TreasuryV1Bin), backend, _proxy, _superblock_cycle)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -190,7 +190,7 @@ func (_TreasuryV1 *TreasuryV1TransactorRaw) Transact(opts *bind.TransactOpts, me
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 amount)
 func (_TreasuryV1 *TreasuryV1Caller) GetReward(opts *bind.CallOpts, _blockNumber *big.Int) (*big.Int, error) {
 	var (
 		ret0 = new(*big.Int)
@@ -202,16 +202,42 @@ func (_TreasuryV1 *TreasuryV1Caller) GetReward(opts *bind.CallOpts, _blockNumber
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 amount)
 func (_TreasuryV1 *TreasuryV1Session) GetReward(_blockNumber *big.Int) (*big.Int, error) {
 	return _TreasuryV1.Contract.GetReward(&_TreasuryV1.CallOpts, _blockNumber)
 }
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
-// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 _amount)
+// Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 amount)
 func (_TreasuryV1 *TreasuryV1CallerSession) GetReward(_blockNumber *big.Int) (*big.Int, error) {
 	return _TreasuryV1.Contract.GetReward(&_TreasuryV1.CallOpts, _blockNumber)
+}
+
+// IsSuperblock is a free data retrieval call binding the contract method 0x52782d86.
+//
+// Solidity: function isSuperblock(uint256 _blockNumber) constant returns(bool)
+func (_TreasuryV1 *TreasuryV1Caller) IsSuperblock(opts *bind.CallOpts, _blockNumber *big.Int) (bool, error) {
+	var (
+		ret0 = new(bool)
+	)
+	out := ret0
+	err := _TreasuryV1.contract.Call(opts, out, "isSuperblock", _blockNumber)
+	return *ret0, err
+}
+
+// IsSuperblock is a free data retrieval call binding the contract method 0x52782d86.
+//
+// Solidity: function isSuperblock(uint256 _blockNumber) constant returns(bool)
+func (_TreasuryV1 *TreasuryV1Session) IsSuperblock(_blockNumber *big.Int) (bool, error) {
+	return _TreasuryV1.Contract.IsSuperblock(&_TreasuryV1.CallOpts, _blockNumber)
+}
+
+// IsSuperblock is a free data retrieval call binding the contract method 0x52782d86.
+//
+// Solidity: function isSuperblock(uint256 _blockNumber) constant returns(bool)
+func (_TreasuryV1 *TreasuryV1CallerSession) IsSuperblock(_blockNumber *big.Int) (bool, error) {
+	return _TreasuryV1.Contract.IsSuperblock(&_TreasuryV1.CallOpts, _blockNumber)
 }
 
 // Proxy is a free data retrieval call binding the contract method 0xec556889.
@@ -240,65 +266,117 @@ func (_TreasuryV1 *TreasuryV1CallerSession) Proxy() (common.Address, error) {
 	return _TreasuryV1.Contract.Proxy(&_TreasuryV1.CallOpts)
 }
 
-// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+// SuperblockCycle is a free data retrieval call binding the contract method 0x0ef34745.
 //
-// Solidity: function destroy(address ) returns()
-func (_TreasuryV1 *TreasuryV1Transactor) Destroy(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.contract.Transact(opts, "destroy", arg0)
+// Solidity: function superblock_cycle() constant returns(uint256)
+func (_TreasuryV1 *TreasuryV1Caller) SuperblockCycle(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _TreasuryV1.contract.Call(opts, out, "superblock_cycle")
+	return *ret0, err
+}
+
+// SuperblockCycle is a free data retrieval call binding the contract method 0x0ef34745.
+//
+// Solidity: function superblock_cycle() constant returns(uint256)
+func (_TreasuryV1 *TreasuryV1Session) SuperblockCycle() (*big.Int, error) {
+	return _TreasuryV1.Contract.SuperblockCycle(&_TreasuryV1.CallOpts)
+}
+
+// SuperblockCycle is a free data retrieval call binding the contract method 0x0ef34745.
+//
+// Solidity: function superblock_cycle() constant returns(uint256)
+func (_TreasuryV1 *TreasuryV1CallerSession) SuperblockCycle() (*big.Int, error) {
+	return _TreasuryV1.Contract.SuperblockCycle(&_TreasuryV1.CallOpts)
+}
+
+// V1storage is a free data retrieval call binding the contract method 0x2d059305.
+//
+// Solidity: function v1storage() constant returns(address)
+func (_TreasuryV1 *TreasuryV1Caller) V1storage(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _TreasuryV1.contract.Call(opts, out, "v1storage")
+	return *ret0, err
+}
+
+// V1storage is a free data retrieval call binding the contract method 0x2d059305.
+//
+// Solidity: function v1storage() constant returns(address)
+func (_TreasuryV1 *TreasuryV1Session) V1storage() (common.Address, error) {
+	return _TreasuryV1.Contract.V1storage(&_TreasuryV1.CallOpts)
+}
+
+// V1storage is a free data retrieval call binding the contract method 0x2d059305.
+//
+// Solidity: function v1storage() constant returns(address)
+func (_TreasuryV1 *TreasuryV1CallerSession) V1storage() (common.Address, error) {
+	return _TreasuryV1.Contract.V1storage(&_TreasuryV1.CallOpts)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_TreasuryV1 *TreasuryV1Session) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Destroy(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_TreasuryV1 *TreasuryV1Transactor) Destroy(opts *bind.TransactOpts, _newImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.contract.Transact(opts, "destroy", _newImpl)
 }
 
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
-// Solidity: function destroy(address ) returns()
-func (_TreasuryV1 *TreasuryV1TransactorSession) Destroy(arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Destroy(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function destroy(address _newImpl) returns()
+func (_TreasuryV1 *TreasuryV1Session) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Destroy(&_TreasuryV1.TransactOpts, _newImpl)
+}
+
+// Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
+//
+// Solidity: function destroy(address _newImpl) returns()
+func (_TreasuryV1 *TreasuryV1TransactorSession) Destroy(_newImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Destroy(&_TreasuryV1.TransactOpts, _newImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_TreasuryV1 *TreasuryV1Transactor) Migrate(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.contract.Transact(opts, "migrate", arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_TreasuryV1 *TreasuryV1Transactor) Migrate(opts *bind.TransactOpts, _oldImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.contract.Transact(opts, "migrate", _oldImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_TreasuryV1 *TreasuryV1Session) Migrate(arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_TreasuryV1 *TreasuryV1Session) Migrate(_oldImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, _oldImpl)
 }
 
 // Migrate is a paid mutator transaction binding the contract method 0xce5494bb.
 //
-// Solidity: function migrate(address ) returns()
-func (_TreasuryV1 *TreasuryV1TransactorSession) Migrate(arg0 common.Address) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function migrate(address _oldImpl) returns()
+func (_TreasuryV1 *TreasuryV1TransactorSession) Migrate(_oldImpl common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Migrate(&_TreasuryV1.TransactOpts, _oldImpl)
 }
 
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
+// Reward is a paid mutator transaction binding the contract method 0x228cb733.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_TreasuryV1 *TreasuryV1Transactor) Reward(opts *bind.TransactOpts, arg0 *big.Int) (*types.Transaction, error) {
-	return _TreasuryV1.contract.Transact(opts, "reward", arg0)
+// Solidity: function reward() returns()
+func (_TreasuryV1 *TreasuryV1Transactor) Reward(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _TreasuryV1.contract.Transact(opts, "reward")
 }
 
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
+// Reward is a paid mutator transaction binding the contract method 0x228cb733.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_TreasuryV1 *TreasuryV1Session) Reward(arg0 *big.Int) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Reward(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function reward() returns()
+func (_TreasuryV1 *TreasuryV1Session) Reward() (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Reward(&_TreasuryV1.TransactOpts)
 }
 
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
+// Reward is a paid mutator transaction binding the contract method 0x228cb733.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_TreasuryV1 *TreasuryV1TransactorSession) Reward(arg0 *big.Int) (*types.Transaction, error) {
-	return _TreasuryV1.Contract.Reward(&_TreasuryV1.TransactOpts, arg0)
+// Solidity: function reward() returns()
+func (_TreasuryV1 *TreasuryV1TransactorSession) Reward() (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Reward(&_TreasuryV1.TransactOpts)
 }

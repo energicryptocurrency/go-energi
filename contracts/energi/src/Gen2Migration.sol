@@ -28,4 +28,11 @@ pragma solidity 0.5.9;
  */
 contract Gen2Migration
 {
+    // TODO: support emergency drain through SporkRegistry !
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
+    }
 }
