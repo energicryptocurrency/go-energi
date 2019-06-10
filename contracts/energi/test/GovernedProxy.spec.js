@@ -24,6 +24,8 @@ const MockContract = artifacts.require('MockContract');
 const MockSporkRegistry = artifacts.require('MockSporkRegistry');
 const MockProposal = artifacts.require('MockProposal');
 
+const common = require('./common');
+
 contract("GovernedProxy", async accounts => {
     let first;
     let second;
@@ -90,6 +92,9 @@ contract("GovernedProxy", async accounts => {
             //assert.match(e.message, /Wrong proxy!/);
             assert.match(e.message, /revert/);
         }
+
+        const evt = await proxy.getPastEvents('UpgradeProposal', common.evt_last_block);
+        expect(evt).lengthOf(0);
     });
 
     it('should accept proposal', async () => {
@@ -97,6 +102,10 @@ contract("GovernedProxy", async accounts => {
                 second.address, 2 * weeks,
                 // NOTE: it's mock registry - no fee check
                 { from: accounts[0], value: '1' });
+
+        const evt = await proxy.getPastEvents('UpgradeProposal', common.evt_last_block);
+        expect(evt).lengthOf(1);
+        expect(evt[0].args).include.keys('impl', 'proposal');
     });
 
     it('should refuse upgrade - Not accepted!', async () => {
@@ -124,6 +133,9 @@ contract("GovernedProxy", async accounts => {
         } catch (e) {
             assert.match(e.message, /Not registered!/);
         }
+
+        const evt = await proxy.getPastEvents('Upgraded', common.evt_last_block);
+        expect(evt).lengthOf(0);
     });
 
     it('should accept upgrade', async () => {
@@ -137,6 +149,10 @@ contract("GovernedProxy", async accounts => {
 
         const res = await proxy.upgrade(proposal.address);
         assert.equal(res.logs.length, 1);
+
+        const evt = await proxy.getPastEvents('Upgraded', common.evt_last_block);
+        expect(evt).lengthOf(1);
+        expect(evt[0].args).include.keys('impl', 'proposal');
     });
 
     it('should refuse upgrade AFTER upgrade - Not registered!', async () => {

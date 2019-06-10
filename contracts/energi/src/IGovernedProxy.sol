@@ -35,11 +35,11 @@ import { IProposal } from "./IProposal.sol";
  */
 interface IGovernedProxy {
     event UpgradeProposal(
-        address indexed newImpl,
+        address indexed impl,
         address proposal
     );
     event Upgraded(
-        address indexed newImpl,
+        address indexed impl,
         address proposal
     );
 

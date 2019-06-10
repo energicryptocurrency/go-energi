@@ -30,7 +30,7 @@ pragma solidity 0.5.9;
  */
 interface IBlockReward {
     // NOTE: it must NEVER fail
-    function reward(uint _amount) external payable;
+    function reward() external payable;
 
     // NOTE: it must NEVER fail
     function getReward(uint _blockNumber) external view returns(uint amount);

@@ -18,6 +18,51 @@
 
 'use strict';
 
+exports.mnregistry_config = [
+    2,
+    3,
+    2,
+    24*60*60
+];
+exports.superblock_cycles = 8;
+
+exports.evt_last_block = {
+    fromBlock: 'latest',
+    toBlock: 'latest',
+};
+
+exports.stringifyBN = (web3, o) => {
+    expect(o).is.not.undefined;
+    for (let f in o) {
+        const v = o[f];
+
+        if (web3.utils.isBN(v)) {
+            o[f] = v.toString();
+        }
+    }
+    return o;
+};
+
+exports.moveTime = async (web3, seconds) => {
+    expect(seconds).is.not.undefined;
+    await new Promise((resolve, reject) => {
+        web3.currentProvider.send({
+            jsonrpc: "2.0",
+            method: "evm_increaseTime",
+            params: [seconds],
+            id: new Date().getSeconds()
+        }, resolve);
+    });
+    await new Promise((resolve, reject) => {
+        web3.currentProvider.send({
+            jsonrpc: "2.0",
+            method: "evm_mine",
+            params: [],
+            id: new Date().getSeconds() + 1
+        }, resolve);
+    });
+};
+
 exports.govPreTests = (s) => {
     s.it('should refuse migrate() through s.proxy', async () => {
         try {

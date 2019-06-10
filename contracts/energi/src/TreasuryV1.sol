@@ -50,10 +50,16 @@ contract TreasuryV1 is
     // Data for migration
     //---------------------------------
     StorageTreasuryV1 public v1storage;
+    uint public superblock_cycle;
     //---------------------------------
 
-    constructor(address _proxy) public GovernedContract(_proxy) {
+    constructor(address _proxy, uint _superblock_cycle)
+        public
+        GovernedContract(_proxy)
+    {
         v1storage = new StorageTreasuryV1();
+        superblock_cycle = _superblock_cycle;
+        assert(superblock_cycle > 0);
     }
 
     // IGovernedContract
@@ -62,12 +68,18 @@ contract TreasuryV1 is
         v1storage.setOwner(_newImpl);
     }
 
-    // IBlockReward
+    // ITreasury
     //---------------------------------
+    function isSuperblock(uint _blockNumber)
+        external view
+        returns(bool)
+    {
+        return (_blockNumber % superblock_cycle) == 0;
+    }
 
     // IBlockReward
     //---------------------------------
-    function reward(uint) external payable {
+    function reward() external payable {
     }
 
     function getReward(uint _blockNumber)

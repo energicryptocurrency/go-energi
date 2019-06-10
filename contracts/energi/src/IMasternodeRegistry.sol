@@ -29,13 +29,35 @@ pragma solidity 0.5.9;
  * NOTE: it MUST NOT change after blockchain launch!
  */
 interface IMasternodeRegistry {
-    function announce(address masternode, uint32 ipv4address) external;
-    function denounce() external;
-    function heartbeat(uint sw_features) external;
-    function invalidate(address masternode) external;
+    event Announced(
+        address indexed masternode,
+        address indexed owner,
+        uint32 ipv4address,
+        bytes32[2] enode,
+        uint collateral
+    );
+    event Denounced(
+        address indexed masternode,
+        address indexed owner
+    );
+    event Validation(
+        address indexed masternode,
+        address indexed validator
+    );
+    event Deactivated(
+        address masternode
+    );
+
+    function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode) external;
+    function denounce(address masternode) external;
+    function heartbeat(uint block_number, bytes32 block_hash, uint sw_features) external;
     function validate(address masternode) external;
     function isValid(address masternode) external view
         returns(bool);
     function count() external view
         returns(uint active, uint total, uint max_of_all_times);
+    function info(address masternode) external view
+        returns(address owner, uint32 ipv4address, bytes32[2] memory enode, uint collateral);
+    function onCollateralUpdate(address owner) external;
+    function enumerate() external view returns(address[] memory masternodes);
 }

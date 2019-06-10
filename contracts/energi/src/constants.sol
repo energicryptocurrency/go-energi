@@ -58,5 +58,10 @@ contract GlobalConstants {
 
     uint constant internal MN_COLLATERAL_MIN = 10000 ether;
     uint constant internal MN_COLLATERAL_MAX = 100000 ether;
+
+    uint constant internal MN_HEARTBEAT_INTERVAL = 60 minutes;
+    uint constant internal MN_HEARTBEAT_INTERVAL_MIN = MN_HEARTBEAT_INTERVAL / 2;
+    uint constant internal MN_HEARTBEAT_INTERVAL_MAX = MN_HEARTBEAT_INTERVAL * 2;
+    uint constant internal MN_HEARTBEAT_PAST_BLOCKS = 10;
 }
 

@@ -46,6 +46,11 @@ contract("TreasuryV1", async accounts => {
         Object.freeze(s);
     });
 
+    after(async () => {
+        const impl = await TreasuryV1.new(s.proxy.address, common.superblock_cycles);
+        await s.proxy.setImpl(impl.address);
+    });
+
     describe('common pre', () => common.govPreTests(s) );
 
     //---

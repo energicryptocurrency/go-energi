@@ -22,4 +22,5 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 interface ITreasury {
+    function isSuperblock(uint _blockNumber) external view returns(bool);
 }

@@ -23,7 +23,9 @@ pragma solidity 0.5.9;
 
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IMasternodeToken } from "./IMasternodeToken.sol";
+import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
 import { StorageBase }  from "./StorageBase.sol";
 
 /**
@@ -70,10 +72,15 @@ contract MasternodeTokenV1 is
     // Data for migration
     //---------------------------------
     StorageMasternodeTokenV1 public v1storage;
+    IGovernedProxy public registry_proxy;
     //---------------------------------
 
-    constructor(address _proxy) public GovernedContract(_proxy) {
+    constructor(address _proxy, IGovernedProxy _registry_proxy) 
+        public
+        GovernedContract(_proxy)
+    {
         v1storage = new StorageMasternodeTokenV1();
+        registry_proxy = _registry_proxy;
 
         // ERC20
         emit Transfer(address(0), address(0), 0);
@@ -142,7 +149,7 @@ contract MasternodeTokenV1 is
 
     function withdrawCollateral(uint256 _amount) external {
         // Retrieve
-        address payable tokenOwner = _ownerAddress();
+        address payable tokenOwner = _callerAddress();
         uint256 balance = v1storage.balanceOnly(tokenOwner);
 
         // Process
@@ -159,13 +166,16 @@ contract MasternodeTokenV1 is
         // Events
         emit Transfer(tokenOwner, address(0), _amount);
 
+        // Notify the registry
+        IMasternodeRegistry(address(registry_proxy.impl())).onCollateralUpdate(tokenOwner);
+
         // TODO: we may need to allow more gas here for shared masternode contracts!
         tokenOwner.transfer(_amount);
     }
 
     function depositCollateral() external payable {
         // Retrieve
-        address payable tokenOwner = _ownerAddress();
+        address payable tokenOwner = _callerAddress();
         uint256 balance = v1storage.balanceOnly(tokenOwner);
 
         // Process
@@ -177,6 +187,9 @@ contract MasternodeTokenV1 is
 
         // Events
         emit Transfer(address(0), tokenOwner, msg.value);
+
+        // Notify the registry
+        IMasternodeRegistry(address(registry_proxy.impl())).onCollateralUpdate(tokenOwner);
     }
 
     function _validateBalance(uint256 _amount) internal pure {
@@ -188,19 +201,6 @@ contract MasternodeTokenV1 is
 
         if ((_amount % MN_COLLATERAL_MIN) != 0) {
             revert("Not a multiple");
-        }
-    }
-
-    function _ownerAddress()
-        internal view
-        returns (address payable)
-    {
-        if (msg.sender == proxy) {
-            // This is guarantee of the GovernedProxy
-            // solium-disable-next-line security/no-tx-origin
-            return tx.origin;
-        } else {
-            return msg.sender;
         }
     }
 

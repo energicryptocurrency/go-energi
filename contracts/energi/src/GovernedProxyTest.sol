@@ -42,6 +42,16 @@ contract MockContract is GovernedContract
     function killStorage(StorageBase _storage) external {
         _storage.kill();
     }
+    function testDrain() external {
+        selfdestruct(msg.sender);
+    }
+    function testDrain(uint amount) external {
+        msg.sender.transfer(amount);
+    }
+    function callProxy() external payable {
+        address payable p = address(uint160(proxy));
+        p.transfer(msg.value);
+    }
     function () external payable {}
 }
 

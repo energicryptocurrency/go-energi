@@ -46,6 +46,11 @@ contract("CheckpointRegistryV1", async accounts => {
         Object.freeze(s);
     });
 
+    after(async () => {
+        const impl = await CheckpointRegistryV1.new(s.proxy.address);
+        await s.proxy.setImpl(impl.address);
+    });
+
     describe('common pre', () => common.govPreTests(s) );
 
     //---

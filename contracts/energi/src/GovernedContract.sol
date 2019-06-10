@@ -58,6 +58,19 @@ contract GovernedContract is IGovernedContract {
 
     // solium-disable-next-line no-empty-blocks
     function _destroy(IGovernedContract) internal {}
+
+    function _callerAddress()
+        internal view
+        returns (address payable)
+    {
+        if (msg.sender == proxy) {
+            // This is guarantee of the GovernedProxy
+            // solium-disable-next-line security/no-tx-origin
+            return tx.origin;
+        } else {
+            return msg.sender;
+        }
+    }
 }
 
 

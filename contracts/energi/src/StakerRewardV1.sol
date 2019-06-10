@@ -41,7 +41,7 @@ contract StakerRewardV1 is
 
     // IBlockReward
     //---------------------------------
-    function reward(uint) external payable {
+    function reward() external payable {
     }
 
     function getReward(uint _blockNumber)

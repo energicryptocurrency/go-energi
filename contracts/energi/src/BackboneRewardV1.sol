@@ -41,7 +41,7 @@ contract BackboneRewardV1 is
 
     // IBlockReward
     //---------------------------------
-    function reward(uint _amount) external payable {
+    function reward() external payable {
     }
 
     function getReward(uint _blockNumber)

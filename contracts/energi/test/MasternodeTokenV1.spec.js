@@ -35,7 +35,6 @@ contract("MasternodeTokenV1", async accounts => {
         web3,
     };
 
-    // NOTE: some BigNumber issues with Truffle exposed web3...
     const COLLATERAL_1 = web3.utils.toWei('10000', 'ether');
     const COLLATERAL_2 = web3.utils.toWei('20000', 'ether');
     const COLLATERAL_3 = web3.utils.toWei('30000', 'ether');
@@ -51,6 +50,7 @@ contract("MasternodeTokenV1", async accounts => {
     before(async () => {
         s.orig = await MasternodeTokenV1.deployed();
         s.proxy = await MockProxy.at(await s.orig.proxy());
+        s.registry_proxy = await MockProxy.at(await s.orig.registry_proxy());
         s.fake = await MockContract.new(s.proxy.address);
         s.proxy_abi = await MasternodeTokenV1.at(s.proxy.address);
         s.token_abi = await IMasternodeToken.at(s.proxy.address);
@@ -59,11 +59,30 @@ contract("MasternodeTokenV1", async accounts => {
         Object.freeze(s);
     });
 
+    after(async () => {
+        const impl = await MasternodeTokenV1.new(s.proxy.address, s.registry_proxy.address);
+        await s.proxy.setImpl(impl.address);
+
+        await s.fake.testDrain(COLLATERAL_3, {from: accounts[1]});
+        await s.fake.testDrain(COLLATERAL_1, {from: accounts[0]});
+    });
+    
     describe('common pre', () => common.govPreTests(s) );
 
     //---
     describe('ERC20', () => {
-        it.skip('should emit Transfer in c-tor', async () => {});
+        it('should emit Transfer in c-tor', async () => {
+            const tmp = await MasternodeTokenV1.new(s.proxy.address, s.registry_proxy.address);
+
+            const evt = await tmp.getPastEvents('Transfer', common.evt_last_block);
+            expect(evt).lengthOf(1);
+            expect(evt[0].args).deep.include({
+                '__length__': 3,
+                'from': '0x0000000000000000000000000000000000000000',
+                'to': '0x0000000000000000000000000000000000000000',
+                'value': web3.utils.toBN('0'),
+            });
+        });
 
         it('should support totalSupply()', async () => {
             const res = await s.token_abi.totalSupply();
@@ -145,25 +164,20 @@ contract("MasternodeTokenV1", async accounts => {
 
             const res3 = await s.token_abi.totalSupply();
             assert.equal(res2.valueOf(), COLLATERAL_1);
+
+            const evt = await s.orig.getPastEvents('Transfer', common.evt_last_block);
+            expect(evt).lengthOf(1);
+            expect(evt[0].args).deep.include({
+                '__length__': 3,
+                'from': '0x0000000000000000000000000000000000000000',
+                'to': accounts[0],
+                'value': web3.utils.toBN(COLLATERAL_1),
+            });
         });
 
         it('should correctly reflect age', async () => {
-            await new Promise((resolve, reject) => {
-                web3.currentProvider.send({
-                    jsonrpc: "2.0",
-                    method: "evm_increaseTime",
-                    params: [3600],
-                    id: new Date().getSeconds()
-                }, resolve);
-            });
-            await new Promise((resolve, reject) => {
-                web3.currentProvider.send({
-                    jsonrpc: "2.0",
-                    method: "evm_mine",
-                    params: [],
-                    id: new Date().getSeconds() + 1
-                }, resolve);
-            });
+            await common.moveTime(web3, 3600);
+
             const res = await s.token_abi.balanceInfo(accounts[0]);
             assert.equal(res['0'].valueOf(), COLLATERAL_1);
             assert.isAtLeast(parseInt(res['1'].valueOf()), 3600);
@@ -183,7 +197,17 @@ contract("MasternodeTokenV1", async accounts => {
             assert.equal(res2.valueOf(), COLLATERAL_3);
 
             const total = await s.token_abi.totalSupply();
+
             assert.equal(total.valueOf(), COLLATERAL_3);
+
+            const evt = await s.orig.getPastEvents('Transfer', common.evt_last_block);
+            expect(evt).lengthOf(1);
+            expect(evt[0].args).deep.include({
+                '__length__': 3,
+                'from': '0x0000000000000000000000000000000000000000',
+                'to': accounts[0],
+                'value': web3.utils.toBN(COLLATERAL_2),
+            });
         });
 
         it('should refuse depositCollateral() not a multiple of', async () => {
@@ -196,6 +220,9 @@ contract("MasternodeTokenV1", async accounts => {
             } catch (e) {
                 assert.match(e.message, /Not a multiple/);
             }
+
+            const evt = await s.orig.getPastEvents('Transfer', common.evt_last_block);
+            expect(evt).lengthOf(0);
         });
 
         it('should allow depositCollateral() - max', async () => {
@@ -256,6 +283,15 @@ contract("MasternodeTokenV1", async accounts => {
 
             const total = await s.token_abi.totalSupply();
             assert.equal(total.valueOf(), COLLATERAL_4);
+
+            const evt = await s.orig.getPastEvents('Transfer', common.evt_last_block);
+            expect(evt).lengthOf(1);
+            expect(evt[0].args).deep.include({
+                '__length__': 3,
+                'from': accounts[0],
+                'to': '0x0000000000000000000000000000000000000000',
+                'value': web3.utils.toBN(COLLATERAL_9),
+            });
         });
 
         it('should refuse withdrawCollateral() over balance', async () => {
@@ -267,6 +303,9 @@ contract("MasternodeTokenV1", async accounts => {
             } catch (e) {
                 assert.match(e.message, /Not enough/);
             }
+
+            const evt = await s.orig.getPastEvents('Transfer', common.evt_last_block);
+            expect(evt).lengthOf(0);
         });
 
         it('should refuse setBalance() on s.storage', async () => {
