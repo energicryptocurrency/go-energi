@@ -137,7 +137,6 @@ contract MasternodeRegistryV1 is
     IGovernedProxy public treasury_proxy;
 
     uint32 public mn_announced;
-    uint64 public mn_total_ever;
 
     address public current_masternode;
     uint8 public current_payouts;
@@ -153,6 +152,10 @@ contract MasternodeRegistryV1 is
         uint64 inactive_since;
         uint8 seq_payouts;
     }
+
+    uint public mn_ever_collateral;
+    uint public mn_active_collateral;
+    uint public mn_announced_collateral;
 
     uint32 public mn_active;
     mapping(address => Status) public mn_status;
@@ -224,12 +227,15 @@ contract MasternodeRegistryV1 is
         mnstatus.last_heartbeat = uint64(block.timestamp);
         mnstatus.seq_payouts = uint8(balance / MN_COLLATERAL_MIN);
         ++mn_active;
+        ++mn_announced;
 
-        uint32 announced_count = mn_announced + 1;
-        mn_announced = announced_count;
+        mn_active_collateral += balance;
+        uint announced_collateral = mn_announced_collateral;
+        announced_collateral += balance;
+        mn_announced_collateral = announced_collateral;
 
-        if (announced_count > mn_total_ever) {
-            mn_total_ever = announced_count;
+        if (announced_collateral > mn_ever_collateral) {
+            mn_ever_collateral = announced_collateral;
         }
 
         // Event
@@ -337,8 +343,11 @@ contract MasternodeRegistryV1 is
 
         // Delete
         //---
+        mn_announced_collateral -= mninfo.collateral;
+
         if (mn_status[masternode].seq_payouts > 0) {
             --mn_active;
+            mn_active_collateral -= mninfo.collateral;
         }
 
         delete mn_status[masternode];
@@ -434,12 +443,18 @@ contract MasternodeRegistryV1 is
 
     //===
 
-    function count() external view returns(
-        uint active, uint total, uint max_of_all_times
-    ) {
+    function count() external view
+        returns(
+            uint active, uint total,
+            uint active_collateral, uint total_collateral,
+            uint max_of_all_times
+        )
+    {
         active = mn_active;
         total = mn_announced;
-        max_of_all_times = mn_total_ever;
+        active_collateral = mn_active_collateral;
+        total_collateral = mn_announced_collateral;
+        max_of_all_times = mn_ever_collateral;
     }
 
     //===
@@ -615,6 +630,7 @@ contract MasternodeRegistryV1 is
             mnstatus.seq_payouts = 0;
             mnstatus.inactive_since = uint64(block.timestamp);
             --mn_active;
+            mn_active_collateral -= mninfo.collateral;
             mnstatus.validations = 0;
             current_masternode = mninfo.next;
             current_payouts = 0;

@@ -412,7 +412,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const res = await s.token_abi.count();
                 assert.equal(res[0], 1);
                 assert.equal(res[1], 1);
-                assert.equal(res[2], 1);
+                assert.equal(res[2].toString(), collateral1.toString());
             });
 
             it('should produce info()', async () => {
@@ -656,10 +656,14 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(res).eql({
                     '0': '2',
                     '1': '2',
-                    '2': '2',
+                    '2': toWei('50000', 'ether'),
+                    '3': toWei('50000', 'ether'),
+                    '4': toWei('60000', 'ether'),
                     'active': '2',
                     'total': '2',
-                    'max_of_all_times': '2',
+                    'active_collateral': toWei('50000', 'ether'),
+                    'total_collateral': toWei('50000', 'ether'),
+                    'max_of_all_times': toWei('60000', 'ether'),
                 });
             });
 
@@ -844,10 +848,14 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(res).eql({
                     '0': '3',
                     '1': '3',
-                    '2': '3',
+                    '2': toWei('60000', 'ether'),
+                    '3': toWei('60000', 'ether'),
+                    '4': toWei('80000', 'ether'),
                     'active': '3',
                     'total': '3',
-                    'max_of_all_times': '3',
+                    'active_collateral': toWei('60000', 'ether'),
+                    'total_collateral': toWei('60000', 'ether'),
+                    'max_of_all_times': toWei('80000', 'ether'),
                 });
             });
 
@@ -1056,6 +1064,23 @@ contract("MasternodeRegistryV1", async accounts => {
                         'owner': mn.owner,
                     });
                 }
+            });
+
+            it('should correctly count() ever max', async () => {
+                const res = await s.token_abi.count();
+                common.stringifyBN(web3, res);
+                expect(res).eql({
+                    '0': '0',
+                    '1': '0',
+                    '2': toWei('0', 'ether'),
+                    '3': toWei('0', 'ether'),
+                    '4': toWei('90000', 'ether'),
+                    'active': '0',
+                    'total': '0',
+                    'active_collateral': toWei('0', 'ether'),
+                    'total_collateral': toWei('0', 'ether'),
+                    'max_of_all_times': toWei('90000', 'ether'),
+                });
             });
         });
     });

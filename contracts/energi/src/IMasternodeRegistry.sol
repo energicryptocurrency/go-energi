@@ -55,7 +55,10 @@ interface IMasternodeRegistry {
     function isValid(address masternode) external view
         returns(bool);
     function count() external view
-        returns(uint active, uint total, uint max_of_all_times);
+        returns(
+            uint active, uint total,
+            uint active_collateral, uint total_collateral,
+            uint max_of_all_times);
     function info(address masternode) external view
         returns(address owner, uint32 ipv4address, bytes32[2] memory enode,
                 uint collateral, uint announced_block);
