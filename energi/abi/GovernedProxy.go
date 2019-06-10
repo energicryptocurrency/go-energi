@@ -28,10 +28,10 @@ var (
 )
 
 // GovernedProxyABI is the input ABI used to generate the binding from.
-const GovernedProxyABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"upgrade_proposals\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"},{\"name\":\"_period\",\"type\":\"uint256\"}],\"name\":\"proposeUpgrade\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"impl\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"spork_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_impl\",\"type\":\"address\"},{\"name\":\"_sporkProxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"newImpl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"UpgradeProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"newImpl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"}]"
+const GovernedProxyABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"upgrade_proposals\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"},{\"name\":\"_period\",\"type\":\"uint256\"}],\"name\":\"proposeUpgrade\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"impl\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"spork_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_impl\",\"type\":\"address\"},{\"name\":\"_sporkProxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"impl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"UpgradeProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"impl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"}]"
 
 // GovernedProxyBin is the compiled bytecode used for deploying new contracts.
-const GovernedProxyBin = `608060405234801561001057600080fd5b50604051610ba3380380610ba38339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b039384166001600160a01b03199182161790915560018054939092169216919091179055610b298061007a6000396000f3fe60806040526004361061007a5760003560e01c80638abf60771161004e5780638abf607714610251578063ce5494bb1461012d578063dd6a851d14610266578063ec5568891461027b5761007a565b8062f55d9d1461012d5780630900f0101461016f57806332e3a905146101af5780635b6dee4c14610218575b3233146100e857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f4f6e6c79206469726563742063616c6c732061726520616c6c6f776564210000604482015290519081900360640190fd5b6000805460405173ffffffffffffffffffffffffffffffffffffffff9091169136908237600080368334866127105a03f13d6000833e808015610129573d83f35b3d83fd5b34801561013957600080fd5b5061016d6004803603602081101561015057600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610290565b005b34801561017b57600080fd5b5061016d6004803603602081101561019257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166102f7565b3480156101bb57600080fd5b506101ef600480360360208110156101d257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166106b5565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b61016d6004803603604081101561022e57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356106dd565b34801561025d57600080fd5b506101ef610ab8565b34801561027257600080fd5b506101ef610ad4565b34801561028757600080fd5b506101ef610af0565b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600860248201527f476f6f6420747279000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff8082166000908152600260205260408120549054908216911681141561039357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff811661041557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f4e6f742072656769737465726564210000000000000000000000000000000000604482015290519081900360640190fd5b8173ffffffffffffffffffffffffffffffffffffffff16635051a5ec6040518163ffffffff1660e01b815260040160206040518083038186803b15801561045b57600080fd5b505afa15801561046f573d6000803e3d6000fd5b505050506040513d602081101561048557600080fd5b50516104f257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f742061636365707465642100000000000000000000000000000000000000604482015290519081900360640190fd5b60008054604080517fce5494bb00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff92831660048201819052915191939285169263ce5494bb9260248084019382900301818387803b15801561056557600080fd5b505af1158015610579573d6000803e3d6000fd5b5050600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff8681169182178355604080517ef55d9d000000000000000000000000000000000000000000000000000000008152600481019390935251908616945062f55d9d93506024808301939282900301818387803b15801561061457600080fd5b505af1158015610628573d6000803e3d6000fd5b50505073ffffffffffffffffffffffffffffffffffffffff80851660008181526002602090815260409182902080547fffffffffffffffffffffffff00000000000000000000000000000000000000001690558151928352905192861693507f5d611f318680d00598bb735d61bacf0c514c6b50e1e5ad30040a4df2b12791c792918290030190a2505050565b60026020526000908152604090205473ffffffffffffffffffffffffffffffffffffffff1681565b32331461074b57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f4f6e6c79206469726563742063616c6c732061726520616c6c6f776564210000604482015290519081900360640190fd5b60005473ffffffffffffffffffffffffffffffffffffffff838116911614156107d557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b3073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff1663ec5568896040518163ffffffff1660e01b8152600401602060405180830381600087803b15801561083457600080fd5b505af1158015610848573d6000803e3d6000fd5b505050506040513d602081101561085e57600080fd5b505173ffffffffffffffffffffffffffffffffffffffff16146108e257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600c60248201527f57726f6e672070726f7879210000000000000000000000000000000000000000604482015290519081900360640190fd5b600154604080517f8abf6077000000000000000000000000000000000000000000000000000000008152905160009273ffffffffffffffffffffffffffffffffffffffff1691638abf6077916004808301926020929190829003018186803b15801561094d57600080fd5b505afa158015610961573d6000803e3d6000fd5b505050506040513d602081101561097757600080fd5b5051604080517f1684f69f00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff868116600483015260248201869052915192935060009291841691631684f69f913491604480830192602092919082900301818588803b1580156109f857600080fd5b505af1158015610a0c573d6000803e3d6000fd5b50505050506040513d6020811015610a2357600080fd5b505173ffffffffffffffffffffffffffffffffffffffff80821660008181526002602090815260409182902080547fffffffffffffffffffffffff000000000000000000000000000000000000000016948a1694851790558151928352905193945091927f812eb2689eecf94cfb55caf4a123ea76c6d93eef07dd54a5273b7a4949f7d763929181900390910190a250505050565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b60015473ffffffffffffffffffffffffffffffffffffffff1681565b309056fea265627a7a72305820d632d0bb3f732d6a0499716f83b814834ed71a8d1ab0bffc57a66f2e8377a50f64736f6c63430005090032`
+const GovernedProxyBin = `608060405234801561001057600080fd5b50604051610ba3380380610ba38339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b039384166001600160a01b03199182161790915560018054939092169216919091179055610b298061007a6000396000f3fe60806040526004361061007a5760003560e01c80638abf60771161004e5780638abf607714610251578063ce5494bb1461012d578063dd6a851d14610266578063ec5568891461027b5761007a565b8062f55d9d1461012d5780630900f0101461016f57806332e3a905146101af5780635b6dee4c14610218575b3233146100e857604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f4f6e6c79206469726563742063616c6c732061726520616c6c6f776564210000604482015290519081900360640190fd5b6000805460405173ffffffffffffffffffffffffffffffffffffffff9091169136908237600080368334866127105a03f13d6000833e808015610129573d83f35b3d83fd5b34801561013957600080fd5b5061016d6004803603602081101561015057600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610290565b005b34801561017b57600080fd5b5061016d6004803603602081101561019257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166102f7565b3480156101bb57600080fd5b506101ef600480360360208110156101d257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166106b5565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b61016d6004803603604081101561022e57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356106dd565b34801561025d57600080fd5b506101ef610ab8565b34801561027257600080fd5b506101ef610ad4565b34801561028757600080fd5b506101ef610af0565b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600860248201527f476f6f6420747279000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff8082166000908152600260205260408120549054908216911681141561039357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b73ffffffffffffffffffffffffffffffffffffffff811661041557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f4e6f742072656769737465726564210000000000000000000000000000000000604482015290519081900360640190fd5b8173ffffffffffffffffffffffffffffffffffffffff16635051a5ec6040518163ffffffff1660e01b815260040160206040518083038186803b15801561045b57600080fd5b505afa15801561046f573d6000803e3d6000fd5b505050506040513d602081101561048557600080fd5b50516104f257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f742061636365707465642100000000000000000000000000000000000000604482015290519081900360640190fd5b60008054604080517fce5494bb00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff92831660048201819052915191939285169263ce5494bb9260248084019382900301818387803b15801561056557600080fd5b505af1158015610579573d6000803e3d6000fd5b5050600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff8681169182178355604080517ef55d9d000000000000000000000000000000000000000000000000000000008152600481019390935251908616945062f55d9d93506024808301939282900301818387803b15801561061457600080fd5b505af1158015610628573d6000803e3d6000fd5b50505073ffffffffffffffffffffffffffffffffffffffff80851660008181526002602090815260409182902080547fffffffffffffffffffffffff00000000000000000000000000000000000000001690558151928352905192861693507f5d611f318680d00598bb735d61bacf0c514c6b50e1e5ad30040a4df2b12791c792918290030190a2505050565b60026020526000908152604090205473ffffffffffffffffffffffffffffffffffffffff1681565b32331461074b57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601e60248201527f4f6e6c79206469726563742063616c6c732061726520616c6c6f776564210000604482015290519081900360640190fd5b60005473ffffffffffffffffffffffffffffffffffffffff838116911614156107d557604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600f60248201527f416c726561647920616374697665210000000000000000000000000000000000604482015290519081900360640190fd5b3073ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff1663ec5568896040518163ffffffff1660e01b8152600401602060405180830381600087803b15801561083457600080fd5b505af1158015610848573d6000803e3d6000fd5b505050506040513d602081101561085e57600080fd5b505173ffffffffffffffffffffffffffffffffffffffff16146108e257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600c60248201527f57726f6e672070726f7879210000000000000000000000000000000000000000604482015290519081900360640190fd5b600154604080517f8abf6077000000000000000000000000000000000000000000000000000000008152905160009273ffffffffffffffffffffffffffffffffffffffff1691638abf6077916004808301926020929190829003018186803b15801561094d57600080fd5b505afa158015610961573d6000803e3d6000fd5b505050506040513d602081101561097757600080fd5b5051604080517f1684f69f00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff868116600483015260248201869052915192935060009291841691631684f69f913491604480830192602092919082900301818588803b1580156109f857600080fd5b505af1158015610a0c573d6000803e3d6000fd5b50505050506040513d6020811015610a2357600080fd5b505173ffffffffffffffffffffffffffffffffffffffff80821660008181526002602090815260409182902080547fffffffffffffffffffffffff000000000000000000000000000000000000000016948a1694851790558151928352905193945091927f812eb2689eecf94cfb55caf4a123ea76c6d93eef07dd54a5273b7a4949f7d763929181900390910190a250505050565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b60015473ffffffffffffffffffffffffffffffffffffffff1681565b309056fea265627a7a723058206048d0bce826f41faa6f723162c7b381beb60e6919d73b2943a317f3c263792364736f6c63430005090032`
 
 // DeployGovernedProxy deploys a new Ethereum contract, binding an instance of GovernedProxy to it.
 func DeployGovernedProxy(auth *bind.TransactOpts, backend bind.ContractBackend, _impl common.Address, _sporkProxy common.Address) (common.Address, *types.Transaction, *GovernedProxy, error) {
@@ -440,22 +440,22 @@ func (it *GovernedProxyUpgradeProposalIterator) Close() error {
 
 // GovernedProxyUpgradeProposal represents a UpgradeProposal event raised by the GovernedProxy contract.
 type GovernedProxyUpgradeProposal struct {
-	NewImpl  common.Address
+	Impl     common.Address
 	Proposal common.Address
 	Raw      types.Log // Blockchain specific contextual infos
 }
 
 // FilterUpgradeProposal is a free log retrieval operation binding the contract event 0x812eb2689eecf94cfb55caf4a123ea76c6d93eef07dd54a5273b7a4949f7d763.
 //
-// Solidity: event UpgradeProposal(address indexed newImpl, address proposal)
-func (_GovernedProxy *GovernedProxyFilterer) FilterUpgradeProposal(opts *bind.FilterOpts, newImpl []common.Address) (*GovernedProxyUpgradeProposalIterator, error) {
+// Solidity: event UpgradeProposal(address indexed impl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) FilterUpgradeProposal(opts *bind.FilterOpts, impl []common.Address) (*GovernedProxyUpgradeProposalIterator, error) {
 
-	var newImplRule []interface{}
-	for _, newImplItem := range newImpl {
-		newImplRule = append(newImplRule, newImplItem)
+	var implRule []interface{}
+	for _, implItem := range impl {
+		implRule = append(implRule, implItem)
 	}
 
-	logs, sub, err := _GovernedProxy.contract.FilterLogs(opts, "UpgradeProposal", newImplRule)
+	logs, sub, err := _GovernedProxy.contract.FilterLogs(opts, "UpgradeProposal", implRule)
 	if err != nil {
 		return nil, err
 	}
@@ -464,15 +464,15 @@ func (_GovernedProxy *GovernedProxyFilterer) FilterUpgradeProposal(opts *bind.Fi
 
 // WatchUpgradeProposal is a free log subscription operation binding the contract event 0x812eb2689eecf94cfb55caf4a123ea76c6d93eef07dd54a5273b7a4949f7d763.
 //
-// Solidity: event UpgradeProposal(address indexed newImpl, address proposal)
-func (_GovernedProxy *GovernedProxyFilterer) WatchUpgradeProposal(opts *bind.WatchOpts, sink chan<- *GovernedProxyUpgradeProposal, newImpl []common.Address) (event.Subscription, error) {
+// Solidity: event UpgradeProposal(address indexed impl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) WatchUpgradeProposal(opts *bind.WatchOpts, sink chan<- *GovernedProxyUpgradeProposal, impl []common.Address) (event.Subscription, error) {
 
-	var newImplRule []interface{}
-	for _, newImplItem := range newImpl {
-		newImplRule = append(newImplRule, newImplItem)
+	var implRule []interface{}
+	for _, implItem := range impl {
+		implRule = append(implRule, implItem)
 	}
 
-	logs, sub, err := _GovernedProxy.contract.WatchLogs(opts, "UpgradeProposal", newImplRule)
+	logs, sub, err := _GovernedProxy.contract.WatchLogs(opts, "UpgradeProposal", implRule)
 	if err != nil {
 		return nil, err
 	}
@@ -573,22 +573,22 @@ func (it *GovernedProxyUpgradedIterator) Close() error {
 
 // GovernedProxyUpgraded represents a Upgraded event raised by the GovernedProxy contract.
 type GovernedProxyUpgraded struct {
-	NewImpl  common.Address
+	Impl     common.Address
 	Proposal common.Address
 	Raw      types.Log // Blockchain specific contextual infos
 }
 
 // FilterUpgraded is a free log retrieval operation binding the contract event 0x5d611f318680d00598bb735d61bacf0c514c6b50e1e5ad30040a4df2b12791c7.
 //
-// Solidity: event Upgraded(address indexed newImpl, address proposal)
-func (_GovernedProxy *GovernedProxyFilterer) FilterUpgraded(opts *bind.FilterOpts, newImpl []common.Address) (*GovernedProxyUpgradedIterator, error) {
+// Solidity: event Upgraded(address indexed impl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) FilterUpgraded(opts *bind.FilterOpts, impl []common.Address) (*GovernedProxyUpgradedIterator, error) {
 
-	var newImplRule []interface{}
-	for _, newImplItem := range newImpl {
-		newImplRule = append(newImplRule, newImplItem)
+	var implRule []interface{}
+	for _, implItem := range impl {
+		implRule = append(implRule, implItem)
 	}
 
-	logs, sub, err := _GovernedProxy.contract.FilterLogs(opts, "Upgraded", newImplRule)
+	logs, sub, err := _GovernedProxy.contract.FilterLogs(opts, "Upgraded", implRule)
 	if err != nil {
 		return nil, err
 	}
@@ -597,15 +597,15 @@ func (_GovernedProxy *GovernedProxyFilterer) FilterUpgraded(opts *bind.FilterOpt
 
 // WatchUpgraded is a free log subscription operation binding the contract event 0x5d611f318680d00598bb735d61bacf0c514c6b50e1e5ad30040a4df2b12791c7.
 //
-// Solidity: event Upgraded(address indexed newImpl, address proposal)
-func (_GovernedProxy *GovernedProxyFilterer) WatchUpgraded(opts *bind.WatchOpts, sink chan<- *GovernedProxyUpgraded, newImpl []common.Address) (event.Subscription, error) {
+// Solidity: event Upgraded(address indexed impl, address proposal)
+func (_GovernedProxy *GovernedProxyFilterer) WatchUpgraded(opts *bind.WatchOpts, sink chan<- *GovernedProxyUpgraded, impl []common.Address) (event.Subscription, error) {
 
-	var newImplRule []interface{}
-	for _, newImplItem := range newImpl {
-		newImplRule = append(newImplRule, newImplItem)
+	var implRule []interface{}
+	for _, implItem := range impl {
+		implRule = append(implRule, implItem)
 	}
 
-	logs, sub, err := _GovernedProxy.contract.WatchLogs(opts, "Upgraded", newImplRule)
+	logs, sub, err := _GovernedProxy.contract.WatchLogs(opts, "Upgraded", implRule)
 	if err != nil {
 		return nil, err
 	}

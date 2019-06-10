@@ -28,10 +28,10 @@ var (
 )
 
 // StakerRewardV1ABI is the input ABI used to generate the binding from.
-const StakerRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const StakerRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // StakerRewardV1Bin is the compiled bytecode used for deploying new contracts.
-const StakerRewardV1Bin = `608060405234801561001057600080fd5b506040516103e13803806103e18339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031990921691909117905561037c806100656000396000f3fe6080604052600436106100595760003560e01c8063a9fb763c11610043578063a9fb763c1461013e578063ce5494bb1461015b578063ec5568891461019b57610059565b8062f55d9d146100c05780631c4b774b14610102575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100cc57600080fd5b50610100600480360360208110156100e357600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101d9565b005b34801561010e57600080fd5b5061012c6004803603602081101561012557600080fd5b5035610281565b60408051918252519081900360200190f35b6101006004803603602081101561015457600080fd5b5035610299565b34801561016757600080fd5b506101006004803603602081101561017e57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661029c565b3480156101a757600080fd5b506101b061032b565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461025f57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61026881610299565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b600081156102945750671fa42feb87e400005b919050565b50565b60005473ffffffffffffffffffffffffffffffffffffffff16331461032257604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61029981610299565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a72305820b01a0655d581bdcd3c6bb94e2949d0c74c01070d466fe42e05844269b8aff30364736f6c63430005090032`
+const StakerRewardV1Bin = `608060405234801561001057600080fd5b506040516103ca3803806103ca8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b0319909216919091179055610365806100656000396000f3fe6080604052600436106100595760003560e01c8063228cb73311610043578063228cb7331461013e578063ce5494bb14610146578063ec5568891461018657610059565b8062f55d9d146100c05780631c4b774b14610102575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100cc57600080fd5b50610100600480360360208110156100e357600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101c4565b005b34801561010e57600080fd5b5061012c6004803603602081101561012557600080fd5b503561026c565b60408051918252519081900360200190f35b610100610284565b34801561015257600080fd5b506101006004803603602081101561016957600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610286565b34801561019257600080fd5b5061019b610314565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461024a57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61025381610311565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000811561027f5750671fa42feb87e400005b919050565b565b60005473ffffffffffffffffffffffffffffffffffffffff16331461030c57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b610311815b50565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a7230582098464ca7f700465fcca68abd4cf252544efdccd80cc7711b1a7e4d7d7ad5ff7c64736f6c63430005090032`
 
 // DeployStakerRewardV1 deploys a new Ethereum contract, binding an instance of StakerRewardV1 to it.
 func DeployStakerRewardV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *StakerRewardV1, error) {
@@ -282,23 +282,23 @@ func (_StakerRewardV1 *StakerRewardV1TransactorSession) Migrate(_oldImpl common.
 	return _StakerRewardV1.Contract.Migrate(&_StakerRewardV1.TransactOpts, _oldImpl)
 }
 
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
+// Reward is a paid mutator transaction binding the contract method 0x228cb733.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_StakerRewardV1 *StakerRewardV1Transactor) Reward(opts *bind.TransactOpts, arg0 *big.Int) (*types.Transaction, error) {
-	return _StakerRewardV1.contract.Transact(opts, "reward", arg0)
+// Solidity: function reward() returns()
+func (_StakerRewardV1 *StakerRewardV1Transactor) Reward(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _StakerRewardV1.contract.Transact(opts, "reward")
 }
 
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
+// Reward is a paid mutator transaction binding the contract method 0x228cb733.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_StakerRewardV1 *StakerRewardV1Session) Reward(arg0 *big.Int) (*types.Transaction, error) {
-	return _StakerRewardV1.Contract.Reward(&_StakerRewardV1.TransactOpts, arg0)
+// Solidity: function reward() returns()
+func (_StakerRewardV1 *StakerRewardV1Session) Reward() (*types.Transaction, error) {
+	return _StakerRewardV1.Contract.Reward(&_StakerRewardV1.TransactOpts)
 }
 
-// Reward is a paid mutator transaction binding the contract method 0xa9fb763c.
+// Reward is a paid mutator transaction binding the contract method 0x228cb733.
 //
-// Solidity: function reward(uint256 ) returns()
-func (_StakerRewardV1 *StakerRewardV1TransactorSession) Reward(arg0 *big.Int) (*types.Transaction, error) {
-	return _StakerRewardV1.Contract.Reward(&_StakerRewardV1.TransactOpts, arg0)
+// Solidity: function reward() returns()
+func (_StakerRewardV1 *StakerRewardV1TransactorSession) Reward() (*types.Transaction, error) {
+	return _StakerRewardV1.Contract.Reward(&_StakerRewardV1.TransactOpts)
 }
