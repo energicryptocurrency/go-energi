@@ -21,6 +21,8 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IGovernedProxy } from "./IGovernedProxy.sol";
+
 /**
  * Genesis version of MasternodeRegistry interface.
  *
@@ -47,6 +49,9 @@ interface IMasternodeRegistry {
     event Deactivated(
         address masternode
     );
+
+    function token_proxy() external view returns(IGovernedProxy);
+    function treasury_proxy() external view returns(IGovernedProxy);
 
     function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode) external;
     function denounce(address masternode) external;

@@ -22,7 +22,22 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 interface IProposal {
+    function parent() external view returns(address);
+    function created_block() external view returns(uint);
+    function deadline() external view returns(uint);
+    function fee_payer() external view returns(address payable);
+    function fee_amount() external view returns(uint);
+    function accepted_weight() external view returns(uint);
+    function rejected_weight() external view returns(uint);
+    function total_weight() external view returns(uint);
+    function quorum_weight() external view returns(uint);
+    function isFinished() external view returns(bool);
     function isAccepted() external view returns(bool);
+    function withdraw() external;
+    function destroy() external;
+    function collect() external;
+    function voteAccept() external;
+    function voteReject() external;
     function () external payable;
 }
 

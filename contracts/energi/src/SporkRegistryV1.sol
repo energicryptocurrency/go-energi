@@ -23,6 +23,7 @@ pragma solidity 0.5.9;
 
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { GenericProposalV1 } from "./GenericProposalV1.sol";
@@ -37,9 +38,15 @@ contract SporkRegistryV1 is
     ISporkRegistry,
     GovernedContract
 {
+    IGovernedProxy public mnregistry_proxy;
+
     // IGovernedContract
     //---------------------------------
-    constructor(address _proxy) public GovernedContract(_proxy) {}
+    constructor(address _proxy, IGovernedProxy _mnregistry_proxy)
+        public GovernedContract(_proxy)
+    {
+        mnregistry_proxy = _mnregistry_proxy;
+    }
 
     // ISporkRegistry
     //---------------------------------
@@ -53,6 +60,7 @@ contract SporkRegistryV1 is
 
         address payable proposal = address(
             new GenericProposalV1(
+                mnregistry_proxy,
                 QUORUM_MAJORITY,
                 _period,
                 // solium-disable-next-line security/no-tx-origin

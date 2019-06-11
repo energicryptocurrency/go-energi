@@ -91,11 +91,44 @@ contract MockProposal is IProposal {
     function isAccepted() external view returns(bool) {
         return accepted;
     }
-
     function setAccepted() external {
         accepted = true;
     }
-
     function () external payable {}
+    function parent() external view returns(address) {
+        return address(0);
+    }
+    function created_block() external view returns(uint) {
+        return 0;
+    }
+    function deadline() external view returns(uint) {
+        return 0;
+    }
+    function fee_payer() external view returns(address payable) {
+        return address(0);
+    }
+    function fee_amount() external view returns(uint) {
+        return 0;
+    }
+    function accepted_weight() external view returns(uint) {
+        return 0;
+    }
+    function rejected_weight() external view returns(uint) {
+        return 0;
+    }
+    function total_weight() external view returns(uint) {
+        return 0;
+    }
+    function quorum_weight() external view returns(uint) {
+        return 0;
+    }
+    function isFinished() external view returns(bool) {
+        return false;
+    }
+    function withdraw() external {}
+    function destroy() external {}
+    function collect() external {}
+    function voteAccept() external {}
+    function voteReject() external {}
 }
 

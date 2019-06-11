@@ -49,7 +49,9 @@ contract GlobalConstants {
     uint constant internal PERIOD_CHECKPOINT = 1 weeks;
     uint constant internal PERIOD_BLACKLIST = 1 weeks;
 
+    uint8 constant internal QUORUM_MIN = 1;
     uint8 constant internal QUORUM_MAJORITY = 51;
+    uint8 constant internal QUORUM_MAX = 100;
 
     uint constant internal REWARD_STAKER_V1 = 2.28 ether;
     uint constant internal REWARD_BACKBONE_V1 = 2.28 ether;

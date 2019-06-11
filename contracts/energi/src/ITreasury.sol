@@ -21,7 +21,17 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IProposal } from "./IProposal.sol";
+
 interface ITreasury {
+    event Contribution(
+        address from,
+        uint amount
+    );
+
     function isSuperblock(uint _blockNumber) external view returns(bool);
+    function collect(IProposal) external;
+    function contribute() external payable;
+    function balance() external view returns(uint amount);
     function () external payable;
 }
