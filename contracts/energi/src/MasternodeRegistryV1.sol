@@ -28,6 +28,7 @@ import { IBlockReward } from "./IBlockReward.sol";
 import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
 import { IMasternodeToken } from "./IMasternodeToken.sol";
 import { ITreasury } from "./ITreasury.sol";
+import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
 
 
@@ -65,7 +66,10 @@ contract StorageMasternodeRegistryV1 is
         uint _announced_block,
         address _prev,
         address _next
-    ) external {
+    )
+        external
+        requireOwner
+    {
         Info storage item = masternodes[_masternode];
         address old_owner = item.owner;
 
@@ -92,14 +96,20 @@ contract StorageMasternodeRegistryV1 is
         address _masternode,
         bool _set_prev, address _prev,
         bool _set_next, address _next
-    ) external {
+    )
+        external
+        requireOwner
+    {
         Info storage item = masternodes[_masternode];
 
         if (_set_prev) item.prev = _prev;
         if (_set_next) item.next = _next;
     }
 
-    function deleteMasternode(address _masternode) external {
+    function deleteMasternode(address _masternode)
+        external
+        requireOwner
+    {
         delete owner_masternodes[masternodes[_masternode].owner];
         delete masternodes[_masternode];
     }
@@ -115,7 +125,8 @@ contract MasternodeRegistryV1 is
     GlobalConstants,
     GovernedContract,
     IBlockReward,
-    IMasternodeRegistry
+    IMasternodeRegistry,
+    NonReentrant
 {
     // NOTE: maybe this is too much...
     event Heartbeat(
@@ -193,7 +204,10 @@ contract MasternodeRegistryV1 is
     // Announcement
     //=================================
 
-    function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode) external {
+    function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode)
+        external
+        noReentry
+    {
         address owner = _callerAddress();
         StorageMasternodeRegistryV1 mn_storage = v1storage;
 
@@ -302,7 +316,10 @@ contract MasternodeRegistryV1 is
 
     //=================================
 
-    function denounce(address masternode) external {
+    function denounce(address masternode)
+        external
+        noReentry
+    {
         _denounce(masternode, _callerAddress());
     }
 
@@ -359,7 +376,10 @@ contract MasternodeRegistryV1 is
         emit Denounced(masternode, mninfo.owner);
     }
 
-    function heartbeat(uint block_number, bytes32 block_hash, uint sw_features) external {
+    function heartbeat(uint block_number, bytes32 block_hash, uint sw_features)
+        external
+        noReentry
+    {
         require((block.number - block_number - 1) <= MN_HEARTBEAT_PAST_BLOCKS, "Too old block");
         require(blockhash(block_number) == block_hash, "Block mismatch");
 
@@ -379,7 +399,10 @@ contract MasternodeRegistryV1 is
         emit Heartbeat(masternode);
     }
 
-    function validate(address masternode) external {
+    function validate(address masternode)
+        external
+        noReentry
+    {
         address caller = _callerAddress();
         require(caller != masternode, "Vote for self");
 
@@ -514,7 +537,9 @@ contract MasternodeRegistryV1 is
 
     //===
 
-    function onCollateralUpdate(address owner) external
+    function onCollateralUpdate(address owner)
+        external
+        noReentry
     {
         // SECURITY: this is a callback for MasternodeToken, but
         //           it must be safe to be called by ANYONE.
@@ -535,7 +560,10 @@ contract MasternodeRegistryV1 is
         }
     }
 
-    function enumerate() external view returns(address[] memory masternodes) {
+    function enumerate()
+        external view
+        returns(address[] memory masternodes)
+    {
         // NOTE: it should be OK for 0
         masternodes = new address[](mn_announced);
 
@@ -565,7 +593,10 @@ contract MasternodeRegistryV1 is
 
     // IBlockReward
     //---------------------------------
-    function reward() external payable {
+    function reward()
+        external payable
+        noReentry
+    {
         // NOTE: ensure to move of remaining from the previous times to Treasury
         //---
         uint diff = address(this).balance - msg.value;

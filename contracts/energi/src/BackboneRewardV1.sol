@@ -24,6 +24,7 @@ pragma solidity 0.5.9;
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
+import { NonReentrant } from "./NonReentrant.sol";
 
 /**
  * Genesis hardcoded version of BackboneReward
@@ -33,7 +34,8 @@ import { IBlockReward } from "./IBlockReward.sol";
 contract BackboneRewardV1 is
     GlobalConstants,
     GovernedContract,
-    IBlockReward
+    IBlockReward,
+    NonReentrant
 {
     // IGovernedContract
     //---------------------------------
@@ -41,7 +43,10 @@ contract BackboneRewardV1 is
 
     // IBlockReward
     //---------------------------------
-    function reward() external payable {
+    function reward()
+        external payable
+        noReentry
+    {
     }
 
     function getReward(uint _blockNumber)

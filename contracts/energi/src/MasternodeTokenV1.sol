@@ -26,6 +26,7 @@ import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IMasternodeToken } from "./IMasternodeToken.sol";
 import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
+import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
 
 /**
@@ -67,7 +68,8 @@ contract StorageMasternodeTokenV1 is
 contract MasternodeTokenV1 is
     GlobalConstants,
     GovernedContract,
-    IMasternodeToken
+    IMasternodeToken,
+    NonReentrant
 {
     // Data for migration
     //---------------------------------
@@ -143,7 +145,7 @@ contract MasternodeTokenV1 is
         (balance, last_block) = v1storage.balances(_tokenOwner);
     }
 
-    function withdrawCollateral(uint256 _amount) external {
+    function withdrawCollateral(uint256 _amount) external noReentry {
         // Retrieve
         address payable tokenOwner = _callerAddress();
         uint256 balance = v1storage.balanceOnly(tokenOwner);
@@ -169,7 +171,7 @@ contract MasternodeTokenV1 is
         tokenOwner.transfer(_amount);
     }
 
-    function depositCollateral() external payable {
+    function depositCollateral() external payable noReentry {
         // Retrieve
         address payable tokenOwner = _callerAddress();
         uint256 balance = v1storage.balanceOnly(tokenOwner);

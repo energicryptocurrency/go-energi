@@ -1083,6 +1083,48 @@ contract("MasternodeRegistryV1", async accounts => {
                 });
             });
         });
+
+        describe('StorageMasternodeRegistryV1', async () => {
+            it ('should refuse setMasternode() from outside', async () => {
+                try {
+                    await s.storage.setMasternode(
+                        masternode1,
+                        masternode1,
+                        ip1,
+                        enode1,
+                        '0',
+                        '0',
+                        masternode1,
+                        masternode1
+                    );
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Not owner/);
+                }
+            });
+
+            it ('should refuse setMasternodePos() from outside', async () => {
+                try {
+                    await s.storage.setMasternodePos(
+                        masternode1,
+                        false, masternode1,
+                        false, masternode1
+                    );
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Not owner/);
+                }
+            });
+
+            it ('should refuse deleteMasternode() from outside', async () => {
+                try {
+                    await s.storage.deleteMasternode(masternode1);
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Not owner/);
+                }
+            });
+        });
     });
 
     //---
