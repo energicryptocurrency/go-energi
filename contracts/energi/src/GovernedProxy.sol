@@ -25,6 +25,7 @@ import { IGovernedContract } from "./IGovernedContract.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IProposal } from "./IProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
+import { NonReentrant } from "./NonReentrant.sol";
 
 /**
  * SC-9: This contract has no chance of being updated. It must be stupid simple.
@@ -33,7 +34,8 @@ import { ISporkRegistry } from "./ISporkRegistry.sol";
  */
 contract GovernedProxy is
     IGovernedContract,
-    IGovernedProxy
+    IGovernedProxy,
+    NonReentrant
 {
     modifier senderOrigin {
         // Internal calls are expected to use impl directly.
@@ -59,6 +61,7 @@ contract GovernedProxy is
     function proposeUpgrade(IGovernedContract _newImpl, uint _period)
         external payable
         senderOrigin
+        noReentry
     {
         require(_newImpl != impl, "Already active!");
         require(_newImpl.proxy() == address(this), "Wrong proxy!");
@@ -74,7 +77,10 @@ contract GovernedProxy is
     /**
      * Once proposal is accepted, anyone can activate that.
      */
-    function upgrade(IProposal _proposal) external {
+    function upgrade(IProposal _proposal)
+        external
+        noReentry
+    {
         IGovernedContract new_impl = upgrade_proposals[address(_proposal)];
         require(new_impl != impl, "Already active!"); // in case it changes in the flight
         require(address(new_impl) != address(0), "Not registered!");
@@ -116,7 +122,10 @@ contract GovernedProxy is
     /**
      * Proxy all other calls to implementation.
      */
-    function () external payable senderOrigin {
+    function ()
+        external payable
+        senderOrigin
+    {
         // SECURITY: senderOrigin() modifier is mandatory
         IGovernedContract impl_m = impl;
 

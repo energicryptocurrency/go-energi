@@ -28,6 +28,7 @@ import { IBlockReward } from "./IBlockReward.sol";
 import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
 import { IMasternodeToken } from "./IMasternodeToken.sol";
 import { ITreasury } from "./ITreasury.sol";
+import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
 
 
@@ -38,15 +39,14 @@ contract StorageMasternodeRegistryV1 is
     StorageBase
 {
     struct Info {
-        address payable owner;
-        uint64 last_announced;
-        uint32 ipv4address;
+        uint announced_block;
+        uint collateral;
         bytes32 enode_0;
         bytes32 enode_1;
-        uint collateral;
-
+        address payable owner;
         address prev;
         address next;
+        uint32 ipv4address;
     }
 
     mapping(address => Info) public masternodes;
@@ -60,13 +60,16 @@ contract StorageMasternodeRegistryV1 is
     function setMasternode(
         address _masternode,
         address payable _owner,
-        uint64 _last_announced,
         uint32 _ipv4address,
         bytes32[2] calldata _enode,
         uint _collateral,
+        uint _announced_block,
         address _prev,
         address _next
-    ) external {
+    )
+        external
+        requireOwner
+    {
         Info storage item = masternodes[_masternode];
         address old_owner = item.owner;
 
@@ -76,11 +79,11 @@ contract StorageMasternodeRegistryV1 is
         }
 
         item.owner = _owner;
-        item.last_announced = _last_announced;
         item.ipv4address = _ipv4address;
         item.enode_0 = _enode[0];
         item.enode_1 = _enode[1];
         item.collateral = _collateral;
+        item.announced_block = _announced_block;
         item.prev = _prev;
         item.next = _next;
     }
@@ -93,14 +96,20 @@ contract StorageMasternodeRegistryV1 is
         address _masternode,
         bool _set_prev, address _prev,
         bool _set_next, address _next
-    ) external {
+    )
+        external
+        requireOwner
+    {
         Info storage item = masternodes[_masternode];
 
         if (_set_prev) item.prev = _prev;
         if (_set_next) item.next = _next;
     }
 
-    function deleteMasternode(address _masternode) external {
+    function deleteMasternode(address _masternode)
+        external
+        requireOwner
+    {
         delete owner_masternodes[masternodes[_masternode].owner];
         delete masternodes[_masternode];
     }
@@ -116,7 +125,8 @@ contract MasternodeRegistryV1 is
     GlobalConstants,
     GovernedContract,
     IBlockReward,
-    IMasternodeRegistry
+    IMasternodeRegistry,
+    NonReentrant
 {
     // NOTE: maybe this is too much...
     event Heartbeat(
@@ -138,7 +148,6 @@ contract MasternodeRegistryV1 is
     IGovernedProxy public treasury_proxy;
 
     uint32 public mn_announced;
-    uint64 public mn_total_ever;
 
     address public current_masternode;
     uint8 public current_payouts;
@@ -154,6 +163,10 @@ contract MasternodeRegistryV1 is
         uint64 inactive_since;
         uint8 seq_payouts;
     }
+
+    uint public mn_ever_collateral;
+    uint public mn_active_collateral;
+    uint public mn_announced_collateral;
 
     uint32 public mn_active;
     mapping(address => Status) public mn_status;
@@ -191,7 +204,10 @@ contract MasternodeRegistryV1 is
     // Announcement
     //=================================
 
-    function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode) external {
+    function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode)
+        external
+        noReentry
+    {
         address owner = _callerAddress();
         StorageMasternodeRegistryV1 mn_storage = v1storage;
 
@@ -213,10 +229,10 @@ contract MasternodeRegistryV1 is
         mn_storage.setMasternode(
             masternode,
             address(uint160(owner)),
-            uint64(block.timestamp),
             ipv4address,
             enode,
             balance,
+            block.number,
             prev,
             next
         );
@@ -225,12 +241,15 @@ contract MasternodeRegistryV1 is
         mnstatus.last_heartbeat = uint64(block.timestamp);
         mnstatus.seq_payouts = uint8(balance / MN_COLLATERAL_MIN);
         ++mn_active;
+        ++mn_announced;
 
-        uint32 announced_count = mn_announced + 1;
-        mn_announced = announced_count;
+        mn_active_collateral += balance;
+        uint announced_collateral = mn_announced_collateral;
+        announced_collateral += balance;
+        mn_announced_collateral = announced_collateral;
 
-        if (announced_count > mn_total_ever) {
-            mn_total_ever = announced_count;
+        if (announced_collateral > mn_ever_collateral) {
+            mn_ever_collateral = announced_collateral;
         }
 
         // Event
@@ -297,7 +316,10 @@ contract MasternodeRegistryV1 is
 
     //=================================
 
-    function denounce(address masternode) external {
+    function denounce(address masternode)
+        external
+        noReentry
+    {
         _denounce(masternode, _callerAddress());
     }
 
@@ -338,8 +360,11 @@ contract MasternodeRegistryV1 is
 
         // Delete
         //---
+        mn_announced_collateral -= mninfo.collateral;
+
         if (mn_status[masternode].seq_payouts > 0) {
             --mn_active;
+            mn_active_collateral -= mninfo.collateral;
         }
 
         delete mn_status[masternode];
@@ -351,7 +376,10 @@ contract MasternodeRegistryV1 is
         emit Denounced(masternode, mninfo.owner);
     }
 
-    function heartbeat(uint block_number, bytes32 block_hash, uint sw_features) external {
+    function heartbeat(uint block_number, bytes32 block_hash, uint sw_features)
+        external
+        noReentry
+    {
         require((block.number - block_number - 1) <= MN_HEARTBEAT_PAST_BLOCKS, "Too old block");
         require(blockhash(block_number) == block_hash, "Block mismatch");
 
@@ -371,7 +399,10 @@ contract MasternodeRegistryV1 is
         emit Heartbeat(masternode);
     }
 
-    function validate(address masternode) external {
+    function validate(address masternode)
+        external
+        noReentry
+    {
         address caller = _callerAddress();
         require(caller != masternode, "Vote for self");
 
@@ -412,13 +443,13 @@ contract MasternodeRegistryV1 is
         internal view
         returns(ValidationStatus)
     {
-        (uint balance, uint age) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(mninfo.owner);
+        (uint balance, uint last_block) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(mninfo.owner);
 
         if (balance != mninfo.collateral) {
             return ValidationStatus.MNCollaterIssue;
         }
 
-        if ((block.timestamp - age) > mninfo.last_announced) {
+        if (last_block > mninfo.announced_block) {
             return ValidationStatus.MNCollaterIssue;
         }
 
@@ -435,16 +466,26 @@ contract MasternodeRegistryV1 is
 
     //===
 
-    function count() external view returns(uint active, uint total, uint max_of_all_times) {
+    function count() external view
+        returns(
+            uint active, uint total,
+            uint active_collateral, uint total_collateral,
+            uint max_of_all_times
+        )
+    {
         active = mn_active;
         total = mn_announced;
-        max_of_all_times = mn_total_ever;
+        active_collateral = mn_active_collateral;
+        total_collateral = mn_announced_collateral;
+        max_of_all_times = mn_ever_collateral;
     }
 
     //===
-
     function info(address masternode) external view
-        returns(address owner, uint32 ipv4address, bytes32[2] memory enode, uint collateral)
+        returns(
+            address owner, uint32 ipv4address, bytes32[2] memory enode,
+            uint collateral, uint announced_block
+        )
     {
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
         require(mninfo.owner != address(0), "Unknown masternode");
@@ -452,6 +493,26 @@ contract MasternodeRegistryV1 is
         ipv4address = mninfo.ipv4address;
         enode = [ mninfo.enode_0, mninfo.enode_1 ];
         collateral = mninfo.collateral;
+        announced_block = mninfo.announced_block;
+    }
+
+    function ownerInfo(address owner) external view
+        returns(
+            address masternode, uint32 ipv4address, bytes32[2] memory enode,
+            uint collateral, uint announced_block
+        )
+    {
+        StorageMasternodeRegistryV1 mnstorage = v1storage;
+
+        masternode = mnstorage.owner_masternodes(owner);
+        require(masternode != address(0), "Unknown owner");
+
+        StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(mnstorage, masternode);
+        masternode = masternode;
+        ipv4address = mninfo.ipv4address;
+        enode = [ mninfo.enode_0, mninfo.enode_1 ];
+        collateral = mninfo.collateral;
+        announced_block = mninfo.announced_block;
     }
 
     function _mnInfo(
@@ -463,20 +524,22 @@ contract MasternodeRegistryV1 is
     {
         // NOTE: no ABIv2 encoding is enabled
         (
-            mninfo.owner,
-            mninfo.last_announced,
-            mninfo.ipv4address,
+            mninfo.announced_block,
+            mninfo.collateral,
             mninfo.enode_0,
             mninfo.enode_1,
-            mninfo.collateral,
+            mninfo.owner,
             mninfo.prev,
-            mninfo.next
+            mninfo.next,
+            mninfo.ipv4address
         ) = v1info.masternodes(masternode);
     }
 
     //===
 
-    function onCollateralUpdate(address owner) external
+    function onCollateralUpdate(address owner)
+        external
+        noReentry
     {
         // SECURITY: this is a callback for MasternodeToken, but
         //           it must be safe to be called by ANYONE.
@@ -497,7 +560,10 @@ contract MasternodeRegistryV1 is
         }
     }
 
-    function enumerate() external view returns(address[] memory masternodes) {
+    function enumerate()
+        external view
+        returns(address[] memory masternodes)
+    {
         // NOTE: it should be OK for 0
         masternodes = new address[](mn_announced);
 
@@ -527,7 +593,10 @@ contract MasternodeRegistryV1 is
 
     // IBlockReward
     //---------------------------------
-    function reward() external payable {
+    function reward()
+        external payable
+        noReentry
+    {
         // NOTE: ensure to move of remaining from the previous times to Treasury
         //---
         uint diff = address(this).balance - msg.value;
@@ -592,6 +661,7 @@ contract MasternodeRegistryV1 is
             mnstatus.seq_payouts = 0;
             mnstatus.inactive_since = uint64(block.timestamp);
             --mn_active;
+            mn_active_collateral -= mninfo.collateral;
             mnstatus.validations = 0;
             current_masternode = mninfo.next;
             current_payouts = 0;

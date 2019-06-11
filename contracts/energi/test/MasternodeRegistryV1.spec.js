@@ -211,6 +211,15 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
+            it('should handle ownerInfo()', async () => {
+                try {
+                    await s.token_abi.ownerInfo(owner1);
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Unknown owner/);
+                }
+            });
+
             it('should process reward() to Treasury', async () => {
                 const treasury_before = toBN(await web3.eth.getBalance(s.treasury_impl.address));
 
@@ -252,6 +261,8 @@ contract("MasternodeRegistryV1", async accounts => {
         });
 
         describe('Single MN', () => {
+            let announced_block;
+
             it('should refuse announce() without collateral', async () => {
                 try {
                     await s.token_abi.announce(
@@ -321,6 +332,8 @@ contract("MasternodeRegistryV1", async accounts => {
                     'masternode': masternode1,
                     'owner': owner1,
                 });
+
+                announced_block = await web3.eth.getBlockNumber();
             });
 
             it('should refuse announce() another owner\'s MN', async () => {
@@ -399,7 +412,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const res = await s.token_abi.count();
                 assert.equal(res[0], 1);
                 assert.equal(res[1], 1);
-                assert.equal(res[2], 1);
+                assert.equal(res[2].toString(), collateral1.toString());
             });
 
             it('should produce info()', async () => {
@@ -409,7 +422,19 @@ contract("MasternodeRegistryV1", async accounts => {
                     owner: owner1,
                     ipv4address: toBN(ip1).toString(),
                     enode: enode1,
-                    collateral: toBN(collateral1).toString()
+                    collateral: toBN(collateral1).toString(),
+                });
+            });
+
+            it('should produce ownerInfo()', async () => {
+                const info = await s.token_abi.ownerInfo(owner1);
+                common.stringifyBN(web3, info);
+                expect(info).deep.include({
+                    masternode: masternode1,
+                    ipv4address: toBN(ip1).toString(),
+                    enode: enode1,
+                    collateral: toBN(collateral1).toString(),
+                    announced_block: announced_block.toString(),
                 });
             });
 
@@ -631,10 +656,14 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(res).eql({
                     '0': '2',
                     '1': '2',
-                    '2': '2',
+                    '2': toWei('50000', 'ether'),
+                    '3': toWei('50000', 'ether'),
+                    '4': toWei('60000', 'ether'),
                     'active': '2',
                     'total': '2',
-                    'max_of_all_times': '2',
+                    'active_collateral': toWei('50000', 'ether'),
+                    'total_collateral': toWei('50000', 'ether'),
+                    'max_of_all_times': toWei('60000', 'ether'),
                 });
             });
 
@@ -819,10 +848,14 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(res).eql({
                     '0': '3',
                     '1': '3',
-                    '2': '3',
+                    '2': toWei('60000', 'ether'),
+                    '3': toWei('60000', 'ether'),
+                    '4': toWei('80000', 'ether'),
                     'active': '3',
                     'total': '3',
-                    'max_of_all_times': '3',
+                    'active_collateral': toWei('60000', 'ether'),
+                    'total_collateral': toWei('60000', 'ether'),
+                    'max_of_all_times': toWei('80000', 'ether'),
                 });
             });
 
@@ -1030,6 +1063,65 @@ contract("MasternodeRegistryV1", async accounts => {
                         'masternode': mn.masternode,
                         'owner': mn.owner,
                     });
+                }
+            });
+
+            it('should correctly count() ever max', async () => {
+                const res = await s.token_abi.count();
+                common.stringifyBN(web3, res);
+                expect(res).eql({
+                    '0': '0',
+                    '1': '0',
+                    '2': toWei('0', 'ether'),
+                    '3': toWei('0', 'ether'),
+                    '4': toWei('90000', 'ether'),
+                    'active': '0',
+                    'total': '0',
+                    'active_collateral': toWei('0', 'ether'),
+                    'total_collateral': toWei('0', 'ether'),
+                    'max_of_all_times': toWei('90000', 'ether'),
+                });
+            });
+        });
+
+        describe('StorageMasternodeRegistryV1', async () => {
+            it ('should refuse setMasternode() from outside', async () => {
+                try {
+                    await s.storage.setMasternode(
+                        masternode1,
+                        masternode1,
+                        ip1,
+                        enode1,
+                        '0',
+                        '0',
+                        masternode1,
+                        masternode1
+                    );
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Not owner/);
+                }
+            });
+
+            it ('should refuse setMasternodePos() from outside', async () => {
+                try {
+                    await s.storage.setMasternodePos(
+                        masternode1,
+                        false, masternode1,
+                        false, masternode1
+                    );
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Not owner/);
+                }
+            });
+
+            it ('should refuse deleteMasternode() from outside', async () => {
+                try {
+                    await s.storage.deleteMasternode(masternode1);
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Not owner/);
                 }
             });
         });

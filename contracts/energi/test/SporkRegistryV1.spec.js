@@ -37,6 +37,7 @@ contract("SporkRegistryV1", async accounts => {
     before(async () => {
         s.orig = await SporkRegistryV1.deployed();
         s.proxy = await MockProxy.at(await s.orig.proxy());
+        s.mnregistry_proxy = await MockProxy.at(await s.orig.mnregistry_proxy());
         s.fake = await MockContract.new(s.proxy.address);
         s.proxy_abi = await SporkRegistryV1.at(s.proxy.address);
         s.token_abi = await ISporkRegistry.at(s.proxy.address);
@@ -45,7 +46,7 @@ contract("SporkRegistryV1", async accounts => {
     });
 
     after(async () => {
-        const impl = await SporkRegistryV1.new(s.proxy.address);
+        const impl = await SporkRegistryV1.new(s.proxy.address, s.mnregistry_proxy.address);
         await s.proxy.setImpl(impl.address);
     });
 

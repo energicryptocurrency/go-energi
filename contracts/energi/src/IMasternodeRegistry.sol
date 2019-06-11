@@ -21,6 +21,8 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IGovernedProxy } from "./IGovernedProxy.sol";
+
 /**
  * Genesis version of MasternodeRegistry interface.
  *
@@ -48,6 +50,9 @@ interface IMasternodeRegistry {
         address masternode
     );
 
+    function token_proxy() external view returns(IGovernedProxy);
+    function treasury_proxy() external view returns(IGovernedProxy);
+
     function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode) external;
     function denounce(address masternode) external;
     function heartbeat(uint block_number, bytes32 block_hash, uint sw_features) external;
@@ -55,9 +60,16 @@ interface IMasternodeRegistry {
     function isValid(address masternode) external view
         returns(bool);
     function count() external view
-        returns(uint active, uint total, uint max_of_all_times);
+        returns(
+            uint active, uint total,
+            uint active_collateral, uint total_collateral,
+            uint max_of_all_times);
     function info(address masternode) external view
-        returns(address owner, uint32 ipv4address, bytes32[2] memory enode, uint collateral);
+        returns(address owner, uint32 ipv4address, bytes32[2] memory enode,
+                uint collateral, uint announced_block);
+    function ownerInfo(address owner) external view
+        returns(address masternode, uint32 ipv4address, bytes32[2] memory enode,
+                uint collateral, uint announced_block);
     function onCollateralUpdate(address owner) external;
     function enumerate() external view returns(address[] memory masternodes);
 }

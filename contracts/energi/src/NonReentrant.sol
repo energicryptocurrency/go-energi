@@ -21,17 +21,17 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IProposal } from "./IProposal.sol";
+/**
+ * A little helper to protect contract from being re-entrant in state
+ * modifying functions.
+ */
+contract NonReentrant {
+    uint private entry_guard;
 
-interface ITreasury {
-    event Contribution(
-        address from,
-        uint amount
-    );
-
-    function isSuperblock(uint _blockNumber) external view returns(bool);
-    function collect(IProposal) external;
-    function contribute() external payable;
-    function balance() external view returns(uint amount);
-    function () external payable;
+    modifier noReentry {
+        require(entry_guard == 0, "Reentry");
+        entry_guard = 1;
+        _;
+        entry_guard = 0;
+    }
 }

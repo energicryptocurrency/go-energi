@@ -43,8 +43,9 @@ contract("MasternodeTokenV1", async accounts => {
     const COLLATERAL_9 = web3.utils.toWei('90000', 'ether');
     const COLLATERAL_10 = web3.utils.toWei('100000', 'ether');
     const COLLATERAL_13 = web3.utils.toWei('130000', 'ether');
-    const check_age = (age) => {
-        assert.isBelow(parseInt(age.valueOf()), 10);
+    const check_age = async (age) => {
+        const bn = await web3.eth.getBlockNumber();
+        expect(age.toString()).equal(bn.toString());
     };
 
     before(async () => {
@@ -157,7 +158,7 @@ contract("MasternodeTokenV1", async accounts => {
             assert.equal(logs.length, 1);
             const res = await s.token_abi.balanceInfo(accounts[0]);
             assert.equal(res['0'].valueOf(), COLLATERAL_1);
-            check_age(res['1']);
+            await check_age(res['1']);
 
             const res2 = await s.token_abi.balanceOf(accounts[0]);
             assert.equal(res2.valueOf(), COLLATERAL_1);
@@ -175,12 +176,13 @@ contract("MasternodeTokenV1", async accounts => {
             });
         });
 
-        it('should correctly reflect age', async () => {
+        it('should correctly reflect last block', async () => {
+            const res1 = await s.token_abi.balanceInfo(accounts[0]);
             await common.moveTime(web3, 3600);
 
-            const res = await s.token_abi.balanceInfo(accounts[0]);
-            assert.equal(res['0'].valueOf(), COLLATERAL_1);
-            assert.isAtLeast(parseInt(res['1'].valueOf()), 3600);
+            const res2 = await s.token_abi.balanceInfo(accounts[0]);
+            assert.equal(res2['0'].valueOf(), COLLATERAL_1);
+            assert.equal(res1['1'].toString(), res2['1'].toString());
         });
         
         it('should allow depositCollateral() direct', async () => {
@@ -191,7 +193,7 @@ contract("MasternodeTokenV1", async accounts => {
             assert.equal(logs.length, 1);
             const res = await s.token_abi.balanceInfo(accounts[0]);
             assert.equal(res['0'].valueOf(), COLLATERAL_3);
-            check_age(res['1']);
+            await check_age(res['1']);
 
             const res2 = await s.token_abi.balanceOf(accounts[0]);
             assert.equal(res2.valueOf(), COLLATERAL_3);
@@ -233,7 +235,7 @@ contract("MasternodeTokenV1", async accounts => {
             assert.equal(logs.length, 1);
             const res = await s.token_abi.balanceInfo(accounts[0]);
             assert.equal(res['0'].valueOf(), COLLATERAL_10);
-            check_age(res['1']);
+            await check_age(res['1']);
 
             const res2 = await s.token_abi.balanceOf(accounts[0]);
             assert.equal(res2.valueOf(), COLLATERAL_10);
@@ -263,7 +265,7 @@ contract("MasternodeTokenV1", async accounts => {
 
             const res = await s.token_abi.balanceInfo(accounts[1]);
             assert.equal(res['0'].valueOf(), COLLATERAL_3);
-            check_age(res['1']);
+            await check_age(res['1']);
 
             const res2 = await s.token_abi.balanceOf(accounts[1]);
             assert.equal(res2.valueOf(), COLLATERAL_3);
@@ -279,7 +281,7 @@ contract("MasternodeTokenV1", async accounts => {
             assert.equal(logs.length, 1);
             const res = await s.token_abi.balanceInfo(accounts[0]);
             assert.equal(res['0'].valueOf(), COLLATERAL_1);
-            check_age(res['1']);
+            await check_age(res['1']);
 
             const total = await s.token_abi.totalSupply();
             assert.equal(total.valueOf(), COLLATERAL_4);

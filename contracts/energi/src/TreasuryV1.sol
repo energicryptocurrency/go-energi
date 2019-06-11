@@ -24,7 +24,7 @@ pragma solidity 0.5.9;
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
-import { ITreasury } from "./ITreasury.sol";
+import { ITreasury, IProposal } from "./ITreasury.sol";
 import { StorageBase }  from "./StorageBase.sol";
 
 /**
@@ -75,6 +75,30 @@ contract TreasuryV1 is
         returns(bool)
     {
         return (_blockNumber % superblock_cycle) == 0;
+    }
+
+    function collect(IProposal proposal)
+        external
+    {
+        // SECURITY: if this one is called as part of "zero-fee",
+        //           then its parameter must be validated to avoid
+        //           gas spending attacks.
+        proposal.collect();
+    }
+
+    function contribute() external payable {
+        if (msg.value > 0) {
+            emit Contribution(msg.sender, msg.value);
+        }
+    }
+
+    // NOTE: usually Treasury is behind proxy and this one
+    //       minimizes possible errors.
+    function balance()
+        external view
+        returns(uint amount)
+    {
+        return address(this).balance;
     }
 
     // IBlockReward

@@ -28,10 +28,10 @@ var (
 )
 
 // TreasuryV1ABI is the input ABI used to generate the binding from.
-const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"superblock_cycle\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"v1storage\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"isSuperblock\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"},{\"name\":\"_superblock_cycle\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const TreasuryV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"collect\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"superblock_cycle\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"v1storage\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"isSuperblock\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"balance\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"contribute\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"},{\"name\":\"_superblock_cycle\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"from\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Contribution\",\"type\":\"event\"}]"
 
 // TreasuryV1Bin is the compiled bytecode used for deploying new contracts.
-const TreasuryV1Bin = `608060405234801561001057600080fd5b506040516107ad3803806107ad8339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b0319166001600160a01b038416179055604051610063906100b3565b604051809103906000f08015801561007f573d6000803e3d6000fd5b50600180546001600160a01b0319166001600160a01b03929092169190911790556002819055806100ac57fe5b50506100c0565b6102288061058583390190565b6104b6806100cf6000396000f3fe60806040526004361061007a5760003560e01c80632d0593051161004e5780632d0593051461017c57806352782d86146101ba578063ce5494bb146101f8578063ec556889146102385761007a565b8062f55d9d146100e15780630ef34745146101235780631c4b774b1461014a578063228cb73314610174575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100ed57600080fd5b506101216004803603602081101561010457600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661024d565b005b34801561012f57600080fd5b506101386102f5565b60408051918252519081900360200190f35b34801561015657600080fd5b506101386004803603602081101561016d57600080fd5b50356102fb565b610121610315565b34801561018857600080fd5b50610191610317565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b3480156101c657600080fd5b506101e4600480360360208110156101dd57600080fd5b5035610333565b604080519115158252519081900360200190f35b34801561020457600080fd5b506101216004803603602081101561021b57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610348565b34801561024457600080fd5b506101916103d6565b60005473ffffffffffffffffffffffffffffffffffffffff1633146102d357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6102dc816103f2565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b60025481565b6000811561031057506926f6a8f4e638030000005b919050565b565b60015473ffffffffffffffffffffffffffffffffffffffff1681565b6000600254828161034057fe5b061592915050565b60005473ffffffffffffffffffffffffffffffffffffffff1633146103ce57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6103d3815b50565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b600154604080517f13af403500000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8481166004830152915191909216916313af403591602480830192600092919082900301818387803b15801561046657600080fd5b505af115801561047a573d6000803e3d6000fd5b505050505056fea265627a7a72305820a9f3d9795efdbd059dedba0d6b0be030c1f7931f622dd5ec7b8bdf9e674a669464736f6c634300050900326080604052600080546001600160a01b03191633179055610203806100256000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806313af40351461003b57806341c0e1b514610070575b600080fd5b61006e6004803603602081101561005157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610078565b005b61006e610145565b60005473ffffffffffffffffffffffffffffffffffffffff1633146100fe57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff92909216919091179055565b60005473ffffffffffffffffffffffffffffffffffffffff1633146101cb57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b33fffea265627a7a723058207b05c108059409986123a397489da27379264c3009c659a142ec87fa82338cbb64736f6c63430005090032`
+const TreasuryV1Bin = `608060405234801561001057600080fd5b506040516108da3803806108da8339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b0319166001600160a01b038416179055604051610063906100b3565b604051809103906000f08015801561007f573d6000803e3d6000fd5b50600180546001600160a01b0319166001600160a01b03929092169190911790556002819055806100ac57fe5b50506100c0565b610228806106b283390190565b6105e3806100cf6000396000f3fe6080604052600436106100bb5760003560e01c80632d05930511610074578063ce5494bb1161004e578063ce5494bb1461028e578063d7bb99ba146102ce578063ec556889146102d6576100bb565b80632d059305146101fd57806352782d861461023b578063b69ef8a814610279576100bb565b80630ef34745116100a55780630ef34745146101a45780631c4b774b146101cb578063228cb733146101f5576100bb565b8062f55d9d1461012257806306ec16f814610164575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b34801561012e57600080fd5b506101626004803603602081101561014557600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166102eb565b005b34801561017057600080fd5b506101626004803603602081101561018757600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610393565b3480156101b057600080fd5b506101b96103f6565b60408051918252519081900360200190f35b3480156101d757600080fd5b506101b9600480360360208110156101ee57600080fd5b50356103fc565b610162610416565b34801561020957600080fd5b50610212610418565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561024757600080fd5b506102656004803603602081101561025e57600080fd5b5035610434565b604080519115158252519081900360200190f35b34801561028557600080fd5b506101b9610449565b34801561029a57600080fd5b50610162600480360360208110156102b157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff1661044e565b6101626104dc565b3480156102e257600080fd5b5061021261051e565b60005473ffffffffffffffffffffffffffffffffffffffff16331461037157604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61037a8161053a565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b8073ffffffffffffffffffffffffffffffffffffffff1663e52253816040518163ffffffff1660e01b8152600401600060405180830381600087803b1580156103db57600080fd5b505af11580156103ef573d6000803e3d6000fd5b5050505050565b60025481565b6000811561041157506926f6a8f4e638030000005b919050565b565b60015473ffffffffffffffffffffffffffffffffffffffff1681565b6000600254828161044157fe5b061592915050565b303190565b60005473ffffffffffffffffffffffffffffffffffffffff1633146104d457604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6104d9815b50565b3415610416576040805133815234602082015281517f4d154d4aae216bed6d0926db77c00df2b57c6b5ba4eee05775de20facede3a7b929181900390910190a1565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b600154604080517f13af403500000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8481166004830152915191909216916313af403591602480830192600092919082900301818387803b1580156103db57600080fdfea265627a7a72305820d56b2ab8e3ace05e37cb2f1f8e1e74f7bea8e14a3c4dded6fc81890dd1d9a9c864736f6c634300050900326080604052600080546001600160a01b03191633179055610203806100256000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806313af40351461003b57806341c0e1b514610070575b600080fd5b61006e6004803603602081101561005157600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610078565b005b61006e610145565b60005473ffffffffffffffffffffffffffffffffffffffff1633146100fe57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b600080547fffffffffffffffffffffffff00000000000000000000000000000000000000001673ffffffffffffffffffffffffffffffffffffffff92909216919091179055565b60005473ffffffffffffffffffffffffffffffffffffffff1633146101cb57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4e6f74206f776e65722100000000000000000000000000000000000000000000604482015290519081900360640190fd5b33fffea265627a7a72305820ce2aa02fd153709e8547b34d6f3fdbc5fe09a8e727a8ae50ed881b46906855c364736f6c63430005090032`
 
 // DeployTreasuryV1 deploys a new Ethereum contract, binding an instance of TreasuryV1 to it.
 func DeployTreasuryV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address, _superblock_cycle *big.Int) (common.Address, *types.Transaction, *TreasuryV1, error) {
@@ -188,6 +188,32 @@ func (_TreasuryV1 *TreasuryV1TransactorRaw) Transact(opts *bind.TransactOpts, me
 	return _TreasuryV1.Contract.contract.Transact(opts, method, params...)
 }
 
+// Balance is a free data retrieval call binding the contract method 0xb69ef8a8.
+//
+// Solidity: function balance() constant returns(uint256 amount)
+func (_TreasuryV1 *TreasuryV1Caller) Balance(opts *bind.CallOpts) (*big.Int, error) {
+	var (
+		ret0 = new(*big.Int)
+	)
+	out := ret0
+	err := _TreasuryV1.contract.Call(opts, out, "balance")
+	return *ret0, err
+}
+
+// Balance is a free data retrieval call binding the contract method 0xb69ef8a8.
+//
+// Solidity: function balance() constant returns(uint256 amount)
+func (_TreasuryV1 *TreasuryV1Session) Balance() (*big.Int, error) {
+	return _TreasuryV1.Contract.Balance(&_TreasuryV1.CallOpts)
+}
+
+// Balance is a free data retrieval call binding the contract method 0xb69ef8a8.
+//
+// Solidity: function balance() constant returns(uint256 amount)
+func (_TreasuryV1 *TreasuryV1CallerSession) Balance() (*big.Int, error) {
+	return _TreasuryV1.Contract.Balance(&_TreasuryV1.CallOpts)
+}
+
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.
 //
 // Solidity: function getReward(uint256 _blockNumber) constant returns(uint256 amount)
@@ -318,6 +344,48 @@ func (_TreasuryV1 *TreasuryV1CallerSession) V1storage() (common.Address, error) 
 	return _TreasuryV1.Contract.V1storage(&_TreasuryV1.CallOpts)
 }
 
+// Collect is a paid mutator transaction binding the contract method 0x06ec16f8.
+//
+// Solidity: function collect(address proposal) returns()
+func (_TreasuryV1 *TreasuryV1Transactor) Collect(opts *bind.TransactOpts, proposal common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.contract.Transact(opts, "collect", proposal)
+}
+
+// Collect is a paid mutator transaction binding the contract method 0x06ec16f8.
+//
+// Solidity: function collect(address proposal) returns()
+func (_TreasuryV1 *TreasuryV1Session) Collect(proposal common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Collect(&_TreasuryV1.TransactOpts, proposal)
+}
+
+// Collect is a paid mutator transaction binding the contract method 0x06ec16f8.
+//
+// Solidity: function collect(address proposal) returns()
+func (_TreasuryV1 *TreasuryV1TransactorSession) Collect(proposal common.Address) (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Collect(&_TreasuryV1.TransactOpts, proposal)
+}
+
+// Contribute is a paid mutator transaction binding the contract method 0xd7bb99ba.
+//
+// Solidity: function contribute() returns()
+func (_TreasuryV1 *TreasuryV1Transactor) Contribute(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _TreasuryV1.contract.Transact(opts, "contribute")
+}
+
+// Contribute is a paid mutator transaction binding the contract method 0xd7bb99ba.
+//
+// Solidity: function contribute() returns()
+func (_TreasuryV1 *TreasuryV1Session) Contribute() (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Contribute(&_TreasuryV1.TransactOpts)
+}
+
+// Contribute is a paid mutator transaction binding the contract method 0xd7bb99ba.
+//
+// Solidity: function contribute() returns()
+func (_TreasuryV1 *TreasuryV1TransactorSession) Contribute() (*types.Transaction, error) {
+	return _TreasuryV1.Contract.Contribute(&_TreasuryV1.TransactOpts)
+}
+
 // Destroy is a paid mutator transaction binding the contract method 0x00f55d9d.
 //
 // Solidity: function destroy(address _newImpl) returns()
@@ -379,4 +447,127 @@ func (_TreasuryV1 *TreasuryV1Session) Reward() (*types.Transaction, error) {
 // Solidity: function reward() returns()
 func (_TreasuryV1 *TreasuryV1TransactorSession) Reward() (*types.Transaction, error) {
 	return _TreasuryV1.Contract.Reward(&_TreasuryV1.TransactOpts)
+}
+
+// TreasuryV1ContributionIterator is returned from FilterContribution and is used to iterate over the raw logs and unpacked data for Contribution events raised by the TreasuryV1 contract.
+type TreasuryV1ContributionIterator struct {
+	Event *TreasuryV1Contribution // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *TreasuryV1ContributionIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(TreasuryV1Contribution)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(TreasuryV1Contribution)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *TreasuryV1ContributionIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *TreasuryV1ContributionIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// TreasuryV1Contribution represents a Contribution event raised by the TreasuryV1 contract.
+type TreasuryV1Contribution struct {
+	From   common.Address
+	Amount *big.Int
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterContribution is a free log retrieval operation binding the contract event 0x4d154d4aae216bed6d0926db77c00df2b57c6b5ba4eee05775de20facede3a7b.
+//
+// Solidity: event Contribution(address from, uint256 amount)
+func (_TreasuryV1 *TreasuryV1Filterer) FilterContribution(opts *bind.FilterOpts) (*TreasuryV1ContributionIterator, error) {
+
+	logs, sub, err := _TreasuryV1.contract.FilterLogs(opts, "Contribution")
+	if err != nil {
+		return nil, err
+	}
+	return &TreasuryV1ContributionIterator{contract: _TreasuryV1.contract, event: "Contribution", logs: logs, sub: sub}, nil
+}
+
+// WatchContribution is a free log subscription operation binding the contract event 0x4d154d4aae216bed6d0926db77c00df2b57c6b5ba4eee05775de20facede3a7b.
+//
+// Solidity: event Contribution(address from, uint256 amount)
+func (_TreasuryV1 *TreasuryV1Filterer) WatchContribution(opts *bind.WatchOpts, sink chan<- *TreasuryV1Contribution) (event.Subscription, error) {
+
+	logs, sub, err := _TreasuryV1.contract.WatchLogs(opts, "Contribution")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(TreasuryV1Contribution)
+				if err := _TreasuryV1.contract.UnpackLog(event, "Contribution", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
 }
