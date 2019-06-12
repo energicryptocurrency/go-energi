@@ -36,7 +36,7 @@ module.exports = async (deployer) => {
             }
 
             const instance = await deployer.deploy(type, proxy, ...args);
-            (await MockProxy.at(proxy)).setImpl(instance.address);
+            await (await MockProxy.at(proxy)).setImpl(instance.address);
         };
 
         await deployer.deploy(Gen2Migration);

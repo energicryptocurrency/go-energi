@@ -102,6 +102,7 @@ contract GenericProposalV1 is
             uint _ever_weight
         ) = IMasternodeRegistry(address(_mnregistry_proxy.impl())).count();
 
+        require(_ever_weight > 0, "Not ready for proposals");
         require(_total_weight >= (_ever_weight/2), "Active weight < 1/2 ever weight");
         assert(_quorum >= QUORUM_MIN);
         assert(_quorum <= QUORUM_MAX);
@@ -114,6 +115,9 @@ contract GenericProposalV1 is
         } else {
             finish_weight = _total_weight * QUORUM_MAJORITY / QUORUM_MAX;
         }
+
+        assert(quorum_weight > 0);
+        assert(finish_weight > 0);
     }
 
     /**
