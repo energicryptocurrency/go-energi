@@ -39,6 +39,5 @@ interface IProposal {
     function voteAccept() external;
     function voteReject() external;
     function setFee() external payable;
-    function () external payable;
 }
 

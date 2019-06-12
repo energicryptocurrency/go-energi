@@ -87,6 +87,8 @@ contract("GenericProposalV1", async accounts => {
                 from: owner3,
                 value: collateral3,
             });
+
+            mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
         });
 
         after(async () => {

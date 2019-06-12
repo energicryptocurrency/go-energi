@@ -24,7 +24,10 @@ pragma solidity 0.5.9;
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
-import { ITreasury, IProposal } from "./ITreasury.sol";
+import { ITreasury, IProposal, IBudgetProposal } from "./ITreasury.sol";
+import { IGovernedProxy } from "./IGovernedProxy.sol";
+import { BudgetProposalV1 } from "./BudgetProposalV1.sol";
+import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
 
 /**
@@ -33,7 +36,25 @@ import { StorageBase }  from "./StorageBase.sol";
 contract StorageTreasuryV1 is
     StorageBase
 {
-    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
+    mapping(uint => IProposal) public uuid_proposal;
+    mapping(address => uint) public proposal_uuid;
+
+    function setProposal(uint _uuid, IProposal _proposal)
+        external
+        requireOwner
+    {
+        uuid_proposal[_uuid] = _proposal;
+        proposal_uuid[address(_proposal)] = _uuid;
+    }
+
+    function deleteProposal(IProposal _proposal)
+        external
+        requireOwner
+    {
+        uint uuid = proposal_uuid[address(_proposal)];
+        delete proposal_uuid[address(_proposal)];
+        delete uuid_proposal[uuid];
+    }
 }
 
 /**
@@ -44,20 +65,24 @@ contract StorageTreasuryV1 is
 contract TreasuryV1 is
     GlobalConstants,
     GovernedContract,
+    NonReentrant,
     IBlockReward,
     ITreasury
 {
     // Data for migration
     //---------------------------------
     StorageTreasuryV1 public v1storage;
+    IGovernedProxy public mnregistry_proxy;
     uint public superblock_cycle;
+    IBudgetProposal[BUDGET_PROPOSAL_MAX] public active_proposals;
     //---------------------------------
 
-    constructor(address _proxy, uint _superblock_cycle)
+    constructor(address _proxy, IGovernedProxy _mnregistry_proxy, uint _superblock_cycle)
         public
         GovernedContract(_proxy)
     {
         v1storage = new StorageTreasuryV1();
+        mnregistry_proxy = _mnregistry_proxy;
         superblock_cycle = _superblock_cycle;
         assert(superblock_cycle > 0);
     }
@@ -70,11 +95,65 @@ contract TreasuryV1 is
 
     // ITreasury
     //---------------------------------
+    function uuid_proposal(uint _ref_uuid) external view returns(IProposal) {
+        return IProposal(v1storage.uuid_proposal(_ref_uuid));
+    }
+
+    function proposal_uuid(IProposal proposal) external view returns(uint) {
+        return v1storage.proposal_uuid(address(proposal));
+    }
+
+    function propose(uint _amount, uint _ref_uuid, uint _period)
+        external payable
+        noReentry
+        returns(IProposal proposal)
+    {
+        require(msg.value == BUDGET_PROPOSAL_FEE, "Invalid fee");
+        require(_amount >= BUDGET_AMOUNT_MIN, "Too small amount");
+        require(_amount <= BUDGET_AMOUNT_MAX, "Too large amount");
+        require(_period >= BUDGET_PERIOD_MIN, "Too small period");
+        require(_period <= BUDGET_PERIOD_MAX, "Too large period");
+
+        StorageTreasuryV1 store = v1storage;
+        address payable payout_address = _callerAddress();
+
+        require(store.uuid_proposal(_ref_uuid) == IProposal(address(0)), "UUID in use");
+
+        proposal = new BudgetProposalV1(
+            mnregistry_proxy,
+            payout_address,
+            _ref_uuid,
+            _amount,
+            _period
+        );
+
+        proposal.setFee.value(msg.value)();
+        store.setProposal(_ref_uuid, proposal);
+
+        // NOTE: it's the only way to retrieve proposal on regular transaction
+        emit BudgetProposal(
+            _ref_uuid,
+            proposal,
+            payout_address,
+            _amount,
+            proposal.deadline()
+        );
+
+        for (uint i = 0; i < BUDGET_PROPOSAL_MAX; ++i) {
+            if (address(active_proposals[i]) == address(0)) {
+                active_proposals[i] = IBudgetProposal(address(proposal));
+                return proposal;
+            }
+        }
+
+        require(false, "Too many active proposals");
+    }
+
     function isSuperblock(uint _blockNumber)
         external view
         returns(bool)
     {
-        return (_blockNumber % superblock_cycle) == 0;
+        return (_blockNumber % superblock_cycle) == 0 && (_blockNumber > 0);
     }
 
     function collect(IProposal proposal)
@@ -88,7 +167,7 @@ contract TreasuryV1 is
 
     function contribute() external payable {
         if (msg.value > 0) {
-            emit Contribution(msg.sender, msg.value);
+            emit Contribution(_callerAddress(), msg.value);
         }
     }
 
@@ -103,7 +182,92 @@ contract TreasuryV1 is
 
     // IBlockReward
     //---------------------------------
-    function reward() external payable {
+    struct AcceptedProposal {
+        IBudgetProposal proposal;
+        uint ref_uuid;
+        uint unpaid;
+    }
+
+    function reward()
+        external payable
+        noReentry
+    {
+        AcceptedProposal[BUDGET_PROPOSAL_MAX] memory accepted;
+
+        uint unpaid_total = _reward_status(accepted);
+        uint curr_balance = address(this).balance;
+
+        if ((curr_balance > 0) && (unpaid_total > 0)) {
+            uint permille = 1000;
+
+            if (unpaid_total > curr_balance) {
+                // Due to lack of floating-point precision,
+                // it may require a few blocks to process
+                // full payouts.
+                permille = curr_balance * 1000 / unpaid_total;
+            }
+
+            _reward_distribute(permille, accepted);
+        }
+    }
+
+    function _reward_status(AcceptedProposal[BUDGET_PROPOSAL_MAX] memory accepted)
+        internal
+        returns(uint unpaid_total)
+    {
+        IBudgetProposal proposal;
+        uint ref_uuid;
+        bool is_accepted;
+        bool is_finished;
+        uint unpaid = 0;
+
+        for (uint i = 0; i < BUDGET_PROPOSAL_MAX; ++i) {
+            proposal = active_proposals[i];
+
+            if (address(proposal) != address(0)) {
+                (ref_uuid, is_accepted, is_finished, unpaid) = proposal.budgetStatus();
+
+                if (is_accepted) {
+                    if (unpaid > 0) {
+                        unpaid_total += unpaid;
+                        accepted[i].proposal = proposal;
+                        accepted[i].ref_uuid = ref_uuid;
+                        accepted[i].unpaid = unpaid;
+                    } else {
+                        // Fulfilled
+                        active_proposals[i] = IBudgetProposal(address(0));
+                    }
+                } else if (is_finished) {
+                    // Rejected
+                    IProposal(address(proposal)).collect();
+                    active_proposals[i] = IBudgetProposal(address(0));
+                }
+            }
+        }
+    }
+
+    function _reward_distribute(
+        uint permille,
+        AcceptedProposal[BUDGET_PROPOSAL_MAX] memory accepted
+    )
+        internal
+    {
+        IBudgetProposal proposal;
+
+        for (uint i = 0; i < BUDGET_PROPOSAL_MAX; ++i) {
+            proposal = accepted[i].proposal;
+
+            if (address(proposal) != address(0)) {
+                uint amount = accepted[i].unpaid * permille / 1000;
+                assert(amount <= accepted[i].unpaid);
+                proposal.distributePayout.value(amount)();
+                emit Payout(
+                    accepted[i].ref_uuid,
+                    IProposal(address(proposal)),
+                    amount
+                );
+            }
+        }
     }
 
     function getReward(uint _blockNumber)

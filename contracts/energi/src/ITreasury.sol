@@ -23,15 +23,49 @@ pragma solidity 0.5.9;
 
 import { IProposal } from "./IProposal.sol";
 
+/**
+ * Interface of BudgetProposal
+ */
+interface IBudgetProposal {
+    function payout_address() external view returns(address payable);
+
+    function distributePayout() external payable;
+
+    function budgetStatus() external view returns(
+        uint ref_uuid,
+        bool is_accepted,
+        bool is_finished,
+        uint unpaid
+    );
+}
+
+/**
+ * Interface for the Treasury
+ */
 interface ITreasury {
+    event BudgetProposal(
+        uint indexed ref_uuid,
+        IProposal proposal,
+        address payout_address,
+        uint amount,
+        uint deadline
+    );
     event Contribution(
         address from,
         uint amount
     );
+    event Payout(
+        uint indexed ref_uuid,
+        IProposal proposal,
+        uint amount
+    );
 
+    function uuid_proposal(uint _ref_uuid) external view returns(IProposal);
+    function proposal_uuid(IProposal proposal) external view returns(uint);
+    function propose(uint _amount, uint _ref_uuid, uint _period)
+        external payable returns(IProposal proposal);
     function isSuperblock(uint _blockNumber) external view returns(bool);
     function collect(IProposal) external;
     function contribute() external payable;
     function balance() external view returns(uint amount);
-    function () external payable;
 }

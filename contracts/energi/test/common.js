@@ -22,7 +22,8 @@ exports.mnregistry_config = [
     2,
     3,
     2,
-    24*60*60
+    24*60*60,
+    '10000000000000000000000', // 10,000 NRG
 ];
 exports.superblock_cycles = 8;
 

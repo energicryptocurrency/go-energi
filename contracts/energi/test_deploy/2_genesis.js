@@ -50,7 +50,7 @@ module.exports = async (deployer) => {
                             common.mnregistry_config);
         await deploy_common(SporkRegistryV1, undefined, mn_registry_proxy);
         await deploy_common(StakerRewardV1);
-        await deploy_common(TreasuryV1, treasury_proxy, common.superblock_cycles);
+        await deploy_common(TreasuryV1, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
 
         // For unit test
         await deployer.deploy(GovernedProxy, BackboneRewardV1.address, SporkRegistryV1.address);
@@ -58,7 +58,7 @@ module.exports = async (deployer) => {
         await deployer.deploy(MockContract, MockProxy.address);
         await deployer.deploy(MockSporkRegistry, MockProxy.address);
         await deployer.deploy(MockProposal);
-        await deployer.deploy(GenericProposalV1, mn_registry_proxy, 1, 1, mn_registry_proxy, 1)
+        //await deployer.deploy(GenericProposalV1, mn_registry_proxy, 1, 1, mn_registry_proxy)
     } catch (e) {
         console.dir(e);
         throw e;

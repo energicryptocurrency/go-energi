@@ -33,6 +33,7 @@ contract("MasternodeTokenV1", async accounts => {
         assert,
         it,
         web3,
+        storage: null,
     };
 
     const COLLATERAL_1 = web3.utils.toWei('10000', 'ether');
