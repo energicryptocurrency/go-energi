@@ -174,6 +174,7 @@ contract MasternodeRegistryV1 is
 
     uint32 public mn_active;
     mapping(address => Status) public mn_status;
+    uint last_block_number;
     //---------------------------------
 
     constructor(
@@ -619,7 +620,12 @@ contract MasternodeRegistryV1 is
         }
 
         //---
-        if (msg.value != 0) {
+        // SECURITY: do processing only when reward is exactly as expected
+        if (msg.value == REWARD_MASTERNODE_V1) {
+            // SECURITY: this check is essential against Masternode skip attacks!
+            require(last_block_number < block.number, "Call outside of governance!");
+            last_block_number = last_block_number;
+
             assert(gasleft() > GAS_RESERVE);
             assert(msg.value == address(this).balance);
 
