@@ -36,6 +36,7 @@ contract("MasternodeRegistryV1", async accounts => {
         assert,
         it,
         web3,
+        storage: null,
     };
 
     const { toWei, fromWei } = web3.utils;
@@ -257,6 +258,20 @@ contract("MasternodeRegistryV1", async accounts => {
 
             it('should handle enumerate()', async () => {
                 expect(await s.token_abi.enumerate()).lengthOf(0);
+            });
+
+            it.skip('must forbid more than one reward() per block', async () => {
+                // Bug: https://github.com/trufflesuite/truffle/issues/1389
+                const batch = web3.eth.BatchRequest();
+                batch.add(s.reward_abi.reward.request({value: reward}));
+                batch.add(s.reward_abi.reward.request({value: reward}));
+
+                try {
+                    await batch.execute();
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Call outside of governance/);
+                }
             });
         });
 

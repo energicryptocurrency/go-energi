@@ -137,7 +137,8 @@ contract MasternodeRegistryV1 is
         VotePerCycle,
         RequireVoting,
         VotesMax,
-        CleanupPeriod
+        CleanupPeriod,
+        InitialEverCollateral
     }
 
     // Data for migration
@@ -151,7 +152,10 @@ contract MasternodeRegistryV1 is
 
     address public current_masternode;
     uint8 public current_payouts;
-    uint[4] public config;
+    uint public votes_per_cycle;
+    uint public require_voting_from;
+    uint public votes_max;
+    uint public cleanup_period;
     //---------------------------------
 
     // Not for migration
@@ -170,13 +174,14 @@ contract MasternodeRegistryV1 is
 
     uint32 public mn_active;
     mapping(address => Status) public mn_status;
+    uint last_block_number;
     //---------------------------------
 
     constructor(
         address _proxy,
         IGovernedProxy _token_proxy,
         IGovernedProxy _treasury_proxy,
-        uint[4] memory _config
+        uint[5] memory _config
     )
         public
         GovernedContract(_proxy)
@@ -184,7 +189,15 @@ contract MasternodeRegistryV1 is
         v1storage = new StorageMasternodeRegistryV1();
         token_proxy = _token_proxy;
         treasury_proxy = _treasury_proxy;
-        config = _config;
+
+        votes_per_cycle = _config[uint(Config.VotePerCycle)];
+        require_voting_from = _config[uint(Config.RequireVoting)];
+        votes_max = _config[uint(Config.VotesMax)];
+        cleanup_period = _config[uint(Config.CleanupPeriod)];
+
+        uint initial_ever_collateral = _config[uint(Config.InitialEverCollateral)];
+        mn_ever_collateral = initial_ever_collateral;
+        require(initial_ever_collateral >= MN_COLLATERAL_MIN, "Initial collateral");
     }
 
     // IMasternodeRegistry
@@ -418,7 +431,7 @@ contract MasternodeRegistryV1 is
 
         require(s.seq_payouts > 0, "Not active target");
 
-        if (s.validations < config[uint(Config.VotesMax)]) {
+        if (s.validations < votes_max) {
             s.validations++;
         }
 
@@ -607,7 +620,12 @@ contract MasternodeRegistryV1 is
         }
 
         //---
-        if (msg.value != 0) {
+        // SECURITY: do processing only when reward is exactly as expected
+        if (msg.value == REWARD_MASTERNODE_V1) {
+            // SECURITY: this check is essential against Masternode skip attacks!
+            require(last_block_number < block.number, "Call outside of governance!");
+            last_block_number = last_block_number;
+
             assert(gasleft() > GAS_RESERVE);
             assert(msg.value == address(this).balance);
 
@@ -628,7 +646,7 @@ contract MasternodeRegistryV1 is
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
 
         Status storage mnstatus = mn_status[masternode];
-        mnstatus.votes = uint32(config[uint(Config.VotePerCycle)]);
+        mnstatus.votes = uint32(votes_per_cycle);
         uint validations = mnstatus.validations;
         ++payouts;
 
@@ -667,7 +685,7 @@ contract MasternodeRegistryV1 is
             current_payouts = 0;
 
             emit Deactivated(masternode);
-        } else if ((block.timestamp - mnstatus.inactive_since) > config[uint(Config.CleanupPeriod)]) {
+        } else if ((block.timestamp - mnstatus.inactive_since) > cleanup_period) {
             // Auto-cleanup
             _denounce(masternode, mninfo.owner);
         }
@@ -678,12 +696,12 @@ contract MasternodeRegistryV1 is
     function _canReward(uint validations) internal view returns(bool) {
         uint active = mn_active;
 
-        if (active < config[uint(Config.RequireVoting)]) {
+        if (active < require_voting_from) {
             return true;
         }
 
         uint required = active / 2;
-        uint max = config[uint(Config.VotesMax)];
+        uint max = votes_max;
 
         if (required > max) {
             required = max;

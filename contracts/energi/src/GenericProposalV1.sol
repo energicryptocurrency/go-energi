@@ -80,20 +80,17 @@ contract GenericProposalV1 is
      * @param _quorum - 1..100
      * @param _period - in seconds until deadline
      * @param _feePayer - the proposal initiator
-     * @param _feeAmount - the amount of the initial fees
      */
     constructor(
         IGovernedProxy _mnregistry_proxy,
         uint8 _quorum,
         uint _period,
-        address payable _feePayer,
-        uint _feeAmount
+        address payable _feePayer
     ) public {
         parent = msg.sender;
         created_block = block.number;
 
         mnregistry_proxy = _mnregistry_proxy;
-        fee_amount = _feeAmount;
         deadline = block.timestamp + _period;
         fee_payer = _feePayer;
 
@@ -105,6 +102,7 @@ contract GenericProposalV1 is
             uint _ever_weight
         ) = IMasternodeRegistry(address(_mnregistry_proxy.impl())).count();
 
+        require(_ever_weight > 0, "Not ready for proposals");
         require(_total_weight >= (_ever_weight/2), "Active weight < 1/2 ever weight");
         assert(_quorum >= QUORUM_MIN);
         assert(_quorum <= QUORUM_MAX);
@@ -117,6 +115,9 @@ contract GenericProposalV1 is
         } else {
             finish_weight = _total_weight * QUORUM_MAJORITY / QUORUM_MAX;
         }
+
+        assert(quorum_weight > 0);
+        assert(finish_weight > 0);
     }
 
     /**
@@ -212,6 +213,15 @@ contract GenericProposalV1 is
         require(msg.sender == address(treasury), "Not treasury");
 
         treasury.contribute.value(address(this).balance)();
+    }
+
+    /**
+     * Set fee amount by parent
+     */
+    function setFee() external payable {
+        require(msg.sender == parent, "Only parent");
+        // NOTE: make sure it correctly handles multiple calls
+        fee_amount += msg.value;
     }
 
     /**

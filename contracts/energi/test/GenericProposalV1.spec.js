@@ -87,6 +87,8 @@ contract("GenericProposalV1", async accounts => {
                 from: owner3,
                 value: collateral3,
             });
+
+            mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
         });
 
         after(async () => {
@@ -107,8 +109,7 @@ contract("GenericProposalV1", async accounts => {
                     mnregistry.address,
                     0,
                     60,
-                    not_owner,
-                    toWei('100', 'ether')
+                    not_owner
                 );
                 assert.fail('It must fail');
             } catch (e) {
@@ -119,16 +120,14 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             await GenericProposalV1.new(
                 mnregistry.address,
                 100,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             try {
@@ -136,8 +135,7 @@ contract("GenericProposalV1", async accounts => {
                     mnregistry.address,
                     101,
                     60,
-                    not_owner,
-                    toWei('100', 'ether')
+                    not_owner
                 );
                 assert.fail('It must fail');
             } catch (e) {
@@ -157,8 +155,7 @@ contract("GenericProposalV1", async accounts => {
                     mnregistry.address,
                     51,
                     60,
-                    not_owner,
-                    toWei('100', 'ether')
+                    not_owner
                 );
                 assert.fail('It must fail');
             } catch (e) {
@@ -175,8 +172,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             await proposal.voteAccept({from: owner1});
@@ -207,8 +203,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             await proposal.voteReject({from: owner1});
@@ -239,8 +234,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             await proposal.voteAccept({from: owner1});
@@ -276,8 +270,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 5,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             await proposal.voteAccept({from: owner1});
@@ -321,8 +314,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 90,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             await proposal.voteAccept({from: owner1});
@@ -357,8 +349,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
@@ -380,8 +371,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             await proposal.voteAccept({from: owner1});
@@ -399,8 +389,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                not_owner,
-                toWei('100', 'ether')
+                not_owner
             );
 
             try {
@@ -419,13 +408,13 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                not_owner,
-                toWei('123', 'ether')
+                not_owner
             );
             await proposal.voteAccept({from: owner1});
             await common.moveTime(web3, 70);
 
-            await proposal.send(toWei('5', 'ether'), { from: owner1 });
+            await proposal.setFee({ from: owner1, value: toWei('2', 'ether')});
+            await proposal.setFee({ from: owner1, value: toWei('3', 'ether')});
             
             await proposal.withdraw({from: owner1});
             const bal_after = await web3.eth.getBalance(not_owner);
@@ -438,8 +427,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                not_owner,
-                toWei('123', 'ether')
+                not_owner
             );
 
             try {
@@ -458,13 +446,12 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                not_owner,
-                toWei('123', 'ether')
+                not_owner
             );
             await proposal.voteAccept({from: owner1});
             await common.moveTime(web3, 70);
 
-            await proposal.send(toWei('5', 'ether'), { from: owner1});
+            await proposal.setFee({ from: owner1, value: toWei('5', 'ether') });
             
             await proposal.destroy({from: owner1});
             const bal_after = await web3.eth.getBalance(not_owner);
@@ -479,8 +466,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                not_owner,
-                toWei('123', 'ether')
+                not_owner
             );
 
             try {
@@ -508,11 +494,10 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                not_owner,
-                toWei('123', 'ether')
+                not_owner
             );
 
-            await proposal.send(toWei('5', 'ether'), { from: owner1 });
+            await proposal.setFee({ from: owner1, value: toWei('5', 'ether') });
 
             await common.moveTime(web3, 70);
 
@@ -530,8 +515,7 @@ contract("GenericProposalV1", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                not_owner,
-                toWei('123', 'ether')
+                not_owner
             );
 
             try {
