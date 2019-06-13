@@ -32,6 +32,7 @@ contract("BackboneRewardV1", async accounts => {
         assert,
         it,
         web3,
+        backbone : accounts[5],
     };
 
     before(async () => {
@@ -45,7 +46,7 @@ contract("BackboneRewardV1", async accounts => {
     });
 
     after(async () => {
-        const impl = await BackboneRewardV1.new(s.proxy.address);
+        const impl = await BackboneRewardV1.new(s.proxy.address, s.backbone);
         await s.proxy.setImpl(impl.address);
     });
 
@@ -53,6 +54,24 @@ contract("BackboneRewardV1", async accounts => {
 
     //---
     describe('Primary', () => {
+        const { toBN, toWei } = web3.utils;
+        const reward = toBN(toWei('2.28', 'ether'));
+
+        it('should correctly getReward()', async () => {
+            expect(toBN(await s.token_abi.getReward(0)).toString())
+                .equal(toBN(0).toString());
+            expect(toBN(await s.token_abi.getReward(1)).toString())
+                .equal(toBN(reward).toString());
+            expect(toBN(await s.token_abi.getReward(common.superblock_cycles)).toString())
+                .equal(toBN(reward).toString());
+        });
+
+        it('should reward()', async () => {
+            const bal_before = toBN(await web3.eth.getBalance(s.backbone));
+            await s.token_abi.reward({value: reward});
+            const bal_after = toBN(await web3.eth.getBalance(s.backbone));
+            expect(bal_after.sub(bal_before).toString()).equal(reward.toString());
+        });
     });
 
     //---

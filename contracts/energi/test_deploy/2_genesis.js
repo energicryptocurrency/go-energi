@@ -19,7 +19,7 @@ const MockProposal = artifacts.require("MockProposal");
 
 const common = require('../test/common');
 
-module.exports = async (deployer) => {
+module.exports = async (deployer, _, accounts) => {
     try {
         // V1 instances
         await deployer.deploy(MockProxy);
@@ -42,7 +42,7 @@ module.exports = async (deployer) => {
         await deployer.deploy(Gen2Migration);
 
         await deploy_common(BlacklistRegistryV1);
-        await deploy_common(BackboneRewardV1);
+        await deploy_common(BackboneRewardV1, undefined, accounts[5]);
         await deploy_common(CheckpointRegistryV1);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,
