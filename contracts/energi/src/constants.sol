@@ -72,5 +72,8 @@ contract GlobalConstants {
     uint constant internal BUDGET_AMOUNT_MIN = BUDGET_PROPOSAL_FEE;
     uint constant internal BUDGET_AMOUNT_MAX = REWARD_TREASURY_V1;
     uint constant internal BUDGET_PROPOSAL_MAX = 8;
+
+    uint constant internal BLACKLIST_PROPOSAL_FEE = 1000 ether;
+    uint constant internal BLACKLIST_REVOKE_FEE = 100 ether;
 }
 

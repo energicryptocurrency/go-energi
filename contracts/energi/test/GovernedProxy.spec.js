@@ -224,5 +224,5 @@ contract("GovernedProxy", async accounts => {
         } catch (e) {
             assert.match(e.message, /Not registered!/);
         }
-   });
+    });
 });

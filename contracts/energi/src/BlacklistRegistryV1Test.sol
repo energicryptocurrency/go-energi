@@ -19,16 +19,23 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
-//pragma experimental SMTChecker;
 
-// solium-disable no-empty-blocks
+import { BlacklistProposalV1 } from "./BlacklistRegistryV1.sol";
+import { IGovernedProxy } from "./IGovernedProxy.sol";
 
-/**
- * Genesis version of CheckpointRegistry interface.
- *
- * Base Consensus interface for constructs which receive block rewards.
- *
- * NOTE: it MUST NOT change after blockchain launch!
- */
-interface ICheckpointRegistry {
+contract MockBlacklistProposalV1
+    is BlacklistProposalV1
+{
+    constructor(IGovernedProxy _mnregistry_proxy, address payable fee_payer)
+        public
+        BlacklistProposalV1(_mnregistry_proxy, fee_payer)
+    // solium-disable-next-line no-empty-blocks
+    {}
+
+    function setWeights(uint accepted, uint rejected, uint quorum, uint finish) external {
+        accepted_weight = accepted;
+        rejected_weight = rejected;
+        quorum_weight = quorum;
+        finish_weight = finish;
+    }
 }

@@ -21,6 +21,15 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IProposal } from "./IProposal.sol";
+
+/**
+ * Interface of BlacklistProposal
+ */
+interface IBlacklistProposal {
+    function isObeyed() external view returns(bool);
+}
+
 /**
  * Genesis version of BlacklistRegistry interface.
  *
@@ -30,4 +39,18 @@ pragma solidity 0.5.9;
  * NOTE: it MUST NOT change after blockchain launch!
  */
 interface IBlacklistRegistry {
+    event BlacklistProposal(
+        address indexed target,
+        IProposal proposal
+    );
+    event WhitelistProposal(
+        address indexed target,
+        IProposal proposal
+    );
+
+    function proposals(address) external view returns(IProposal enforce, IProposal revoke);
+    function propose(address) external payable returns(address);
+    function revokeProposal(address) external payable returns(address);
+    function isBlacklisted(address) external view returns(bool);
+    function collect(address) external;
 }

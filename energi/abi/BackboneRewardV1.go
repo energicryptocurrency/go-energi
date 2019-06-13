@@ -28,18 +28,18 @@ var (
 )
 
 // BackboneRewardV1ABI is the input ABI used to generate the binding from.
-const BackboneRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
+const BackboneRewardV1ABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"}],\"name\":\"destroy\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_blockNumber\",\"type\":\"uint256\"}],\"name\":\"getReward\",\"outputs\":[{\"name\":\"amount\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"reward\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"backbone_address\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_oldImpl\",\"type\":\"address\"}],\"name\":\"migrate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_proxy\",\"type\":\"address\"},{\"name\":\"_backbone_address\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]"
 
 // BackboneRewardV1Bin is the compiled bytecode used for deploying new contracts.
-const BackboneRewardV1Bin = `608060405234801561001057600080fd5b5060405161043e38038061043e8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b03199092169190911790556103d9806100656000396000f3fe6080604052600436106100595760003560e01c8063228cb73311610043578063228cb7331461013e578063ce5494bb14610146578063ec5568891461018657610059565b8062f55d9d146100c05780631c4b774b14610102575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100cc57600080fd5b50610100600480360360208110156100e357600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101c4565b005b34801561010e57600080fd5b5061012c6004803603602081101561012557600080fd5b503561026c565b60408051918252519081900360200190f35b610100610284565b34801561015257600080fd5b506101006004803603602081101561016957600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166102fa565b34801561019257600080fd5b5061019b610388565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b60005473ffffffffffffffffffffffffffffffffffffffff16331461024a57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61025381610385565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000811561027f5750671fa42feb87e400005b919050565b600154156102f357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600760248201527f5265656e74727900000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6000600155565b60005473ffffffffffffffffffffffffffffffffffffffff16331461038057604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b610385815b50565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a72305820bb09a6392ea8ac8f85bb713bc0de5dc5b6b1c0bd6c631334e1c9583dffd43a4664736f6c63430005090032`
+const BackboneRewardV1Bin = `608060405234801561001057600080fd5b506040516104da3803806104da8339818101604052604081101561003357600080fd5b508051602090910151600080546001600160a01b039384166001600160a01b031991821617909155600280549390921692169190911790556104608061007a6000396000f3fe6080604052600436106100645760003560e01c80637079cf33116100435780637079cf3314610151578063ce5494bb1461018f578063ec556889146101cf57610064565b8062f55d9d146100cb5780631c4b774b1461010d578063228cb73314610149575b604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600d60248201527f4e6f7420737570706f7274656400000000000000000000000000000000000000604482015290519081900360640190fd5b3480156100d757600080fd5b5061010b600480360360208110156100ee57600080fd5b503573ffffffffffffffffffffffffffffffffffffffff166101e4565b005b34801561011957600080fd5b506101376004803603602081101561013057600080fd5b503561028c565b60408051918252519081900360200190f35b61010b6102a4565b34801561015d57600080fd5b50610166610365565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561019b57600080fd5b5061010b600480360360208110156101b257600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610381565b3480156101db57600080fd5b5061016661040f565b60005473ffffffffffffffffffffffffffffffffffffffff16331461026a57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6102738161040c565b8073ffffffffffffffffffffffffffffffffffffffff16ff5b6000811561029f5750671fa42feb87e400005b919050565b6001541561031357604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600760248201527f5265656e74727900000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b6001805560025460405173ffffffffffffffffffffffffffffffffffffffff909116903480156108fc02916000818181858888f1935050505015801561035d573d6000803e3d6000fd5b506000600155565b60025473ffffffffffffffffffffffffffffffffffffffff1681565b60005473ffffffffffffffffffffffffffffffffffffffff16331461040757604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600960248201527f4e6f742070726f78790000000000000000000000000000000000000000000000604482015290519081900360640190fd5b61040c815b50565b60005473ffffffffffffffffffffffffffffffffffffffff168156fea265627a7a7230582025894d85e37c3f3120ec3225ce6927d8e293cf964f82ecfd755ef525c65a397a64736f6c63430005090032`
 
 // DeployBackboneRewardV1 deploys a new Ethereum contract, binding an instance of BackboneRewardV1 to it.
-func DeployBackboneRewardV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address) (common.Address, *types.Transaction, *BackboneRewardV1, error) {
+func DeployBackboneRewardV1(auth *bind.TransactOpts, backend bind.ContractBackend, _proxy common.Address, _backbone_address common.Address) (common.Address, *types.Transaction, *BackboneRewardV1, error) {
 	parsed, err := abi.JSON(strings.NewReader(BackboneRewardV1ABI))
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
-	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(BackboneRewardV1Bin), backend, _proxy)
+	address, tx, contract, err := bind.DeployContract(auth, parsed, common.FromHex(BackboneRewardV1Bin), backend, _proxy, _backbone_address)
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
@@ -186,6 +186,32 @@ func (_BackboneRewardV1 *BackboneRewardV1TransactorRaw) Transfer(opts *bind.Tran
 // Transact invokes the (paid) contract method with params as input values.
 func (_BackboneRewardV1 *BackboneRewardV1TransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
 	return _BackboneRewardV1.Contract.contract.Transact(opts, method, params...)
+}
+
+// BackboneAddress is a free data retrieval call binding the contract method 0x7079cf33.
+//
+// Solidity: function backbone_address() constant returns(address)
+func (_BackboneRewardV1 *BackboneRewardV1Caller) BackboneAddress(opts *bind.CallOpts) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _BackboneRewardV1.contract.Call(opts, out, "backbone_address")
+	return *ret0, err
+}
+
+// BackboneAddress is a free data retrieval call binding the contract method 0x7079cf33.
+//
+// Solidity: function backbone_address() constant returns(address)
+func (_BackboneRewardV1 *BackboneRewardV1Session) BackboneAddress() (common.Address, error) {
+	return _BackboneRewardV1.Contract.BackboneAddress(&_BackboneRewardV1.CallOpts)
+}
+
+// BackboneAddress is a free data retrieval call binding the contract method 0x7079cf33.
+//
+// Solidity: function backbone_address() constant returns(address)
+func (_BackboneRewardV1 *BackboneRewardV1CallerSession) BackboneAddress() (common.Address, error) {
+	return _BackboneRewardV1.Contract.BackboneAddress(&_BackboneRewardV1.CallOpts)
 }
 
 // GetReward is a free data retrieval call binding the contract method 0x1c4b774b.

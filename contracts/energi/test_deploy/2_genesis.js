@@ -41,7 +41,7 @@ module.exports = async (deployer, _, accounts) => {
 
         await deployer.deploy(Gen2Migration);
 
-        await deploy_common(BlacklistRegistryV1);
+        await deploy_common(BlacklistRegistryV1, undefined, mn_registry_proxy);
         await deploy_common(BackboneRewardV1, undefined, accounts[5]);
         await deploy_common(CheckpointRegistryV1);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);

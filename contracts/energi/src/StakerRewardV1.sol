@@ -37,6 +37,7 @@ contract StakerRewardV1 is
 {
     // IGovernedContract
     //---------------------------------
+    // solium-disable-next-line no-empty-blocks
     constructor(address _proxy) public GovernedContract(_proxy) {}
 
     // IBlockReward

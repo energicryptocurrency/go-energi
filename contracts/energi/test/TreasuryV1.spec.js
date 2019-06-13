@@ -495,6 +495,7 @@ contract("TreasuryV1", async accounts => {
             }
         });
     });
+
     //---
     describe('common post', () => common.govPostTests(s) );
 });
