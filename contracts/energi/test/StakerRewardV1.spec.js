@@ -20,7 +20,6 @@
 
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
-const MockProposal = artifacts.require('MockProposal');
 const StakerRewardV1 = artifacts.require('StakerRewardV1');
 const IBlockReward = artifacts.require('IBlockReward');
 

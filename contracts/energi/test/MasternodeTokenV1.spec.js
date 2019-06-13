@@ -165,7 +165,7 @@ contract("MasternodeTokenV1", async accounts => {
             assert.equal(res2.valueOf(), COLLATERAL_1);
 
             const res3 = await s.token_abi.totalSupply();
-            assert.equal(res2.valueOf(), COLLATERAL_1);
+            assert.equal(res3.valueOf(), COLLATERAL_1);
 
             const evt = await s.orig.getPastEvents('Transfer', common.evt_last_block);
             expect(evt).lengthOf(1);

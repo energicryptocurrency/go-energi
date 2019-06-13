@@ -71,8 +71,6 @@ contract("TreasuryV1", async accounts => {
         const { fromAscii, toBN, toWei } = web3.utils;
         const superblock_reward = toBN(toWei('184000', 'ether'));
         const payer1 = accounts[0];
-        const payer2 = accounts[1];
-        const payer3 = accounts[3];
         const def_period = 14*24*60*60; // 2 weeks
         const def_amount = toBN(toWei('1000', 'ether'));
         const fee_amount = toBN(toWei('100', 'ether'));
@@ -82,7 +80,6 @@ contract("TreasuryV1", async accounts => {
 
         const owner1 = accounts[0];
         const owner2 = accounts[1];
-        const not_owner = accounts[3];
 
         const masternode1 = accounts[9];
         const masternode2 = accounts[8];
@@ -292,7 +289,7 @@ contract("TreasuryV1", async accounts => {
         it ('should record & map proposals()', async () => {
             const max_amount = superblock_reward;
             await s.treasury_abi.propose(
-                superblock_reward, '22222222', def_period,
+                max_amount, '22222222', def_period,
                 { value: fee_amount }
             );
             const proposal2 = await s.treasury_abi.uuid_proposal('22222222');
@@ -374,7 +371,6 @@ contract("TreasuryV1", async accounts => {
                 toWei('300', 'ether'), '203', def_period,
                 { value: fee_amount }
             );
-            const proposal3 = await get_proposal();
 
             await proposal1.voteAccept({from: owner1});
             await proposal1.voteAccept({from: owner2});

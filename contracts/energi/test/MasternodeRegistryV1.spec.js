@@ -39,7 +39,7 @@ contract("MasternodeRegistryV1", async accounts => {
         storage: null,
     };
 
-    const { toWei, fromWei } = web3.utils;
+    const { toWei } = web3.utils;
     
     before(async () => {
         s.orig = await MasternodeRegistryV1.deployed();
@@ -281,7 +281,7 @@ contract("MasternodeRegistryV1", async accounts => {
             it('should refuse announce() without collateral', async () => {
                 try {
                     await s.token_abi.announce(
-                            masternode1, ip1, enode1, { from: not_owner });
+                        masternode1, ip1, enode1, { from: not_owner });
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Invalid collateral/);
@@ -295,7 +295,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 assert.equal(res['0'].valueOf(), collateral1);
 
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
 
                 const ann_e = await s.orig.getPastEvents('Announced', common.evt_last_block);
                 expect(ann_e).lengthOf(1);
@@ -320,7 +320,7 @@ contract("MasternodeRegistryV1", async accounts => {
 
             it('should re-announce MN', async () => {
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
 
                 const ann_e = await s.orig.getPastEvents('Announced', common.evt_last_block);
                 expect(ann_e).lengthOf(1);
@@ -354,7 +354,7 @@ contract("MasternodeRegistryV1", async accounts => {
             it('should refuse announce() another owner\'s MN', async () => {
                 try {
                     await s.token_abi.announce(
-                            masternode1, ip2, enode2, { from: owner2 });
+                        masternode1, ip2, enode2, { from: owner2 });
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Invalid owner/);
@@ -514,7 +514,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.token_abi.enumerate()).members([]);
 
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1]);
 
@@ -526,7 +526,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.token_abi.enumerate()).members([]);
 
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
             });
 
             it('should denounce()', async()=> {
@@ -564,7 +564,7 @@ contract("MasternodeRegistryV1", async accounts => {
             it('should announce()', async () => {
                 for (let mn of nodes) {
                     await s.token_abi.announce(
-                            mn.masternode, mn.ip, mn.enode, { from: mn.owner });
+                        mn.masternode, mn.ip, mn.enode, { from: mn.owner });
                 }
 
                 const mn1_status = await s.orig.mn_status(masternode1);
@@ -577,7 +577,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 // back order to test current being left in place first
                 for (let mn of Array.from(nodes).reverse()) {
                     await s.token_abi.announce(
-                            mn.masternode, mn.ip, mn.enode, { from: mn.owner });
+                        mn.masternode, mn.ip, mn.enode, { from: mn.owner });
 
                     const ann_e = await s.orig.getPastEvents('Announced', common.evt_last_block);
                     expect(ann_e).lengthOf(1);
@@ -612,7 +612,7 @@ contract("MasternodeRegistryV1", async accounts => {
             it('should refuse announce() another owner\'s MN', async () => {
                 try {
                     await s.token_abi.announce(
-                            masternode1, ip2, enode2, { from: owner2 });
+                        masternode1, ip2, enode2, { from: owner2 });
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Invalid owner/);
@@ -744,7 +744,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.token_abi.enumerate()).members([masternode2]);
 
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
 
@@ -756,7 +756,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.token_abi.enumerate()).members([masternode2]);
 
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
             });
 
             it('should denounce()', async()=> {
@@ -803,7 +803,7 @@ contract("MasternodeRegistryV1", async accounts => {
             it('should announce()', async () => {
                 for (let mn of nodes) {
                     await s.token_abi.announce(
-                            mn.masternode, mn.ip, mn.enode, { from: mn.owner });
+                        mn.masternode, mn.ip, mn.enode, { from: mn.owner });
                 }
 
                 const mn1_status = await s.orig.mn_status(masternode1);
@@ -818,7 +818,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 // back order to test current being left in place first
                 for (let mn of Array.from(nodes).reverse()) {
                     await s.token_abi.announce(
-                            mn.masternode, mn.ip, mn.enode, { from: mn.owner });
+                        mn.masternode, mn.ip, mn.enode, { from: mn.owner });
 
                     const ann_e = await s.orig.getPastEvents('Announced', common.evt_last_block);
                     expect(ann_e).lengthOf(1);
@@ -1032,7 +1032,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.token_abi.enumerate()).members([masternode2, masternode3]);
 
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
 
@@ -1044,7 +1044,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.token_abi.enumerate()).members([masternode2, masternode3]);
 
                 await s.token_abi.announce(
-                        masternode1, ip1, enode1, { from: owner1 });
+                    masternode1, ip1, enode1, { from: owner1 });
             });
 
             it('should cleanup inactive node', async () => {

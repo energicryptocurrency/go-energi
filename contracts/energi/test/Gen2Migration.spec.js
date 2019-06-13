@@ -20,7 +20,7 @@
 
 const Gen2Migration = artifacts.require('Gen2Migration');
 
-contract("Gen2Migration", async accounts => {
+contract("Gen2Migration", async _accounts => {
     let orig;
 
     before(async () => {
