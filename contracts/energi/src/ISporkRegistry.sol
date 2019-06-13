@@ -25,7 +25,11 @@ import { IGovernedContract } from "./IGovernedContract.sol";
 import { IProposal } from "./IProposal.sol";
 
 interface ISporkRegistry {
-    function createUpgradeProposal(IGovernedContract _impl, uint _period)
+    function createUpgradeProposal(
+        IGovernedContract _impl,
+        uint _period,
+        address payable _fee_payer
+    )
         external payable
         returns (IProposal);
 }

@@ -41,11 +41,12 @@ contract GlobalConstants {
     uint constant internal FEE_BUDGET_V1 = 100 ether;
     uint constant internal FEE_CHECKPOINT_V1 = 1000 ether;
     uint constant internal FEE_BLACKLIST_V1 = 1000 ether;
+    uint constant internal FEE_BLACKLIST_REVOKE_V1 = 100 ether;
 
     uint constant internal PERIOD_UPGRADE_MIN = 2 weeks;
     uint constant internal PERIOD_UPGRADE_MAX = 365 days;
     uint constant internal PERIOD_BUDGET_MIN = 2 weeks;
-    uint constant internal PERIOD_BUDGET_MAX = 365 days;
+    uint constant internal PERIOD_BUDGET_MAX = 30 days;
     uint constant internal PERIOD_CHECKPOINT = 1 weeks;
     uint constant internal PERIOD_BLACKLIST = 1 weeks;
 
@@ -66,14 +67,8 @@ contract GlobalConstants {
     uint constant internal MN_HEARTBEAT_INTERVAL_MAX = MN_HEARTBEAT_INTERVAL * 2;
     uint constant internal MN_HEARTBEAT_PAST_BLOCKS = 10;
 
-    uint constant internal BUDGET_PERIOD_MIN = 1 weeks;
-    uint constant internal BUDGET_PERIOD_MAX = 30 days;
-    uint constant internal BUDGET_PROPOSAL_FEE = 100 ether;
-    uint constant internal BUDGET_AMOUNT_MIN = BUDGET_PROPOSAL_FEE;
+    uint constant internal BUDGET_AMOUNT_MIN = FEE_BUDGET_V1;
     uint constant internal BUDGET_AMOUNT_MAX = REWARD_TREASURY_V1;
     uint constant internal BUDGET_PROPOSAL_MAX = 8;
-
-    uint constant internal BLACKLIST_PROPOSAL_FEE = 1000 ether;
-    uint constant internal BLACKLIST_REVOKE_FEE = 100 ether;
 }
 

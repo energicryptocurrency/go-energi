@@ -144,7 +144,7 @@ contract BlacklistRegistryV1 is
         noReentry
         returns(address)
     {
-        require(msg.value == BLACKLIST_PROPOSAL_FEE, "Invalid fee");
+        require(msg.value == FEE_BLACKLIST_V1, "Invalid fee");
 
         StorageBlacklistRegistryV1 store = v1storage;
         (IProposal enforce, IProposal revoke) = store.address_info(addr);
@@ -185,7 +185,7 @@ contract BlacklistRegistryV1 is
         noReentry
         returns(address)
     {
-        require(msg.value == BLACKLIST_REVOKE_FEE, "Invalid fee");
+        require(msg.value == FEE_BLACKLIST_REVOKE_V1, "Invalid fee");
 
         StorageBlacklistRegistryV1 store = v1storage;
         (IProposal enforce, IProposal revoke) = store.address_info(addr);

@@ -67,7 +67,7 @@ contract GovernedProxy is
         require(_newImpl.proxy() == address(this), "Wrong proxy!");
 
         ISporkRegistry spork_reg = ISporkRegistry(address(spork_proxy.impl()));
-        IProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period);
+        IProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period, msg.sender);
 
         upgrade_proposals[address(proposal)] = _newImpl;
 

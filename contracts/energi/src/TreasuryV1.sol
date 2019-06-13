@@ -108,11 +108,11 @@ contract TreasuryV1 is
         noReentry
         returns(IProposal proposal)
     {
-        require(msg.value == BUDGET_PROPOSAL_FEE, "Invalid fee");
+        require(msg.value == FEE_BUDGET_V1, "Invalid fee");
         require(_amount >= BUDGET_AMOUNT_MIN, "Too small amount");
         require(_amount <= BUDGET_AMOUNT_MAX, "Too large amount");
-        require(_period >= BUDGET_PERIOD_MIN, "Too small period");
-        require(_period <= BUDGET_PERIOD_MAX, "Too large period");
+        require(_period >= PERIOD_BUDGET_MIN, "Too small period");
+        require(_period <= PERIOD_BUDGET_MAX, "Too large period");
 
         StorageTreasuryV1 store = v1storage;
         address payable payout_address = _callerAddress();
