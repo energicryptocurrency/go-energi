@@ -53,6 +53,30 @@ contract("StakerRewardV1", async accounts => {
 
     //---
     describe('Primary', () => {
+        const { toBN, toWei } = web3.utils;
+        const reward = toBN(toWei('2.28', 'ether'));
+
+        it('should correctly getReward()', async () => {
+            expect(toBN(await s.token_abi.getReward(0)).toString())
+                .equal(toBN(0).toString());
+            expect(toBN(await s.token_abi.getReward(1)).toString())
+                .equal(toBN(reward).toString());
+            expect(toBN(await s.token_abi.getReward(common.superblock_cycles)).toString())
+                .equal(toBN(reward).toString());
+        });
+
+        it('should reward()', async () => {
+            const coinbase = (await web3.eth.getBlock('latest')).miner;
+            const trunc = toBN(toWei('0.01', 'ether')); // truncate gas
+            const eth_reward = toBN(toWei('2', 'ether')); // standard reward
+
+            const bal_before = toBN(await web3.eth.getBalance(coinbase));
+            await s.token_abi.reward({value: reward, from: accounts[1]});
+            const bal_after = toBN(await web3.eth.getBalance(coinbase));
+
+            expect(bal_after.sub(bal_before).div(trunc).mul(trunc).toString())
+                .equal(reward.add(eth_reward).toString());
+        });
     });
 
     //---

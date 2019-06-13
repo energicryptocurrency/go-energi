@@ -42,6 +42,7 @@ contract StakerRewardV1 is
     // IBlockReward
     //---------------------------------
     function reward() external payable {
+        block.coinbase.transfer(msg.value);
     }
 
     function getReward(uint _blockNumber)
