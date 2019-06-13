@@ -146,7 +146,7 @@ contract TreasuryV1 is
             }
         }
 
-        require(false, "Too many active proposals");
+        revert("Too many active proposals");
     }
 
     function isSuperblock(uint _blockNumber)
@@ -154,15 +154,6 @@ contract TreasuryV1 is
         returns(bool)
     {
         return (_blockNumber % superblock_cycle) == 0 && (_blockNumber > 0);
-    }
-
-    function collect(IProposal proposal)
-        external
-    {
-        // SECURITY: if this one is called as part of "zero-fee",
-        //           then its parameter must be validated to avoid
-        //           gas spending attacks.
-        proposal.collect();
     }
 
     function contribute() external payable {

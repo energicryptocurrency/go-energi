@@ -192,4 +192,37 @@ contract("GovernedProxy", async accounts => {
             assert.match(e.message, /Already active!/);
         }
     });
+
+    it('should refuse collect - Not registered!', async () => {
+        let proposal = await MockProposal.new();
+
+        try {
+            await proxy.collectProposal(proposal.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not registered!/);
+        }
+
+        const evt = await proxy.getPastEvents('Upgraded', common.evt_last_block);
+        expect(evt).lengthOf(0);
+    });
+
+
+    it('should collectProposal()', async () => {
+        let tmp = await MockContract.new(proxy.address);
+        let proposal = await proxy.proposeUpgrade(
+            tmp.address, 2 * weeks,
+            { from: accounts[0], value: '1' });
+        proposal = await MockProposal.at(proposal.logs[0].args['1']);
+
+        await common.moveTime(web3, 2 * weeks + 1);
+        await proxy.collectProposal(proposal.address);
+
+        try {
+            await proxy.collectProposal(proposal.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not registered!/);
+        }
+   });
 });

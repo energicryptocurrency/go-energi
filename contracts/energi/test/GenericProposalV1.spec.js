@@ -426,7 +426,7 @@ contract("GenericProposalV1", async accounts => {
                 await proposal.destroy({from: not_owner});
                 assert.fail('It must fail');
             } catch (e) {
-                assert.match(e.message, /Not parent/);
+                assert.match(e.message, /Only parent/);
             }
         });
 
@@ -462,7 +462,7 @@ contract("GenericProposalV1", async accounts => {
             );
 
             try {
-                await treasury.collect(proposal.address, {from: not_owner});
+                await proposal.collect({from: not_owner});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Not collectable/);
@@ -472,7 +472,7 @@ contract("GenericProposalV1", async accounts => {
             await common.moveTime(web3, 70);
 
             try {
-                await treasury.collect(proposal.address, {from: not_owner});
+                await proposal.collect({from: not_owner});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Not collectable/);
@@ -494,15 +494,22 @@ contract("GenericProposalV1", async accounts => {
             await common.moveTime(web3, 70);
 
             const bal_before = await treasury.balance();
+            
+            try {
+                await proposal.collect({from: not_owner});
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Only parent/);
+            }
 
-            await treasury.collect(proposal.address);
+            await proposal.collect();
 
             const bal_after = await treasury.balance();
             expect(toBN(bal_after).sub(toBN(bal_before)).toString())
                 .equal(toBN(toWei('5', 'ether')).toString());
         });
         
-        it('should refuse payment unless from parent', async () => {
+        it('should refuse payments', async () => {
             const proposal = await GenericProposalV1.new(
                 mnregistry.address,
                 1,
@@ -511,10 +518,10 @@ contract("GenericProposalV1", async accounts => {
             );
 
             try {
-                await proposal.destroy({from: not_owner});
+                await proposal.send(toWei('1', 'ether'), {from: not_owner});
                 assert.fail('It must fail');
             } catch (e) {
-                assert.match(e.message, /Not parent/);
+                assert.match(e.message, /Not allowed/);
             }
         });
     });
