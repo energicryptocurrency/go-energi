@@ -37,11 +37,13 @@ contract StakerRewardV1 is
 {
     // IGovernedContract
     //---------------------------------
+    // solium-disable-next-line no-empty-blocks
     constructor(address _proxy) public GovernedContract(_proxy) {}
 
     // IBlockReward
     //---------------------------------
     function reward() external payable {
+        block.coinbase.transfer(msg.value);
     }
 
     function getReward(uint _blockNumber)

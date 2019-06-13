@@ -65,7 +65,6 @@ interface ITreasury {
     function propose(uint _amount, uint _ref_uuid, uint _period)
         external payable returns(IProposal proposal);
     function isSuperblock(uint _blockNumber) external view returns(bool);
-    function collect(IProposal) external;
     function contribute() external payable;
     function balance() external view returns(uint amount);
 }

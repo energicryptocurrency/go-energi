@@ -67,7 +67,7 @@ contract GovernedProxy is
         require(_newImpl.proxy() == address(this), "Wrong proxy!");
 
         ISporkRegistry spork_reg = ISporkRegistry(address(spork_proxy.impl()));
-        IProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period);
+        IProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period, msg.sender);
 
         upgrade_proposals[address(proposal)] = _newImpl;
 
@@ -95,7 +95,23 @@ contract GovernedProxy is
         // SECURITY: prevent downgrade attack
         delete upgrade_proposals[address(_proposal)];
 
+        // Return fee ASAP
+        _proposal.destroy();
+
         emit Upgraded(address(new_impl), address(_proposal));
+    }
+
+    /**
+     * Once proposal is reject, anyone can start collect procedure.
+     */
+    function collectProposal(IProposal _proposal)
+        external
+        noReentry
+    {
+        IGovernedContract new_impl = upgrade_proposals[address(_proposal)];
+        require(address(new_impl) != address(0), "Not registered!");
+        _proposal.collect();
+        delete upgrade_proposals[address(_proposal)];
     }
 
     /**

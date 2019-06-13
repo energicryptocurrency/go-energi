@@ -46,7 +46,7 @@ exports.stringifyBN = (web3, o) => {
 
 exports.moveTime = async (web3, seconds) => {
     expect(seconds).is.not.undefined;
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve, _) => {
         web3.currentProvider.send({
             jsonrpc: "2.0",
             method: "evm_increaseTime",
@@ -54,7 +54,7 @@ exports.moveTime = async (web3, seconds) => {
             id: new Date().getSeconds()
         }, resolve);
     });
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve, _) => {
         web3.currentProvider.send({
             jsonrpc: "2.0",
             method: "evm_mine",
@@ -144,8 +144,8 @@ exports.govPostTests = (s) => {
     s.it('should destroy() after upgrade', async () => {
         const orig_balance = await s.web3.eth.getBalance(s.orig.address)
         const { logs } = await s.proxy.proposeUpgrade(
-                s.fake.address, 0,
-                { from: s.accounts[0], value: '1' });
+            s.fake.address, 0,
+            { from: s.accounts[0], value: '1' });
 
         s.assert.equal(logs.length, 1);
         const proposal = await MockProposal.at(logs[0].args['1']);

@@ -50,11 +50,11 @@ contract SporkRegistryV1 is
 
     // ISporkRegistry
     //---------------------------------
-    function createUpgradeProposal(IGovernedContract, uint _period)
+    function createUpgradeProposal(IGovernedContract, uint _period, address payable _fee_payer)
         external payable
         returns (IProposal proposal)
     {
-        require(msg.value == FEE_UPGRADE_V1, "Fee amount");
+        require(msg.value == FEE_UPGRADE_V1, "Invalid fee");
         require(_period >= PERIOD_UPGRADE_MIN, "Period min");
         require(_period <= PERIOD_UPGRADE_MAX, "Period max");
 
@@ -63,7 +63,7 @@ contract SporkRegistryV1 is
             QUORUM_MAJORITY,
             _period,
             // solium-disable-next-line security/no-tx-origin
-            tx.origin
+            _fee_payer
         );
 
         proposal.setFee.value(msg.value)();

@@ -19,17 +19,23 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
-//pragma experimental SMTChecker;
 
-import { IGovernedContract } from "./IGovernedContract.sol";
-import { IProposal } from "./IProposal.sol";
+import { BlacklistProposalV1 } from "./BlacklistRegistryV1.sol";
+import { IGovernedProxy } from "./IGovernedProxy.sol";
 
-interface ISporkRegistry {
-    function createUpgradeProposal(
-        IGovernedContract _impl,
-        uint _period,
-        address payable _fee_payer
-    )
-        external payable
-        returns (IProposal);
+contract MockBlacklistProposalV1
+    is BlacklistProposalV1
+{
+    constructor(IGovernedProxy _mnregistry_proxy, address payable fee_payer)
+        public
+        BlacklistProposalV1(_mnregistry_proxy, fee_payer)
+    // solium-disable-next-line no-empty-blocks
+    {}
+
+    function setWeights(uint accepted, uint rejected, uint quorum, uint finish) external {
+        accepted_weight = accepted;
+        rejected_weight = rejected;
+        quorum_weight = quorum;
+        finish_weight = finish;
+    }
 }

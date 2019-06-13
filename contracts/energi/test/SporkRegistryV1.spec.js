@@ -23,6 +23,9 @@ const MockContract = artifacts.require('MockContract');
 const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const ISporkRegistry = artifacts.require('ISporkRegistry');
 
+const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
+const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
+
 const common = require('./common');
 
 contract("SporkRegistryV1", async accounts => {
@@ -35,6 +38,12 @@ contract("SporkRegistryV1", async accounts => {
     };
 
     before(async () => {
+        s.registry_orig = await MasternodeRegistryV1.deployed();
+        s.registry = await MasternodeRegistryV1.at(await s.registry_orig.proxy());
+
+        s.mntoken_orig = await MasternodeTokenV1.deployed();
+        s.mntoken = await MasternodeTokenV1.at(await s.mntoken_orig.proxy());
+
         s.orig = await SporkRegistryV1.deployed();
         s.proxy = await MockProxy.at(await s.orig.proxy());
         s.mnregistry_proxy = await MockProxy.at(await s.orig.mnregistry_proxy());
@@ -54,6 +63,82 @@ contract("SporkRegistryV1", async accounts => {
 
     //---
     describe('Primary', () => {
+        const { fromAscii, toBN, toWei } = web3.utils;
+
+        const fee_amount = toBN(toWei('10000', 'ether'));
+
+        const collateral1 = toBN(toWei('50000', 'ether'));
+        const owner1 = accounts[0];
+        const masternode1 = accounts[9];
+        const ip1 = toBN(0x12345678);
+        const enode_common = '123456789012345678901234567890'
+        const enode1 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '11')];
+
+        before(async () => {
+            await s.mntoken.depositCollateral({
+                from: owner1,
+                value: collateral1,
+            });
+            await s.registry.announce(masternode1, ip1, enode1, {from: owner1});
+        });
+
+        after(async () => {
+            await s.mntoken.withdrawCollateral(collateral1, {
+                from: owner1,
+            });
+        });
+        
+        it ('should refuse to createUpgradeProposal() with invalid fee', async () => {
+            try {
+                await s.token_abi.createUpgradeProposal(
+                    s.fake.address, 14*24*60*60, accounts[0],
+                    { value: fee_amount.add(toBN(1)) });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid fee/);
+            }
+
+            await s.token_abi.createUpgradeProposal(
+                s.fake.address, 14*24*60*60, accounts[0],
+                { value: fee_amount });
+
+            try {
+                await s.token_abi.createUpgradeProposal(
+                    s.fake.address, 14*24*60*60, accounts[0],
+                    { value: fee_amount.sub(toBN(1)) });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid fee/);
+            }
+        });
+
+        it ('should refuse to createUpgradeProposal() with invalid period', async () => {
+            try {
+                await s.token_abi.createUpgradeProposal(
+                    s.fake.address, 14*24*60*60-1, accounts[0],
+                    { value: fee_amount });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Period min/);
+            }
+
+            await s.token_abi.createUpgradeProposal(
+                s.fake.address, 14*24*60*60, accounts[0],
+                { value: fee_amount });
+
+            await s.token_abi.createUpgradeProposal(
+                s.fake.address, 365*24*60*60, accounts[0],
+                { value: fee_amount });
+
+            try {
+                await s.token_abi.createUpgradeProposal(
+                    s.fake.address, 365*24*60*60+1, accounts[0],
+                    { value: fee_amount });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Period max/);
+            }
+        });
     });
 
     //---

@@ -37,9 +37,13 @@ contract BackboneRewardV1 is
     IBlockReward,
     NonReentrant
 {
+    address payable public backbone_address;
+
     // IGovernedContract
     //---------------------------------
-    constructor(address _proxy) public GovernedContract(_proxy) {}
+    constructor(address _proxy, address payable _backbone_address) public GovernedContract(_proxy) {
+        backbone_address = _backbone_address;
+    }
 
     // IBlockReward
     //---------------------------------
@@ -47,6 +51,7 @@ contract BackboneRewardV1 is
         external payable
         noReentry
     {
+        backbone_address.transfer(msg.value);
     }
 
     function getReward(uint _blockNumber)

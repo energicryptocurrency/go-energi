@@ -4,7 +4,7 @@ const BackboneRewardV1 = artifacts.require('BackboneRewardV1');
 const BlacklistRegistryV1 = artifacts.require('BlacklistRegistryV1');
 const CheckpointRegistryV1 = artifacts.require('CheckpointRegistryV1');
 const Gen2Migration = artifacts.require('Gen2Migration');
-const GenericProposalV1 = artifacts.require('GenericProposalV1');
+//const GenericProposalV1 = artifacts.require('GenericProposalV1');
 const GovernedProxy = artifacts.require('GovernedProxy');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
@@ -19,7 +19,7 @@ const MockProposal = artifacts.require("MockProposal");
 
 const common = require('../test/common');
 
-module.exports = async (deployer) => {
+module.exports = async (deployer, _, accounts) => {
     try {
         // V1 instances
         await deployer.deploy(MockProxy);
@@ -41,13 +41,13 @@ module.exports = async (deployer) => {
 
         await deployer.deploy(Gen2Migration);
 
-        await deploy_common(BlacklistRegistryV1);
-        await deploy_common(BackboneRewardV1);
+        await deploy_common(BlacklistRegistryV1, undefined, mn_registry_proxy);
+        await deploy_common(BackboneRewardV1, undefined, accounts[5]);
         await deploy_common(CheckpointRegistryV1);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,
-                            mn_registry_proxy, mn_token_proxy, treasury_proxy,
-                            common.mnregistry_config);
+            mn_registry_proxy, mn_token_proxy, treasury_proxy,
+            common.mnregistry_config);
         await deploy_common(SporkRegistryV1, undefined, mn_registry_proxy);
         await deploy_common(StakerRewardV1);
         await deploy_common(TreasuryV1, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
@@ -60,6 +60,7 @@ module.exports = async (deployer) => {
         await deployer.deploy(MockProposal);
         //await deployer.deploy(GenericProposalV1, mn_registry_proxy, 1, 1, mn_registry_proxy)
     } catch (e) {
+        // eslint-disable-next-line no-console
         console.dir(e);
         throw e;
     }

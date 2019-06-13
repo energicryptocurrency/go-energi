@@ -77,7 +77,7 @@ contract MockProxy is GovernedProxy
 contract MockSporkRegistry is MockContract, ISporkRegistry {
     constructor(address _proxy) public MockContract(_proxy) {}
 
-    function createUpgradeProposal(IGovernedContract, uint)
+    function createUpgradeProposal(IGovernedContract, uint, address payable)
         external payable
         returns (IProposal)
     {

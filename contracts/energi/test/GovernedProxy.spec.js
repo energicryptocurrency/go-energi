@@ -74,8 +74,8 @@ contract("GovernedProxy", async accounts => {
     it('should refuse proposal - same impl', async () => {
         try {
             await proxy.proposeUpgrade(
-                    first.address, 2 * weeks,
-                    { from: accounts[0], value: web3.utils.toWei('1', 'ether') });
+                first.address, 2 * weeks,
+                { from: accounts[0], value: web3.utils.toWei('1', 'ether') });
             assert.fail("It must fail");
         } catch (e) {
             assert.match(e.message, /Already active!/);
@@ -85,8 +85,8 @@ contract("GovernedProxy", async accounts => {
     it('should refuse proposal - wrong proxy', async () => {
         try {
             await proxy.proposeUpgrade(
-                    registry.address, 2 * weeks,
-                    { from: accounts[0], value: web3.utils.toWei('1', 'ether') });
+                registry.address, 2 * weeks,
+                { from: accounts[0], value: web3.utils.toWei('1', 'ether') });
             assert.fail("It must fail");
         } catch (e) {
             //assert.match(e.message, /Wrong proxy!/);
@@ -99,9 +99,9 @@ contract("GovernedProxy", async accounts => {
 
     it('should accept proposal', async () => {
         await proxy.proposeUpgrade(
-                second.address, 2 * weeks,
-                // NOTE: it's mock registry - no fee check
-                { from: accounts[0], value: '1' });
+            second.address, 2 * weeks,
+            // NOTE: it's mock registry - no fee check
+            { from: accounts[0], value: '1' });
 
         const evt = await proxy.getPastEvents('UpgradeProposal', common.evt_last_block);
         expect(evt).lengthOf(1);
@@ -110,8 +110,8 @@ contract("GovernedProxy", async accounts => {
 
     it('should refuse upgrade - Not accepted!', async () => {
         const { logs } = await proxy.proposeUpgrade(
-                second.address, 2 * weeks,
-                { from: accounts[0], value: '1' });
+            second.address, 2 * weeks,
+            { from: accounts[0], value: '1' });
 
         assert.equal(logs.length, 1);
         const proposal = logs[0].args['1'];
@@ -140,8 +140,8 @@ contract("GovernedProxy", async accounts => {
 
     it('should accept upgrade', async () => {
         const { logs } = await proxy.proposeUpgrade(
-                second.address, 2 * weeks,
-                { from: accounts[0], value: '1' });
+            second.address, 2 * weeks,
+            { from: accounts[0], value: '1' });
         assert.equal(logs.length, 1);
         const proposal = await MockProposal.at(logs[0].args['1']);
 
@@ -157,8 +157,8 @@ contract("GovernedProxy", async accounts => {
 
     it('should refuse upgrade AFTER upgrade - Not registered!', async () => {
         const { logs } = await proxy.proposeUpgrade(
-                third.address, 2 * weeks,
-                { from: accounts[0], value: '1' });
+            third.address, 2 * weeks,
+            { from: accounts[0], value: '1' });
         const proposal = await MockProposal.at(logs[0].args['1']);
 
         await proposal.setAccepted();
@@ -174,11 +174,11 @@ contract("GovernedProxy", async accounts => {
 
     it('should refuse upgrade - Already active!', async () => {
         let proposal1 = await proxy.proposeUpgrade(
-                fourth.address, 2 * weeks,
-                { from: accounts[0], value: '1' });
+            fourth.address, 2 * weeks,
+            { from: accounts[0], value: '1' });
         let proposal2 = await proxy.proposeUpgrade(
-                fourth.address, 2 * weeks,
-                { from: accounts[0], value: '1' });
+            fourth.address, 2 * weeks,
+            { from: accounts[0], value: '1' });
         proposal1 = await MockProposal.at(proposal1.logs[0].args['1']);
         proposal2 = await MockProposal.at(proposal2.logs[0].args['1']);
         await proposal1.setAccepted();
@@ -190,6 +190,39 @@ contract("GovernedProxy", async accounts => {
             assert.fail("It must fail");
         } catch (e) {
             assert.match(e.message, /Already active!/);
+        }
+    });
+
+    it('should refuse collect - Not registered!', async () => {
+        let proposal = await MockProposal.new();
+
+        try {
+            await proxy.collectProposal(proposal.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not registered!/);
+        }
+
+        const evt = await proxy.getPastEvents('Upgraded', common.evt_last_block);
+        expect(evt).lengthOf(0);
+    });
+
+
+    it('should collectProposal()', async () => {
+        let tmp = await MockContract.new(proxy.address);
+        let proposal = await proxy.proposeUpgrade(
+            tmp.address, 2 * weeks,
+            { from: accounts[0], value: '1' });
+        proposal = await MockProposal.at(proposal.logs[0].args['1']);
+
+        await common.moveTime(web3, 2 * weeks + 1);
+        await proxy.collectProposal(proposal.address);
+
+        try {
+            await proxy.collectProposal(proposal.address);
+            assert.fail("It must fail");
+        } catch (e) {
+            assert.match(e.message, /Not registered!/);
         }
     });
 });

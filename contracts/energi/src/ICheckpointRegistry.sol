@@ -21,6 +21,8 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+// solium-disable no-empty-blocks
+
 /**
  * Genesis version of CheckpointRegistry interface.
  *

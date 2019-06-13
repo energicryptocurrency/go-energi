@@ -198,7 +198,7 @@ contract GenericProposalV1 is
      */
     function destroy() external {
         // NOTE: unfinished voting must get canceled
-        require(msg.sender == parent, "Not parent");
+        require(msg.sender == parent, "Only parent");
         selfdestruct(fee_payer);
     }
 
@@ -207,10 +207,10 @@ contract GenericProposalV1 is
      */
     function collect() external {
         require(isFinished() && !isAccepted(), "Not collectable");
+        require(msg.sender == parent, "Only parent");
 
         IMasternodeRegistry registry = IMasternodeRegistry(address(mnregistry_proxy.impl()));
         ITreasury treasury = ITreasury(address(registry.treasury_proxy().impl()));
-        require(msg.sender == address(treasury), "Not treasury");
 
         treasury.contribute.value(address(this).balance)();
     }
@@ -228,6 +228,6 @@ contract GenericProposalV1 is
      * Only accept fee from the parent creating contract
      */
     function () external payable {
-        require(msg.sender == parent, "Only parent");
+        revert("Not allowed");
     }
 }
