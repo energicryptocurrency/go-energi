@@ -238,7 +238,7 @@ contract("TreasuryV1", async accounts => {
 
             try {
                 await s.treasury_abi.propose(
-                    def_amount, '1', 365*24*60*60+1,
+                    def_amount, '1', 30*24*60*60+1,
                     { value: fee_amount }
                 );
                 assert.fail('It must fail');
@@ -305,7 +305,7 @@ contract("TreasuryV1", async accounts => {
         it ('should refuse propose() over total limit', async () => {
             for (let i = 3; i <= 8; ++i) {
                 await s.treasury_abi.propose(
-                    def_amount, String(i).repeat(8), i * def_period,
+                    def_amount, String(i).repeat(8), def_period + (i * def_period / 10),
                     { value: fee_amount }
                 );
             }
@@ -336,13 +336,13 @@ contract("TreasuryV1", async accounts => {
                 .equal(toBN(toWei('200', 'ether')).toString());
 
             // another 2
-            await common.moveTime(web3, (4*def_period)+1);
+            await common.moveTime(web3, (4*def_period/10)+1);
             await s.reward_abi.reward();
             expect(toBN(await s.treasury_abi.balance()).sub(orig_bal).toString())
-                .equal(toBN(toWei('500', 'ether')).toString());
+                .equal(toBN(toWei('400', 'ether')).toString());
 
-            // remaining 3
-            await common.moveTime(web3, (5*def_period)+1);
+            // remaining 4
+            await common.moveTime(web3, (5*def_period/10)+1);
             await s.reward_abi.reward();
             expect(toBN(await s.treasury_abi.balance()).sub(orig_bal).toString())
                 .equal(toBN(toWei('800', 'ether')).toString());

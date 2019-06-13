@@ -67,7 +67,7 @@ contract GlobalConstants {
     uint constant internal MN_HEARTBEAT_PAST_BLOCKS = 10;
 
     uint constant internal BUDGET_PERIOD_MIN = 1 weeks;
-    uint constant internal BUDGET_PERIOD_MAX = 365 days;
+    uint constant internal BUDGET_PERIOD_MAX = 30 days;
     uint constant internal BUDGET_PROPOSAL_FEE = 100 ether;
     uint constant internal BUDGET_AMOUNT_MIN = BUDGET_PROPOSAL_FEE;
     uint constant internal BUDGET_AMOUNT_MAX = REWARD_TREASURY_V1;
