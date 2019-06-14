@@ -26,6 +26,7 @@ exports.mnregistry_config = [
     '10000000000000000000000', // 10,000 NRG
 ];
 exports.superblock_cycles = 8;
+exports.chain_id = 49797;
 
 exports.evt_last_block = {
     fromBlock: 'latest',

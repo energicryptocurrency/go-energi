@@ -21,6 +21,9 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IGovernedProxy } from "./IGovernedProxy.sol";
+import { ITreasury } from "./ITreasury.sol";
+
 /**
  * Genesis hardcoded version of Gen 2 Migration
  *
@@ -28,7 +31,87 @@ pragma solidity 0.5.9;
  */
 contract Gen2Migration
 {
-    // TODO: support emergency drain through SporkRegistry !
+    struct UnspentCoins {
+        bytes20 owner; // Gen 2 P2PKH
+        uint amount;
+    }
+
+    event Migrated(
+        uint item_id,
+        address destination,
+        uint amount
+    );
+
+    IGovernedProxy public treasury_proxy;
+    uint public chain_id;
+    UnspentCoins[] public coins;
+
+    // NOTE: this c-tor is used during testing
+    constructor(IGovernedProxy _treasury_proxy, uint _chain_id) public {
+        treasury_proxy = _treasury_proxy;
+        chain_id = _chain_id;
+    }
+
+    function itemCount() external view returns(uint) {
+        return coins.length;
+    }
+
+    function hashToSign(address payable _destination)
+        public view
+        returns(bytes32)
+    {
+        return keccak256(
+            abi.encodePacked(
+                _destination,
+                "||Energi Gen 2 migration claim||",
+                chain_id
+            )
+        );
+    }
+
+    function verifyClaim(uint _item_id, address payable _destination, uint8 sig_v, bytes32 sig_r, bytes32 sig_s)
+        public view
+        returns(uint amount)
+    {
+        // Check ID
+        require(_item_id < coins.length, "Invalid ID");
+
+        // Recover owner
+        bytes32 hash = hashToSign(_destination);
+        bytes20 owner = bytes20(ecrecover(hash, sig_v, sig_r, sig_s));
+
+        // Validate Owner
+        require(coins[_item_id].owner == owner, "Invalid signature");
+
+        // Validate amount
+        amount = coins[_item_id].amount;
+    }
+
+    function claim(uint _item_id, address payable _destination, uint8 sig_v, bytes32 sig_r, bytes32 sig_s)
+        external
+    {
+        uint amount = verifyClaim(_item_id, _destination, sig_v, sig_r, sig_s);
+        require(amount > 0, "Already spent");
+
+        // Spend
+        coins[_item_id].amount = 0;
+
+        emit Migrated(
+            _item_id,
+            _destination,
+            amount
+        );
+
+        _destination.transfer(amount);
+    }
+
+    // SECURITY: emergency drain procedure
+    function drain() external {
+        ITreasury treasury = ITreasury(address(treasury_proxy.impl()));
+        require(msg.sender == address(treasury), "Not treasury");
+        // NOTE: DO NOT selfdestruct() as this contract must remain as storage.
+        treasury.contribute.value(address(this).balance)();
+    }
 
     // Safety
     //---------------------------------
