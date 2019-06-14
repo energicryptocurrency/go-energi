@@ -28,6 +28,7 @@ import { StorageBase }  from "./StorageBase.sol";
 /**
  * Permanent storage of Checkpoint Registry V1 data.
  */
+// solium-disable-next-line no-empty-blocks
 contract StorageCheckpointRegistryV1 is
     StorageBase
 {
