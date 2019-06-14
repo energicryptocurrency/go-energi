@@ -18,6 +18,12 @@ if [ ! -L "$ethdir/go-ethereum" ]; then
     cd "$root"
 fi
 
+energidir="$workspace/src/energi.world/core"
+if [ ! -L "$energidir/gen3" ]; then
+    mkdir -p "$energidir"
+    ln -s ../../../../../. $energidir/gen3
+fi
+
 # Set up the environment to use the workspace.
 GOPATH="$workspace"
 export GOPATH
