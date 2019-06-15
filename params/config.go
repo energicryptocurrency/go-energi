@@ -1,18 +1,19 @@
+// Copyright 2018 The Energi Core Authors
 // Copyright 2016 The go-ethereum Authors
-// This file is part of the go-ethereum library.
+// This file is part of the Energi Core library.
 //
-// The go-ethereum library is free software: you can redistribute it and/or modify
+// The Energi Core library is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// The go-ethereum library is distributed in the hope that it will be useful,
+// The Energi Core library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
+// along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
 
 package params
 
@@ -49,11 +50,11 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Ethash:              new(EthashConfig),
-		SuperblockCycle:     big.NewInt(60*24*14),
+		SuperblockCycle:     big.NewInt(60 * 24 * 14),
 		MNVotesPerCycle:     big.NewInt(32),
 		MNRequireVoting:     big.NewInt(100),
 		MNVotesMax:          big.NewInt(16),
-		MNCleanupPeriod:     big.NewInt(60*60*24*14),
+		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14),
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(1000000), big.NewInt(Ether)),
 		BackboneAddress:     common.Address{},
 	}
@@ -79,11 +80,11 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Ethash:              new(EthashConfig),
-		SuperblockCycle:     big.NewInt(60*24),
+		SuperblockCycle:     big.NewInt(60 * 24),
 		MNVotesPerCycle:     big.NewInt(6),
 		MNRequireVoting:     big.NewInt(5),
 		MNVotesMax:          big.NewInt(3),
-		MNCleanupPeriod:     big.NewInt(60*60*3),
+		MNCleanupPeriod:     big.NewInt(60 * 60 * 3),
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
 		BackboneAddress:     common.Address{},
 	}
@@ -160,7 +161,7 @@ type ChainConfig struct {
 	MNCleanupPeriod  *big.Int `json:"mnCleanupPeriod"`
 	MNEverCollateral *big.Int `json:"mnEverCollateral"`
 
-	BackboneAddress  common.Address `json:"backboneAddress"`
+	BackboneAddress common.Address `json:"backboneAddress"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
