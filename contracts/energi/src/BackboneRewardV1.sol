@@ -51,14 +51,16 @@ contract BackboneRewardV1 is
         external payable
         noReentry
     {
-        backbone_address.transfer(msg.value);
+        if (msg.value > 0) {
+            backbone_address.transfer(msg.value);
+        }
     }
 
     function getReward(uint _blockNumber)
         external view
         returns(uint amount)
     {
-        if (_blockNumber > 0) {
+        if ((_blockNumber > 0) && (backbone_address != address(0))) {
             amount = REWARD_BACKBONE_V1;
         }
     }

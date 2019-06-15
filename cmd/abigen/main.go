@@ -32,6 +32,7 @@ import (
 var (
 	abiFlag = flag.String("abi", "", "Path to the Energi contract ABI json to bind, - for STDIN")
 	binFlag = flag.String("bin", "", "Path to the Energi contract bytecode (generate deploy method)")
+	runFlag = flag.String("runbin", "", "Path to the Energi contract runtimecode (generate runtime method)")
 	typFlag = flag.String("type", "", "Struct name for the binding (default = package name)")
 
 	solFlag  = flag.String("sol", "", "Path to the Energi contract Solidity source to build and bind")
@@ -50,8 +51,8 @@ func main() {
 	if *abiFlag == "" && *solFlag == "" {
 		fmt.Printf("No contract ABI (--abi) or Solidity source (--sol) specified\n")
 		os.Exit(-1)
-	} else if (*abiFlag != "" || *binFlag != "" || *typFlag != "") && *solFlag != "" {
-		fmt.Printf("Contract ABI (--abi), bytecode (--bin) and type (--type) flags are mutually exclusive with the Solidity source (--sol) flag\n")
+	} else if (*abiFlag != "" || *binFlag != "" || *runFlag != "" || *typFlag != "") && *solFlag != "" {
+		fmt.Printf("Contract ABI (--abi), bytecode (--bin), runtime code (--runbin) and type (--type) flags are mutually exclusive with the Solidity source (--sol) flag\n")
 		os.Exit(-1)
 	}
 	if *pkgFlag == "" {
@@ -74,6 +75,7 @@ func main() {
 	var (
 		abis  []string
 		bins  []string
+		runs  []string
 		types []string
 	)
 	if *solFlag != "" || (*abiFlag == "-" && *pkgFlag == "") {
@@ -106,6 +108,7 @@ func main() {
 			abi, _ := json.Marshal(contract.Info.AbiDefinition) // Flatten the compiler parse
 			abis = append(abis, string(abi))
 			bins = append(bins, contract.Code)
+			runs = append(runs, contract.RuntimeCode)
 
 			nameParts := strings.Split(name, ":")
 			types = append(types, nameParts[len(nameParts)-1])
@@ -134,6 +137,15 @@ func main() {
 		}
 		bins = append(bins, string(bin))
 
+		run := []byte{}
+		if *runFlag != "" {
+			if run, err = ioutil.ReadFile(*runFlag); err != nil {
+				fmt.Printf("Failed to read input runtime code: %v\n", err)
+				os.Exit(-1)
+			}
+		}
+		runs = append(runs, string(run))
+
 		kind := *typFlag
 		if kind == "" {
 			kind = *pkgFlag
@@ -141,7 +153,7 @@ func main() {
 		types = append(types, kind)
 	}
 	// Generate the contract binding
-	code, err := bind.Bind(types, abis, bins, *pkgFlag, lang)
+	code, err := bind.Bind(types, abis, bins, runs, *pkgFlag, lang)
 	if err != nil {
 		fmt.Printf("Failed to generate ABI binding: %v\n", err)
 		os.Exit(-1)

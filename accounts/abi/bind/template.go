@@ -29,6 +29,7 @@ type tmplContract struct {
 	Type        string                 // Type name of the main contract binding
 	InputABI    string                 // JSON ABI used as the input to generate the binding from
 	InputBin    string                 // Optional EVM bytecode used to denetare deploy code from
+	RuntimeBin  string                 // Optional EVM bytecode of deployed contract
 	Constructor abi.Method             // Contract constructor for deploy parametrization
 	Calls       map[string]*tmplMethod // Contract calls that only read state data
 	Transacts   map[string]*tmplMethod // Contract calls that write state data
@@ -108,6 +109,11 @@ var (
 		  }
 		  return address, tx, &{{.Type}}{ {{.Type}}Caller: {{.Type}}Caller{contract: contract}, {{.Type}}Transactor: {{.Type}}Transactor{contract: contract}, {{.Type}}Filterer: {{.Type}}Filterer{contract: contract} }, nil
 		}
+	{{end}}
+
+	{{if .RuntimeBin}}
+		// {{.Type}}Bin is the compiled bytecode of contract after deployment.
+		const {{.Type}}RuntimeBin = ` + "`" + `{{.RuntimeBin}}` + "`" + `
 	{{end}}
 
 	// {{.Type}} is an auto generated Go binding around an Ethereum contract.

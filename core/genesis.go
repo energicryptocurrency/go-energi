@@ -18,23 +18,32 @@ package core
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	gomath "math"
 	"math/big"
+	"os"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
+
+	energi_abi "energi.world/core/gen3/energi/abi"
 )
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -54,6 +63,7 @@ type Genesis struct {
 	Mixhash    common.Hash         `json:"mixHash"`
 	Coinbase   common.Address      `json:"coinbase"`
 	Alloc      GenesisAlloc        `json:"alloc"      gencodec:"required"`
+	InitXfers  types.Transactions  `json:"-"`
 
 	// These fields are used for consensus tests. Please don't use them
 	// in actual genesis blocks.
@@ -259,6 +269,58 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	if g.Difficulty == nil {
 		head.Difficulty = params.GenesisDifficulty
 	}
+
+	// Process transactions, but do not really record them in Genesis
+	//---
+	if config := g.Config; config != nil {
+		debug := false
+		gp := new(GasPool)
+		gp.AddGas(gomath.MaxUint64 / 2)
+		gu := uint64(0)
+		author := params.Energi_TreasuryV1
+		signer := types.MakeSigner(config, head.Number)
+
+		tmpKey, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
+		tmpAddress := crypto.PubkeyToAddress(tmpKey.PublicKey)
+		statedb.SetBalance(tmpAddress, math.MaxBig256)
+
+		vmcfg := vm.Config{}
+
+		if debug {
+			vmcfg = vm.Config{
+				Debug: true,
+				Tracer: vm.NewStructLogger(&vm.LogConfig{
+					Debug: true,
+				}),
+			}
+		}
+
+		for i, tx := range g.InitXfers {
+			tx, _ := types.SignTx(tx, signer, tmpKey)
+			statedb.Prepare(tx.Hash(), common.Hash{}, i)
+
+			_, _, err := ApplyTransaction(
+				config, nil, &author, gp, statedb, head, tx, &gu, vmcfg)
+			if err != nil {
+				panic(fmt.Errorf("invalid transaction: %v", err))
+			}
+
+			if len(statedb.GetCode(*tx.To())) == 0 {
+				panic("Failed to create a contract")
+			}
+		}
+
+		if debug {
+			vm.WriteTrace(os.Stderr, vmcfg.Tracer.(*vm.StructLogger).StructLogs())
+			vm.WriteLogs(os.Stderr, statedb.Logs())
+		}
+
+		statedb.SetBalance(tmpAddress, big.NewInt(0))
+		root = statedb.IntermediateRoot(false)
+		head.Root = root
+	}
+	//---
+
 	statedb.Commit(false)
 	statedb.Database().TrieDB().Commit(root, true)
 
@@ -309,9 +371,10 @@ func DefaultGenesisBlock() *Genesis {
 		Config:     params.MainnetChainConfig,
 		Nonce:      66,
 		ExtraData:  hexutil.MustDecode("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
-		GasLimit:   5000,
+		GasLimit:   0,
 		Difficulty: big.NewInt(17179869184),
 		Alloc:      decodePrealloc(mainnetAllocData),
+		InitXfers:  DeployEnergiGovernance(params.MainnetChainConfig),
 	}
 }
 
@@ -321,9 +384,10 @@ func DefaultTestnetGenesisBlock() *Genesis {
 		Config:     params.TestnetChainConfig,
 		Nonce:      66,
 		ExtraData:  hexutil.MustDecode("0x3535353535353535353535353535353535353535353535353535353535353535"),
-		GasLimit:   16777216,
+		GasLimit:   0,
 		Difficulty: big.NewInt(1048576),
 		Alloc:      decodePrealloc(testnetAllocData),
+		InitXfers:  DeployEnergiGovernance(params.TestnetChainConfig),
 	}
 }
 
@@ -338,7 +402,7 @@ func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 	return &Genesis{
 		Config:     &config,
 		ExtraData:  append(append(make([]byte, 32), faucet[:]...), make([]byte, 65)...),
-		GasLimit:   6283185,
+		GasLimit:   0,
 		Difficulty: big.NewInt(1),
 		Alloc: map[common.Address]GenesisAccount{
 			common.BytesToAddress([]byte{1}): {Balance: big.NewInt(1)}, // ECRecover
@@ -351,10 +415,24 @@ func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
 			faucet:                           {Balance: new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(9))},
 		},
+		InitXfers: DeployEnergiGovernance(&config),
 	}
 }
 
 func decodePrealloc(data string) GenesisAlloc {
+	if len(data) == 0 {
+		return GenesisAlloc{
+			common.BytesToAddress([]byte{1}): {Balance: big.NewInt(1)}, // ECRecover
+			common.BytesToAddress([]byte{2}): {Balance: big.NewInt(1)}, // SHA256
+			common.BytesToAddress([]byte{3}): {Balance: big.NewInt(1)}, // RIPEMD
+			common.BytesToAddress([]byte{4}): {Balance: big.NewInt(1)}, // Identity
+			common.BytesToAddress([]byte{5}): {Balance: big.NewInt(1)}, // ModExp
+			common.BytesToAddress([]byte{6}): {Balance: big.NewInt(1)}, // ECAdd
+			common.BytesToAddress([]byte{7}): {Balance: big.NewInt(1)}, // ECScalarMul
+			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
+		}
+	}
+
 	var p []struct{ Addr, Balance *big.Int }
 	if err := rlp.NewStream(strings.NewReader(data), 0).Decode(&p); err != nil {
 		panic(err)
@@ -364,4 +442,135 @@ func decodePrealloc(data string) GenesisAlloc {
 		ga[common.BigToAddress(account.Addr)] = GenesisAccount{Balance: account.Balance}
 	}
 	return ga
+}
+
+//=====================================
+func deployEnergiContract(
+	xfers *types.Transactions,
+	dst common.Address, abi_json string, hex_code string,
+	params ...interface{},
+) {
+	value := big.NewInt(0)
+	gasLimit := uint64(10000000)
+	gasPrice := big.NewInt(1)
+
+	parsed_abi, err := abi.JSON(strings.NewReader(abi_json))
+	if err != nil {
+		panic(fmt.Errorf("invalid JSON: %v", err))
+	}
+
+	input, err := parsed_abi.Pack("", params...)
+	if err != nil {
+		panic(fmt.Errorf("invalid ABI: %v", err))
+	}
+
+	code := append(common.FromHex(hex_code), input...)
+
+	tx := types.NewTransaction(uint64(len(*xfers)), dst, value, gasLimit, gasPrice, code)
+	*xfers = append(*xfers, tx)
+}
+
+func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
+	xfers := make(types.Transactions, 0, 16)
+
+	if config == nil {
+		return xfers
+	}
+
+	// Hardcoded Governance V1
+	deployEnergiContract(
+		&xfers,
+		params.Energi_TreasuryV1,
+		energi_abi.TreasuryV1ABI,
+		energi_abi.TreasuryV1Bin,
+		params.Energi_Treasury,
+		params.Energi_MasternodeRegistry,
+		config.SuperblockCycle,
+	)
+	deployEnergiContract(
+		&xfers,
+		params.Energi_MasternodeRegistryV1,
+		energi_abi.MasternodeRegistryV1ABI,
+		energi_abi.MasternodeRegistryV1Bin,
+		params.Energi_MasternodeRegistry,
+		params.Energi_Treasury,
+		params.Energi_MasternodeToken,
+		[5]*big.Int{
+			config.MNVotesPerCycle,
+			config.MNRequireVoting,
+			config.MNVotesMax,
+			config.MNCleanupPeriod,
+			config.MNEverCollateral,
+		},
+	)
+	deployEnergiContract(
+		&xfers,
+		params.Energi_StakerRewardV1,
+		energi_abi.StakerRewardV1ABI,
+		energi_abi.StakerRewardV1Bin,
+		params.Energi_StakerReward,
+	)
+	deployEnergiContract(
+		&xfers,
+		params.Energi_BackboneRewardV1,
+		energi_abi.BackboneRewardV1ABI,
+		energi_abi.BackboneRewardV1Bin,
+		params.Energi_BackboneReward,
+		config.BackboneAddress,
+	)
+	deployEnergiContract(
+		&xfers,
+		params.Energi_SporkRegistryV1,
+		energi_abi.GovernedProxyABI,
+		energi_abi.GovernedProxyBin,
+		params.Energi_SporkRegistry,
+		params.Energi_MasternodeRegistry,
+	)
+	deployEnergiContract(
+		&xfers,
+		params.Energi_CheckpointRegistryV1,
+		energi_abi.CheckpointRegistryV1ABI,
+		energi_abi.CheckpointRegistryV1Bin,
+		params.Energi_CheckpointRegistry,
+	)
+	deployEnergiContract(
+		&xfers,
+		params.Energi_BlacklistRegistryV1,
+		energi_abi.BlacklistRegistryV1ABI,
+		energi_abi.BlacklistRegistryV1Bin,
+		params.Energi_BlacklistRegistry,
+		params.Energi_MasternodeRegistry,
+	)
+	deployEnergiContract(
+		&xfers,
+		params.Energi_MasternodeTokenV1,
+		energi_abi.MasternodeTokenV1ABI,
+		energi_abi.MasternodeTokenV1Bin,
+		params.Energi_MasternodeToken,
+		params.Energi_MasternodeRegistry,
+	)
+
+	// Proxy List
+	proxies := map[common.Address]common.Address{
+		params.Energi_Treasury:           params.Energi_TreasuryV1,
+		params.Energi_MasternodeRegistry: params.Energi_MasternodeRegistryV1,
+		params.Energi_StakerReward:       params.Energi_StakerRewardV1,
+		params.Energi_BackboneReward:     params.Energi_BackboneRewardV1,
+		params.Energi_SporkRegistry:      params.Energi_SporkRegistryV1,
+		params.Energi_CheckpointRegistry: params.Energi_CheckpointRegistryV1,
+		params.Energi_BlacklistRegistry:  params.Energi_BlacklistRegistryV1,
+		params.Energi_MasternodeToken:    params.Energi_MasternodeTokenV1,
+	}
+	for k, v := range proxies {
+		deployEnergiContract(
+			&xfers,
+			k,
+			energi_abi.GovernedProxyABI,
+			energi_abi.GovernedProxyBin,
+			v,
+			params.Energi_SporkRegistry,
+		)
+	}
+
+	return xfers
 }

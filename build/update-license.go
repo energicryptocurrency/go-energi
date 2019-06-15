@@ -121,8 +121,6 @@ var licenseT = template.Must(template.New("").Parse(`
 
 `[1:]))
 
-// this template generates the license comment.
-// its input is an info structure.
 var energiLicenseT = template.Must(template.New("").Parse(`
 // Copyright {{.YearEnergi}} The Energi Core Authors
 // Copyright {{.Year}} The go-ethereum Authors
@@ -143,11 +141,32 @@ var energiLicenseT = template.Must(template.New("").Parse(`
 
 `[1:]))
 
+var onlyEnergiLicenseT = template.Must(template.New("").Parse(`
+// Copyright {{.YearEnergi}} The Energi Core Authors
+// This file is part of {{.WholeEnergi false}}.
+//
+// {{.WholeEnergi true}} is free software: you can redistribute it and/or modify
+// it under the terms of the GNU {{.License}} as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// {{.WholeEnergi true}} is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU {{.License}} for more details.
+//
+// You should have received a copy of the GNU {{.License}}
+// along with {{.WholeEnergi false}}. If not, see <http://www.gnu.org/licenses/>.
+
+`[1:]))
+
+
 type info struct {
 	file       string
 	Year       int64
 	YearEnergi int64
 	IsEnergi   bool
+	OnlyEnergi bool
 }
 
 func (i info) License() string {
@@ -401,6 +420,10 @@ func fileInfo(file string) (*info, error) {
 		// Character comparison should be OK for ISO format
 		if line[:len(energiForkDate)] >= energiForkDate {
 			info.IsEnergi = true
+			info.OnlyEnergi = true
+		}
+		if line[:len(energiForkDate)] < energiForkDate {
+			info.OnlyEnergi = false
 		}
 		y, err := strconv.ParseInt(line[:4], 10, 64)
 		if err != nil {
@@ -442,7 +465,11 @@ func writeLicense(info *info) {
 	// Construct new file content.
 	buf := new(bytes.Buffer)
 	if info.IsEnergi {
-		energiLicenseT.Execute(buf, info)
+		if info.OnlyEnergi {
+			onlyEnergiLicenseT.Execute(buf, info)
+		} else {
+			energiLicenseT.Execute(buf, info)
+		}
 	} else {
 		licenseT.Execute(buf, info)
 	}
