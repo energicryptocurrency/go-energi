@@ -18,13 +18,10 @@ package core
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	gomath "math"
 	"math/big"
 	"os"
 	"strings"
@@ -37,7 +34,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
@@ -48,7 +44,7 @@ import (
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
 //go:generate gencodec -type GenesisAccount -field-override genesisAccountMarshaling -out gen_genesis_account.go
-
+//go:generate gencodec -type GenesisXfer -field-override genesisXferMarshaling -out gen_genesis_xfer
 var errGenesisNoConfig = errors.New("genesis has no chain configuration")
 
 // Genesis specifies the header fields, state of a genesis block. It also defines hard
@@ -63,7 +59,7 @@ type Genesis struct {
 	Mixhash    common.Hash         `json:"mixHash"`
 	Coinbase   common.Address      `json:"coinbase"`
 	Alloc      GenesisAlloc        `json:"alloc"      gencodec:"required"`
-	InitXfers  types.Transactions  `json:"-"`
+	Xfers      GenesisXfers        `json:"xfers"`
 
 	// These fields are used for consensus tests. Please don't use them
 	// in actual genesis blocks.
@@ -96,6 +92,14 @@ type GenesisAccount struct {
 	PrivateKey []byte                      `json:"secretKey,omitempty"` // for tests
 }
 
+type GenesisXfers []GenesisXfer
+
+type GenesisXfer struct {
+	Addr  common.Address `json:"addr" gencodec:"required"`
+	Code  []byte         `json:"code" gencodec:"required"`
+	Value *big.Int       `json:"value,omitempty"`
+}
+
 // field type overrides for gencodec
 type genesisSpecMarshaling struct {
 	Nonce      math.HexOrDecimal64
@@ -114,6 +118,12 @@ type genesisAccountMarshaling struct {
 	Nonce      math.HexOrDecimal64
 	Storage    map[storageJSON]storageJSON
 	PrivateKey hexutil.Bytes
+}
+
+type genesisXferMarshaling struct {
+	Addr  common.UnprefixedAddress
+	Code  hexutil.Bytes
+	Value *math.HexOrDecimal256
 }
 
 // storageJSON represents a 256 bit byte array, but allows less than 256 bits when
@@ -274,15 +284,12 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	//---
 	if config := g.Config; config != nil {
 		debug := false
-		gp := new(GasPool)
-		gp.AddGas(gomath.MaxUint64 / 2)
-		gu := uint64(0)
 		author := params.Energi_TreasuryV1
-		signer := types.MakeSigner(config, head.Number)
+		gasLimit := uint64(100000000)
+		gp := new(GasPool)
 
-		tmpKey, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
-		tmpAddress := crypto.PubkeyToAddress(tmpKey.PublicKey)
-		statedb.SetBalance(tmpAddress, math.MaxBig256)
+		systemFaucet := params.Energi_SystemFaucet
+		statedb.SetBalance(systemFaucet, math.MaxBig256)
 
 		vmcfg := vm.Config{}
 
@@ -295,18 +302,34 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			}
 		}
 
-		for i, tx := range g.InitXfers {
-			tx, _ := types.SignTx(tx, signer, tmpKey)
-			statedb.Prepare(tx.Hash(), common.Hash{}, i)
+		for i, tx := range g.Xfers {
+			gp.AddGas(gasLimit)
+			val := tx.Value
 
-			_, _, err := ApplyTransaction(
-				config, nil, &author, gp, statedb, head, tx, &gu, vmcfg)
+			if val == nil {
+				val = big.NewInt(0)
+			}
+
+			msg := types.NewMessage(
+				systemFaucet,
+				&tx.Addr,
+				uint64(i),
+				val,
+				gasLimit,
+				big.NewInt(1),
+				tx.Code,
+				false,
+			)
+			ctx := NewEVMContext(msg, head, nil, &author)
+			ctx.GasLimit = gasLimit
+			evm := vm.NewEVM(ctx, statedb, g.Config, vmcfg)
+			_, _, _, err := ApplyMessage(evm, msg, gp)
 			if err != nil {
 				panic(fmt.Errorf("invalid transaction: %v", err))
 			}
 
-			if len(statedb.GetCode(*tx.To())) == 0 {
-				panic("Failed to create a contract")
+			if statedb.GetCodeSize(tx.Addr) == 0 {
+				panic(fmt.Errorf("Failed to create a contract%v", tx.Addr))
 			}
 		}
 
@@ -315,7 +338,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			vm.WriteLogs(os.Stderr, statedb.Logs())
 		}
 
-		statedb.SetBalance(tmpAddress, big.NewInt(0))
+		statedb.SetBalance(systemFaucet, big.NewInt(0))
 		root = statedb.IntermediateRoot(false)
 		head.Root = root
 	}
@@ -374,7 +397,7 @@ func DefaultGenesisBlock() *Genesis {
 		GasLimit:   0,
 		Difficulty: big.NewInt(17179869184),
 		Alloc:      decodePrealloc(mainnetAllocData),
-		InitXfers:  DeployEnergiGovernance(params.MainnetChainConfig),
+		Xfers:      DeployEnergiGovernance(params.MainnetChainConfig),
 	}
 }
 
@@ -387,7 +410,7 @@ func DefaultTestnetGenesisBlock() *Genesis {
 		GasLimit:   0,
 		Difficulty: big.NewInt(1048576),
 		Alloc:      decodePrealloc(testnetAllocData),
-		InitXfers:  DeployEnergiGovernance(params.TestnetChainConfig),
+		Xfers:      DeployEnergiGovernance(params.TestnetChainConfig),
 	}
 }
 
@@ -415,7 +438,7 @@ func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
 			faucet:                           {Balance: new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(9))},
 		},
-		InitXfers: DeployEnergiGovernance(&config),
+		Xfers: DeployEnergiGovernance(&config),
 	}
 }
 
@@ -446,14 +469,12 @@ func decodePrealloc(data string) GenesisAlloc {
 
 //=====================================
 func deployEnergiContract(
-	xfers *types.Transactions,
-	dst common.Address, abi_json string, hex_code string,
+	xfers *GenesisXfers,
+	dst common.Address,
+	value *big.Int,
+	abi_json string, hex_code string,
 	params ...interface{},
 ) {
-	value := big.NewInt(0)
-	gasLimit := uint64(10000000)
-	gasPrice := big.NewInt(1)
-
 	parsed_abi, err := abi.JSON(strings.NewReader(abi_json))
 	if err != nil {
 		panic(fmt.Errorf("invalid JSON: %v", err))
@@ -465,13 +486,15 @@ func deployEnergiContract(
 	}
 
 	code := append(common.FromHex(hex_code), input...)
-
-	tx := types.NewTransaction(uint64(len(*xfers)), dst, value, gasLimit, gasPrice, code)
-	*xfers = append(*xfers, tx)
+	*xfers = append(*xfers, GenesisXfer{
+		Addr:  dst,
+		Code:  code,
+		Value: value,
+	})
 }
 
-func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
-	xfers := make(types.Transactions, 0, 16)
+func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
+	xfers := make(GenesisXfers, 0, 16)
 
 	if config == nil {
 		return xfers
@@ -481,6 +504,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_TreasuryV1,
+		nil,
 		energi_abi.TreasuryV1ABI,
 		energi_abi.TreasuryV1Bin,
 		params.Energi_Treasury,
@@ -490,11 +514,12 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_MasternodeRegistryV1,
+		nil,
 		energi_abi.MasternodeRegistryV1ABI,
 		energi_abi.MasternodeRegistryV1Bin,
 		params.Energi_MasternodeRegistry,
-		params.Energi_Treasury,
 		params.Energi_MasternodeToken,
+		params.Energi_Treasury,
 		[5]*big.Int{
 			config.MNVotesPerCycle,
 			config.MNRequireVoting,
@@ -506,6 +531,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_StakerRewardV1,
+		nil,
 		energi_abi.StakerRewardV1ABI,
 		energi_abi.StakerRewardV1Bin,
 		params.Energi_StakerReward,
@@ -513,6 +539,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_BackboneRewardV1,
+		nil,
 		energi_abi.BackboneRewardV1ABI,
 		energi_abi.BackboneRewardV1Bin,
 		params.Energi_BackboneReward,
@@ -521,6 +548,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_SporkRegistryV1,
+		nil,
 		energi_abi.GovernedProxyABI,
 		energi_abi.GovernedProxyBin,
 		params.Energi_SporkRegistry,
@@ -529,6 +557,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_CheckpointRegistryV1,
+		nil,
 		energi_abi.CheckpointRegistryV1ABI,
 		energi_abi.CheckpointRegistryV1Bin,
 		params.Energi_CheckpointRegistry,
@@ -536,6 +565,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_BlacklistRegistryV1,
+		nil,
 		energi_abi.BlacklistRegistryV1ABI,
 		energi_abi.BlacklistRegistryV1Bin,
 		params.Energi_BlacklistRegistry,
@@ -544,6 +574,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 	deployEnergiContract(
 		&xfers,
 		params.Energi_MasternodeTokenV1,
+		nil,
 		energi_abi.MasternodeTokenV1ABI,
 		energi_abi.MasternodeTokenV1Bin,
 		params.Energi_MasternodeToken,
@@ -565,6 +596,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) types.Transactions {
 		deployEnergiContract(
 			&xfers,
 			k,
+			nil,
 			energi_abi.GovernedProxyABI,
 			energi_abi.GovernedProxyBin,
 			v,

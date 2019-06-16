@@ -22,6 +22,7 @@ var Modules = map[string]string{
 	"admin":      Admin_JS,
 	"chequebook": Chequebook_JS,
 	"clique":     Clique_JS,
+	"energi":     Energi_JS,
 	"ethash":     Ethash_JS,
 	"debug":      Debug_JS,
 	"eth":        Eth_JS,
@@ -107,6 +108,16 @@ web3._extend({
 			name: 'proposals',
 			getter: 'clique_proposals'
 		}),
+	]
+});
+`
+
+const Energi_JS = `
+web3._extend({
+	property: 'energi',
+	methods: [
+	],
+	properties: [
 	]
 });
 `
