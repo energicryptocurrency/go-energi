@@ -59,6 +59,8 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
 	cli "gopkg.in/urfave/cli.v1"
+
+	energi "energi.world/core/gen3/energi/consensus"
 )
 
 var (
@@ -1416,7 +1418,9 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		Fatalf("%v", err)
 	}
 	var engine consensus.Engine
-	if config.Clique != nil {
+	if config.Energi != nil {
+		engine = energi.New(config.Energi, chainDb)
+	} else if config.Clique != nil {
 		engine = clique.New(config.Clique, chainDb)
 	} else {
 		engine = ethash.NewFaker()

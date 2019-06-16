@@ -95,9 +95,9 @@ type GenesisAccount struct {
 type GenesisXfers []GenesisXfer
 
 type GenesisXfer struct {
-	Addr  common.Address  `json:"addr" gencodec:"required"`
-	Code  []byte          `json:"code" gencodec:"required"`
-	Value *big.Int        `json:"value,omitempty"`
+	Addr  common.Address `json:"addr" gencodec:"required"`
+	Code  []byte         `json:"code" gencodec:"required"`
+	Value *big.Int       `json:"value,omitempty"`
 }
 
 // field type overrides for gencodec
@@ -121,9 +121,9 @@ type genesisAccountMarshaling struct {
 }
 
 type genesisXferMarshaling struct {
-	Addr       common.UnprefixedAddress
-	Code       hexutil.Bytes
-	Value      *math.HexOrDecimal256
+	Addr  common.UnprefixedAddress
+	Code  hexutil.Bytes
+	Value *math.HexOrDecimal256
 }
 
 // storageJSON represents a 256 bit byte array, but allows less than 256 bits when
@@ -438,7 +438,7 @@ func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
 			faucet:                           {Balance: new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(9))},
 		},
-		Xfers:      DeployEnergiGovernance(&config),
+		Xfers: DeployEnergiGovernance(&config),
 	}
 }
 
@@ -487,8 +487,8 @@ func deployEnergiContract(
 
 	code := append(common.FromHex(hex_code), input...)
 	*xfers = append(*xfers, GenesisXfer{
-		Addr: dst,
-		Code: code,
+		Addr:  dst,
+		Code:  code,
 		Value: value,
 	})
 }
