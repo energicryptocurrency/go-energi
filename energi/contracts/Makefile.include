@@ -86,6 +86,8 @@ $(ENERGI_CONTRACT_BUILD_DIR)/%.$(SOLC_ABI_EXT): $(ENERGI_CONTRACT_SRC_DIR)/%.sol
 .PHONY: test-sol
 
 test-sol:
+	@echo "Checking if precompiled contracts have changes"
+	@git diff --exit-code $(ENERGI_CONTRACTS_GOABI) >/dev/null
 	@which ganache-cli 2>&1 >/dev/null || npm install -g ganache-cli
 	@which truffle 2>&1 >/dev/null || npm install -g truffle
 	@ganache-cli \
