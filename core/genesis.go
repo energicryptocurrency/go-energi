@@ -40,6 +40,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -284,11 +285,11 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	//---
 	if config := g.Config; config != nil {
 		debug := false
-		author := params.Energi_TreasuryV1
+		author := energi_params.Energi_TreasuryV1
 		gasLimit := uint64(100000000)
 		gp := new(GasPool)
 
-		systemFaucet := params.Energi_SystemFaucet
+		systemFaucet := energi_params.Energi_SystemFaucet
 		statedb.SetBalance(systemFaucet, math.MaxBig256)
 
 		vmcfg := vm.Config{}
@@ -503,23 +504,23 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	// Hardcoded Governance V1
 	deployEnergiContract(
 		&xfers,
-		params.Energi_TreasuryV1,
+		energi_params.Energi_TreasuryV1,
 		nil,
 		energi_abi.TreasuryV1ABI,
 		energi_abi.TreasuryV1Bin,
-		params.Energi_Treasury,
-		params.Energi_MasternodeRegistry,
+		energi_params.Energi_Treasury,
+		energi_params.Energi_MasternodeRegistry,
 		config.SuperblockCycle,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_MasternodeRegistryV1,
+		energi_params.Energi_MasternodeRegistryV1,
 		nil,
 		energi_abi.MasternodeRegistryV1ABI,
 		energi_abi.MasternodeRegistryV1Bin,
-		params.Energi_MasternodeRegistry,
-		params.Energi_MasternodeToken,
-		params.Energi_Treasury,
+		energi_params.Energi_MasternodeRegistry,
+		energi_params.Energi_MasternodeToken,
+		energi_params.Energi_Treasury,
 		[5]*big.Int{
 			config.MNVotesPerCycle,
 			config.MNRequireVoting,
@@ -530,67 +531,67 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_StakerRewardV1,
+		energi_params.Energi_StakerRewardV1,
 		nil,
 		energi_abi.StakerRewardV1ABI,
 		energi_abi.StakerRewardV1Bin,
-		params.Energi_StakerReward,
+		energi_params.Energi_StakerReward,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_BackboneRewardV1,
+		energi_params.Energi_BackboneRewardV1,
 		nil,
 		energi_abi.BackboneRewardV1ABI,
 		energi_abi.BackboneRewardV1Bin,
-		params.Energi_BackboneReward,
+		energi_params.Energi_BackboneReward,
 		config.BackboneAddress,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_SporkRegistryV1,
+		energi_params.Energi_SporkRegistryV1,
 		nil,
 		energi_abi.GovernedProxyABI,
 		energi_abi.GovernedProxyBin,
-		params.Energi_SporkRegistry,
-		params.Energi_MasternodeRegistry,
+		energi_params.Energi_SporkRegistry,
+		energi_params.Energi_MasternodeRegistry,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_CheckpointRegistryV1,
+		energi_params.Energi_CheckpointRegistryV1,
 		nil,
 		energi_abi.CheckpointRegistryV1ABI,
 		energi_abi.CheckpointRegistryV1Bin,
-		params.Energi_CheckpointRegistry,
+		energi_params.Energi_CheckpointRegistry,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_BlacklistRegistryV1,
+		energi_params.Energi_BlacklistRegistryV1,
 		nil,
 		energi_abi.BlacklistRegistryV1ABI,
 		energi_abi.BlacklistRegistryV1Bin,
-		params.Energi_BlacklistRegistry,
-		params.Energi_MasternodeRegistry,
+		energi_params.Energi_BlacklistRegistry,
+		energi_params.Energi_MasternodeRegistry,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_MasternodeTokenV1,
+		energi_params.Energi_MasternodeTokenV1,
 		nil,
 		energi_abi.MasternodeTokenV1ABI,
 		energi_abi.MasternodeTokenV1Bin,
-		params.Energi_MasternodeToken,
-		params.Energi_MasternodeRegistry,
+		energi_params.Energi_MasternodeToken,
+		energi_params.Energi_MasternodeRegistry,
 	)
 
 	// Proxy List
 	proxies := map[common.Address]common.Address{
-		params.Energi_Treasury:           params.Energi_TreasuryV1,
-		params.Energi_MasternodeRegistry: params.Energi_MasternodeRegistryV1,
-		params.Energi_StakerReward:       params.Energi_StakerRewardV1,
-		params.Energi_BackboneReward:     params.Energi_BackboneRewardV1,
-		params.Energi_SporkRegistry:      params.Energi_SporkRegistryV1,
-		params.Energi_CheckpointRegistry: params.Energi_CheckpointRegistryV1,
-		params.Energi_BlacklistRegistry:  params.Energi_BlacklistRegistryV1,
-		params.Energi_MasternodeToken:    params.Energi_MasternodeTokenV1,
+		energi_params.Energi_Treasury:           energi_params.Energi_TreasuryV1,
+		energi_params.Energi_MasternodeRegistry: energi_params.Energi_MasternodeRegistryV1,
+		energi_params.Energi_StakerReward:       energi_params.Energi_StakerRewardV1,
+		energi_params.Energi_BackboneReward:     energi_params.Energi_BackboneRewardV1,
+		energi_params.Energi_SporkRegistry:      energi_params.Energi_SporkRegistryV1,
+		energi_params.Energi_CheckpointRegistry: energi_params.Energi_CheckpointRegistryV1,
+		energi_params.Energi_BlacklistRegistry:  energi_params.Energi_BlacklistRegistryV1,
+		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
 	}
 	for k, v := range proxies {
 		deployEnergiContract(
@@ -600,7 +601,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			energi_abi.GovernedProxyABI,
 			energi_abi.GovernedProxyBin,
 			v,
-			params.Energi_SporkRegistry,
+			energi_params.Energi_SporkRegistry,
 		)
 	}
 

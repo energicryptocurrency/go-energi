@@ -33,6 +33,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 type ChainReader = eth_consensus.ChainReader
@@ -59,12 +60,12 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		db:        db,
 		rewardAbi: reward_abi,
 		rewardGov: []common.Address{
-			params.Energi_Treasury,
-			params.Energi_MasternodeRegistry,
-			params.Energi_BackboneReward,
-			params.Energi_StakerReward,
+			energi_params.Energi_Treasury,
+			energi_params.Energi_MasternodeRegistry,
+			energi_params.Energi_BackboneReward,
+			energi_params.Energi_StakerReward,
 		},
-		systemFaucet: params.Energi_SystemFaucet,
+		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      2000000,
 		callGas:      1000000,
 	}
