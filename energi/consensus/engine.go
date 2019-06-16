@@ -60,7 +60,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		rewardAbi: reward_abi,
 		rewardGov: []common.Address{
 			params.Energi_Treasury,
-			//params.Energi_MasternodeRegistry,
+			params.Energi_MasternodeRegistry,
 			params.Energi_BackboneReward,
 			params.Energi_StakerReward,
 		},

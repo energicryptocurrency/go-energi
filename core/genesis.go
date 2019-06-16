@@ -518,8 +518,8 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_abi.MasternodeRegistryV1ABI,
 		energi_abi.MasternodeRegistryV1Bin,
 		params.Energi_MasternodeRegistry,
-		params.Energi_Treasury,
 		params.Energi_MasternodeToken,
+		params.Energi_Treasury,
 		[5]*big.Int{
 			config.MNVotesPerCycle,
 			config.MNRequireVoting,

@@ -47,17 +47,17 @@ func (e *Energi) processBlockRewards(
 	// Common get reward call
 	getRewardData, err := e.rewardAbi.Pack("getReward", header.Number)
 	if err != nil {
-		log.Error("Fail to prepare getReward() call", err)
+		log.Error("Fail to prepare getReward() call", "err", err)
 		return err
 	}
 
 	rewardData, err := e.rewardAbi.Pack("reward")
 	if err != nil {
-		log.Error("Fail to prepare reward() call", err)
+		log.Error("Fail to prepare reward() call", "err", err)
 		return err
 	}
 
-	for _, caddr := range e.rewardGov {
+	for i, caddr := range e.rewardGov {
 		// GetReward()
 		msg := types.NewMessage(
 			systemFaucet,
@@ -71,9 +71,9 @@ func (e *Energi) processBlockRewards(
 		)
 		evm := e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.callGas)
-		output, _, _, err := core.ApplyMessage(evm, msg, gp)
+		output, gas1, _, err := core.ApplyMessage(evm, msg, gp)
 		if err != nil {
-			log.Error("Failed in getReward() call", err)
+			log.Error("Failed in getReward() call", "err", err)
 			return err
 		}
 
@@ -81,7 +81,7 @@ func (e *Energi) processBlockRewards(
 		value := big.NewInt(0)
 		err = e.rewardAbi.Unpack(&value, "getReward", output)
 		if err != nil {
-			log.Error("Failed to unpack getReward() call", err)
+			log.Error("Failed to unpack getReward() call", "err", err)
 			return err
 		}
 
@@ -98,11 +98,14 @@ func (e *Energi) processBlockRewards(
 		)
 		evm = e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.xferGas)
-		_, _, _, err = core.ApplyMessage(evm, msg, gp)
+		_, gas2, _, err := core.ApplyMessage(evm, msg, gp)
 		if err != nil {
-			log.Error("Failed in reward() call", err)
+			log.Error("Failed in reward() call", "err", err)
 			return err
 		}
+
+		log.Trace("Block reward", "id", i, "addr", caddr,
+				  "reward", value, "gas", gas1+gas2)
 	}
 
 	return nil

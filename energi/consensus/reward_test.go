@@ -28,11 +28,13 @@ import (
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/params"
+
+	"github.com/ethereum/go-ethereum/log"
 )
 
 func TestBlockRewards(t *testing.T) {
 	t.Parallel()
-
+	log.Root().SetHandler(log.StdoutHandler)
 	var (
 		testdb = ethdb.NewMemDatabase()
 		gspec  = &core.Genesis{
@@ -64,14 +66,13 @@ func TestBlockRewards(t *testing.T) {
 		Time:     parent.Time(),
 	}
 
-	var err error
-
 	for i := 0; i < 5; i++ {
 		// TODO: check balance changes
-		err = engine.processBlockRewards(chain, header, statedb)
+		err := engine.processBlockRewards(chain, header, statedb)
+
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	if err != nil {
-		panic(err)
-	}
 }
