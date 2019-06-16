@@ -32,7 +32,7 @@ $(ABIGEN):
 	cid run cigo -- install ./cmd/abigen
 
 # ---
-ENERGI_CONTRACT_ROOT_DIR := contracts/energi
+ENERGI_CONTRACT_ROOT_DIR := energi/contracts
 ENERGI_CONTRACT_SRC_DIR := $(ENERGI_CONTRACT_ROOT_DIR)/src
 ENERGI_CONTRACT_BUILD_DIR := build/contracts/energi
 ENERGI_CONTRACT_ABIGEN_DIR := energi/abi

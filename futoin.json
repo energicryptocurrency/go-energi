@@ -29,7 +29,7 @@
             "@cid tool exec make -- test"
         ],
         "test-sol": [
-            "@cid tool exec yarn -- run eslint contracts/energi/",
+            "@cid tool exec yarn -- run eslint energi/contracts/",
             "@cid tool exec make -- test-sol"
         ],
         "package": [

@@ -27,14 +27,14 @@ for (let c of contracts) {
 }
 
 module.exports = {
-    contracts_directory: './contracts/energi/src',
+    contracts_directory: './energi/contracts/src',
     contracts_build_directory: './build/contracts/truffle',
-    migrations_directory: './contracts/energi/test_deploy',
-    test_directory: './contracts/energi/test',
+    migrations_directory: './energi/contracts/test_deploy',
+    test_directory: './energi/contracts/test',
     test_file_extension_regexp: /.*\.spec\.js$/,
     verboseRpc: false,
     mocha: {
-        spec: './contracts/energi/test/*.spec.js',
+        spec: './energi/contracts/test/*.spec.js',
     },
     networks: {
         development: {
