@@ -24,15 +24,19 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
+
+	"golang.org/x/crypto/sha3"
 )
 
 const (
 	MaturityPeriod    uint64 = 60 * 60
 	AverageTimeBlocks uint64 = 60
-	TargetBockGap     uint64 = 60
+	TargetBlockGap    uint64 = 60
 	MinBlockGap       uint64 = 30
 	MaxFutureGap      uint64 = 30
-	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBockGap
+	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBlockGap
+
+	maturityGuessBlocks uint64 = MaturityPeriod / TargetBlockGap
 )
 
 var (
@@ -69,20 +73,18 @@ func (e *Energi) calcTimeTarget(
 
 	// POS-11: Block time restrictions
 	ret.min_time = parent.Time + MinBlockGap
-	ret.target_time = parent.Time + TargetBockGap
+	ret.target_time = parent.Time + TargetBlockGap
 
 	// POS-12: Block interval enforcement
 	//---
 	if block_number >= AverageTimeBlocks {
 		past := chain.GetHeaderByNumber(block_number - AverageTimeBlocks)
 		actual := parent.Time - past.Time
-		expected := TargetPeriodGap - TargetBockGap
+		expected := TargetPeriodGap - TargetBlockGap
 
 		if expected > actual {
-			ret.min_time = expected + TargetBockGap
+			ret.min_time = past.Time + TargetPeriodGap
 		}
-
-		ret.target_time = past.Time + TargetPeriodGap
 	}
 
 	log.Trace("PoS time", "block", block_number,
@@ -131,10 +133,58 @@ func (e *Energi) checkTime(
  */
 func (e *Energi) calcPoSModifier(
 	chain ChainReader,
-	header *types.Header,
-) common.Hash {
-	ret := common.Hash{}
-	log.Trace("PoS modifier", "block", header.Number.Uint64()+1, "modifier", ret)
+	time uint64,
+	parent *types.Header,
+) (ret common.Hash) {
+	hasher := sha3.NewLegacyKeccak256()
+
+	// Add coinbase
+	hasher.Write(parent.Coinbase.Bytes())
+
+	// Find maturity period border
+	maturity_border := time
+
+	if maturity_border < MaturityPeriod {
+		// This should happen only in testing
+		maturity_border = 0
+	} else {
+		maturity_border -= MaturityPeriod
+	}
+
+	// Find the oldest inside maturity period
+	parent_height := parent.Number.Uint64()
+	guess := parent_height
+
+	if guess < maturityGuessBlocks {
+		guess = 0
+	} else {
+		guess -= maturityGuessBlocks
+	}
+
+	// NOTE: the logic below can go into if-clauses, but we always run both
+	//       cases
+
+	// If we hit inside the period
+	oldest := chain.GetHeaderByNumber(guess)
+
+	for (oldest.Time > maturity_border) && (guess > 0) {
+		guess--
+		oldest = chain.GetHeaderByNumber(guess)
+	}
+
+	// If we hit outside the period
+	for (oldest.Time <= maturity_border) && (oldest.Number.Uint64() < parent_height) {
+		guess++
+		oldest = chain.GetHeaderByNumber(guess)
+	}
+
+	// Hash it
+	hasher.Write(oldest.Root.Bytes())
+
+	// Sum together
+	ret = common.BytesToHash(hasher.Sum(nil))
+	log.Trace("PoS modifier", "block", parent_height+1,
+		"modifier", ret, "oldest", oldest.Number.Uint64())
 	return ret
 }
 

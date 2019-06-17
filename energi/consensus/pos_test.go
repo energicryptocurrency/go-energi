@@ -31,7 +31,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPoSTime(t *testing.T) {
+func TestPoSChain(t *testing.T) {
 	t.Parallel()
 	log.Root().SetHandler(log.StdoutHandler)
 	log.Trace("prevent unused")
@@ -57,7 +57,7 @@ func TestPoSTime(t *testing.T) {
 	parent := chain.GetHeaderByHash(genesis.Hash())
 	assert.NotEmpty(t, parent)
 
-	for i := 1; i < 62; i++ {
+	for i := 1; i < 1000; i++ {
 		header := &types.Header{
 			Root:       parent.Hash(),
 			ParentHash: parent.Hash(),
@@ -70,21 +70,28 @@ func TestPoSTime(t *testing.T) {
 		assert.Empty(t, err)
 
 		tt := engine.calcTimeTarget(chain, parent)
+		assert.True(t, tt.max_time >= now)
+		assert.True(t, tt.max_time <= engine.now()+30)
 
 		if i < 60 {
 			assert.Equal(t, header.Time, parent.Time+30)
 
 			assert.Equal(t, tt.min_time, header.Time)
 			assert.Equal(t, tt.target_time, header.Time+30)
-			assert.True(t, tt.max_time >= now)
 		} else if i < 61 {
 			assert.Equal(t, header.Time, genesis.Time()+3600)
+			assert.Equal(t, header.Time, parent.Time+1830)
 
 			assert.Equal(t, tt.min_time, header.Time)
-			assert.Equal(t, tt.target_time, header.Time)
-			assert.True(t, tt.max_time >= now)
-		} else {
+			assert.Equal(t, tt.target_time, parent.Time+60)
+		} else if i < 62 {
 			assert.Equal(t, header.Time, genesis.Time()+3630)
+		}
+
+		assert.True(t, parent.Time < tt.min_time, "Header %v", i)
+
+		if i > 60 {
+			assert.NotEqual(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
 		}
 
 		_, err = chain.InsertHeaderChain([]*types.Header{header}, 1)

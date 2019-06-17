@@ -165,7 +165,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	err := e.enforceTime(header, time_target)
 
 	// Repurpose the MixDigest field
-	header.MixDigest = e.calcPoSModifier(chain, header)
+	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// TODO: trim Extra
 
