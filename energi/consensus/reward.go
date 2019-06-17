@@ -19,6 +19,7 @@ package consensus
 import (
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
@@ -27,8 +28,6 @@ import (
 )
 
 var (
-	BigZero    = big.NewInt(0)
-	BigOne     = big.NewInt(1)
 	BigBalance = new(big.Int).Div(math.MaxBig256, big.NewInt(2))
 )
 
@@ -42,7 +41,7 @@ func (e *Energi) processBlockRewards(
 
 	// Temporary balance setup & clean up
 	statedb.SetBalance(systemFaucet, BigBalance)
-	defer statedb.SetBalance(systemFaucet, BigZero)
+	defer statedb.SetBalance(systemFaucet, common.Big0)
 
 	// Common get reward call
 	getRewardData, err := e.rewardAbi.Pack("getReward", header.Number)
@@ -63,9 +62,9 @@ func (e *Energi) processBlockRewards(
 			systemFaucet,
 			&caddr,
 			0,
-			BigZero,
+			common.Big0,
 			e.callGas,
-			BigOne,
+			common.Big1,
 			getRewardData,
 			false,
 		)
@@ -92,7 +91,7 @@ func (e *Energi) processBlockRewards(
 			0,
 			value,
 			e.xferGas,
-			BigOne,
+			common.Big1,
 			rewardData,
 			false,
 		)
@@ -105,7 +104,7 @@ func (e *Energi) processBlockRewards(
 		}
 
 		log.Trace("Block reward", "id", i, "addr", caddr,
-				  "reward", value, "gas", gas1+gas2)
+			"reward", value, "gas", gas1+gas2)
 	}
 
 	return nil

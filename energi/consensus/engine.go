@@ -153,16 +153,26 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	// Clear out specially used fields
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
-	header.MixDigest = common.Hash{}
 
-	// TODO; enforce time
+	parent := chain.GetHeaderByHash(header.ParentHash)
+
+	if parent == nil {
+		return errors.New("Unknown parent")
+	}
+
+	time_target := e.calcTimeTarget(chain, parent)
+
+	err := e.enforceTime(header, time_target)
+
+	// Repurpose the MixDigest field
+	header.MixDigest = e.calcPoSModifier(chain, header)
 
 	// TODO: trim Extra
 
-	// Adjust diff
-	header.Difficulty = e.CalcDifficulty(chain, header.Time, header)
+	// Diff
+	header.Difficulty = e.calcPoSDifficulty(chain, header.Time, parent)
 
-	return nil
+	return err
 }
 
 // Finalize runs any post-transaction state modifications (e.g. block rewards)
@@ -180,6 +190,7 @@ func (e *Energi) Finalize(
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
+	// NOTE: the code does not check result!
 	return types.NewBlock(header, txs, nil, receipts), err
 
 }
@@ -201,7 +212,7 @@ func (e *Energi) SealHash(header *types.Header) common.Hash {
 // CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty
 // that a new block should have.
 func (e *Energi) CalcDifficulty(chain ChainReader, time uint64, parent *types.Header) *big.Int {
-	return big.NewInt(1)
+	return e.calcPoSDifficulty(chain, time, parent)
 }
 
 // APIs returns the RPC APIs this consensus engine provides.

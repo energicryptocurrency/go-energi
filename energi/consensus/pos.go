@@ -1,0 +1,155 @@
+// Copyright 2019 The Energi Core Authors
+// This file is part of the Energi Core library.
+//
+// The Energi Core library is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// The Energi Core library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
+
+package consensus
+
+import (
+	"errors"
+	"math/big"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/log"
+)
+
+const (
+	MaturityPeriod    uint64 = 60 * 60
+	AverageTimeBlocks uint64 = 60
+	TargetBockGap     uint64 = 60
+	MinBlockGap       uint64 = 30
+	MaxFutureGap      uint64 = 30
+	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBockGap
+)
+
+var (
+	errBlockMinTime  = errors.New("Minimal time gap is not obeyed")
+	errBlockInFuture = errors.New("Too much in future")
+)
+
+type timeTarget struct {
+	min_time    uint64
+	target_time uint64
+	max_time    uint64
+}
+
+func (e *Energi) now() uint64 {
+	return uint64(time.Now().Unix())
+}
+
+/**
+ * Implements block time consensus
+ *
+ * POS-11: Block time restrictions
+ * POS-12: Block interval enforcement
+ */
+func (e *Energi) calcTimeTarget(
+	chain ChainReader,
+	parent *types.Header,
+) *timeTarget {
+	ret := &timeTarget{}
+	now := e.now()
+	block_number := parent.Number.Uint64() + 1
+
+	// POS-11: Block time restrictions
+	ret.max_time = now + MaxFutureGap
+
+	// POS-11: Block time restrictions
+	ret.min_time = parent.Time + MinBlockGap
+	ret.target_time = parent.Time + TargetBockGap
+
+	// POS-12: Block interval enforcement
+	//---
+	if block_number >= AverageTimeBlocks {
+		past := chain.GetHeaderByNumber(block_number - AverageTimeBlocks)
+		actual := parent.Time - past.Time
+		expected := TargetPeriodGap - TargetBockGap
+
+		if expected > actual {
+			ret.min_time = expected + TargetBockGap
+		}
+
+		ret.target_time = past.Time + TargetPeriodGap
+	}
+
+	log.Trace("PoS time", "block", block_number,
+		"min", ret.min_time, "target", ret.target_time, "max", ret.max_time)
+	return ret
+}
+
+func (e *Energi) enforceTime(
+	header *types.Header,
+	time_target *timeTarget,
+) error {
+	// NOTE: allow Miner to hint already tried period by
+	if header.Time < time_target.min_time {
+		header.Time = time_target.min_time
+	}
+
+	// Check if allowed to mine
+	if header.Time > time_target.max_time {
+		return errBlockInFuture
+	}
+
+	return nil
+}
+
+func (e *Energi) checkTime(
+	header *types.Header,
+	time_target *timeTarget,
+) error {
+	// NOTE: allow Miner to hint already tried period by
+	if header.Time < time_target.min_time {
+		return errBlockMinTime
+	}
+
+	// Check if allowed to mine
+	if header.Time > time_target.max_time {
+		return errBlockInFuture
+	}
+
+	return nil
+}
+
+/**
+ * Implements check modifier consensus
+ *
+ * POS-14: Stake modifier
+ */
+func (e *Energi) calcPoSModifier(
+	chain ChainReader,
+	header *types.Header,
+) common.Hash {
+	ret := common.Hash{}
+	log.Trace("PoS modifier", "block", header.Number.Uint64()+1, "modifier", ret)
+	return ret
+}
+
+/**
+ * Implements difficulty consensus
+ *
+ * POS-13: Difficulty algorithm
+ */
+func (e *Energi) calcPoSDifficulty(
+	chain ChainReader,
+	time uint64,
+	parent *types.Header,
+) *big.Int {
+	//time_target := e.calcTimeTarget(chain, parent)
+	ret := big.NewInt(1)
+	log.Trace("PoS difficulty", "block", parent.Number.Uint64()+1, "time", time, "diff", ret)
+	return ret
+}

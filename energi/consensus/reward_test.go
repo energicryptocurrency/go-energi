@@ -34,7 +34,8 @@ import (
 
 func TestBlockRewards(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	//log.Root().SetHandler(log.StdoutHandler)
+	log.Trace("prevent unused")
 	var (
 		testdb = ethdb.NewMemDatabase()
 		gspec  = &core.Genesis{
