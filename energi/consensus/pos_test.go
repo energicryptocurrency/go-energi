@@ -69,9 +69,9 @@ func TestPoSChain(t *testing.T) {
 		assert.Empty(t, err)
 
 		if i <= iterMid {
-			blstate.AddBalance(parent.Coinbase, common.Big1)
+			blstate.AddBalance(parent.Coinbase, minStake)
 		} else {
-			blstate.SubBalance(parent.Coinbase, common.Big1)
+			blstate.SubBalance(parent.Coinbase, minStake)
 		}
 
 		root := blstate.IntermediateRoot(false)
@@ -128,41 +128,41 @@ func TestPoSChain(t *testing.T) {
 		// Stake amount tests
 		//---
 
-		expminbal := header.Number
+		expminbal := new(big.Int).Mul(header.Number, minStake)
 
 		if i > iterMid {
-			expminbal = big.NewInt(int64(iterMid - (i - iterMid)))
+			expminbal = new(big.Int).Mul(big.NewInt(int64(iterMid-(i-iterMid))), minStake)
 		}
 
 		minbal, err := engine.lookupMinBalance(chain, header.Time+1, header, header.Coinbase)
 		assert.Empty(t, err)
-		assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+		assert.Equal(t, expminbal.String(), minbal.String())
 
 		minbal, err = engine.lookupMinBalance(chain, header.Time, header, header.Coinbase)
 		assert.Empty(t, err)
-		assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+		assert.Equal(t, expminbal.String(), minbal.String())
 
 		minbal, err = engine.lookupMinBalance(chain, parent.Time, header, header.Coinbase)
 		assert.Empty(t, err)
-		assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+		assert.Equal(t, expminbal.String(), minbal.String())
 
 		minbal, err = engine.lookupMinBalance(chain, parent.Time-1, header, header.Coinbase)
 		assert.Empty(t, err)
 		if i <= iterMid {
-			assert.Equal(t, new(big.Int).Sub(expminbal, common.Big1).Uint64(), minbal.Uint64())
+			assert.Equal(t, new(big.Int).Sub(expminbal, minStake).String(), minbal.String())
 
 		} else {
-			assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+			assert.Equal(t, expminbal.String(), minbal.String())
 		}
 
 		if i == iterCount-20 {
 			minbal, err = engine.lookupMinBalance(chain, 0, header, header.Coinbase)
 			assert.Empty(t, err)
-			assert.Equal(t, uint64(0), minbal.Uint64())
+			assert.Equal(t, common.Big0.String(), minbal.String())
 
 			minbal, err = engine.lookupMinBalance(chain, header.Time-3600, header, header.Coinbase)
 			assert.Empty(t, err)
-			assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+			assert.Equal(t, expminbal.String(), minbal.String())
 		}
 		//---
 

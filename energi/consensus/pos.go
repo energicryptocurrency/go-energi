@@ -41,6 +41,8 @@ const (
 )
 
 var (
+	minStake = big.NewInt(1e18)
+
 	errBlockMinTime  = errors.New("Minimal time gap is not obeyed")
 	errBlockInFuture = errors.New("Too much in future")
 	errMissingParent = errors.New("Missing parent")
@@ -242,6 +244,11 @@ func (e *Energi) lookupMinBalance(
 
 		if (min_balance == nil) || (min_balance.Cmp(bl_balance) > 0) {
 			min_balance = bl_balance
+
+			// No need to lookup further
+			if min_balance.Cmp(minStake) < 0 {
+				break
+			}
 		}
 
 		curr := till
