@@ -17,6 +17,8 @@
 package consensus
 
 import (
+	"crypto/ecdsa"
+	"crypto/rand"
 	"math/big"
 	"testing"
 
@@ -25,6 +27,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
@@ -37,27 +40,52 @@ func TestPoSChain(t *testing.T) {
 	log.Root().SetHandler(log.StdoutHandler)
 	log.Trace("prevent unused")
 
+	tmpKey, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
+	tmpAddress := crypto.PubkeyToAddress(tmpKey.PublicKey)
+
+	results := make(chan *types.Block, 1)
+	stop := make(chan struct{})
+
 	var (
 		testdb = ethdb.NewMemDatabase()
-		gspec  = &core.Genesis{
+		engine = New(new(params.EnergiConfig), testdb)
+	)
+
+	engine.SetSigner(func(addr common.Address, hash []byte) ([]byte, error) {
+		assert.Equal(t, tmpAddress, addr)
+		return crypto.Sign(hash, tmpKey)
+	})
+
+	var (
+		gspec = &core.Genesis{
 			Config:    params.TestChainConfig,
 			Timestamp: 1000,
+			Coinbase:  tmpAddress,
 		}
-		genesis = gspec.MustCommit(testdb)
+		genesis = gspec.MustSignCommit(testdb, func(b *types.Block) (*types.Block, error) {
+			err := engine.Seal(nil, b, results, stop)
+			assert.Empty(t, err)
+			b = <-results
+			err = engine.VerifySeal(nil, b.Header())
+			assert.Empty(t, err)
+			return b, err
+		})
 
-		engine = New(new(params.EnergiConfig), testdb)
-		now    = engine.now()
+		now = engine.now()
 	)
 
 	chain, err := core.NewBlockChain(testdb, nil, params.TestChainConfig, engine, vm.Config{}, nil)
 	assert.Empty(t, err)
 	defer chain.Stop()
 
+	//--
 	_, err = chain.InsertChain([]*types.Block{genesis})
 	assert.Empty(t, err)
 
 	parent := chain.GetHeaderByHash(genesis.Hash())
 	assert.NotEmpty(t, parent)
+	err = engine.VerifySeal(nil, parent)
+	assert.Empty(t, err)
 
 	iterCount := 500
 	iterMid := iterCount * 2 / 3
@@ -74,13 +102,8 @@ func TestPoSChain(t *testing.T) {
 			blstate.SubBalance(parent.Coinbase, minStake)
 		}
 
-		root := blstate.IntermediateRoot(false)
-		blstate.Commit(true)
-		stdb.TrieDB().Commit(root, true)
-
 		//---
 		header := &types.Header{
-			Root:       root,
 			ParentHash: parent.Hash(),
 			Coinbase:   parent.Coinbase,
 			GasLimit:   parent.GasLimit,
@@ -88,6 +111,21 @@ func TestPoSChain(t *testing.T) {
 			Time:       parent.Time,
 		}
 		err = engine.Prepare(chain, header)
+		assert.Empty(t, err)
+		assert.NotEmpty(t, header.Difficulty)
+		block, err := engine.Finalize(
+			chain, header, blstate, []*types.Transaction{}, nil, []*types.Receipt{})
+
+		blstate.Commit(true)
+		stdb.TrieDB().Commit(block.Root(), true)
+
+		//---
+		err = engine.Seal(chain, block, results, stop)
+		assert.Empty(t, err)
+
+		block = <-results
+		header = block.Header()
+		err = engine.VerifySeal(nil, header)
 		assert.Empty(t, err)
 
 		// Time tests

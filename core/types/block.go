@@ -83,6 +83,9 @@ type Header struct {
 	Extra       []byte         `json:"extraData"        gencodec:"required"`
 	MixDigest   common.Hash    `json:"mixHash"`
 	Nonce       BlockNonce     `json:"nonce"`
+
+	// Energi-specific as Extra tail seems to be inappropriate
+	Signature []byte `json:"signature"`
 }
 
 // field type overrides for gencodec
@@ -105,7 +108,7 @@ func (h *Header) Hash() common.Hash {
 // Size returns the approximate memory used by all internal contents. It is used
 // to approximate and limit the memory consumption of various caches.
 func (h *Header) Size() common.StorageSize {
-	return common.StorageSize(unsafe.Sizeof(*h)) + common.StorageSize(len(h.Extra)+(h.Difficulty.BitLen()+h.Number.BitLen())/8)
+	return common.StorageSize(unsafe.Sizeof(*h)) + common.StorageSize(len(h.Extra)+(h.Difficulty.BitLen()+h.Number.BitLen())/8+len(h.Signature))
 }
 
 func rlpHash(x interface{}) (h common.Hash) {
@@ -231,6 +234,10 @@ func CopyHeader(h *Header) *Header {
 		cpy.Extra = make([]byte, len(h.Extra))
 		copy(cpy.Extra, h.Extra)
 	}
+	if len(h.Signature) > 0 {
+		cpy.Signature = make([]byte, len(h.Signature))
+		copy(cpy.Signature, h.Signature)
+	}
 	return &cpy
 }
 
@@ -296,6 +303,7 @@ func (b *Block) TxHash() common.Hash      { return b.header.TxHash }
 func (b *Block) ReceiptHash() common.Hash { return b.header.ReceiptHash }
 func (b *Block) UncleHash() common.Hash   { return b.header.UncleHash }
 func (b *Block) Extra() []byte            { return common.CopyBytes(b.header.Extra) }
+func (b *Block) Signature() []byte        { return common.CopyBytes(b.header.Signature) }
 
 func (b *Block) Header() *Header { return CopyHeader(b.header) }
 

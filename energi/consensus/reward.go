@@ -56,6 +56,12 @@ func (e *Energi) processBlockRewards(
 		return err
 	}
 
+	gas_total := uint64(0)
+	defer func() {
+		// price = 1
+		statedb.SubBalance(header.Coinbase, new(big.Int).SetUint64(gas_total))
+	}()
+
 	for i, caddr := range e.rewardGov {
 		// GetReward()
 		msg := types.NewMessage(
@@ -75,6 +81,7 @@ func (e *Energi) processBlockRewards(
 			log.Error("Failed in getReward() call", "err", err)
 			return err
 		}
+		gas_total += gas1
 
 		//
 		value := big.NewInt(0)
@@ -102,6 +109,7 @@ func (e *Energi) processBlockRewards(
 			log.Error("Failed in reward() call", "err", err)
 			return err
 		}
+		gas_total += gas2
 
 		log.Trace("Block reward", "id", i, "addr", caddr,
 			"reward", value, "gas", gas1+gas2)

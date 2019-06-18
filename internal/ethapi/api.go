@@ -897,6 +897,10 @@ func RPCMarshalBlock(b *types.Block, inclTx bool, fullTx bool) (map[string]inter
 		"receiptsRoot":     head.ReceiptHash,
 	}
 
+	if len(head.Signature) > 0 {
+		fields["signature"] = hexutil.Bytes(head.Signature)
+	}
+
 	if inclTx {
 		formatTx := func(tx *types.Transaction) (interface{}, error) {
 			return tx.Hash(), nil

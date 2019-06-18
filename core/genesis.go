@@ -187,7 +187,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, genesis *Genesis, constant
 		} else {
 			log.Info("Writing custom genesis block")
 		}
-		block, err := genesis.Commit(db)
+		block, err := genesis.Commit(db, nil)
 		return genesis.Config, block.Hash(), err
 	}
 
@@ -351,12 +351,22 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	return types.NewBlock(head, nil, nil, nil)
 }
 
+// Genesis signing callback
+type GenesisSigner func(*types.Block) (*types.Block, error)
+
 // Commit writes the block and state of a genesis specification to the database.
 // The block is committed as the canonical head block.
-func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
+func (g *Genesis) Commit(db ethdb.Database, signer GenesisSigner) (*types.Block, error) {
 	block := g.ToBlock(db)
 	if block.Number().Sign() != 0 {
 		return nil, fmt.Errorf("can't commit genesis block with number > 0")
+	}
+	if signer != nil {
+		var err error
+		block, err = signer(block)
+		if err != nil {
+			return nil, err
+		}
 	}
 	rawdb.WriteTd(db, block.Hash(), block.NumberU64(), g.Difficulty)
 	rawdb.WriteBlock(db, block)
@@ -376,7 +386,11 @@ func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
 // MustCommit writes the genesis block and state to db, panicking on error.
 // The block is committed as the canonical head block.
 func (g *Genesis) MustCommit(db ethdb.Database) *types.Block {
-	block, err := g.Commit(db)
+	return g.MustSignCommit(db, nil)
+}
+
+func (g *Genesis) MustSignCommit(db ethdb.Database, signer GenesisSigner) *types.Block {
+	block, err := g.Commit(db, signer)
 	if err != nil {
 		panic(err)
 	}
