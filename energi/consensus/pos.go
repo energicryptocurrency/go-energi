@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
@@ -42,6 +43,7 @@ const (
 var (
 	errBlockMinTime  = errors.New("Minimal time gap is not obeyed")
 	errBlockInFuture = errors.New("Too much in future")
+	errMissingParent = errors.New("Missing parent")
 )
 
 type timeTarget struct {
@@ -202,4 +204,59 @@ func (e *Energi) calcPoSDifficulty(
 	ret := big.NewInt(1)
 	log.Trace("PoS difficulty", "block", parent.Number.Uint64()+1, "time", time, "diff", ret)
 	return ret
+}
+
+/**
+ * Implements stake amount calculation.
+ *
+ * POS-3: Stake maturity period
+ * POS-4: Stake amount
+ *
+ * This is a basic helper for stake amount calculation.
+ * There are ways to optimize it for high load, but we need something
+ * to start with.
+ */
+func (e *Energi) lookupMinBalance(
+	chain ChainReader,
+	since uint64,
+	till *types.Header,
+	addr common.Address,
+) (min_balance *big.Int, err error) {
+	stdb, err := chain.GetStateDB()
+
+	if err != nil {
+		log.Error("PoS stake amount is called without state database", "err", err)
+		return nil, err
+	}
+
+	// NOTE: we need to ensure at least one iteration with the balance condition
+	for (till.Time > since) || (min_balance == nil) {
+		blockst, err := state.New(till.Root, stdb)
+
+		if err != nil {
+			log.Error("PoS state root failure", "err", err)
+			return nil, err
+		}
+
+		bl_balance := blockst.GetBalance(addr)
+
+		if (min_balance == nil) || (min_balance.Cmp(bl_balance) > 0) {
+			min_balance = bl_balance
+		}
+
+		curr := till
+		till = chain.GetHeaderByHash(till.ParentHash)
+
+		if till == nil {
+			if curr.Number.Cmp(common.Big0) == 0 {
+				break
+			}
+
+			log.Error("PoS state missing parent")
+			return nil, errMissingParent
+		}
+	}
+
+	log.Trace("PoS stake amount", "addr", addr, "amount", min_balance)
+	return min_balance, nil
 }

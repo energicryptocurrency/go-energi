@@ -22,6 +22,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
@@ -39,7 +40,8 @@ func TestPoSChain(t *testing.T) {
 	var (
 		testdb = ethdb.NewMemDatabase()
 		gspec  = &core.Genesis{
-			Config: params.TestChainConfig,
+			Config:    params.TestChainConfig,
+			Timestamp: 1000,
 		}
 		genesis = gspec.MustCommit(testdb)
 
@@ -57,18 +59,39 @@ func TestPoSChain(t *testing.T) {
 	parent := chain.GetHeaderByHash(genesis.Hash())
 	assert.NotEmpty(t, parent)
 
-	for i := 1; i < 1000; i++ {
+	iterCount := 500
+	iterMid := iterCount * 2 / 3
+
+	for i := 1; i < iterCount; i++ {
+		number := new(big.Int).Add(parent.Number, common.Big1)
+		stdb, err := chain.GetStateDB()
+		blstate, err := state.New(parent.Root, stdb)
+		assert.Empty(t, err)
+
+		if i <= iterMid {
+			blstate.AddBalance(parent.Coinbase, common.Big1)
+		} else {
+			blstate.SubBalance(parent.Coinbase, common.Big1)
+		}
+
+		root := blstate.IntermediateRoot(false)
+		blstate.Commit(true)
+		stdb.TrieDB().Commit(root, true)
+
+		//---
 		header := &types.Header{
-			Root:       parent.Hash(),
+			Root:       root,
 			ParentHash: parent.Hash(),
 			Coinbase:   parent.Coinbase,
 			GasLimit:   parent.GasLimit,
-			Number:     new(big.Int).Add(parent.Number, common.Big1),
+			Number:     number,
 			Time:       parent.Time,
 		}
 		err = engine.Prepare(chain, header)
 		assert.Empty(t, err)
 
+		// Time tests
+		//---
 		tt := engine.calcTimeTarget(chain, parent)
 		assert.True(t, tt.max_time >= now)
 		assert.True(t, tt.max_time <= engine.now()+30)
@@ -90,12 +113,58 @@ func TestPoSChain(t *testing.T) {
 
 		assert.True(t, parent.Time < tt.min_time, "Header %v", i)
 
-		if i > 60 {
+		// Stake modifier tests
+		//---
+		if i > 59 {
 			assert.NotEqual(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
+		} else if i > 1 {
+			assert.Equal(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
 		}
+		//---
 
 		_, err = chain.InsertHeaderChain([]*types.Header{header}, 1)
 		assert.Empty(t, err)
+
+		// Stake amount tests
+		//---
+
+		expminbal := header.Number
+
+		if i > iterMid {
+			expminbal = big.NewInt(int64(iterMid - (i - iterMid)))
+		}
+
+		minbal, err := engine.lookupMinBalance(chain, header.Time+1, header, header.Coinbase)
+		assert.Empty(t, err)
+		assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+
+		minbal, err = engine.lookupMinBalance(chain, header.Time, header, header.Coinbase)
+		assert.Empty(t, err)
+		assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+
+		minbal, err = engine.lookupMinBalance(chain, parent.Time, header, header.Coinbase)
+		assert.Empty(t, err)
+		assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+
+		minbal, err = engine.lookupMinBalance(chain, parent.Time-1, header, header.Coinbase)
+		assert.Empty(t, err)
+		if i <= iterMid {
+			assert.Equal(t, new(big.Int).Sub(expminbal, common.Big1).Uint64(), minbal.Uint64())
+
+		} else {
+			assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+		}
+
+		if i == iterCount-20 {
+			minbal, err = engine.lookupMinBalance(chain, 0, header, header.Coinbase)
+			assert.Empty(t, err)
+			assert.Equal(t, uint64(0), minbal.Uint64())
+
+			minbal, err = engine.lookupMinBalance(chain, header.Time-3600, header, header.Coinbase)
+			assert.Empty(t, err)
+			assert.Equal(t, expminbal.Uint64(), minbal.Uint64())
+		}
+		//---
 
 		parent = header
 	}
