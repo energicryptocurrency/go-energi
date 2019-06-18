@@ -248,6 +248,7 @@ func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *typ
 	sealhash := e.SealHash(header)
 	log.Trace("PoS seal hash", "hash", sealhash)
 
+	// TODO: implement Coinbase+time mining
 	header.Signature, err = e.signerFn(header.Coinbase, sealhash.Bytes())
 	if err != nil {
 		return err
@@ -269,6 +270,34 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 	rlp.Encode(hasher, []interface{}{
 		header.ParentHash,
 		header.UncleHash,
+		// This part is for "mining"
+		//header.Coinbase,
+		header.Root,
+		header.TxHash,
+		header.ReceiptHash,
+		header.Bloom,
+		header.Difficulty,
+		header.Number,
+		header.GasLimit,
+		header.GasUsed,
+		// This part is for "mining"
+		//header.Time,
+		header.Extra,
+		header.MixDigest,
+		header.Nonce,
+		// This part is to be added afterwards
+		//header.Signature,
+	})
+	hasher.Sum(hash[:0])
+	return hash
+}
+
+func (e *Energi) SignatureHash(header *types.Header) (hash common.Hash) {
+	hasher := sha3.NewLegacyKeccak256()
+
+	rlp.Encode(hasher, []interface{}{
+		header.ParentHash,
+		header.UncleHash,
 		header.Coinbase,
 		header.Root,
 		header.TxHash,
@@ -282,6 +311,7 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 		header.Extra,
 		header.MixDigest,
 		header.Nonce,
+		//header.Signature,
 	})
 	hasher.Sum(hash[:0])
 	return hash
