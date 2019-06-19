@@ -126,6 +126,9 @@ type Wallet interface {
 	// It looks up the account specified either solely via its address contained within,
 	// or optionally with the aid of any location metadata from the embedded URL field.
 	SignTxWithPassphrase(account Account, passphrase string, tx *types.Transaction, chainID *big.Int) (*types.Transaction, error)
+
+	// Check if account is available for immediate signing of PoS blocks
+	IsUnlockedForStaking(account Account) bool
 }
 
 // Backend is a "wallet provider" that may contain a batch of accounts they can

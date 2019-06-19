@@ -326,6 +326,13 @@ func (e *Energi) mine(
 	}
 
 	accounts := e.accountsFn()
+	if len(accounts) == 0 {
+		select {
+		case <-stop:
+			return false, nil
+		}
+	}
+
 	candidates := make([]Candidates, 0, len(accounts))
 	for _, a := range accounts {
 		candidates = append(candidates, Candidates{
@@ -349,8 +356,9 @@ func (e *Energi) mine(
 
 		// It could be done once, but then there is a chance to miss blocks.
 		// Some significant algo optimizations are possible, but we start with simplicity.
-		for i, v := range candidates {
-			candidates[i].stake, err = e.lookupMinBalance(
+		for i := range candidates {
+			v := &candidates[i]
+			v.stake, err = e.lookupMinBalance(
 				chain, blockTime-MaturityPeriod, parent, v.addr)
 			if err != nil {
 				return false, err
@@ -361,7 +369,8 @@ func (e *Energi) mine(
 			return candidates[i].stake.Cmp(candidates[j].stake) < 0
 		})
 		// Try to match target
-		for _, v := range candidates {
+		for i := range candidates {
+			v := &candidates[i]
 			if v.stake.Cmp(minStake) < 0 {
 				continue
 			}
