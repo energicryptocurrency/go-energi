@@ -40,28 +40,32 @@ func TestPoSChain(t *testing.T) {
 	log.Root().SetHandler(log.StdoutHandler)
 	log.Trace("prevent unused")
 
-	tmpKey, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
-	tmpAddress := crypto.PubkeyToAddress(tmpKey.PublicKey)
-
 	results := make(chan *types.Block, 1)
 	stop := make(chan struct{})
 
-	var (
-		testdb = ethdb.NewMemDatabase()
-		engine = New(&params.EnergiConfig{GenesisSigner: tmpAddress}, testdb)
-	)
+	signers := make(map[common.Address]*ecdsa.PrivateKey, 60)
+	addresses := make([]common.Address, 0, 60)
+	alloc := make(core.GenesisAlloc, 60)
+	for i := 0; i < 60; i++ {
+		k, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
+		a := crypto.PubkeyToAddress(k.PublicKey)
+
+		signers[a] = k
+		addresses = append(addresses, a)
+		alloc[a] = core.GenesisAccount{
+			Balance: minStake,
+		}
+	}
+
+	testdb := ethdb.NewMemDatabase()
+	engine := New(&params.EnergiConfig{GenesisSigner: addresses[0]}, testdb)
 
 	engine.SetMinerCB(
 		func() []common.Address {
-			return []common.Address{
-				{},
-				tmpAddress,
-				{},
-			}
+			return addresses
 		},
 		func(addr common.Address, hash []byte) ([]byte, error) {
-			assert.Equal(t, tmpAddress, addr)
-			return crypto.Sign(hash, tmpKey)
+			return crypto.Sign(hash, signers[addr])
 		},
 	)
 
@@ -69,12 +73,8 @@ func TestPoSChain(t *testing.T) {
 		gspec = &core.Genesis{
 			Config:    params.TestChainConfig,
 			Timestamp: 1000,
-			Coinbase:  tmpAddress,
-			Alloc: core.GenesisAlloc{
-				tmpAddress: core.GenesisAccount{
-					Balance: minStake,
-				},
-			},
+			Coinbase:  addresses[0],
+			Alloc:     alloc,
 		}
 		genesis = gspec.MustSignCommit(testdb, func(b *types.Block) (*types.Block, error) {
 			err := engine.Seal(nil, b, results, stop)
@@ -101,7 +101,7 @@ func TestPoSChain(t *testing.T) {
 	err = engine.VerifySeal(nil, parent)
 	assert.Empty(t, err)
 
-	iterCount := 500
+	iterCount := 150
 	iterMid := iterCount * 2 / 3
 
 	for i := 1; i < iterCount; i++ {
@@ -111,15 +111,19 @@ func TestPoSChain(t *testing.T) {
 		assert.Empty(t, err)
 
 		if i <= iterMid {
-			blstate.AddBalance(parent.Coinbase, minStake)
+			for _, a := range addresses {
+				blstate.AddBalance(a, minStake)
+			}
 		} else {
-			blstate.SubBalance(parent.Coinbase, minStake)
+			for _, a := range addresses {
+				blstate.SubBalance(a, minStake)
+			}
 		}
 
 		//---
 		header := &types.Header{
 			ParentHash: parent.Hash(),
-			Coinbase:   parent.Coinbase,
+			Coinbase:   common.Address{},
 			GasLimit:   parent.GasLimit,
 			Number:     number,
 			Time:       parent.Time,
@@ -136,6 +140,7 @@ func TestPoSChain(t *testing.T) {
 		//---
 		err = engine.Seal(chain, block, results, stop)
 		assert.Empty(t, err)
+		assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
 
 		block = <-results
 		assert.NotEmpty(t, block)
@@ -168,11 +173,7 @@ func TestPoSChain(t *testing.T) {
 
 		// Stake modifier tests
 		//---
-		if i > 59 {
-			assert.NotEqual(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
-		} else if i > 1 {
-			assert.Equal(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
-		}
+		assert.NotEqual(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
 		//---
 
 		_, err = chain.InsertHeaderChain([]*types.Header{header}, 1)
@@ -187,35 +188,32 @@ func TestPoSChain(t *testing.T) {
 			expminbal = new(big.Int).Mul(big.NewInt(int64(iterMid-(i-iterMid)+1)), minStake)
 		}
 
-		minbal, err := engine.lookupMinBalance(chain, header.Time+1, header, header.Coinbase)
+		minbal, err := engine.lookupMinBalance(chain, header.Time+1, header, parent.Coinbase)
 		assert.Empty(t, err)
 		assert.Equal(t, expminbal.String(), minbal.String())
 
-		minbal, err = engine.lookupMinBalance(chain, header.Time, header, header.Coinbase)
+		minbal, err = engine.lookupMinBalance(chain, header.Time, header, parent.Coinbase)
 		assert.Empty(t, err)
 		assert.Equal(t, expminbal.String(), minbal.String())
 
-		minbal, err = engine.lookupMinBalance(chain, parent.Time, header, header.Coinbase)
+		minbal, err = engine.lookupMinBalance(chain, parent.Time, header, parent.Coinbase)
 		assert.Empty(t, err)
 		assert.Equal(t, expminbal.String(), minbal.String())
 
-		minbal, err = engine.lookupMinBalance(chain, parent.Time-1, header, header.Coinbase)
+		minbal, err = engine.lookupMinBalance(chain, parent.Time-1, header, parent.Coinbase)
 		assert.Empty(t, err)
-		if i <= iterMid {
-			assert.Equal(t, new(big.Int).Sub(expminbal, minStake).String(), minbal.String())
-
-		} else {
-			assert.Equal(t, expminbal.String(), minbal.String())
-		}
+		assert.Equal(t, common.Big0.String(), minbal.String())
 
 		if i == iterCount-20 {
-			minbal, err = engine.lookupMinBalance(chain, 0, header, header.Coinbase)
+			// Reset on coinbase
+			minbal, err = engine.lookupMinBalance(chain, 0, parent, header.Coinbase)
 			assert.Empty(t, err)
-			assert.Equal(t, minStake.String(), minbal.String())
+			assert.Equal(t, common.Big0.String(), minbal.String())
 
-			minbal, err = engine.lookupMinBalance(chain, header.Time-3600, header, header.Coinbase)
+			// Use the last
+			minbal, err = engine.lookupMinBalance(chain, header.Time-3600, parent, header.Coinbase)
 			assert.Empty(t, err)
-			assert.Equal(t, expminbal.String(), minbal.String())
+			assert.Equal(t, new(big.Int).Add(expminbal, minStake).String(), minbal.String())
 		}
 		//---
 

@@ -274,11 +274,11 @@ func (e *Energi) lookupMinBalance(
 
 	// NOTE: we need to ensure at least one iteration with the balance condition
 	for (till.Time > since) || (min_balance == nil) {
-		/*if (till.Coinbase == addr) {
+		if till.Coinbase == addr {
 			// Found block resets maturity period
 			min_balance = common.Big0
 			break
-		}*/
+		}
 
 		blockst, err := state.New(till.Root, stdb)
 
@@ -311,7 +311,7 @@ func (e *Energi) lookupMinBalance(
 		}
 	}
 
-	log.Trace("PoS stake amount", "addr", addr, "amount", min_balance)
+	//log.Trace("PoS stake amount", "addr", addr, "amount", min_balance)
 	return min_balance, nil
 }
 
@@ -332,7 +332,7 @@ func (e *Energi) mine(
 			addr:  a,
 			stake: common.Big0,
 		})
-		log.Trace("PoS miner candidate found", "address", a)
+		//log.Trace("PoS miner candidate found", "address", a)
 	}
 
 	//---
@@ -363,11 +363,10 @@ func (e *Energi) mine(
 		// Try to match target
 		for _, v := range candidates {
 			if v.stake.Cmp(minStake) < 0 {
-				log.Trace("PoS miner skipping small amount",
-					"stake", v.stake, "minstake", minStake)
 				continue
 			}
 
+			log.Trace("PoS stake candidate", "addr", v.addr, "stake", v.stake)
 			header.Coinbase = v.addr
 			poshash := e.calcPoSHash(header, v.stake)
 
