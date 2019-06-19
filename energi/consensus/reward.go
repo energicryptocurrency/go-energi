@@ -79,7 +79,7 @@ func (e *Energi) processBlockRewards(
 		output, gas1, _, err := core.ApplyMessage(evm, msg, gp)
 		if err != nil {
 			log.Error("Failed in getReward() call", "err", err)
-			return err
+			continue
 		}
 		gas_total += gas1
 
@@ -88,7 +88,7 @@ func (e *Energi) processBlockRewards(
 		err = e.rewardAbi.Unpack(&value, "getReward", output)
 		if err != nil {
 			log.Error("Failed to unpack getReward() call", "err", err)
-			return err
+			continue
 		}
 
 		// Reward
@@ -107,7 +107,7 @@ func (e *Energi) processBlockRewards(
 		_, gas2, _, err := core.ApplyMessage(evm, msg, gp)
 		if err != nil {
 			log.Error("Failed in reward() call", "err", err)
-			return err
+			continue
 		}
 		gas_total += gas2
 

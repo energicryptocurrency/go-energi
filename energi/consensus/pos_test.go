@@ -48,19 +48,33 @@ func TestPoSChain(t *testing.T) {
 
 	var (
 		testdb = ethdb.NewMemDatabase()
-		engine = New(new(params.EnergiConfig), testdb)
+		engine = New(&params.EnergiConfig{GenesisSigner: tmpAddress}, testdb)
 	)
 
-	engine.SetSigner(func(addr common.Address, hash []byte) ([]byte, error) {
-		assert.Equal(t, tmpAddress, addr)
-		return crypto.Sign(hash, tmpKey)
-	})
+	engine.SetMinerCB(
+		func() []common.Address {
+			return []common.Address{
+				{},
+				tmpAddress,
+				{},
+			}
+		},
+		func(addr common.Address, hash []byte) ([]byte, error) {
+			assert.Equal(t, tmpAddress, addr)
+			return crypto.Sign(hash, tmpKey)
+		},
+	)
 
 	var (
 		gspec = &core.Genesis{
 			Config:    params.TestChainConfig,
 			Timestamp: 1000,
 			Coinbase:  tmpAddress,
+			Alloc: core.GenesisAlloc{
+				tmpAddress: core.GenesisAccount{
+					Balance: minStake,
+				},
+			},
 		}
 		genesis = gspec.MustSignCommit(testdb, func(b *types.Block) (*types.Block, error) {
 			err := engine.Seal(nil, b, results, stop)
@@ -124,8 +138,9 @@ func TestPoSChain(t *testing.T) {
 		assert.Empty(t, err)
 
 		block = <-results
+		assert.NotEmpty(t, block)
 		header = block.Header()
-		err = engine.VerifySeal(nil, header)
+		err = engine.VerifySeal(chain, header)
 		assert.Empty(t, err)
 
 		// Time tests
@@ -166,10 +181,10 @@ func TestPoSChain(t *testing.T) {
 		// Stake amount tests
 		//---
 
-		expminbal := new(big.Int).Mul(header.Number, minStake)
+		expminbal := new(big.Int).Mul(new(big.Int).Add(header.Number, common.Big1), minStake)
 
 		if i > iterMid {
-			expminbal = new(big.Int).Mul(big.NewInt(int64(iterMid-(i-iterMid))), minStake)
+			expminbal = new(big.Int).Mul(big.NewInt(int64(iterMid-(i-iterMid)+1)), minStake)
 		}
 
 		minbal, err := engine.lookupMinBalance(chain, header.Time+1, header, header.Coinbase)
@@ -196,7 +211,7 @@ func TestPoSChain(t *testing.T) {
 		if i == iterCount-20 {
 			minbal, err = engine.lookupMinBalance(chain, 0, header, header.Coinbase)
 			assert.Empty(t, err)
-			assert.Equal(t, common.Big0.String(), minbal.String())
+			assert.Equal(t, minStake.String(), minbal.String())
 
 			minbal, err = engine.lookupMinBalance(chain, header.Time-3600, header, header.Coinbase)
 			assert.Empty(t, err)

@@ -19,6 +19,7 @@ package consensus
 import (
 	"errors"
 	"math/big"
+	"sort"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -34,7 +35,7 @@ const (
 	AverageTimeBlocks uint64 = 60
 	TargetBlockGap    uint64 = 60
 	MinBlockGap       uint64 = 30
-	MaxFutureGap      uint64 = 30
+	MaxFutureGap      uint64 = 3
 	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBlockGap
 
 	maturityGuessBlocks uint64 = MaturityPeriod / TargetBlockGap
@@ -43,9 +44,14 @@ const (
 var (
 	minStake = big.NewInt(1e18)
 
+	baseDifficulty = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
+
 	errBlockMinTime  = errors.New("Minimal time gap is not obeyed")
 	errBlockInFuture = errors.New("Too much in future")
 	errMissingParent = errors.New("Missing parent")
+
+	errInvalidPoSHash     = errors.New("Invalid PoS hash")
+	errInvalidStakeAmount = errors.New("Invalid Stake amount")
 )
 
 type timeTarget struct {
@@ -209,6 +215,41 @@ func (e *Energi) calcPoSDifficulty(
 }
 
 /**
+ * Implements hash consensus
+ *
+ * POS-18: PoS hash generation
+ */
+func (e *Energi) calcPoSHash(
+	header *types.Header,
+	stake *big.Int,
+) *big.Int {
+	// new(big.Int).SetBytes(poshash.Bytes())
+	return baseDifficulty
+}
+
+func (e *Energi) verifyPoSHash(
+	chain ChainReader,
+	header *types.Header,
+) error {
+	parent := chain.GetHeaderByHash(header.ParentHash)
+	stake, err := e.lookupMinBalance(chain, header.Time-MaturityPeriod, parent, header.Coinbase)
+	if err != nil {
+		return err
+	}
+	if stake.Cmp(minStake) < 0 {
+		return errInvalidStakeAmount
+	}
+	poshash := e.calcPoSHash(header, stake)
+	target := new(big.Int).Div(baseDifficulty, header.Difficulty)
+
+	if poshash.Cmp(target) > 0 {
+		return errInvalidPoSHash
+	}
+
+	return nil
+}
+
+/**
  * Implements stake amount calculation.
  *
  * POS-3: Stake maturity period
@@ -233,6 +274,12 @@ func (e *Energi) lookupMinBalance(
 
 	// NOTE: we need to ensure at least one iteration with the balance condition
 	for (till.Time > since) || (min_balance == nil) {
+		/*if (till.Coinbase == addr) {
+			// Found block resets maturity period
+			min_balance = common.Big0
+			break
+		}*/
+
 		blockst, err := state.New(till.Root, stdb)
 
 		if err != nil {
@@ -266,4 +313,79 @@ func (e *Energi) lookupMinBalance(
 
 	log.Trace("PoS stake amount", "addr", addr, "amount", min_balance)
 	return min_balance, nil
+}
+
+func (e *Energi) mine(
+	chain ChainReader,
+	header *types.Header,
+	stop <-chan struct{},
+) (success bool, err error) {
+	type Candidates struct {
+		addr  common.Address
+		stake *big.Int
+	}
+
+	accounts := e.accountsFn()
+	candidates := make([]Candidates, 0, len(accounts))
+	for _, a := range accounts {
+		candidates = append(candidates, Candidates{
+			addr:  a,
+			stake: common.Big0,
+		})
+		log.Trace("PoS miner candidate found", "address", a)
+	}
+
+	//---
+	parent := chain.GetHeaderByHash(header.ParentHash)
+	tt := e.calcTimeTarget(chain, parent)
+	target := new(big.Int).Div(baseDifficulty, header.Difficulty)
+
+	blockTime := tt.min_time
+
+	//---
+	for ; ; blockTime++ {
+		header.Time = blockTime
+		log.Trace("PoS miner time", "time", blockTime)
+
+		// It could be done once, but then there is a chance to miss blocks.
+		// Some significant algo optimizations are possible, but we start with simplicity.
+		for i, v := range candidates {
+			candidates[i].stake, err = e.lookupMinBalance(
+				chain, blockTime-MaturityPeriod, parent, v.addr)
+			if err != nil {
+				return false, err
+			}
+		}
+		// Try smaller amounts first
+		sort.Slice(candidates, func(i, j int) bool {
+			return candidates[i].stake.Cmp(candidates[j].stake) < 0
+		})
+		// Try to match target
+		for _, v := range candidates {
+			if v.stake.Cmp(minStake) < 0 {
+				log.Trace("PoS miner skipping small amount",
+					"stake", v.stake, "minstake", minStake)
+				continue
+			}
+
+			header.Coinbase = v.addr
+			poshash := e.calcPoSHash(header, v.stake)
+
+			if poshash.Cmp(target) <= 0 {
+				return true, nil
+			}
+		}
+
+		if now := e.now(); blockTime > now {
+			log.Trace("PoS miner is sleeping")
+			select {
+			case <-stop:
+				return false, nil
+			case <-time.After(time.Duration(blockTime-now) * time.Second):
+			}
+		}
+		// else try to find a better block in any case!
+	}
+
+	return false, nil
 }

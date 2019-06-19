@@ -18,12 +18,14 @@ package consensus
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	eth_consensus "github.com/ethereum/go-ethereum/consensus"
+	"github.com/ethereum/go-ethereum/consensus/misc"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -45,11 +47,13 @@ var (
 	sealLen   = 65
 	uncleHash = types.CalcUncleHash(nil)
 
-	errMissingSig = errors.New("Signature is missing")
-	errInvalidSig = errors.New("Invalid signature")
+	errMissingSig    = errors.New("Signature is missing")
+	errInvalidSig    = errors.New("Invalid signature")
+	errUnknownParent = errors.New("Unknown parent")
 )
 
 type ChainReader = eth_consensus.ChainReader
+type AccountsFn func() []common.Address
 type SignerFn func(common.Address, []byte) ([]byte, error)
 
 type Energi struct {
@@ -61,6 +65,7 @@ type Energi struct {
 	xferGas      uint64
 	callGas      uint64
 	signerFn     SignerFn
+	accountsFn   AccountsFn
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -117,8 +122,87 @@ func (e *Energi) Author(header *types.Header) (common.Address, error) {
 func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool) error {
 	var err error
 
+	// Ensure that the header's extra-data section is of a reasonable size
+	if uint64(len(header.Extra)) > params.MaximumExtraDataSize {
+		return fmt.Errorf("extra-data too long: %d > %d",
+			len(header.Extra), params.MaximumExtraDataSize)
+	}
+
+	parent := chain.GetHeaderByHash(header.ParentHash)
+
+	if parent == nil {
+		if header.Number.Cmp(common.Big0) != 0 {
+			return errUnknownParent
+		}
+
+		// Genesis check
+		if header.Coinbase != e.config.GenesisSigner {
+			return errors.New("Invalid Genesis signer")
+		}
+
+		err = e.VerifySeal(chain, header)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	} else {
+		timeTarget := e.calcTimeTarget(chain, parent)
+		err = e.checkTime(header, timeTarget)
+		if err != nil {
+			return err
+		}
+	}
+
+	modifier := e.calcPoSModifier(chain, header.Time, parent)
+	if header.MixDigest != modifier {
+		return fmt.Errorf("invalid modifier: have %v, want %v",
+			header.MixDigest, modifier)
+	}
+
+	difficulty := e.calcPoSDifficulty(chain, header.Time, parent)
+
+	if header.Difficulty.Cmp(difficulty) != 0 {
+		return fmt.Errorf("invalid difficulty: have %v, want %v",
+			header.Difficulty, difficulty)
+	}
+
+	cap := uint64(0x7fffffffffffffff)
+	if header.GasLimit > cap {
+		return fmt.Errorf("invalid gasLimit: have %v, max %v",
+			header.GasLimit, cap)
+	}
+
+	// Verify that the gasUsed is <= gasLimit
+	if header.GasUsed > header.GasLimit {
+		return fmt.Errorf("invalid gasUsed: have %d, gasLimit %d",
+			header.GasUsed, header.GasLimit)
+	}
+
+	// Verify that the gas limit remains within allowed bounds
+	diff := int64(parent.GasLimit) - int64(header.GasLimit)
+	if diff < 0 {
+		diff *= -1
+	}
+	limit := parent.GasLimit / params.GasLimitBoundDivisor
+
+	if uint64(diff) >= limit || header.GasLimit < params.MinGasLimit {
+		return fmt.Errorf("invalid gas limit: have %d, want %d += %d",
+			header.GasLimit, parent.GasLimit, limit)
+	}
+
+	// Verify that the block number is parent's +1
+	if diff := new(big.Int).Sub(header.Number, parent.Number); diff.Cmp(big.NewInt(1)) != 0 {
+		return eth_consensus.ErrInvalidNumber
+	}
+
+	// Verify the engine specific seal securing the block
 	err = e.VerifySeal(chain, header)
 	if err != nil {
+		return err
+	}
+
+	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
 		return err
 	}
 
@@ -151,7 +235,6 @@ func (e *Energi) VerifyHeaders(
 	}()
 
 	return abort, results
-
 }
 
 // VerifyUncles verifies that the given block's uncles conform to the consensus
@@ -187,6 +270,13 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 		return errInvalidSig
 	}
 
+	if header.Number.Cmp(common.Big0) != 0 {
+		err = e.verifyPoSHash(chain, header)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -199,7 +289,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	parent := chain.GetHeaderByHash(header.ParentHash)
 
 	if parent == nil {
-		return errors.New("Unknown parent")
+		return errUnknownParent
 	}
 
 	time_target := e.calcTimeTarget(chain, parent)
@@ -245,20 +335,39 @@ func (e *Energi) Finalize(
 func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) (err error) {
 	header := block.Header()
 
-	sealhash := e.SealHash(header)
-	log.Trace("PoS seal hash", "hash", sealhash)
+	go func() {
+		if header.Number.Cmp(common.Big0) != 0 {
+			success, err := e.mine(chain, header, stop)
 
-	// TODO: implement Coinbase+time mining
-	header.Signature, err = e.signerFn(header.Coinbase, sealhash.Bytes())
-	if err != nil {
-		return err
-	}
+			if err != nil {
+				log.Error("PoS miner error", "err", err)
+			}
 
-	select {
-	case results <- block.WithSeal(header):
-	default:
-		log.Warn("PoS seal is not ready by miner", "sealhash", e.SealHash(header))
-	}
+			if !success {
+				select {
+				case results <- nil:
+				default:
+				}
+				return
+			}
+		}
+
+		sealhash := e.SealHash(header)
+		log.Trace("PoS seal hash", "sealhash", sealhash)
+
+		header.Signature, err = e.signerFn(header.Coinbase, sealhash.Bytes())
+		if err != nil {
+			log.Error("PoS miner error", "err", err)
+			return
+		}
+
+		select {
+		case results <- block.WithSeal(header):
+			log.Info("PoS seal has submitted solution", "block", block.Hash())
+		default:
+			log.Warn("PoS seal is not read by miner", "sealhash", sealhash)
+		}
+	}()
 
 	return nil
 }
@@ -317,12 +426,13 @@ func (e *Energi) SignatureHash(header *types.Header) (hash common.Hash) {
 	return hash
 }
 
-func (e *Energi) SetSigner(signerFn SignerFn) {
+func (e *Energi) SetMinerCB(accountsFn AccountsFn, signerFn SignerFn) {
 	if e.signerFn != nil {
-		panic("Signer must be set only once!")
+		panic("Callbacks must be set only once!")
 	}
 
 	e.signerFn = signerFn
+	e.accountsFn = accountsFn
 }
 
 // CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty

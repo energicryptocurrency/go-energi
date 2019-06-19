@@ -186,7 +186,9 @@ func (c *CliqueConfig) String() string {
 }
 
 // EnergiConfig is the consensus engine config for proof-of-stake based sealing.
-type EnergiConfig struct{}
+type EnergiConfig struct {
+	GenesisSigner common.Address
+}
 
 // String implements the stringer interface, returning the consensus engine details.
 func (*EnergiConfig) String() string {
