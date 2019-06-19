@@ -58,10 +58,15 @@ func TestPoSChain(t *testing.T) {
 	}
 
 	testdb := ethdb.NewMemDatabase()
-	engine := New(&params.EnergiConfig{GenesisSigner: addresses[0]}, testdb)
+	engine := New(&params.EnergiConfig{MigrationSigner: addresses[1]}, testdb)
+	var header *types.Header
 
 	engine.SetMinerCB(
 		func() []common.Address {
+			if header.Number.Uint64() == 1 {
+				return addresses[1:2]
+			}
+
 			return addresses
 		},
 		func(addr common.Address, hash []byte) ([]byte, error) {
@@ -71,24 +76,18 @@ func TestPoSChain(t *testing.T) {
 
 	var (
 		gspec = &core.Genesis{
-			Config:    params.TestChainConfig,
+			Config:    params.EnergiTestnetChainConfig,
 			Timestamp: 1000,
 			Coinbase:  addresses[0],
 			Alloc:     alloc,
+			Xfers:     core.DeployEnergiGovernance(params.EnergiTestnetChainConfig),
 		}
-		genesis = gspec.MustSignCommit(testdb, func(b *types.Block) (*types.Block, error) {
-			err := engine.Seal(nil, b, results, stop)
-			assert.Empty(t, err)
-			b = <-results
-			err = engine.VerifySeal(nil, b.Header())
-			assert.Empty(t, err)
-			return b, err
-		})
+		genesis = gspec.MustCommit(testdb)
 
 		now = engine.now()
 	)
 
-	chain, err := core.NewBlockChain(testdb, nil, params.TestChainConfig, engine, vm.Config{}, nil)
+	chain, err := core.NewBlockChain(testdb, nil, params.EnergiTestnetChainConfig, engine, vm.Config{}, nil)
 	assert.Empty(t, err)
 	defer chain.Stop()
 
@@ -98,8 +97,6 @@ func TestPoSChain(t *testing.T) {
 
 	parent := chain.GetHeaderByHash(genesis.Hash())
 	assert.NotEmpty(t, parent)
-	err = engine.VerifySeal(nil, parent)
-	assert.Empty(t, err)
 
 	iterCount := 150
 	iterMid := iterCount * 2 / 3
@@ -121,7 +118,7 @@ func TestPoSChain(t *testing.T) {
 		}
 
 		//---
-		header := &types.Header{
+		header = &types.Header{
 			ParentHash: parent.Hash(),
 			Coinbase:   common.Address{},
 			GasLimit:   parent.GasLimit,

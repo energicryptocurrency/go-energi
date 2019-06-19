@@ -187,7 +187,7 @@ func SetupGenesisBlockWithOverride(db ethdb.Database, genesis *Genesis, constant
 		} else {
 			log.Info("Writing custom genesis block")
 		}
-		block, err := genesis.Commit(db, nil)
+		block, err := genesis.Commit(db)
 		return genesis.Config, block.Hash(), err
 	}
 
@@ -340,6 +340,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 		}
 
 		statedb.SetBalance(systemFaucet, big.NewInt(0))
+		statedb.SetBalance(author, big.NewInt(0))
 		root = statedb.IntermediateRoot(false)
 		head.Root = root
 	}
@@ -351,22 +352,12 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	return types.NewBlock(head, nil, nil, nil)
 }
 
-// Genesis signing callback
-type GenesisSigner func(*types.Block) (*types.Block, error)
-
 // Commit writes the block and state of a genesis specification to the database.
 // The block is committed as the canonical head block.
-func (g *Genesis) Commit(db ethdb.Database, signer GenesisSigner) (*types.Block, error) {
+func (g *Genesis) Commit(db ethdb.Database) (*types.Block, error) {
 	block := g.ToBlock(db)
 	if block.Number().Sign() != 0 {
 		return nil, fmt.Errorf("can't commit genesis block with number > 0")
-	}
-	if signer != nil {
-		var err error
-		block, err = signer(block)
-		if err != nil {
-			return nil, err
-		}
 	}
 	rawdb.WriteTd(db, block.Hash(), block.NumberU64(), g.Difficulty)
 	rawdb.WriteBlock(db, block)
@@ -386,11 +377,7 @@ func (g *Genesis) Commit(db ethdb.Database, signer GenesisSigner) (*types.Block,
 // MustCommit writes the genesis block and state to db, panicking on error.
 // The block is committed as the canonical head block.
 func (g *Genesis) MustCommit(db ethdb.Database) *types.Block {
-	return g.MustSignCommit(db, nil)
-}
-
-func (g *Genesis) MustSignCommit(db ethdb.Database, signer GenesisSigner) *types.Block {
-	block, err := g.Commit(db, signer)
+	block, err := g.Commit(db)
 	if err != nil {
 		panic(err)
 	}
@@ -412,7 +399,6 @@ func DefaultGenesisBlock() *Genesis {
 		GasLimit:   0,
 		Difficulty: big.NewInt(17179869184),
 		Alloc:      decodePrealloc(mainnetAllocData),
-		Xfers:      DeployEnergiGovernance(params.MainnetChainConfig),
 	}
 }
 
@@ -425,7 +411,30 @@ func DefaultTestnetGenesisBlock() *Genesis {
 		GasLimit:   0,
 		Difficulty: big.NewInt(1048576),
 		Alloc:      decodePrealloc(testnetAllocData),
-		Xfers:      DeployEnergiGovernance(params.TestnetChainConfig),
+	}
+}
+
+func DefaultEnergiMainnetGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.EnergiMainnetChainConfig,
+		Nonce:      0,
+		ExtraData:  []byte{},
+		GasLimit:   8000000,
+		Difficulty: big.NewInt(0xFFFF),
+		Alloc:      DefaultPrealloc(),
+		Xfers:      DeployEnergiGovernance(params.EnergiMainnetChainConfig),
+	}
+}
+
+func DefaultEnergiTestnetGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.EnergiTestnetChainConfig,
+		Nonce:      0,
+		ExtraData:  []byte{},
+		GasLimit:   8000000,
+		Difficulty: big.NewInt(0xFFFF),
+		Alloc:      DefaultPrealloc(),
+		Xfers:      DeployEnergiGovernance(params.EnergiTestnetChainConfig),
 	}
 }
 
@@ -453,22 +462,25 @@ func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
 			faucet:                           {Balance: new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(9))},
 		},
-		Xfers: DeployEnergiGovernance(&config),
+	}
+}
+
+func DefaultPrealloc() GenesisAlloc {
+	return GenesisAlloc{
+		common.BytesToAddress([]byte{1}): {Balance: big.NewInt(1)}, // ECRecover
+		common.BytesToAddress([]byte{2}): {Balance: big.NewInt(1)}, // SHA256
+		common.BytesToAddress([]byte{3}): {Balance: big.NewInt(1)}, // RIPEMD
+		common.BytesToAddress([]byte{4}): {Balance: big.NewInt(1)}, // Identity
+		common.BytesToAddress([]byte{5}): {Balance: big.NewInt(1)}, // ModExp
+		common.BytesToAddress([]byte{6}): {Balance: big.NewInt(1)}, // ECAdd
+		common.BytesToAddress([]byte{7}): {Balance: big.NewInt(1)}, // ECScalarMul
+		common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
 	}
 }
 
 func decodePrealloc(data string) GenesisAlloc {
 	if len(data) == 0 {
-		return GenesisAlloc{
-			common.BytesToAddress([]byte{1}): {Balance: big.NewInt(1)}, // ECRecover
-			common.BytesToAddress([]byte{2}): {Balance: big.NewInt(1)}, // SHA256
-			common.BytesToAddress([]byte{3}): {Balance: big.NewInt(1)}, // RIPEMD
-			common.BytesToAddress([]byte{4}): {Balance: big.NewInt(1)}, // Identity
-			common.BytesToAddress([]byte{5}): {Balance: big.NewInt(1)}, // ModExp
-			common.BytesToAddress([]byte{6}): {Balance: big.NewInt(1)}, // ECAdd
-			common.BytesToAddress([]byte{7}): {Balance: big.NewInt(1)}, // ECScalarMul
-			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
-		}
+		return DefaultPrealloc()
 	}
 
 	var p []struct{ Addr, Balance *big.Int }

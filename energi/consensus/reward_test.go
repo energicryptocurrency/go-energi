@@ -39,15 +39,15 @@ func TestBlockRewards(t *testing.T) {
 	var (
 		testdb = ethdb.NewMemDatabase()
 		gspec  = &core.Genesis{
-			Config: params.TestChainConfig,
-			Xfers:  core.DeployEnergiGovernance(params.TestnetChainConfig),
+			Config: params.EnergiTestnetChainConfig,
+			Xfers:  core.DeployEnergiGovernance(params.EnergiTestnetChainConfig),
 		}
 		parent = gspec.MustCommit(testdb)
 
 		engine = New(new(params.EnergiConfig), testdb)
 	)
 
-	chain, _ := core.NewBlockChain(testdb, nil, params.TestChainConfig, ethash.NewFaker(), vm.Config{}, nil)
+	chain, _ := core.NewBlockChain(testdb, nil, params.EnergiTestnetChainConfig, ethash.NewFaker(), vm.Config{}, nil)
 	defer chain.Stop()
 
 	statedb, _ := state.New(parent.Root(), state.NewDatabase(testdb))

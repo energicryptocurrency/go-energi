@@ -123,7 +123,6 @@ func (e *Energi) checkTime(
 	header *types.Header,
 	time_target *timeTarget,
 ) error {
-	// NOTE: allow Miner to hint already tried period by
 	if header.Time < time_target.min_time {
 		return errBlockMinTime
 	}

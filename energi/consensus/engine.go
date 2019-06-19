@@ -128,21 +128,19 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 			len(header.Extra), params.MaximumExtraDataSize)
 	}
 
+	// A special Migration block #1
+	if (header.Number.Cmp(common.Big1) == 0) && (header.Coinbase != e.config.MigrationSigner) {
+		log.Error("PoS migration mismatch",
+			"signer", header.Coinbase,
+			"required", e.config.MigrationSigner)
+		return errors.New("Invalid Migration signer")
+	}
+
 	parent := chain.GetHeaderByHash(header.ParentHash)
 
 	if parent == nil {
 		if header.Number.Cmp(common.Big0) != 0 {
 			return errUnknownParent
-		}
-
-		// Genesis check
-		if header.Coinbase != e.config.GenesisSigner {
-			return errors.New("Invalid Genesis signer")
-		}
-
-		err = e.VerifySeal(chain, header)
-		if err != nil {
-			return err
 		}
 
 		return nil
