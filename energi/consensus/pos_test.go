@@ -40,7 +40,6 @@ import (
 func TestPoSChain(t *testing.T) {
 	t.Parallel()
 	log.Root().SetHandler(log.StdoutHandler)
-	log.Trace("prevent unused")
 
 	results := make(chan *types.Block, 1)
 	stop := make(chan struct{})
@@ -90,11 +89,12 @@ func TestPoSChain(t *testing.T) {
 
 	var (
 		gspec = &core.Genesis{
-			Config:    &chainConfig,
-			Timestamp: 1000,
-			Coinbase:  energi_params.Energi_Treasury,
-			Alloc:     alloc,
-			Xfers:     core.DeployEnergiGovernance(&chainConfig),
+			Config:     &chainConfig,
+			Timestamp:  1000,
+			Difficulty: big.NewInt(1),
+			Coinbase:   energi_params.Energi_Treasury,
+			Alloc:      alloc,
+			Xfers:      core.DeployEnergiGovernance(&chainConfig),
 		}
 		genesis = gspec.MustCommit(testdb)
 
@@ -114,6 +114,10 @@ func TestPoSChain(t *testing.T) {
 
 	iterCount := 150
 	//iterMid := iterCount * 2 / 3
+
+	engine.diffFn = func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int {
+		return common.Big1
+	}
 
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
@@ -160,13 +164,13 @@ func TestPoSChain(t *testing.T) {
 			assert.Equal(t, header.Time, parent.Time+30)
 
 			assert.Equal(t, tt.min_time, header.Time)
-			assert.Equal(t, tt.target_time, header.Time+30)
+			assert.Equal(t, tt.block_target, header.Time+30)
 		} else if i < 61 {
 			assert.Equal(t, header.Time, genesis.Time()+3600)
 			assert.Equal(t, header.Time, parent.Time+1830)
 
 			assert.Equal(t, tt.min_time, header.Time)
-			assert.Equal(t, tt.target_time, parent.Time+60)
+			assert.Equal(t, tt.block_target, parent.Time+60)
 		} else if i < 62 {
 			assert.Equal(t, header.Time, genesis.Time()+3630)
 		}
@@ -189,5 +193,108 @@ func TestPoSChain(t *testing.T) {
 		//---
 
 		parent = header
+	}
+}
+
+func TestPoSDiffV1(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	type TC struct {
+		parent  int64
+		time    uint64
+		min     uint64
+		btarget uint64
+		ptarget uint64
+		result  uint64
+	}
+
+	tests := []TC{
+		{
+			parent:  100,
+			time:    61,
+			min:     31,
+			btarget: 61,
+			ptarget: 61,
+			result:  100,
+		},
+		{
+			parent:  100,
+			time:    31,
+			min:     31,
+			btarget: 61,
+			ptarget: 61,
+			result:  1744,
+		},
+		{
+			parent:  100,
+			time:    31,
+			min:     31,
+			btarget: 51,
+			ptarget: 71,
+			result:  1744,
+		},
+		{
+			parent:  100,
+			time:    31,
+			min:     61,
+			btarget: 31,
+			ptarget: 31,
+			result:  1744,
+		},
+		{
+			parent:  100,
+			time:    31,
+			min:     31,
+			btarget: 31,
+			ptarget: 31,
+			result:  100,
+		},
+		{
+			parent:  1744,
+			time:    91,
+			min:     31,
+			btarget: 61,
+			ptarget: 61,
+			result:  403,
+		},
+		{
+			parent:  1744,
+			time:    121,
+			min:     31,
+			btarget: 61,
+			ptarget: 61,
+			result:  93,
+		},
+		{
+			parent:  1744,
+			time:    200,
+			min:     31,
+			btarget: 61,
+			ptarget: 61,
+			result:  4,
+		},
+		{
+			parent:  1744,
+			time:    181,
+			min:     31,
+			btarget: 61,
+			ptarget: 61,
+			result:  4,
+		},
+	}
+
+	for i, tc := range tests {
+		parent := &types.Header{
+			Difficulty: big.NewInt(tc.parent),
+		}
+		tt := &timeTarget{
+			min_time:      tc.min,
+			block_target:  tc.btarget,
+			period_target: tc.ptarget,
+		}
+
+		res := calcPoSDifficultyV1(nil, tc.time, parent, tt)
+		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }

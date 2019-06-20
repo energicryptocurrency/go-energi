@@ -55,6 +55,7 @@ var (
 type ChainReader = eth_consensus.ChainReader
 type AccountsFn func() []common.Address
 type SignerFn func(common.Address, []byte) ([]byte, error)
+type DiffFn func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int
 
 type Energi struct {
 	config       *params.EnergiConfig
@@ -67,6 +68,7 @@ type Energi struct {
 	callGas      uint64
 	signerFn     SignerFn
 	accountsFn   AccountsFn
+	diffFn       DiffFn
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -96,6 +98,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      2000000,
 		callGas:      1000000,
+		diffFn:       calcPoSDifficultyV1,
 	}
 }
 
@@ -153,12 +156,12 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		}
 
 		return nil
-	} else {
-		timeTarget := e.calcTimeTarget(chain, parent)
-		err = e.checkTime(header, timeTarget)
-		if err != nil {
-			return err
-		}
+	}
+
+	time_target := e.calcTimeTarget(chain, parent)
+	err = e.checkTime(header, time_target)
+	if err != nil {
+		return err
 	}
 
 	modifier := e.calcPoSModifier(chain, header.Time, parent)
@@ -167,7 +170,7 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 			header.MixDigest, modifier)
 	}
 
-	difficulty := e.calcPoSDifficulty(chain, header.Time, parent)
+	difficulty := e.calcPoSDifficulty(chain, header.Time, parent, time_target)
 
 	if header.Difficulty.Cmp(difficulty) != 0 {
 		return fmt.Errorf("invalid difficulty: have %v, want %v",
@@ -369,7 +372,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	// TODO: trim Extra
 
 	// Diff
-	header.Difficulty = e.calcPoSDifficulty(chain, header.Time, parent)
+	header.Difficulty = e.calcPoSDifficulty(chain, header.Time, parent, time_target)
 
 	return err
 }
@@ -506,7 +509,8 @@ func (e *Energi) SetMinerCB(accountsFn AccountsFn, signerFn SignerFn) {
 // CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty
 // that a new block should have.
 func (e *Energi) CalcDifficulty(chain ChainReader, time uint64, parent *types.Header) *big.Int {
-	return e.calcPoSDifficulty(chain, time, parent)
+	time_target := e.calcTimeTarget(chain, parent)
+	return e.calcPoSDifficulty(chain, time, parent, time_target)
 }
 
 // APIs returns the RPC APIs this consensus engine provides.

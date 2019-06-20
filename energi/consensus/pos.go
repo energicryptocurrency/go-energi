@@ -43,7 +43,7 @@ const (
 var (
 	minStake = big.NewInt(1e18)
 
-	baseDifficulty = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
+	diff1Target = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
 
 	errBlockMinTime  = errors.New("Minimal time gap is not obeyed")
 	errBlockInFuture = errors.New("Too much in future")
@@ -54,9 +54,10 @@ var (
 )
 
 type timeTarget struct {
-	min_time    uint64
-	target_time uint64
-	max_time    uint64
+	min_time      uint64
+	max_time      uint64
+	block_target  uint64
+	period_target uint64
 }
 
 func (e *Energi) now() uint64 {
@@ -82,7 +83,8 @@ func (e *Energi) calcTimeTarget(
 
 	// POS-11: Block time restrictions
 	ret.min_time = parent.Time + MinBlockGap
-	ret.target_time = parent.Time + TargetBlockGap
+	ret.block_target = parent.Time + TargetBlockGap
+	ret.period_target = ret.block_target
 
 	// POS-12: Block interval enforcement
 	//---
@@ -90,14 +92,15 @@ func (e *Energi) calcTimeTarget(
 		past := chain.GetHeaderByNumber(block_number - AverageTimeBlocks)
 		actual := parent.Time - past.Time
 		expected := TargetPeriodGap - TargetBlockGap
+		ret.period_target = past.Time + TargetPeriodGap
 
 		if expected > actual {
-			ret.min_time = past.Time + TargetPeriodGap
+			ret.min_time = ret.period_target
 		}
 	}
 
 	log.Trace("PoS time", "block", block_number,
-		"min", ret.min_time, "target", ret.target_time, "max", ret.max_time)
+		"min", ret.min_time, "target", ret.block_target, "max", ret.max_time)
 	return ret
 }
 
@@ -195,18 +198,88 @@ func (e *Energi) calcPoSModifier(
 
 /**
  * Implements difficulty consensus
- *
- * POS-13: Difficulty algorithm
  */
 func (e *Energi) calcPoSDifficulty(
 	chain ChainReader,
 	time uint64,
 	parent *types.Header,
-) *big.Int {
-	//time_target := e.calcTimeTarget(chain, parent)
-	ret := big.NewInt(1)
+	tt *timeTarget,
+) (ret *big.Int) {
+	ret = e.diffFn(chain, time, parent, tt)
 	log.Trace("PoS difficulty", "block", parent.Number.Uint64()+1, "time", time, "diff", ret)
 	return ret
+}
+
+/**
+ * POS-13: Difficulty algorithm (Proposal v1)
+ */
+const (
+	diffV1_BMax     uint64 = 30
+	diffV1_AMax     uint64 = 120
+	diffV1_DivPlain uint64 = 100
+)
+
+var (
+	diffV1_BTable []*big.Int
+	diffV1_ATable []*big.Int
+	diffV1_Div    = new(big.Int).SetUint64(diffV1_DivPlain)
+)
+
+func initDiffTable(l uint64, c float64) []*big.Int {
+	t := make([]*big.Int, l+1)
+	t[0] = common.Big1
+	var acc float64 = 1
+	for i := 1; i < len(t); i++ {
+		acc *= c
+		t[i] = big.NewInt(int64(acc * float64(diffV1_DivPlain)))
+	}
+	return t
+}
+func init() {
+	diffV1_BTable = initDiffTable(diffV1_BMax, 1.1)
+	diffV1_ATable = initDiffTable(diffV1_AMax, 1.05)
+}
+func calcPoSDifficultyV1(
+	chain ChainReader,
+	time uint64,
+	parent *types.Header,
+	tt *timeTarget,
+) (D *big.Int) {
+	// Find out our target anchor
+	target := (tt.block_target + tt.period_target) / 2
+	if target < tt.min_time {
+		target = tt.min_time
+	}
+
+	if time < target {
+		S := target - time
+		if S > diffV1_BMax {
+			S = diffV1_BMax
+		}
+		B := diffV1_BTable[S]
+		D = new(big.Int).Div(
+			new(big.Int).Mul(parent.Difficulty, B),
+			diffV1_Div,
+		)
+	} else if time > target {
+		S := time - target
+		if S > diffV1_AMax {
+			S = diffV1_AMax
+		}
+		A := diffV1_ATable[S]
+		D = new(big.Int).Div(
+			new(big.Int).Mul(parent.Difficulty, diffV1_Div),
+			A,
+		)
+	} else {
+		return parent.Difficulty
+	}
+
+	if D.Cmp(common.Big1) < 0 {
+		D = common.Big1
+	}
+
+	return D
 }
 
 /**
@@ -254,12 +327,12 @@ func (e *Energi) verifyPoSHash(
 	header *types.Header,
 ) error {
 	parent := chain.GetHeaderByHash(header.ParentHash)
-	weight, err := e.lookupStakeWeight(chain, header.Time-MaturityPeriod, parent, header.Coinbase)
+	weight, err := e.lookupStakeWeight(chain, header.Time, parent, header.Coinbase)
 	if err != nil {
 		return err
 	}
 
-	target := new(big.Int).Div(baseDifficulty, header.Difficulty)
+	target := new(big.Int).Div(diff1Target, header.Difficulty)
 
 	poshash, used_weight := e.calcPoSHash(header, target, weight)
 
@@ -287,7 +360,7 @@ func (e *Energi) verifyPoSHash(
  */
 func (e *Energi) lookupStakeWeight(
 	chain ChainReader,
-	since uint64,
+	now uint64,
 	till *types.Header,
 	addr common.Address,
 ) (weight uint64, err error) {
@@ -296,6 +369,14 @@ func (e *Energi) lookupStakeWeight(
 	if err != nil {
 		log.Error("PoS stake amount is called without state database", "err", err)
 		return 0, err
+	}
+
+	var since uint64
+
+	if now > MaturityPeriod {
+		since = now - MaturityPeriod
+	} else {
+		since = 0
 	}
 
 	// NOTE: Do not set to high initial value due to defensive coding approach!
@@ -394,14 +475,25 @@ func (e *Energi) mine(
 
 	//---
 	parent := chain.GetHeaderByHash(header.ParentHash)
-	tt := e.calcTimeTarget(chain, parent)
-	target := new(big.Int).Div(baseDifficulty, header.Difficulty)
+	time_target := e.calcTimeTarget(chain, parent)
 
-	blockTime := tt.min_time
+	blockTime := time_target.min_time
 
 	//---
 	for ; ; blockTime++ {
+		if max_time := e.now() + MaxFutureGap; blockTime > max_time {
+			log.Trace("PoS miner is sleeping")
+			select {
+			case <-stop:
+				return false, nil
+			case <-time.After(time.Duration(blockTime-max_time) * time.Second):
+			}
+		}
+
 		header.Time = blockTime
+		header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
+		header.Difficulty = e.calcPoSDifficulty(chain, blockTime, parent, time_target)
+		target := new(big.Int).Div(diff1Target, header.Difficulty)
 		log.Trace("PoS miner time", "time", blockTime)
 
 		// It could be done once, but then there is a chance to miss blocks.
@@ -409,7 +501,7 @@ func (e *Energi) mine(
 		for i := range candidates {
 			v := &candidates[i]
 			v.weight, err = e.lookupStakeWeight(
-				chain, blockTime-MaturityPeriod, parent, v.addr)
+				chain, blockTime, parent, v.addr)
 			if err != nil {
 				return false, err
 			}
@@ -425,25 +517,16 @@ func (e *Energi) mine(
 				continue
 			}
 
-			log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
+			//log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
 			header.Coinbase = v.addr
 			poshash, used_weight := e.calcPoSHash(header, target, v.weight)
 
 			if poshash != nil {
+				log.Trace("PoS stake", "addr", v.addr, "weight", v.weight, "used_weight", used_weight)
 				header.Nonce = types.EncodeNonce(used_weight)
 				return true, nil
 			}
 		}
-
-		if now := e.now(); blockTime > now {
-			log.Trace("PoS miner is sleeping")
-			select {
-			case <-stop:
-				return false, nil
-			case <-time.After(time.Duration(blockTime-now) * time.Second):
-			}
-		}
-		// else try to find a better block in any case!
 	}
 
 	return false, nil
