@@ -28,6 +28,9 @@ import (
 var (
 	MainnetGenesisHash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
 	TestnetGenesisHash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000001")
+
+	MainnetMigrationSigner = common.HexToAddress("0x00")
+	TestnetMigrationSigner = common.HexToAddress("0x00")
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
@@ -38,6 +41,50 @@ var TrustedCheckpoints = map[common.Hash]*TrustedCheckpoint{
 }
 
 var (
+	EnergiMainnetChainConfig = &ChainConfig{
+		ChainID:             big.NewInt(39797),
+		HomesteadBlock:      big.NewInt(0),
+		EIP150Block:         big.NewInt(0),
+		EIP150Hash:          common.Hash{},
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
+		ByzantiumBlock:      big.NewInt(0),
+		ConstantinopleBlock: big.NewInt(0),
+		PetersburgBlock:     big.NewInt(0),
+		Energi: &EnergiConfig{
+			MigrationSigner: MainnetMigrationSigner,
+		},
+		SuperblockCycle:  big.NewInt(60 * 24 * 14),
+		MNVotesPerCycle:  big.NewInt(32),
+		MNRequireVoting:  big.NewInt(100),
+		MNVotesMax:       big.NewInt(16),
+		MNCleanupPeriod:  big.NewInt(60 * 60 * 24 * 14),
+		MNEverCollateral: new(big.Int).Mul(big.NewInt(1000000), big.NewInt(Ether)),
+		BackboneAddress:  common.Address{},
+	}
+
+	EnergiTestnetChainConfig = &ChainConfig{
+		ChainID:             big.NewInt(49797),
+		HomesteadBlock:      big.NewInt(0),
+		EIP150Block:         big.NewInt(0),
+		EIP150Hash:          common.Hash{},
+		EIP155Block:         big.NewInt(0),
+		EIP158Block:         big.NewInt(0),
+		ByzantiumBlock:      big.NewInt(0),
+		ConstantinopleBlock: big.NewInt(0),
+		PetersburgBlock:     big.NewInt(0),
+		Energi: &EnergiConfig{
+			MigrationSigner: TestnetMigrationSigner,
+		},
+		SuperblockCycle:  big.NewInt(60 * 24),
+		MNVotesPerCycle:  big.NewInt(6),
+		MNRequireVoting:  big.NewInt(5),
+		MNVotesMax:       big.NewInt(3),
+		MNCleanupPeriod:  big.NewInt(60 * 60 * 3),
+		MNEverCollateral: new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
+		BackboneAddress:  common.Address{},
+	}
+
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
 	MainnetChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(39797),
@@ -50,13 +97,6 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Ethash:              new(EthashConfig),
-		SuperblockCycle:     big.NewInt(60 * 24 * 14),
-		MNVotesPerCycle:     big.NewInt(32),
-		MNRequireVoting:     big.NewInt(100),
-		MNVotesMax:          big.NewInt(16),
-		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14),
-		MNEverCollateral:    new(big.Int).Mul(big.NewInt(1000000), big.NewInt(Ether)),
-		BackboneAddress:     common.Address{},
 	}
 
 	// MainnetTrustedCheckpoint contains the light client trusted checkpoint for the main network.
@@ -80,13 +120,6 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Ethash:              new(EthashConfig),
-		SuperblockCycle:     big.NewInt(60 * 24),
-		MNVotesPerCycle:     big.NewInt(6),
-		MNRequireVoting:     big.NewInt(5),
-		MNVotesMax:          big.NewInt(3),
-		MNCleanupPeriod:     big.NewInt(60 * 60 * 3),
-		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
-		BackboneAddress:     common.Address{},
 	}
 
 	// TestnetTrustedCheckpoint contains the light client trusted checkpoint for the Ropsten test network.
@@ -186,7 +219,9 @@ func (c *CliqueConfig) String() string {
 }
 
 // EnergiConfig is the consensus engine config for proof-of-stake based sealing.
-type EnergiConfig struct{}
+type EnergiConfig struct {
+	MigrationSigner common.Address
+}
 
 // String implements the stringer interface, returning the consensus engine details.
 func (*EnergiConfig) String() string {

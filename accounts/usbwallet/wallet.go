@@ -560,3 +560,9 @@ func (w *wallet) SignHashWithPassphrase(account accounts.Account, passphrase str
 func (w *wallet) SignTxWithPassphrase(account accounts.Account, passphrase string, tx *types.Transaction, chainID *big.Int) (*types.Transaction, error) {
 	return w.SignTx(account, tx, chainID)
 }
+
+// Check if account is available for immediate signing of PoS blocks
+func (w *wallet) IsUnlockedForStaking(account accounts.Account) bool {
+	// TODO: support block signing without unlocking
+	return false
+}

@@ -9,7 +9,7 @@
 .PHONY: geth-windows geth-windows-386 geth-windows-amd64
 .PHONY: prebuild
 
-include contracts/energi/Makefile.include
+include energi/contracts/Makefile.include
 
 GOBIN = $(shell pwd)/build/bin
 GO ?= latest

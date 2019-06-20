@@ -40,6 +40,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -284,11 +285,11 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 	//---
 	if config := g.Config; config != nil {
 		debug := false
-		author := params.Energi_TreasuryV1
+		author := energi_params.Energi_TreasuryV1
 		gasLimit := uint64(100000000)
 		gp := new(GasPool)
 
-		systemFaucet := params.Energi_SystemFaucet
+		systemFaucet := energi_params.Energi_SystemFaucet
 		statedb.SetBalance(systemFaucet, math.MaxBig256)
 
 		vmcfg := vm.Config{}
@@ -307,14 +308,14 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			val := tx.Value
 
 			if val == nil {
-				val = big.NewInt(0)
+				val = common.Big1
 			}
 
 			msg := types.NewMessage(
 				systemFaucet,
 				&tx.Addr,
 				uint64(i),
-				val,
+				common.Big0,
 				gasLimit,
 				big.NewInt(1),
 				tx.Code,
@@ -323,7 +324,9 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			ctx := NewEVMContext(msg, head, nil, &author)
 			ctx.GasLimit = gasLimit
 			evm := vm.NewEVM(ctx, statedb, g.Config, vmcfg)
-			_, _, _, err := ApplyMessage(evm, msg, gp)
+			sttrans := NewStateTransition(evm, msg, gp)
+			sttrans.inSetup = true
+			_, _, _, err := sttrans.TransitionDb()
 			if err != nil {
 				panic(fmt.Errorf("invalid transaction: %v", err))
 			}
@@ -331,6 +334,8 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			if statedb.GetCodeSize(tx.Addr) == 0 {
 				panic(fmt.Errorf("Failed to create a contract%v", tx.Addr))
 			}
+
+			statedb.AddBalance(tx.Addr, val)
 		}
 
 		if debug {
@@ -339,6 +344,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 		}
 
 		statedb.SetBalance(systemFaucet, big.NewInt(0))
+		statedb.SetBalance(author, big.NewInt(0))
 		root = statedb.IntermediateRoot(false)
 		head.Root = root
 	}
@@ -397,7 +403,6 @@ func DefaultGenesisBlock() *Genesis {
 		GasLimit:   0,
 		Difficulty: big.NewInt(17179869184),
 		Alloc:      decodePrealloc(mainnetAllocData),
-		Xfers:      DeployEnergiGovernance(params.MainnetChainConfig),
 	}
 }
 
@@ -410,7 +415,32 @@ func DefaultTestnetGenesisBlock() *Genesis {
 		GasLimit:   0,
 		Difficulty: big.NewInt(1048576),
 		Alloc:      decodePrealloc(testnetAllocData),
-		Xfers:      DeployEnergiGovernance(params.TestnetChainConfig),
+	}
+}
+
+func DefaultEnergiMainnetGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.EnergiMainnetChainConfig,
+		Coinbase:   energi_params.Energi_Treasury,
+		Nonce:      0,
+		ExtraData:  []byte{},
+		GasLimit:   8000000,
+		Difficulty: big.NewInt(0xFFFF),
+		Alloc:      DefaultPrealloc(),
+		Xfers:      DeployEnergiGovernance(params.EnergiMainnetChainConfig),
+	}
+}
+
+func DefaultEnergiTestnetGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.EnergiTestnetChainConfig,
+		Coinbase:   energi_params.Energi_Treasury,
+		Nonce:      0,
+		ExtraData:  []byte{},
+		GasLimit:   8000000,
+		Difficulty: big.NewInt(0xFFFF),
+		Alloc:      DefaultPrealloc(),
+		Xfers:      DeployEnergiGovernance(params.EnergiTestnetChainConfig),
 	}
 }
 
@@ -438,22 +468,25 @@ func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {
 			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
 			faucet:                           {Balance: new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 256), big.NewInt(9))},
 		},
-		Xfers: DeployEnergiGovernance(&config),
+	}
+}
+
+func DefaultPrealloc() GenesisAlloc {
+	return GenesisAlloc{
+		common.BytesToAddress([]byte{1}): {Balance: big.NewInt(1)}, // ECRecover
+		common.BytesToAddress([]byte{2}): {Balance: big.NewInt(1)}, // SHA256
+		common.BytesToAddress([]byte{3}): {Balance: big.NewInt(1)}, // RIPEMD
+		common.BytesToAddress([]byte{4}): {Balance: big.NewInt(1)}, // Identity
+		common.BytesToAddress([]byte{5}): {Balance: big.NewInt(1)}, // ModExp
+		common.BytesToAddress([]byte{6}): {Balance: big.NewInt(1)}, // ECAdd
+		common.BytesToAddress([]byte{7}): {Balance: big.NewInt(1)}, // ECScalarMul
+		common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
 	}
 }
 
 func decodePrealloc(data string) GenesisAlloc {
 	if len(data) == 0 {
-		return GenesisAlloc{
-			common.BytesToAddress([]byte{1}): {Balance: big.NewInt(1)}, // ECRecover
-			common.BytesToAddress([]byte{2}): {Balance: big.NewInt(1)}, // SHA256
-			common.BytesToAddress([]byte{3}): {Balance: big.NewInt(1)}, // RIPEMD
-			common.BytesToAddress([]byte{4}): {Balance: big.NewInt(1)}, // Identity
-			common.BytesToAddress([]byte{5}): {Balance: big.NewInt(1)}, // ModExp
-			common.BytesToAddress([]byte{6}): {Balance: big.NewInt(1)}, // ECAdd
-			common.BytesToAddress([]byte{7}): {Balance: big.NewInt(1)}, // ECScalarMul
-			common.BytesToAddress([]byte{8}): {Balance: big.NewInt(1)}, // ECPairing
-		}
+		return DefaultPrealloc()
 	}
 
 	var p []struct{ Addr, Balance *big.Int }
@@ -503,23 +536,23 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	// Hardcoded Governance V1
 	deployEnergiContract(
 		&xfers,
-		params.Energi_TreasuryV1,
+		energi_params.Energi_TreasuryV1,
 		nil,
 		energi_abi.TreasuryV1ABI,
 		energi_abi.TreasuryV1Bin,
-		params.Energi_Treasury,
-		params.Energi_MasternodeRegistry,
+		energi_params.Energi_Treasury,
+		energi_params.Energi_MasternodeRegistry,
 		config.SuperblockCycle,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_MasternodeRegistryV1,
+		energi_params.Energi_MasternodeRegistryV1,
 		nil,
 		energi_abi.MasternodeRegistryV1ABI,
 		energi_abi.MasternodeRegistryV1Bin,
-		params.Energi_MasternodeRegistry,
-		params.Energi_MasternodeToken,
-		params.Energi_Treasury,
+		energi_params.Energi_MasternodeRegistry,
+		energi_params.Energi_MasternodeToken,
+		energi_params.Energi_Treasury,
 		[5]*big.Int{
 			config.MNVotesPerCycle,
 			config.MNRequireVoting,
@@ -530,67 +563,68 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_StakerRewardV1,
+		energi_params.Energi_StakerRewardV1,
 		nil,
 		energi_abi.StakerRewardV1ABI,
 		energi_abi.StakerRewardV1Bin,
-		params.Energi_StakerReward,
+		energi_params.Energi_StakerReward,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_BackboneRewardV1,
+		energi_params.Energi_BackboneRewardV1,
 		nil,
 		energi_abi.BackboneRewardV1ABI,
 		energi_abi.BackboneRewardV1Bin,
-		params.Energi_BackboneReward,
+		energi_params.Energi_BackboneReward,
 		config.BackboneAddress,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_SporkRegistryV1,
+		energi_params.Energi_SporkRegistryV1,
 		nil,
 		energi_abi.GovernedProxyABI,
 		energi_abi.GovernedProxyBin,
-		params.Energi_SporkRegistry,
-		params.Energi_MasternodeRegistry,
+		energi_params.Energi_SporkRegistry,
+		energi_params.Energi_MasternodeRegistry,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_CheckpointRegistryV1,
+		energi_params.Energi_CheckpointRegistryV1,
 		nil,
 		energi_abi.CheckpointRegistryV1ABI,
 		energi_abi.CheckpointRegistryV1Bin,
-		params.Energi_CheckpointRegistry,
+		energi_params.Energi_CheckpointRegistry,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_BlacklistRegistryV1,
+		energi_params.Energi_BlacklistRegistryV1,
 		nil,
 		energi_abi.BlacklistRegistryV1ABI,
 		energi_abi.BlacklistRegistryV1Bin,
-		params.Energi_BlacklistRegistry,
-		params.Energi_MasternodeRegistry,
+		energi_params.Energi_BlacklistRegistry,
+		energi_params.Energi_MasternodeRegistry,
 	)
 	deployEnergiContract(
 		&xfers,
-		params.Energi_MasternodeTokenV1,
+		energi_params.Energi_MigrationContract,
 		nil,
-		energi_abi.MasternodeTokenV1ABI,
-		energi_abi.MasternodeTokenV1Bin,
-		params.Energi_MasternodeToken,
-		params.Energi_MasternodeRegistry,
+		energi_abi.Gen2MigrationABI,
+		energi_abi.Gen2MigrationBin,
+		energi_params.Energi_Treasury,
+		config.ChainID,
+		config.Energi.MigrationSigner,
 	)
 
 	// Proxy List
 	proxies := map[common.Address]common.Address{
-		params.Energi_Treasury:           params.Energi_TreasuryV1,
-		params.Energi_MasternodeRegistry: params.Energi_MasternodeRegistryV1,
-		params.Energi_StakerReward:       params.Energi_StakerRewardV1,
-		params.Energi_BackboneReward:     params.Energi_BackboneRewardV1,
-		params.Energi_SporkRegistry:      params.Energi_SporkRegistryV1,
-		params.Energi_CheckpointRegistry: params.Energi_CheckpointRegistryV1,
-		params.Energi_BlacklistRegistry:  params.Energi_BlacklistRegistryV1,
-		params.Energi_MasternodeToken:    params.Energi_MasternodeTokenV1,
+		energi_params.Energi_Treasury:           energi_params.Energi_TreasuryV1,
+		energi_params.Energi_MasternodeRegistry: energi_params.Energi_MasternodeRegistryV1,
+		energi_params.Energi_StakerReward:       energi_params.Energi_StakerRewardV1,
+		energi_params.Energi_BackboneReward:     energi_params.Energi_BackboneRewardV1,
+		energi_params.Energi_SporkRegistry:      energi_params.Energi_SporkRegistryV1,
+		energi_params.Energi_CheckpointRegistry: energi_params.Energi_CheckpointRegistryV1,
+		energi_params.Energi_BlacklistRegistry:  energi_params.Energi_BlacklistRegistryV1,
+		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
 	}
 	for k, v := range proxies {
 		deployEnergiContract(
@@ -600,7 +634,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			energi_abi.GovernedProxyABI,
 			energi_abi.GovernedProxyBin,
 			v,
-			params.Energi_SporkRegistry,
+			energi_params.Energi_SporkRegistry,
 		)
 	}
 

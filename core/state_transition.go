@@ -59,6 +59,7 @@ type StateTransition struct {
 	data       []byte
 	state      vm.StateDB
 	evm        *vm.EVM
+	inSetup    bool
 }
 
 // Message represents a message sent to a contract.
@@ -119,6 +120,7 @@ func NewStateTransition(evm *vm.EVM, msg Message, gp *GasPool) *StateTransition 
 		value:    msg.Value(),
 		data:     msg.Data(),
 		state:    evm.StateDB,
+		inSetup:  false,
 	}
 }
 
@@ -188,7 +190,6 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	msg := st.msg
 	sender := vm.AccountRef(msg.From())
 	homestead := st.evm.ChainConfig().IsHomestead(st.evm.BlockNumber)
-	is_genesis := st.evm.BlockNumber.Cmp(genesisNumber) == 0
 	contractCreation := msg.To() == nil
 
 	// Pay intrinsic gas
@@ -209,7 +210,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 	)
 	if contractCreation {
 		ret, _, st.gas, vmerr = evm.Create(sender, st.data, st.gas, st.value)
-	} else if is_genesis {
+	} else if st.inSetup {
 		ret, _, st.gas, vmerr = evm.CreateGenesis(sender, *msg.To(), st.data, st.gas, st.value)
 	} else {
 		// Increment the nonce for the next transaction

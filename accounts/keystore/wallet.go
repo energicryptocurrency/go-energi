@@ -125,3 +125,10 @@ func (w *keystoreWallet) SignTxWithPassphrase(account accounts.Account, passphra
 	// Account seems valid, request the keystore to sign
 	return w.keystore.SignTxWithPassphrase(account, passphrase, tx, chainID)
 }
+
+// Check if account is available for immediate signing of PoS blocks
+func (w *keystoreWallet) IsUnlockedForStaking(account accounts.Account) bool {
+	// TODO: support special PoS unlock mode
+	s, _ := w.Status()
+	return s == "Unlocked"
+}

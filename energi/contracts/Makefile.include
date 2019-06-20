@@ -1,0 +1,111 @@
+
+.PHONY: solc abigen energi-contracts
+
+# ---
+SOLC_VERSION := 0.5.9
+SOLC ?= build/_workspace/bin/solc-$(SOLC_VERSION)
+SOLC_OPTIONS := \
+  --asm \
+  --asm-json \
+  --bin \
+  --bin-runtime \
+  --abi \
+  --optimize \
+  --optimize-runs=999999999 \
+  --overwrite
+SOLC_BIN_EXT := bin
+SOLC_ABI_EXT := abi
+
+solc: $(SOLC)
+$(SOLC):
+	@mkdir -p $$(dirname $(SOLC))
+	@wget -q -O $(SOLC).tmp 'https://github.com/ethereum/solidity/releases/download/v$(SOLC_VERSION)/solc-static-linux'
+	@test "$$(sha256sum $(SOLC).tmp | cut -f1 -d' ')" = "390d14ac47b4a01e4f804a57159ffa526c2329a0eb08b9e20dee00649efb3461"
+	@chmod +x $(SOLC).tmp
+	@mv -f $(SOLC).tmp $(SOLC)
+
+# ---
+ABIGEN ?= build/bin/abigen
+
+abigen: $(ABIGEN)
+$(ABIGEN):
+	cid run cigo -- install ./cmd/abigen
+
+# ---
+ENERGI_CONTRACT_ROOT_DIR := energi/contracts
+ENERGI_CONTRACT_SRC_DIR := $(ENERGI_CONTRACT_ROOT_DIR)/src
+ENERGI_CONTRACT_BUILD_DIR := build/contracts/energi
+ENERGI_CONTRACT_ABIGEN_DIR := energi/abi
+
+ENERGI_CONTRACTS := \
+  BackboneRewardV1.sol \
+  BlacklistRegistryV1.sol \
+  CheckpointRegistryV1.sol \
+  IBlockReward.sol \
+  IDelegatedPoS.sol \
+  Gen2Migration.sol \
+  GovernedProxy.sol \
+  MasternodeTokenV1.sol \
+  MasternodeRegistryV1.sol \
+  SporkRegistryV1.sol \
+  StakerRewardV1.sol \
+  TreasuryV1.sol
+
+ENERGI_CONTRACTS_SRC := $(addprefix $(ENERGI_CONTRACT_SRC_DIR)/,$(ENERGI_CONTRACTS))
+
+ENERGI_CONTRACTS_BIN := $(ENERGI_CONTRACTS:sol=$(SOLC_BIN_EXT))
+ENERGI_CONTRACTS_BIN := $(addprefix $(ENERGI_CONTRACT_BUILD_DIR)/,$(ENERGI_CONTRACTS_BIN))
+
+ENERGI_CONTRACTS_ABI := $(ENERGI_CONTRACTS:sol=$(SOLC_ABI_EXT))
+ENERGI_CONTRACTS_ABI := $(addprefix $(ENERGI_CONTRACT_BUILD_DIR)/,$(ENERGI_CONTRACTS_ABI))
+
+ENERGI_CONTRACTS_GOABI := $(ENERGI_CONTRACTS:sol=go)
+ENERGI_CONTRACTS_GOABI := $(addprefix $(ENERGI_CONTRACT_ABIGEN_DIR)/,$(ENERGI_CONTRACTS_GOABI))
+
+.SECONDARY: $(ENERGI_CONTRACTS_BIN) $(ENERGI_CONTRACTS_ABI)
+
+prebuild: energi-contracts
+
+energi-contracts: $(ENERGI_CONTRACTS_GOABI)
+
+$(ENERGI_CONTRACT_BUILD_DIR):
+	@mkdir -p $(ENERGI_CONTRACT_BUILD_DIR)
+
+$(ENERGI_CONTRACT_ABIGEN_DIR)/%.go: $(ENERGI_CONTRACT_BUILD_DIR)/%.bin \
+  $(ENERGI_CONTRACT_BUILD_DIR)/%.abi $(ABIGEN) $(ENERGI_CONTRACT_BUILD_DIR)
+	$(ABIGEN) -out $@ -bin $< -runbin $<-runtime -abi ${<:.bin=.abi} -type $* -pkg abi
+
+$(ENERGI_CONTRACT_BUILD_DIR)/%.$(SOLC_BIN_EXT): $(ENERGI_CONTRACT_SRC_DIR)/%.sol \
+  $(ENERGI_CONTRACT_SRC_DIR)/*.sol $(SOLC) $(ENERGI_CONTRACT_BUILD_DIR)
+	$(SOLC) $(SOLC_OPTIONS) -o $(ENERGI_CONTRACT_BUILD_DIR)/ $<
+
+# Built with bin files
+$(ENERGI_CONTRACT_BUILD_DIR)/%.$(SOLC_ABI_EXT): $(ENERGI_CONTRACT_SRC_DIR)/%.sol
+	@true
+
+# ---
+.PHONY: test-sol
+
+test-sol:
+	@echo "Checking if precompiled contracts have changes"
+	@git diff --exit-code $(ENERGI_CONTRACTS_GOABI) >/dev/null
+	@which ganache-cli 2>&1 >/dev/null || npm install -g ganache-cli
+	@which truffle 2>&1 >/dev/null || npm install -g truffle
+	@ganache-cli \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef,10000000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdff,200000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcfff,100000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abffff,10000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890afffff,1000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890ffffff,1000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef123456789fffffff,0' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef12345678ffffffff,1000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567fffffffff,1000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef123456ffffffffff,1000000000000000000000' \
+	    2>&1 >build/contracts/ganache.log & \
+	  sleep 1; \
+	  truffle test; \
+	  res=$$?; \
+	  kill $$!; \
+	  wait; \
+	  exit $$res

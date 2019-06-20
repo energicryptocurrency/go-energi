@@ -1745,3 +1745,7 @@ func (bc *BlockChain) SubscribeChainSideEvent(ch chan<- ChainSideEvent) event.Su
 func (bc *BlockChain) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscription {
 	return bc.scope.Track(bc.logsFeed.Subscribe(ch))
 }
+
+func (bc *BlockChain) GetStateDB() (state.Database, error) {
+	return bc.stateCache, nil
+}

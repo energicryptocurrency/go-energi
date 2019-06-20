@@ -19,6 +19,7 @@ package consensus
 import (
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
@@ -27,8 +28,6 @@ import (
 )
 
 var (
-	BigZero    = big.NewInt(0)
-	BigOne     = big.NewInt(1)
 	BigBalance = new(big.Int).Div(math.MaxBig256, big.NewInt(2))
 )
 
@@ -42,7 +41,7 @@ func (e *Energi) processBlockRewards(
 
 	// Temporary balance setup & clean up
 	statedb.SetBalance(systemFaucet, BigBalance)
-	defer statedb.SetBalance(systemFaucet, BigZero)
+	defer statedb.SetBalance(systemFaucet, common.Big0)
 
 	// Common get reward call
 	getRewardData, err := e.rewardAbi.Pack("getReward", header.Number)
@@ -57,24 +56,31 @@ func (e *Energi) processBlockRewards(
 		return err
 	}
 
+	gas_total := uint64(0)
+	defer func() {
+		// price = 1
+		statedb.SubBalance(header.Coinbase, new(big.Int).SetUint64(gas_total))
+	}()
+
 	for i, caddr := range e.rewardGov {
 		// GetReward()
 		msg := types.NewMessage(
 			systemFaucet,
 			&caddr,
 			0,
-			BigZero,
+			common.Big0,
 			e.callGas,
-			BigOne,
+			common.Big1,
 			getRewardData,
 			false,
 		)
 		evm := e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.callGas)
 		output, gas1, _, err := core.ApplyMessage(evm, msg, gp)
+		gas_total += gas1
 		if err != nil {
 			log.Error("Failed in getReward() call", "err", err)
-			return err
+			continue
 		}
 
 		//
@@ -82,7 +88,7 @@ func (e *Energi) processBlockRewards(
 		err = e.rewardAbi.Unpack(&value, "getReward", output)
 		if err != nil {
 			log.Error("Failed to unpack getReward() call", "err", err)
-			return err
+			continue
 		}
 
 		// Reward
@@ -92,20 +98,21 @@ func (e *Energi) processBlockRewards(
 			0,
 			value,
 			e.xferGas,
-			BigOne,
+			common.Big1,
 			rewardData,
 			false,
 		)
 		evm = e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.xferGas)
 		_, gas2, _, err := core.ApplyMessage(evm, msg, gp)
+		gas_total += gas2
 		if err != nil {
 			log.Error("Failed in reward() call", "err", err)
-			return err
+			continue
 		}
 
 		log.Trace("Block reward", "id", i, "addr", caddr,
-				  "reward", value, "gas", gas1+gas2)
+			"reward", value, "gas", gas1+gas2)
 	}
 
 	return nil

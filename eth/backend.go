@@ -340,6 +340,11 @@ func (s *Ethereum) Etherbase() (eb common.Address, err error) {
 			return etherbase, nil
 		}
 	}
+
+	if _, ok := s.engine.(*energi.Energi); ok {
+		return common.Address{}, fmt.Errorf("local accounts are required for staking")
+	}
+
 	return common.Address{}, fmt.Errorf("etherbase must be explicitly specified")
 }
 
@@ -442,6 +447,30 @@ func (s *Ethereum) StartMining(threads int) error {
 				return fmt.Errorf("signer missing: %v", err)
 			}
 			clique.Authorize(eb, wallet.SignHash)
+		}
+		if energi, ok := s.engine.(*energi.Energi); ok {
+			energi.SetMinerCB(
+				func() []common.Address {
+					res := make([]common.Address, 0, 32)
+					for _, w := range s.accountManager.Wallets() {
+						for _, a := range w.Accounts() {
+							if w.IsUnlockedForStaking(a) {
+								res = append(res, a.Address)
+							}
+						}
+					}
+					return res
+				},
+				func(addr common.Address, hash []byte) ([]byte, error) {
+					account := accounts.Account{Address: addr}
+					wallet, err := s.accountManager.Find(account)
+					if wallet == nil || err != nil {
+						log.Error("Account unavailable locally", "err", err)
+						return nil, fmt.Errorf("signer missing: %v", err)
+					}
+					return wallet.SignHash(account, hash)
+				},
+			)
 		}
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.

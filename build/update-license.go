@@ -160,7 +160,6 @@ var onlyEnergiLicenseT = template.Must(template.New("").Parse(`
 
 `[1:]))
 
-
 type info struct {
 	file       string
 	Year       int64

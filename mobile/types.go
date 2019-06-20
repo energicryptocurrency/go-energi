@@ -111,6 +111,7 @@ func (h *Header) GetGasLimit() int64     { return int64(h.header.GasLimit) }
 func (h *Header) GetGasUsed() int64      { return int64(h.header.GasUsed) }
 func (h *Header) GetTime() int64         { return int64(h.header.Time) }
 func (h *Header) GetExtra() []byte       { return h.header.Extra }
+func (h *Header) GetSignature() []byte   { return h.header.Signature }
 func (h *Header) GetMixDigest() *Hash    { return &Hash{h.header.MixDigest} }
 func (h *Header) GetNonce() *Nonce       { return &Nonce{h.header.Nonce} }
 func (h *Header) GetHash() *Hash         { return &Hash{h.header.Hash()} }
