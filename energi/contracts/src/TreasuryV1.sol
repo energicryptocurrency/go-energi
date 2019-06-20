@@ -150,7 +150,7 @@ contract TreasuryV1 is
     }
 
     function isSuperblock(uint _blockNumber)
-        external view
+        public view
         returns(bool)
     {
         return (_blockNumber % superblock_cycle) == 0 && (_blockNumber > 0);
@@ -265,7 +265,7 @@ contract TreasuryV1 is
         external view
         returns(uint amount)
     {
-        if (_blockNumber > 0) {
+        if (isSuperblock(_blockNumber)) {
             amount = REWARD_TREASURY_V1;
         }
     }
