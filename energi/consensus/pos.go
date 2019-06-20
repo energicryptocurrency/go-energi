@@ -25,9 +25,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
-
-	"golang.org/x/crypto/sha3"
 )
 
 const (
@@ -145,11 +144,6 @@ func (e *Energi) calcPoSModifier(
 	time uint64,
 	parent *types.Header,
 ) (ret common.Hash) {
-	hasher := sha3.NewLegacyKeccak256()
-
-	// Add coinbase
-	hasher.Write(parent.Coinbase.Bytes())
-
 	// Find maturity period border
 	maturity_border := time
 
@@ -187,11 +181,13 @@ func (e *Energi) calcPoSModifier(
 		oldest = chain.GetHeaderByNumber(guess)
 	}
 
-	// Hash it
-	hasher.Write(oldest.Root.Bytes())
+	// Create Stake Modifier
+	ret = crypto.Keccak256Hash(
+		parent.Coinbase.Bytes(),
+		oldest.Root.Bytes(),
+	)
 
-	// Sum together
-	ret = common.BytesToHash(hasher.Sum(nil))
+	//
 	log.Trace("PoS modifier", "block", parent_height+1,
 		"modifier", ret, "oldest", oldest.Number.Uint64())
 	return ret
@@ -217,14 +213,17 @@ func (e *Energi) calcPoSDifficulty(
  * Implements hash consensus
  *
  * POS-18: PoS hash generation
+ * POS-22: Partial stake amount
  */
 func (e *Energi) calcPoSHash(
 	header *types.Header,
 	target *big.Int,
 	weight uint64,
 ) (poshash *big.Int, used_weight uint64) {
-	// new(big.Int).SetBytes(poshash.Bytes())
-	poshash = baseDifficulty
+	poshash = new(big.Int).SetBytes(crypto.Keccak256(
+		header.MixDigest.Bytes(),
+		header.Coinbase.Bytes(),
+	))
 
 	if poshash.Cmp(target) > 0 {
 		mod := new(big.Int)
