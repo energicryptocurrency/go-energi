@@ -50,8 +50,8 @@ var (
 	errBlockInFuture = errors.New("Too much in future")
 	errMissingParent = errors.New("Missing parent")
 
-	errInvalidPoSHash     = errors.New("Invalid PoS hash")
-	errInvalidStakeAmount = errors.New("Invalid Stake amount")
+	errInvalidPoSHash  = errors.New("Invalid PoS hash")
+	errInvalidPoSNonce = errors.New("Invalid Stake weight")
 )
 
 type timeTarget struct {
@@ -220,10 +220,34 @@ func (e *Energi) calcPoSDifficulty(
  */
 func (e *Energi) calcPoSHash(
 	header *types.Header,
-	stake *big.Int,
-) *big.Int {
+	target *big.Int,
+	weight uint64,
+) (poshash *big.Int, used_weight uint64) {
 	// new(big.Int).SetBytes(poshash.Bytes())
-	return baseDifficulty
+	poshash = baseDifficulty
+
+	if poshash.Cmp(target) > 0 {
+		mod := new(big.Int)
+		count, mod := new(big.Int).DivMod(poshash, target, mod)
+		used_weight = count.Uint64()
+
+		if mod.Cmp(common.Big0) > 0 {
+			used_weight += 1
+		}
+	} else {
+		used_weight = 1
+	}
+
+	if weight < used_weight {
+		return nil, 0
+	}
+
+	log.Trace("PoS hash",
+		"target", target,
+		"poshash", poshash,
+		"used_weight", used_weight,
+		"weight", weight)
+	return poshash, used_weight
 }
 
 func (e *Energi) verifyPoSHash(
@@ -231,18 +255,21 @@ func (e *Energi) verifyPoSHash(
 	header *types.Header,
 ) error {
 	parent := chain.GetHeaderByHash(header.ParentHash)
-	stake, err := e.lookupMinBalance(chain, header.Time-MaturityPeriod, parent, header.Coinbase)
+	weight, err := e.lookupStakeWeight(chain, header.Time-MaturityPeriod, parent, header.Coinbase)
 	if err != nil {
 		return err
 	}
-	if stake.Cmp(minStake) < 0 {
-		return errInvalidStakeAmount
-	}
-	poshash := e.calcPoSHash(header, stake)
+
 	target := new(big.Int).Div(baseDifficulty, header.Difficulty)
 
-	if poshash.Cmp(target) > 0 {
+	poshash, used_weight := e.calcPoSHash(header, target, weight)
+
+	if poshash == nil {
 		return errInvalidPoSHash
+	}
+
+	if used_weight != header.Nonce.Uint64() {
+		return errInvalidPoSNonce
 	}
 
 	return nil
@@ -253,48 +280,62 @@ func (e *Energi) verifyPoSHash(
  *
  * POS-3: Stake maturity period
  * POS-4: Stake amount
+ * POS-22: Partial stake amount
  *
  * This is a basic helper for stake amount calculation.
  * There are ways to optimize it for high load, but we need something
  * to start with.
  */
-func (e *Energi) lookupMinBalance(
+func (e *Energi) lookupStakeWeight(
 	chain ChainReader,
 	since uint64,
 	till *types.Header,
 	addr common.Address,
-) (min_balance *big.Int, err error) {
+) (weight uint64, err error) {
 	stdb, err := chain.GetStateDB()
 
 	if err != nil {
 		log.Error("PoS stake amount is called without state database", "err", err)
-		return nil, err
+		return 0, err
 	}
 
-	// NOTE: we need to ensure at least one iteration with the balance condition
-	for (till.Time > since) || (min_balance == nil) {
-		if till.Coinbase == addr {
-			// Found block resets maturity period
-			min_balance = common.Big0
-			break
-		}
+	// NOTE: Do not set to high initial value due to defensive coding approach!
+	weight = 0
+	total_staked := uint64(0)
+	first_run := true
 
+	// NOTE: we need to ensure at least one iteration with the balance condition
+	for (till.Time > since) || first_run {
 		blockst, err := state.New(till.Root, stdb)
 
 		if err != nil {
 			log.Error("PoS state root failure", "err", err)
-			return nil, err
+			return 0, err
 		}
 
-		bl_balance := blockst.GetBalance(addr)
+		weight_at_block := new(big.Int).Div(
+			blockst.GetBalance(addr),
+			minStake,
+		).Uint64()
 
-		if (min_balance == nil) || (min_balance.Cmp(bl_balance) > 0) {
-			min_balance = bl_balance
+		if first_run {
+			weight = weight_at_block
+			first_run = false
+		}
 
-			// No need to lookup further
-			if min_balance.Cmp(minStake) < 0 {
-				break
-			}
+		// Find the minimum balance
+		if weight > weight_at_block {
+			weight = weight_at_block
+		}
+
+		// No need to lookup further
+		if weight < 1 {
+			break
+		}
+
+		// POS-22: partial stake amount
+		if till.Coinbase == addr {
+			total_staked += till.Nonce.Uint64()
 		}
 
 		curr := till
@@ -306,22 +347,33 @@ func (e *Energi) lookupMinBalance(
 			}
 
 			log.Error("PoS state missing parent")
-			return nil, errMissingParent
+			return 0, errMissingParent
 		}
 	}
 
-	//log.Trace("PoS stake amount", "addr", addr, "amount", min_balance)
-	return min_balance, nil
+	if weight < total_staked {
+		log.Error("PoS consensus bug",
+			"addr", addr, "since", since, "weight", weight, "total_staked", total_staked)
+		weight = 0
+	} else {
+		weight -= total_staked
+	}
+
+	//log.Trace("PoS stake weight", "addr", addr, "weight", weight)
+	return weight, nil
 }
 
+/**
+ * POS-19: PoS miner implementation
+ */
 func (e *Energi) mine(
 	chain ChainReader,
 	header *types.Header,
 	stop <-chan struct{},
 ) (success bool, err error) {
 	type Candidates struct {
-		addr  common.Address
-		stake *big.Int
+		addr   common.Address
+		weight uint64
 	}
 
 	accounts := e.accountsFn()
@@ -335,8 +387,8 @@ func (e *Energi) mine(
 	candidates := make([]Candidates, 0, len(accounts))
 	for _, a := range accounts {
 		candidates = append(candidates, Candidates{
-			addr:  a,
-			stake: common.Big0,
+			addr:   a,
+			weight: 0,
 		})
 		//log.Trace("PoS miner candidate found", "address", a)
 	}
@@ -357,7 +409,7 @@ func (e *Energi) mine(
 		// Some significant algo optimizations are possible, but we start with simplicity.
 		for i := range candidates {
 			v := &candidates[i]
-			v.stake, err = e.lookupMinBalance(
+			v.weight, err = e.lookupStakeWeight(
 				chain, blockTime-MaturityPeriod, parent, v.addr)
 			if err != nil {
 				return false, err
@@ -365,20 +417,21 @@ func (e *Energi) mine(
 		}
 		// Try smaller amounts first
 		sort.Slice(candidates, func(i, j int) bool {
-			return candidates[i].stake.Cmp(candidates[j].stake) < 0
+			return candidates[i].weight < candidates[j].weight
 		})
 		// Try to match target
 		for i := range candidates {
 			v := &candidates[i]
-			if v.stake.Cmp(minStake) < 0 {
+			if v.weight < 1 {
 				continue
 			}
 
-			log.Trace("PoS stake candidate", "addr", v.addr, "stake", v.stake)
+			log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
 			header.Coinbase = v.addr
-			poshash := e.calcPoSHash(header, v.stake)
+			poshash, used_weight := e.calcPoSHash(header, target, v.weight)
 
-			if poshash.Cmp(target) <= 0 {
+			if poshash != nil {
+				header.Nonce = types.EncodeNonce(used_weight)
 				return true, nil
 			}
 		}

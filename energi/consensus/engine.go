@@ -391,7 +391,8 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 		//header.Time,
 		header.Extra,
 		header.MixDigest,
-		header.Nonce,
+		// This part is for "mining"
+		//header.Nonce,
 		// This part is to be added afterwards
 		//header.Signature,
 	})
