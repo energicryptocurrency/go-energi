@@ -308,14 +308,14 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			val := tx.Value
 
 			if val == nil {
-				val = big.NewInt(0)
+				val = common.Big1
 			}
 
 			msg := types.NewMessage(
 				systemFaucet,
 				&tx.Addr,
 				uint64(i),
-				val,
+				common.Big0,
 				gasLimit,
 				big.NewInt(1),
 				tx.Code,
@@ -324,7 +324,9 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			ctx := NewEVMContext(msg, head, nil, &author)
 			ctx.GasLimit = gasLimit
 			evm := vm.NewEVM(ctx, statedb, g.Config, vmcfg)
-			_, _, _, err := ApplyMessage(evm, msg, gp)
+			sttrans := NewStateTransition(evm, msg, gp)
+			sttrans.inSetup = true
+			_, _, _, err := sttrans.TransitionDb()
 			if err != nil {
 				panic(fmt.Errorf("invalid transaction: %v", err))
 			}
@@ -332,6 +334,8 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 			if statedb.GetCodeSize(tx.Addr) == 0 {
 				panic(fmt.Errorf("Failed to create a contract%v", tx.Addr))
 			}
+
+			statedb.AddBalance(tx.Addr, val)
 		}
 
 		if debug {
@@ -417,6 +421,7 @@ func DefaultTestnetGenesisBlock() *Genesis {
 func DefaultEnergiMainnetGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.EnergiMainnetChainConfig,
+		Coinbase:   energi_params.Energi_Treasury,
 		Nonce:      0,
 		ExtraData:  []byte{},
 		GasLimit:   8000000,
@@ -429,6 +434,7 @@ func DefaultEnergiMainnetGenesisBlock() *Genesis {
 func DefaultEnergiTestnetGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.EnergiTestnetChainConfig,
+		Coinbase:   energi_params.Energi_Treasury,
 		Nonce:      0,
 		ExtraData:  []byte{},
 		GasLimit:   8000000,
@@ -600,12 +606,13 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	)
 	deployEnergiContract(
 		&xfers,
-		energi_params.Energi_MasternodeTokenV1,
+		energi_params.Energi_MigrationContract,
 		nil,
-		energi_abi.MasternodeTokenV1ABI,
-		energi_abi.MasternodeTokenV1Bin,
-		energi_params.Energi_MasternodeToken,
-		energi_params.Energi_MasternodeRegistry,
+		energi_abi.Gen2MigrationABI,
+		energi_abi.Gen2MigrationBin,
+		energi_params.Energi_Treasury,
+		config.ChainID,
+		config.Energi.MigrationSigner,
 	)
 
 	// Proxy List

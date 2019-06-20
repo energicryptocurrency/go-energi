@@ -77,11 +77,11 @@ func (e *Energi) processBlockRewards(
 		evm := e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.callGas)
 		output, gas1, _, err := core.ApplyMessage(evm, msg, gp)
+		gas_total += gas1
 		if err != nil {
 			log.Error("Failed in getReward() call", "err", err)
 			continue
 		}
-		gas_total += gas1
 
 		//
 		value := big.NewInt(0)
@@ -105,11 +105,11 @@ func (e *Energi) processBlockRewards(
 		evm = e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.xferGas)
 		_, gas2, _, err := core.ApplyMessage(evm, msg, gp)
+		gas_total += gas2
 		if err != nil {
 			log.Error("Failed in reward() call", "err", err)
 			continue
 		}
-		gas_total += gas2
 
 		log.Trace("Block reward", "id", i, "addr", caddr,
 			"reward", value, "gas", gas1+gas2)

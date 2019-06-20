@@ -61,6 +61,7 @@ type Energi struct {
 	db           ethdb.Database
 	rewardAbi    abi.ABI
 	rewardGov    []common.Address
+	dposAbi      abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -70,6 +71,12 @@ type Energi struct {
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 	reward_abi, err := abi.JSON(strings.NewReader(energi_abi.IBlockRewardABI))
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
+	dpos_abi, err := abi.JSON(strings.NewReader(energi_abi.IDelegatedPoSABI))
 	if err != nil {
 		panic(err)
 		return nil
@@ -85,6 +92,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 			energi_params.Energi_BackboneReward,
 			energi_params.Energi_StakerReward,
 		},
+		dposAbi:      dpos_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      2000000,
 		callGas:      1000000,
@@ -129,11 +137,12 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 	}
 
 	// A special Migration block #1
-	if (header.Number.Cmp(common.Big1) == 0) && (header.Coinbase != e.config.MigrationSigner) {
+	if (header.Number.Cmp(common.Big1) == 0) &&
+		(header.Coinbase != energi_params.Energi_MigrationContract) {
 		log.Error("PoS migration mismatch",
 			"signer", header.Coinbase,
-			"required", e.config.MigrationSigner)
-		return errors.New("Invalid Migration signer")
+			"required", energi_params.Energi_MigrationContract)
+		return errors.New("Invalid Migration")
 	}
 
 	parent := chain.GetHeaderByHash(header.ParentHash)
@@ -196,6 +205,11 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 
 	// Verify the engine specific seal securing the block
 	err = e.VerifySeal(chain, header)
+	if err != nil {
+		return err
+	}
+
+	err = e.verifyPoSHash(chain, header)
 	if err != nil {
 		return err
 	}
@@ -264,15 +278,70 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	copy(addr[:], crypto.Keccak256(pubkey[1:])[12:])
 
 	if addr != header.Coinbase {
-		log.Trace("PoS seal compare", "addr", addr, "coinbase", header.Coinbase)
-		return errInvalidSig
-	}
-
-	if header.Number.Cmp(common.Big0) != 0 {
-		err = e.verifyPoSHash(chain, header)
+		// POS-5: Delegated PoS
+		//--
+		stdb, err := chain.GetStateDB()
 		if err != nil {
+			log.Error("PoS seal is called without state database", "err", err)
 			return err
 		}
+
+		parent := chain.GetHeaderByHash(header.ParentHash)
+		if parent == nil {
+			return errUnknownParent
+		}
+
+		blockst, err := state.New(parent.Root, stdb)
+		if err != nil {
+			log.Error("PoS state root failure", "err", err)
+			return err
+		}
+
+		if blockst.GetCodeSize(header.Coinbase) > 0 {
+			signerData, err := e.dposAbi.Pack("signerAddress")
+			if err != nil {
+				log.Error("Fail to prepare signerAddress() call", "err", err)
+				return err
+			}
+
+			blockst.SetBalance(e.systemFaucet, new(big.Int).SetUint64(e.callGas))
+			msg := types.NewMessage(
+				e.systemFaucet,
+				&header.Coinbase,
+				0,
+				common.Big0,
+				e.callGas,
+				common.Big1,
+				signerData,
+				false,
+			)
+
+			evm := e.createEVM(msg, chain, parent, blockst)
+			gp := new(core.GasPool).AddGas(e.callGas)
+			output, _, _, err := core.ApplyMessage(evm, msg, gp)
+			if err != nil {
+				log.Trace("Fail to get signerAddress()", "err", err)
+				return err
+			}
+
+			//
+			signer := common.Address{}
+			err = e.dposAbi.Unpack(&signer, "signerAddress", output)
+			if err != nil {
+				log.Error("Failed to unpack signerAddress() call", "err", err)
+				return err
+			}
+
+			if signer == addr {
+				return nil
+			}
+
+			log.Trace("PoS seal compare", "addr", addr, "signer", signer)
+		} else {
+			log.Trace("PoS seal compare", "addr", addr, "coinbase", header.Coinbase)
+		}
+
+		return errInvalidSig
 	}
 
 	return nil

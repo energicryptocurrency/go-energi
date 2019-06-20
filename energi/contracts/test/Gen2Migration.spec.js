@@ -32,11 +32,11 @@ contract("Gen2Migration", async accounts => {
     before(async () => {
         orig = await Gen2Migration.deployed();
         treasury_proxy = await ITreasury.at(await orig.treasury_proxy());
-        orig = await MockGen2Migration.new(treasury_proxy.address, common.chain_id); 
+        orig = await MockGen2Migration.new(treasury_proxy.address, common.chain_id, common.migration_signer); 
     });
 
     after(async () => {
-        await Gen2Migration.new(treasury_proxy.address, common.chain_id);
+        await Gen2Migration.new(treasury_proxy.address, common.chain_id, common.migration_signer);
     });
     
     // Primary stuff
@@ -162,6 +162,11 @@ contract("Gen2Migration", async accounts => {
 
     it.skip('should allow to drain() by Treasury', async() => {
         // TODO: only manually tested
+    });
+
+    it('should signerAddress()', async () => {
+        const signer = await orig.signerAddress();
+        expect(signer).equal(common.migration_signer);
     });
 
     // Safety & Cleanup

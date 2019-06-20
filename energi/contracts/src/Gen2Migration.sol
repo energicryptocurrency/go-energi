@@ -21,6 +21,8 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { GlobalConstants } from "./constants.sol";
+import { IDelegatedPoS } from "./IDelegatedPoS.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { ITreasury } from "./ITreasury.sol";
 
@@ -29,7 +31,9 @@ import { ITreasury } from "./ITreasury.sol";
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract Gen2Migration
+contract Gen2Migration is
+	GlobalConstants,
+	IDelegatedPoS
 {
     struct UnspentCoins {
         bytes20 owner; // Gen 2 P2PKH
@@ -44,12 +48,14 @@ contract Gen2Migration
 
     IGovernedProxy public treasury_proxy;
     uint public chain_id;
+    address public signerAddress; // IDelegatedPoS
     UnspentCoins[] public coins;
 
     // NOTE: this c-tor is used during testing
-    constructor(IGovernedProxy _treasury_proxy, uint _chain_id) public {
+    constructor(IGovernedProxy _treasury_proxy, uint _chain_id, address _signer) public {
         treasury_proxy = _treasury_proxy;
         chain_id = _chain_id;
+        signerAddress = _signer;
     }
 
     function itemCount() external view returns(uint) {
@@ -112,7 +118,7 @@ contract Gen2Migration
         // NOTE: DO NOT selfdestruct() as this contract must remain as storage.
         treasury.contribute.value(address(this).balance)();
     }
-
+    
     // Safety
     //---------------------------------
     function () external payable {

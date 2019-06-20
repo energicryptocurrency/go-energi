@@ -33,6 +33,8 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 
 	"github.com/stretchr/testify/assert"
+
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 func TestPoSChain(t *testing.T) {
@@ -43,9 +45,9 @@ func TestPoSChain(t *testing.T) {
 	results := make(chan *types.Block, 1)
 	stop := make(chan struct{})
 
-	signers := make(map[common.Address]*ecdsa.PrivateKey, 60)
+	signers := make(map[common.Address]*ecdsa.PrivateKey, 61)
 	addresses := make([]common.Address, 0, 60)
-	alloc := make(core.GenesisAlloc, 60)
+	alloc := make(core.GenesisAlloc, 61)
 	for i := 0; i < 60; i++ {
 		k, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
 		a := crypto.PubkeyToAddress(k.PublicKey)
@@ -56,15 +58,22 @@ func TestPoSChain(t *testing.T) {
 			Balance: minStake,
 		}
 	}
+	alloc[energi_params.Energi_MigrationContract] = core.GenesisAccount{
+		Balance: minStake,
+	}
+	migrationSigner := addresses[1]
+	signers[energi_params.Energi_MigrationContract] = signers[migrationSigner]
 
 	testdb := ethdb.NewMemDatabase()
-	engine := New(&params.EnergiConfig{MigrationSigner: addresses[1]}, testdb)
+	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	var header *types.Header
 
 	engine.SetMinerCB(
 		func() []common.Address {
 			if header.Number.Uint64() == 1 {
-				return addresses[1:2]
+				return []common.Address{
+					energi_params.Energi_MigrationContract,
+				}
 			}
 
 			return addresses
@@ -74,20 +83,25 @@ func TestPoSChain(t *testing.T) {
 		},
 	)
 
+	chainConfig := *params.EnergiTestnetChainConfig
+	chainConfig.Energi = &params.EnergiConfig{
+		MigrationSigner: migrationSigner,
+	}
+
 	var (
 		gspec = &core.Genesis{
-			Config:    params.EnergiTestnetChainConfig,
+			Config:    &chainConfig,
 			Timestamp: 1000,
-			Coinbase:  addresses[0],
+			Coinbase:  energi_params.Energi_Treasury,
 			Alloc:     alloc,
-			Xfers:     core.DeployEnergiGovernance(params.EnergiTestnetChainConfig),
+			Xfers:     core.DeployEnergiGovernance(&chainConfig),
 		}
 		genesis = gspec.MustCommit(testdb)
 
 		now = engine.now()
 	)
 
-	chain, err := core.NewBlockChain(testdb, nil, params.EnergiTestnetChainConfig, engine, vm.Config{}, nil)
+	chain, err := core.NewBlockChain(testdb, nil, &chainConfig, engine, vm.Config{}, nil)
 	assert.Empty(t, err)
 	defer chain.Stop()
 
@@ -127,11 +141,12 @@ func TestPoSChain(t *testing.T) {
 		//---
 		err = engine.Seal(chain, block, results, stop)
 		assert.Empty(t, err)
-		assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
 
 		block = <-results
 		assert.NotEmpty(t, block)
 		header = block.Header()
+		assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
+		assert.NotEqual(t, parent.Coinbase, common.Address{}, "Header %v", i)
 		err = engine.VerifySeal(chain, header)
 		assert.Empty(t, err)
 

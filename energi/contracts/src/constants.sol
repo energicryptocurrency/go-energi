@@ -35,7 +35,7 @@ contract GlobalConstants {
     address payable constant internal BLACKLIST_REGISTRY = address(0x307);
     address constant internal MIGRATION_CONTRACT = address(0x308);
     address payable constant internal MASTERNODE_TOKEN = address(0x309);
-    address constant internal GEN2_ADDR_RECOVERY = address(0x310);
+    address constant internal SYSTEM_FAUCET = address(0x310);
 
     uint constant internal FEE_UPGRADE_V1 = 10000 ether;
     uint constant internal FEE_BUDGET_V1 = 100 ether;

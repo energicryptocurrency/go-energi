@@ -24,7 +24,7 @@ pragma solidity 0.5.9;
 /**
  * Genesis version of BlacklistRegistry interface.
  *
- * Base Consensus interface for constructs which receive block rewards.
+ * Base Consensus interface for contracts which receive block rewards.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */

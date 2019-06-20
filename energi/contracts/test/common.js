@@ -27,6 +27,7 @@ exports.mnregistry_config = [
 ];
 exports.superblock_cycles = 8;
 exports.chain_id = 49797;
+exports.migration_signer = '0x0000000000000000000000000000000012345678';
 
 exports.evt_last_block = {
     fromBlock: 'latest',

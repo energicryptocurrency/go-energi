@@ -19,26 +19,16 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.9;
+//pragma experimental SMTChecker;
 
-import { Gen2Migration } from "./Gen2Migration.sol";
-import { IGovernedProxy } from "./IGovernedProxy.sol";
-
-contract MockGen2Migration is Gen2Migration {
-    constructor(IGovernedProxy _treasury_proxy, uint _chain_id, address _signer) public
-        Gen2Migration(_treasury_proxy, _chain_id, _signer)
-    // solium-disable-next-line no-empty-blocks
-    {
-    }
-
-    function setCoins(bytes20[] calldata _owners, uint[] calldata _amounts) external payable {
-        require(_owners.length == _amounts.length, "match length");
-        require(_owners.length > 0, "has data");
-
-        coins.length = _owners.length;
-
-        for (uint i = _owners.length; i-- > 0;) {
-            coins[i].owner = _owners[i];
-            coins[i].amount = _amounts[i];
-        }
-    }
+/**
+ * Genesis version of DelegatedPoS interface.
+ *
+ * Base Consensus interface for contracts which which allow another address
+ * to stake on behalf of them.
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
+interface IDelegatedPoS {
+	function signerAddress() external view returns(address);
 }

@@ -39,7 +39,7 @@ module.exports = async (deployer, _, accounts) => {
             await (await MockProxy.at(proxy)).setImpl(instance.address);
         };
 
-        await deployer.deploy(Gen2Migration, treasury_proxy, common.chain_id);
+        await deployer.deploy(Gen2Migration, treasury_proxy, common.chain_id, common.migration_signer);
 
         await deploy_common(BlacklistRegistryV1, undefined, mn_registry_proxy);
         await deploy_common(BackboneRewardV1, undefined, accounts[5]);
