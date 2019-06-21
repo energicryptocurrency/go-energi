@@ -314,7 +314,7 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 				0,
 				common.Big0,
 				e.callGas,
-				common.Big1,
+				common.Big0,
 				signerData,
 				false,
 			)

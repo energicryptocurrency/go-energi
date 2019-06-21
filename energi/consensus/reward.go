@@ -56,12 +56,6 @@ func (e *Energi) processBlockRewards(
 		return err
 	}
 
-	gas_total := uint64(0)
-	defer func() {
-		// price = 1
-		statedb.SubBalance(header.Coinbase, new(big.Int).SetUint64(gas_total))
-	}()
-
 	for i, caddr := range e.rewardGov {
 		// GetReward()
 		msg := types.NewMessage(
@@ -70,14 +64,13 @@ func (e *Energi) processBlockRewards(
 			0,
 			common.Big0,
 			e.callGas,
-			common.Big1,
+			common.Big0,
 			getRewardData,
 			false,
 		)
 		evm := e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.callGas)
 		output, gas1, _, err := core.ApplyMessage(evm, msg, gp)
-		gas_total += gas1
 		if err != nil {
 			log.Error("Failed in getReward() call", "err", err)
 			continue
@@ -98,14 +91,13 @@ func (e *Energi) processBlockRewards(
 			0,
 			value,
 			e.xferGas,
-			common.Big1,
+			common.Big0,
 			rewardData,
 			false,
 		)
 		evm = e.createEVM(msg, chain, header, statedb)
 		gp.AddGas(e.xferGas)
 		_, gas2, _, err := core.ApplyMessage(evm, msg, gp)
-		gas_total += gas2
 		if err != nil {
 			log.Error("Failed in reward() call", "err", err)
 			continue

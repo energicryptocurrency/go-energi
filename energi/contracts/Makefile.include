@@ -43,6 +43,7 @@ ENERGI_CONTRACTS := \
   CheckpointRegistryV1.sol \
   IBlockReward.sol \
   IDelegatedPoS.sol \
+  IMasternodeRegistry.sol \
   Gen2Migration.sol \
   GovernedProxy.sol \
   MasternodeTokenV1.sol \
