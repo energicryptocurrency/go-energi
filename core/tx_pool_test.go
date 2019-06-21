@@ -77,6 +77,11 @@ func pricedTransaction(nonce uint64, gaslimit uint64, gasprice *big.Int, key *ec
 	return tx
 }
 
+func zerofeeTransaction(nonce uint64, dst common.Address, data []byte, key *ecdsa.PrivateKey) *types.Transaction {
+	tx, _ := types.SignTx(types.NewTransaction(nonce, dst, common.Big0, 50000, common.Big0, data), types.HomesteadSigner{}, key)
+	return tx
+}
+
 func setupTxPool() (*TxPool, *ecdsa.PrivateKey) {
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(ethdb.NewMemDatabase()))
 	blockchain := &testBlockChain{statedb, 1000000, new(event.Feed)}
@@ -1830,5 +1835,35 @@ func benchmarkPoolBatchInsert(b *testing.B, size int) {
 	b.ResetTimer()
 	for _, batch := range batches {
 		pool.AddRemotes(batch)
+	}
+}
+
+/**
+ * Test if zero fee xfers get added
+ */
+func TestZeroFee(t *testing.T) {
+	t.Parallel()
+
+	// Create a test account and fund it
+	pool, key := setupTxPool()
+	defer pool.Stop()
+
+	//account, _ := deriveSender(transaction(0, 0, key))
+	total := 3
+
+	// Keep queuing up transactions and make sure all above a limit are dropped
+	for i := 1; i <= total; i++ {
+		if err := pool.AddRemote(pricedTransaction(uint64(i), 50000, common.Big0, key)); err == nil {
+			t.Fatalf("tx %d: invalid zerofee got added: %v", i, err)
+		}
+		if err := pool.AddRemote(zerofeeTransaction(uint64(i), common.HexToAddress("0x308"), energiMigrateID[:], key)); err != nil {
+			t.Fatalf("tx %d: failed to add transaction: %v", i, err)
+		}
+		if len(pool.pending) != 0 {
+			t.Errorf("tx %d: pending pool size mismatch: have %d, want %d", i, len(pool.pending), 0)
+		}
+	}
+	if pool.all.Count() != total {
+		t.Errorf("total transaction mismatch: have %d, want %d", pool.all.Count(), total)
 	}
 }

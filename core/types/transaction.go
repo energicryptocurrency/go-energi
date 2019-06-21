@@ -179,6 +179,19 @@ func (tx *Transaction) Value() *big.Int    { return new(big.Int).Set(tx.data.Amo
 func (tx *Transaction) Nonce() uint64      { return tx.data.AccountNonce }
 func (tx *Transaction) CheckNonce() bool   { return true }
 
+const MethodIDLen = 4
+
+type MethodID [MethodIDLen]byte
+
+func (tx *Transaction) MethodID() (res MethodID) {
+	if len(tx.data.Payload) < MethodIDLen {
+		return MethodID{}
+	}
+
+	copy(res[:], tx.data.Payload[:MethodIDLen])
+	return
+}
+
 // To returns the recipient address of the transaction.
 // It returns nil if the transaction is a contract creation.
 func (tx *Transaction) To() *common.Address {

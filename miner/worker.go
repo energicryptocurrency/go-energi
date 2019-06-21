@@ -909,8 +909,31 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 			localTxs[account] = txs
 		}
 	}
+	zerofeeTxs := make(map[common.Address]types.Transactions)
+	for account, txs := range remoteTxs {
+		for _, tx := range txs {
+			if core.IsValidZeroFee(tx) {
+				var ztxs types.Transactions
+
+				// NOTE: zero-fee is not emitted in regular operations
+				//       so expect no regular xfers are present.
+				if _, ok := zerofeeTxs[account]; !ok {
+					ztxs = make(types.Transactions, 0, len(txs))
+					delete(remoteTxs, account)
+				}
+
+				zerofeeTxs[account] = append(ztxs, tx)
+			}
+		}
+	}
 	if len(localTxs) > 0 {
 		txs := types.NewTransactionsByPriceAndNonce(w.current.signer, localTxs)
+		if w.commitTransactions(txs, w.coinbase, interrupt) {
+			return
+		}
+	}
+	if len(zerofeeTxs) > 0 {
+		txs := types.NewTransactionsByPriceAndNonce(w.current.signer, zerofeeTxs)
 		if w.commitTransactions(txs, w.coinbase, interrupt) {
 			return
 		}
