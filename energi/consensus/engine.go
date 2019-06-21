@@ -132,6 +132,7 @@ func (e *Energi) Author(header *types.Header) (common.Address, error) {
 // via the VerifySeal method.
 func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool) error {
 	var err error
+	is_migration := (header.Number.Cmp(common.Big1) == 0)
 
 	// Ensure that the header's extra-data section is of a reasonable size
 	if uint64(len(header.Extra)) > params.MaximumExtraDataSize {
@@ -140,8 +141,7 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 	}
 
 	// A special Migration block #1
-	if (header.Number.Cmp(common.Big1) == 0) &&
-		(header.Coinbase != energi_params.Energi_MigrationContract) {
+	if is_migration && (header.Coinbase != energi_params.Energi_MigrationContract) {
 		log.Error("PoS migration mismatch",
 			"signer", header.Coinbase,
 			"required", energi_params.Energi_MigrationContract)
@@ -183,8 +183,8 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 			header.GasLimit, cap)
 	}
 
-	// Verify that the gasUsed is <= gasLimit
-	if header.GasUsed > header.GasLimit {
+	// Verify that the gasUsed is <= gasLimit, except for migration
+	if (header.GasUsed > header.GasLimit) && !is_migration {
 		return fmt.Errorf("invalid gasUsed: have %d, gasLimit %d",
 			header.GasUsed, header.GasLimit)
 	}

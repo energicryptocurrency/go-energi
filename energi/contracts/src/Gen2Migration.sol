@@ -49,6 +49,7 @@ contract Gen2Migration is
     IGovernedProxy public treasury_proxy;
     uint public chain_id;
     address public signerAddress; // IDelegatedPoS
+    uint public totalAmount;
     UnspentCoins[] public coins;
 
     // NOTE: this c-tor is used during testing
@@ -56,6 +57,26 @@ contract Gen2Migration is
         treasury_proxy = _treasury_proxy;
         chain_id = _chain_id;
         signerAddress = _signer;
+    }
+
+    function setSnapshot(bytes20[] calldata _owners, uint[] calldata _amounts) external {
+        require(coins.length == 0, "Already set");
+        require(msg.sender == signerAddress, "Invalid sender");
+        require(_owners.length == _amounts.length, "match length");
+        require(_owners.length > 0, "has data");
+
+        coins.length = _owners.length;
+        uint total;
+
+        for (uint i = _owners.length; i-- > 0;) {
+            coins[i].owner = _owners[i];
+            coins[i].amount = _amounts[i];
+            total += _amounts[i];
+        }
+
+        totalAmount = total;
+        // NOTE: there is a special consensus procedure to setup account balance based on
+        //       totalAmount().
     }
 
     function itemCount() external view returns(uint) {
@@ -118,7 +139,7 @@ contract Gen2Migration is
         // NOTE: DO NOT selfdestruct() as this contract must remain as storage.
         treasury.contribute.value(address(this).balance)();
     }
-    
+
     // Safety
     //---------------------------------
     function () external payable {

@@ -31,14 +31,10 @@ contract MockGen2Migration is Gen2Migration {
     }
 
     function setCoins(bytes20[] calldata _owners, uint[] calldata _amounts) external payable {
-        require(_owners.length == _amounts.length, "match length");
-        require(_owners.length > 0, "has data");
-
-        coins.length = _owners.length;
-
-        for (uint i = _owners.length; i-- > 0;) {
-            coins[i].owner = _owners[i];
-            coins[i].amount = _amounts[i];
-        }
+        coins.length = 0;
+        address orig_signer = signerAddress;
+        signerAddress = address(this);
+        this.setSnapshot(_owners, _amounts);
+        signerAddress = orig_signer;
     }
 }
