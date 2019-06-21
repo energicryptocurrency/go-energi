@@ -317,7 +317,7 @@ func (g *Genesis) ToBlock(db ethdb.Database) *types.Block {
 				uint64(i),
 				common.Big0,
 				gasLimit,
-				big.NewInt(1),
+				common.Big0,
 				tx.Code,
 				false,
 			)
