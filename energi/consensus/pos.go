@@ -467,12 +467,17 @@ func (e *Energi) mine(
 	}
 
 	candidates := make([]Candidates, 0, len(accounts))
+	migration_dpos := false
 	for _, a := range accounts {
 		candidates = append(candidates, Candidates{
 			addr:   a,
 			weight: 0,
 		})
 		//log.Trace("PoS miner candidate found", "address", a)
+
+		if a == energi_params.Energi_MigrationContract {
+			migration_dpos = true
+		}
 	}
 
 	//---
@@ -480,6 +485,17 @@ func (e *Energi) mine(
 	time_target := e.calcTimeTarget(chain, parent)
 
 	blockTime := time_target.min_time
+
+	// Special case due to expected very large gap between Genesis and Migration
+	if header.IsGen2Migration() {
+		blockTime = e.now()
+	}
+
+	// A special workaround to obey target time when migration contract is used
+	// for mining to prevent any difficult bombs.
+	if migration_dpos && (blockTime < time_target.block_target) {
+		blockTime = time_target.block_target
+	}
 
 	//---
 	for ; ; blockTime++ {

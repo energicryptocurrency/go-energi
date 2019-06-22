@@ -132,7 +132,7 @@ func (e *Energi) Author(header *types.Header) (common.Address, error) {
 // via the VerifySeal method.
 func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool) error {
 	var err error
-	is_migration := (header.Number.Cmp(common.Big1) == 0)
+	is_migration := header.IsGen2Migration()
 
 	// Ensure that the header's extra-data section is of a reasonable size
 	if uint64(len(header.Extra)) > params.MaximumExtraDataSize {
@@ -196,9 +196,14 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 	}
 	limit := parent.GasLimit / params.GasLimitBoundDivisor
 
-	if uint64(diff) >= limit || header.GasLimit < params.MinGasLimit {
+	if (uint64(diff) >= limit) && !is_migration && !parent.IsGen2Migration() {
 		return fmt.Errorf("invalid gas limit: have %d, want %d += %d",
 			header.GasLimit, parent.GasLimit, limit)
+	}
+
+	if header.GasLimit < params.MinGasLimit {
+		return fmt.Errorf("invalid gas limit: have %d, minimum %d",
+			header.GasLimit, params.MinGasLimit)
 	}
 
 	// Verify that the block number is parent's +1
@@ -388,6 +393,9 @@ func (e *Energi) Finalize(
 	*types.Block, error,
 ) {
 	err := e.processBlockRewards(chain, header, state)
+	if err == nil {
+		err = e.finalizeMigration(chain, header, state, txs)
+	}
 
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = uncleHash
@@ -447,25 +455,22 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 	hasher := sha3.NewLegacyKeccak256()
 
 	rlp.Encode(hasher, []interface{}{
+		// NOTE: commented parts are part of "mining" process
 		header.ParentHash,
 		header.UncleHash,
-		// This part is for "mining"
 		//header.Coinbase,
 		header.Root,
 		header.TxHash,
 		header.ReceiptHash,
 		header.Bloom,
-		header.Difficulty,
+		//header.Difficulty,
 		header.Number,
 		header.GasLimit,
 		header.GasUsed,
-		// This part is for "mining"
 		//header.Time,
 		header.Extra,
-		header.MixDigest,
-		// This part is for "mining"
+		//header.MixDigest,
 		//header.Nonce,
-		// This part is to be added afterwards
 		//header.Signature,
 	})
 	hasher.Sum(hash[:0])
