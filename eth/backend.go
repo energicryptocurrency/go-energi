@@ -90,6 +90,7 @@ type Ethereum struct {
 	miner     *miner.Miner
 	gasPrice  *big.Int
 	etherbase common.Address
+	dpos      DPoSMap
 
 	networkID     uint64
 	netRPCService *ethapi.PublicNetAPI
@@ -138,6 +139,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		networkID:      config.NetworkId,
 		gasPrice:       config.MinerGasPrice,
 		etherbase:      config.Etherbase,
+		dpos:           config.MinerDPoS,
 		bloomRequests:  make(chan chan *bloombits.Retrieval),
 		bloomIndexer:   NewBloomIndexer(chainDb, params.BloomBitsBlocks, params.BloomConfirms),
 	}
@@ -182,8 +184,12 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 		return nil, err
 	}
 
+	if eth.dpos == nil {
+		eth.dpos = make(DPoSMap)
+	}
 	eth.miner = miner.New(eth, eth.chainConfig, eth.EventMux(), eth.engine, config.MinerRecommit, config.MinerGasFloor, config.MinerGasCeil, eth.isLocalBlock)
 	eth.miner.SetExtra(makeExtraData(config.MinerExtraData))
+	eth.miner.SetMigration(config.MinerMigration)
 
 	eth.APIBackend = &EthAPIBackend{eth, nil}
 	gpoParams := config.GPO
@@ -373,6 +379,7 @@ func (s *Ethereum) isLocalBlock(block *types.Block) bool {
 			return true
 		}
 	}
+	// TODO: DPoS + accounts
 	return false
 }
 
@@ -409,6 +416,20 @@ func (s *Ethereum) SetEtherbase(etherbase common.Address) {
 	s.lock.Unlock()
 
 	s.miner.SetEtherbase(etherbase)
+}
+
+// AddDPoS add contract for delegated PoS
+func (s *Ethereum) AddDPoS(contract common.Address, signer common.Address) {
+	s.lock.Lock()
+	s.dpos[contract] = signer
+	s.lock.Unlock()
+}
+
+// RemoveDPoS remove contract from delegated PoS
+func (s *Ethereum) RemoveDPoS(contract common.Address) {
+	s.lock.Lock()
+	delete(s.dpos, contract)
+	s.lock.Unlock()
 }
 
 // StartMining starts the miner with the given number of CPU threads. If mining
@@ -459,9 +480,24 @@ func (s *Ethereum) StartMining(threads int) error {
 							}
 						}
 					}
+
+					// TODO: revise how locking affects performance
+					s.lock.RLock()
+					for k := range s.dpos {
+						res = append(res, k)
+					}
+					s.lock.RUnlock()
+
 					return res
 				},
 				func(addr common.Address, hash []byte) ([]byte, error) {
+					// TODO: revise how locking affects performance
+					s.lock.RLock()
+					if signer, ok := s.dpos[addr]; ok {
+						addr = signer
+					}
+					s.lock.RUnlock()
+
 					account := accounts.Account{Address: addr}
 					wallet, err := s.accountManager.Find(account)
 					if wallet == nil || err != nil {

@@ -155,6 +155,8 @@ type worker struct {
 	coinbase common.Address
 	extra    []byte
 
+	migration string
+
 	pendingMu    sync.RWMutex
 	pendingTasks map[common.Hash]*task
 
@@ -229,6 +231,12 @@ func (w *worker) setEtherbase(addr common.Address) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.coinbase = addr
+}
+
+func (w *worker) setMigration(migration string) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.migration = migration
 }
 
 // setExtra sets the content used to initialize the block extra field.

@@ -155,6 +155,18 @@ func (api *PrivateMinerAPI) GetHashrate() uint64 {
 	return api.e.miner.HashRate()
 }
 
+// AddDPoS adds contract for DPoS mining
+func (api *PrivateMinerAPI) AddDPoS(contract common.Address, signer common.Address) bool {
+	api.e.AddDPoS(contract, signer)
+	return true
+}
+
+// RemoveDPoS removes contract from DPoS mining
+func (api *PrivateMinerAPI) RemoveDPoS(contract common.Address) bool {
+	api.e.RemoveDPoS(contract)
+	return true
+}
+
 // PrivateAdminAPI is the collection of Ethereum full node-related APIs
 // exposed over the private admin endpoint.
 type PrivateAdminAPI struct {

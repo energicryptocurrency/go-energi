@@ -168,3 +168,7 @@ func (self *Miner) SetEtherbase(addr common.Address) {
 	self.coinbase = addr
 	self.worker.setEtherbase(addr)
 }
+
+func (self *Miner) SetMigration(migration string) {
+	self.worker.setMigration(migration)
+}

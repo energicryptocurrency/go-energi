@@ -569,6 +569,21 @@ web3._extend({
 			name: 'getHashrate',
 			call: 'miner_getHashrate'
 		}),
+		new web3._extend.Method({
+			name: 'addDPoS',
+			call: 'miner_addDPoS',
+			params: 2,
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+			]
+		}),
+		new web3._extend.Method({
+			name: 'removeDPoS',
+			call: 'miner_removeDPoS',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
+		}),
 	],
 	properties: []
 });
