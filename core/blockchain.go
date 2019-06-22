@@ -44,6 +44,8 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 	"github.com/hashicorp/golang-lru"
+
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 var (
@@ -67,6 +69,12 @@ const (
 	// BlockChainVersion ensures that an incompatible database forces a resync from scratch.
 	BlockChainVersion uint64 = 3
 )
+
+func init() {
+	if triesInMemory < ((energi_params.MaturityPeriod / energi_params.MinBlockGap) + 1) {
+		panic("More Tries in memory is required!")
+	}
+}
 
 // CacheConfig contains the configuration values for the trie caching/pruning
 // that's resident in a blockchain.
@@ -698,6 +706,33 @@ func (bc *BlockChain) Stop() {
 	atomic.StoreInt32(&bc.procInterrupt, 1)
 
 	bc.wg.Wait()
+
+	/**
+	 * Energi PoS requires lookup of at least the recent 1 hour, not to mention possible
+	 * reorganizations.
+	 */
+	if bc.chainConfig.Energi != nil {
+		triedb := bc.stateCache.TrieDB()
+		recent := bc.CurrentBlock()
+		threshold := uint64(time.Now().Unix()) - energi_params.MaturityPeriod
+
+		for (recent.NumberU64() > 0) && (recent.Time() > threshold) {
+			log.Info("Writing cached state to disk", "block",
+				recent.Number(), "hash", recent.Hash(), "root", recent.Root())
+			if err := triedb.Commit(recent.Root(), true); err != nil {
+				log.Error("Failed to commit recent state trie", "err", err)
+			}
+
+			recent = bc.GetBlockByNumber(recent.NumberU64() - 1)
+		}
+
+		for !bc.triegc.Empty() {
+			triedb.Dereference(bc.triegc.PopItem().(common.Hash))
+		}
+		if size, _ := triedb.Size(); size != 0 {
+			log.Error("Dangling trie nodes after full cleanup")
+		}
+	} else
 
 	// Ensure the state of a recent block is also stored to disk before exiting.
 	// We're writing three different states to catch different restart scenarios:

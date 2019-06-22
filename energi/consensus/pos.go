@@ -27,15 +27,17 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 const (
-	MaturityPeriod    uint64 = 60 * 60
-	AverageTimeBlocks uint64 = 60
-	TargetBlockGap    uint64 = 60
-	MinBlockGap       uint64 = 30
-	MaxFutureGap      uint64 = 3
-	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBlockGap
+	MaturityPeriod    uint64 = energi_params.MaturityPeriod
+	AverageTimeBlocks uint64 = energi_params.AverageTimeBlocks
+	TargetBlockGap    uint64 = energi_params.TargetBlockGap
+	MinBlockGap       uint64 = energi_params.MinBlockGap
+	MaxFutureGap      uint64 = energi_params.MaxFutureGap
+	TargetPeriodGap   uint64 = energi_params.TargetPeriodGap
 
 	maturityGuessBlocks uint64 = MaturityPeriod / TargetBlockGap
 )
