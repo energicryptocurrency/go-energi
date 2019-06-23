@@ -508,8 +508,11 @@ func (e *Energi) mine(
 		}
 
 		header.Time = blockTime
-		header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
-		header.Difficulty = e.calcPoSDifficulty(chain, blockTime, parent, time_target)
+		time_target, err = e.posPrepare(chain, header, parent)
+		if err != nil {
+			return false, err
+		}
+
 		target := new(big.Int).Div(diff1Target, header.Difficulty)
 		log.Trace("PoS miner time", "time", blockTime)
 

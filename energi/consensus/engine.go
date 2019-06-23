@@ -367,29 +367,37 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 // Prepare initializes the consensus fields of a block header according to the
 // rules of a particular engine. The changes are executed inline.
 func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
-	// Clear out unused
-	header.Nonce = types.BlockNonce{}
-
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 
 	if parent == nil {
 		log.Error("Fail to find parent", "header", header)
 		return eth_consensus.ErrUnknownAncestor
 	}
 
-	time_target := e.calcTimeTarget(chain, parent)
+	_, err := e.posPrepare(chain, header, parent)
+	return err
+}
 
-	err := e.enforceTime(header, time_target)
+func (e *Energi) posPrepare(
+	chain ChainReader,
+	header *types.Header,
+	parent *types.Header,
+) (time_target *timeTarget, err error) {
+	// Clear field to be set in mining
+	header.Coinbase = common.Address{}
+	header.Nonce = types.BlockNonce{}
+
+	time_target = e.calcTimeTarget(chain, parent)
+
+	err = e.enforceTime(header, time_target)
 
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
-	// TODO: trim Extra
-
 	// Diff
 	header.Difficulty = e.calcPoSDifficulty(chain, header.Time, parent, time_target)
 
-	return err
+	return time_target, err
 }
 
 // Finalize runs any post-transaction state modifications (e.g. block rewards)
@@ -400,19 +408,30 @@ func (e *Energi) Finalize(
 	chain ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction,
 	uncles []*types.Header, receipts []*types.Receipt,
 ) (
-	*types.Block, error,
+	block *types.Block, err error,
 ) {
-	err := e.processBlockRewards(chain, header, state)
+	// Do not finalize too early in mining
+	if (header.Coinbase != common.Address{}) {
+		err = e.govFinalize(chain, header, state, txs)
+	}
+
+	header.UncleHash = uncleHash
+
+	return types.NewBlock(header, txs, nil, receipts), err
+}
+
+func (e *Energi) govFinalize(
+	chain ChainReader,
+	header *types.Header,
+	state *state.StateDB,
+	txs types.Transactions,
+) (err error) {
+	err = e.processBlockRewards(chain, header, state)
 	if err == nil {
 		err = e.finalizeMigration(chain, header, state, txs)
 	}
-
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-	header.UncleHash = uncleHash
-
-	// NOTE: the code does not check result!
-	return types.NewBlock(header, txs, nil, receipts), err
-
+	return
 }
 
 // Seal generates a new sealing request for the given input block and pushes
@@ -433,8 +452,13 @@ func (e *Energi) Seal(
 		if header.Number.Cmp(common.Big0) != 0 {
 			success, err := e.mine(chain, header, stop)
 
+			if success && err == nil {
+				err = e.govFinalize(chain, header, state, block.Transactions())
+			}
+
 			if err != nil {
 				log.Error("PoS miner error", "err", err)
+				success = false
 			}
 
 			if !success {
