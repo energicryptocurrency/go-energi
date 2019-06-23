@@ -32,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/consensus"
+	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 )
@@ -48,7 +49,7 @@ var (
 
 // Seal implements consensus.Engine, attempting to find a nonce that satisfies
 // the block's difficulty requirements.
-func (ethash *Ethash) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
+func (ethash *Ethash) Seal(chain consensus.ChainReader, block *types.Block, state *state.StateDB, results chan<- *types.Block, stop <-chan struct{}) error {
 	// If we're running a fake PoW, simply return a 0 nonce immediately
 	if ethash.config.PowMode == ModeFake || ethash.config.PowMode == ModeFullFake {
 		header := block.Header()
@@ -62,7 +63,7 @@ func (ethash *Ethash) Seal(chain consensus.ChainReader, block *types.Block, resu
 	}
 	// If we're running a shared PoW, delegate sealing to it
 	if ethash.shared != nil {
-		return ethash.shared.Seal(chain, block, results, stop)
+		return ethash.shared.Seal(chain, block, state, results, stop)
 	}
 	// Create a runner and the multiple search threads it directs
 	abort := make(chan struct{})
@@ -117,7 +118,7 @@ func (ethash *Ethash) Seal(chain consensus.ChainReader, block *types.Block, resu
 		case <-ethash.update:
 			// Thread count was changed on user request, restart
 			close(abort)
-			if err := ethash.Seal(chain, block, results, stop); err != nil {
+			if err := ethash.Seal(chain, block, state, results, stop); err != nil {
 				log.Error("Failed to restart sealing after update", "err", err)
 			}
 		}
