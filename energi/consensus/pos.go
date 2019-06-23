@@ -162,7 +162,7 @@ func (e *Energi) calcPoSModifier(
 	parent_height := parent.Number.Uint64()
 	guess := parent_height
 
-	if guess < maturityGuessBlocks {
+	if guess <= maturityGuessBlocks {
 		guess = 0
 	} else {
 		guess -= maturityGuessBlocks
@@ -327,7 +327,7 @@ func (e *Energi) verifyPoSHash(
 	chain ChainReader,
 	header *types.Header,
 ) error {
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	weight, err := e.lookupStakeWeight(chain, header.Time, parent, header.Coinbase)
 	if err != nil {
 		return err
@@ -420,7 +420,7 @@ func (e *Energi) lookupStakeWeight(
 		}
 
 		curr := till
-		till = chain.GetHeaderByHash(till.ParentHash)
+		till = chain.GetHeader(till.ParentHash, till.Number.Uint64()-1)
 
 		if till == nil {
 			if curr.Number.Cmp(common.Big0) == 0 {
@@ -480,19 +480,24 @@ func (e *Energi) mine(
 	}
 
 	//---
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+
+	if parent == nil {
+		return false, eth_consensus.ErrUnknownAncestor
+	}
+
 	time_target := e.calcTimeTarget(chain, parent)
 
 	blockTime := time_target.min_time
 
 	// Special case due to expected very large gap between Genesis and Migration
-	if header.IsGen2Migration() {
+	if header.IsGen2Migration() && !e.testing {
 		blockTime = e.now()
 	}
 
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
-	if migration_dpos && (blockTime < time_target.block_target) {
+	if migration_dpos && (blockTime < time_target.block_target) && !e.testing {
 		blockTime = time_target.block_target
 	}
 

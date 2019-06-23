@@ -68,6 +68,7 @@ type Energi struct {
 	signerFn     SignerFn
 	accountsFn   AccountsFn
 	diffFn       DiffFn
+	testing      bool
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -147,7 +148,7 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		return errors.New("Invalid Migration")
 	}
 
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 
 	if parent == nil {
 		if header.Number.Cmp(common.Big0) != 0 {
@@ -303,7 +304,7 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 			return err
 		}
 
-		parent := chain.GetHeaderByHash(header.ParentHash)
+		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 		if parent == nil {
 			return eth_consensus.ErrUnknownAncestor
 		}
