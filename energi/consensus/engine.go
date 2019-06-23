@@ -135,7 +135,7 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 	is_migration := header.IsGen2Migration()
 
 	// Ensure that the header's extra-data section is of a reasonable size
-	if uint64(len(header.Extra)) > params.MaximumExtraDataSize {
+	if uint64(len(header.Extra)) > params.MaximumExtraDataSize && !is_migration {
 		return fmt.Errorf("extra-data too long: %d > %d",
 			len(header.Extra), params.MaximumExtraDataSize)
 	}
@@ -152,6 +152,8 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 
 	if parent == nil {
 		if header.Number.Cmp(common.Big0) != 0 {
+			log.Trace("Not found parent", "number", header.Number,
+				"hash", header.Hash, "parent", header.ParentHash)
 			return errUnknownParent
 		}
 

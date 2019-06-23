@@ -31,6 +31,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/params"
+	"github.com/ethereum/go-ethereum/rlp"
 
 	"github.com/shengdoushi/base58"
 
@@ -145,8 +147,14 @@ func MigrationTx(
 
 	gasLimit := gasPerMigrationEntry * uint64(len(owners))
 	header.GasLimit = gasLimit
-	header.Extra = make([]byte, 64)
-	copy(header.Extra[32:], common.HexToHash(snapshot.Hash).Bytes())
+	header.Extra, err = rlp.EncodeToBytes([]interface{}{
+		uint(params.VersionMajor<<16 | params.VersionMinor<<8 | params.VersionPatch),
+		"energi3",
+		snapshot.Hash,
+	})
+	if err != nil {
+		panic(err)
+	}
 
 	res = types.NewTransaction(
 		uint64(0), // it should be the first transaction
