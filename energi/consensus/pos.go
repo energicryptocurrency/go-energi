@@ -39,8 +39,6 @@ const (
 	MinBlockGap       uint64 = energi_params.MinBlockGap
 	MaxFutureGap      uint64 = energi_params.MaxFutureGap
 	TargetPeriodGap   uint64 = energi_params.TargetPeriodGap
-
-	maturityGuessBlocks uint64 = MaturityPeriod / TargetBlockGap
 )
 
 var (
@@ -77,7 +75,8 @@ func (e *Energi) calcTimeTarget(
 ) *timeTarget {
 	ret := &timeTarget{}
 	now := e.now()
-	block_number := parent.Number.Uint64() + 1
+	parent_number := parent.Number.Uint64()
+	block_number := parent_number + 1
 
 	// POS-11: Block time restrictions
 	ret.max_time = now + MaxFutureGap
@@ -90,7 +89,14 @@ func (e *Energi) calcTimeTarget(
 	// POS-12: Block interval enforcement
 	//---
 	if block_number >= AverageTimeBlocks {
-		past := chain.GetHeaderByNumber(block_number - AverageTimeBlocks)
+		past := parent
+
+		// NOTE: we have to this way as parent may be not part of canonical
+		//       chain. As no mutex is held, we cannot do checks for canonical.
+		for i := AverageTimeBlocks - 1; i > 0; i-- {
+			past = chain.GetHeader(past.ParentHash, past.Number.Uint64()-1)
+		}
+
 		actual := parent.Time - past.Time
 		expected := TargetPeriodGap - TargetBlockGap
 		ret.period_target = past.Time + TargetPeriodGap
@@ -159,30 +165,15 @@ func (e *Energi) calcPoSModifier(
 	}
 
 	// Find the oldest inside maturity period
+	// NOTE: we have to do this walk as parent may not be part of the canonical chain
 	parent_height := parent.Number.Uint64()
-	guess := parent_height
+	oldest := parent
 
-	if guess <= maturityGuessBlocks {
-		guess = 0
-	} else {
-		guess -= maturityGuessBlocks
-	}
+	for header, num := oldest, oldest.Number.Uint64(); (header.Time > maturity_border) && (num > 0); {
 
-	// NOTE: the logic below can go into if-clauses, but we always run both
-	//       cases
-
-	// If we hit inside the period
-	oldest := chain.GetHeaderByNumber(guess)
-
-	for (oldest.Time > maturity_border) && (guess > 0) {
-		guess--
-		oldest = chain.GetHeaderByNumber(guess)
-	}
-
-	// If we hit outside the period
-	for (oldest.Time <= maturity_border) && (oldest.Number.Uint64() < parent_height) {
-		guess++
-		oldest = chain.GetHeaderByNumber(guess)
+		oldest = header
+		num--
+		header = chain.GetHeader(header.ParentHash, num)
 	}
 
 	// Create Stake Modifier

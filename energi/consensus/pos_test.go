@@ -200,14 +200,6 @@ func TestPoSChain(t *testing.T) {
 
 		assert.True(t, parent.Time < tt.min_time, "Header %v", i)
 
-		// Stake modifier tests
-		//---
-		if i > 60 {
-			assert.NotEqual(t, header.Coinbase.Hex(), parent.Coinbase.Hex(), "Header %v", i)
-			assert.NotEqual(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
-		}
-		//---
-
 		_, err = chain.WriteBlockWithState(block, receipts, blstate)
 		assert.Empty(t, err)
 
