@@ -72,6 +72,14 @@ func RunPrecompiledContract(p PrecompiledContract, input []byte, contract *Contr
 type ecrecover struct{}
 
 func (c *ecrecover) RequiredGas(input []byte) uint64 {
+	// If length is less then it gets padded and falls into BTC mode
+	if len(input) < 64 || input[63] <= 1 {
+		return (params.EcrecoverGas +
+			params.Sha256BaseGas +
+			params.Sha256PerWordGas +
+			params.Ripemd160BaseGas +
+			params.Ripemd160PerWordGas)
+	}
 	return params.EcrecoverGas
 }
 
@@ -84,7 +92,13 @@ func (c *ecrecover) Run(input []byte) ([]byte, error) {
 
 	r := new(big.Int).SetBytes(input[64:96])
 	s := new(big.Int).SetBytes(input[96:128])
-	v := input[63] - 27
+	v := input[63]
+	is_btc := v <= 1
+	is_eth := v == 27 || v == 28
+
+	if is_eth {
+		v -= 27
+	}
 
 	// tighter sig s values input homestead only apply to tx sigs
 	if !allZero(input[32:63]) || !crypto.ValidateSignatureValues(v, r, s, false) {
@@ -95,6 +109,18 @@ func (c *ecrecover) Run(input []byte) ([]byte, error) {
 	// make sure the public key is a valid one
 	if err != nil {
 		return nil, nil
+	}
+
+	if is_btc {
+		pubKey_obj, err := crypto.UnmarshalPubkey(pubKey)
+		if err != nil {
+			return nil, nil
+		}
+
+		basehash := sha256.Sum256(crypto.CompressPubkey(pubKey_obj))
+		ripemd := ripemd160.New()
+		ripemd.Write(basehash[:])
+		return common.LeftPadBytes(ripemd.Sum(nil), 32), nil
 	}
 
 	// the first byte of pubkey is bitcoin heritage
