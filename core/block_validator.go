@@ -106,6 +106,11 @@ func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *stat
 // ceil if the blocks are full. If the ceil is exceeded, it will always decrease
 // the gas allowance.
 func CalcGasLimit(parent *types.Block, gasFloor, gasCeil uint64) uint64 {
+	// Resest limit after migration
+	if parent.IsGen2Migration() {
+		return params.GenesisGasLimit
+	}
+
 	// contrib = (parentGasUsed * 3 / 2) / 1024
 	contrib := (parent.GasUsed() + parent.GasUsed()/2) / params.GasLimitBoundDivisor
 

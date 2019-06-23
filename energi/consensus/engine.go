@@ -132,16 +132,16 @@ func (e *Energi) Author(header *types.Header) (common.Address, error) {
 // via the VerifySeal method.
 func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool) error {
 	var err error
+	is_migration := header.IsGen2Migration()
 
 	// Ensure that the header's extra-data section is of a reasonable size
-	if uint64(len(header.Extra)) > params.MaximumExtraDataSize {
+	if uint64(len(header.Extra)) > params.MaximumExtraDataSize && !is_migration {
 		return fmt.Errorf("extra-data too long: %d > %d",
 			len(header.Extra), params.MaximumExtraDataSize)
 	}
 
 	// A special Migration block #1
-	if (header.Number.Cmp(common.Big1) == 0) &&
-		(header.Coinbase != energi_params.Energi_MigrationContract) {
+	if is_migration && (header.Coinbase != energi_params.Energi_MigrationContract) {
 		log.Error("PoS migration mismatch",
 			"signer", header.Coinbase,
 			"required", energi_params.Energi_MigrationContract)
@@ -152,6 +152,8 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 
 	if parent == nil {
 		if header.Number.Cmp(common.Big0) != 0 {
+			log.Trace("Not found parent", "number", header.Number,
+				"hash", header.Hash, "parent", header.ParentHash)
 			return errUnknownParent
 		}
 
@@ -183,8 +185,8 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 			header.GasLimit, cap)
 	}
 
-	// Verify that the gasUsed is <= gasLimit
-	if header.GasUsed > header.GasLimit {
+	// Verify that the gasUsed is <= gasLimit, except for migration
+	if (header.GasUsed > header.GasLimit) && !is_migration {
 		return fmt.Errorf("invalid gasUsed: have %d, gasLimit %d",
 			header.GasUsed, header.GasLimit)
 	}
@@ -196,9 +198,14 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 	}
 	limit := parent.GasLimit / params.GasLimitBoundDivisor
 
-	if uint64(diff) >= limit || header.GasLimit < params.MinGasLimit {
+	if (uint64(diff) >= limit) && !is_migration && !parent.IsGen2Migration() {
 		return fmt.Errorf("invalid gas limit: have %d, want %d += %d",
 			header.GasLimit, parent.GasLimit, limit)
+	}
+
+	if header.GasLimit < params.MinGasLimit {
+		return fmt.Errorf("invalid gas limit: have %d, minimum %d",
+			header.GasLimit, params.MinGasLimit)
 	}
 
 	// Verify that the block number is parent's +1
@@ -388,6 +395,9 @@ func (e *Energi) Finalize(
 	*types.Block, error,
 ) {
 	err := e.processBlockRewards(chain, header, state)
+	if err == nil {
+		err = e.finalizeMigration(chain, header, state, txs)
+	}
 
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = uncleHash
@@ -447,25 +457,22 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 	hasher := sha3.NewLegacyKeccak256()
 
 	rlp.Encode(hasher, []interface{}{
+		// NOTE: commented parts are part of "mining" process
 		header.ParentHash,
 		header.UncleHash,
-		// This part is for "mining"
 		//header.Coinbase,
 		header.Root,
 		header.TxHash,
 		header.ReceiptHash,
 		header.Bloom,
-		header.Difficulty,
+		//header.Difficulty,
 		header.Number,
 		header.GasLimit,
 		header.GasUsed,
-		// This part is for "mining"
 		//header.Time,
 		header.Extra,
-		header.MixDigest,
-		// This part is for "mining"
+		//header.MixDigest,
 		//header.Nonce,
-		// This part is to be added afterwards
 		//header.Signature,
 	})
 	hasher.Sum(hash[:0])

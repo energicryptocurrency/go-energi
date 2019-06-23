@@ -77,6 +77,8 @@ func init() {
 
 //go:generate gencodec -type Config -field-override configMarshaling -formats toml -out gen_config.go
 
+type DPoSMap map[common.Address]common.Address
+
 type Config struct {
 	// The genesis block, which is inserted if the database is empty.
 	// If nil, the Ethereum main net block is used.
@@ -111,6 +113,9 @@ type Config struct {
 	MinerGasPrice  *big.Int
 	MinerRecommit  time.Duration
 	MinerNoverify  bool
+
+	MinerDPoS      DPoSMap `toml:",omitempty"`
+	MinerMigration string  `toml:",omitempty"`
 
 	// Ethash options
 	Ethash ethash.Config

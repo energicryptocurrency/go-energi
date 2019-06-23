@@ -27,6 +27,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.1
 	github.com/huin/goupnp v1.0.0
 	github.com/influxdata/influxdb v1.7.3
+	github.com/influxdata/platform v0.0.0-20190117200541-d500d3cf5589 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.1
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/karalabe/hid v1.0.0
@@ -42,10 +43,12 @@ require (
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/pborman/uuid v1.2.0
 	github.com/peterh/liner v1.1.0
+	github.com/pkg/errors v0.8.1 // indirect
 	github.com/prometheus/prometheus v2.1.0+incompatible
 	github.com/rjeczalik/notify v0.9.1
 	github.com/robertkrimen/otto v0.0.0-20170205013659-6a77b7cbc37d
 	github.com/rs/cors v1.3.0
+	github.com/shengdoushi/base58 v1.0.0
 	github.com/stretchr/testify v1.3.0
 	github.com/syndtr/goleveldb v1.0.0
 	github.com/uber/jaeger-client-go v2.16.0+incompatible

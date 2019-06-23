@@ -32,6 +32,8 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
+
+	energi_consensus "energi.world/core/gen3/energi/consensus"
 )
 
 const (
@@ -155,6 +157,8 @@ type worker struct {
 	coinbase common.Address
 	extra    []byte
 
+	migration string
+
 	pendingMu    sync.RWMutex
 	pendingTasks map[common.Hash]*task
 
@@ -229,6 +233,12 @@ func (w *worker) setEtherbase(addr common.Address) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.coinbase = addr
+}
+
+func (w *worker) setMigration(migration string) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.migration = migration
 }
 
 // setExtra sets the content used to initialize the block extra field.
@@ -821,11 +831,12 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	tstart := time.Now()
 	parent := w.chain.CurrentBlock()
 
-	if parent.Time() >= uint64(timestamp) {
-		timestamp = int64(parent.Time() + 1)
-	}
+	// TODO: prevent re-evaluation of older time on work re-submit
+	// NOTE: force from min gap!
+	timestamp = int64(parent.Time() + energi_consensus.MinBlockGap)
+
 	// this will ensure we're not going off too far in the future
-	if now := time.Now().Unix(); timestamp > now+1 {
+	if now := time.Now().Unix(); timestamp > (now + int64(energi_consensus.MaxFutureGap)) {
 		wait := time.Duration(timestamp-now) * time.Second
 		log.Info("Mining too far in the future", "wait", common.PrettyDuration(wait))
 		time.Sleep(wait)
@@ -883,6 +894,40 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	// Prefer to locally generated uncle
 	commitUncles(w.localUncles)
 	commitUncles(w.remoteUncles)
+
+	// Processing a special case of migrations
+	if header.IsGen2Migration() {
+		if !w.isRunning() {
+			return
+		}
+
+		if len(w.migration) == 0 {
+			log.Error("Refusing to mine migration block")
+			return
+		}
+
+		tx := energi_consensus.MigrationTx(w.current.signer, header, w.migration, w.engine)
+
+		if tx == nil {
+			log.Error("Failed to create migration transaction")
+			return
+		}
+
+		migrationTxs := map[common.Address]types.Transactions{
+			w.config.Energi.MigrationSigner: {tx},
+		}
+		log.Warn("Migration Txs", "migrationTxs", migrationTxs)
+		txs := types.NewTransactionsByPriceAndNonce(w.current.signer, migrationTxs)
+
+		log.Warn("Migration", "header", header, "txs", txs)
+
+		if w.commitTransactions(txs, w.coinbase, interrupt) {
+			return
+		}
+
+		w.commit(uncles, w.fullTaskHook, true, tstart)
+		return
+	}
 
 	if !noempty {
 		// Create an empty block based on temporary copied state for sealing in advance without waiting block

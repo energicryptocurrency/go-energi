@@ -390,6 +390,15 @@ var (
 		Name:  "miner.noverify",
 		Usage: "Disable remote sealing verification",
 	}
+	MinerDPoSFlag = cli.StringFlag{
+		Name:  "miner.dpos",
+		Usage: "Comma separated list of contract=account pairs",
+		Value: "0",
+	}
+	MinerMigrationFlag = cli.StringFlag{
+		Name:  "miner.migration",
+		Usage: "Enable Gen 2 migration mining with the specific snapshot file",
+	}
 	// Account settings
 	UnlockedAccountFlag = cli.StringFlag{
 		Name:  "unlock",
@@ -891,6 +900,24 @@ func setEtherbase(ctx *cli.Context, ks *keystore.KeyStore, cfg *eth.Config) {
 	}
 }
 
+// Prepares contract -> address pairs for delegated PoS mining
+func setDPoS(ctx *cli.Context, ks *keystore.KeyStore, cfg *eth.Config) {
+	cfg.MinerDPoS = make(eth.DPoSMap)
+	cfg.MinerMigration = ctx.GlobalString(MinerMigrationFlag.Name)
+
+	if !ctx.GlobalIsSet(MinerDPoSFlag.Name) {
+		return
+	}
+
+	pairs := strings.Split(ctx.GlobalString(MinerDPoSFlag.Name), ",")
+	for _, ps := range pairs {
+		p := strings.Split(ps, "=")
+		contract := common.HexToAddress(p[0])
+		signer := common.HexToAddress(p[1])
+		cfg.MinerDPoS[contract] = signer
+	}
+}
+
 // MakePasswordList reads password lines from the file specified by the global --password flag.
 func MakePasswordList(ctx *cli.Context) []string {
 	path := ctx.GlobalString(PasswordFileFlag.Name)
@@ -1165,6 +1192,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 
 	ks := stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
 	setEtherbase(ctx, ks, cfg)
+	setDPoS(ctx, ks, cfg)
 	setGPO(ctx, &cfg.GPO)
 	setTxPool(ctx, &cfg.TxPool)
 	setEthash(ctx, cfg)

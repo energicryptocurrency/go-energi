@@ -394,3 +394,11 @@ func (self blockSorter) Swap(i, j int) {
 func (self blockSorter) Less(i, j int) bool { return self.by(self.blocks[i], self.blocks[j]) }
 
 func Number(b1, b2 *Block) bool { return b1.header.Number.Cmp(b2.header.Number) < 0 }
+
+// Energi specific detection of Gen2 migration block
+func (h *Header) IsGen2Migration() bool {
+	return h.Number.Uint64() == 1
+}
+func (b *Block) IsGen2Migration() bool {
+	return b.header.IsGen2Migration()
+}

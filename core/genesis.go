@@ -423,6 +423,7 @@ func DefaultEnergiMainnetGenesisBlock() *Genesis {
 		Config:     params.EnergiMainnetChainConfig,
 		Coinbase:   energi_params.Energi_Treasury,
 		Nonce:      0,
+		Timestamp:  1569888000000,
 		ExtraData:  []byte{},
 		GasLimit:   8000000,
 		Difficulty: big.NewInt(0xFFFF),
@@ -432,9 +433,13 @@ func DefaultEnergiMainnetGenesisBlock() *Genesis {
 }
 
 func DefaultEnergiTestnetGenesisBlock() *Genesis {
+	// Gen2 e3d97b4c8ce67242fbbc857ee64b49f3ce32b02df81b45359d3cd0b03c7b53ee
+	// Time: 1561134790
+	// Number: 367350
 	return &Genesis{
 		Config:     params.EnergiTestnetChainConfig,
 		Coinbase:   energi_params.Energi_Treasury,
+		Timestamp:  1561134790,
 		Nonce:      0,
 		ExtraData:  []byte{},
 		GasLimit:   8000000,
@@ -607,7 +612,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	deployEnergiContract(
 		&xfers,
 		energi_params.Energi_MigrationContract,
-		nil,
+		new(big.Int).Mul(big.NewInt(100), big.NewInt(1e18)),
 		energi_abi.Gen2MigrationABI,
 		energi_abi.Gen2MigrationBin,
 		energi_params.Energi_Treasury,

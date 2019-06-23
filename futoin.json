@@ -21,7 +21,7 @@
         ],
         "lint": [ "lint-go", "lint-sol" ],
         "lint-go": "@cte make lint",
-        "lint-sol": "@cte yarn run solium -d contracts/",
+        "lint-sol": "@cte yarn run solium -d energi/contracts/",
 
         "test": [ "test-go", "test-sol" ],
         "test-go": [

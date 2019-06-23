@@ -27,15 +27,17 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 const (
-	MaturityPeriod    uint64 = 60 * 60
-	AverageTimeBlocks uint64 = 60
-	TargetBlockGap    uint64 = 60
-	MinBlockGap       uint64 = 30
-	MaxFutureGap      uint64 = 3
-	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBlockGap
+	MaturityPeriod    uint64 = energi_params.MaturityPeriod
+	AverageTimeBlocks uint64 = energi_params.AverageTimeBlocks
+	TargetBlockGap    uint64 = energi_params.TargetBlockGap
+	MinBlockGap       uint64 = energi_params.MinBlockGap
+	MaxFutureGap      uint64 = energi_params.MaxFutureGap
+	TargetPeriodGap   uint64 = energi_params.TargetPeriodGap
 
 	maturityGuessBlocks uint64 = MaturityPeriod / TargetBlockGap
 )
@@ -465,12 +467,17 @@ func (e *Energi) mine(
 	}
 
 	candidates := make([]Candidates, 0, len(accounts))
+	migration_dpos := false
 	for _, a := range accounts {
 		candidates = append(candidates, Candidates{
 			addr:   a,
 			weight: 0,
 		})
 		//log.Trace("PoS miner candidate found", "address", a)
+
+		if a == energi_params.Energi_MigrationContract {
+			migration_dpos = true
+		}
 	}
 
 	//---
@@ -478,6 +485,17 @@ func (e *Energi) mine(
 	time_target := e.calcTimeTarget(chain, parent)
 
 	blockTime := time_target.min_time
+
+	// Special case due to expected very large gap between Genesis and Migration
+	if header.IsGen2Migration() {
+		blockTime = e.now()
+	}
+
+	// A special workaround to obey target time when migration contract is used
+	// for mining to prevent any difficult bombs.
+	if migration_dpos && (blockTime < time_target.block_target) {
+		blockTime = time_target.block_target
+	}
 
 	//---
 	for ; ; blockTime++ {

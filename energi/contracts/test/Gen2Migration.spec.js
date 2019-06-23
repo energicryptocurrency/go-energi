@@ -32,7 +32,7 @@ contract("Gen2Migration", async accounts => {
     before(async () => {
         orig = await Gen2Migration.deployed();
         treasury_proxy = await ITreasury.at(await orig.treasury_proxy());
-        orig = await MockGen2Migration.new(treasury_proxy.address, common.chain_id, common.migration_signer); 
+        orig = await MockGen2Migration.new(treasury_proxy.address, common.chain_id, accounts[0]); 
     });
 
     after(async () => {
@@ -67,7 +67,7 @@ contract("Gen2Migration", async accounts => {
         ], [
             bal1,
             bal2,
-        ], { value: toWei('300', 'ether') });
+        ], { value: bal1.add(bal2) });
 
         expect((await orig.itemCount()).toString()).equal(toBN(2).toString());
 
@@ -166,7 +166,12 @@ contract("Gen2Migration", async accounts => {
 
     it('should signerAddress()', async () => {
         const signer = await orig.signerAddress();
-        expect(signer).equal(common.migration_signer);
+        expect(signer).equal(accounts[0]);
+    });
+
+    it('should totalAmount()', async () => {
+        const total = await orig.totalAmount();
+        expect(total.toString()).equal(bal1.add(bal2).toString());
     });
 
     // Safety & Cleanup
