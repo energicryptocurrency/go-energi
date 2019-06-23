@@ -47,9 +47,8 @@ var (
 	sealLen   = 65
 	uncleHash = types.CalcUncleHash(nil)
 
-	errMissingSig    = errors.New("Signature is missing")
-	errInvalidSig    = errors.New("Invalid signature")
-	errUnknownParent = errors.New("Unknown parent")
+	errMissingSig = errors.New("Signature is missing")
+	errInvalidSig = errors.New("Invalid signature")
 )
 
 type ChainReader = eth_consensus.ChainReader
@@ -69,6 +68,7 @@ type Energi struct {
 	signerFn     SignerFn
 	accountsFn   AccountsFn
 	diffFn       DiffFn
+	testing      bool
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -148,13 +148,13 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		return errors.New("Invalid Migration")
 	}
 
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 
 	if parent == nil {
 		if header.Number.Cmp(common.Big0) != 0 {
 			log.Trace("Not found parent", "number", header.Number,
 				"hash", header.Hash, "parent", header.ParentHash)
-			return errUnknownParent
+			return eth_consensus.ErrUnknownAncestor
 		}
 
 		return nil
@@ -238,14 +238,22 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 func (e *Energi) VerifyHeaders(
 	chain ChainReader, headers []*types.Header, seals []bool,
 ) (
-	chan<- struct{}, <-chan error,
+	chan<- struct{}, <-chan error, chan<- bool,
 ) {
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
+	ready := make(chan bool, len(headers))
 
 	go func() {
 		for i, header := range headers {
-			// TODO: optimize to use headers as history
+			// NOTE: unlike Ethash with DAG, there is little sense of this
+			//       batch async routine overhead
+			select {
+			case <-abort:
+				return
+			case <-ready:
+			}
+
 			err := e.VerifyHeader(chain, header, seals[i])
 
 			select {
@@ -256,7 +264,7 @@ func (e *Energi) VerifyHeaders(
 		}
 	}()
 
-	return abort, results
+	return abort, results, ready
 }
 
 // VerifyUncles verifies that the given block's uncles conform to the consensus
@@ -276,10 +284,10 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 		return errMissingSig
 	}
 
-	sealhash := e.SealHash(header)
-	log.Trace("PoS verify seal hash", "hash", sealhash)
+	sighash := e.SignatureHash(header)
+	log.Trace("PoS verify signature hash", "sighash", sighash)
 
-	pubkey, err := crypto.Ecrecover(sealhash.Bytes(), header.Signature)
+	pubkey, err := crypto.Ecrecover(sighash.Bytes(), header.Signature)
 	if err != nil {
 		return err
 	}
@@ -296,9 +304,9 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 			return err
 		}
 
-		parent := chain.GetHeaderByHash(header.ParentHash)
+		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 		if parent == nil {
-			return errUnknownParent
+			return eth_consensus.ErrUnknownAncestor
 		}
 
 		blockst, err := state.New(parent.Root, stdb)
@@ -360,28 +368,37 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 // Prepare initializes the consensus fields of a block header according to the
 // rules of a particular engine. The changes are executed inline.
 func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
-	// Clear out unused
-	header.Nonce = types.BlockNonce{}
-
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 
 	if parent == nil {
-		return errUnknownParent
+		log.Error("Fail to find parent", "header", header)
+		return eth_consensus.ErrUnknownAncestor
 	}
 
-	time_target := e.calcTimeTarget(chain, parent)
+	_, err := e.posPrepare(chain, header, parent)
+	return err
+}
 
-	err := e.enforceTime(header, time_target)
+func (e *Energi) posPrepare(
+	chain ChainReader,
+	header *types.Header,
+	parent *types.Header,
+) (time_target *timeTarget, err error) {
+	// Clear field to be set in mining
+	header.Coinbase = common.Address{}
+	header.Nonce = types.BlockNonce{}
+
+	time_target = e.calcTimeTarget(chain, parent)
+
+	err = e.enforceTime(header, time_target)
 
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
-	// TODO: trim Extra
-
 	// Diff
 	header.Difficulty = e.calcPoSDifficulty(chain, header.Time, parent, time_target)
 
-	return err
+	return time_target, err
 }
 
 // Finalize runs any post-transaction state modifications (e.g. block rewards)
@@ -392,19 +409,30 @@ func (e *Energi) Finalize(
 	chain ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction,
 	uncles []*types.Header, receipts []*types.Receipt,
 ) (
-	*types.Block, error,
+	block *types.Block, err error,
 ) {
-	err := e.processBlockRewards(chain, header, state)
+	// Do not finalize too early in mining
+	if (header.Coinbase != common.Address{}) {
+		err = e.govFinalize(chain, header, state, txs)
+	}
+
+	header.UncleHash = uncleHash
+
+	return types.NewBlock(header, txs, nil, receipts), err
+}
+
+func (e *Energi) govFinalize(
+	chain ChainReader,
+	header *types.Header,
+	state *state.StateDB,
+	txs types.Transactions,
+) (err error) {
+	err = e.processBlockRewards(chain, header, state)
 	if err == nil {
 		err = e.finalizeMigration(chain, header, state, txs)
 	}
-
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-	header.UncleHash = uncleHash
-
-	// NOTE: the code does not check result!
-	return types.NewBlock(header, txs, nil, receipts), err
-
+	return
 }
 
 // Seal generates a new sealing request for the given input block and pushes
@@ -412,15 +440,26 @@ func (e *Energi) Finalize(
 //
 // Note, the method returns immediately and will send the result async. More
 // than one result may also be returned depending on the consensus algorithm.
-func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) (err error) {
+func (e *Energi) Seal(
+	chain ChainReader,
+	block *types.Block,
+	state *state.StateDB,
+	results chan<- *types.Block,
+	stop <-chan struct{},
+) (err error) {
 	header := block.Header()
 
 	go func() {
 		if header.Number.Cmp(common.Big0) != 0 {
 			success, err := e.mine(chain, header, stop)
 
+			if success && err == nil {
+				err = e.govFinalize(chain, header, state, block.Transactions())
+			}
+
 			if err != nil {
 				log.Error("PoS miner error", "err", err)
+				success = false
 			}
 
 			if !success {
@@ -432,10 +471,10 @@ func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *typ
 			}
 		}
 
-		sealhash := e.SealHash(header)
-		log.Trace("PoS seal hash", "sealhash", sealhash)
+		sighash := e.SignatureHash(header)
+		log.Trace("PoS seal hash", "sighash", sighash)
 
-		header.Signature, err = e.signerFn(header.Coinbase, sealhash.Bytes())
+		header.Signature, err = e.signerFn(header.Coinbase, sighash.Bytes())
 		if err != nil {
 			log.Error("PoS miner error", "err", err)
 			return
@@ -445,7 +484,7 @@ func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *typ
 		case results <- block.WithSeal(header):
 			log.Info("PoS seal has submitted solution", "block", block.Hash())
 		default:
-			log.Warn("PoS seal is not read by miner", "sealhash", sealhash)
+			log.Warn("PoS seal is not read by miner", "sealhash", e.SealHash(header))
 		}
 	}()
 
@@ -461,10 +500,10 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 		header.ParentHash,
 		header.UncleHash,
 		//header.Coinbase,
-		header.Root,
+		//header.Root,
 		header.TxHash,
 		header.ReceiptHash,
-		header.Bloom,
+		//header.Bloom,
 		//header.Difficulty,
 		header.Number,
 		header.GasLimit,

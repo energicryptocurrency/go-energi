@@ -81,6 +81,10 @@ func (b Bloom) TestBytes(test []byte) bool {
 
 }
 
+func (b Bloom) Contains(o *big.Int) bool {
+	return new(big.Int).And(b.Big(), o).Cmp(o) == 0
+}
+
 // MarshalText encodes b as a hex string with 0x prefix.
 func (b Bloom) MarshalText() ([]byte, error) {
 	return hexutil.Bytes(b[:]).MarshalText()

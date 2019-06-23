@@ -60,13 +60,14 @@ func TestPoSChain(t *testing.T) {
 	alloc[energi_params.Energi_MigrationContract] = core.GenesisAccount{
 		Balance: minStake,
 	}
-	migrationSigner := addresses[1]
+	migrationSigner := addresses[59]
 	signers[energi_params.Energi_MigrationContract] = signers[migrationSigner]
 
 	testdb := ethdb.NewMemDatabase()
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	var header *types.Header
 
+	engine.testing = true
 	engine.SetMinerCB(
 		func() []common.Address {
 			if header.Number.Uint64() == 1 {
@@ -90,6 +91,7 @@ func TestPoSChain(t *testing.T) {
 	var (
 		gspec = &core.Genesis{
 			Config:     &chainConfig,
+			GasLimit:   8000000,
 			Timestamp:  1000,
 			Difficulty: big.NewInt(1),
 			Coinbase:   energi_params.Energi_Treasury,
@@ -136,20 +138,41 @@ func TestPoSChain(t *testing.T) {
 		err = engine.Prepare(chain, header)
 		assert.Empty(t, err)
 		assert.NotEmpty(t, header.Difficulty)
+		txs := types.Transactions{}
+		receipts := []*types.Receipt{}
+		if i == 1 {
+			tx := migrationTx(
+				types.NewEIP155Signer(chainConfig.ChainID), header,
+				&snapshot{
+					Txouts: []snapshotItem{
+						{
+							Owner:  "t6vtJKxdjaJdofaUrx7w4xUs5bMcjDq5R2",
+							Amount: big.NewInt(10228000000),
+							Atype:  "pubkeyhash",
+						},
+					},
+				}, engine)
+			receipt, _, err := core.ApplyTransaction(
+				&chainConfig, chain, &header.Coinbase,
+				new(core.GasPool).AddGas(header.GasLimit),
+				blstate, header, tx,
+				&header.GasUsed, *chain.GetVMConfig())
+			assert.Empty(t, err)
+			txs = append(txs, tx)
+			receipts = append(receipts, receipt)
+		}
 		block, err := engine.Finalize(
-			chain, header, blstate, []*types.Transaction{}, nil, []*types.Receipt{})
-
-		blstate.Commit(true)
-		stdb.TrieDB().Commit(block.Root(), true)
+			chain, header, blstate, txs, nil, receipts)
+		assert.Empty(t, err)
 
 		//---
-		err = engine.Seal(chain, block, results, stop)
+		err = engine.Seal(chain, block, blstate, results, stop)
 		assert.Empty(t, err)
 
 		block = <-results
 		assert.NotEmpty(t, block)
 		header = block.Header()
-		assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
+		//assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
 		assert.NotEqual(t, parent.Coinbase, common.Address{}, "Header %v", i)
 		err = engine.VerifySeal(chain, header)
 		assert.Empty(t, err)
@@ -177,13 +200,7 @@ func TestPoSChain(t *testing.T) {
 
 		assert.True(t, parent.Time < tt.min_time, "Header %v", i)
 
-		// Stake modifier tests
-		//---
-		assert.NotEqual(t, header.Coinbase.Hex(), parent.Coinbase.Hex(), "Header %v", i)
-		assert.NotEqual(t, header.MixDigest.Hex(), parent.MixDigest.Hex(), "Header %v", i)
-		//---
-
-		_, err = chain.InsertHeaderChain([]*types.Header{header}, 1)
+		_, err = chain.WriteBlockWithState(block, receipts, blstate)
 		assert.Empty(t, err)
 
 		// Stake amount tests

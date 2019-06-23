@@ -17,6 +17,7 @@
 package consensus
 
 import (
+	"errors"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -55,6 +56,9 @@ func (e *Energi) processBlockRewards(
 		log.Error("Fail to prepare reward() call", "err", err)
 		return err
 	}
+
+	txhash := common.Hash{}
+	statedb.Prepare(txhash, common.Hash{}, 0)
 
 	for i, caddr := range e.rewardGov {
 		// GetReward()
@@ -105,6 +109,16 @@ func (e *Energi) processBlockRewards(
 
 		log.Trace("Block reward", "id", i, "addr", caddr,
 			"reward", value, "gas", gas1+gas2)
+	}
+
+	bloom := types.LogsBloom(statedb.GetLogs(txhash))
+
+	if header.Signature == nil || len(header.Signature) == 0 {
+		// In generation
+		header.Bloom.Add(bloom)
+	} else if !header.Bloom.Contains(bloom) {
+		// In replication
+		return errors.New("Invalid Bloom value")
 	}
 
 	return nil

@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	eth_consensus "github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -38,8 +39,6 @@ const (
 	MinBlockGap       uint64 = energi_params.MinBlockGap
 	MaxFutureGap      uint64 = energi_params.MaxFutureGap
 	TargetPeriodGap   uint64 = energi_params.TargetPeriodGap
-
-	maturityGuessBlocks uint64 = MaturityPeriod / TargetBlockGap
 )
 
 var (
@@ -47,9 +46,7 @@ var (
 
 	diff1Target = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
 
-	errBlockMinTime  = errors.New("Minimal time gap is not obeyed")
-	errBlockInFuture = errors.New("Too much in future")
-	errMissingParent = errors.New("Missing parent")
+	errBlockMinTime = errors.New("Minimal time gap is not obeyed")
 
 	errInvalidPoSHash  = errors.New("Invalid PoS hash")
 	errInvalidPoSNonce = errors.New("Invalid Stake weight")
@@ -78,7 +75,8 @@ func (e *Energi) calcTimeTarget(
 ) *timeTarget {
 	ret := &timeTarget{}
 	now := e.now()
-	block_number := parent.Number.Uint64() + 1
+	parent_number := parent.Number.Uint64()
+	block_number := parent_number + 1
 
 	// POS-11: Block time restrictions
 	ret.max_time = now + MaxFutureGap
@@ -91,7 +89,14 @@ func (e *Energi) calcTimeTarget(
 	// POS-12: Block interval enforcement
 	//---
 	if block_number >= AverageTimeBlocks {
-		past := chain.GetHeaderByNumber(block_number - AverageTimeBlocks)
+		past := parent
+
+		// NOTE: we have to this way as parent may be not part of canonical
+		//       chain. As no mutex is held, we cannot do checks for canonical.
+		for i := AverageTimeBlocks - 1; i > 0; i-- {
+			past = chain.GetHeader(past.ParentHash, past.Number.Uint64()-1)
+		}
+
 		actual := parent.Time - past.Time
 		expected := TargetPeriodGap - TargetBlockGap
 		ret.period_target = past.Time + TargetPeriodGap
@@ -117,7 +122,7 @@ func (e *Energi) enforceTime(
 
 	// Check if allowed to mine
 	if header.Time > time_target.max_time {
-		return errBlockInFuture
+		return eth_consensus.ErrFutureBlock
 	}
 
 	return nil
@@ -133,7 +138,7 @@ func (e *Energi) checkTime(
 
 	// Check if allowed to mine
 	if header.Time > time_target.max_time {
-		return errBlockInFuture
+		return eth_consensus.ErrFutureBlock
 	}
 
 	return nil
@@ -160,30 +165,15 @@ func (e *Energi) calcPoSModifier(
 	}
 
 	// Find the oldest inside maturity period
+	// NOTE: we have to do this walk as parent may not be part of the canonical chain
 	parent_height := parent.Number.Uint64()
-	guess := parent_height
+	oldest := parent
 
-	if guess < maturityGuessBlocks {
-		guess = 0
-	} else {
-		guess -= maturityGuessBlocks
-	}
+	for header, num := oldest, oldest.Number.Uint64(); (header.Time > maturity_border) && (num > 0); {
 
-	// NOTE: the logic below can go into if-clauses, but we always run both
-	//       cases
-
-	// If we hit inside the period
-	oldest := chain.GetHeaderByNumber(guess)
-
-	for (oldest.Time > maturity_border) && (guess > 0) {
-		guess--
-		oldest = chain.GetHeaderByNumber(guess)
-	}
-
-	// If we hit outside the period
-	for (oldest.Time <= maturity_border) && (oldest.Number.Uint64() < parent_height) {
-		guess++
-		oldest = chain.GetHeaderByNumber(guess)
+		oldest = header
+		num--
+		header = chain.GetHeader(header.ParentHash, num)
 	}
 
 	// Create Stake Modifier
@@ -328,7 +318,7 @@ func (e *Energi) verifyPoSHash(
 	chain ChainReader,
 	header *types.Header,
 ) error {
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	weight, err := e.lookupStakeWeight(chain, header.Time, parent, header.Coinbase)
 	if err != nil {
 		return err
@@ -421,7 +411,7 @@ func (e *Energi) lookupStakeWeight(
 		}
 
 		curr := till
-		till = chain.GetHeaderByHash(till.ParentHash)
+		till = chain.GetHeader(till.ParentHash, till.Number.Uint64()-1)
 
 		if till == nil {
 			if curr.Number.Cmp(common.Big0) == 0 {
@@ -429,7 +419,7 @@ func (e *Energi) lookupStakeWeight(
 			}
 
 			log.Error("PoS state missing parent")
-			return 0, errMissingParent
+			return 0, eth_consensus.ErrUnknownAncestor
 		}
 	}
 
@@ -481,19 +471,24 @@ func (e *Energi) mine(
 	}
 
 	//---
-	parent := chain.GetHeaderByHash(header.ParentHash)
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+
+	if parent == nil {
+		return false, eth_consensus.ErrUnknownAncestor
+	}
+
 	time_target := e.calcTimeTarget(chain, parent)
 
 	blockTime := time_target.min_time
 
 	// Special case due to expected very large gap between Genesis and Migration
-	if header.IsGen2Migration() {
+	if header.IsGen2Migration() && !e.testing {
 		blockTime = e.now()
 	}
 
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
-	if migration_dpos && (blockTime < time_target.block_target) {
+	if migration_dpos && (blockTime < time_target.block_target) && !e.testing {
 		blockTime = time_target.block_target
 	}
 
@@ -509,8 +504,11 @@ func (e *Energi) mine(
 		}
 
 		header.Time = blockTime
-		header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
-		header.Difficulty = e.calcPoSDifficulty(chain, blockTime, parent, time_target)
+		time_target, err = e.posPrepare(chain, header, parent)
+		if err != nil {
+			return false, err
+		}
+
 		target := new(big.Int).Div(diff1Target, header.Difficulty)
 		log.Trace("PoS miner time", "time", blockTime)
 

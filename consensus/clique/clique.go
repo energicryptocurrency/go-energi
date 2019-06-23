@@ -250,7 +250,7 @@ func (c *Clique) VerifyHeader(chain consensus.ChainReader, header *types.Header,
 // VerifyHeaders is similar to VerifyHeader, but verifies a batch of headers. The
 // method returns a quit channel to abort the operations and a results channel to
 // retrieve the async verifications (the order is that of the input slice).
-func (c *Clique) VerifyHeaders(chain consensus.ChainReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error) {
+func (c *Clique) VerifyHeaders(chain consensus.ChainReader, headers []*types.Header, seals []bool) (chan<- struct{}, <-chan error, chan<- bool) {
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 
@@ -265,7 +265,7 @@ func (c *Clique) VerifyHeaders(chain consensus.ChainReader, headers []*types.Hea
 			}
 		}
 	}()
-	return abort, results
+	return abort, results, nil
 }
 
 // verifyHeader checks whether a header conforms to the consensus rules.The
@@ -600,7 +600,7 @@ func (c *Clique) Authorize(signer common.Address, signFn SignerFn) {
 
 // Seal implements consensus.Engine, attempting to create a sealed block using
 // the local signing credentials.
-func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) error {
+func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, state *state.StateDB, results chan<- *types.Block, stop <-chan struct{}) error {
 	header := block.Header()
 
 	// Sealing the genesis block is not supported

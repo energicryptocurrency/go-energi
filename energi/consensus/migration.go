@@ -110,12 +110,6 @@ func MigrationTx(
 	migration_file string,
 	engine consensus.Engine,
 ) (res *types.Transaction) {
-	e, ok := engine.(*Energi)
-	if !ok {
-		log.Error("Not Energi consensus engine")
-		return nil
-	}
-
 	file, err := os.Open(migration_file)
 	if err != nil {
 		log.Error("Failed to open snapshot", "err", err)
@@ -126,6 +120,21 @@ func MigrationTx(
 	snapshot, err := parseSnapshot(file)
 	if err != nil {
 		log.Error("Failed to parse snapshot", "err", err)
+		return nil
+	}
+
+	return migrationTx(signer, header, snapshot, engine)
+}
+
+func migrationTx(
+	signer types.Signer,
+	header *types.Header,
+	snapshot *snapshot,
+	engine consensus.Engine,
+) (res *types.Transaction) {
+	e, ok := engine.(*Energi)
+	if !ok {
+		log.Error("Not Energi consensus engine")
 		return nil
 	}
 
