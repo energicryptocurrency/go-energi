@@ -82,16 +82,18 @@ func (st *insertStats) report(chain []*types.Block, index int, cache common.Stor
 type insertIterator struct {
 	chain     types.Blocks
 	results   <-chan error
+	ready     chan<- bool
 	index     int
 	validator Validator
 }
 
 // newInsertIterator creates a new iterator based on the given blocks, which are
 // assumed to be a contiguous chain.
-func newInsertIterator(chain types.Blocks, results <-chan error, validator Validator) *insertIterator {
+func newInsertIterator(chain types.Blocks, results <-chan error, ready chan<- bool, validator Validator) *insertIterator {
 	return &insertIterator{
 		chain:     chain,
 		results:   results,
+		ready:     ready,
 		index:     -1,
 		validator: validator,
 	}
@@ -105,6 +107,9 @@ func (it *insertIterator) next() (*types.Block, error) {
 		return nil, nil
 	}
 	it.index++
+	if it.ready != nil {
+		it.ready <- true
+	}
 	if err := <-it.results; err != nil {
 		return it.chain[it.index], err
 	}

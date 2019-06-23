@@ -238,14 +238,22 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 func (e *Energi) VerifyHeaders(
 	chain ChainReader, headers []*types.Header, seals []bool,
 ) (
-	chan<- struct{}, <-chan error,
+	chan<- struct{}, <-chan error, chan<- bool,
 ) {
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
+	ready := make(chan bool, len(headers))
 
 	go func() {
 		for i, header := range headers {
-			// TODO: optimize to use headers as history
+			// NOTE: unlike Ethash with DAG, there is little sense of this
+			//       batch async routine overhead
+			select {
+			case <-abort:
+				return
+			case <-ready:
+			}
+
 			err := e.VerifyHeader(chain, header, seals[i])
 
 			select {
@@ -256,7 +264,7 @@ func (e *Energi) VerifyHeaders(
 		}
 	}()
 
-	return abort, results
+	return abort, results, ready
 }
 
 // VerifyUncles verifies that the given block's uncles conform to the consensus

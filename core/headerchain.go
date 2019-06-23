@@ -229,8 +229,12 @@ func (hc *HeaderChain) ValidateHeaderChain(chain []*types.Header, checkFreq int)
 	}
 	seals[len(seals)-1] = true // Last should always be verified to avoid junk
 
-	abort, results := hc.engine.VerifyHeaders(hc, chain, seals)
+	abort, results, ready := hc.engine.VerifyHeaders(hc, chain, seals)
 	defer close(abort)
+
+	if ready != nil {
+		log.Debug("Unable to validate against engine requirement of ready parent")
+	}
 
 	// Iterate over the headers and ensure they all check out
 	for i, header := range chain {
@@ -242,6 +246,9 @@ func (hc *HeaderChain) ValidateHeaderChain(chain []*types.Header, checkFreq int)
 		// If the header is a banned one, straight out abort
 		if BadHashes[header.Hash()] {
 			return i, ErrBlacklistedHash
+		}
+		if ready != nil {
+			ready <- true
 		}
 		// Otherwise wait for headers checks and ensure they pass
 		if err := <-results; err != nil {
