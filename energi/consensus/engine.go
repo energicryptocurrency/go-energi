@@ -284,10 +284,10 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 		return errMissingSig
 	}
 
-	sealhash := e.SealHash(header)
-	log.Trace("PoS verify seal hash", "hash", sealhash)
+	sighash := e.SignatureHash(header)
+	log.Trace("PoS verify signature hash", "sighash", sighash)
 
-	pubkey, err := crypto.Ecrecover(sealhash.Bytes(), header.Signature)
+	pubkey, err := crypto.Ecrecover(sighash.Bytes(), header.Signature)
 	if err != nil {
 		return err
 	}
@@ -446,10 +446,10 @@ func (e *Energi) Seal(
 			}
 		}
 
-		sealhash := e.SealHash(header)
-		log.Trace("PoS seal hash", "sealhash", sealhash)
+		sighash := e.SignatureHash(header)
+		log.Trace("PoS seal hash", "sighash", sighash)
 
-		header.Signature, err = e.signerFn(header.Coinbase, sealhash.Bytes())
+		header.Signature, err = e.signerFn(header.Coinbase, sighash.Bytes())
 		if err != nil {
 			log.Error("PoS miner error", "err", err)
 			return
@@ -459,7 +459,7 @@ func (e *Energi) Seal(
 		case results <- block.WithSeal(header):
 			log.Info("PoS seal has submitted solution", "block", block.Hash())
 		default:
-			log.Warn("PoS seal is not read by miner", "sealhash", sealhash)
+			log.Warn("PoS seal is not read by miner", "sealhash", e.SealHash(header))
 		}
 	}()
 
@@ -475,10 +475,10 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 		header.ParentHash,
 		header.UncleHash,
 		//header.Coinbase,
-		header.Root,
+		//header.Root,
 		header.TxHash,
 		header.ReceiptHash,
-		header.Bloom,
+		//header.Bloom,
 		//header.Difficulty,
 		header.Number,
 		header.GasLimit,
