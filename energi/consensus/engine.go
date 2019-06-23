@@ -47,9 +47,8 @@ var (
 	sealLen   = 65
 	uncleHash = types.CalcUncleHash(nil)
 
-	errMissingSig    = errors.New("Signature is missing")
-	errInvalidSig    = errors.New("Invalid signature")
-	errUnknownParent = errors.New("Unknown parent")
+	errMissingSig = errors.New("Signature is missing")
+	errInvalidSig = errors.New("Invalid signature")
 )
 
 type ChainReader = eth_consensus.ChainReader
@@ -154,7 +153,7 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		if header.Number.Cmp(common.Big0) != 0 {
 			log.Trace("Not found parent", "number", header.Number,
 				"hash", header.Hash, "parent", header.ParentHash)
-			return errUnknownParent
+			return eth_consensus.ErrUnknownAncestor
 		}
 
 		return nil
@@ -306,7 +305,7 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 
 		parent := chain.GetHeaderByHash(header.ParentHash)
 		if parent == nil {
-			return errUnknownParent
+			return eth_consensus.ErrUnknownAncestor
 		}
 
 		blockst, err := state.New(parent.Root, stdb)
@@ -374,7 +373,8 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	parent := chain.GetHeaderByHash(header.ParentHash)
 
 	if parent == nil {
-		return errUnknownParent
+		log.Error("Fail to find parent", "header", header)
+		return eth_consensus.ErrUnknownAncestor
 	}
 
 	time_target := e.calcTimeTarget(chain, parent)

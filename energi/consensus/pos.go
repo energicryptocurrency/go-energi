@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
+	eth_consensus "github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -47,9 +48,7 @@ var (
 
 	diff1Target = new(big.Int).Exp(big.NewInt(2), big.NewInt(256), big.NewInt(0))
 
-	errBlockMinTime  = errors.New("Minimal time gap is not obeyed")
-	errBlockInFuture = errors.New("Too much in future")
-	errMissingParent = errors.New("Missing parent")
+	errBlockMinTime = errors.New("Minimal time gap is not obeyed")
 
 	errInvalidPoSHash  = errors.New("Invalid PoS hash")
 	errInvalidPoSNonce = errors.New("Invalid Stake weight")
@@ -117,7 +116,7 @@ func (e *Energi) enforceTime(
 
 	// Check if allowed to mine
 	if header.Time > time_target.max_time {
-		return errBlockInFuture
+		return eth_consensus.ErrFutureBlock
 	}
 
 	return nil
@@ -133,7 +132,7 @@ func (e *Energi) checkTime(
 
 	// Check if allowed to mine
 	if header.Time > time_target.max_time {
-		return errBlockInFuture
+		return eth_consensus.ErrFutureBlock
 	}
 
 	return nil
@@ -429,7 +428,7 @@ func (e *Energi) lookupStakeWeight(
 			}
 
 			log.Error("PoS state missing parent")
-			return 0, errMissingParent
+			return 0, eth_consensus.ErrUnknownAncestor
 		}
 	}
 
