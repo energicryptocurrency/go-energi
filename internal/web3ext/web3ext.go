@@ -116,6 +116,21 @@ const Energi_JS = `
 web3._extend({
 	property: 'energi',
 	methods: [
+		new web3._extend.Method({
+			name: 'listGen2Coins',
+			call: 'energi_listGen2Coins',
+			params: 0
+		}),
+		new web3._extend.Method({
+			name: 'searchGen2Coins',
+			call: 'energi_searchGen2Coins',
+			params: 2
+		}),
+		new web3._extend.Method({
+			name: 'searchRawGen2Coins',
+			call: 'energi_searchRawGen2Coins',
+			params: 2
+		}),
 	],
 	properties: [
 	]
