@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	ZeroFeeGasLimit uint64 = 50000
+	ZeroFeeGasLimit uint64 = 500000
 )
 
 var (

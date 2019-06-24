@@ -142,7 +142,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn - 10, b.hash, '0');
+                    await s.token_abi.heartbeat(bn - 10, b.hash, '0', common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Too old/);
@@ -154,7 +154,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn - 9, b.hash, '0');
+                    await s.token_abi.heartbeat(bn - 9, b.hash, '0', common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Block mismatch/);
@@ -166,7 +166,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0');
+                    await s.token_abi.heartbeat(bn, b.hash, '0', common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Not active/);
@@ -175,7 +175,7 @@ contract("MasternodeRegistryV1", async accounts => {
 
             it('should refuse to validate() vote for self', async () => {
                 try {
-                    await s.token_abi.validate(owner1);
+                    await s.token_abi.validate(owner1, common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Vote for self/);
@@ -184,7 +184,7 @@ contract("MasternodeRegistryV1", async accounts => {
 
             it('should refuse to validate() not active', async () => {
                 try {
-                    await s.token_abi.validate(masternode2);
+                    await s.token_abi.validate(masternode2, common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Not active caller/);
@@ -379,7 +379,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1});
+                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Too early/);
@@ -388,7 +388,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 await common.moveTime(web3, 59*30);
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1});
+                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Too early/);
@@ -407,7 +407,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const bn = await web3.eth.getBlockNumber();
                 const b = await web3.eth.getBlock(bn);
 
-                await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1});
+                await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                 
                 const s2 = await s.orig.mn_status(masternode1);
                 expect(s2.last_heartbeat.gt(s1.last_heartbeat)).true;
@@ -489,7 +489,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1});
+                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Too early/);
@@ -498,7 +498,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 await common.moveTime(web3, 2*60*60);
                 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1});
+                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Too late/);
@@ -646,7 +646,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const bn = await web3.eth.getBlockNumber();
                 const b = await web3.eth.getBlock(bn);
 
-                await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1});
+                await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                 
                 const s2 = await s.orig.mn_status(masternode1);
                 expect(s2.last_heartbeat.gt(s1.last_heartbeat)).true;
@@ -897,12 +897,12 @@ contract("MasternodeRegistryV1", async accounts => {
                 
                 for (let i = count; i > 0; --i) {
                     if (i == 6 || i == 12) {
-                        await s.token_abi.validate(masternode2, {from:masternode1});
-                        await s.token_abi.validate(masternode3, {from:masternode1});
-                        await s.token_abi.validate(masternode1, {from:masternode2});
-                        await s.token_abi.validate(masternode3, {from:masternode2});
-                        await s.token_abi.validate(masternode1, {from:masternode3});
-                        await s.token_abi.validate(masternode2, {from:masternode3});
+                        await s.token_abi.validate(masternode2, {from:masternode1, ...common.zerofee_callopts});
+                        await s.token_abi.validate(masternode3, {from:masternode1, ...common.zerofee_callopts});
+                        await s.token_abi.validate(masternode1, {from:masternode2, ...common.zerofee_callopts});
+                        await s.token_abi.validate(masternode3, {from:masternode2, ...common.zerofee_callopts});
+                        await s.token_abi.validate(masternode1, {from:masternode3, ...common.zerofee_callopts});
+                        await s.token_abi.validate(masternode2, {from:masternode3, ...common.zerofee_callopts});
                     }
 
                     let r = await s.reward_abi.getReward(i);
@@ -949,17 +949,17 @@ contract("MasternodeRegistryV1", async accounts => {
                 let sb = false;
 
                 // Once while active count is above validation barrier
-                await s.token_abi.validate(masternode3, {from:masternode1});
-                await s.token_abi.validate(masternode1, {from:masternode2});
-                await s.token_abi.validate(masternode3, {from:masternode2});
-                await s.token_abi.validate(masternode1, {from:masternode3});
+                await s.token_abi.validate(masternode3, {from:masternode1, ...common.zerofee_callopts});
+                await s.token_abi.validate(masternode1, {from:masternode2, ...common.zerofee_callopts});
+                await s.token_abi.validate(masternode3, {from:masternode2, ...common.zerofee_callopts});
+                await s.token_abi.validate(masternode1, {from:masternode3, ...common.zerofee_callopts});
 
                 for (let i = count; i > 0; --i) {
                     if (i == 12 || i == 8 || i == 4) {
                         const bn = await web3.eth.getBlockNumber();
                         const b = await web3.eth.getBlock(bn);
-                        await s.token_abi.heartbeat(bn, b.hash, '12', {from:masternode1});
-                        await s.token_abi.heartbeat(bn, b.hash, '34', {from:masternode3});
+                        await s.token_abi.heartbeat(bn, b.hash, '12', {from:masternode1, ...common.zerofee_callopts});
+                        await s.token_abi.heartbeat(bn, b.hash, '34', {from:masternode3, ...common.zerofee_callopts});
                         await common.moveTime(web3, 90*60);
                     }
 
@@ -1003,7 +1003,7 @@ contract("MasternodeRegistryV1", async accounts => {
 
             it('should refuse validate() inactive node', async () => {
                 try {
-                    await s.token_abi.validate(masternode2, {from:masternode1});
+                    await s.token_abi.validate(masternode2, {from:masternode1, ...common.zerofee_callopts});
                     assert.fail('It must fail');
                 } catch (e) {
                     assert.match(e.message, /Not active target/);
@@ -1012,7 +1012,7 @@ contract("MasternodeRegistryV1", async accounts => {
 
             it('should refuse validate() by inactive node', async () => {
                 try {
-                    await s.token_abi.validate(masternode1, {from:masternode2});
+                    await s.token_abi.validate(masternode1, {from:masternode2, ...common.zerofee_callopts});
                     assert.fail('It must fail');
                 } catch (e) {
                     assert.match(e.message, /Not active caller/);

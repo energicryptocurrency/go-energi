@@ -51,6 +51,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 
+	energi_api "energi.world/core/gen3/energi/api"
 	energi "energi.world/core/gen3/energi/consensus"
 )
 
@@ -274,7 +275,7 @@ func (s *Ethereum) APIs() []rpc.API {
 	apis = append(apis, s.engine.APIs(s.BlockChain())...)
 
 	// Append all the local APIs and return
-	return append(apis, []rpc.API{
+	apis = append(apis, []rpc.API{
 		{
 			Namespace: "eth",
 			Version:   "1.0",
@@ -320,6 +321,26 @@ func (s *Ethereum) APIs() []rpc.API {
 			Public:    true,
 		},
 	}...)
+
+	// Append Energi-specific APIs
+	apis = append(apis, []rpc.API{
+		{
+			Namespace: "energi",
+			Version:   "1.0",
+			Service:   energi_api.NewMigrationAPI(s.APIBackend),
+			Public:    true,
+		},
+	}...)
+
+	for _, a := range apis {
+		if a.Namespace == "eth" {
+			// "a" should be a copy
+			a.Namespace = "energi"
+			apis = append(apis, a)
+		}
+	}
+
+	return apis
 }
 
 func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {

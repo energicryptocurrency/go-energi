@@ -113,7 +113,7 @@ contract("Gen2Migration", async accounts => {
         const bal_before = await web3.eth.getBalance(dst);
 
         const hash = await orig.hashToSign(dst);
-        await orig.claim(1, dst, ...ecsign(acc2, hash));
+        await orig.claim(1, dst, ...ecsign(acc2, hash), common.zerofee_callopts);
 
         const bal_after = await web3.eth.getBalance(dst);
         expect(toBN(bal_after).sub(toBN(bal_before)).toString()).equal(bal2.toString());
@@ -136,7 +136,7 @@ contract("Gen2Migration", async accounts => {
         const hash = await orig.hashToSign(dst);
 
         try {
-            await orig.claim(1, dst, ...ecsign(acc2, hash));
+            await orig.claim(1, dst, ...ecsign(acc2, hash), common.zerofee_callopts);
             assert.fail('It must fail');
         } catch (e) {
             assert.match(e.message, /Already spent/);

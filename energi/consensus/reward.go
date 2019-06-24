@@ -111,12 +111,12 @@ func (e *Energi) processBlockRewards(
 			"reward", value, "gas", gas1+gas2)
 	}
 
-	bloom := types.LogsBloom(statedb.GetLogs(txhash))
+	bloom := types.BytesToBloom(types.LogsBloom(statedb.GetLogs(txhash)).Bytes())
 
 	if header.Signature == nil || len(header.Signature) == 0 {
 		// In generation
-		header.Bloom.Add(bloom)
-	} else if !header.Bloom.Contains(bloom) {
+		header.Bloom.AddBloom(&bloom)
+	} else if !header.Bloom.ContainsBloom(&bloom) {
 		// In replication
 		return errors.New("Invalid Bloom value")
 	}

@@ -87,7 +87,7 @@ func (v *BlockValidator) ValidateState(block, parent *types.Block, statedb *stat
 	rbloom := types.CreateBloom(receipts)
 	//if rbloom != header.Bloom {
 	// NOTE: Energi adds governance events to Bloom, so it's not equal by design.
-	if !header.Bloom.Contains(rbloom.Big()) {
+	if !header.Bloom.ContainsBloom(&rbloom) {
 		return fmt.Errorf("invalid bloom (remote: %x  local: %x)", header.Bloom, rbloom)
 	}
 	// Tre receipt Trie's root (R = (Tr [[H1, R1], ... [Hn, R1]]))
