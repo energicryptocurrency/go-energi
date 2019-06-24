@@ -18,6 +18,7 @@ package eth
 
 import (
 	"context"
+	"errors"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
@@ -78,4 +79,51 @@ func (b *EthAPIBackend) CallContract(ctx context.Context, call ethereum.CallMsg,
 
 	ret, _, _, err := core.NewStateTransition(vmenv, msg, gaspool).TransitionDb()
 	return ret, err
+}
+
+func (b *EthAPIBackend) PendingCodeAt(
+	ctx context.Context,
+	account common.Address,
+) ([]byte, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (b *EthAPIBackend) PendingNonceAt(
+	ctx context.Context,
+	account common.Address,
+) (uint64, error) {
+	return b.GetPoolNonce(ctx, account)
+}
+
+func (b *EthAPIBackend) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (b *EthAPIBackend) EstimateGas(
+	ctx context.Context,
+	call ethereum.CallMsg,
+) (gas uint64, err error) {
+	return 0, errors.New("Not implemented")
+}
+
+func (b *EthAPIBackend) SendTransaction(
+	ctx context.Context,
+	tx *types.Transaction,
+) error {
+	return b.SendTx(ctx, tx)
+}
+
+func (b *EthAPIBackend) FilterLogs(
+	ctx context.Context,
+	query ethereum.FilterQuery,
+) ([]types.Log, error) {
+	return nil, errors.New("Not implemented")
+}
+
+func (b *EthAPIBackend) SubscribeFilterLogs(
+	ctx context.Context,
+	query ethereum.FilterQuery,
+	ch chan<- types.Log,
+) (ethereum.Subscription, error) {
+	return nil, errors.New("Not implemented")
 }
