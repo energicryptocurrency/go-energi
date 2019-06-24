@@ -131,6 +131,21 @@ web3._extend({
 			call: 'energi_searchRawGen2Coins',
 			params: 2
 		}),
+		new web3._extend.Method({
+			name: 'claimGen2CoinsDirect',
+			call: 'energi_claimGen2CoinsDirect',
+			params: 3
+		}),
+		new web3._extend.Method({
+			name: 'claimGen2CoinsCombined',
+			call: 'energi_claimGen2CoinsCombined',
+			params: 3
+		}),
+		new web3._extend.Method({
+			name: 'claimGen2CoinsImport',
+			call: 'energi_claimGen2CoinsImport',
+			params: 2
+		}),
 	],
 	properties: [
 	]

@@ -47,13 +47,13 @@ func TestGen2Parse(t *testing.T) {
 	assert.Equal(t, 2, len(res))
 	assert.Equal(t,
 		"0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6",
-		res[0].Owner.String())
+		res[0].RawOwner.String())
 	assert.Equal(t,
 		"0x3fb403e4227a129129e9c0f01ba3ed79294f1ae18bbd961e7ad7fa0996680c40",
 		common.ToHex(crypto.FromECDSA(res[0].Key)))
 	assert.Equal(t,
 		"0xDB52E60435e09e998b6077eE65e3719836fA0d2e",
-		res[1].Owner.String())
+		res[1].RawOwner.String())
 	assert.Equal(t,
 		"0x4be146dcb88089732cdbea785bcf5c2c188d67152f0b80329e275c2b553174bc",
 		common.ToHex(crypto.FromECDSA(res[1].Key)))
@@ -71,19 +71,19 @@ func TestSearchCoins(t *testing.T) {
 		},
 		[]Gen2Coin{
 			{
-				ItemID: 77,
-				Owner:  common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount: big.NewInt(0),
+				ItemID:   77,
+				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
+				Amount:   big.NewInt(0),
 			},
 			{
-				ItemID: 78,
-				Owner:  common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount: big.NewInt(10),
+				ItemID:   78,
+				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
+				Amount:   big.NewInt(10),
 			},
 			{
-				ItemID: 79,
-				Owner:  common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
-				Amount: big.NewInt(10),
+				ItemID:   79,
+				RawOwner: common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
+				Amount:   big.NewInt(10),
 			},
 		},
 		true,
@@ -98,19 +98,19 @@ func TestSearchCoins(t *testing.T) {
 		},
 		[]Gen2Coin{
 			{
-				ItemID: 77,
-				Owner:  common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount: big.NewInt(0),
+				ItemID:   77,
+				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
+				Amount:   big.NewInt(0),
 			},
 			{
-				ItemID: 78,
-				Owner:  common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount: big.NewInt(10),
+				ItemID:   78,
+				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
+				Amount:   big.NewInt(10),
 			},
 			{
-				ItemID: 79,
-				Owner:  common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
-				Amount: big.NewInt(10),
+				ItemID:   79,
+				RawOwner: common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
+				Amount:   big.NewInt(10),
 			},
 		},
 		false,

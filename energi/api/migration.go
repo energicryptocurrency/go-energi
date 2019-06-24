@@ -19,13 +19,17 @@ package api
 import (
 	"crypto/ecdsa"
 	"crypto/sha256"
+	"errors"
 	"io"
 	"math/big"
 	"os"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/internal/ethapi"
 	"github.com/ethereum/go-ethereum/log"
@@ -38,8 +42,9 @@ import (
 )
 
 const (
-	base54PrivateKeyLen int = 52
-	privateKeyLen       int = 32
+	base54PrivateKeyLen int    = 52
+	privateKeyLen       int    = 32
+	migrationGas        uint64 = 100000
 )
 
 type MigrationAPI struct {
@@ -156,28 +161,28 @@ func (m *MigrationAPI) searchGen2Coins(
 	return coins
 }
 
-func (m *MigrationAPI) loadGen2Dump(file string) (keys []Gen2Key) {
+func (m *MigrationAPI) loadGen2Dump(file string) (keys []Gen2Key, err error) {
 	f, err := os.Open(file)
 	if err != nil {
 		log.Error("Failed to open dump file", "err", err)
-		return nil
+		return nil, err
 	}
 	defer f.Close()
 
 	fi, err := f.Stat()
 	if err != nil {
 		log.Error("Failed to stat file", "err", err)
-		return nil
+		return nil, err
 	}
 
 	buf := make([]byte, fi.Size())
 	len, err := io.ReadFull(f, buf)
 	if err != nil {
 		log.Error("Failed to read file", "err", err)
-		return nil
+		return nil, err
 	}
 
-	return m.parseGen2Dump(string(buf[:len]))
+	return m.parseGen2Dump(string(buf[:len])), nil
 }
 
 func (m *MigrationAPI) parseGen2Dump(data string) (keys []Gen2Key) {
@@ -186,40 +191,226 @@ func (m *MigrationAPI) parseGen2Dump(data string) (keys []Gen2Key) {
 
 	for i, l := range lines {
 		lp := strings.Split(l, " ")
-		if len(lp) < 3 {
+		if len(lp) < 3 || lp[0] == "#" {
 			continue
 		}
 
-		tkey := lp[0]
-		if len(tkey) != base54PrivateKeyLen {
-			continue
-		}
-
-		rkey, err := base58.Decode(tkey, base58.BitcoinAlphabet)
+		key, err := m.parseGen2Key(lp[0])
 		if err != nil {
-			log.Error("Failed to decode key", "err", err, "line", i)
+			log.Error("Failed to parse key", "err", err, "line", i)
 			continue
 		}
 
-		// There is prefix + key + [magic +] checksum
-		key, err := crypto.ToECDSA(rkey[1 : 1+privateKeyLen])
-		if err != nil {
-			log.Error("Failed to create key", "err", err, "len", len(rkey)*8, "line", i)
-			continue
-		}
-
-		var owner common.Address
-
-		basehash := sha256.Sum256(crypto.CompressPubkey(&key.PublicKey))
-		ripemd := ripemd160.New()
-		ripemd.Write(basehash[:])
-		owner.SetBytes(ripemd.Sum(nil))
-
-		keys = append(keys, Gen2Key{
-			RawOwner: owner,
-			Key:      key,
-		})
+		keys = append(keys, *key)
 	}
 
 	return
+}
+
+func (m *MigrationAPI) parseGen2Key(tkey string) (*Gen2Key, error) {
+	if len(tkey) != base54PrivateKeyLen {
+		return nil, errors.New("Invalid private key length")
+	}
+
+	rkey, err := base58.Decode(tkey, base58.BitcoinAlphabet)
+	if err != nil {
+		return nil, err
+	}
+
+	// There is prefix + key + [magic +] checksum
+	key_obj, err := crypto.ToECDSA(rkey[1 : 1+privateKeyLen])
+	if err != nil {
+		return nil, err
+	}
+
+	var owner common.Address
+
+	basehash := sha256.Sum256(crypto.CompressPubkey(&key_obj.PublicKey))
+	ripemd := ripemd160.New()
+	ripemd.Write(basehash[:])
+	owner.SetBytes(ripemd.Sum(nil))
+
+	return &Gen2Key{
+		RawOwner: owner,
+		Key:      key_obj,
+	}, nil
+}
+
+func (m *MigrationAPI) ClaimGen2CoinsDirect(
+	password string,
+	dst common.Address,
+	tkey string,
+) error {
+	key, err := m.parseGen2Key(tkey)
+	if err != nil {
+		log.Error("Failed to parse key", "err", err)
+		return err
+	}
+
+	coins := m.SearchRawGen2Coins([]common.Address{key.RawOwner}, false)
+
+	if len(coins) != 1 {
+		log.Error("Unable to find coins")
+		return errors.New("No coins found")
+	}
+
+	err = m.claimGen2Coins(password, dst, &coins[0], key)
+	if err != nil {
+		log.Error("Failed to claim", "err", err)
+		return err
+	}
+
+	return nil
+}
+
+func (m *MigrationAPI) ClaimGen2CoinsCombined(
+	password string,
+	dst common.Address,
+	file string,
+) error {
+	keys, err := m.loadGen2Dump(file)
+	if err != nil {
+		return err
+	}
+
+	raw_owners := make([]common.Address, len(keys))
+	owner2key := make(map[common.Address]*Gen2Key, len(keys))
+	for i, k := range keys {
+		raw_owners[i] = k.RawOwner
+		owner2key[k.RawOwner] = &keys[i]
+	}
+
+	coins := m.SearchRawGen2Coins(raw_owners, false)
+
+	for _, c := range coins {
+		err = m.claimGen2Coins(password, dst, &c, owner2key[c.RawOwner])
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *MigrationAPI) ClaimGen2CoinsImport(password string, file string) error {
+	keys, err := m.loadGen2Dump(file)
+	if err != nil {
+		return err
+	}
+
+	raw_owners := make([]common.Address, len(keys))
+	owner2key := make(map[common.Address]*Gen2Key, len(keys))
+	for i, k := range keys {
+		raw_owners[i] = k.RawOwner
+		owner2key[k.RawOwner] = &keys[i]
+	}
+
+	coins := m.SearchRawGen2Coins(raw_owners, false)
+	am := m.backend.AccountManager()
+	ks := am.Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
+
+	for _, c := range coins {
+		key := owner2key[c.RawOwner]
+		dst := crypto.PubkeyToAddress(key.Key.PublicKey)
+
+		//----
+		sink := make(chan accounts.WalletEvent)
+		evtsub := am.Subscribe(sink)
+		defer evtsub.Unsubscribe()
+
+		if _, err := ks.ImportECDSA(key.Key, password); err != nil {
+			log.Warn("Failed to import private key", "err", err)
+			// Most likely key exists
+		} else {
+			select {
+			case <-sink:
+			}
+		}
+
+		evtsub.Unsubscribe()
+		//----
+
+		err = m.claimGen2Coins(password, dst, &c, key)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *MigrationAPI) claimGen2Coins(
+	password string,
+	dst common.Address,
+	coin *Gen2Coin,
+	key *Gen2Key,
+) error {
+	account := accounts.Account{Address: dst}
+	wallet, err := m.backend.AccountManager().Find(accounts.Account{Address: dst})
+	if err != nil {
+		return err
+	}
+
+	mgrt_contract_obj, err := energi_abi.NewGen2Migration(
+		energi_params.Energi_MigrationContract, m.backend.(bind.ContractBackend))
+	if err != nil {
+		return err
+	}
+
+	mgrt_contract := energi_abi.Gen2MigrationSession{
+		Contract: mgrt_contract_obj,
+		CallOpts: bind.CallOpts{
+			From: dst,
+		},
+		TransactOpts: bind.TransactOpts{
+			From: dst,
+			Signer: func(
+				signer types.Signer,
+				addr common.Address,
+				tx *types.Transaction,
+			) (*types.Transaction, error) {
+				return wallet.SignTxWithPassphrase(
+					account, password, tx, m.backend.ChainConfig().ChainID)
+			},
+			Value:    common.Big0,
+			GasPrice: common.Big0,
+			GasLimit: migrationGas,
+		},
+	}
+
+	hts, err := mgrt_contract.HashToSign(dst)
+	if err != nil {
+		return err
+	}
+
+	sig, err := crypto.Sign(hts[:], key.Key)
+	if err != nil {
+		return err
+	}
+
+	if len(sig) != 65 {
+		return errors.New("Wrong signature size")
+	}
+
+	item := new(big.Int).SetUint64(coin.ItemID)
+	r := [32]byte{}
+	copy(r[:], sig[:32])
+	s := [32]byte{}
+	copy(s[:], sig[32:64])
+	v := uint8(sig[64])
+
+	amt, err := mgrt_contract.VerifyClaim(item, dst, v, r, s)
+	if err != nil {
+		return err
+	}
+
+	if amt.Cmp(common.Big0) == 0 {
+		log.Warn("Already claimed", "coins", coin.Owner)
+		return nil
+	}
+
+	tx, err := mgrt_contract.Claim(item, dst, v, r, s)
+	log.Info("Sent migration transaction", "tx", tx.Hash(), "coins", coin.Owner)
+
+	return err
 }
