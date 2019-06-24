@@ -81,8 +81,13 @@ func (b Bloom) TestBytes(test []byte) bool {
 
 }
 
-func (b Bloom) Contains(o *big.Int) bool {
-	return new(big.Int).And(b.Big(), o).Cmp(o) == 0
+func (b *Bloom) AddBloom(o *Bloom) {
+	b.SetBytes(new(big.Int).Or(b.Big(), o.Big()).Bytes())
+}
+
+func (b Bloom) ContainsBloom(o *Bloom) bool {
+	ob := o.Big()
+	return new(big.Int).And(b.Big(), ob).Cmp(ob) == 0
 }
 
 // MarshalText encodes b as a hex string with 0x prefix.

@@ -838,7 +838,9 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	// this will ensure we're not going off too far in the future
 	if now := time.Now().Unix(); timestamp > (now + int64(energi_consensus.MaxFutureGap)) {
 		wait := time.Duration(timestamp-now) * time.Second
-		log.Info("Mining too far in the future", "wait", common.PrettyDuration(wait))
+		if w.isRunning() {
+			log.Info("Mining too far in the future", "wait", common.PrettyDuration(wait))
+		}
 		time.Sleep(wait)
 	}
 
