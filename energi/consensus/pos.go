@@ -95,6 +95,11 @@ func (e *Energi) calcTimeTarget(
 		//       chain. As no mutex is held, we cannot do checks for canonical.
 		for i := AverageTimeBlocks - 1; i > 0; i-- {
 			past = chain.GetHeader(past.ParentHash, past.Number.Uint64()-1)
+
+			if past == nil {
+				log.Trace("Inconsistent tree, shutdown?")
+				return ret
+			}
 		}
 
 		actual := parent.Time - past.Time
