@@ -55,7 +55,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		0,
 		common.Address{},
 		common.Big0,
-		50000,
+		500000,
 		common.Big0,
 		[]byte{},
 	))
@@ -65,7 +65,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		0,
 		energi_params.Energi_MigrationContract,
 		common.Big0,
-		50000,
+		500000,
 		common.Big0,
 		claimCall,
 	))
@@ -75,7 +75,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		2,
 		energi_params.Energi_MigrationContract,
 		common.Big0,
-		50000,
+		500000,
 		common.Big0,
 		claimCall,
 	))
@@ -85,7 +85,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		0,
 		energi_params.Energi_MigrationContract,
 		common.Big1,
-		50000,
+		500000,
 		common.Big0,
 		claimCall,
 	))
@@ -95,7 +95,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		0,
 		energi_params.Energi_MigrationContract,
 		common.Big0,
-		50001,
+		500001,
 		common.Big0,
 		claimCall,
 	))
@@ -105,7 +105,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		0,
 		energi_params.Energi_MigrationContract,
 		common.Big0,
-		50000,
+		500000,
 		common.Big1,
 		claimCall,
 	))
@@ -115,7 +115,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		0,
 		energi_params.Energi_MasternodeRegistry,
 		common.Big0,
-		50000,
+		500000,
 		common.Big0,
 		claimCall,
 	))
@@ -125,7 +125,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		0,
 		energi_params.Energi_MigrationContract,
 		common.Big0,
-		50000,
+		500000,
 		common.Big0,
 		heartbeatCall,
 	))
