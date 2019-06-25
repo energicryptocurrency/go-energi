@@ -961,11 +961,12 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		for _, tx := range txs {
 			if core.IsValidZeroFee(tx) {
 				var ztxs types.Transactions
+				var ok bool
 
 				// NOTE: zero-fee is not emitted in regular operations
 				//       so expect no regular xfers are present.
-				if _, ok := zerofeeTxs[account]; !ok {
-					ztxs = make(types.Transactions, 0, len(txs))
+				if ztxs, ok = zerofeeTxs[account]; !ok {
+					ztxs = make(types.Transactions, 0)
 					delete(remoteTxs, account)
 				}
 
