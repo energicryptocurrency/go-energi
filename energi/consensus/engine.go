@@ -440,15 +440,25 @@ func (e *Energi) govFinalize(
 //
 // Note, the method returns immediately and will send the result async. More
 // than one result may also be returned depending on the consensus algorithm.
-func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) (err error) {
-	header := block.Header()
-
+func (e *Energi) Seal(
+	chain ChainReader,
+	block *types.Block,
+	results chan<- *eth_consensus.SealResult,
+	stop <-chan struct{},
+) (err error) {
 	go func() {
+		header := block.Header()
+		result := eth_consensus.NewSealResult(block, nil)
+
 		if header.Number.Cmp(common.Big0) != 0 {
 			success, err := e.mine(chain, header, stop)
 
+			// NOTE: due to the fact that PoS mining may change Coinbase
+			//       it is required to reprocess all transaction with correct
+			//       state of the block (input parameters). This is essential
+			//       for consensus and correct distribution of gas.
 			if success && err == nil {
-				err = e.govFinalize(chain, header, state, block.Transactions())
+				result, err = e.recreateBlock(chain, header, block.Transactions())
 			}
 
 			if err != nil {
@@ -458,11 +468,13 @@ func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *typ
 
 			if !success {
 				select {
-				case results <- nil:
+				case results <- eth_consensus.NewSealResult(nil, nil):
 				default:
 				}
 				return
 			}
+
+			header = result.Block.Header()
 		}
 
 		sighash := e.SignatureHash(header)
@@ -474,15 +486,72 @@ func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *typ
 			return
 		}
 
+		result.Block = result.Block.WithSeal(header)
+
 		select {
-		case results <- block.WithSeal(header):
-			log.Info("PoS seal has submitted solution", "block", block.Hash())
+		case results <- result:
+			log.Info("PoS seal has submitted solution", "block", result.Block.Hash())
 		default:
 			log.Warn("PoS seal is not read by miner", "sealhash", e.SealHash(header))
 		}
 	}()
 
 	return nil
+}
+
+func (e *Energi) recreateBlock(
+	chain ChainReader,
+	header *types.Header,
+	txs types.Transactions,
+) (
+	result *eth_consensus.SealResult, err error,
+) {
+	var (
+		usedGas = new(uint64)
+		gp      = new(core.GasPool).AddGas(header.GasLimit)
+
+		bc *core.BlockChain
+		ok bool
+	)
+
+	stdb, err := chain.GetStateDB()
+	if err != nil {
+		return nil, err
+	}
+
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return nil, eth_consensus.ErrUnknownAncestor
+	}
+
+	blstate, err := state.New(parent.Root, stdb)
+	if err != nil {
+		return nil, err
+	}
+
+	vmc := &vm.Config{}
+	if bc, ok = chain.(*core.BlockChain); ok {
+		vmc = bc.GetVMConfig()
+	}
+
+	receipts := make(types.Receipts, 0, len(txs))
+
+	for i, tx := range txs {
+		blstate.Prepare(tx.Hash(), common.Hash{}, i)
+		receipt, _, err := core.ApplyTransaction(
+			chain.Config(), bc, nil,
+			gp, blstate, header, tx, usedGas, *vmc)
+		if err != nil {
+			return nil, err
+		}
+		receipts = append(receipts, receipt)
+	}
+
+	header.GasUsed = *usedGas
+	header.Bloom = types.Bloom{}
+
+	block, err := e.Finalize(chain, header, blstate, txs, nil, receipts)
+	return eth_consensus.NewSealResult(block, blstate), err
 }
 
 // SealHash returns the hash of a block prior to it being sealed.
@@ -496,14 +565,14 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 		//header.Coinbase,
 		//header.Root,
 		header.TxHash,
-		header.ReceiptHash,
+		//header.ReceiptHash,
 		//header.Bloom,
 		//header.Difficulty,
 		header.Number,
 		header.GasLimit,
-		header.GasUsed,
+		//header.GasUsed,
 		//header.Time,
-		header.Extra,
+		//header.Extra,
 		//header.MixDigest,
 		//header.Nonce,
 		//header.Signature,
