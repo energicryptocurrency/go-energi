@@ -330,6 +330,12 @@ func (s *Ethereum) APIs() []rpc.API {
 			Service:   energi_api.NewMigrationAPI(s.APIBackend),
 			Public:    true,
 		},
+		{
+			Namespace: "masternode",
+			Version:   "1.0",
+			Service:   energi_api.NewMasternodeAPI(s.APIBackend),
+			Public:    true,
+		},
 	}...)
 
 	for _, a := range apis {

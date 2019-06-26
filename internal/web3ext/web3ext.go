@@ -20,12 +20,13 @@ package web3ext
 var Modules = map[string]string{
 	"accounting": Accounting_JS,
 	"admin":      Admin_JS,
-	"chequebook": Chequebook_JS,
-	"clique":     Clique_JS,
-	"energi":     Energi_JS,
-	"ethash":     Ethash_JS,
+	//"chequebook": Chequebook_JS,
+	//"clique":     Clique_JS,
+	"energi": Energi_JS,
+	//"ethash":     Ethash_JS,
 	"debug":      Debug_JS,
 	"eth":        Eth_JS,
+	"masternode": Masternode_JS,
 	"miner":      Miner_JS,
 	"net":        Net_JS,
 	"personal":   Personal_JS,
@@ -556,6 +557,49 @@ web3._extend({
 			}
 		}),
 	]
+});
+`
+
+const Masternode_JS = `
+web3._extend({
+	property: 'masternode',
+	methods: [
+		new web3._extend.Method({
+			name: 'collateralBalance',
+			call: 'masternode_collateralBalance',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter],
+			outputFormatter: function(status) {
+				return {
+					balance: web3._extend.utils.toDecimal(status.Balance),
+					lastBlock: web3._extend.utils.toDecimal(status.LastBlock),
+				};
+			}
+		}),
+		new web3._extend.Method({
+			name: 'depositCollateral',
+			call: 'masternode_depositCollateral',
+			params: 3,
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'withdrawCollateral',
+			call: 'masternode_withdrawCollateral',
+			params: 3,
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+	],
+	properties: []
 });
 `
 
