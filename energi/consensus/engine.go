@@ -440,13 +440,7 @@ func (e *Energi) govFinalize(
 //
 // Note, the method returns immediately and will send the result async. More
 // than one result may also be returned depending on the consensus algorithm.
-func (e *Energi) Seal(
-	chain ChainReader,
-	block *types.Block,
-	state *state.StateDB,
-	results chan<- *types.Block,
-	stop <-chan struct{},
-) (err error) {
+func (e *Energi) Seal(chain ChainReader, block *types.Block, results chan<- *types.Block, stop <-chan struct{}) (err error) {
 	header := block.Header()
 
 	go func() {
