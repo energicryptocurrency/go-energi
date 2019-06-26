@@ -96,7 +96,7 @@ func (b *EthAPIBackend) PendingNonceAt(
 }
 
 func (b *EthAPIBackend) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
-	return nil, errors.New("Not implemented")
+	return b.gpo.SuggestPrice(ctx)
 }
 
 func (b *EthAPIBackend) EstimateGas(
