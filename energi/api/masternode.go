@@ -35,7 +35,8 @@ import (
 )
 
 const (
-	masternodeCallGas uint64 = 300000
+	mntokenCallGas    uint64 = 300000
+	masternodeCallGas uint64 = 500000
 )
 
 type MasternodeAPI struct {
@@ -85,7 +86,7 @@ func (m *MasternodeAPI) token(
 					account, password, tx, m.backend.ChainConfig().ChainID)
 			},
 			Value:    common.Big0,
-			GasLimit: masternodeCallGas,
+			GasLimit: mntokenCallGas,
 		},
 	}
 	return
@@ -190,7 +191,7 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNINfo) {
 		res = append(res, MNINfo{
 			Masternode:     mn,
 			Owner:          mninfo.Owner,
-			Enode:          "",
+			Enode:          m.enode(mninfo.Ipv4address, mninfo.Enode),
 			Collateral:     (*hexutil.Big)(mninfo.Collateral),
 			AnnouncedBlock: mninfo.AnnouncedBlock.Uint64(),
 		})
@@ -213,7 +214,7 @@ func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNINfo) 
 	if err == nil {
 		res.Masternode = owner_or_mn
 		res.Owner = mninfo.Owner
-		res.Enode = ""
+		res.Enode = m.enode(mninfo.Ipv4address, mninfo.Enode)
 		res.Collateral = (*hexutil.Big)(mninfo.Collateral)
 		res.AnnouncedBlock = mninfo.AnnouncedBlock.Uint64()
 		return
@@ -227,7 +228,7 @@ func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNINfo) 
 
 	res.Masternode = ownerinfo.Masternode
 	res.Owner = owner_or_mn
-	res.Enode = ""
+	res.Enode = m.enode(ownerinfo.Ipv4address, ownerinfo.Enode)
 	res.Collateral = (*hexutil.Big)(ownerinfo.Collateral)
 	res.AnnouncedBlock = ownerinfo.AnnouncedBlock.Uint64()
 	return
@@ -271,9 +272,9 @@ func (m *MasternodeAPI) enode(ipv4address uint32, pubkey [2][32]byte) string {
 		byte(ipv4address),
 	)
 
-	pubkey_buf := make([]byte, 64)
+	pubkey_buf := make([]byte, 33)
 	copy(pubkey_buf[:32], pubkey[0][:])
-	copy(pubkey_buf[32:34], pubkey[1][:])
+	copy(pubkey_buf[32:33], pubkey[1][:])
 	pk, err := crypto.DecompressPubkey(pubkey_buf)
 	if err != nil {
 		log.Error("Failed to unmarshal pubkey")
@@ -295,7 +296,7 @@ func (m *MasternodeAPI) registry(
 	}
 
 	contract, err := energi_abi.NewIMasternodeRegistry(
-		energi_params.Energi_MasternodeToken, m.backend.(bind.ContractBackend))
+		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, err
 	}
