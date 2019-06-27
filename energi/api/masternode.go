@@ -345,12 +345,25 @@ func (m *MasternodeAPI) Announce(owner common.Address, enode_url, password strin
 		return errors.New("Invalid IPv4")
 	}
 
+	if ip[0] == byte(127) || ip[0] == byte(10) ||
+		(ip[0] == byte(192) && ip[1] == byte(168)) ||
+		(ip[0] == byte(172) && (ip[1]&0xF0) == byte(16)) {
+		return errors.New("Wrong enode IP")
+	}
+
+	cfg := m.backend.ChainConfig()
+
+	if res.UDP() != int(cfg.ChainID.Int64()) || res.TCP() != int(cfg.ChainID.Int64()) {
+		return errors.New("Wrong enode port")
+	}
+
 	ipv4address = uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 | uint32(ip[3])
 
 	//---
 	pk := crypto.CompressPubkey(res.Pubkey())
 	if len(pk) != 33 {
 		log.Error("Wrong public key length", "pklen", len(pk))
+		return errors.New("Wrong public key")
 	}
 
 	copy(pubkey[0][:], pk[:32])
