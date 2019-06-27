@@ -561,6 +561,16 @@ web3._extend({
 `
 
 const Masternode_JS = `
+web3._extend.formatters.outputMasternodeFormatter = function(item){
+	return {
+		masternode:     item.Masternode,
+		owner:          item.Owner,
+		enode:          item.Enode,
+		collateral:     web3._extend.utils.toDecimal(item.Collateral),
+		announcedBlock: item.AnnouncedBlock,
+	};
+};
+
 web3._extend({
 	property: 'masternode',
 	methods: [
@@ -597,6 +607,53 @@ web3._extend({
 				null,
 			],
 			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'listMasternodes',
+			call: 'masternode_listMasternodes',
+			params: 0,
+			outputFormatter: function(list) {
+				var res = [];
+				for (var i = 0; i < list.length; ++i) {
+					res.push(web3._extend.formatters.outputMasternodeFormatter(list[i]));
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'masternodeInfo',
+			call: 'masternode_masternodeInfo',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter],
+			outputFormatter: function(status) {
+				return web3._extend.formatters.outputMasternodeFormatter(status);
+			}
+		}),
+		new web3._extend.Method({
+			name: 'stats',
+			call: 'masternode_stats',
+			params: 0,
+			outputFormatter: function(status) {
+				return {
+					active: status.Active,
+					total: status.Total,
+					activeCollateral: web3._extend.utils.toDecimal(status.ActiveCollateral),
+					totalCollateral: web3._extend.utils.toDecimal(status.TotalCollateral),
+					maxOfAllTimes: web3._extend.utils.toDecimal(status.MaxOfAllTimes),
+				};
+			}
+		}),
+		new web3._extend.Method({
+			name: 'announce',
+			call: 'masternode_announce',
+			params: 3,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null],
+		}),
+		new web3._extend.Method({
+			name: 'denounce',
+			call: 'masternode_denounce',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null],
 		}),
 	],
 	properties: []
