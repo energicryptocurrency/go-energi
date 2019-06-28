@@ -112,7 +112,10 @@ func (e *Energi) calcTimeTarget(
 	}
 
 	log.Trace("PoS time", "block", block_number,
-		"min", ret.min_time, "target", ret.block_target, "max", ret.max_time)
+		"min", ret.min_time, "max", ret.max_time,
+		"block_target", ret.block_target,
+		"period_target", ret.period_target,
+	)
 	return ret
 }
 

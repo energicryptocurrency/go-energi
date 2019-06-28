@@ -330,6 +330,12 @@ func (s *Ethereum) APIs() []rpc.API {
 			Service:   energi_api.NewMigrationAPI(s.APIBackend),
 			Public:    true,
 		},
+		{
+			Namespace: "masternode",
+			Version:   "1.0",
+			Service:   energi_api.NewMasternodeAPI(s.APIBackend),
+			Public:    true,
+		},
 	}...)
 
 	for _, a := range apis {
@@ -363,7 +369,9 @@ func (s *Ethereum) Etherbase() (eb common.Address, err error) {
 			s.etherbase = etherbase
 			s.lock.Unlock()
 
-			log.Info("Etherbase automatically configured", "address", etherbase)
+			if _, ok := s.engine.(*energi.Energi); !ok {
+				log.Info("Etherbase automatically configured", "address", etherbase)
+			}
 			return etherbase, nil
 		}
 	}

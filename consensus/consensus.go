@@ -94,7 +94,7 @@ type Engine interface {
 	//
 	// Note, the method returns immediately and will send the result async. More
 	// than one result may also be returned depending on the consensus algorithm.
-	Seal(chain ChainReader, block *types.Block, state *state.StateDB, results chan<- *types.Block, stop <-chan struct{}) error
+	Seal(chain ChainReader, block *types.Block, results chan<- *SealResult, stop <-chan struct{}) error
 
 	// SealHash returns the hash of a block prior to it being sealed.
 	SealHash(header *types.Header) common.Hash
@@ -116,4 +116,16 @@ type PoW interface {
 
 	// Hashrate returns the current mining hashrate of a PoW consensus engine.
 	Hashrate() float64
+}
+
+type SealResult struct {
+	Block    *types.Block
+	NewState *state.StateDB
+}
+
+func NewSealResult(block *types.Block, state *state.StateDB) *SealResult {
+	return &SealResult{
+		Block:    block,
+		NewState: state,
+	}
 }

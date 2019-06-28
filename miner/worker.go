@@ -142,7 +142,7 @@ type worker struct {
 	// Channels
 	newWorkCh          chan *newWorkReq
 	taskCh             chan *task
-	resultCh           chan *types.Block
+	resultCh           chan *consensus.SealResult
 	startCh            chan struct{}
 	exitCh             chan struct{}
 	resubmitIntervalCh chan time.Duration
@@ -199,7 +199,7 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 		chainSideCh:        make(chan core.ChainSideEvent, chainSideChanSize),
 		newWorkCh:          make(chan *newWorkReq),
 		taskCh:             make(chan *task),
-		resultCh:           make(chan *types.Block, resultQueueSize),
+		resultCh:           make(chan *consensus.SealResult, resultQueueSize),
 		exitCh:             make(chan struct{}),
 		startCh:            make(chan struct{}, 1),
 		resubmitIntervalCh: make(chan time.Duration),
@@ -533,7 +533,7 @@ func (w *worker) taskLoop() {
 			w.pendingTasks[w.engine.SealHash(task.block.Header())] = task
 			w.pendingMu.Unlock()
 
-			if err := w.engine.Seal(w.chain, task.block, task.state, w.resultCh, stopCh); err != nil {
+			if err := w.engine.Seal(w.chain, task.block, w.resultCh, stopCh); err != nil {
 				log.Warn("Block sealing failed", "err", err)
 			}
 		case <-w.exitCh:
@@ -548,7 +548,9 @@ func (w *worker) taskLoop() {
 func (w *worker) resultLoop() {
 	for {
 		select {
-		case block := <-w.resultCh:
+		case result := <-w.resultCh:
+			block := result.Block
+
 			// Short circuit when receiving empty result.
 			if block == nil {
 				continue
@@ -568,6 +570,10 @@ func (w *worker) resultLoop() {
 				log.Error("Block found but no relative pending task", "number", block.Number(), "sealhash", sealhash, "hash", hash)
 				continue
 			}
+			statedb := result.NewState
+			if statedb == nil {
+				statedb = task.state
+			}
 			// Different block could share same sealhash, deep copy here to prevent write-write conflict.
 			var (
 				receipts = make([]*types.Receipt, len(task.receipts))
@@ -584,7 +590,7 @@ func (w *worker) resultLoop() {
 				logs = append(logs, receipt.Logs...)
 			}
 			// Commit block and state to database.
-			stat, err := w.chain.WriteBlockWithState(block, receipts, task.state)
+			stat, err := w.chain.WriteBlockWithState(block, receipts, statedb)
 			if err != nil {
 				log.Error("Failed writing block to chain", "err", err)
 				continue
@@ -961,11 +967,12 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		for _, tx := range txs {
 			if core.IsValidZeroFee(tx) {
 				var ztxs types.Transactions
+				var ok bool
 
 				// NOTE: zero-fee is not emitted in regular operations
 				//       so expect no regular xfers are present.
-				if _, ok := zerofeeTxs[account]; !ok {
-					ztxs = make(types.Transactions, 0, len(txs))
+				if ztxs, ok = zerofeeTxs[account]; !ok {
+					ztxs = make(types.Transactions, 0)
 					delete(remoteTxs, account)
 				}
 

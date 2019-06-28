@@ -61,6 +61,7 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 
 	energi "energi.world/core/gen3/energi/consensus"
+	energi_svc "energi.world/core/gen3/energi/service"
 )
 
 var (
@@ -645,6 +646,12 @@ var (
 		Name:  "vm.evm",
 		Usage: "External EVM configuration (default = built-in interpreter)",
 		Value: "",
+	}
+
+	// Energi flags
+	MasternodeFlag = cli.BoolFlag{
+		Name:  "masternode",
+		Usage: "Enable Energi Masternode service",
 	}
 )
 
@@ -1376,6 +1383,18 @@ func RegisterEthStatsService(stack *node.Node, url string) {
 		return ethstats.New(url, ethServ, lesServ)
 	}); err != nil {
 		Fatalf("Failed to register the Energi Stats service: %v", err)
+	}
+}
+
+// RegisterMasternodeService configures Energi Masternode service
+func RegisterMasternodeService(stack *node.Node) {
+	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+		var ethServ *eth.Ethereum
+		ctx.Service(&ethServ)
+
+		return energi_svc.NewMasternodeService(ethServ)
+	}); err != nil {
+		Fatalf("Failed to register the Energi Masternode: %v", err)
 	}
 }
 

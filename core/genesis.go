@@ -237,9 +237,9 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	case g != nil:
 		return g.Config
 	case ghash == params.MainnetGenesisHash:
-		return params.MainnetChainConfig
+		return params.EnergiMainnetChainConfig
 	case ghash == params.TestnetGenesisHash:
-		return params.TestnetChainConfig
+		return params.EnergiTestnetChainConfig
 	default:
 		return params.AllEthashProtocolChanges
 	}
@@ -551,6 +551,15 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	)
 	deployEnergiContract(
 		&xfers,
+		energi_params.Energi_MasternodeTokenV1,
+		nil,
+		energi_abi.MasternodeTokenV1ABI,
+		energi_abi.MasternodeTokenV1Bin,
+		energi_params.Energi_MasternodeToken,
+		energi_params.Energi_MasternodeRegistry,
+	)
+	deployEnergiContract(
+		&xfers,
 		energi_params.Energi_MasternodeRegistryV1,
 		nil,
 		energi_abi.MasternodeRegistryV1ABI,
@@ -612,7 +621,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	deployEnergiContract(
 		&xfers,
 		energi_params.Energi_MigrationContract,
-		new(big.Int).Mul(big.NewInt(100), big.NewInt(1e18)),
+		new(big.Int).Mul(big.NewInt(0xFFFF), big.NewInt(1e18)),
 		energi_abi.Gen2MigrationABI,
 		energi_abi.Gen2MigrationBin,
 		energi_params.Energi_Treasury,

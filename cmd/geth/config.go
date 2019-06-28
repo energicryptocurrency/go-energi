@@ -181,6 +181,11 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	if cfg.Ethstats.URL != "" {
 		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
 	}
+
+	if ctx.GlobalBool(utils.MasternodeFlag.Name) {
+		utils.RegisterMasternodeService(stack)
+	}
+
 	return stack
 }
 

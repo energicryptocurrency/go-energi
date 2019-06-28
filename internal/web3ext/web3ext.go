@@ -20,12 +20,13 @@ package web3ext
 var Modules = map[string]string{
 	"accounting": Accounting_JS,
 	"admin":      Admin_JS,
-	"chequebook": Chequebook_JS,
-	"clique":     Clique_JS,
-	"energi":     Energi_JS,
-	"ethash":     Ethash_JS,
+	//"chequebook": Chequebook_JS,
+	//"clique":     Clique_JS,
+	"energi": Energi_JS,
+	//"ethash":     Ethash_JS,
 	"debug":      Debug_JS,
 	"eth":        Eth_JS,
+	"masternode": Masternode_JS,
 	"miner":      Miner_JS,
 	"net":        Net_JS,
 	"personal":   Personal_JS,
@@ -556,6 +557,106 @@ web3._extend({
 			}
 		}),
 	]
+});
+`
+
+const Masternode_JS = `
+web3._extend.formatters.outputMasternodeFormatter = function(item){
+	return {
+		masternode:     item.Masternode,
+		owner:          item.Owner,
+		enode:          item.Enode,
+		collateral:     web3._extend.utils.toDecimal(item.Collateral),
+		announcedBlock: item.AnnouncedBlock,
+	};
+};
+
+web3._extend({
+	property: 'masternode',
+	methods: [
+		new web3._extend.Method({
+			name: 'collateralBalance',
+			call: 'masternode_collateralBalance',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter],
+			outputFormatter: function(status) {
+				return {
+					balance: web3._extend.utils.toDecimal(status.Balance),
+					lastBlock: web3._extend.utils.toDecimal(status.LastBlock),
+				};
+			}
+		}),
+		new web3._extend.Method({
+			name: 'depositCollateral',
+			call: 'masternode_depositCollateral',
+			params: 3,
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'withdrawCollateral',
+			call: 'masternode_withdrawCollateral',
+			params: 3,
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'listMasternodes',
+			call: 'masternode_listMasternodes',
+			params: 0,
+			outputFormatter: function(list) {
+				var res = [];
+				for (var i = 0; i < list.length; ++i) {
+					res.push(web3._extend.formatters.outputMasternodeFormatter(list[i]));
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'masternodeInfo',
+			call: 'masternode_masternodeInfo',
+			params: 1,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter],
+			outputFormatter: function(status) {
+				return web3._extend.formatters.outputMasternodeFormatter(status);
+			}
+		}),
+		new web3._extend.Method({
+			name: 'stats',
+			call: 'masternode_stats',
+			params: 0,
+			outputFormatter: function(status) {
+				return {
+					active: status.Active,
+					total: status.Total,
+					activeCollateral: web3._extend.utils.toDecimal(status.ActiveCollateral),
+					totalCollateral: web3._extend.utils.toDecimal(status.TotalCollateral),
+					maxOfAllTimes: web3._extend.utils.toDecimal(status.MaxOfAllTimes),
+				};
+			}
+		}),
+		new web3._extend.Method({
+			name: 'announce',
+			call: 'masternode_announce',
+			params: 3,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null, null],
+		}),
+		new web3._extend.Method({
+			name: 'denounce',
+			call: 'masternode_denounce',
+			params: 2,
+			inputFormatter: [web3._extend.formatters.inputAddressFormatter, null],
+		}),
+	],
+	properties: []
 });
 `
 
