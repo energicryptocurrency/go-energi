@@ -1,50 +1,54 @@
 {
-    "name": "energi3",
-    "version": "0.0.1",
-    "vcs": "git",
-    "tools": {
-        "go": "1.11.11",
-        "make": true,
-        "node": "8",
-        "yarn": true
-    },
-    "package": [
-        "bin"
+  "name": "energi3",
+  "version": "0.1.0",
+  "vcs": "git",
+  "tools": {
+    "go": "1.11.11",
+    "make": true,
+    "node": "8",
+    "yarn": true
+  },
+  "package": [
+    "bin"
+  ],
+  "actions": {
+    "build": [
+      "@cte make all"
     ],
-    "actions": {
-        "build": [
-            "@cte make all"
-        ],
-        "check": [
-            "lint",
-            "test"
-        ],
-        "lint": [ "lint-go", "lint-sol" ],
-        "lint-go": "@cte make lint",
-        "lint-sol": "@cte yarn run solium -d energi/contracts/",
-
-        "test": [ "test-go", "test-sol" ],
-        "test-go": [
-            "@cte git submodule update --init --recursive",
-            "@cte make test"
-        ],
-        "test-sol": [
-            "@cte yarn run eslint energi/contracts/",
-            "@cte make test-sol"
-        ],
-        "package": [
-            "@cte make package"
-        ],
-
-        "autoformat": "@cid tool envexec go -- gofmt -s -w",
-        "update-license": "@cte go run ./build/update-license.go",
-        "cigo": "./build/env.sh go run ./build/ci.go",
-        "ganache": "cid tool envexec npm -- ganache-cli",
-        "truffle": "cid tool envexec npm -- truffle",
-        "validate-contracts": [
-            "@cte make prebuild",
-            "lint-sol",
-            "test-sol"
-        ]
-    }
+    "check": [
+      "lint",
+      "test"
+    ],
+    "lint": [
+      "lint-go",
+      "lint-sol"
+    ],
+    "lint-go": "@cte make lint",
+    "lint-sol": "@cte yarn run solium -d energi/contracts/",
+    "test": [
+      "test-go",
+      "test-sol"
+    ],
+    "test-go": [
+      "@cte git submodule update --init --recursive",
+      "@cte make test"
+    ],
+    "test-sol": [
+      "@cte yarn run eslint energi/contracts/",
+      "@cte make test-sol"
+    ],
+    "package": [
+      "@cte make package"
+    ],
+    "autoformat": "@cid tool envexec go -- gofmt -s -w",
+    "update-license": "@cte go run ./build/update-license.go",
+    "cigo": "./build/env.sh go run ./build/ci.go",
+    "ganache": "cid tool envexec npm -- ganache-cli",
+    "truffle": "cid tool envexec npm -- truffle",
+    "validate-contracts": [
+      "@cte make prebuild",
+      "lint-sol",
+      "test-sol"
+    ]
+  }
 }
