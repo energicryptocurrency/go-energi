@@ -67,7 +67,7 @@ type flagGroup struct {
 // AppHelpFlagGroups is the application flags, grouped by functionality.
 var AppHelpFlagGroups = []flagGroup{
 	{
-		Name: "ETHEREUM",
+		Name: "ENERGI",
 		Flags: []cli.Flag{
 			configFileFlag,
 			utils.DataDirFlag,
@@ -83,6 +83,12 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.LightPeersFlag,
 			utils.LightKDFFlag,
 			utils.WhitelistFlag,
+		},
+	},
+	{
+		Name: "ENERGI MASTERNODE",
+		Flags: []cli.Flag{
+			utils.MasternodeFlag,
 		},
 	},
 	{

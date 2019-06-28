@@ -136,6 +136,7 @@ var (
 		utils.GpoPercentileFlag,
 		utils.EWASMInterpreterFlag,
 		utils.EVMInterpreterFlag,
+		utils.MasternodeFlag,
 		configFileFlag,
 	}
 
