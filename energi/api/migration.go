@@ -31,11 +31,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
 	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/shengdoushi/base58"
 	"golang.org/x/crypto/ripemd160"
+
+	"energi.world/core/gen3/internal/ethapi"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_params "energi.world/core/gen3/energi/params"

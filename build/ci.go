@@ -800,7 +800,7 @@ func doWindowsInstaller(cmdline []string) {
 		version[2] += "-" + env.Commit[:8]
 	}
 	installer, _ := filepath.Abs("energi3-" + archiveBasename(*arch, params.ArchiveVersion(env.Commit)) + ".exe")
-	build.MustRunCommand("makensis.exe",
+	build.MustRunCommand("makensis",
 		"/DOUTPUTFILE="+installer,
 		"/DMAJORVERSION="+version[0],
 		"/DMINORVERSION="+version[1],
@@ -1069,6 +1069,16 @@ func doXgo(cmdline []string) {
 
 	xgo := xgoTool(args)
 	build.MustRun(xgo)
+
+	// A minor hack to keep the same source structure
+	if fl, _ := filepath.Glob(executablePath("geth-*")); fl != nil {
+		for _, f := range fl {
+			geth := f
+			energi3 := strings.Replace(f, "geth-", "energi3-", 1)
+			fmt.Println(">>> Renaming ", geth, " to ", energi3)
+			os.Rename(geth, energi3)
+		}
+	}
 }
 
 func xgoTool(args []string) *exec.Cmd {

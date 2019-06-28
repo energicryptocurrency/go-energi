@@ -26,9 +26,10 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/p2p/enode"
+
+	"energi.world/core/gen3/internal/ethapi"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_params "energi.world/core/gen3/energi/params"

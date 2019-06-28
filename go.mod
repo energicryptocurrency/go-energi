@@ -1,6 +1,7 @@
 module energi.world/core/gen3
 
 replace github.com/ethereum/go-ethereum => ./
+replace github.com/ethereum/go-ethereum/internal/ethapi => ./internal/ethapi
 
 require (
 	bazil.org/fuse v0.0.0-20160811212531-371fbbdaa898
