@@ -212,6 +212,10 @@ const (
 	diffV1_BMax     uint64 = 30
 	diffV1_AMax     uint64 = 120
 	diffV1_DivPlain uint64 = 100
+
+	// Roughly get 2x difficulty decrease
+	diffV1_MigrationStakerDelay  uint64 = 15
+	diffV1_MigrationStakerTarget uint64 = 0xFFFF
 )
 
 var (
@@ -491,8 +495,21 @@ func (e *Energi) mine(
 
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
-	if migration_dpos && (blockTime < time_target.block_target) && !e.testing {
-		blockTime = time_target.block_target
+	if migration_dpos && !e.testing {
+		// Obey block target
+		if blockTime < time_target.block_target {
+			blockTime = time_target.block_target
+		}
+
+		// Also, obey period target
+		if blockTime < time_target.period_target {
+			blockTime = time_target.period_target
+		}
+
+		// Decrease difficulty, if it got bumped
+		if header.Difficulty.Uint64() > diffV1_MigrationStakerTarget {
+			blockTime += diffV1_MigrationStakerDelay
+		}
 	}
 
 	//---
