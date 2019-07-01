@@ -76,22 +76,33 @@ contract StorageBlacklistRegistryV1 is
     struct Info {
         IProposal enforce;
         IProposal revoke;
+        uint index;
     }
 
     mapping(address => Info) public address_info;
+    address[] public address_list;
 
     function setEnforce(address addr, IProposal proposal)
         external
         requireOwner
     {
-        address_info[addr].enforce = proposal;
+        Info storage item = address_info[addr];
+        assert(address(item.enforce) == address(0));
+
+        item.enforce = proposal;
+        item.index = address_list.length;
+        address_list.push(addr);
     }
 
     function setRevoke(address addr, IProposal proposal)
         external
         requireOwner
     {
-        address_info[addr].revoke = proposal;
+        Info storage item = address_info[addr];
+
+        assert(address(item.enforce) != address(0));
+
+        item.revoke = proposal;
     }
 
 
@@ -99,7 +110,26 @@ contract StorageBlacklistRegistryV1 is
         external
         requireOwner
     {
+        Info storage item = address_info[addr];
+        assert(address(item.enforce) != address(0));
+
+        // Move the last into the gap, NOOP on on match
+        address_list[item.index] = address_list[address_list.length - 1];
+        address_list.pop();
+
         delete address_info[addr];
+    }
+
+    function addresses()
+        external view
+        returns(address[] memory result)
+    {
+        uint len = address_list.length;
+        result = new address[](len);
+
+        for (uint i = 0; i < len; ++i) {
+            result[i] = address_list[i];
+        }
     }
 }
 
@@ -148,7 +178,7 @@ contract BlacklistRegistryV1 is
         external view
         returns(IProposal enforce, IProposal revoke)
     {
-        (enforce, revoke) = v1storage.address_info(addr);
+        (enforce, revoke,) = v1storage.address_info(addr);
     }
 
     function propose(address addr)
@@ -159,7 +189,7 @@ contract BlacklistRegistryV1 is
         require(msg.value == FEE_BLACKLIST_V1, "Invalid fee");
 
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
 
         // Cleanup old
         if (address(enforce) != address(0)) {
@@ -168,12 +198,13 @@ contract BlacklistRegistryV1 is
                 if (revoke.isAccepted()) {
                     enforce.destroy();
                     revoke.destroy();
-                    store.setRevoke(addr, IProposal(address(0)));
+                    store.remove(addr);
                 } else if (revoke.isFinished()) {
                     revert("Already active (1)");
                 }
             } else if (enforce.isFinished() && !enforce.isAccepted()) {
                 enforce.collect();
+                store.remove(addr);
             } else {
                 revert("Already active (2)");
             }
@@ -200,7 +231,7 @@ contract BlacklistRegistryV1 is
         require(msg.value == FEE_BLACKLIST_REVOKE_V1, "Invalid fee");
 
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
 
         // Cleanup old
         require(address(enforce) != address(0), "No need (1)");
@@ -236,7 +267,7 @@ contract BlacklistRegistryV1 is
         returns(bool)
     {
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
 
         if ((address(revoke) != address(0)) && revoke.isAccepted()) {
             return false;
@@ -254,7 +285,7 @@ contract BlacklistRegistryV1 is
         noReentry
     {
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
 
         require (address(enforce) != address(0), "Nothing to collect (1)");
         require (enforce.isFinished(), "Nothing to collect (2)");
@@ -286,6 +317,26 @@ contract BlacklistRegistryV1 is
         require(isBlacklisted(address(owner)), "Not blacklisted");
         // TODO: check if valid to collect
         migration.blacklistClaim(item_id, owner);
+    }
+
+    function enumerateAll()
+        external view
+        returns(address[] memory addresses)
+    {
+        return v1storage.addresses();
+    }
+
+    function enumerateBlocked()
+        external view
+        returns(address[] memory addresses)
+    {
+        addresses = v1storage.addresses();
+
+        for (uint i = addresses.length; i-- > 0;) {
+            if (!isBlacklisted(addresses[i])) {
+                addresses[i] = address(0);
+            }
+        }
     }
 
     // Safety

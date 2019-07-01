@@ -57,4 +57,6 @@ interface IBlacklistRegistry {
     function isBlacklisted(address) external view returns(bool);
     function collect(address) external;
     function collectMigration(uint item_id, bytes20 owner) external;
+    function enumerateAll() external view returns(address[] memory addresses);
+    function enumerateBlocked() external view returns(address[] memory addresses);
 }

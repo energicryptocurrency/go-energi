@@ -41,6 +41,7 @@ ENERGI_CONTRACTS := \
   BackboneRewardV1.sol \
   BlacklistRegistryV1.sol \
   CheckpointRegistryV1.sol \
+  IBlacklistRegistry.sol \
   IBlockReward.sol \
   IDelegatedPoS.sol \
   IMasternodeRegistry.sol \

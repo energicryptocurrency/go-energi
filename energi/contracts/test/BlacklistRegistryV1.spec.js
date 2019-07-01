@@ -147,6 +147,11 @@ contract("BlacklistRegistryV1", async accounts => {
             }
         });
 
+        it('should enumerate*() empty', async () => {
+            expect(await s.token_abi.enumerateAll()).length(0);
+            expect(await s.token_abi.enumerateBlocked()).length(0);
+        });
+
         it('should propose()', async () => {
             await s.token_abi.propose(target1, { value: enforce_fee });
 
@@ -161,6 +166,14 @@ contract("BlacklistRegistryV1", async accounts => {
             expect(evt[0].args).include.keys('proposal');
 
             expect(await s.token_abi.isBlacklisted(target1)).false;
+        });
+
+        it('should enumerate*() one', async () => {
+            const all = await s.token_abi.enumerateAll();
+            const blocked = await s.token_abi.enumerateBlocked();
+
+            expect(all).eql([target1]);
+            expect(blocked).eql(['0x0000000000000000000000000000000000000000']);
         });
 
         it('should refuse propose() on active enforce voting', async () => {
