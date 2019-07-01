@@ -22,6 +22,7 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 import { IProposal } from "./IProposal.sol";
+import { ITreasury } from "./ITreasury.sol";
 
 /**
  * Interface of BlacklistProposal
@@ -48,9 +49,12 @@ interface IBlacklistRegistry {
         IProposal proposal
     );
 
+    function compensation_fund() external view returns(ITreasury);
+
     function proposals(address) external view returns(IProposal enforce, IProposal revoke);
     function propose(address) external payable returns(address);
     function revokeProposal(address) external payable returns(address);
     function isBlacklisted(address) external view returns(bool);
     function collect(address) external;
+    function collectMigration(uint item_id, bytes20 owner) external;
 }

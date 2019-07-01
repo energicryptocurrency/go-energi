@@ -23,6 +23,7 @@ const MockContract = artifacts.require('MockContract');
 const BlacklistRegistryV1 = artifacts.require('BlacklistRegistryV1');
 const IBlacklistRegistry = artifacts.require('IBlacklistRegistry');
 const IProposal = artifacts.require('IProposal');
+const Gen2Migration = artifacts.require('Gen2Migration');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const TreasuryV1 = artifacts.require('TreasuryV1');
@@ -58,11 +59,14 @@ contract("BlacklistRegistryV1", async accounts => {
         s.token_abi = await IBlacklistRegistry.at(s.proxy.address);
         await s.proxy.setImpl(s.orig.address);
         s.storage = await StorageBlacklistRegistryV1.at(await s.proxy_abi.v1storage());
+        s.compensation_fund = await s.orig.compensation_fund();
         Object.freeze(s);
     });
 
     after(async () => {
-        const impl = await BlacklistRegistryV1.new(s.proxy.address, s.mnregistry_proxy.address);
+        const impl = await BlacklistRegistryV1.new(
+            s.proxy.address, s.mnregistry_proxy.address,
+            Gen2Migration.address, s.compensation_fund);
         await s.proxy.setImpl(impl.address);
     });
 

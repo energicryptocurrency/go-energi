@@ -25,6 +25,8 @@ import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlacklistRegistry, IBlacklistProposal, IProposal } from "./IBlacklistRegistry.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
+import { ITreasury } from "./ITreasury.sol";
+import { Gen2Migration } from "./Gen2Migration.sol";
 import { GenericProposalV1 } from "./GenericProposalV1.sol";
 import { StorageBase }  from "./StorageBase.sol";
 import { NonReentrant } from "./NonReentrant.sol";
@@ -117,11 +119,21 @@ contract BlacklistRegistryV1 is
     //---------------------------------
     StorageBlacklistRegistryV1 public v1storage;
     IGovernedProxy public mnregistry_proxy;
+    Gen2Migration public migration;
+    ITreasury public compensation_fund;
     //---------------------------------
 
-    constructor(address _proxy, IGovernedProxy _mnregistry_proxy) public GovernedContract(_proxy) {
+    constructor(
+        address _proxy,
+        IGovernedProxy _mnregistry_proxy,
+        Gen2Migration _migration,
+        ITreasury _compensatin_fund
+    )
+        public GovernedContract(_proxy) {
         v1storage = new StorageBlacklistRegistryV1();
         mnregistry_proxy = _mnregistry_proxy;
+        migration = _migration;
+        compensation_fund = _compensatin_fund;
     }
 
     // IGovernedContract
@@ -265,6 +277,15 @@ contract BlacklistRegistryV1 is
 
         revoke.collect();
         store.setRevoke(addr, IProposal(address(0)));
+    }
+
+    function collectMigration(uint item_id, bytes20 owner)
+        external
+        noReentry
+    {
+        require(isBlacklisted(address(owner)), "Not blacklisted");
+        // TODO: check if valid to collect
+        migration.blacklistClaim(item_id, owner);
     }
 
     // Safety

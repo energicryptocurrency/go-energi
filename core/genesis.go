@@ -617,6 +617,18 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_abi.BlacklistRegistryV1Bin,
 		energi_params.Energi_BlacklistRegistry,
 		energi_params.Energi_MasternodeRegistry,
+		energi_params.Energi_MigrationContract,
+		energi_params.Energi_CompensationFundV1,
+	)
+	deployEnergiContract(
+		&xfers,
+		energi_params.Energi_CompensationFundV1,
+		nil,
+		energi_abi.TreasuryV1ABI,
+		energi_abi.TreasuryV1Bin,
+		energi_params.Energi_BlacklistRegistryV1,
+		energi_params.Energi_MasternodeRegistry,
+		common.Big1, // unused
 	)
 	deployEnergiContract(
 		&xfers,
@@ -624,7 +636,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		new(big.Int).Mul(big.NewInt(0xFFFF), big.NewInt(1e18)),
 		energi_abi.Gen2MigrationABI,
 		energi_abi.Gen2MigrationBin,
-		energi_params.Energi_Treasury,
+		energi_params.Energi_BlacklistRegistry,
 		config.ChainID,
 		config.Energi.MigrationSigner,
 	)
