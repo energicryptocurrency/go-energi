@@ -260,6 +260,7 @@ func calcPoSDifficultyV1(
 			new(big.Int).Mul(parent.Difficulty, B),
 			diffV1_Div,
 		)
+		log.Trace("Diff multiplier", "before", S, "mult", B)
 	} else if time > target {
 		S := time - target
 		if S > diffV1_AMax {
@@ -270,7 +271,9 @@ func calcPoSDifficultyV1(
 			new(big.Int).Mul(parent.Difficulty, diffV1_Div),
 			A,
 		)
+		log.Trace("Diff multiplier", "after", S, "div", A)
 	} else {
+		log.Trace("No difficulty change", "parent", parent.Difficulty)
 		return parent.Difficulty
 	}
 
@@ -278,6 +281,9 @@ func calcPoSDifficultyV1(
 		D = common.Big1
 	}
 
+	log.Trace("Difficulty change",
+		"parent", parent.Difficulty, "new", D,
+		"time", time, "target", target)
 	return D
 }
 
