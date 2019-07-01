@@ -837,26 +837,13 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	tstart := time.Now()
 	parent := w.chain.CurrentBlock()
 
-	// TODO: prevent re-evaluation of older time on work re-submit
-	// NOTE: force from min gap!
-	timestamp = int64(parent.Time() + energi_consensus.MinBlockGap)
-
-	// this will ensure we're not going off too far in the future
-	if now := time.Now().Unix(); timestamp > (now + int64(energi_consensus.MaxFutureGap)) {
-		wait := time.Duration(timestamp-now) * time.Second
-		if w.isRunning() {
-			log.Info("Mining too far in the future", "wait", common.PrettyDuration(wait))
-		}
-		time.Sleep(wait)
-	}
-
 	num := parent.Number()
 	header := &types.Header{
 		ParentHash: parent.Hash(),
 		Number:     num.Add(num, common.Big1),
 		GasLimit:   core.CalcGasLimit(parent, w.gasFloor, w.gasCeil),
 		Extra:      w.extra,
-		Time:       uint64(timestamp),
+		Time:       uint64(parent.Time() + energi_consensus.MinBlockGap),
 	}
 	// Only set the coinbase if our consensus engine is running (avoid spurious block rewards)
 	if w.isRunning() {

@@ -128,11 +128,6 @@ func (e *Energi) enforceTime(
 		header.Time = time_target.min_time
 	}
 
-	// Check if allowed to mine
-	if header.Time > time_target.max_time {
-		return eth_consensus.ErrFutureBlock
-	}
-
 	return nil
 }
 
