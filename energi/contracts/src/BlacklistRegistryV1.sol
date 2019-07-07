@@ -76,6 +76,7 @@ contract StorageBlacklistRegistryV1 is
     struct Info {
         IProposal enforce;
         IProposal revoke;
+        IProposal drain;
         uint index;
     }
 
@@ -105,6 +106,16 @@ contract StorageBlacklistRegistryV1 is
         item.revoke = proposal;
     }
 
+    function setDrain(address addr, IProposal proposal)
+        external
+        requireOwner
+    {
+        Info storage item = address_info[addr];
+
+        assert(address(item.enforce) != address(0));
+
+        item.drain = proposal;
+    }
 
     function remove(address addr)
         external
@@ -176,9 +187,19 @@ contract BlacklistRegistryV1 is
     //---------------------------------
     function proposals(address addr)
         external view
-        returns(IProposal enforce, IProposal revoke)
+        returns(IProposal enforce, IProposal revoke, IProposal drain)
     {
-        (enforce, revoke,) = v1storage.address_info(addr);
+        (enforce, revoke, drain,) = v1storage.address_info(addr);
+    }
+
+    function _createProposal() internal returns(IProposal) {
+        BlacklistProposalV1 proposal = new BlacklistProposalV1(
+            mnregistry_proxy,
+            _callerAddress()
+        );
+
+        proposal.setFee.value(msg.value)();
+        return IProposal(address(proposal));
     }
 
     function propose(address addr)
@@ -189,7 +210,7 @@ contract BlacklistRegistryV1 is
         require(msg.value == FEE_BLACKLIST_V1, "Invalid fee");
 
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke, IProposal drain,) = store.address_info(addr);
 
         // Cleanup old
         if (address(enforce) != address(0)) {
@@ -198,6 +219,9 @@ contract BlacklistRegistryV1 is
                 if (revoke.isAccepted()) {
                     enforce.destroy();
                     revoke.destroy();
+                    if (address(drain) != address(0)) {
+                        drain.destroy();
+                    }
                     store.remove(addr);
                 } else if (revoke.isFinished()) {
                     revert("Already active (1)");
@@ -211,19 +235,14 @@ contract BlacklistRegistryV1 is
         }
 
         // Create new
-        BlacklistProposalV1 proposal = new BlacklistProposalV1(
-            mnregistry_proxy,
-            _callerAddress()
-        );
-
-        proposal.setFee.value(msg.value)();
+        IProposal proposal = _createProposal();
 
         store.setEnforce(addr, proposal);
 
-        emit BlacklistProposal(addr, IProposal(address(proposal)));
+        emit BlacklistProposal(addr, proposal);
     }
 
-    function revokeProposal(address addr)
+    function proposeRevoke(address addr)
         external payable
         noReentry
         returns(address)
@@ -231,7 +250,7 @@ contract BlacklistRegistryV1 is
         require(msg.value == FEE_BLACKLIST_REVOKE_V1, "Invalid fee");
 
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke,,) = store.address_info(addr);
 
         // Cleanup old
         require(address(enforce) != address(0), "No need (1)");
@@ -250,16 +269,41 @@ contract BlacklistRegistryV1 is
         }
 
         // Create new
-        BlacklistProposalV1 proposal = new BlacklistProposalV1(
-            mnregistry_proxy,
-            _callerAddress()
-        );
-
-        proposal.setFee.value(msg.value)();
+        IProposal proposal = _createProposal();
 
         store.setRevoke(addr, proposal);
 
-        emit WhitelistProposal(addr, IProposal(address(proposal)));
+        emit WhitelistProposal(addr, proposal);
+    }
+
+    function proposeDrain(address addr)
+        external payable
+        noReentry
+        returns(address)
+    {
+        require(msg.value == FEE_BLACKLIST_DRAIN_V1, "Invalid fee");
+
+        require(isBlacklisted(address(addr)), "Not blacklisted");
+
+        StorageBlacklistRegistryV1 store = v1storage;
+        (,, IProposal drain,) = store.address_info(addr);
+
+        if (address(drain) != address(0)) {
+            if (drain.isAccepted()) {
+                revert("Not need");
+            } else if (drain.isFinished()) {
+                drain.collect();
+            } else {
+                revert("Voting in progress");
+            }
+        }
+
+        // Create new
+        IProposal proposal = _createProposal();
+
+        store.setDrain(addr, proposal);
+
+        emit DrainProposal(addr, proposal);
     }
 
     function isBlacklisted(address addr)
@@ -267,7 +311,7 @@ contract BlacklistRegistryV1 is
         returns(bool)
     {
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke,,) = store.address_info(addr);
 
         if ((address(revoke) != address(0)) && revoke.isAccepted()) {
             return false;
@@ -280,15 +324,32 @@ contract BlacklistRegistryV1 is
         return false;
     }
 
+    function isDrainable(address addr)
+        public view
+        returns(bool)
+    {
+        if (!isBlacklisted(addr)) {
+            return false;
+        }
+
+        (,, IProposal drain,) = v1storage.address_info(addr);
+
+        if (address(drain) == address(0)) {
+            return false;
+        }
+
+        return drain.isAccepted();
+    }
+
     function collect(address addr)
         external
         noReentry
     {
         StorageBlacklistRegistryV1 store = v1storage;
-        (IProposal enforce, IProposal revoke,) = store.address_info(addr);
+        (IProposal enforce, IProposal revoke, IProposal drain,) = store.address_info(addr);
 
-        require (address(enforce) != address(0), "Nothing to collect (1)");
-        require (enforce.isFinished(), "Nothing to collect (2)");
+        require(address(enforce) != address(0), "Nothing to collect");
+        require(enforce.isFinished(), "Enforce voting in progress");
 
         if (!enforce.isAccepted()) {
             enforce.collect();
@@ -296,27 +357,43 @@ contract BlacklistRegistryV1 is
             return;
         }
 
-        require (address(revoke) != address(0), "Nothing to collect (3)");
-        require(revoke.isFinished(), "Nothing to collect (4)");
+        if (address(drain) != address(0)) {
+            require(drain.isFinished(), "Drain voting in progress");
 
-        if (revoke.isAccepted()) {
-            enforce.destroy();
-            revoke.destroy();
-            store.remove(addr);
+            if (drain.isAccepted()) {
+                revert("Account must be drained");
+            }
+
+            drain.collect();
+            store.setDrain(addr, IProposal(address(0)));
             return;
         }
 
-        revoke.collect();
-        store.setRevoke(addr, IProposal(address(0)));
+        if (address(revoke) != address(0)) {
+            require(revoke.isFinished(), "Revoke voting in progress");
+
+            if (revoke.isAccepted()) {
+                enforce.destroy();
+                revoke.destroy();
+                assert(address(drain) == address(0));
+                store.remove(addr);
+            } else {
+                revoke.collect();
+                store.setRevoke(addr, IProposal(address(0)));
+            }
+            return;
+        }
+
+        revert("No proposals ready to collect");
     }
 
-    function collectMigration(uint item_id, bytes20 owner)
+    function drainMigration(uint item_id, bytes20 owner)
         external
         noReentry
     {
-        require(isBlacklisted(address(owner)), "Not blacklisted");
-        // TODO: check if valid to collect
+        require(isDrainable(address(owner)), "Not drainable");
         migration.blacklistClaim(item_id, owner);
+        _onDrain(address(owner));
     }
 
     function enumerateAll()
@@ -336,6 +413,47 @@ contract BlacklistRegistryV1 is
             if (!isBlacklisted(addresses[i])) {
                 addresses[i] = address(0);
             }
+        }
+    }
+
+    function enumerateDrainable()
+        external view
+        returns(address[] memory addresses)
+    {
+        addresses = v1storage.addresses();
+
+        for (uint i = addresses.length; i-- > 0;) {
+            if (!isBlacklisted(addresses[i])) {
+                addresses[i] = address(0);
+            }
+        }
+    }
+
+    function onDrain(address addr)
+        external
+        noReentry
+    {
+        // solium-disable-next-line security/no-tx-origin
+        require(tx.origin == proxy, "Not consensus");
+        _onDrain(addr);
+    }
+
+    function _onDrain(address addr) internal {
+        StorageBlacklistRegistryV1 store = v1storage;
+        (IProposal enforce, IProposal revoke, IProposal drain,) = store.address_info(addr);
+
+        if (address(enforce) != address(0)) {
+            enforce.destroy();
+
+            if (address(revoke) != address(0)) {
+                revoke.destroy();
+            }
+
+            if (address(drain) != address(0)) {
+                drain.destroy();
+            }
+
+            store.remove(addr);
         }
     }
 

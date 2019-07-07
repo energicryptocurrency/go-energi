@@ -42,6 +42,7 @@ contract GlobalConstants {
     uint constant internal FEE_CHECKPOINT_V1 = 1000 ether;
     uint constant internal FEE_BLACKLIST_V1 = 1000 ether;
     uint constant internal FEE_BLACKLIST_REVOKE_V1 = 100 ether;
+    uint constant internal FEE_BLACKLIST_DRAIN_V1 = 100 ether;
 
     uint constant internal PERIOD_UPGRADE_MIN = 2 weeks;
     uint constant internal PERIOD_UPGRADE_MAX = 365 days;

@@ -48,15 +48,26 @@ interface IBlacklistRegistry {
         address indexed target,
         IProposal proposal
     );
+    event DrainProposal(
+        address indexed target,
+        IProposal proposal
+    );
 
     function compensation_fund() external view returns(ITreasury);
 
-    function proposals(address) external view returns(IProposal enforce, IProposal revoke);
+    function proposals(address) external view returns(
+        IProposal enforce,
+        IProposal revoke,
+        IProposal drain);
     function propose(address) external payable returns(address);
-    function revokeProposal(address) external payable returns(address);
+    function proposeRevoke(address) external payable returns(address);
+    function proposeDrain(address) external payable returns(address);
     function isBlacklisted(address) external view returns(bool);
+    function isDrainable(address) external view returns(bool);
     function collect(address) external;
-    function collectMigration(uint item_id, bytes20 owner) external;
+    function drainMigration(uint item_id, bytes20 owner) external;
     function enumerateAll() external view returns(address[] memory addresses);
     function enumerateBlocked() external view returns(address[] memory addresses);
+    function enumerateDrainable() external view returns(address[] memory addresses);
+    function onDrain(address) external;
 }

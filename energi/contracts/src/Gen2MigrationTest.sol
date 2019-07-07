@@ -46,7 +46,9 @@ contract MockGen2MigrationBlacklist is BlacklistRegistryV1 {
 
     constructor(address _proxy, IGovernedProxy _mnregistry_proxy, Gen2Migration _migration, ITreasury _fund)
         public
-        BlacklistRegistryV1(_proxy, _mnregistry_proxy, _migration, _fund) {}
+        BlacklistRegistryV1(_proxy, _mnregistry_proxy, _migration, _fund)
+    // solium-disable-next-line no-empty-blocks
+    {}
 
     function setBlacklisted(address addr, bool is_bl) external {
         is_blacklisted[addr] = is_bl;
@@ -56,7 +58,8 @@ contract MockGen2MigrationBlacklist is BlacklistRegistryV1 {
         return is_blacklisted[addr];
     }
 
-    function collectMigration(uint item_id, bytes20 owner) external {
+    function drainMigration(uint item_id, bytes20 owner) external {
         migration.blacklistClaim(item_id, owner);
+        _onDrain(address(owner));
     }
 }

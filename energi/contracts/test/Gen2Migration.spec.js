@@ -40,7 +40,8 @@ contract("Gen2Migration", async accounts => {
         blacklist_registry = await BlacklistRegistryV1.deployed();
         blacklist_registry = await MockGen2MigrationBlacklist.new(
             blacklist_proxy.address, await blacklist_registry.mnregistry_proxy(),
-            orig.address, await blacklist_registry.compensation_fund());
+            orig.address, await blacklist_registry.compensation_fund(),
+            { gas: "30000000" });
         await blacklist_proxy.setImpl(blacklist_registry.address);
     });
 
@@ -219,7 +220,7 @@ contract("Gen2Migration", async accounts => {
     it('should allow to blacklistClaim() by Blacklist', async() => {
         const fund = await blacklist_registry.compensation_fund();
         const bal_before = await web3.eth.getBalance(fund);
-        await blacklist_registry.collectMigration(2, owner3);
+        await blacklist_registry.drainMigration(2, owner3);
         const bal_after = await web3.eth.getBalance(fund);
         expect(toBN(bal_after).sub(toBN(bal_before)).toString()).equal(bal3.toString());
     });

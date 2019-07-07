@@ -46,7 +46,8 @@ module.exports = async (deployer, _, accounts) => {
         const compensation_fund = await TreasuryV1.new(treasury_proxy, mn_registry_proxy, 1);
         await deploy_common(BlacklistRegistryV1,
             blacklist_registry, mn_registry_proxy,
-            Gen2Migration.address, compensation_fund.address);
+            Gen2Migration.address, compensation_fund.address,
+            { gas: "30000000" });
         await deploy_common(BackboneRewardV1, undefined, accounts[5]);
         await deploy_common(CheckpointRegistryV1);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);

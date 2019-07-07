@@ -105,6 +105,7 @@ test-sol:
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef12345678ffffffff,1000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567fffffffff,1000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef123456ffffffffff,1000000000000000000000' \
+	    -l 30000000 \
 	    2>&1 >build/contracts/ganache.log & \
 	  sleep 1; \
 	  truffle test; \

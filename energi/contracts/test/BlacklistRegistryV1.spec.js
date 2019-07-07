@@ -66,7 +66,8 @@ contract("BlacklistRegistryV1", async accounts => {
     after(async () => {
         const impl = await BlacklistRegistryV1.new(
             s.proxy.address, s.mnregistry_proxy.address,
-            Gen2Migration.address, s.compensation_fund);
+            Gen2Migration.address, s.compensation_fund,
+            { gas: "10000000" });
         await s.proxy.setImpl(impl.address);
     });
 
@@ -77,6 +78,7 @@ contract("BlacklistRegistryV1", async accounts => {
         const { fromAscii, toBN, toWei } = web3.utils;
         const enforce_fee = toBN(toWei('1000', 'ether'));
         const revoke_fee = toBN(toWei('100', 'ether'));
+        const drain_fee = toBN(toWei('100', 'ether'));
 
         const collateral1 = toBN(toWei('50000', 'ether'));
         const owner1 = accounts[0];
@@ -122,7 +124,7 @@ contract("BlacklistRegistryV1", async accounts => {
             }
         });
 
-        it('should refuse revokeProposal() without proper fee', async () => {
+        it('should refuse proposeRevoke() without proper fee', async () => {
             try {
                 await s.token_abi.propose(target1, { value: revoke_fee.sub(toBN(1)) });
                 assert.fail('It should fail');
@@ -138,9 +140,9 @@ contract("BlacklistRegistryV1", async accounts => {
             }
         });
 
-        it('should refuse revokeProposal() on no enforce voting', async () => {
+        it('should refuse proposeRevoke() on no enforce voting', async () => {
             try {
-                await s.token_abi.revokeProposal(target1, { value: revoke_fee });
+                await s.token_abi.proposeRevoke(target1, { value: revoke_fee });
                 assert.fail('It should fail');
             } catch (e) {
                 assert.match(e.message, /No need \(1\)/);
@@ -185,21 +187,21 @@ contract("BlacklistRegistryV1", async accounts => {
             }
         });
 
-        it('should refuse revokeProposal() on active enforce voting', async () => {
+        it('should refuse proposeRevoke() on active enforce voting', async () => {
             try {
-                await s.token_abi.revokeProposal(target1, { value: revoke_fee });
+                await s.token_abi.proposeRevoke(target1, { value: revoke_fee });
                 assert.fail('It should fail');
             } catch (e) {
                 assert.match(e.message, /Not applicable/);
             }
         });
 
-        it('should refuse revokeProposal() on rejected enforcement', async () => {
+        it('should refuse proposeRevoke() on rejected enforcement', async () => {
             const old_proposal = await IProposal.at((await s.token_abi.proposals(target1))['0']);
             await old_proposal.voteReject({from: owner1});
 
             try {
-                await s.token_abi.revokeProposal(target1, { value: revoke_fee });
+                await s.token_abi.proposeRevoke(target1, { value: revoke_fee });
                 assert.fail('It should fail');
             } catch (e) {
                 assert.match(e.message, /No need \(2\)/);
@@ -218,7 +220,7 @@ contract("BlacklistRegistryV1", async accounts => {
                 await s.token_abi.collect(target2);
                 assert.fail('It should fail');
             } catch (e) {
-                assert.match(e.message, /Nothing to collect \(1\)/);
+                assert.match(e.message, /Nothing to collect/);
             }
         });
 
@@ -227,7 +229,7 @@ contract("BlacklistRegistryV1", async accounts => {
                 await s.token_abi.collect(target1);
                 assert.fail('It should fail');
             } catch (e) {
-                assert.match(e.message, /Nothing to collect \(2\)/);
+                assert.match(e.message, /Enforce voting in progress/);
             }
         });
 
@@ -250,29 +252,29 @@ contract("BlacklistRegistryV1", async accounts => {
                 await s.token_abi.collect(target1);
                 assert.fail('It should fail');
             } catch (e) {
-                assert.match(e.message, /Nothing to collect \(3\)/);
+                assert.match(e.message, /No proposals ready to collect/);
             }
         });
 
-        it('should revokeProposal()', async () => {
-            await s.token_abi.revokeProposal(target1, { value: revoke_fee });
+        it('should proposeRevoke()', async () => {
+            await s.token_abi.proposeRevoke(target1, { value: revoke_fee });
             expect(await s.token_abi.isBlacklisted(target1)).true;
             expect(await s.token_abi.isBlacklisted(target2)).false;
         });
 
-        it('should refuse revokeProposal() on active revoke voting', async () => {
+        it('should refuse proposeRevoke() on active revoke voting', async () => {
             try {
-                await s.token_abi.revokeProposal(target1, { value: revoke_fee });
+                await s.token_abi.proposeRevoke(target1, { value: revoke_fee });
                 assert.fail('It should fail');
             } catch (e) {
                 assert.match(e.message, /Already active/);
             }
         });
 
-        it('should revokeProposal() and collect rejected', async () => {
+        it('should proposeRevoke() and collect rejected', async () => {
             const old_proposal = await IProposal.at((await s.token_abi.proposals(target1))['1']);
             await old_proposal.voteReject({from: owner1});
-            await s.token_abi.revokeProposal(target1, { value: revoke_fee });
+            await s.token_abi.proposeRevoke(target1, { value: revoke_fee });
             expect(await s.treasury_orig.getPastEvents('Contribution', common.evt_last_block)).lengthOf(1);
             expect(await s.token_abi.isBlacklisted(target1)).true;
             expect(await s.token_abi.isBlacklisted(target2)).false;
@@ -283,7 +285,7 @@ contract("BlacklistRegistryV1", async accounts => {
                 await s.token_abi.collect(target1);
                 assert.fail('It should fail');
             } catch (e) {
-                assert.match(e.message, /Nothing to collect \(4\)/);
+                assert.match(e.message, /Revoke voting in progress/);
             }
         });
 
@@ -297,7 +299,7 @@ contract("BlacklistRegistryV1", async accounts => {
         });
 
         it('should collect() after approved revocation', async () => {
-            await s.token_abi.revokeProposal(target1, { value: revoke_fee });
+            await s.token_abi.proposeRevoke(target1, { value: revoke_fee });
             const old_proposal = await IProposal.at((await s.token_abi.proposals(target1))['1']);
             await old_proposal.voteAccept({from: owner1});
             await s.token_abi.collect(target1);
@@ -338,6 +340,56 @@ contract("BlacklistRegistryV1", async accounts => {
             await proposal.setWeights(toBN(7).mul(b), toBN(3).mul(b), toBN(1).mul(b), toBN(50).mul(b));
             expect(await proposal.isObeyed()).false;
             expect(await proposal.isAccepted()).false;
+        });
+
+        it('should proposeDrain() collect rejected', async () => {
+            await s.token_abi.propose(target1, { value: enforce_fee });
+            const enforce = await IProposal.at((await s.token_abi.proposals(target1))['0']);
+            await enforce.voteAccept();
+            await s.token_abi.proposeDrain(target1, { value: drain_fee });
+            const drain = await IProposal.at((await s.token_abi.proposals(target1))['2']);
+
+            expect(await s.token_abi.isDrainable(target1)).false;
+            await drain.voteReject();
+            expect(await s.token_abi.isDrainable(target1)).false;
+
+            s.token_abi.collect(target1);
+        });
+
+        it('should proposeDrain()', async () => {
+            await s.token_abi.proposeDrain(target1, { value: drain_fee });
+            const drain = await IProposal.at((await s.token_abi.proposals(target1))['2']);
+
+            expect(await s.token_abi.isDrainable(target1)).false;
+            await drain.voteAccept();
+            expect(await s.token_abi.isDrainable(target1)).true;
+        });
+
+        it('should refuse onDrain()', async () => {
+            try {
+                await s.token_abi.onDrain(target1);
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Not consensus/);
+            }
+        });
+
+        it('should accept drainMigration()', async () => {
+            try {
+                await s.token_abi.drainMigration(0, target1);
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid ID/);
+            }
+        });
+
+        it('should refuse drainMigration()', async () => {
+            try {
+                await s.token_abi.drainMigration(0, target2);
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Not drainable/);
+            }
         });
     });
 
