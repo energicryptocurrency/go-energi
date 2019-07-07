@@ -28,7 +28,7 @@ var (
 )
 
 // IBlacklistRegistryABI is the input ABI used to generate the binding from.
-const IBlacklistRegistryABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"propose\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"collect\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"revokeProposal\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"proposals\",\"outputs\":[{\"name\":\"enforce\",\"type\":\"address\"},{\"name\":\"revoke\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateBlocked\",\"outputs\":[{\"name\":\"addresses\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateAll\",\"outputs\":[{\"name\":\"addresses\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"compensation_fund\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"isBlacklisted\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"item_id\",\"type\":\"uint256\"},{\"name\":\"owner\",\"type\":\"bytes20\"}],\"name\":\"collectMigration\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"target\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"BlacklistProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"target\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"WhitelistProposal\",\"type\":\"event\"}]"
+const IBlacklistRegistryABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"propose\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"collect\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"proposeRevoke\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"isDrainable\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"proposals\",\"outputs\":[{\"name\":\"enforce\",\"type\":\"address\"},{\"name\":\"revoke\",\"type\":\"address\"},{\"name\":\"drain\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"item_id\",\"type\":\"uint256\"},{\"name\":\"owner\",\"type\":\"bytes20\"}],\"name\":\"drainMigration\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateBlocked\",\"outputs\":[{\"name\":\"addresses\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"onDrain\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateAll\",\"outputs\":[{\"name\":\"addresses\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"proposeDrain\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateDrainable\",\"outputs\":[{\"name\":\"addresses\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"compensation_fund\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"isBlacklisted\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"target\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"BlacklistProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"target\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"WhitelistProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"target\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"DrainProposal\",\"type\":\"event\"}]"
 
 // IBlacklistRegistry is an auto generated Go binding around an Ethereum contract.
 type IBlacklistRegistry struct {
@@ -250,6 +250,32 @@ func (_IBlacklistRegistry *IBlacklistRegistryCallerSession) EnumerateBlocked() (
 	return _IBlacklistRegistry.Contract.EnumerateBlocked(&_IBlacklistRegistry.CallOpts)
 }
 
+// EnumerateDrainable is a free data retrieval call binding the contract method 0xee33f9d2.
+//
+// Solidity: function enumerateDrainable() constant returns(address[] addresses)
+func (_IBlacklistRegistry *IBlacklistRegistryCaller) EnumerateDrainable(opts *bind.CallOpts) ([]common.Address, error) {
+	var (
+		ret0 = new([]common.Address)
+	)
+	out := ret0
+	err := _IBlacklistRegistry.contract.Call(opts, out, "enumerateDrainable")
+	return *ret0, err
+}
+
+// EnumerateDrainable is a free data retrieval call binding the contract method 0xee33f9d2.
+//
+// Solidity: function enumerateDrainable() constant returns(address[] addresses)
+func (_IBlacklistRegistry *IBlacklistRegistrySession) EnumerateDrainable() ([]common.Address, error) {
+	return _IBlacklistRegistry.Contract.EnumerateDrainable(&_IBlacklistRegistry.CallOpts)
+}
+
+// EnumerateDrainable is a free data retrieval call binding the contract method 0xee33f9d2.
+//
+// Solidity: function enumerateDrainable() constant returns(address[] addresses)
+func (_IBlacklistRegistry *IBlacklistRegistryCallerSession) EnumerateDrainable() ([]common.Address, error) {
+	return _IBlacklistRegistry.Contract.EnumerateDrainable(&_IBlacklistRegistry.CallOpts)
+}
+
 // IsBlacklisted is a free data retrieval call binding the contract method 0xfe575a87.
 //
 // Solidity: function isBlacklisted(address ) constant returns(bool)
@@ -276,16 +302,44 @@ func (_IBlacklistRegistry *IBlacklistRegistryCallerSession) IsBlacklisted(arg0 c
 	return _IBlacklistRegistry.Contract.IsBlacklisted(&_IBlacklistRegistry.CallOpts, arg0)
 }
 
+// IsDrainable is a free data retrieval call binding the contract method 0x3303bbb1.
+//
+// Solidity: function isDrainable(address ) constant returns(bool)
+func (_IBlacklistRegistry *IBlacklistRegistryCaller) IsDrainable(opts *bind.CallOpts, arg0 common.Address) (bool, error) {
+	var (
+		ret0 = new(bool)
+	)
+	out := ret0
+	err := _IBlacklistRegistry.contract.Call(opts, out, "isDrainable", arg0)
+	return *ret0, err
+}
+
+// IsDrainable is a free data retrieval call binding the contract method 0x3303bbb1.
+//
+// Solidity: function isDrainable(address ) constant returns(bool)
+func (_IBlacklistRegistry *IBlacklistRegistrySession) IsDrainable(arg0 common.Address) (bool, error) {
+	return _IBlacklistRegistry.Contract.IsDrainable(&_IBlacklistRegistry.CallOpts, arg0)
+}
+
+// IsDrainable is a free data retrieval call binding the contract method 0x3303bbb1.
+//
+// Solidity: function isDrainable(address ) constant returns(bool)
+func (_IBlacklistRegistry *IBlacklistRegistryCallerSession) IsDrainable(arg0 common.Address) (bool, error) {
+	return _IBlacklistRegistry.Contract.IsDrainable(&_IBlacklistRegistry.CallOpts, arg0)
+}
+
 // Proposals is a free data retrieval call binding the contract method 0x3341b445.
 //
-// Solidity: function proposals(address ) constant returns(address enforce, address revoke)
+// Solidity: function proposals(address ) constant returns(address enforce, address revoke, address drain)
 func (_IBlacklistRegistry *IBlacklistRegistryCaller) Proposals(opts *bind.CallOpts, arg0 common.Address) (struct {
 	Enforce common.Address
 	Revoke  common.Address
+	Drain   common.Address
 }, error) {
 	ret := new(struct {
 		Enforce common.Address
 		Revoke  common.Address
+		Drain   common.Address
 	})
 	out := ret
 	err := _IBlacklistRegistry.contract.Call(opts, out, "proposals", arg0)
@@ -294,20 +348,22 @@ func (_IBlacklistRegistry *IBlacklistRegistryCaller) Proposals(opts *bind.CallOp
 
 // Proposals is a free data retrieval call binding the contract method 0x3341b445.
 //
-// Solidity: function proposals(address ) constant returns(address enforce, address revoke)
+// Solidity: function proposals(address ) constant returns(address enforce, address revoke, address drain)
 func (_IBlacklistRegistry *IBlacklistRegistrySession) Proposals(arg0 common.Address) (struct {
 	Enforce common.Address
 	Revoke  common.Address
+	Drain   common.Address
 }, error) {
 	return _IBlacklistRegistry.Contract.Proposals(&_IBlacklistRegistry.CallOpts, arg0)
 }
 
 // Proposals is a free data retrieval call binding the contract method 0x3341b445.
 //
-// Solidity: function proposals(address ) constant returns(address enforce, address revoke)
+// Solidity: function proposals(address ) constant returns(address enforce, address revoke, address drain)
 func (_IBlacklistRegistry *IBlacklistRegistryCallerSession) Proposals(arg0 common.Address) (struct {
 	Enforce common.Address
 	Revoke  common.Address
+	Drain   common.Address
 }, error) {
 	return _IBlacklistRegistry.Contract.Proposals(&_IBlacklistRegistry.CallOpts, arg0)
 }
@@ -333,25 +389,46 @@ func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) Collect(arg0 com
 	return _IBlacklistRegistry.Contract.Collect(&_IBlacklistRegistry.TransactOpts, arg0)
 }
 
-// CollectMigration is a paid mutator transaction binding the contract method 0xfed01c30.
+// DrainMigration is a paid mutator transaction binding the contract method 0x3502a130.
 //
-// Solidity: function collectMigration(uint256 item_id, bytes20 owner) returns()
-func (_IBlacklistRegistry *IBlacklistRegistryTransactor) CollectMigration(opts *bind.TransactOpts, item_id *big.Int, owner [20]byte) (*types.Transaction, error) {
-	return _IBlacklistRegistry.contract.Transact(opts, "collectMigration", item_id, owner)
+// Solidity: function drainMigration(uint256 item_id, bytes20 owner) returns()
+func (_IBlacklistRegistry *IBlacklistRegistryTransactor) DrainMigration(opts *bind.TransactOpts, item_id *big.Int, owner [20]byte) (*types.Transaction, error) {
+	return _IBlacklistRegistry.contract.Transact(opts, "drainMigration", item_id, owner)
 }
 
-// CollectMigration is a paid mutator transaction binding the contract method 0xfed01c30.
+// DrainMigration is a paid mutator transaction binding the contract method 0x3502a130.
 //
-// Solidity: function collectMigration(uint256 item_id, bytes20 owner) returns()
-func (_IBlacklistRegistry *IBlacklistRegistrySession) CollectMigration(item_id *big.Int, owner [20]byte) (*types.Transaction, error) {
-	return _IBlacklistRegistry.Contract.CollectMigration(&_IBlacklistRegistry.TransactOpts, item_id, owner)
+// Solidity: function drainMigration(uint256 item_id, bytes20 owner) returns()
+func (_IBlacklistRegistry *IBlacklistRegistrySession) DrainMigration(item_id *big.Int, owner [20]byte) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.DrainMigration(&_IBlacklistRegistry.TransactOpts, item_id, owner)
 }
 
-// CollectMigration is a paid mutator transaction binding the contract method 0xfed01c30.
+// DrainMigration is a paid mutator transaction binding the contract method 0x3502a130.
 //
-// Solidity: function collectMigration(uint256 item_id, bytes20 owner) returns()
-func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) CollectMigration(item_id *big.Int, owner [20]byte) (*types.Transaction, error) {
-	return _IBlacklistRegistry.Contract.CollectMigration(&_IBlacklistRegistry.TransactOpts, item_id, owner)
+// Solidity: function drainMigration(uint256 item_id, bytes20 owner) returns()
+func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) DrainMigration(item_id *big.Int, owner [20]byte) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.DrainMigration(&_IBlacklistRegistry.TransactOpts, item_id, owner)
+}
+
+// OnDrain is a paid mutator transaction binding the contract method 0x79d7bc07.
+//
+// Solidity: function onDrain(address ) returns()
+func (_IBlacklistRegistry *IBlacklistRegistryTransactor) OnDrain(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.contract.Transact(opts, "onDrain", arg0)
+}
+
+// OnDrain is a paid mutator transaction binding the contract method 0x79d7bc07.
+//
+// Solidity: function onDrain(address ) returns()
+func (_IBlacklistRegistry *IBlacklistRegistrySession) OnDrain(arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.OnDrain(&_IBlacklistRegistry.TransactOpts, arg0)
+}
+
+// OnDrain is a paid mutator transaction binding the contract method 0x79d7bc07.
+//
+// Solidity: function onDrain(address ) returns()
+func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) OnDrain(arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.OnDrain(&_IBlacklistRegistry.TransactOpts, arg0)
 }
 
 // Propose is a paid mutator transaction binding the contract method 0x01267951.
@@ -375,25 +452,46 @@ func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) Propose(arg0 com
 	return _IBlacklistRegistry.Contract.Propose(&_IBlacklistRegistry.TransactOpts, arg0)
 }
 
-// RevokeProposal is a paid mutator transaction binding the contract method 0x2a7736ad.
+// ProposeDrain is a paid mutator transaction binding the contract method 0xd1e8ebda.
 //
-// Solidity: function revokeProposal(address ) returns(address)
-func (_IBlacklistRegistry *IBlacklistRegistryTransactor) RevokeProposal(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
-	return _IBlacklistRegistry.contract.Transact(opts, "revokeProposal", arg0)
+// Solidity: function proposeDrain(address ) returns(address)
+func (_IBlacklistRegistry *IBlacklistRegistryTransactor) ProposeDrain(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.contract.Transact(opts, "proposeDrain", arg0)
 }
 
-// RevokeProposal is a paid mutator transaction binding the contract method 0x2a7736ad.
+// ProposeDrain is a paid mutator transaction binding the contract method 0xd1e8ebda.
 //
-// Solidity: function revokeProposal(address ) returns(address)
-func (_IBlacklistRegistry *IBlacklistRegistrySession) RevokeProposal(arg0 common.Address) (*types.Transaction, error) {
-	return _IBlacklistRegistry.Contract.RevokeProposal(&_IBlacklistRegistry.TransactOpts, arg0)
+// Solidity: function proposeDrain(address ) returns(address)
+func (_IBlacklistRegistry *IBlacklistRegistrySession) ProposeDrain(arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.ProposeDrain(&_IBlacklistRegistry.TransactOpts, arg0)
 }
 
-// RevokeProposal is a paid mutator transaction binding the contract method 0x2a7736ad.
+// ProposeDrain is a paid mutator transaction binding the contract method 0xd1e8ebda.
 //
-// Solidity: function revokeProposal(address ) returns(address)
-func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) RevokeProposal(arg0 common.Address) (*types.Transaction, error) {
-	return _IBlacklistRegistry.Contract.RevokeProposal(&_IBlacklistRegistry.TransactOpts, arg0)
+// Solidity: function proposeDrain(address ) returns(address)
+func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) ProposeDrain(arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.ProposeDrain(&_IBlacklistRegistry.TransactOpts, arg0)
+}
+
+// ProposeRevoke is a paid mutator transaction binding the contract method 0x244fcea5.
+//
+// Solidity: function proposeRevoke(address ) returns(address)
+func (_IBlacklistRegistry *IBlacklistRegistryTransactor) ProposeRevoke(opts *bind.TransactOpts, arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.contract.Transact(opts, "proposeRevoke", arg0)
+}
+
+// ProposeRevoke is a paid mutator transaction binding the contract method 0x244fcea5.
+//
+// Solidity: function proposeRevoke(address ) returns(address)
+func (_IBlacklistRegistry *IBlacklistRegistrySession) ProposeRevoke(arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.ProposeRevoke(&_IBlacklistRegistry.TransactOpts, arg0)
+}
+
+// ProposeRevoke is a paid mutator transaction binding the contract method 0x244fcea5.
+//
+// Solidity: function proposeRevoke(address ) returns(address)
+func (_IBlacklistRegistry *IBlacklistRegistryTransactorSession) ProposeRevoke(arg0 common.Address) (*types.Transaction, error) {
+	return _IBlacklistRegistry.Contract.ProposeRevoke(&_IBlacklistRegistry.TransactOpts, arg0)
 }
 
 // IBlacklistRegistryBlacklistProposalIterator is returned from FilterBlacklistProposal and is used to iterate over the raw logs and unpacked data for BlacklistProposal events raised by the IBlacklistRegistry contract.
@@ -509,6 +607,139 @@ func (_IBlacklistRegistry *IBlacklistRegistryFilterer) WatchBlacklistProposal(op
 				// New log arrived, parse the event and forward to the user
 				event := new(IBlacklistRegistryBlacklistProposal)
 				if err := _IBlacklistRegistry.contract.UnpackLog(event, "BlacklistProposal", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// IBlacklistRegistryDrainProposalIterator is returned from FilterDrainProposal and is used to iterate over the raw logs and unpacked data for DrainProposal events raised by the IBlacklistRegistry contract.
+type IBlacklistRegistryDrainProposalIterator struct {
+	Event *IBlacklistRegistryDrainProposal // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IBlacklistRegistryDrainProposalIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IBlacklistRegistryDrainProposal)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IBlacklistRegistryDrainProposal)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IBlacklistRegistryDrainProposalIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IBlacklistRegistryDrainProposalIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IBlacklistRegistryDrainProposal represents a DrainProposal event raised by the IBlacklistRegistry contract.
+type IBlacklistRegistryDrainProposal struct {
+	Target   common.Address
+	Proposal common.Address
+	Raw      types.Log // Blockchain specific contextual infos
+}
+
+// FilterDrainProposal is a free log retrieval operation binding the contract event 0xb0163b33033bcea41a78d2d4a9c596c29b0667259543d6d56b8cac8cd92d2cea.
+//
+// Solidity: event DrainProposal(address indexed target, address proposal)
+func (_IBlacklistRegistry *IBlacklistRegistryFilterer) FilterDrainProposal(opts *bind.FilterOpts, target []common.Address) (*IBlacklistRegistryDrainProposalIterator, error) {
+
+	var targetRule []interface{}
+	for _, targetItem := range target {
+		targetRule = append(targetRule, targetItem)
+	}
+
+	logs, sub, err := _IBlacklistRegistry.contract.FilterLogs(opts, "DrainProposal", targetRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IBlacklistRegistryDrainProposalIterator{contract: _IBlacklistRegistry.contract, event: "DrainProposal", logs: logs, sub: sub}, nil
+}
+
+// WatchDrainProposal is a free log subscription operation binding the contract event 0xb0163b33033bcea41a78d2d4a9c596c29b0667259543d6d56b8cac8cd92d2cea.
+//
+// Solidity: event DrainProposal(address indexed target, address proposal)
+func (_IBlacklistRegistry *IBlacklistRegistryFilterer) WatchDrainProposal(opts *bind.WatchOpts, sink chan<- *IBlacklistRegistryDrainProposal, target []common.Address) (event.Subscription, error) {
+
+	var targetRule []interface{}
+	for _, targetItem := range target {
+		targetRule = append(targetRule, targetItem)
+	}
+
+	logs, sub, err := _IBlacklistRegistry.contract.WatchLogs(opts, "DrainProposal", targetRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IBlacklistRegistryDrainProposal)
+				if err := _IBlacklistRegistry.contract.UnpackLog(event, "DrainProposal", log); err != nil {
 					return err
 				}
 				event.Raw = log
