@@ -22,6 +22,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/log"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
@@ -103,5 +104,10 @@ func IsMasternodeCall(tx *types.Transaction) bool {
 		return true
 	}
 
+	return false
+}
+
+func IsBlacklisted(db vm.StateDB, addr common.Address) bool {
+	// NOTE: It's far from being the most elegant and effective solution.
 	return false
 }
