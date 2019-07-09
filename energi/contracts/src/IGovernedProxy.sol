@@ -35,16 +35,17 @@ import { IProposal } from "./IProposal.sol";
  */
 interface IGovernedProxy {
     event UpgradeProposal(
-        address indexed impl,
-        address proposal
+        IGovernedContract indexed impl,
+        IProposal proposal
     );
     event Upgraded(
-        address indexed impl,
-        address proposal
+        IGovernedContract indexed impl,
+        IProposal proposal
     );
 
     function impl() external view returns(IGovernedContract);
-    function proposeUpgrade(IGovernedContract _newImpl, uint _period) external payable;
+    function proposeUpgrade(IGovernedContract _newImpl, uint _period)
+        external payable returns(IProposal);
     function upgrade(IProposal _proposal) external;
 
     function () external payable;

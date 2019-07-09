@@ -59,9 +59,9 @@ interface IBlacklistRegistry {
         IProposal enforce,
         IProposal revoke,
         IProposal drain);
-    function propose(address) external payable returns(address);
-    function proposeRevoke(address) external payable returns(address);
-    function proposeDrain(address) external payable returns(address);
+    function propose(address) external payable returns(IProposal);
+    function proposeRevoke(address) external payable returns(IProposal);
+    function proposeDrain(address) external payable returns(IProposal);
     function isBlacklisted(address) external view returns(bool);
     function isDrainable(address) external view returns(bool);
     function collect(address) external;

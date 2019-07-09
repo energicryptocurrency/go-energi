@@ -205,7 +205,7 @@ contract BlacklistRegistryV1 is
     function propose(address addr)
         external payable
         noReentry
-        returns(address)
+        returns(IProposal)
     {
         require(msg.value == FEE_BLACKLIST_V1, "Invalid fee");
 
@@ -228,6 +228,10 @@ contract BlacklistRegistryV1 is
                 }
             } else if (enforce.isFinished() && !enforce.isAccepted()) {
                 enforce.collect();
+                // See below
+                if (address(drain) != address(0)) {
+                    drain.destroy();
+                }
                 store.remove(addr);
             } else {
                 revert("Already active (2)");
@@ -240,12 +244,14 @@ contract BlacklistRegistryV1 is
         store.setEnforce(addr, proposal);
 
         emit BlacklistProposal(addr, proposal);
+
+        return proposal;
     }
 
     function proposeRevoke(address addr)
         external payable
         noReentry
-        returns(address)
+        returns(IProposal)
     {
         require(msg.value == FEE_BLACKLIST_REVOKE_V1, "Invalid fee");
 
@@ -274,12 +280,14 @@ contract BlacklistRegistryV1 is
         store.setRevoke(addr, proposal);
 
         emit WhitelistProposal(addr, proposal);
+
+        return proposal;
     }
 
     function proposeDrain(address addr)
         external payable
         noReentry
-        returns(address)
+        returns(IProposal)
     {
         require(msg.value == FEE_BLACKLIST_DRAIN_V1, "Invalid fee");
 
@@ -304,6 +312,8 @@ contract BlacklistRegistryV1 is
         store.setDrain(addr, proposal);
 
         emit DrainProposal(addr, proposal);
+
+        return proposal;
     }
 
     function isBlacklisted(address addr)
@@ -328,11 +338,19 @@ contract BlacklistRegistryV1 is
         public view
         returns(bool)
     {
-        if (!isBlacklisted(addr)) {
+        (IProposal enforce, IProposal revoke, IProposal drain,) = v1storage.address_info(addr);
+
+        if (address(enforce) == address(0)) {
             return false;
         }
 
-        (,, IProposal drain,) = v1storage.address_info(addr);
+        if (!enforce.isAccepted()) {
+            return false;
+        }
+
+        if ((address(revoke) != address(0)) && revoke.isAccepted()) {
+            return false;
+        }
 
         if (address(drain) == address(0)) {
             return false;
@@ -423,7 +441,7 @@ contract BlacklistRegistryV1 is
         addresses = v1storage.addresses();
 
         for (uint i = addresses.length; i-- > 0;) {
-            if (!isBlacklisted(addresses[i])) {
+            if (!isDrainable(addresses[i])) {
                 addresses[i] = address(0);
             }
         }
