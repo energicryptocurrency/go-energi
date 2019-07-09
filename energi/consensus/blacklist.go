@@ -79,7 +79,7 @@ func (e *Energi) processDrainable(
 		return err
 	}
 
-	log.Trace("Address list", "address_list", address_list);
+	log.Trace("Address list", "address_list", address_list)
 
 	// 2. Get current compensation fund address
 	if len(*address_list) > 0 {

@@ -16,7 +16,6 @@
 
 package consensus
 
-
 import (
 	"math/big"
 	"strings"
@@ -125,7 +124,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 
 	header.Number.Add(header.Number, common.Big1)
-	header.Time += 2*24*60*60+1
+	header.Time += 2*24*60*60 + 1
 	evm = engine.createEVM(msg, chain, header, blstate)
 	//---
 
@@ -207,7 +206,6 @@ func TestBlacklist(t *testing.T) {
 	err = blacklist_abi.Unpack(&drain_address, "proposeDrain", output)
 	assert.Empty(t, err)
 
-
 	callData, err = proposal_abi.Pack("voteAccept")
 	assert.Empty(t, err)
 	msg = types.NewMessage(
@@ -234,6 +232,6 @@ func TestBlacklist(t *testing.T) {
 	// Test: no change
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
-	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())	
+	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())
 	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
 }
