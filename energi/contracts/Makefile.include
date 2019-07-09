@@ -46,6 +46,7 @@ ENERGI_CONTRACTS := \
   IDelegatedPoS.sol \
   IMasternodeRegistry.sol \
   IMasternodeToken.sol \
+  IProposal.sol \
   Gen2Migration.sol \
   GovernedProxy.sol \
   MasternodeTokenV1.sol \

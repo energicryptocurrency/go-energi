@@ -43,10 +43,6 @@ func (e *Energi) processDrainable(
 	blregistry := energi_params.Energi_BlacklistRegistry
 	var comp_fund common.Address
 
-	// Temporary balance setup & clean up
-	statedb.SetBalance(blregistry, BigBalance)
-	defer statedb.SetBalance(blregistry, common.Big0)
-
 	txhash := common.Hash{}
 	statedb.Prepare(txhash, common.Hash{}, 0)
 
@@ -83,6 +79,8 @@ func (e *Energi) processDrainable(
 		return err
 	}
 
+	log.Trace("Address list", "address_list", address_list);
+
 	// 2. Get current compensation fund address
 	if len(*address_list) > 0 {
 		enumerateData, err := e.blacklistAbi.Pack("compensation_fund")
@@ -118,11 +116,18 @@ func (e *Energi) processDrainable(
 
 	// 3. Drain
 	//---
+	empty_addr := common.Address{}
+
 	for _, addr := range *address_list {
+		if addr == empty_addr {
+			continue
+		}
+
 		//--
 		bal := statedb.GetBalance(addr)
 		statedb.AddBalance(comp_fund, bal)
 		statedb.SetBalance(addr, common.Big0)
+		log.Trace("Draining account", "fund", comp_fund, "addr", addr, "bal", bal)
 
 		//--
 		collectData, err := e.blacklistAbi.Pack("onDrain", addr)

@@ -1,0 +1,239 @@
+// Copyright 2019 The Energi Core Authors
+// This file is part of the Energi Core library.
+//
+// The Energi Core library is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// The Energi Core library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
+
+package consensus
+
+
+import (
+	"math/big"
+	"strings"
+	"testing"
+
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/state"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/params"
+
+	"github.com/stretchr/testify/assert"
+
+	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_params "energi.world/core/gen3/energi/params"
+)
+
+func TestBlacklist(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	testdb := ethdb.NewMemDatabase()
+	engine := New(&params.EnergiConfig{}, testdb)
+
+	engine.testing = true
+
+	chainConfig := *params.EnergiTestnetChainConfig
+	chainConfig.Energi = &params.EnergiConfig{}
+
+	var (
+		gspec = &core.Genesis{
+			Config:     &chainConfig,
+			GasLimit:   8000000,
+			Timestamp:  1000,
+			Difficulty: big.NewInt(1),
+			Coinbase:   energi_params.Energi_Treasury,
+			Xfers:      core.DeployEnergiGovernance(&chainConfig),
+		}
+		genesis = gspec.MustCommit(testdb)
+	)
+
+	chain, err := core.NewBlockChain(testdb, nil, &chainConfig, engine, vm.Config{}, nil)
+	assert.Empty(t, err)
+	defer chain.Stop()
+
+	//--
+	_, err = chain.InsertChain([]*types.Block{genesis})
+	assert.Empty(t, err)
+
+	header := chain.GetHeaderByHash(genesis.Hash())
+	assert.NotEmpty(t, header)
+
+	stdb, err := chain.GetStateDB()
+	blstate, err := state.New(header.Root, stdb)
+	assert.Empty(t, err)
+
+	blacklist_addr1 := common.HexToAddress("0x0000000000000000000000000000000012345678")
+	blacklist_addr2 := common.HexToAddress("0x0000000000000000000000000000000012345679")
+	owner_addr := common.HexToAddress("0x0000000000000000000000000000000022345678")
+
+	amt := big.NewInt(100)
+	collateral := new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e18))
+	blstate.SetBalance(owner_addr, collateral)
+	blstate.SetBalance(blacklist_addr1, amt)
+	blstate.SetBalance(blacklist_addr2, amt)
+
+	//---
+	mntoken_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeTokenABI))
+	callData, err := mntoken_abi.Pack("depositCollateral")
+	assert.Empty(t, err)
+	msg := types.NewMessage(
+		owner_addr,
+		&energi_params.Energi_MasternodeToken,
+		0,
+		collateral,
+		engine.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	evm := engine.createEVM(msg, chain, header, blstate)
+	gp := new(core.GasPool).AddGas(engine.callGas)
+	log.Trace("depositCollateral")
+	core.ApplyMessage(evm, msg, gp)
+	//---
+	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	callData, err = mnreg_abi.Pack("announce", blacklist_addr1, uint32(0), [2][32]byte{})
+	assert.Empty(t, err)
+	msg = types.NewMessage(
+		owner_addr,
+		&energi_params.Energi_MasternodeRegistry,
+		0,
+		common.Big0,
+		engine.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.callGas)
+	log.Trace("announce")
+	_, _, _, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+
+	header.Number.Add(header.Number, common.Big1)
+	header.Time += 2*24*60*60+1
+	evm = engine.createEVM(msg, chain, header, blstate)
+	//---
+
+	// Test: no change
+	err = engine.processDrainable(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), amt.String())
+	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+
+	// Test: blacklist
+	blacklist_abi, _ := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
+	callData, err = blacklist_abi.Pack("propose", blacklist_addr1)
+	assert.Empty(t, err)
+	fee := new(big.Int).Mul(big.NewInt(1000), big.NewInt(1e18))
+	blstate.SetBalance(owner_addr, fee)
+	msg = types.NewMessage(
+		owner_addr,
+		&energi_params.Energi_BlacklistRegistry,
+		0,
+		fee,
+		engine.xferGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.xferGas)
+	log.Trace("propose")
+	output, _, failed, err := core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, failed)
+
+	var enforce_address common.Address
+	err = blacklist_abi.Unpack(&enforce_address, "propose", output)
+	assert.Empty(t, err)
+
+	proposal_abi, _ := abi.JSON(strings.NewReader(energi_abi.IProposalABI))
+	callData, err = proposal_abi.Pack("voteAccept")
+	assert.Empty(t, err)
+	msg = types.NewMessage(
+		owner_addr,
+		&enforce_address,
+		0,
+		common.Big0,
+		engine.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.callGas)
+	log.Trace("voteAccept")
+	output, _, _, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, output)
+	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), amt.String())
+	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+
+	// Test: drain
+	callData, err = blacklist_abi.Pack("proposeDrain", blacklist_addr1)
+	assert.Empty(t, err)
+	fee = new(big.Int).Mul(big.NewInt(100), big.NewInt(1e18))
+	blstate.SetBalance(owner_addr, fee)
+	msg = types.NewMessage(
+		owner_addr,
+		&energi_params.Energi_BlacklistRegistry,
+		0,
+		fee,
+		engine.xferGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.xferGas)
+	log.Trace("proposeDrain")
+	output, _, failed, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, failed)
+
+	var drain_address common.Address
+	err = blacklist_abi.Unpack(&drain_address, "proposeDrain", output)
+	assert.Empty(t, err)
+
+
+	callData, err = proposal_abi.Pack("voteAccept")
+	assert.Empty(t, err)
+	msg = types.NewMessage(
+		owner_addr,
+		&drain_address,
+		0,
+		common.Big0,
+		engine.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.callGas)
+	log.Trace("voteAccept")
+	output, _, _, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, output)
+
+	err = engine.processDrainable(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())
+	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+
+	// Test: no change
+	err = engine.processDrainable(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())	
+	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+}
