@@ -327,6 +327,18 @@ func (s *Ethereum) APIs() []rpc.API {
 		{
 			Namespace: "energi",
 			Version:   "1.0",
+			Service:   energi_api.NewBlacklistAPI(s.APIBackend),
+			Public:    true,
+		},
+		{
+			Namespace: "energi",
+			Version:   "1.0",
+			Service:   energi_api.NewGovernanceAPI(s.APIBackend),
+			Public:    true,
+		},
+		{
+			Namespace: "energi",
+			Version:   "1.0",
 			Service:   energi_api.NewMigrationAPI(s.APIBackend),
 			Public:    true,
 		},
@@ -338,6 +350,7 @@ func (s *Ethereum) APIs() []rpc.API {
 		},
 	}...)
 
+	// NOTE: this requires web3.js extensions as well
 	for _, a := range apis {
 		if a.Namespace == "eth" {
 			// "a" should be a copy
