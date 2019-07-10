@@ -32,11 +32,15 @@ contract MockGen2Migration is Gen2Migration {
     {
     }
 
-    function setCoins(bytes20[] calldata _owners, uint[] calldata _amounts) external payable {
+    function setCoins(
+        bytes20[] calldata _owners,
+        uint[] calldata _amounts,
+        bytes20[] calldata _blacklist
+    ) external payable {
         coins.length = 0;
         address orig_signer = signerAddress;
         signerAddress = address(this);
-        this.setSnapshot(_owners, _amounts);
+        this.setSnapshot(_owners, _amounts, _blacklist);
         signerAddress = orig_signer;
     }
 }

@@ -296,7 +296,7 @@ contract MasternodeRegistryV1 is
         require(mninfo.owner == address(0), "Invalid owner");
     }
 
-    function _announce_check_ipv4(uint32 ipv4address) internal view {
+    function _announce_check_ipv4(uint32 ipv4address) internal pure {
         uint a = ipv4address & 0xFF000000;
         uint b = ipv4address & 0x00FF0000;
         require(

@@ -83,7 +83,7 @@ contract("Gen2Migration", async accounts => {
             bal1,
             bal2,
             bal3,
-        ], { value: bal1.add(bal2).add(bal3) });
+        ], [], { value: bal1.add(bal2).add(bal3) });
 
         expect((await orig.itemCount()).toString()).equal(toBN(3).toString());
 
@@ -214,6 +214,26 @@ contract("Gen2Migration", async accounts => {
             assert.fail('It must fail');
         } catch (e) {
             assert.match(e.message, /Not blacklist registry/);
+        }
+    });
+
+    it('should refuse claim() on hard blacklist', async () => {
+        try {
+            await orig.setCoins([
+                owner1,
+                owner2,
+                owner3,
+            ], [
+                bal1,
+                bal2,
+                bal3,
+            ], [ owner3 ]);
+
+            const hash = await orig.hashToSign(dst);
+            await orig.claim(2, dst, ...ecsign(acc3, hash), common.zerofee_callopts);
+            assert.fail('It must fail');
+        } catch (e) {
+            assert.match(e.message, /Owner is hard blacklisted/);
         }
     });
 

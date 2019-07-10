@@ -69,7 +69,7 @@ func (e *Energi) processBlacklists(
 	empty_addr := common.Address{}
 	state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Blacklist)
 	db := statedb.Database()
-	value := common.BytesToHash([]byte{ 0x01 })
+	value := common.BytesToHash([]byte{0x01})
 
 	for _, addr := range *address_list {
 		if addr != empty_addr {

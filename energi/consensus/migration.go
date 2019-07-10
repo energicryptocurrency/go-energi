@@ -138,8 +138,8 @@ func migrationTx(
 		return nil
 	}
 
-	owners, amounts := createSnapshotParams(snapshot)
-	if owners == nil || amounts == nil {
+	owners, amounts, blacklist := createSnapshotParams(snapshot)
+	if owners == nil || amounts == nil || blacklist == nil {
 		log.Error("Failed to create arguments")
 		return nil
 	}
@@ -149,7 +149,7 @@ func migrationTx(
 		panic(err)
 	}
 
-	callData, err := migration_abi.Pack("setSnapshot", owners, amounts)
+	callData, err := migration_abi.Pack("setSnapshot", owners, amounts, blacklist)
 	if err != nil {
 		panic(err)
 	}
@@ -199,9 +199,14 @@ func migrationTx(
 	return
 }
 
-func createSnapshotParams(ss *snapshot) (owners []common.Address, amounts []*big.Int) {
+func createSnapshotParams(ss *snapshot) (
+	owners []common.Address,
+	amounts []*big.Int,
+	blacklist []common.Address,
+) {
 	owners = make([]common.Address, len(ss.Txouts))
 	amounts = make([]*big.Int, len(ss.Txouts))
+	blacklist = make([]common.Address, len(ss.Blacklist))
 
 	// NOTE: Gen 2 precision is 8, but Gen 3 is 18
 	multiplier := big.NewInt(1e10)
@@ -211,12 +216,24 @@ func createSnapshotParams(ss *snapshot) (owners []common.Address, amounts []*big
 
 		if err != nil {
 			log.Error("Failed to decode address", "err", err, "address", info.Owner)
-			return nil, nil
+			return nil, nil, nil
 		}
 
 		owner = owner[1 : len(owner)-4]
 		owners[i] = common.BytesToAddress(owner)
 		amounts[i] = new(big.Int).Mul(info.Amount, multiplier)
+	}
+
+	for i, blo := range ss.Blacklist {
+		owner, err := base58.Decode(blo, base58.BitcoinAlphabet)
+
+		if err != nil {
+			log.Error("Failed to decode address", "err", err, "address", blo)
+			return nil, nil, nil
+		}
+
+		owner = owner[1 : len(owner)-4]
+		blacklist[i] = common.BytesToAddress(owner)
 	}
 
 	return
@@ -237,6 +254,7 @@ type snapshotItem struct {
 }
 
 type snapshot struct {
-	Txouts []snapshotItem `json:"snapshot_utxos"`
-	Hash   string         `json:"snapshot_hash"`
+	Txouts    []snapshotItem `json:"snapshot_utxos"`
+	Blacklist []string       `json:"snapshot_blacklist"`
+	Hash      string         `json:"snapshot_hash"`
 }
