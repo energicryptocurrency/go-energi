@@ -232,6 +232,30 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
+
+		// Governance
+		new web3._extend.Method({
+			name: 'voteAccept',
+			call: 'energi_voteAccept',
+			params: 3
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'voteReject',
+			call: 'energi_voteReject',
+			params: 3
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
 	],
 	properties: [
 	]

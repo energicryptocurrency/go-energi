@@ -14,15 +14,21 @@
 package api
 
 import (
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
 	"energi.world/core/gen3/internal/ethapi"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	//energi_params "energi.world/core/gen3/energi/params"
+)
+
+const (
+	proposalCallGas uint64 = 500000
 )
 
 type GovernanceAPI struct {
@@ -33,12 +39,60 @@ func NewGovernanceAPI(b ethapi.Backend) *GovernanceAPI {
 	return &GovernanceAPI{b}
 }
 
+func (g *GovernanceAPI) proposal(
+	password string,
+	owner common.Address,
+	proposal common.Address,
+) (session *energi_abi.IProposalSession, err error) {
+	account := accounts.Account{Address: owner}
+	wallet, err := g.backend.AccountManager().Find(account)
+	if err != nil {
+		return nil, err
+	}
+
+	contract, err := energi_abi.NewIProposal(proposal, g.backend.(bind.ContractBackend))
+	if err != nil {
+		return nil, err
+	}
+
+	session = &energi_abi.IProposalSession{
+		Contract: contract,
+		CallOpts: bind.CallOpts{
+			From: owner,
+		},
+		TransactOpts: bind.TransactOpts{
+			From: owner,
+			Signer: func(
+				signer types.Signer,
+				addr common.Address,
+				tx *types.Transaction,
+			) (*types.Transaction, error) {
+				return wallet.SignTxWithPassphrase(
+					account, password, tx, g.backend.ChainConfig().ChainID)
+			},
+			Value:    common.Big0,
+			GasLimit: proposalCallGas,
+		},
+	}
+	return
+}
+
 func (g *GovernanceAPI) VoteAccept(
 	proposal common.Address,
 	mn_owner common.Address,
 	password string,
 ) error {
-	return nil
+	contract, err := g.proposal(password, mn_owner, proposal)
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	tx, err := contract.VoteAccept()
+
+	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+
+	return err
 }
 
 func (g *GovernanceAPI) VoteReject(
@@ -46,7 +100,17 @@ func (g *GovernanceAPI) VoteReject(
 	mn_owner common.Address,
 	password string,
 ) error {
-	return nil
+	contract, err := g.proposal(password, mn_owner, proposal)
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	tx, err := contract.VoteReject()
+
+	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+
+	return err
 }
 
 type ProposalInfo struct {

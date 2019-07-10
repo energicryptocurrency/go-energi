@@ -38,7 +38,7 @@ func NewBlacklistAPI(b ethapi.Backend) *BlacklistAPI {
 }
 
 const (
-	blacklistCallGas uint64 = 10000000
+	blacklistCallGas uint64 = 500000
 )
 
 func (b *BlacklistAPI) registry(
