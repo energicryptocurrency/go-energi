@@ -24,7 +24,7 @@ pragma solidity 0.5.9;
 import { GlobalConstants } from "./constants.sol";
 import { IDelegatedPoS } from "./IDelegatedPoS.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
-import { ITreasury } from "./ITreasury.sol";
+import { IBlacklistRegistry } from "./IBlacklistRegistry.sol";
 
 /**
  * Genesis hardcoded version of Gen 2 Migration
@@ -46,20 +46,25 @@ contract Gen2Migration is
         uint amount
     );
 
-    IGovernedProxy public treasury_proxy;
+    IGovernedProxy public blacklist_proxy;
     uint public chain_id;
     address public signerAddress; // IDelegatedPoS
     uint public totalAmount;
     UnspentCoins[] public coins;
+    mapping(bytes20 => bool) hard_blacklist;
 
     // NOTE: this c-tor is used during testing
-    constructor(IGovernedProxy _treasury_proxy, uint _chain_id, address _signer) public {
-        treasury_proxy = _treasury_proxy;
+    constructor(IGovernedProxy _blacklist_proxy, uint _chain_id, address _signer) public {
+        blacklist_proxy = _blacklist_proxy;
         chain_id = _chain_id;
         signerAddress = _signer;
     }
 
-    function setSnapshot(bytes20[] calldata _owners, uint[] calldata _amounts) external {
+    function setSnapshot(
+        bytes20[] calldata _owners,
+        uint[] calldata _amounts,
+        bytes20[] calldata _blacklist
+    ) external {
         require(coins.length == 0, "Already set");
         require(msg.sender == signerAddress, "Invalid sender");
         require(_owners.length == _amounts.length, "match length");
@@ -77,6 +82,10 @@ contract Gen2Migration is
         totalAmount = total;
         // NOTE: there is a special consensus procedure to setup account balance based on
         //       totalAmount().
+
+        for (uint i = _blacklist.length; i-- > 0;) {
+            hard_blacklist[_blacklist[i]] = true;
+        }
     }
 
     function itemCount() external view returns(uint) {
@@ -110,6 +119,11 @@ contract Gen2Migration is
         // Validate Owner
         require(coins[_item_id].owner == owner, "Invalid signature");
 
+        // Check if blacklisted
+        IBlacklistRegistry blacklist = IBlacklistRegistry(address(blacklist_proxy.impl()));
+        require(!blacklist.isBlacklisted(address(owner)), "Owner is blacklisted");
+        require(!hard_blacklist[owner], "Owner is hard blacklisted");
+
         // Validate amount
         amount = coins[_item_id].amount;
     }
@@ -132,12 +146,24 @@ contract Gen2Migration is
         _destination.transfer(amount);
     }
 
-    // SECURITY: emergency drain procedure
-    function drain() external {
-        ITreasury treasury = ITreasury(address(treasury_proxy.impl()));
-        require(msg.sender == address(treasury), "Not treasury");
-        // NOTE: DO NOT selfdestruct() as this contract must remain as storage.
-        treasury.contribute.value(address(this).balance)();
+    // SECURITY: emergency drain procedure has to be implemented as blacklist
+    //           followed by consensus-level drain to Blacklist registry.
+
+    function blacklistClaim(uint _item_id, bytes20 _owner) external {
+        require(_item_id < coins.length, "Invalid ID");
+
+        uint amount = coins[_item_id].amount;
+        require(amount > 0, "Already spent");
+
+        require(coins[_item_id].owner == _owner, "Invalid Owner");
+
+        IBlacklistRegistry blacklist = IBlacklistRegistry(address(blacklist_proxy.impl()));
+        require(msg.sender == address(blacklist), "Not blacklist registry");
+
+        // Spend
+        coins[_item_id].amount = 0;
+
+        blacklist.compensation_fund().contribute.value(amount)();
     }
 
     // Safety

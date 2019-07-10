@@ -62,6 +62,7 @@ type Energi struct {
 	rewardAbi    abi.ABI
 	rewardGov    []common.Address
 	dposAbi      abi.ABI
+	blacklistAbi abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -84,6 +85,12 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
+	blacklist_abi, err := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
 	return &Energi{
 		config:    config,
 		db:        db,
@@ -95,9 +102,10 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 			energi_params.Energi_StakerReward,
 		},
 		dposAbi:      dpos_abi,
+		blacklistAbi: blacklist_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
-		xferGas:      2000000,
-		callGas:      1000000,
+		xferGas:      30000000,
+		callGas:      15000000,
 		diffFn:       calcPoSDifficultyV1,
 	}
 }
@@ -428,6 +436,12 @@ func (e *Energi) govFinalize(
 	txs types.Transactions,
 ) (err error) {
 	err = e.processBlockRewards(chain, header, state)
+	if err == nil {
+		err = e.processBlacklists(chain, header, state)
+	}
+	if err == nil {
+		err = e.processDrainable(chain, header, state)
+	}
 	if err == nil {
 		err = e.finalizeMigration(chain, header, state, txs)
 	}

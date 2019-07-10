@@ -114,9 +114,25 @@ web3._extend({
 `
 
 const Energi_JS = `
+web3._extend.formatters.outputProposalFormatter = function(item){
+	return {
+		proposal:     item.Proposal,
+		proposer:     item.Proposer,
+		createdBlock: item.CreatedBlock,
+		deadline:     item.Deadline,
+		quorumWeight: web3._extend.utils.toDecimal(item.QuorumWeight),
+		totalWeight:  web3._extend.utils.toDecimal(item.TotalWeight),
+		rejectWeight: web3._extend.utils.toDecimal(item.RejectWeight),
+		acceptWeight: web3._extend.utils.toDecimal(item.AcceptWeight),
+		finished:     item.Finished,
+		accepted:     item.Accepted,
+	};
+};
+
 web3._extend({
 	property: 'energi',
 	methods: [
+		// Migration
 		new web3._extend.Method({
 			name: 'listGen2Coins',
 			call: 'energi_listGen2Coins',
@@ -146,6 +162,75 @@ web3._extend({
 			name: 'claimGen2CoinsImport',
 			call: 'energi_claimGen2CoinsImport',
 			params: 2
+		}),
+
+		// Blacklist
+		new web3._extend.Method({
+			name: 'blacklistInfo',
+			call: 'energi_blacklistInfo',
+			params: 0
+			outputFormatter: function(list) {
+				var res = [];
+				var proposalf = web3._extend.formatters.outputProposalFormatter;
+				for (var i = 0; i < list.length; ++i) {
+					var item = list[i];
+					res.push({
+						target:  item.Target,
+						enforce: proposalf(item.Enforce),
+						revoke:  proposalf(item.Revoke),
+						drain:   proposalf(item.Drain),
+						blocked: item.Blocked,
+					});
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'blacklistEnforce',
+			call: 'energi_blacklistEnforce',
+			params: 4
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'blacklistRevoke',
+			call: 'energi_blacklistRevoke',
+			params: 4
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'blacklistDrain',
+			call: 'energi_blacklistDrain',
+			params: 4
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'blacklistCollect',
+			call: 'energi_blacklistCollect',
+			params: 3
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
 		}),
 	],
 	properties: [

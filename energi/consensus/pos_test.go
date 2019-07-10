@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
+	eth_consensus "github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -41,7 +42,7 @@ func TestPoSChain(t *testing.T) {
 	t.Parallel()
 	log.Root().SetHandler(log.StdoutHandler)
 
-	results := make(chan *types.Block, 1)
+	results := make(chan *eth_consensus.SealResult, 1)
 	stop := make(chan struct{})
 
 	signers := make(map[common.Address]*ecdsa.PrivateKey, 61)
@@ -166,10 +167,12 @@ func TestPoSChain(t *testing.T) {
 		assert.Empty(t, err)
 
 		//---
-		err = engine.Seal(chain, block, blstate, results, stop)
+		err = engine.Seal(chain, block, results, stop)
 		assert.Empty(t, err)
 
-		block = <-results
+		seal_res := <-results
+		block = seal_res.Block
+		blstate = seal_res.NewState
 		assert.NotEmpty(t, block)
 		header = block.Header()
 		//assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)

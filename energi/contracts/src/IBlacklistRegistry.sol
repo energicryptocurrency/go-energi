@@ -22,6 +22,7 @@ pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
 import { IProposal } from "./IProposal.sol";
+import { ITreasury } from "./ITreasury.sol";
 
 /**
  * Interface of BlacklistProposal
@@ -47,10 +48,26 @@ interface IBlacklistRegistry {
         address indexed target,
         IProposal proposal
     );
+    event DrainProposal(
+        address indexed target,
+        IProposal proposal
+    );
 
-    function proposals(address) external view returns(IProposal enforce, IProposal revoke);
-    function propose(address) external payable returns(address);
-    function revokeProposal(address) external payable returns(address);
+    function compensation_fund() external view returns(ITreasury);
+
+    function proposals(address) external view returns(
+        IProposal enforce,
+        IProposal revoke,
+        IProposal drain);
+    function propose(address) external payable returns(IProposal);
+    function proposeRevoke(address) external payable returns(IProposal);
+    function proposeDrain(address) external payable returns(IProposal);
     function isBlacklisted(address) external view returns(bool);
+    function isDrainable(address) external view returns(bool);
     function collect(address) external;
+    function drainMigration(uint item_id, bytes20 owner) external;
+    function enumerateAll() external view returns(address[] memory addresses);
+    function enumerateBlocked() external view returns(address[] memory addresses);
+    function enumerateDrainable() external view returns(address[] memory addresses);
+    function onDrain(address) external;
 }

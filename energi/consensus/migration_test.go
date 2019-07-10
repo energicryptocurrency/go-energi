@@ -41,6 +41,9 @@ const (
       "type": "pubkeyhash"
     }
   ],
+  "snapshot_blacklist": [
+    "tWFyUdwGxEkcam2aikVsDMPDpvMNKfP2XV"
+  ],
   "snapshot_hash": "778d7a438e3b86e0e754c4e46af802f852eb7c051d268c8599aa17c0cb9ce819"
 }
 `
@@ -83,6 +86,10 @@ func TestSnapshotParser(t *testing.T) {
 		t,
 		ret.Txouts[1].Amount.String(),
 		big.NewInt(1000010).String())
+	assert.Equal(
+		t,
+		ret.Blacklist[0],
+		"tWFyUdwGxEkcam2aikVsDMPDpvMNKfP2XV")
 }
 
 func TestSnapshotParams(t *testing.T) {
@@ -90,7 +97,7 @@ func TestSnapshotParams(t *testing.T) {
 
 	snapshot, err := parseSnapshot(strings.NewReader(testSnapshotData))
 	assert.Empty(t, err)
-	owners, amounts := createSnapshotParams(snapshot)
+	owners, amounts, blacklist := createSnapshotParams(snapshot)
 	assert.NotEmpty(t, owners)
 	assert.Equal(
 		t,
@@ -108,4 +115,8 @@ func TestSnapshotParams(t *testing.T) {
 		t,
 		amounts[1].String(),
 		"10000100000000000")
+	assert.Equal(
+		t,
+		blacklist[0].String(),
+		common.HexToAddress("0xFFF4AF0E7421838CDB2F14134F74AA4B5B0A816E").String())
 }

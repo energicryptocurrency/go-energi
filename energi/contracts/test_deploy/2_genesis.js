@@ -27,6 +27,8 @@ module.exports = async (deployer, _, accounts) => {
         await deployer.deploy(MockProxy);
         const treasury_proxy = MockProxy.address;
         await deployer.deploy(MockProxy);
+        const blacklist_registry = MockProxy.address;
+        await deployer.deploy(MockProxy);
         const mn_registry_proxy = MockProxy.address;
 
         const deploy_common = async (type, proxy, ...args) => {
@@ -39,9 +41,13 @@ module.exports = async (deployer, _, accounts) => {
             await (await MockProxy.at(proxy)).setImpl(instance.address);
         };
 
-        await deployer.deploy(Gen2Migration, treasury_proxy, common.chain_id, common.migration_signer);
+        await deployer.deploy(Gen2Migration, blacklist_registry, common.chain_id, common.migration_signer);
 
-        await deploy_common(BlacklistRegistryV1, undefined, mn_registry_proxy);
+        const compensation_fund = await TreasuryV1.new(treasury_proxy, mn_registry_proxy, 1);
+        await deploy_common(BlacklistRegistryV1,
+            blacklist_registry, mn_registry_proxy,
+            Gen2Migration.address, compensation_fund.address,
+            { gas: "30000000" });
         await deploy_common(BackboneRewardV1, undefined, accounts[5]);
         await deploy_common(CheckpointRegistryV1);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);

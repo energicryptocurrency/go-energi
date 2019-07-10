@@ -62,6 +62,7 @@ contract GovernedProxy is
         external payable
         senderOrigin
         noReentry
+        returns(IProposal)
     {
         require(_newImpl != impl, "Already active!");
         require(_newImpl.proxy() == address(this), "Wrong proxy!");
@@ -71,7 +72,9 @@ contract GovernedProxy is
 
         upgrade_proposals[address(proposal)] = _newImpl;
 
-        emit UpgradeProposal(address(_newImpl), address(proposal));
+        emit UpgradeProposal(_newImpl, proposal);
+
+        return proposal;
     }
 
     /**
@@ -98,7 +101,7 @@ contract GovernedProxy is
         // Return fee ASAP
         _proposal.destroy();
 
-        emit Upgraded(address(new_impl), address(_proposal));
+        emit Upgraded(new_impl, _proposal);
     }
 
     /**

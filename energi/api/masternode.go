@@ -52,7 +52,7 @@ func (m *MasternodeAPI) getAddress(
 	dst common.Address,
 ) (account accounts.Account, wallet accounts.Wallet, err error) {
 	account = accounts.Account{Address: dst}
-	wallet, err = m.backend.AccountManager().Find(accounts.Account{Address: dst})
+	wallet, err = m.backend.AccountManager().Find(account)
 	return
 }
 
@@ -157,7 +157,7 @@ func (m *MasternodeAPI) WithdrawCollateral(
 	return err
 }
 
-type MNINfo struct {
+type MNInfo struct {
 	Masternode     common.Address
 	Owner          common.Address
 	Enode          string
@@ -165,7 +165,7 @@ type MNINfo struct {
 	AnnouncedBlock uint64
 }
 
-func (m *MasternodeAPI) ListMasternodes() (res []MNINfo) {
+func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
 	registry, err := energi_abi.NewIMasternodeRegistryCaller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {
@@ -180,7 +180,7 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNINfo) {
 		return nil
 	}
 
-	res = make([]MNINfo, 0, len(masternodes))
+	res = make([]MNInfo, 0, len(masternodes))
 
 	for _, mn := range masternodes {
 		mninfo, err := registry.Info(call_opts, mn)
@@ -189,7 +189,7 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNINfo) {
 			continue
 		}
 
-		res = append(res, MNINfo{
+		res = append(res, MNInfo{
 			Masternode:     mn,
 			Owner:          mninfo.Owner,
 			Enode:          m.enode(mninfo.Ipv4address, mninfo.Enode),
@@ -201,7 +201,7 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNINfo) {
 	return
 }
 
-func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNINfo) {
+func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNInfo) {
 	registry, err := energi_abi.NewIMasternodeRegistryCaller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {

@@ -290,6 +290,44 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(0);
             });
 
+            it('should refuse announce() local IPs', async () => {
+                try {
+                    await s.token_abi.announce(
+                        masternode1, 0x7F000001, enode1, { from: owner1 });
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Wrong IP/);
+                }
+                try {
+                    await s.token_abi.announce(
+                        masternode1, 0x0A000001, enode1, { from: owner1 });
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Wrong IP/);
+                }
+                try {
+                    await s.token_abi.announce(
+                        masternode1, 0xC0A80001, enode1, { from: owner1 });
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Wrong IP/);
+                }
+                try {
+                    await s.token_abi.announce(
+                        masternode1, 0xAC100001, enode1, { from: owner1 });
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Wrong IP/);
+                }
+                try {
+                    await s.token_abi.announce(
+                        masternode1, 0xAC1F0001, enode1, { from: owner1 });
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Wrong IP/);
+                }
+            });
+
             it('should announce()', async () => {
                 const res = await s.mntoken_abi.balanceInfo(owner1);
                 assert.equal(res['0'].valueOf(), collateral1);

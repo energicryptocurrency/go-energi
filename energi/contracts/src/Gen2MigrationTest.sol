@@ -22,19 +22,48 @@ pragma solidity 0.5.9;
 
 import { Gen2Migration } from "./Gen2Migration.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
+import { ITreasury } from "./ITreasury.sol";
+import { BlacklistRegistryV1 } from "./BlacklistRegistryV1.sol";
 
 contract MockGen2Migration is Gen2Migration {
-    constructor(IGovernedProxy _treasury_proxy, uint _chain_id, address _signer) public
-        Gen2Migration(_treasury_proxy, _chain_id, _signer)
+    constructor(IGovernedProxy _blacklist_proxy, uint _chain_id, address _signer) public
+        Gen2Migration(_blacklist_proxy, _chain_id, _signer)
     // solium-disable-next-line no-empty-blocks
     {
     }
 
-    function setCoins(bytes20[] calldata _owners, uint[] calldata _amounts) external payable {
+    function setCoins(
+        bytes20[] calldata _owners,
+        uint[] calldata _amounts,
+        bytes20[] calldata _blacklist
+    ) external payable {
         coins.length = 0;
         address orig_signer = signerAddress;
         signerAddress = address(this);
-        this.setSnapshot(_owners, _amounts);
+        this.setSnapshot(_owners, _amounts, _blacklist);
         signerAddress = orig_signer;
+    }
+}
+
+contract MockGen2MigrationBlacklist is BlacklistRegistryV1 {
+    mapping(address => bool) is_blacklisted;
+
+    constructor(address _proxy, IGovernedProxy _mnregistry_proxy, Gen2Migration _migration, ITreasury _fund)
+        public
+        BlacklistRegistryV1(_proxy, _mnregistry_proxy, _migration, _fund)
+    // solium-disable-next-line no-empty-blocks
+    {}
+
+    function setBlacklisted(address addr, bool is_bl) external {
+        is_blacklisted[addr] = is_bl;
+    }
+
+    function isBlacklisted(address addr) public view returns(bool) {
+        return is_blacklisted[addr];
+    }
+
+    function drainMigration(uint item_id, bytes20 owner) external {
+        migration.blacklistClaim(item_id, owner);
+        _onDrain(address(owner));
     }
 }

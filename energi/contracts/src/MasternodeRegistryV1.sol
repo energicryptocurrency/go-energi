@@ -232,6 +232,7 @@ contract MasternodeRegistryV1 is
         //---
         _announce_clear_old(mn_storage, owner);
         _announce_check_free(mn_storage, masternode);
+        _announce_check_ipv4(ipv4address);
 
         // Insert into list
         //---
@@ -293,6 +294,17 @@ contract MasternodeRegistryV1 is
         //           MN should refuse to operate in such condition.
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(mn_storage, masternode);
         require(mninfo.owner == address(0), "Invalid owner");
+    }
+
+    function _announce_check_ipv4(uint32 ipv4address) internal pure {
+        uint a = ipv4address & 0xFF000000;
+        uint b = ipv4address & 0x00FF0000;
+        require(
+            (a != (127 << 24)) &&
+            (a != (10 << 24)) &&
+            !((a == (192 << 24)) && (b == (168 << 16))) &&
+            !((a == (172 << 24)) && ((b & 0x00F00000) == (16 << 16))),
+            "Wrong IP");
     }
 
     function _announce_insert(StorageMasternodeRegistryV1 mn_storage, address masternode)
