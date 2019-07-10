@@ -104,8 +104,8 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		dposAbi:      dpos_abi,
 		blacklistAbi: blacklist_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
-		xferGas:      2000000,
-		callGas:      1000000,
+		xferGas:      30000000,
+		callGas:      15000000,
 		diffFn:       calcPoSDifficultyV1,
 	}
 }

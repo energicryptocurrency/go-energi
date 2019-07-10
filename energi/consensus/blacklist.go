@@ -31,6 +31,55 @@ func (e *Energi) processBlacklists(
 	header *types.Header,
 	statedb *state.StateDB,
 ) (err error) {
+	gp := new(core.GasPool)
+	blregistry := energi_params.Energi_BlacklistRegistry
+
+	enumerateData, err := e.blacklistAbi.Pack("enumerateBlocked")
+	if err != nil {
+		log.Error("Fail to prepare enumerateBlocked() call", "err", err)
+		return err
+	}
+
+	msg := types.NewMessage(
+		blregistry,
+		&blregistry,
+		0,
+		common.Big0,
+		e.callGas,
+		common.Big0,
+		enumerateData,
+		false,
+	)
+	evm := e.createEVM(msg, chain, header, statedb)
+	gp.AddGas(e.callGas)
+	output, _, _, err := core.ApplyMessage(evm, msg, gp)
+	if err != nil {
+		log.Error("Failed in enumerateBlocked() call", "err", err)
+		return err
+	}
+
+	address_list := new([]common.Address)
+	err = e.blacklistAbi.Unpack(&address_list, "enumerateBlocked", output)
+	if err != nil {
+		log.Error("Failed to unpack enumerateBlocked() call", "err", err)
+		return err
+	}
+
+	log.Trace("Blacklist address list", "address_list", address_list)
+	empty_addr := common.Address{}
+	state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Blacklist)
+	db := statedb.Database()
+	value := common.BytesToHash([]byte{ 0x01 })
+
+	for _, addr := range *address_list {
+		if addr != empty_addr {
+			log.Trace("Blacklisting account", "addr", addr)
+			state_obj.SetState(db, addr.Hash(), value)
+		}
+	}
+
+	state_obj.CleanupUntouched()
+
 	return nil
 }
 
@@ -79,7 +128,7 @@ func (e *Energi) processDrainable(
 		return err
 	}
 
-	log.Trace("Address list", "address_list", address_list)
+	log.Trace("Drain address list", "address_list", address_list)
 
 	// 2. Get current compensation fund address
 	if len(*address_list) > 0 {

@@ -32,8 +32,8 @@ var (
 	Energi_BlacklistRegistry  = common.BigToAddress(big.NewInt(0x307))
 	Energi_MigrationContract  = common.BigToAddress(big.NewInt(0x308))
 	Energi_MasternodeToken    = common.BigToAddress(big.NewInt(0x309))
-	// 0x30A-F unused
-	Energi_SystemFaucet = common.BigToAddress(big.NewInt(0x310))
+	Energi_Blacklist          = common.BigToAddress(big.NewInt(0x30A))
+	Energi_SystemFaucet       = common.BigToAddress(big.NewInt(0x310))
 
 	Energi_TreasuryV1           = common.BigToAddress(big.NewInt(0x311))
 	Energi_MasternodeRegistryV1 = common.BigToAddress(big.NewInt(0x312))

@@ -85,6 +85,12 @@ func TestBlacklist(t *testing.T) {
 	blstate.SetBalance(owner_addr, collateral)
 	blstate.SetBalance(blacklist_addr1, amt)
 	blstate.SetBalance(blacklist_addr2, amt)
+	header.Root, err = blstate.Commit(true)
+	assert.Empty(t, err)
+	err = blstate.Database().TrieDB().Commit(header.Root, true)
+	assert.Empty(t, err)
+	blstate, err = state.New(header.Root, stdb)
+	assert.Empty(t, err)
 
 	//---
 	mntoken_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeTokenABI))
@@ -129,10 +135,21 @@ func TestBlacklist(t *testing.T) {
 	//---
 
 	// Test: no change
+	err = engine.processBlacklists(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), amt.String())
 	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+	header.Root, err = blstate.Commit(true)
+	assert.Empty(t, err)
+	err = blstate.Database().TrieDB().Commit(header.Root, true)
+	assert.Empty(t, err)
+	blstate, err = state.New(header.Root, stdb)
+	assert.Empty(t, err)
+	evm = engine.createEVM(msg, chain, header, blstate)
 
 	// Test: blacklist
 	blacklist_abi, _ := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
@@ -178,8 +195,22 @@ func TestBlacklist(t *testing.T) {
 	output, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, output)
+
+	err = engine.processBlacklists(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	err = engine.processDrainable(chain, header, blstate)
+	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), amt.String())
 	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+	header.Root, err = blstate.Commit(true)
+	assert.Empty(t, err)
+	err = blstate.Database().TrieDB().Commit(header.Root, true)
+	assert.Empty(t, err)
+	blstate, err = state.New(header.Root, stdb)
+	assert.Empty(t, err)
+	evm = engine.createEVM(msg, chain, header, blstate)
 
 	// Test: drain
 	callData, err = blacklist_abi.Pack("proposeDrain", blacklist_addr1)
@@ -224,12 +255,27 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	assert.Empty(t, output)
 
+	err = engine.processBlacklists(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())
 	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+	header.Root, err = blstate.Commit(true)
+	assert.Empty(t, err)
+	err = blstate.Database().TrieDB().Commit(header.Root, true)
+	assert.Empty(t, err)
+	blstate, err = state.New(header.Root, stdb)
+	assert.Empty(t, err)
+	evm = engine.createEVM(msg, chain, header, blstate)
 
 	// Test: no change
+	err = engine.processBlacklists(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())

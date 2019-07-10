@@ -25,6 +25,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/ethereum/go-ethereum/trie"
+
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -380,4 +383,18 @@ func (self *stateObject) Nonce() uint64 {
 // interface. Interfaces are awesome.
 func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
+}
+
+// Cleanup untouched storage entries
+func (self *stateObject) CleanupUntouched() {
+	db := self.db.Database()
+	tr := self.getTrie(db)
+	storageIt := trie.NewIterator(tr.NodeIterator(nil))
+	log.Trace("storageIt", "storageIt", storageIt, "dirtyStorage", self.dirtyStorage)
+	for storageIt.Next() {
+		k := common.BytesToHash(tr.GetKey(storageIt.Key))
+		if _, ok := self.dirtyStorage[k]; !ok {
+			self.SetState(db, k, common.Hash{})
+		}
+	}
 }

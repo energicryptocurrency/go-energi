@@ -108,6 +108,5 @@ func IsMasternodeCall(tx *types.Transaction) bool {
 }
 
 func IsBlacklisted(db vm.StateDB, addr common.Address) bool {
-	// NOTE: It's far from being the most elegant and effective solution.
-	return false
+	return db.GetState(energi_params.Energi_Blacklist, addr.Hash()) != common.Hash{}
 }
