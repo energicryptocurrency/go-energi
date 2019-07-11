@@ -425,6 +425,44 @@ func (g *GovernanceAPI) UpgradeCollect(
 // GOV-9: Treasury API
 //=============================================================================
 
+func (g *GovernanceAPI) treasury(
+	password string,
+	payer common.Address,
+) (session *energi_abi.ITreasurySession, err error) {
+	account := accounts.Account{Address: payer}
+	wallet, err := g.backend.AccountManager().Find(account)
+	if err != nil {
+		return nil, err
+	}
+
+	contract, err := energi_abi.NewITreasury(
+		energi_params.Energi_Treasury, g.backend.(bind.ContractBackend))
+	if err != nil {
+		return nil, err
+	}
+
+	session = &energi_abi.ITreasurySession{
+		Contract: contract,
+		CallOpts: bind.CallOpts{
+			From: payer,
+		},
+		TransactOpts: bind.TransactOpts{
+			From: payer,
+			Signer: func(
+				signer types.Signer,
+				addr common.Address,
+				tx *types.Transaction,
+			) (*types.Transaction, error) {
+				return wallet.SignTxWithPassphrase(
+					account, password, tx, g.backend.ChainConfig().ChainID)
+			},
+			Value:    common.Big0,
+			GasLimit: proposalCallGas,
+		},
+	}
+	return
+}
+
 type BudgetProposalInfo struct {
 	ProposalInfo
 	ProposedAmount *hexutil.Big
@@ -505,11 +543,23 @@ func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
 
 func (g *GovernanceAPI) BudgetPropose(
 	amount *hexutil.Big,
-	uuid string,
+	ref_uuid *hexutil.Big,
 	period uint64,
 	fee *hexutil.Big,
 	payer common.Address,
 	password string,
 ) error {
-	return nil
+	session, err := g.treasury(password, payer)
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	session.TransactOpts.Value = fee.ToInt()
+	tx, err := session.Propose(
+		(*big.Int)(amount), (*big.Int)(ref_uuid), new(big.Int).SetUint64(period))
+
+	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+
+	return err
 }

@@ -115,18 +115,19 @@ web3._extend({
 
 const Energi_JS = `
 web3._extend.formatters.outputProposalFormatter = function(item){
+	var toDecimal = web3._extend.utils.toDecimal;
 	return {
 		proposal:     item.Proposal,
 		proposer:     item.Proposer,
 		createdBlock: item.CreatedBlock,
 		deadline:     item.Deadline,
-		quorumWeight: web3._extend.utils.toDecimal(item.QuorumWeight),
-		totalWeight:  web3._extend.utils.toDecimal(item.TotalWeight),
-		rejectWeight: web3._extend.utils.toDecimal(item.RejectWeight),
-		acceptWeight: web3._extend.utils.toDecimal(item.AcceptWeight),
+		quorumWeight: toDecimal(item.QuorumWeight),
+		totalWeight:  toDecimal(item.TotalWeight),
+		rejectWeight: toDecimal(item.RejectWeight),
+		acceptWeight: toDecimal(item.AcceptWeight),
 		finished:     item.Finished,
 		accepted:     item.Accepted,
-		balance:      web3._extend.utils.toDecimal(item.Balance),
+		balance:      toDecimal(item.Balance),
 	};
 };
 
@@ -338,7 +339,7 @@ web3._extend({
 			params: 0
 			outputFormatter: function(status) {
 				var proposals = [];
-				toDecimal = web3._extend.utils.toDecimal;
+				var toDecimal = web3._extend.utils.toDecimal;
 				var res = {
 					balance: toDecimal(status.Balance),
 					proposals: proposals,
@@ -355,6 +356,20 @@ web3._extend({
 				}
 				return res;
 			},
+		}),
+		new web3._extend.Method({
+			name: 'budgetPropose',
+			call: 'energi_budgetPropose',
+			params: 6
+			inputFormatter: [
+				web3._extend.utils.fromDecimal,
+				web3._extend.utils.fromDecimal,
+				null,
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
 		}),
 
 	],
