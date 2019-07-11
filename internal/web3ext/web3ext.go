@@ -258,6 +258,17 @@ web3._extend({
 			outputFormatter: console.log,
 		}),
 		new web3._extend.Method({
+			name: 'withdrawFee',
+			call: 'energi_withdrawFee',
+			params: 3
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
 			name: 'listUpgrades',
 			call: 'energi_listUpgrades',
 			params: 0

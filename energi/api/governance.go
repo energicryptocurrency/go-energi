@@ -14,6 +14,8 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -39,6 +41,8 @@ type GovernanceAPI struct {
 func NewGovernanceAPI(b ethapi.Backend) *GovernanceAPI {
 	return &GovernanceAPI{b}
 }
+
+//=============================================================================
 
 func (g *GovernanceAPI) proposal(
 	password string,
@@ -78,6 +82,10 @@ func (g *GovernanceAPI) proposal(
 	return
 }
 
+//=============================================================================
+// VT-5 Voting API
+//=============================================================================
+
 func (g *GovernanceAPI) VoteAccept(
 	proposal common.Address,
 	mn_owner common.Address,
@@ -113,6 +121,34 @@ func (g *GovernanceAPI) VoteReject(
 
 	return err
 }
+
+func (g *GovernanceAPI) WithdrawFee(
+	proposal common.Address,
+	payer common.Address,
+	password string,
+) error {
+	contract, err := g.proposal(password, payer, proposal)
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	if res, _ := contract.IsAccepted(); !res {
+		err = errors.New("The proposal is not accepted!")
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	tx, err := contract.Withdraw()
+
+	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+
+	return err
+}
+
+//=============================================================================
+// Generic proposal info
+//=============================================================================
 
 type ProposalInfo struct {
 	Proposal     common.Address
