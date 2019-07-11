@@ -25,8 +25,6 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 
-	"energi.world/core/gen3/internal/ethapi"
-
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_params "energi.world/core/gen3/energi/params"
 )
@@ -36,10 +34,10 @@ const (
 )
 
 type GovernanceAPI struct {
-	backend ethapi.Backend
+	backend Backend
 }
 
-func NewGovernanceAPI(b ethapi.Backend) *GovernanceAPI {
+func NewGovernanceAPI(b Backend) *GovernanceAPI {
 	return &GovernanceAPI{b}
 }
 
@@ -165,7 +163,7 @@ type ProposalInfo struct {
 	Balance      *hexutil.Big
 }
 
-func getBalance(backend ethapi.Backend, address common.Address) *hexutil.Big {
+func getBalance(backend Backend, address common.Address) *hexutil.Big {
 	curr_block := backend.CurrentBlock()
 
 	state, _, err := backend.StateAndHeaderByNumber(
@@ -178,7 +176,7 @@ func getBalance(backend ethapi.Backend, address common.Address) *hexutil.Big {
 	return (*hexutil.Big)(state.GetBalance(address))
 }
 
-func proposalInfo(backend ethapi.Backend, address common.Address) *ProposalInfo {
+func proposalInfo(backend Backend, address common.Address) *ProposalInfo {
 	proposal, err := energi_abi.NewIProposalCaller(
 		address, backend.(bind.ContractCaller))
 	if err != nil {

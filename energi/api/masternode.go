@@ -29,8 +29,6 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/p2p/enode"
 
-	"energi.world/core/gen3/internal/ethapi"
-
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_params "energi.world/core/gen3/energi/params"
 )
@@ -41,10 +39,10 @@ const (
 )
 
 type MasternodeAPI struct {
-	backend ethapi.Backend
+	backend Backend
 }
 
-func NewMasternodeAPI(b ethapi.Backend) *MasternodeAPI {
+func NewMasternodeAPI(b Backend) *MasternodeAPI {
 	return &MasternodeAPI{b}
 }
 

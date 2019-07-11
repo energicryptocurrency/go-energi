@@ -36,8 +36,6 @@ import (
 	"github.com/shengdoushi/base58"
 	"golang.org/x/crypto/ripemd160"
 
-	"energi.world/core/gen3/internal/ethapi"
-
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_params "energi.world/core/gen3/energi/params"
 )
@@ -49,10 +47,10 @@ const (
 )
 
 type MigrationAPI struct {
-	backend ethapi.Backend
+	backend Backend
 }
 
-func NewMigrationAPI(b ethapi.Backend) *MigrationAPI {
+func NewMigrationAPI(b Backend) *MigrationAPI {
 	return &MigrationAPI{b}
 }
 
