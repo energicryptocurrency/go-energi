@@ -212,7 +212,7 @@ contract("GovernedProxy", async accounts => {
         let proposal = await MockProposal.new();
 
         try {
-            await proxy.collectProposal(proposal.address);
+            await proxy.collectUpgradeProposal(proposal.address);
             assert.fail("It must fail");
         } catch (e) {
             assert.match(e.message, /Not registered!/);
@@ -223,7 +223,7 @@ contract("GovernedProxy", async accounts => {
     });
 
 
-    it('should collectProposal()', async () => {
+    it('should collectUpgradeProposal()', async () => {
         const start_proposals = (await proxy.listUpgradeProposals()).length;
 
         let tmp = await MockContract.new(proxy.address);
@@ -237,13 +237,13 @@ contract("GovernedProxy", async accounts => {
         expect(proposals_after1).include(proposal_addr);
 
         await common.moveTime(web3, 2 * weeks + 1);
-        await proxy.collectProposal(proposal_addr);
+        await proxy.collectUpgradeProposal(proposal_addr);
         const proposals_after2 = await proxy.listUpgradeProposals();
         expect(proposals_after2.length).equal(start_proposals);
         expect(proposals_after2).not.include(proposal_addr);
 
         try {
-            await proxy.collectProposal(proposal_addr);
+            await proxy.collectUpgradeProposal(proposal_addr);
             assert.fail("It must fail");
         } catch (e) {
             assert.match(e.message, /Not registered!/);

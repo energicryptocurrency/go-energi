@@ -136,7 +136,7 @@ contract GovernedProxy is
     /**
      * Once proposal is reject, anyone can start collect procedure.
      */
-    function collectProposal(IProposal _proposal)
+    function collectUpgradeProposal(IProposal _proposal)
         external
         noReentry
     {

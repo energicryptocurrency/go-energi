@@ -28,7 +28,7 @@ var (
 )
 
 // IGovernedProxyABI is the input ABI used to generate the binding from.
-const IGovernedProxyABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"collectProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"},{\"name\":\"_period\",\"type\":\"uint256\"}],\"name\":\"proposeUpgrade\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"upgradeProposalImpl\",\"outputs\":[{\"name\":\"new_impl\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"impl\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"listUpgradeProposals\",\"outputs\":[{\"name\":\"proposals\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"impl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"UpgradeProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"impl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"}]"
+const IGovernedProxyABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_newImpl\",\"type\":\"address\"},{\"name\":\"_period\",\"type\":\"uint256\"}],\"name\":\"proposeUpgrade\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"upgradeProposalImpl\",\"outputs\":[{\"name\":\"new_impl\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"impl\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"_proposal\",\"type\":\"address\"}],\"name\":\"collectUpgradeProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"listUpgradeProposals\",\"outputs\":[{\"name\":\"proposals\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"impl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"UpgradeProposal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"impl\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"proposal\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"}]"
 
 // IGovernedProxy is an auto generated Go binding around an Ethereum contract.
 type IGovernedProxy struct {
@@ -250,25 +250,25 @@ func (_IGovernedProxy *IGovernedProxyCallerSession) UpgradeProposalImpl(_proposa
 	return _IGovernedProxy.Contract.UpgradeProposalImpl(&_IGovernedProxy.CallOpts, _proposal)
 }
 
-// CollectProposal is a paid mutator transaction binding the contract method 0x417d94f7.
+// CollectUpgradeProposal is a paid mutator transaction binding the contract method 0xa1b0e476.
 //
-// Solidity: function collectProposal(address _proposal) returns()
-func (_IGovernedProxy *IGovernedProxyTransactor) CollectProposal(opts *bind.TransactOpts, _proposal common.Address) (*types.Transaction, error) {
-	return _IGovernedProxy.contract.Transact(opts, "collectProposal", _proposal)
+// Solidity: function collectUpgradeProposal(address _proposal) returns()
+func (_IGovernedProxy *IGovernedProxyTransactor) CollectUpgradeProposal(opts *bind.TransactOpts, _proposal common.Address) (*types.Transaction, error) {
+	return _IGovernedProxy.contract.Transact(opts, "collectUpgradeProposal", _proposal)
 }
 
-// CollectProposal is a paid mutator transaction binding the contract method 0x417d94f7.
+// CollectUpgradeProposal is a paid mutator transaction binding the contract method 0xa1b0e476.
 //
-// Solidity: function collectProposal(address _proposal) returns()
-func (_IGovernedProxy *IGovernedProxySession) CollectProposal(_proposal common.Address) (*types.Transaction, error) {
-	return _IGovernedProxy.Contract.CollectProposal(&_IGovernedProxy.TransactOpts, _proposal)
+// Solidity: function collectUpgradeProposal(address _proposal) returns()
+func (_IGovernedProxy *IGovernedProxySession) CollectUpgradeProposal(_proposal common.Address) (*types.Transaction, error) {
+	return _IGovernedProxy.Contract.CollectUpgradeProposal(&_IGovernedProxy.TransactOpts, _proposal)
 }
 
-// CollectProposal is a paid mutator transaction binding the contract method 0x417d94f7.
+// CollectUpgradeProposal is a paid mutator transaction binding the contract method 0xa1b0e476.
 //
-// Solidity: function collectProposal(address _proposal) returns()
-func (_IGovernedProxy *IGovernedProxyTransactorSession) CollectProposal(_proposal common.Address) (*types.Transaction, error) {
-	return _IGovernedProxy.Contract.CollectProposal(&_IGovernedProxy.TransactOpts, _proposal)
+// Solidity: function collectUpgradeProposal(address _proposal) returns()
+func (_IGovernedProxy *IGovernedProxyTransactorSession) CollectUpgradeProposal(_proposal common.Address) (*types.Transaction, error) {
+	return _IGovernedProxy.Contract.CollectUpgradeProposal(&_IGovernedProxy.TransactOpts, _proposal)
 }
 
 // ProposeUpgrade is a paid mutator transaction binding the contract method 0x5b6dee4c.
