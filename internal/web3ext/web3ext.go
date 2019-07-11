@@ -330,6 +330,33 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
+
+		// Governance budget
+		new web3._extend.Method({
+			name: 'budgetInfo',
+			call: 'energi_budgetInfo',
+			params: 0
+			outputFormatter: function(status) {
+				var proposals = [];
+				toDecimal = web3._extend.utils.toDecimal;
+				var res = {
+					balance: toDecimal(status.Balance),
+					proposals: proposals,
+				};
+				var proposalf = web3._extend.formatters.outputProposalFormatter;
+				var raw_proposals = status.Proposals;
+				for (var i = 0; i < raw_proposals.length; ++i) {
+					var raw_item = raw_proposals[i];
+					var item = proposalf(raw_item);
+					item.proposalAmount = toDecimal(status.ProposalAmount);
+					item.paidAmount = toDecimal(status.PaidAmount);
+					item.refUUID = toDecimal(status.RefUUID);
+					proposals.push(item);
+				}
+				return res;
+			},
+		}),
+
 	],
 	properties: [
 	]

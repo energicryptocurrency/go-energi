@@ -80,6 +80,8 @@ contract("TreasuryV1", async accounts => {
 
         const owner1 = accounts[0];
         const owner2 = accounts[1];
+        const owner3 = accounts[3];
+        const owner4 = accounts[4];
 
         const masternode1 = accounts[9];
         const masternode2 = accounts[8];
@@ -389,6 +391,8 @@ contract("TreasuryV1", async accounts => {
 
         it ('should correctly distribute partial payouts', async() => {
             const orig_bal = toBN(await s.treasury_abi.balance());
+            const start_bal3 = toBN(await web3.eth.getBalance(owner3));
+            const start_bal4 = toBN(await web3.eth.getBalance(owner4));
 
             const get_proposal = async () => {
                 const evt = await s.orig.getPastEvents('BudgetProposal', common.evt_last_block);
@@ -400,16 +404,17 @@ contract("TreasuryV1", async accounts => {
             const tot = mul1.add(mul2);
             const addbal = orig_bal.mul(tot.sub(toBN(1)));
             const trunc = toBN(10);
+            const trunc_bal = toBN('1000000000000000000');
             const extra = toBN(12345678);
             
             await s.treasury_abi.propose(
                 orig_bal.mul(mul1), '301', def_period,
-                { value: fee_amount }
+                { value: fee_amount, from: owner3 }
             );
             const proposal1 = await get_proposal();
             await s.treasury_abi.propose(
                 orig_bal.mul(mul2), '302', def_period,
-                { value: fee_amount }
+                { value: fee_amount, from: owner4 }
             );
             const proposal2 = await get_proposal();
 
@@ -428,6 +433,8 @@ contract("TreasuryV1", async accounts => {
                 .equal(orig_bal.mul(mul1).div(tot).div(trunc).toString());
             expect(evt1[1].args.amount.div(trunc).toString())
                 .equal(orig_bal.mul(mul2).div(tot).div(trunc).toString());
+            await proposal1.withdraw({from: owner3});
+            await proposal2.withdraw({from: owner4});
 
             await s.reward_abi.reward({from: owner1, value: addbal.add(extra)});
             expect(toBN(await s.treasury_abi.balance()).div(trunc).toString())
@@ -443,12 +450,10 @@ contract("TreasuryV1", async accounts => {
             const evt3 = await s.orig.getPastEvents('Payout', common.evt_last_block);
             expect(evt3.length).equal(0);
 
-            expect((await web3.eth.getBalance(proposal1.address)).toString())
-                .equal(orig_bal.mul(mul1).add(fee_amount).toString());
-            expect((await web3.eth.getBalance(proposal2.address)).toString())
-                .equal(orig_bal.mul(mul2).add(fee_amount).toString());
-            await proposal1.withdraw();
-            await proposal2.withdraw();
+            expect(toBN(await web3.eth.getBalance(owner3)).div(trunc_bal).toString())
+                .equal(orig_bal.mul(mul1).add(start_bal3).div(trunc_bal).toString());
+            expect(toBN(await web3.eth.getBalance(owner4)).div(trunc_bal).toString())
+                .equal(orig_bal.mul(mul2).add(start_bal4).div(trunc_bal).toString());
         });
 
         it ('should refuse propose() on UUID duplicate of past proposal', async () => {

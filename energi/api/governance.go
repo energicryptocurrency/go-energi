@@ -165,6 +165,19 @@ type ProposalInfo struct {
 	Balance      *hexutil.Big
 }
 
+func getBalance(backend ethapi.Backend, address common.Address) *hexutil.Big {
+	curr_block := backend.CurrentBlock()
+
+	state, _, err := backend.StateAndHeaderByNumber(
+		nil, rpc.BlockNumber(curr_block.Number().Int64()))
+	if err != nil {
+		log.Error("Failed at state", "err", err)
+		return nil
+	}
+
+	return (*hexutil.Big)(state.GetBalance(address))
+}
+
 func proposalInfo(backend ethapi.Backend, address common.Address) *ProposalInfo {
 	proposal, err := energi_abi.NewIProposalCaller(
 		address, backend.(bind.ContractCaller))
@@ -233,21 +246,6 @@ func proposalInfo(backend ethapi.Backend, address common.Address) *ProposalInfo 
 		return nil
 	}
 
-	curr_block := backend.CurrentBlock()
-	if err != nil {
-		log.Error("Failed at current block", "err", err)
-		return nil
-	}
-
-	state, _, err := backend.StateAndHeaderByNumber(
-		nil, rpc.BlockNumber(curr_block.Number().Int64()))
-	if err != nil {
-		log.Error("Failed at state", "err", err)
-		return nil
-	}
-
-	balance := state.GetBalance(address)
-
 	return &ProposalInfo{
 		Proposal:     address,
 		Proposer:     proposer,
@@ -259,7 +257,7 @@ func proposalInfo(backend ethapi.Backend, address common.Address) *ProposalInfo 
 		AcceptWeight: (*hexutil.Big)(accepted_w),
 		Finished:     finished,
 		Accepted:     accepted,
-		Balance:      (*hexutil.Big)(balance),
+		Balance:      getBalance(backend, address),
 	}
 }
 
@@ -427,11 +425,82 @@ func (g *GovernanceAPI) UpgradeCollect(
 // GOV-9: Treasury API
 //=============================================================================
 
+type BudgetProposalInfo struct {
+	ProposalInfo
+	ProposedAmount *hexutil.Big
+	PaidAmount     *hexutil.Big
+	RefUUID        *hexutil.Big
+}
+
 type BudgetInfo struct {
+	Balance   *hexutil.Big
+	Proposals []BudgetProposalInfo
 }
 
 func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
-	return nil
+	treasury, err := energi_abi.NewITreasuryCaller(
+		energi_params.Energi_Treasury, g.backend.(bind.ContractCaller))
+	if err != nil {
+		log.Error("Failed NewITreasuryCaller", "err", err)
+		return nil
+	}
+
+	proxy, err := energi_abi.NewIGovernedProxyCaller(
+		energi_params.Energi_Treasury, g.backend.(bind.ContractCaller))
+	if err != nil {
+		log.Error("Failed NewITreasuryCaller", "err", err)
+		return nil
+	}
+
+	call_opts := &bind.CallOpts{}
+
+	proposals, err := treasury.ListProposals(call_opts)
+	if err != nil {
+		log.Error("Failed ListProposals", "err", err)
+		return nil
+	}
+
+	impl, err := proxy.Impl(call_opts)
+	if err != nil {
+		log.Error("Failed Impl", "err", err)
+		return nil
+	}
+
+	ret := make([]BudgetProposalInfo, len(proposals))
+	for i, p := range proposals {
+		ret[i].ProposalInfo = *proposalInfo(g.backend, p)
+
+		budger_proposal, err := energi_abi.NewIBudgetProposalCaller(
+			p, g.backend.(bind.ContractCaller))
+		if err != nil {
+			log.Error("Failed at NewIBudgetProposalCaller", "err", err)
+			return nil
+		}
+
+		proposed_amount, err := budger_proposal.ProposedAmount(call_opts)
+		if err != nil {
+			log.Error("Failed ProposedAmount", "err", err)
+			continue
+		}
+		paid_amount, err := budger_proposal.PaidAmount(call_opts)
+		if err != nil {
+			log.Error("Failed ProposedAmount", "err", err)
+			continue
+		}
+		ref_uuid, err := budger_proposal.RefUuid(call_opts)
+		if err != nil {
+			log.Error("Failed ProposedAmount", "err", err)
+			continue
+		}
+		ret[i].ProposedAmount = (*hexutil.Big)(proposed_amount)
+		ret[i].PaidAmount = (*hexutil.Big)(paid_amount)
+		ret[i].RefUUID = (*hexutil.Big)(ref_uuid)
+	}
+
+	return &BudgetInfo{
+		Balance:   getBalance(g.backend, impl),
+		Proposals: ret,
+	}
 }
 
 func (g *GovernanceAPI) BudgetPropose(
@@ -439,14 +508,6 @@ func (g *GovernanceAPI) BudgetPropose(
 	uuid string,
 	period uint64,
 	fee *hexutil.Big,
-	payer common.Address,
-	password string,
-) error {
-	return nil
-}
-
-func (g *GovernanceAPI) BudgetCollect(
-	proposal common.Address,
 	payer common.Address,
 	password string,
 ) error {

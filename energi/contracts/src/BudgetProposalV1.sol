@@ -32,9 +32,9 @@ contract BudgetProposalV1 is
     GenericProposalV1,
     IBudgetProposal
 {
-    uint paid_amount;
-    uint proposed_amount;
-    uint ref_uuid;
+    uint public paid_amount;
+    uint public proposed_amount;
+    uint public ref_uuid;
 
     constructor(
         IGovernedProxy _mnregistry_proxy,
