@@ -45,6 +45,7 @@ ENERGI_CONTRACTS := \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
   IDelegatedPoS.sol \
+  IGovernedProxy.sol \
   IMasternodeRegistry.sol \
   IMasternodeToken.sol \
   IProposal.sol \

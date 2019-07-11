@@ -124,8 +124,12 @@ contract StorageBlacklistRegistryV1 is
         Info storage item = address_info[addr];
         assert(address(item.enforce) != address(0));
 
+        // Ensure re-ordered index is updated
+        address last = address_list[address_list.length - 1];
+        address_info[last].index = item.index;
+
         // Move the last into the gap, NOOP on on match
-        address_list[item.index] = address_list[address_list.length - 1];
+        address_list[item.index] = last;
         address_list.pop();
 
         delete address_info[addr];

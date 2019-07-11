@@ -126,6 +126,7 @@ web3._extend.formatters.outputProposalFormatter = function(item){
 		acceptWeight: web3._extend.utils.toDecimal(item.AcceptWeight),
 		finished:     item.Finished,
 		accepted:     item.Accepted,
+		balance:      web3._extend.utils.toDecimal(item.Balance),
 	};
 };
 
@@ -255,6 +256,28 @@ web3._extend({
 				null,
 			],
 			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'listUpgrades',
+			call: 'energi_listUpgrades',
+			params: 0
+			outputFormatter: function(status) {
+				var res = {};
+				var proposalf = web3._extend.formatters.outputProposalFormatter;
+				var keys = Object.keys(status);
+				for (var i = 0; i < keys.length; ++i) {
+					var k = keys[i];
+					var items = status[k];
+					var res_items = res[k] = [];
+
+					for (var j = 0; j < items.length; ++j) {
+						var res_item = proposalf(item);
+						res_item.impl = item.Impl;
+						res_items.push(res_item);
+					}
+				}
+				return res;
+			},
 		}),
 	],
 	properties: [

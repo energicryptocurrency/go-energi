@@ -47,6 +47,9 @@ interface IGovernedProxy {
     function proposeUpgrade(IGovernedContract _newImpl, uint _period)
         external payable returns(IProposal);
     function upgrade(IProposal _proposal) external;
+    function upgradeProposalImpl(IProposal _proposal) external view returns(IGovernedContract new_impl);
+    function listUpgradeProposals() external view returns(IProposal[] memory proposals);
+    function collectProposal(IProposal _proposal) external;
 
     function () external payable;
 }

@@ -205,7 +205,7 @@ contract("Gen2Migration", async accounts => {
 
     it('should claim() another account', async () => {
         const hash = await orig.hashToSign(dst);
-        await orig.claim(0, dst, ...ecsign(acc1, hash));
+        await orig.claim(0, dst, ...ecsign(acc1, hash), common.zerofee_callopts);
     });
 
     it('should refuse to blacklistClaim() not by blacklist', async() => {
