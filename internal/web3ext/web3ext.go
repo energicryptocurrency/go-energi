@@ -268,9 +268,11 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
+
+		// Governance upgrades
 		new web3._extend.Method({
-			name: 'listUpgrades',
-			call: 'energi_listUpgrades',
+			name: 'upgradeInfo',
+			call: 'energi_upgradeInfo',
 			params: 0
 			outputFormatter: function(status) {
 				var res = {};
@@ -289,6 +291,44 @@ web3._extend({
 				}
 				return res;
 			},
+		}),
+		new web3._extend.Method({
+			name: 'upgradePropose',
+			call: 'energi_upgradePropose',
+			params: 6
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'upgradePerform',
+			call: 'energi_upgradePerform',
+			params: 4
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'upgradeCollect',
+			call: 'energi_upgradeCollect',
+			params: 4
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
 		}),
 	],
 	properties: [

@@ -15,6 +15,7 @@ package api
 
 import (
 	"errors"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -262,6 +263,10 @@ func proposalInfo(backend ethapi.Backend, address common.Address) *ProposalInfo 
 	}
 }
 
+//=============================================================================
+// SC-15: Upgrade API
+//=============================================================================
+
 type UpgradeProposalInfo struct {
 	ProposalInfo
 	Impl common.Address
@@ -295,6 +300,45 @@ func (g *GovernanceAPI) upgradeProposalInfo(proxy common.Address) []UpgradePropo
 	return ret
 }
 
+func (g *GovernanceAPI) governedProxy(
+	password string,
+	owner common.Address,
+	proxy common.Address,
+) (session *energi_abi.IGovernedProxySession, err error) {
+	account := accounts.Account{Address: owner}
+	wallet, err := g.backend.AccountManager().Find(account)
+	if err != nil {
+		return nil, err
+	}
+
+	contract, err := energi_abi.NewIGovernedProxy(
+		proxy, g.backend.(bind.ContractBackend))
+	if err != nil {
+		return nil, err
+	}
+
+	session = &energi_abi.IGovernedProxySession{
+		Contract: contract,
+		CallOpts: bind.CallOpts{
+			From: owner,
+		},
+		TransactOpts: bind.TransactOpts{
+			From: owner,
+			Signer: func(
+				signer types.Signer,
+				addr common.Address,
+				tx *types.Transaction,
+			) (*types.Transaction, error) {
+				return wallet.SignTxWithPassphrase(
+					account, password, tx, g.backend.ChainConfig().ChainID)
+			},
+			Value:    common.Big0,
+			GasLimit: proposalCallGas,
+		},
+	}
+	return
+}
+
 type UpgradeProposals struct {
 	Treasury           []UpgradeProposalInfo
 	MasternodeRegistry []UpgradeProposalInfo
@@ -306,7 +350,7 @@ type UpgradeProposals struct {
 	MasternodeToken    []UpgradeProposalInfo
 }
 
-func (g *GovernanceAPI) ListUpgrades() *UpgradeProposals {
+func (g *GovernanceAPI) UpgradeInfo() *UpgradeProposals {
 	ret := new(UpgradeProposals)
 	ret.Treasury = g.upgradeProposalInfo(energi_params.Energi_Treasury)
 	ret.MasternodeRegistry = g.upgradeProposalInfo(energi_params.Energi_MasternodeRegistry)
@@ -317,4 +361,94 @@ func (g *GovernanceAPI) ListUpgrades() *UpgradeProposals {
 	ret.BlacklistRegistry = g.upgradeProposalInfo(energi_params.Energi_BlacklistRegistry)
 	ret.MasternodeToken = g.upgradeProposalInfo(energi_params.Energi_MasternodeToken)
 	return ret
+}
+
+func (g *GovernanceAPI) UpgradePropose(
+	proxy common.Address,
+	new_impl common.Address,
+	period uint64,
+	fee *hexutil.Big,
+	payer common.Address,
+	password string,
+) error {
+	session, err := g.governedProxy(password, payer, proxy)
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	session.TransactOpts.Value = fee.ToInt()
+	tx, err := session.ProposeUpgrade(new_impl, new(big.Int).SetUint64(period))
+
+	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+
+	return err
+}
+
+func (g *GovernanceAPI) UpgradePerform(
+	proxy common.Address,
+	proposal common.Address,
+	payer common.Address,
+	password string,
+) error {
+	session, err := g.governedProxy(password, payer, proxy)
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	tx, err := session.Upgrade(proposal)
+
+	log.Info("Note: please wait until upgrade TX gets into a block!", "tx", tx.Hash())
+
+	return err
+}
+
+func (g *GovernanceAPI) UpgradeCollect(
+	proxy common.Address,
+	proposal common.Address,
+	payer common.Address,
+	password string,
+) error {
+	session, err := g.governedProxy(password, payer, proxy)
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return err
+	}
+
+	tx, err := session.CollectUpgradeProposal(proposal)
+
+	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+
+	return err
+}
+
+//=============================================================================
+// GOV-9: Treasury API
+//=============================================================================
+
+type BudgetInfo struct {
+}
+
+func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
+	return nil
+}
+
+func (g *GovernanceAPI) BudgetPropose(
+	amount *hexutil.Big,
+	uuid string,
+	period uint64,
+	fee *hexutil.Big,
+	payer common.Address,
+	password string,
+) error {
+	return nil
+}
+
+func (g *GovernanceAPI) BudgetCollect(
+	proposal common.Address,
+	payer common.Address,
+	password string,
+) error {
+	return nil
 }
