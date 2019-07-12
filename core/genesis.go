@@ -596,8 +596,8 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		&xfers,
 		energi_params.Energi_SporkRegistryV1,
 		nil,
-		energi_abi.GovernedProxyABI,
-		energi_abi.GovernedProxyBin,
+		energi_abi.SporkRegistryV1ABI,
+		energi_abi.SporkRegistryV1Bin,
 		energi_params.Energi_SporkRegistry,
 		energi_params.Energi_MasternodeRegistry,
 	)

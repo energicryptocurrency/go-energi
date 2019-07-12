@@ -32,4 +32,8 @@ interface ISporkRegistry {
     )
         external payable
         returns (IProposal);
+
+    function consensusGasLimits()
+        external view
+        returns(uint callGas, uint xferGas);
 }

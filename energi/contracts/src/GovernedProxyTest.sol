@@ -83,6 +83,11 @@ contract MockSporkRegistry is MockContract, ISporkRegistry {
     {
         return new MockProposal();
     }
+
+    function consensusGasLimits()
+        external view
+        returns(uint callGas, uint xferGas)
+    {}
 }
 
 contract MockProposal is IProposal {

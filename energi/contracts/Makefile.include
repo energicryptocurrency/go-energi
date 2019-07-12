@@ -50,6 +50,7 @@ ENERGI_CONTRACTS := \
   IMasternodeRegistry.sol \
   IMasternodeToken.sol \
   IProposal.sol \
+  ISporkRegistry.sol \
   ITreasury.sol \
   Gen2Migration.sol \
   GovernedProxy.sol \
