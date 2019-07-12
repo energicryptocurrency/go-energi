@@ -1,6 +1,6 @@
 {
   "name": "energi3",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "vcs": "git",
   "tools": {
     "go": "1.11.11",
