@@ -404,7 +404,7 @@ contract("TreasuryV1", async accounts => {
             const tot = mul1.add(mul2);
             const addbal = orig_bal.mul(tot.sub(toBN(1)));
             const trunc = toBN(10);
-            const trunc_bal = toBN('1000000000000000000');
+            const trunc_bal = toBN('10000000000000000');
             const extra = toBN(12345678);
             
             await s.treasury_abi.propose(
@@ -450,10 +450,14 @@ contract("TreasuryV1", async accounts => {
             const evt3 = await s.orig.getPastEvents('Payout', common.evt_last_block);
             expect(evt3.length).equal(0);
 
-            expect(toBN(await web3.eth.getBalance(owner3)).div(trunc_bal).toString())
-                .equal(orig_bal.mul(mul1).add(start_bal3).div(trunc_bal).toString());
-            expect(toBN(await web3.eth.getBalance(owner4)).div(trunc_bal).toString())
-                .equal(orig_bal.mul(mul2).add(start_bal4).div(trunc_bal).toString());
+            const after_bal1 = orig_bal.mul(mul1).add(start_bal3)
+                .sub(toBN(await web3.eth.getBalance(owner3)))
+                .div(trunc_bal);
+            const after_bal2 = orig_bal.mul(mul2).add(start_bal4)
+                .sub(toBN(await web3.eth.getBalance(owner4)))
+                .div(trunc_bal);
+            expect(after_bal1.toString()).equal(toBN(2).toString());
+            expect(after_bal2.toString()).equal(toBN(2).toString());
         });
 
         it ('should refuse propose() on UUID duplicate of past proposal', async () => {
