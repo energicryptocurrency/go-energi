@@ -17,6 +17,8 @@ import (
 	"errors"
 	"math/big"
 
+	"github.com/pborman/uuid"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -465,7 +467,7 @@ type BudgetProposalInfo struct {
 	ProposalInfo
 	ProposedAmount *hexutil.Big
 	PaidAmount     *hexutil.Big
-	RefUUID        *hexutil.Big
+	RefUUID        string
 }
 
 type BudgetInfo struct {
@@ -530,7 +532,7 @@ func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
 		}
 		ret[i].ProposedAmount = (*hexutil.Big)(proposed_amount)
 		ret[i].PaidAmount = (*hexutil.Big)(paid_amount)
-		ret[i].RefUUID = (*hexutil.Big)(ref_uuid)
+		ret[i].RefUUID = uuid.UUID(common.LeftPadBytes(ref_uuid.Bytes(), 16)).String()
 	}
 
 	return &BudgetInfo{
@@ -541,7 +543,7 @@ func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
 
 func (g *GovernanceAPI) BudgetPropose(
 	amount *hexutil.Big,
-	ref_uuid *hexutil.Big,
+	ref_uuid string,
 	period uint64,
 	fee *hexutil.Big,
 	payer common.Address,
@@ -553,9 +555,18 @@ func (g *GovernanceAPI) BudgetPropose(
 		return err
 	}
 
+	ref_uuid_b := uuid.Parse(ref_uuid)
+	if ref_uuid_b == nil {
+		err = errors.New("Failed to parse UUID")
+		log.Error("Failed", "err", err)
+		return err
+	}
+
 	session.TransactOpts.Value = fee.ToInt()
 	tx, err := session.Propose(
-		(*big.Int)(amount), (*big.Int)(ref_uuid), new(big.Int).SetUint64(period))
+		(*big.Int)(amount),
+		new(big.Int).SetBytes(ref_uuid_b),
+		new(big.Int).SetUint64(period))
 
 	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
 

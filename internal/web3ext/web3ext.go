@@ -351,7 +351,7 @@ web3._extend({
 					var item = proposalf(raw_item);
 					item.proposalAmount = toDecimal(status.ProposalAmount);
 					item.paidAmount = toDecimal(status.PaidAmount);
-					item.refUUID = toDecimal(status.RefUUID);
+					item.refUUID = status.RefUUID;
 					proposals.push(item);
 				}
 				return res;
@@ -363,7 +363,7 @@ web3._extend({
 			params: 6
 			inputFormatter: [
 				web3._extend.utils.fromDecimal,
-				web3._extend.utils.fromDecimal,
+				null,
 				null,
 				web3._extend.utils.fromDecimal,
 				web3._extend.formatters.inputAddressFormatter,
