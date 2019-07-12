@@ -21,23 +21,7 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
-import { IProposal } from "./IProposal.sol";
-
-/**
- * Interface of BudgetProposal
- */
-interface IBudgetProposal {
-    function payout_address() external view returns(address payable);
-
-    function distributePayout() external payable;
-
-    function budgetStatus() external view returns(
-        uint ref_uuid,
-        bool is_accepted,
-        bool is_finished,
-        uint unpaid
-    );
-}
+import { IBudgetProposal } from "./IBudgetProposal.sol";
 
 /**
  * Interface for the Treasury
@@ -45,7 +29,7 @@ interface IBudgetProposal {
 interface ITreasury {
     event BudgetProposal(
         uint indexed ref_uuid,
-        IProposal proposal,
+        IBudgetProposal proposal,
         address payout_address,
         uint amount,
         uint deadline
@@ -56,14 +40,15 @@ interface ITreasury {
     );
     event Payout(
         uint indexed ref_uuid,
-        IProposal proposal,
+        IBudgetProposal proposal,
         uint amount
     );
 
-    function uuid_proposal(uint _ref_uuid) external view returns(IProposal);
-    function proposal_uuid(IProposal proposal) external view returns(uint);
+    function uuid_proposal(uint _ref_uuid) external view returns(IBudgetProposal);
+    function proposal_uuid(IBudgetProposal proposal) external view returns(uint);
     function propose(uint _amount, uint _ref_uuid, uint _period)
-        external payable returns(IProposal proposal);
+        external payable returns(IBudgetProposal proposal);
+    function listProposals() external view returns(IBudgetProposal[] memory proposals);
     function isSuperblock(uint _blockNumber) external view returns(bool);
     function contribute() external payable;
     function balance() external view returns(uint amount);

@@ -27,15 +27,15 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBlockRewards(t *testing.T) {
 	t.Parallel()
-	//log.Root().SetHandler(log.StdoutHandler)
-	log.Trace("prevent unused")
+	log.Root().SetHandler(log.StdoutHandler)
 	var (
 		testdb = ethdb.NewMemDatabase()
 		gspec  = &core.Genesis{
@@ -67,9 +67,12 @@ func TestBlockRewards(t *testing.T) {
 		Time:     parent.Time(),
 	}
 
+	err := engine.processConsensusGasLimits(chain, header, statedb)
+	assert.Empty(t, err)
+
 	for i := 0; i < 5; i++ {
 		// TODO: check balance changes
-		err := engine.processBlockRewards(chain, header, statedb)
+		err = engine.processBlockRewards(chain, header, statedb)
 
 		if err != nil {
 			panic(err)

@@ -24,7 +24,7 @@ pragma solidity 0.5.9;
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
-import { ITreasury, IProposal, IBudgetProposal } from "./ITreasury.sol";
+import { ITreasury, IBudgetProposal } from "./ITreasury.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { BudgetProposalV1 } from "./BudgetProposalV1.sol";
 import { NonReentrant } from "./NonReentrant.sol";
@@ -36,10 +36,10 @@ import { StorageBase }  from "./StorageBase.sol";
 contract StorageTreasuryV1 is
     StorageBase
 {
-    mapping(uint => IProposal) public uuid_proposal;
+    mapping(uint => IBudgetProposal) public uuid_proposal;
     mapping(address => uint) public proposal_uuid;
 
-    function setProposal(uint _uuid, IProposal _proposal)
+    function setProposal(uint _uuid, IBudgetProposal _proposal)
         external
         requireOwner
     {
@@ -47,7 +47,7 @@ contract StorageTreasuryV1 is
         proposal_uuid[address(_proposal)] = _uuid;
     }
 
-    function deleteProposal(IProposal _proposal)
+    function deleteProposal(IBudgetProposal _proposal)
         external
         requireOwner
     {
@@ -95,18 +95,18 @@ contract TreasuryV1 is
 
     // ITreasury
     //---------------------------------
-    function uuid_proposal(uint _ref_uuid) external view returns(IProposal) {
-        return IProposal(v1storage.uuid_proposal(_ref_uuid));
+    function uuid_proposal(uint _ref_uuid) external view returns(IBudgetProposal) {
+        return v1storage.uuid_proposal(_ref_uuid);
     }
 
-    function proposal_uuid(IProposal proposal) external view returns(uint) {
+    function proposal_uuid(IBudgetProposal proposal) external view returns(uint) {
         return v1storage.proposal_uuid(address(proposal));
     }
 
     function propose(uint _amount, uint _ref_uuid, uint _period)
         external payable
         noReentry
-        returns(IProposal proposal)
+        returns(IBudgetProposal proposal)
     {
         require(msg.value == FEE_BUDGET_V1, "Invalid fee");
         require(_amount >= BUDGET_AMOUNT_MIN, "Too small amount");
@@ -117,15 +117,26 @@ contract TreasuryV1 is
         StorageTreasuryV1 store = v1storage;
         address payable payout_address = _callerAddress();
 
-        require(store.uuid_proposal(_ref_uuid) == IProposal(address(0)), "UUID in use");
+        require(address(store.uuid_proposal(_ref_uuid)) == address(0), "UUID in use");
 
-        proposal = new BudgetProposalV1(
-            mnregistry_proxy,
-            payout_address,
-            _ref_uuid,
-            _amount,
-            _period
-        );
+        // Find, if proposal slot is available.
+        for (uint i = 0; i < BUDGET_PROPOSAL_MAX; ++i) {
+            if (address(active_proposals[i]) == address(0)) {
+                proposal = new BudgetProposalV1(
+                    mnregistry_proxy,
+                    payout_address,
+                    _ref_uuid,
+                    _amount,
+                    _period
+                );
+
+                active_proposals[i] = proposal;
+                break;
+            }
+        }
+
+        require(address(proposal) != address(0), "Too many active proposals");
+        //---
 
         proposal.setFee.value(msg.value)();
         store.setProposal(_ref_uuid, proposal);
@@ -139,14 +150,28 @@ contract TreasuryV1 is
             proposal.deadline()
         );
 
+        return proposal;
+    }
+
+    function listProposals() external view returns(IBudgetProposal[] memory proposals) {
+        IBudgetProposal[] memory tmp = new IBudgetProposal[](BUDGET_PROPOSAL_MAX);
+        uint tmp_len = 0;
+
         for (uint i = 0; i < BUDGET_PROPOSAL_MAX; ++i) {
-            if (address(active_proposals[i]) == address(0)) {
-                active_proposals[i] = IBudgetProposal(address(proposal));
-                return proposal;
+            IBudgetProposal p = active_proposals[i];
+
+            if (address(p) != address(0)) {
+                tmp[tmp_len++] = p;
             }
         }
 
-        revert("Too many active proposals");
+        proposals = new IBudgetProposal[](tmp_len);
+
+        for (uint i = 0; i < tmp_len; ++i) {
+            proposals[i] = tmp[i];
+        }
+
+        return proposals;
     }
 
     function isSuperblock(uint _blockNumber)
@@ -226,12 +251,13 @@ contract TreasuryV1 is
                         accepted[i].unpaid = unpaid;
                     } else {
                         // Fulfilled
-                        active_proposals[i] = IBudgetProposal(address(0));
+                        proposal.destroy();
+                        delete active_proposals[i];
                     }
                 } else if (is_finished) {
                     // Rejected
-                    IProposal(address(proposal)).collect();
-                    active_proposals[i] = IBudgetProposal(address(0));
+                    proposal.collect();
+                    delete active_proposals[i];
                 }
             }
         }
@@ -254,7 +280,7 @@ contract TreasuryV1 is
                 proposal.distributePayout.value(amount)();
                 emit Payout(
                     accepted[i].ref_uuid,
-                    IProposal(address(proposal)),
+                    proposal,
                     amount
                 );
             }

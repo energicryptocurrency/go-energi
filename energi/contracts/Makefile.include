@@ -44,10 +44,14 @@ ENERGI_CONTRACTS := \
   DummyAccount.sol \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
+  IBudgetProposal.sol \
   IDelegatedPoS.sol \
+  IGovernedProxy.sol \
   IMasternodeRegistry.sol \
   IMasternodeToken.sol \
   IProposal.sol \
+  ISporkRegistry.sol \
+  ITreasury.sol \
   Gen2Migration.sol \
   GovernedProxy.sol \
   MasternodeTokenV1.sol \

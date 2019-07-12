@@ -48,6 +48,7 @@ contract GovernedProxy is
     IGovernedContract public impl;
     IGovernedProxy public spork_proxy;
     mapping(address => IGovernedContract) public upgrade_proposals;
+    IProposal[] public upgrade_proposal_list;
 
     constructor(IGovernedContract _impl, IGovernedProxy _sporkProxy) public {
         impl = _impl;
@@ -71,6 +72,7 @@ contract GovernedProxy is
         IProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period, msg.sender);
 
         upgrade_proposals[address(proposal)] = _newImpl;
+        upgrade_proposal_list.push(proposal);
 
         emit UpgradeProposal(_newImpl, proposal);
 
@@ -96,7 +98,7 @@ contract GovernedProxy is
         old_impl.destroy(new_impl);
 
         // SECURITY: prevent downgrade attack
-        delete upgrade_proposals[address(_proposal)];
+        _cleanupProposal(_proposal);
 
         // Return fee ASAP
         _proposal.destroy();
@@ -105,9 +107,36 @@ contract GovernedProxy is
     }
 
     /**
+     * Map proposal to implementation
+     */
+    function upgradeProposalImpl(IProposal _proposal)
+        external view
+        returns(IGovernedContract new_impl)
+    {
+        new_impl = upgrade_proposals[address(_proposal)];
+    }
+
+    /**
+     * Lists all available upgrades
+     */
+    function listUpgradeProposals()
+        external view
+        returns(IProposal[] memory proposals)
+    {
+        uint len = upgrade_proposal_list.length;
+        proposals = new IProposal[](len);
+
+        for (uint i = 0; i < len; ++i) {
+            proposals[i] = upgrade_proposal_list[i];
+        }
+
+        return proposals;
+    }
+
+    /**
      * Once proposal is reject, anyone can start collect procedure.
      */
-    function collectProposal(IProposal _proposal)
+    function collectUpgradeProposal(IProposal _proposal)
         external
         noReentry
     {
@@ -115,6 +144,21 @@ contract GovernedProxy is
         require(address(new_impl) != address(0), "Not registered!");
         _proposal.collect();
         delete upgrade_proposals[address(_proposal)];
+
+        _cleanupProposal(_proposal);
+    }
+
+    function _cleanupProposal(IProposal _proposal) internal {
+        delete upgrade_proposals[address(_proposal)];
+
+        uint len = upgrade_proposal_list.length;
+        for (uint i = 0; i < len; ++i) {
+            if (upgrade_proposal_list[i] == _proposal) {
+                upgrade_proposal_list[i] = upgrade_proposal_list[len - 1];
+                upgrade_proposal_list.pop();
+                break;
+            }
+        }
     }
 
     /**

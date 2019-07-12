@@ -69,6 +69,14 @@ contract SporkRegistryV1 is
         proposal.setFee.value(msg.value)();
     }
 
+    function consensusGasLimits()
+        external view
+        returns(uint callGas, uint xferGas)
+    {
+        callGas = 15000000;
+        xferGas = 30000000;
+    }
+
     // Safety
     //---------------------------------
     function () external payable {

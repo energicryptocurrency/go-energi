@@ -76,6 +76,9 @@ func TestBlacklist(t *testing.T) {
 	blstate, err := state.New(header.Root, stdb)
 	assert.Empty(t, err)
 
+	err = engine.processConsensusGasLimits(chain, header, blstate)
+	assert.Empty(t, err)
+
 	blacklist_addr1 := common.HexToAddress("0x0000000000000000000000000000000012345678")
 	blacklist_addr2 := common.HexToAddress("0x0000000000000000000000000000000012345679")
 	owner_addr := common.HexToAddress("0x0000000000000000000000000000000022345678")

@@ -27,7 +27,7 @@ import { ITreasury } from "./ITreasury.sol";
 /**
  * Interface of BlacklistProposal
  */
-interface IBlacklistProposal {
+contract IBlacklistProposal is IProposal {
     function isObeyed() external view returns(bool);
 }
 
@@ -42,26 +42,26 @@ interface IBlacklistProposal {
 interface IBlacklistRegistry {
     event BlacklistProposal(
         address indexed target,
-        IProposal proposal
+        IBlacklistProposal proposal
     );
     event WhitelistProposal(
         address indexed target,
-        IProposal proposal
+        IBlacklistProposal proposal
     );
     event DrainProposal(
         address indexed target,
-        IProposal proposal
+        IBlacklistProposal proposal
     );
 
     function compensation_fund() external view returns(ITreasury);
 
     function proposals(address) external view returns(
-        IProposal enforce,
-        IProposal revoke,
-        IProposal drain);
-    function propose(address) external payable returns(IProposal);
-    function proposeRevoke(address) external payable returns(IProposal);
-    function proposeDrain(address) external payable returns(IProposal);
+        IBlacklistProposal enforce,
+        IBlacklistProposal revoke,
+        IBlacklistProposal drain);
+    function propose(address) external payable returns(IBlacklistProposal);
+    function proposeRevoke(address) external payable returns(IBlacklistProposal);
+    function proposeDrain(address) external payable returns(IBlacklistProposal);
     function isBlacklisted(address) external view returns(bool);
     function isDrainable(address) external view returns(bool);
     function collect(address) external;

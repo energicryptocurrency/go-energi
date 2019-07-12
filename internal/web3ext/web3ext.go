@@ -115,17 +115,19 @@ web3._extend({
 
 const Energi_JS = `
 web3._extend.formatters.outputProposalFormatter = function(item){
+	var toDecimal = web3._extend.utils.toDecimal;
 	return {
 		proposal:     item.Proposal,
 		proposer:     item.Proposer,
 		createdBlock: item.CreatedBlock,
 		deadline:     item.Deadline,
-		quorumWeight: web3._extend.utils.toDecimal(item.QuorumWeight),
-		totalWeight:  web3._extend.utils.toDecimal(item.TotalWeight),
-		rejectWeight: web3._extend.utils.toDecimal(item.RejectWeight),
-		acceptWeight: web3._extend.utils.toDecimal(item.AcceptWeight),
+		quorumWeight: toDecimal(item.QuorumWeight),
+		totalWeight:  toDecimal(item.TotalWeight),
+		rejectWeight: toDecimal(item.RejectWeight),
+		acceptWeight: toDecimal(item.AcceptWeight),
 		finished:     item.Finished,
 		accepted:     item.Accepted,
+		balance:      toDecimal(item.Balance),
 	};
 };
 
@@ -232,6 +234,144 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
+
+		// Governance
+		new web3._extend.Method({
+			name: 'voteAccept',
+			call: 'energi_voteAccept',
+			params: 3
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'voteReject',
+			call: 'energi_voteReject',
+			params: 3
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'withdrawFee',
+			call: 'energi_withdrawFee',
+			params: 3
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+
+		// Governance upgrades
+		new web3._extend.Method({
+			name: 'upgradeInfo',
+			call: 'energi_upgradeInfo',
+			params: 0
+			outputFormatter: function(status) {
+				var res = {};
+				var proposalf = web3._extend.formatters.outputProposalFormatter;
+				var keys = Object.keys(status);
+				for (var i = 0; i < keys.length; ++i) {
+					var k = keys[i];
+					var items = status[k];
+					var res_items = res[k] = [];
+
+					for (var j = 0; j < items.length; ++j) {
+						var res_item = proposalf(item);
+						res_item.impl = item.Impl;
+						res_items.push(res_item);
+					}
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'upgradePropose',
+			call: 'energi_upgradePropose',
+			params: 6
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'upgradePerform',
+			call: 'energi_upgradePerform',
+			params: 4
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'upgradeCollect',
+			call: 'energi_upgradeCollect',
+			params: 4
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+
+		// Governance budget
+		new web3._extend.Method({
+			name: 'budgetInfo',
+			call: 'energi_budgetInfo',
+			params: 0
+			outputFormatter: function(status) {
+				var proposals = [];
+				var toDecimal = web3._extend.utils.toDecimal;
+				var res = {
+					balance: toDecimal(status.Balance),
+					proposals: proposals,
+				};
+				var proposalf = web3._extend.formatters.outputProposalFormatter;
+				var raw_proposals = status.Proposals;
+				for (var i = 0; i < raw_proposals.length; ++i) {
+					var raw_item = raw_proposals[i];
+					var item = proposalf(raw_item);
+					item.proposalAmount = toDecimal(status.ProposalAmount);
+					item.paidAmount = toDecimal(status.PaidAmount);
+					item.refUUID = toDecimal(status.RefUUID);
+					proposals.push(item);
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'budgetPropose',
+			call: 'energi_budgetPropose',
+			params: 6
+			inputFormatter: [
+				web3._extend.utils.fromDecimal,
+				web3._extend.utils.fromDecimal,
+				null,
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+
 	],
 	properties: [
 	]

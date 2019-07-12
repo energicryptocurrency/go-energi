@@ -63,6 +63,7 @@ type Energi struct {
 	rewardGov    []common.Address
 	dposAbi      abi.ABI
 	blacklistAbi abi.ABI
+	sporkAbi     abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -91,6 +92,12 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
+	spork_abi, err := abi.JSON(strings.NewReader(energi_abi.ISporkRegistryABI))
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
 	return &Energi{
 		config:    config,
 		db:        db,
@@ -103,9 +110,10 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		},
 		dposAbi:      dpos_abi,
 		blacklistAbi: blacklist_abi,
+		sporkAbi:     spork_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
-		xferGas:      30000000,
-		callGas:      15000000,
+		xferGas:      0,
+		callGas:      30000,
 		diffFn:       calcPoSDifficultyV1,
 	}
 }
@@ -435,7 +443,10 @@ func (e *Energi) govFinalize(
 	state *state.StateDB,
 	txs types.Transactions,
 ) (err error) {
-	err = e.processBlockRewards(chain, header, state)
+	err = e.processConsensusGasLimits(chain, header, state)
+	if err == nil {
+		err = e.processBlockRewards(chain, header, state)
+	}
 	if err == nil {
 		err = e.processBlacklists(chain, header, state)
 	}
@@ -648,4 +659,52 @@ func (e *Energi) Close() error {
 
 func (e *Energi) Hashrate() float64 {
 	return 0
+}
+
+func (e *Energi) processConsensusGasLimits(
+	chain ChainReader,
+	header *types.Header,
+	state *state.StateDB,
+) error {
+	callData, err := e.sporkAbi.Pack("consensusGasLimits")
+	if err != nil {
+		log.Error("Fail to prepare consensusGasLimits() call", "err", err)
+		return err
+	}
+
+	// consensusGasLimits()
+	msg := types.NewMessage(
+		e.systemFaucet,
+		&energi_params.Energi_SporkRegistry,
+		0,
+		common.Big0,
+		e.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	evm := e.createEVM(msg, chain, header, state)
+	gp := new(core.GasPool).AddGas(e.callGas)
+	output, _, _, err := core.ApplyMessage(evm, msg, gp)
+	if err != nil {
+		log.Error("Failed in consensusGasLimits() call", "err", err)
+		return err
+	}
+
+	//
+	ret := new(struct {
+		CallGas *big.Int
+		XferGas *big.Int
+	})
+	err = e.sporkAbi.Unpack(ret, "consensusGasLimits", output)
+	if err != nil {
+		log.Error("Failed to unpack consensusGasLimits() call", "err", err)
+		return err
+	}
+
+	e.callGas = ret.CallGas.Uint64()
+	e.xferGas = ret.XferGas.Uint64()
+	log.Trace("Consensus Gas", "call", e.callGas, "xfer", e.xferGas)
+
+	return nil
 }

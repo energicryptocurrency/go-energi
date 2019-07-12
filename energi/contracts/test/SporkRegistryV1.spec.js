@@ -139,6 +139,12 @@ contract("SporkRegistryV1", async accounts => {
                 assert.match(e.message, /Period max/);
             }
         });
+
+        it ('should consensusGasLimits()', async () => {
+            const res = await s.token_abi.consensusGasLimits();
+            expect(res[0].toString()).eql(web3.utils.toBN(15e6).toString());
+            expect(res[1].toString()).eql(web3.utils.toBN(30e6).toString());
+        });
     });
 
     //---
