@@ -24,7 +24,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
@@ -72,8 +71,7 @@ func TestBlacklist(t *testing.T) {
 	header := chain.GetHeaderByHash(genesis.Hash())
 	assert.NotEmpty(t, header)
 
-	stdb, err := chain.GetStateDB()
-	blstate, err := state.New(header.Root, stdb)
+	blstate, err := chain.StateAt(header.Root)
 	assert.Empty(t, err)
 
 	err = engine.processConsensusGasLimits(chain, header, blstate)
@@ -92,7 +90,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	err = blstate.Database().TrieDB().Commit(header.Root, true)
 	assert.Empty(t, err)
-	blstate, err = state.New(header.Root, stdb)
+	blstate, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
 
 	//---
@@ -150,7 +148,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	err = blstate.Database().TrieDB().Commit(header.Root, true)
 	assert.Empty(t, err)
-	blstate, err = state.New(header.Root, stdb)
+	blstate, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
 	evm = engine.createEVM(msg, chain, header, blstate)
 
@@ -211,7 +209,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	err = blstate.Database().TrieDB().Commit(header.Root, true)
 	assert.Empty(t, err)
-	blstate, err = state.New(header.Root, stdb)
+	blstate, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
 	evm = engine.createEVM(msg, chain, header, blstate)
 
@@ -270,7 +268,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	err = blstate.Database().TrieDB().Commit(header.Root, true)
 	assert.Empty(t, err)
-	blstate, err = state.New(header.Root, stdb)
+	blstate, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
 	evm = engine.createEVM(msg, chain, header, blstate)
 

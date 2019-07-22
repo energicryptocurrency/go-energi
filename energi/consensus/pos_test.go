@@ -25,7 +25,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	eth_consensus "github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -124,9 +123,6 @@ func TestPoSChain(t *testing.T) {
 
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
-		stdb, err := chain.GetStateDB()
-		blstate, err := state.New(parent.Root, stdb)
-		assert.Empty(t, err)
 
 		//---
 		header = &types.Header{
@@ -136,6 +132,9 @@ func TestPoSChain(t *testing.T) {
 			Number:     number,
 			Time:       parent.Time,
 		}
+		blstate := chain.CalculateBlockState(header.ParentHash, parent.Number.Uint64())
+		assert.NotEmpty(t, blstate)
+
 		err = engine.Prepare(chain, header)
 		assert.Empty(t, err)
 		assert.NotEmpty(t, header.Difficulty)

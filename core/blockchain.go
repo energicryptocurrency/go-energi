@@ -1207,6 +1207,15 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		}
 		// Falls through to the block import
 
+	// We are unable to process the block due to missing previous state.
+	// Most likely, it got pruned. It is not bad block case.
+	//
+	// TODO: schedule retrieval of missing pieces and re-try only if
+	//       the current head is stalled.
+	case err == consensus.ErrMissingState:
+		stats.ignored += len(it.chain)
+		return it.index, events, coalescedLogs, err
+
 	// Some other error occurred, abort
 	case err != nil:
 		stats.ignored += len(it.chain)
@@ -1781,6 +1790,23 @@ func (bc *BlockChain) SubscribeLogsEvent(ch chan<- []*types.Log) event.Subscript
 	return bc.scope.Track(bc.logsFeed.Subscribe(ch))
 }
 
-func (bc *BlockChain) GetStateDB() (state.Database, error) {
-	return bc.stateCache, nil
+// Retrieve or calculate block state based on available reference points
+func (bc *BlockChain) CalculateBlockState(
+	hash common.Hash,
+	number uint64,
+) *state.StateDB {
+	block := bc.GetBlock(hash, number)
+
+	if block == nil {
+		return nil
+	}
+
+	state, err := state.New(block.Root(), bc.stateCache)
+
+	if err != nil {
+		log.Debug("CalculateBlockState", "err", err)
+		return nil
+	}
+
+	return state
 }
