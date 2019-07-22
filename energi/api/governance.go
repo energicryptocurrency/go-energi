@@ -100,7 +100,9 @@ func (g *GovernanceAPI) VoteAccept(
 
 	tx, err := contract.VoteAccept()
 
-	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -118,7 +120,9 @@ func (g *GovernanceAPI) VoteReject(
 
 	tx, err := contract.VoteReject()
 
-	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -142,7 +146,9 @@ func (g *GovernanceAPI) WithdrawFee(
 
 	tx, err := contract.Withdraw()
 
-	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -378,7 +384,9 @@ func (g *GovernanceAPI) UpgradePropose(
 	session.TransactOpts.Value = fee.ToInt()
 	tx, err := session.ProposeUpgrade(new_impl, new(big.Int).SetUint64(period))
 
-	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -397,7 +405,9 @@ func (g *GovernanceAPI) UpgradePerform(
 
 	tx, err := session.Upgrade(proposal)
 
-	log.Info("Note: please wait until upgrade TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until upgrade TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -416,7 +426,9 @@ func (g *GovernanceAPI) UpgradeCollect(
 
 	tx, err := session.CollectUpgradeProposal(proposal)
 
-	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -568,7 +580,9 @@ func (g *GovernanceAPI) BudgetPropose(
 		new(big.Int).SetBytes(ref_uuid_b),
 		new(big.Int).SetUint64(period))
 
-	log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }

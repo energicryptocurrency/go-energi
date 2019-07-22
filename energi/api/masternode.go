@@ -133,7 +133,9 @@ func (m *MasternodeAPI) DepositCollateral(
 	token.TransactOpts.Value = amount.ToInt()
 	tx, err := token.DepositCollateral()
 
-	log.Info("Note: please wait until collateral TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until collateral TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -150,7 +152,9 @@ func (m *MasternodeAPI) WithdrawCollateral(
 
 	tx, err := token.WithdrawCollateral(amount.ToInt())
 
-	log.Info("Note: please wait until collateral TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		log.Info("Note: please wait until collateral TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -374,7 +378,10 @@ func (m *MasternodeAPI) Announce(owner common.Address, enode_url, password strin
 
 	//---
 	tx, err := registry.Announce(masternode, ipv4address, pubkey)
-	log.Info("Note: please wait until TX gets into a block!", "tx", tx.Hash())
+
+	if tx != nil {
+		log.Info("Note: please wait until TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
@@ -392,7 +399,10 @@ func (m *MasternodeAPI) Denounce(owner common.Address, password string) (err err
 	}
 
 	tx, err := registry.Denounce(ownerinfo.Masternode)
-	log.Info("Note: please wait until TX gets into a block!", "tx", tx.Hash())
+
+	if tx != nil {
+		log.Info("Note: please wait until TX gets into a block!", "tx", tx.Hash())
+	}
 
 	return err
 }
