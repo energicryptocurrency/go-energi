@@ -101,7 +101,7 @@ func (g *GovernanceAPI) VoteAccept(
 	tx, err := contract.VoteAccept()
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -121,7 +121,7 @@ func (g *GovernanceAPI) VoteReject(
 	tx, err := contract.VoteReject()
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -147,7 +147,7 @@ func (g *GovernanceAPI) WithdrawFee(
 	tx, err := contract.Withdraw()
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -389,7 +389,7 @@ func (g *GovernanceAPI) UpgradePropose(
 	tx, err := session.ProposeUpgrade(new_impl, new(big.Int).SetUint64(period))
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -410,7 +410,7 @@ func (g *GovernanceAPI) UpgradePerform(
 	tx, err := session.Upgrade(proposal)
 
 	if tx != nil {
-		log.Info("Note: please wait until upgrade TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until upgrade TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -431,7 +431,7 @@ func (g *GovernanceAPI) UpgradeCollect(
 	tx, err := session.CollectUpgradeProposal(proposal)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -585,7 +585,7 @@ func (g *GovernanceAPI) BudgetPropose(
 		new(big.Int).SetUint64(period))
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err

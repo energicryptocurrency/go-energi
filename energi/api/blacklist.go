@@ -142,7 +142,7 @@ func (b *BlacklistAPI) BlacklistEnforce(
 	tx, err := registry.Propose(address)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -171,7 +171,7 @@ func (b *BlacklistAPI) BlacklistRevoke(
 	tx, err := registry.ProposeRevoke(address)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -200,7 +200,7 @@ func (b *BlacklistAPI) BlacklistDrain(
 	tx, err := registry.ProposeDrain(address)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
@@ -219,7 +219,7 @@ func (b *BlacklistAPI) BlacklistCollect(
 	tx, err := registry.Collect(target)
 
 	if tx != nil {
-		log.Info("Note: please wait until collect TX gets into a block!", "tx", tx.Hash())
+		log.Info("Note: please wait until collect TX gets into a block!", "tx", tx.Hash().Hex())
 	}
 
 	return err
