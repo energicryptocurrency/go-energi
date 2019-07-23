@@ -229,15 +229,18 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		return eth_consensus.ErrInvalidNumber
 	}
 
-	// Verify the engine specific seal securing the block
-	err = e.VerifySeal(chain, header)
-	if err != nil {
-		return err
-	}
+	// We skip checks only where full previous meturity period state is required.
+	if seal {
+		// Verify the engine specific seal securing the block
+		err = e.VerifySeal(chain, header)
+		if err != nil {
+			return err
+		}
 
-	err = e.verifyPoSHash(chain, header)
-	if err != nil {
-		return err
+		err = e.verifyPoSHash(chain, header)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {

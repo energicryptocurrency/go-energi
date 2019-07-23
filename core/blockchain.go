@@ -64,14 +64,17 @@ const (
 	maxFutureBlocks     = 256
 	maxTimeFutureBlocks = 30
 	badBlockLimit       = 10
-	triesInMemory       = 128
+	triesInMemory       = 160
 
 	// BlockChainVersion ensures that an incompatible database forces a resync from scratch.
 	BlockChainVersion uint64 = 3
 )
 
 func init() {
-	if triesInMemory < ((energi_params.MaturityPeriod / energi_params.MinBlockGap) + 1) {
+	max_maturity_blocks := ((energi_params.MaturityPeriod / energi_params.MinBlockGap) + 1)
+	max_fork_blocks := ((energi_params.OldForkPeriod / energi_params.MinBlockGap) + 1)
+
+	if triesInMemory < (max_maturity_blocks + max_fork_blocks) {
 		panic("More Tries in memory is required!")
 	}
 }
@@ -83,6 +86,7 @@ type CacheConfig struct {
 	TrieCleanLimit int           // Memory allowance (MB) to use for caching trie nodes in memory
 	TrieDirtyLimit int           // Memory limit (MB) at which to start flushing dirty trie nodes to disk
 	TrieTimeLimit  time.Duration // Time limit after which to flush the current in-memory trie to disk
+	TrieRapidLimit time.Duration // Similar to TrieTimeLimit, but for Engine with history requirements
 }
 
 // BlockChain represents the canonical chain given a database with a genesis
@@ -155,6 +159,7 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *par
 			TrieCleanLimit: 256,
 			TrieDirtyLimit: 256,
 			TrieTimeLimit:  5 * time.Minute,
+			TrieRapidLimit: 10 * time.Second,
 		}
 	}
 	bodyCache, _ := lru.New(bodyCacheLimit)
@@ -707,33 +712,6 @@ func (bc *BlockChain) Stop() {
 
 	bc.wg.Wait()
 
-	/**
-	 * Energi PoS requires lookup of at least the recent 1 hour, not to mention possible
-	 * reorganizations.
-	 */
-	if bc.chainConfig.Energi != nil {
-		triedb := bc.stateCache.TrieDB()
-		recent := bc.CurrentBlock()
-		threshold := uint64(time.Now().Unix()) - energi_params.MaturityPeriod
-
-		for (recent.NumberU64() > 0) && (recent.Time() > threshold) {
-			log.Info("Writing cached state to disk", "block",
-				recent.Number(), "hash", recent.Hash(), "root", recent.Root())
-			if err := triedb.Commit(recent.Root(), true); err != nil {
-				log.Error("Failed to commit recent state trie", "err", err)
-			}
-
-			recent = bc.GetBlockByNumber(recent.NumberU64() - 1)
-		}
-
-		for !bc.triegc.Empty() {
-			triedb.Dereference(bc.triegc.PopItem().(common.Hash))
-		}
-		if size, _ := triedb.Size(); size != 0 {
-			log.Error("Dangling trie nodes after full cleanup")
-		}
-	} else
-
 	// Ensure the state of a recent block is also stored to disk before exiting.
 	// We're writing three different states to catch different restart scenarios:
 	//  - HEAD:     So we don't need to reprocess any blocks in the general case
@@ -1027,7 +1005,21 @@ func (bc *BlockChain) WriteBlockWithState(block *types.Block, receipts []*types.
 					lastWrite = chosen
 					bc.gcproc = 0
 				}
+			} else if bc.chainConfig.Energi != nil && bc.gcproc > bc.cacheConfig.TrieRapidLimit {
+				// Energi requires state for PoS verification,
+				// so ensure more often commit for faster recreation.
+
+				header := bc.GetHeaderByNumber(chosen)
+				if header == nil {
+					log.Warn("Reorg in progress, trie commit postponed", "number", chosen)
+				} else {
+					// Flush an entire trie and restart the counters
+					triedb.Commit(header.Root, true)
+					lastWrite = chosen
+					bc.gcproc = 0
+				}
 			}
+
 			// Garbage collect anything below our required write retention
 			for !bc.triegc.Empty() {
 				root, number := bc.triegc.Pop()
@@ -1795,18 +1787,96 @@ func (bc *BlockChain) CalculateBlockState(
 	hash common.Hash,
 	number uint64,
 ) *state.StateDB {
-	block := bc.GetBlock(hash, number)
+	header := bc.GetHeader(hash, number)
 
-	if block == nil {
+	if header == nil {
 		return nil
 	}
 
-	state, err := state.New(block.Root(), bc.stateCache)
+	statedb, err := state.New(header.Root, bc.stateCache)
 
-	if err != nil {
-		log.Debug("CalculateBlockState", "err", err)
+	// Fast exit
+	if err == nil {
+		return statedb
+	}
+
+	hh_stack := make([]common.Hash, 1, triesInMemory)
+	hh_stack[0] = hash
+
+	// Find the base header with state
+	for {
+		hh_stack = append(hh_stack, header.ParentHash)
+
+		header = bc.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+		if header == nil {
+			log.Error("Failed to find ancestor with state", "block", hash)
+			return nil
+		}
+
+		statedb, err = state.New(header.Root, bc.stateCache)
+		if err == nil {
+			break
+		}
+		if len(hh_stack) == triesInMemory {
+			log.Warn("Ancestor with state is too far! Out-of-memory is possible.")
+		}
+	}
+
+	tmp_hash := &hh_stack[len(hh_stack)-1]
+	parent := bc.GetBlockByHash(*tmp_hash)
+	if parent == nil {
+		log.Error("Failed to read parent", "parent", *tmp_hash)
 		return nil
 	}
 
-	return state
+	log.Info("Re-creating historical state",
+		"block", hash, "number", number,
+		"len", len(hh_stack))
+
+	// re-create state
+	for i := len(hh_stack) - 2; i >= 0; i-- {
+		tmp_hash = &hh_stack[i]
+		block := bc.GetBlockByHash(*tmp_hash)
+		if block == nil {
+			log.Error("Failed to read block", "block", *tmp_hash)
+			return nil
+		}
+
+		receipts, _, usedGas, err := bc.processor.Process(block, statedb, bc.vmConfig)
+		if err != nil {
+			log.Error("Failed to re-process block", "block", *tmp_hash, "err", err)
+			return nil
+		}
+
+		err = bc.Validator().ValidateState(block, parent, statedb, receipts, usedGas)
+		if err != nil {
+			log.Error("Failed to re-validate block", "block", *tmp_hash, "err", err)
+			return nil
+		}
+
+		root, err := statedb.Commit(bc.chainConfig.IsEIP158(block.Number()))
+		if err != nil {
+			log.Error("Failed to commit state", "block", *tmp_hash, "err", err)
+			return nil
+		}
+
+		// Help subsequent calls to avoid recalculation.
+		// It may grow dramatically, but triedb GC is anticipated at some point.
+		if i < triesInMemory {
+			bc.stateCache.TrieDB().Reference(root, common.Hash{})
+			bc.triegc.Push(root, -int64(block.NumberU64()))
+		} else if i == (triesInMemory + 1) {
+			// This should be a dead code, if periodic save is working properly
+			err = bc.stateCache.TrieDB().Commit(root, false)
+			if err != nil {
+				log.Error("Failed to commit trie", "block", *tmp_hash, "err", err)
+				return nil
+			}
+		}
+
+		statedb = statedb.Copy()
+		parent = block
+	}
+
+	return statedb
 }

@@ -1498,6 +1498,7 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		TrieCleanLimit: eth.DefaultConfig.TrieCleanCache,
 		TrieDirtyLimit: eth.DefaultConfig.TrieDirtyCache,
 		TrieTimeLimit:  eth.DefaultConfig.TrieTimeout,
+		TrieRapidLimit: eth.DefaultConfig.TrieRapidTime,
 	}
 	if ctx.GlobalIsSet(CacheFlag.Name) || ctx.GlobalIsSet(CacheTrieFlag.Name) {
 		cache.TrieCleanLimit = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheTrieFlag.Name) / 100
