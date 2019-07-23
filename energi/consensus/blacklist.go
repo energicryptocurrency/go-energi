@@ -65,20 +65,28 @@ func (e *Energi) processBlacklists(
 		return err
 	}
 
-	log.Trace("Blacklist address list", "address_list", address_list)
+	log.Debug("Address blacklist", "address_list", address_list)
 	empty_addr := common.Address{}
 	state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Blacklist)
 	db := statedb.Database()
 	value := common.BytesToHash([]byte{0x01})
+	keep := make(state.KeepStorage, len(*address_list))
 
 	for _, addr := range *address_list {
 		if addr != empty_addr {
+			addr_hash := addr.Hash()
+
+			if (state_obj.GetState(db, addr_hash) == common.Hash{}) {
+				log.Debug("New blacklisted account", "addr", addr)
+			}
+
 			log.Trace("Blacklisting account", "addr", addr)
-			state_obj.SetState(db, addr.Hash(), value)
+			state_obj.SetState(db, addr_hash, value)
+			keep[addr_hash] = true
 		}
 	}
 
-	state_obj.CleanupUntouched()
+	state_obj.CleanupStorage(&keep)
 
 	return nil
 }
@@ -128,7 +136,7 @@ func (e *Energi) processDrainable(
 		return err
 	}
 
-	log.Trace("Drain address list", "address_list", address_list)
+	log.Debug("Address drain list", "address_list", address_list)
 
 	// 2. Get current compensation fund address
 	if len(*address_list) > 0 {

@@ -135,7 +135,7 @@ func TestBlacklist(t *testing.T) {
 	evm = engine.createEVM(msg, chain, header, blstate)
 	//---
 
-	// Test: no change
+	log.Info("Test: no change")
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
@@ -152,7 +152,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	evm = engine.createEVM(msg, chain, header, blstate)
 
-	// Test: blacklist
+	log.Info("Test: blacklist")
 	blacklist_abi, _ := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
 	callData, err = blacklist_abi.Pack("propose", blacklist_addr1)
 	assert.Empty(t, err)
@@ -211,9 +211,25 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	blstate, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
-	evm = engine.createEVM(msg, chain, header, blstate)
 
-	// Test: drain
+	log.Info("Test Bug: in cleanup untouched when just referenced")
+	blstate.AddBalance(owner_addr, common.Big1)
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	header.Root, err = blstate.Commit(true)
+	assert.Empty(t, err)
+	blstate.Database().TrieDB().Reference(header.Root, common.Hash{})
+
+	blstate, err = chain.StateAt(header.Root)
+	assert.Empty(t, err)
+	err = engine.processBlacklists(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	blstate.Database().TrieDB().Dereference(header.Root)
+
+	log.Info("Test: drain")
+	evm = engine.createEVM(msg, chain, header, blstate)
 	callData, err = blacklist_abi.Pack("proposeDrain", blacklist_addr1)
 	assert.Empty(t, err)
 	fee = new(big.Int).Mul(big.NewInt(100), big.NewInt(1e18))
@@ -258,7 +274,7 @@ func TestBlacklist(t *testing.T) {
 
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
@@ -272,7 +288,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	evm = engine.createEVM(msg, chain, header, blstate)
 
-	// Test: no change
+	log.Info("Test: no change")
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
