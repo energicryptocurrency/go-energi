@@ -132,20 +132,21 @@ func (b *BlacklistAPI) BlacklistEnforce(
 	fee *hexutil.Big,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {
-		return err
+		return
 	}
 
 	registry.TransactOpts.Value = fee.ToInt()
 	tx, err := registry.Propose(address)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 func (b *BlacklistAPI) BlacklistRevoke(
@@ -153,28 +154,30 @@ func (b *BlacklistAPI) BlacklistRevoke(
 	fee *hexutil.Big,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {
-		return err
+		return
 	}
 
 	is_blacklisted, err := registry.IsBlacklisted(address)
 	if err != nil {
-		return err
+		return
 	}
 	if !is_blacklisted {
-		return errors.New("Not blocklisted")
+		err = errors.New("Not blocklisted")
+		return
 	}
 
 	registry.TransactOpts.Value = fee.ToInt()
 	tx, err := registry.ProposeRevoke(address)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 func (b *BlacklistAPI) BlacklistDrain(
@@ -182,45 +185,48 @@ func (b *BlacklistAPI) BlacklistDrain(
 	fee *hexutil.Big,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {
-		return err
+		return
 	}
 
 	is_blacklisted, err := registry.IsBlacklisted(address)
 	if err != nil {
-		return err
+		return
 	}
 	if !is_blacklisted {
-		return errors.New("Not blocklisted")
+		err = errors.New("Not blocklisted")
+		return
 	}
 
 	registry.TransactOpts.Value = fee.ToInt()
 	tx, err := registry.ProposeDrain(address)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 func (b *BlacklistAPI) BlacklistCollect(
 	target common.Address,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {
-		return err
+		return
 	}
 
 	tx, err := registry.Collect(target)
 
 	if tx != nil {
-		log.Info("Note: please wait until collect TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the collect TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }

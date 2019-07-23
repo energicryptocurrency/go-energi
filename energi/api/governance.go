@@ -91,66 +91,69 @@ func (g *GovernanceAPI) VoteAccept(
 	proposal common.Address,
 	mn_owner common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	contract, err := g.proposal(password, mn_owner, proposal)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	tx, err := contract.VoteAccept()
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 func (g *GovernanceAPI) VoteReject(
 	proposal common.Address,
 	mn_owner common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	contract, err := g.proposal(password, mn_owner, proposal)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	tx, err := contract.VoteReject()
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 func (g *GovernanceAPI) WithdrawFee(
 	proposal common.Address,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	contract, err := g.proposal(password, payer, proposal)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	if res, _ := contract.IsAccepted(); !res {
 		err = errors.New("The proposal is not accepted!")
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	tx, err := contract.Withdraw()
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 //=============================================================================
@@ -378,21 +381,22 @@ func (g *GovernanceAPI) UpgradePropose(
 	fee *hexutil.Big,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	session, err := g.governedProxy(password, payer, proxy)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	session.TransactOpts.Value = fee.ToInt()
 	tx, err := session.ProposeUpgrade(new_impl, new(big.Int).SetUint64(period))
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 func (g *GovernanceAPI) UpgradePerform(
@@ -400,20 +404,21 @@ func (g *GovernanceAPI) UpgradePerform(
 	proposal common.Address,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	session, err := g.governedProxy(password, payer, proxy)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	tx, err := session.Upgrade(proposal)
 
 	if tx != nil {
-		log.Info("Note: please wait until upgrade TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the upgrade TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 func (g *GovernanceAPI) UpgradeCollect(
@@ -421,20 +426,21 @@ func (g *GovernanceAPI) UpgradeCollect(
 	proposal common.Address,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	session, err := g.governedProxy(password, payer, proxy)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	tx, err := session.CollectUpgradeProposal(proposal)
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
 
 //=============================================================================
@@ -564,18 +570,18 @@ func (g *GovernanceAPI) BudgetPropose(
 	fee *hexutil.Big,
 	payer common.Address,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	session, err := g.treasury(password, payer)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	ref_uuid_b := uuid.Parse(ref_uuid)
 	if ref_uuid_b == nil {
 		err = errors.New("Failed to parse UUID")
 		log.Error("Failed", "err", err)
-		return err
+		return
 	}
 
 	session.TransactOpts.Value = fee.ToInt()
@@ -585,8 +591,9 @@ func (g *GovernanceAPI) BudgetPropose(
 		new(big.Int).SetUint64(period))
 
 	if tx != nil {
-		log.Info("Note: please wait until proposal TX gets into a block!", "tx", tx.Hash().Hex())
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
 
-	return err
+	return
 }
