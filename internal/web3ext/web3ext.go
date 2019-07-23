@@ -179,8 +179,8 @@ web3._extend({
 					res.push({
 						target:  item.Target,
 						enforce: proposalf(item.Enforce),
-						revoke:  proposalf(item.Revoke),
-						drain:   proposalf(item.Drain),
+						revoke:  item.Revoke && proposalf(item.Revoke),
+						drain:   item.Drain && proposalf(item.Drain),
 						blocked: item.Blocked,
 					});
 				}

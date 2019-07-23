@@ -185,6 +185,10 @@ func getBalance(backend Backend, address common.Address) *hexutil.Big {
 }
 
 func proposalInfo(backend Backend, address common.Address) *ProposalInfo {
+	if (address == common.Address{}) {
+		return nil
+	}
+
 	proposal, err := energi_abi.NewIProposalCaller(
 		address, backend.(bind.ContractCaller))
 	if err != nil {

@@ -36,7 +36,7 @@ func NewBlacklistAPI(b Backend) *BlacklistAPI {
 }
 
 const (
-	blacklistCallGas uint64 = 500000
+	blacklistCallGas uint64 = 3000000
 )
 
 func (b *BlacklistAPI) registry(
