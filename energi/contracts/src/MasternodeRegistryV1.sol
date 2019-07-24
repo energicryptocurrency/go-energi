@@ -299,12 +299,37 @@ contract MasternodeRegistryV1 is
     function _announce_check_ipv4(uint32 ipv4address) internal pure {
         uint a = ipv4address & 0xFF000000;
         uint b = ipv4address & 0x00FF0000;
+        uint c = ipv4address & 0x0000FF00;
+        // solium-disable operator-whitespace
         require(
+            // 127.0.0.0/8
             (a != (127 << 24)) &&
+            // 10.0.0.0/8
             (a != (10 << 24)) &&
+            // 192.168.0.0/16
             !((a == (192 << 24)) && (b == (168 << 16))) &&
-            !((a == (172 << 24)) && ((b & 0x00F00000) == (16 << 16))),
+            // 172.16.0.0/12
+            !((a == (172 << 24)) && ((b & 0x00F00000) == (16 << 16))) &&
+            // 0.0.0.0/8
+            (a != 0) &&
+            // 100.64.0.0/10
+            !((a == (100 << 24)) && ((b & 0x00C00000) == (64 << 16))) &&
+            // 169.254.0.0/16
+            !((a == (169 << 24)) && (b == (254 << 16))) &&
+            // 198.18.0.0/15
+            !((a == (198 << 24)) && ((b & 0x00FE0000) == (18 << 16))) &&
+            // 198.51.100.0/24
+            !((a == (198 << 24)) && (b == (51 << 16)) && (c == (100 << 8))) &&
+            // 203.0.113.0/24
+            !((a == (203 << 24)) && (b == (0 << 16)) && (c == (113 << 8))) &&
+            // 224.0.0.0/4
+            ((a & 0xF0000000) != (224 << 24)) &&
+            // 240.0.0.0/4
+            ((a & 0xF0000000) != (240 << 24)) &&
+            // 255.255.255.255/32
+            (ipv4address != 0xFFFFFFFF),
             "Wrong IP");
+        // solium-enable operator-whitespace
     }
 
     function _announce_insert(StorageMasternodeRegistryV1 mn_storage, address masternode)

@@ -290,43 +290,35 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(0);
             });
 
-            it('should refuse announce() local IPs', async () => {
-                try {
-                    await s.token_abi.announce(
-                        masternode1, 0x7F000001, enode1, { from: owner1 });
-                    assert.fail('It should fail');
-                } catch (e) {
-                    assert.match(e.message, /Wrong IP/);
-                }
-                try {
-                    await s.token_abi.announce(
-                        masternode1, 0x0A000001, enode1, { from: owner1 });
-                    assert.fail('It should fail');
-                } catch (e) {
-                    assert.match(e.message, /Wrong IP/);
-                }
-                try {
-                    await s.token_abi.announce(
-                        masternode1, 0xC0A80001, enode1, { from: owner1 });
-                    assert.fail('It should fail');
-                } catch (e) {
-                    assert.match(e.message, /Wrong IP/);
-                }
-                try {
-                    await s.token_abi.announce(
-                        masternode1, 0xAC100001, enode1, { from: owner1 });
-                    assert.fail('It should fail');
-                } catch (e) {
-                    assert.match(e.message, /Wrong IP/);
-                }
-                try {
-                    await s.token_abi.announce(
-                        masternode1, 0xAC1F0001, enode1, { from: owner1 });
-                    assert.fail('It should fail');
-                } catch (e) {
-                    assert.match(e.message, /Wrong IP/);
-                }
-            });
+            const non_routables = {
+                '127.0.0.0/8' : [ 0x7F000001, 0x7FFFFFFF ],
+                '10.0.0.0/8' : [ 0x0A000001, 0x0AFFFFFF ],
+                '172.16.0.0/12' : [ 0xAC100001, 0xAC108001 ],
+                '192.168.0.0/16' : [ 0xC0A80001, 0xC0A88001 ],
+                '0.0.0.0/8' : [ 0x00123456 ],
+                '100.64.0.0/10' : [ 0x64400001, 0x64480001 ],
+                '169.254.0.0/16' : [ 0xA9FE0001, 0xA9FEFFFF ],
+                '198.18.0.0/15' : [ 0xC6120001, 0xC613FFFF ],
+                '198.51.100.0/24' : [ 0xC6336401, 0xC63364FF ],
+                '203.0.113.0/24' : [ 0xCB007101, 0xCB0071FE ],
+                '224.0.0.0/4' : [ 0xE0000001, 0xE80FF001 ],
+                '240.0.0.0/4' : [ 0xF0000001, 0xF800FFFF ],
+                '255.255.255.255/32' : [ 0xFFFFFFFF ],
+            };
+
+            for (let k in non_routables) {
+                it(`should refuse announce() non-routable IPs: ${k}`, async () => {
+                    for (let ip of non_routables[k]) {
+                        try {
+                            await s.token_abi.announce(
+                                masternode1, ip, enode1, { from: owner1 });
+                            assert.fail('It should fail');
+                        } catch (e) {
+                            assert.match(e.message, /Wrong IP/);
+                        }
+                    }
+                });
+            }
 
             it('should announce()', async () => {
                 const res = await s.mntoken_abi.balanceInfo(owner1);
