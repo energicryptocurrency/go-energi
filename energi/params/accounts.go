@@ -34,6 +34,7 @@ var (
 	Energi_MasternodeToken    = common.BigToAddress(big.NewInt(0x309))
 	Energi_Blacklist          = common.BigToAddress(big.NewInt(0x30A))
 	Energi_Whitelist          = common.BigToAddress(big.NewInt(0x30B))
+	Energi_MasternodeList     = common.BigToAddress(big.NewInt(0x30C))
 	Energi_SystemFaucet       = common.BigToAddress(big.NewInt(0x310))
 
 	Energi_TreasuryV1           = common.BigToAddress(big.NewInt(0x311))
