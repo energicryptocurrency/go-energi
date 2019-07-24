@@ -89,6 +89,23 @@ func (e *Energi) processBlacklists(
 
 	state_obj.CleanupStorage(keep)
 
+	//
+	wl_state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Whitelist)
+	wl_keep := make(state.KeepStorage, len(whitelist))
+	for addr := range whitelist {
+		addr_hash := addr.Hash()
+
+		if (wl_state_obj.GetState(db, addr_hash) == common.Hash{}) {
+			log.Debug("New whitelisted account", "addr", addr)
+		}
+
+		log.Trace("Whitelisting account", "addr", addr)
+		wl_state_obj.SetState(db, addr_hash, value)
+		wl_keep[addr_hash] = true
+	}
+
+	wl_state_obj.CleanupStorage(wl_keep)
+
 	return nil
 }
 

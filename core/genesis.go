@@ -647,6 +647,13 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_abi.DummyAccountABI,
 		energi_abi.DummyAccountBin,
 	)
+	deployEnergiContract(
+		&xfers,
+		energi_params.Energi_Whitelist,
+		nil,
+		energi_abi.DummyAccountABI,
+		energi_abi.DummyAccountBin,
+	)
 
 	// Proxy List
 	proxies := map[common.Address]common.Address{
