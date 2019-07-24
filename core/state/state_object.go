@@ -388,14 +388,14 @@ func (self *stateObject) Value() *big.Int {
 // Cleanup storage entries
 type KeepStorage map[common.Hash]bool
 
-func (self *stateObject) CleanupStorage(keep *KeepStorage) {
+func (self *stateObject) CleanupStorage(keep KeepStorage) {
 	db := self.db.Database()
 	tr := self.getTrie(db)
 	storageIt := trie.NewIterator(tr.NodeIterator(nil))
 	log.Trace("storageIt", "storageIt", storageIt, "dirtyStorage", self.dirtyStorage)
 	for storageIt.Next() {
 		k := common.BytesToHash(tr.GetKey(storageIt.Key))
-		if _, ok := (*keep)[k]; !ok {
+		if _, ok := keep[k]; !ok {
 			self.SetState(db, k, common.Hash{})
 		}
 	}

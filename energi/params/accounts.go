@@ -44,4 +44,7 @@ var (
 	Energi_BlacklistRegistryV1  = common.BigToAddress(big.NewInt(0x317))
 	Energi_CompensationFundV1   = common.BigToAddress(big.NewInt(0x318))
 	Energi_MasternodeTokenV1    = common.BigToAddress(big.NewInt(0x319))
+
+	// NOTE: this is NOT very safe, but it optimizes significantly
+	Storage_ProxyImpl = common.BigToHash(big.NewInt(0x01))
 )

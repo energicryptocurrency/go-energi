@@ -135,11 +135,12 @@ func TestBlacklist(t *testing.T) {
 	evm = engine.createEVM(msg, chain, header, blstate)
 	//---
 
+	//====================================
 	log.Info("Test: no change")
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), amt.String())
@@ -152,6 +153,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	evm = engine.createEVM(msg, chain, header, blstate)
 
+	//====================================
 	log.Info("Test: blacklist")
 	blacklist_abi, _ := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
 	callData, err = blacklist_abi.Pack("propose", blacklist_addr1)
@@ -199,8 +201,9 @@ func TestBlacklist(t *testing.T) {
 
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
-	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), amt.String())
@@ -214,8 +217,9 @@ func TestBlacklist(t *testing.T) {
 
 	log.Info("Test Bug: in cleanup untouched when just referenced")
 	blstate.AddBalance(owner_addr, common.Big1)
-	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	header.Root, err = blstate.Commit(true)
 	assert.Empty(t, err)
 	blstate.Database().TrieDB().Reference(header.Root, common.Hash{})
@@ -224,10 +228,12 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
-	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	blstate.Database().TrieDB().Dereference(header.Root)
 
+	//====================================
 	log.Info("Test: drain")
 	evm = engine.createEVM(msg, chain, header, blstate)
 	callData, err = blacklist_abi.Pack("proposeDrain", blacklist_addr1)
@@ -274,8 +280,9 @@ func TestBlacklist(t *testing.T) {
 
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
-	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())
@@ -288,13 +295,119 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	evm = engine.createEVM(msg, chain, header, blstate)
 
+	//====================================
 	log.Info("Test: no change")
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
-	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big0))
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	err = engine.processDrainable(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())
 	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+
+	//====================================
+	log.Info("Test: whitelist")
+	callData, err = blacklist_abi.Pack("propose", energi_params.Energi_TreasuryV1)
+	assert.Empty(t, err)
+	fee = new(big.Int).Mul(big.NewInt(1000), big.NewInt(1e18))
+	blstate.SetBalance(owner_addr, fee)
+	msg = types.NewMessage(
+		owner_addr,
+		&energi_params.Energi_BlacklistRegistry,
+		0,
+		fee,
+		engine.xferGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.xferGas)
+	log.Trace("propose")
+	output, _, failed, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, failed)
+
+	err = blacklist_abi.Unpack(&enforce_address, "propose", output)
+	assert.Empty(t, err)
+
+	callData, err = proposal_abi.Pack("voteAccept")
+	assert.Empty(t, err)
+	msg = types.NewMessage(
+		owner_addr,
+		&enforce_address,
+		0,
+		common.Big0,
+		engine.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.callGas)
+	log.Trace("voteAccept")
+	output, _, _, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, output)
+
+	evm = engine.createEVM(msg, chain, header, blstate)
+	callData, err = blacklist_abi.Pack("proposeDrain", energi_params.Energi_TreasuryV1)
+	assert.Empty(t, err)
+	fee = new(big.Int).Mul(big.NewInt(100), big.NewInt(1e18))
+	blstate.SetBalance(owner_addr, fee)
+	msg = types.NewMessage(
+		owner_addr,
+		&energi_params.Energi_BlacklistRegistry,
+		0,
+		fee,
+		engine.xferGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.xferGas)
+	log.Trace("proposeDrain")
+	output, _, failed, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, failed)
+
+	err = blacklist_abi.Unpack(&drain_address, "proposeDrain", output)
+	assert.Empty(t, err)
+
+	callData, err = proposal_abi.Pack("voteAccept")
+	assert.Empty(t, err)
+	msg = types.NewMessage(
+		owner_addr,
+		&drain_address,
+		0,
+		common.Big0,
+		engine.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+	gp.AddGas(engine.callGas)
+	log.Trace("voteAccept")
+	output, _, _, err = core.ApplyMessage(evm, msg, gp)
+	assert.Empty(t, err)
+	assert.Empty(t, output)
+
+	blstate.AddBalance(energi_params.Energi_TreasuryV1, amt)
+
+	err = engine.processBlacklists(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
+	assert.True(t, core.CanTransfer(blstate, energi_params.Energi_TreasuryV1, common.Big1))
+	err = engine.processDrainable(chain, header, blstate)
+	assert.Empty(t, err)
+	assert.Equal(t, blstate.GetBalance(blacklist_addr1).String(), common.Big0.String())
+	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
+	// NOTE: whitelisted addresses must not be drainable!
+	assert.NotEqual(t, blstate.GetBalance(energi_params.Energi_TreasuryV1).String(), common.Big0.String())
+	header.Root, err = blstate.Commit(true)
+	assert.Empty(t, err)
+	err = blstate.Database().TrieDB().Commit(header.Root, true)
+	assert.Empty(t, err)
+	blstate, err = chain.StateAt(header.Root)
+	assert.Empty(t, err)
 }
