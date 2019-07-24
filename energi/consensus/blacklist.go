@@ -65,22 +65,84 @@ func (e *Energi) processBlacklists(
 		return err
 	}
 
-	log.Trace("Blacklist address list", "address_list", address_list)
+	log.Debug("Address blacklist", "address_list", address_list)
 	empty_addr := common.Address{}
 	state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Blacklist)
 	db := statedb.Database()
 	value := common.BytesToHash([]byte{0x01})
+	keep := make(state.KeepStorage, len(*address_list))
+	whitelist := e.createWhitelist(statedb)
 
 	for _, addr := range *address_list {
-		if addr != empty_addr {
+		if addr != empty_addr && !whitelist[addr] {
+			addr_hash := addr.Hash()
+
+			if (state_obj.GetState(db, addr_hash) == common.Hash{}) {
+				log.Debug("New blacklisted account", "addr", addr)
+			}
+
 			log.Trace("Blacklisting account", "addr", addr)
-			state_obj.SetState(db, addr.Hash(), value)
+			state_obj.SetState(db, addr_hash, value)
+			keep[addr_hash] = true
 		}
 	}
 
-	state_obj.CleanupUntouched()
+	state_obj.CleanupStorage(keep)
+
+	//
+	wl_state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Whitelist)
+	wl_keep := make(state.KeepStorage, len(whitelist))
+	for addr := range whitelist {
+		addr_hash := addr.Hash()
+
+		if (wl_state_obj.GetState(db, addr_hash) == common.Hash{}) {
+			log.Debug("New whitelisted account", "addr", addr)
+		}
+
+		log.Trace("Whitelisting account", "addr", addr)
+		wl_state_obj.SetState(db, addr_hash, value)
+		wl_keep[addr_hash] = true
+	}
+
+	wl_state_obj.CleanupStorage(wl_keep)
 
 	return nil
+}
+
+var (
+	consensusProxies = []common.Address{
+		energi_params.Energi_Treasury,
+		energi_params.Energi_MasternodeRegistry,
+		energi_params.Energi_StakerReward,
+		energi_params.Energi_BackboneReward,
+		energi_params.Energi_SporkRegistry,
+		energi_params.Energi_CheckpointRegistry,
+		energi_params.Energi_BlacklistRegistry,
+		energi_params.Energi_MasternodeToken,
+	}
+
+	consensusStandalone = []common.Address{
+		energi_params.Energi_MigrationContract,
+		energi_params.Energi_SystemFaucet,
+	}
+)
+
+func (e *Energi) createWhitelist(
+	statedb *state.StateDB,
+) map[common.Address]bool {
+	whitelist := map[common.Address]bool{}
+
+	for _, addr := range consensusProxies {
+		whitelist[addr] = true
+		impl := statedb.GetState(addr, energi_params.Storage_ProxyImpl)
+		whitelist[common.BytesToAddress(impl[:])] = true
+	}
+
+	for _, addr := range consensusStandalone {
+		whitelist[addr] = true
+	}
+
+	return whitelist
 }
 
 func (e *Energi) processDrainable(
@@ -128,7 +190,7 @@ func (e *Energi) processDrainable(
 		return err
 	}
 
-	log.Trace("Drain address list", "address_list", address_list)
+	log.Debug("Address drain list", "address_list", address_list)
 
 	// 2. Get current compensation fund address
 	if len(*address_list) > 0 {
@@ -174,6 +236,17 @@ func (e *Energi) processDrainable(
 
 		//--
 		bal := statedb.GetBalance(addr)
+
+		// Skip, if nothing
+		if bal.Cmp(common.Big0) == 0 {
+			continue
+		}
+
+		// Skip whitelisted
+		if core.CanTransfer(statedb, addr, bal) {
+			continue
+		}
+
 		statedb.AddBalance(comp_fund, bal)
 		statedb.SetBalance(addr, common.Big0)
 		log.Trace("Draining account", "fund", comp_fund, "addr", addr, "bal", bal)

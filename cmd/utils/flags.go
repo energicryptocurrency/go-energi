@@ -1227,6 +1227,11 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	}
 	cfg.NoPruning = ctx.GlobalString(GCModeFlag.Name) == "archive"
 
+	// MN-10: Masternode must act as Archive node
+	if ctx.GlobalBool(MasternodeFlag.Name) && !cfg.NoPruning {
+		log.Info("Enforcing Archive mode for Masternode")
+		cfg.NoPruning = true
+	}
 	if ctx.GlobalIsSet(CacheFlag.Name) || ctx.GlobalIsSet(CacheTrieFlag.Name) {
 		cfg.TrieCleanCache = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheTrieFlag.Name) / 100
 	}
@@ -1498,6 +1503,12 @@ func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chai
 		TrieCleanLimit: eth.DefaultConfig.TrieCleanCache,
 		TrieDirtyLimit: eth.DefaultConfig.TrieDirtyCache,
 		TrieTimeLimit:  eth.DefaultConfig.TrieTimeout,
+		TrieRapidLimit: eth.DefaultConfig.TrieRapidTime,
+	}
+	// MN-10: Masternode must act as Archive node
+	if ctx.GlobalBool(MasternodeFlag.Name) && !cache.Disabled {
+		log.Info("Enforcing Archive mode for Masternode")
+		cache.Disabled = true
 	}
 	if ctx.GlobalIsSet(CacheFlag.Name) || ctx.GlobalIsSet(CacheTrieFlag.Name) {
 		cache.TrieCleanLimit = ctx.GlobalInt(CacheFlag.Name) * ctx.GlobalInt(CacheTrieFlag.Name) / 100

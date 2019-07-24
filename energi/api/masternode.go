@@ -124,35 +124,41 @@ func (m *MasternodeAPI) DepositCollateral(
 	dst common.Address,
 	amount *hexutil.Big,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	token, err := m.token(password, dst)
 	if err != nil {
-		return err
+		return
 	}
 
 	token.TransactOpts.Value = amount.ToInt()
 	tx, err := token.DepositCollateral()
 
-	log.Info("Note: please wait until collateral TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the collateral TX gets into a block!", "tx", txhash.Hex())
+	}
 
-	return err
+	return
 }
 
 func (m *MasternodeAPI) WithdrawCollateral(
 	dst common.Address,
 	amount *hexutil.Big,
 	password string,
-) error {
+) (txhash common.Hash, err error) {
 	token, err := m.token(password, dst)
 	if err != nil {
-		return err
+		return
 	}
 
 	tx, err := token.WithdrawCollateral(amount.ToInt())
 
-	log.Info("Note: please wait until collateral TX gets into a block!", "tx", tx.Hash())
+	if tx != nil {
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the collateral TX gets into a block!", "tx", txhash.Hex())
+	}
 
-	return err
+	return
 }
 
 type MNInfo struct {
@@ -322,10 +328,13 @@ func (m *MasternodeAPI) registry(
 	return
 }
 
-func (m *MasternodeAPI) Announce(owner common.Address, enode_url, password string) error {
+func (m *MasternodeAPI) Announce(
+	owner common.Address,
+	enode_url, password string,
+) (txhash common.Hash, err error) {
 	registry, err := m.registry(password, owner)
 	if err != nil {
-		return err
+		return
 	}
 
 	var (
@@ -336,25 +345,28 @@ func (m *MasternodeAPI) Announce(owner common.Address, enode_url, password strin
 	//---
 	res, err := enode.ParseV4(enode_url)
 	if err != nil {
-		return err
+		return
 	}
 
 	//---
 	ip := res.IP().To4()
 	if ip == nil {
-		return errors.New("Invalid IPv4")
+		err = errors.New("Invalid IPv4")
+		return
 	}
 
 	if ip[0] == byte(127) || ip[0] == byte(10) ||
 		(ip[0] == byte(192) && ip[1] == byte(168)) ||
 		(ip[0] == byte(172) && (ip[1]&0xF0) == byte(16)) {
-		return errors.New("Wrong enode IP")
+		err = errors.New("Wrong enode IP")
+		return
 	}
 
 	cfg := m.backend.ChainConfig()
 
 	if res.UDP() != int(cfg.ChainID.Int64()) || res.TCP() != int(cfg.ChainID.Int64()) {
-		return errors.New("Wrong enode port")
+		err = errors.New("Wrong enode port")
+		return
 	}
 
 	ipv4address = uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 | uint32(ip[3])
@@ -363,7 +375,8 @@ func (m *MasternodeAPI) Announce(owner common.Address, enode_url, password strin
 	pk := crypto.CompressPubkey(res.Pubkey())
 	if len(pk) != 33 {
 		log.Error("Wrong public key length", "pklen", len(pk))
-		return errors.New("Wrong public key")
+		err = errors.New("Wrong public key")
+		return
 	}
 
 	copy(pubkey[0][:], pk[:32])
@@ -374,25 +387,35 @@ func (m *MasternodeAPI) Announce(owner common.Address, enode_url, password strin
 
 	//---
 	tx, err := registry.Announce(masternode, ipv4address, pubkey)
-	log.Info("Note: please wait until TX gets into a block!", "tx", tx.Hash())
 
-	return err
+	if tx != nil {
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the TX gets into a block!", "tx", txhash.Hex())
+	}
+
+	return
 }
 
-func (m *MasternodeAPI) Denounce(owner common.Address, password string) (err error) {
+func (m *MasternodeAPI) Denounce(
+	owner common.Address, password string,
+) (txhash common.Hash, err error) {
 	registry, err := m.registry(password, owner)
 	if err != nil {
-		return err
+		return
 	}
 
 	ownerinfo, err := registry.OwnerInfo(owner)
 	if err != nil {
 		log.Error("Not found", "owner", owner)
-		return err
+		return
 	}
 
 	tx, err := registry.Denounce(ownerinfo.Masternode)
-	log.Info("Note: please wait until TX gets into a block!", "tx", tx.Hash())
 
-	return err
+	if tx != nil {
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the TX gets into a block!", "tx", txhash.Hex())
+	}
+
+	return
 }

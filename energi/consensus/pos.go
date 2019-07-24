@@ -24,7 +24,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	eth_consensus "github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
@@ -369,13 +368,6 @@ func (e *Energi) lookupStakeWeight(
 	till *types.Header,
 	addr common.Address,
 ) (weight uint64, err error) {
-	stdb, err := chain.GetStateDB()
-
-	if err != nil {
-		log.Error("PoS stake amount is called without state database", "err", err)
-		return 0, err
-	}
-
 	var since uint64
 
 	if now > MaturityPeriod {
@@ -388,14 +380,13 @@ func (e *Energi) lookupStakeWeight(
 	weight = 0
 	total_staked := uint64(0)
 	first_run := true
+	blockst := chain.CalculateBlockState(till.Hash(), till.Number.Uint64())
 
 	// NOTE: we need to ensure at least one iteration with the balance condition
 	for (till.Time > since) || first_run {
-		blockst, err := state.New(till.Root, stdb)
-
-		if err != nil {
-			log.Error("PoS state root failure", "err", err)
-			return 0, err
+		if blockst == nil {
+			log.Warn("PoS state root failure", "header", till.Hash())
+			return 0, eth_consensus.ErrMissingState
 		}
 
 		weight_at_block := new(big.Int).Div(
@@ -424,16 +415,19 @@ func (e *Energi) lookupStakeWeight(
 		}
 
 		curr := till
-		till = chain.GetHeader(till.ParentHash, till.Number.Uint64()-1)
+		parent_number := curr.Number.Uint64() - 1
+		till = chain.GetHeader(curr.ParentHash, parent_number)
 
 		if till == nil {
 			if curr.Number.Cmp(common.Big0) == 0 {
 				break
 			}
 
-			log.Error("PoS state missing parent")
+			log.Error("PoS state missing parent", "parent", curr.ParentHash)
 			return 0, eth_consensus.ErrUnknownAncestor
 		}
+
+		blockst = chain.CalculateBlockState(curr.ParentHash, parent_number)
 	}
 
 	if weight < total_staked {

@@ -517,7 +517,6 @@ func (hc *HeaderChain) GetBlock(hash common.Hash, number uint64) *types.Block {
 	return nil
 }
 
-// TODO: This may be slow
-func (hc *HeaderChain) GetStateDB() (state.Database, error) {
-	return state.NewDatabase(hc.chainDb), nil
+func (hc *HeaderChain) CalculateBlockState(hash common.Hash, number uint64) *state.StateDB {
+	return nil
 }

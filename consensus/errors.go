@@ -34,4 +34,8 @@ var (
 	// ErrInvalidNumber is returned if a block's number doesn't equal it's parent's
 	// plus one.
 	ErrInvalidNumber = errors.New("invalid block number")
+
+	// ErrMissingState is returned when database is missing state root which is required
+	// for block validation.
+	ErrMissingState = errors.New("missing state")
 )

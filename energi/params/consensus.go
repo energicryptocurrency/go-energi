@@ -23,4 +23,7 @@ const (
 	MinBlockGap       uint64 = 30
 	MaxFutureGap      uint64 = 3
 	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBlockGap
+
+	// DoS protection
+	OldForkPeriod uint64 = 15 * 60
 )

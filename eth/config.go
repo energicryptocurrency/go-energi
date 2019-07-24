@@ -50,6 +50,7 @@ var DefaultConfig = Config{
 	TrieCleanCache: 256,
 	TrieDirtyCache: 256,
 	TrieTimeout:    60 * time.Minute,
+	TrieRapidTime:  10 * time.Second,
 	MinerGasFloor:  8000000,
 	MinerGasCeil:   16000000,
 	MinerGasPrice:  big.NewInt(params.GWei),
@@ -104,6 +105,7 @@ type Config struct {
 	TrieCleanCache     int
 	TrieDirtyCache     int
 	TrieTimeout        time.Duration
+	TrieRapidTime      time.Duration
 
 	// Mining-related options
 	Etherbase      common.Address `toml:",omitempty"`

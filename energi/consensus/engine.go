@@ -229,15 +229,18 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		return eth_consensus.ErrInvalidNumber
 	}
 
-	// Verify the engine specific seal securing the block
-	err = e.VerifySeal(chain, header)
-	if err != nil {
-		return err
-	}
+	// We skip checks only where full previous meturity period state is required.
+	if seal {
+		// Verify the engine specific seal securing the block
+		err = e.VerifySeal(chain, header)
+		if err != nil {
+			return err
+		}
 
-	err = e.verifyPoSHash(chain, header)
-	if err != nil {
-		return err
+		err = e.verifyPoSHash(chain, header)
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
@@ -314,21 +317,16 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	if addr != header.Coinbase {
 		// POS-5: Delegated PoS
 		//--
-		stdb, err := chain.GetStateDB()
-		if err != nil {
-			log.Error("PoS seal is called without state database", "err", err)
-			return err
-		}
-
-		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+		parent_number := header.Number.Uint64() - 1
+		parent := chain.GetHeader(header.ParentHash, parent_number)
 		if parent == nil {
 			return eth_consensus.ErrUnknownAncestor
 		}
 
-		blockst, err := state.New(parent.Root, stdb)
-		if err != nil {
-			log.Error("PoS state root failure", "err", err)
-			return err
+		blockst := chain.CalculateBlockState(header.ParentHash, parent_number)
+		if blockst == nil {
+			log.Error("PoS state root failure", "header", header.ParentHash)
+			return eth_consensus.ErrMissingState
 		}
 
 		if blockst.GetCodeSize(header.Coinbase) > 0 {
@@ -539,19 +537,9 @@ func (e *Energi) recreateBlock(
 		ok bool
 	)
 
-	stdb, err := chain.GetStateDB()
+	blstate := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
 	if err != nil {
-		return nil, err
-	}
-
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
 		return nil, eth_consensus.ErrUnknownAncestor
-	}
-
-	blstate, err := state.New(parent.Root, stdb)
-	if err != nil {
-		return nil, err
 	}
 
 	vmc := &vm.Config{}
