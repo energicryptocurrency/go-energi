@@ -45,7 +45,7 @@ func TestIsValidZeroFee(t *testing.T) {
 	assert.Empty(t, err)
 	heartbeatCall, err := mnreg_abi.Pack("heartbeat", common.Big1, common.Hash{}, common.Big0)
 	assert.Empty(t, err)
-	validateCall, err := mnreg_abi.Pack("validate", common.Address{})
+	invalidateCall, err := mnreg_abi.Pack("invalidate", common.Address{})
 	assert.Empty(t, err)
 
 	res := false
@@ -165,7 +165,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		common.Big0,
 		10000,
 		common.Big0,
-		validateCall,
+		invalidateCall,
 	))
 	assert.True(t, res, "Valid MN validate")
 	res = IsValidZeroFee(types.NewTransaction(
@@ -183,7 +183,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		common.Big0,
 		40000,
 		common.Big0,
-		validateCall,
+		invalidateCall,
 	))
 	assert.False(t, res, "Invalid MN validate - dst")
 }

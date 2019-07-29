@@ -54,13 +54,12 @@ var (
 		Energi: &EnergiConfig{
 			MigrationSigner: MainnetMigrationSigner,
 		},
-		SuperblockCycle:  big.NewInt(60 * 24 * 14),
-		MNVotesPerCycle:  big.NewInt(32),
-		MNRequireVoting:  big.NewInt(100),
-		MNVotesMax:       big.NewInt(16),
-		MNCleanupPeriod:  big.NewInt(60 * 60 * 24 * 14),
-		MNEverCollateral: new(big.Int).Mul(big.NewInt(1000000), big.NewInt(Ether)),
-		BackboneAddress:  common.Address{},
+		SuperblockCycle:     big.NewInt(60 * 24 * 14),
+		MNRequireValidation: big.NewInt(10),
+		MNValidationPeriod:  big.NewInt(5),
+		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14),
+		MNEverCollateral:    new(big.Int).Mul(big.NewInt(1000000), big.NewInt(Ether)),
+		BackboneAddress:     common.Address{},
 	}
 
 	EnergiTestnetChainConfig = &ChainConfig{
@@ -76,13 +75,12 @@ var (
 		Energi: &EnergiConfig{
 			MigrationSigner: TestnetMigrationSigner,
 		},
-		SuperblockCycle:  big.NewInt(60 * 24),
-		MNVotesPerCycle:  big.NewInt(6),
-		MNRequireVoting:  big.NewInt(5),
-		MNVotesMax:       big.NewInt(3),
-		MNCleanupPeriod:  big.NewInt(60 * 60 * 3),
-		MNEverCollateral: new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
-		BackboneAddress:  common.Address{},
+		SuperblockCycle:     big.NewInt(60 * 24),
+		MNRequireValidation: big.NewInt(5),
+		MNValidationPeriod:  big.NewInt(5),
+		MNCleanupPeriod:     big.NewInt(60 * 60 * 3),
+		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
+		BackboneAddress:     common.Address{},
 	}
 
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
@@ -136,16 +134,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -189,12 +187,11 @@ type ChainConfig struct {
 	Energi *EnergiConfig `json:"energi,omitempty"`
 
 	// This parameters are not part of hardcoded consensus!
-	SuperblockCycle  *big.Int `json:"superblockCycle"`
-	MNVotesPerCycle  *big.Int `json:"mnVotesPerCycle"`
-	MNRequireVoting  *big.Int `json:"mnRequireVoting"`
-	MNVotesMax       *big.Int `json:"mnVotesMax"`
-	MNCleanupPeriod  *big.Int `json:"mnCleanupPeriod"`
-	MNEverCollateral *big.Int `json:"mnEverCollateral"`
+	SuperblockCycle     *big.Int `json:"superblockCycle"`
+	MNRequireValidation *big.Int `json:"mnRequireValidation"`
+	MNValidationPeriod  *big.Int `json:"mnValidationPeriod"`
+	MNCleanupPeriod     *big.Int `json:"mnCleanupPeriod"`
+	MNEverCollateral    *big.Int `json:"mnEverCollateral"`
 
 	BackboneAddress common.Address `json:"backboneAddress"`
 }

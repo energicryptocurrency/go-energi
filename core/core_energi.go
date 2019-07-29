@@ -34,9 +34,9 @@ const (
 )
 
 var (
-	energiMigrateID     types.MethodID
-	energiMNHeartbeatID types.MethodID
-	energiMNValidateID  types.MethodID
+	energiMigrateID      types.MethodID
+	energiMNHeartbeatID  types.MethodID
+	energiMNInvalidateID types.MethodID
 )
 
 func init() {
@@ -52,7 +52,7 @@ func init() {
 		panic(err)
 	}
 	copy(energiMNHeartbeatID[:], mnreg_abi.Methods["heartbeat"].Id())
-	copy(energiMNValidateID[:], mnreg_abi.Methods["validate"].Id())
+	copy(energiMNInvalidateID[:], mnreg_abi.Methods["invalidate"].Id())
 }
 
 /**
@@ -100,7 +100,7 @@ func IsMasternodeCall(tx *types.Transaction) bool {
 
 	if method := tx.MethodID(); method == energiMNHeartbeatID {
 		return true
-	} else if method == energiMNValidateID {
+	} else if method == energiMNInvalidateID {
 		return true
 	}
 
