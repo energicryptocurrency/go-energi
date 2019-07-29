@@ -28,7 +28,7 @@ var (
 )
 
 // IMasternodeRegistryABI is the input ABI used to generate the binding from.
-const IMasternodeRegistryABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"name\":\"active\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"active_collateral\",\"type\":\"uint256\"},{\"name\":\"total_collateral\",\"type\":\"uint256\"},{\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"info\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isValid\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ownerInfo\",\"outputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"onCollateralUpdate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"indexed\":false,\"name\":\"collateral\",\"type\":\"uint256\"}],\"name\":\"Announced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Denounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"Validation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"Deactivated\",\"type\":\"event\"}]"
+const IMasternodeRegistryABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"name\":\"active\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"active_collateral\",\"type\":\"uint256\"},{\"name\":\"total_collateral\",\"type\":\"uint256\"},{\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"info\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"invalidate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isValid\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ownerInfo\",\"outputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validationTarget\",\"outputs\":[{\"name\":\"target\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"onCollateralUpdate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"indexed\":false,\"name\":\"collateral\",\"type\":\"uint256\"}],\"name\":\"Announced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Denounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"Invalidation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"Deactivated\",\"type\":\"event\"}]"
 
 // IMasternodeRegistry is an auto generated Go binding around an Ethereum contract.
 type IMasternodeRegistry struct {
@@ -420,6 +420,32 @@ func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) TreasuryProxy() (c
 	return _IMasternodeRegistry.Contract.TreasuryProxy(&_IMasternodeRegistry.CallOpts)
 }
 
+// ValidationTarget is a free data retrieval call binding the contract method 0xc3db74d6.
+//
+// Solidity: function validationTarget(address masternode) constant returns(address target)
+func (_IMasternodeRegistry *IMasternodeRegistryCaller) ValidationTarget(opts *bind.CallOpts, masternode common.Address) (common.Address, error) {
+	var (
+		ret0 = new(common.Address)
+	)
+	out := ret0
+	err := _IMasternodeRegistry.contract.Call(opts, out, "validationTarget", masternode)
+	return *ret0, err
+}
+
+// ValidationTarget is a free data retrieval call binding the contract method 0xc3db74d6.
+//
+// Solidity: function validationTarget(address masternode) constant returns(address target)
+func (_IMasternodeRegistry *IMasternodeRegistrySession) ValidationTarget(masternode common.Address) (common.Address, error) {
+	return _IMasternodeRegistry.Contract.ValidationTarget(&_IMasternodeRegistry.CallOpts, masternode)
+}
+
+// ValidationTarget is a free data retrieval call binding the contract method 0xc3db74d6.
+//
+// Solidity: function validationTarget(address masternode) constant returns(address target)
+func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) ValidationTarget(masternode common.Address) (common.Address, error) {
+	return _IMasternodeRegistry.Contract.ValidationTarget(&_IMasternodeRegistry.CallOpts, masternode)
+}
+
 // Announce is a paid mutator transaction binding the contract method 0xd70d5c30.
 //
 // Solidity: function announce(address masternode, uint32 ipv4address, bytes32[2] enode) returns()
@@ -483,6 +509,27 @@ func (_IMasternodeRegistry *IMasternodeRegistryTransactorSession) Heartbeat(bloc
 	return _IMasternodeRegistry.Contract.Heartbeat(&_IMasternodeRegistry.TransactOpts, block_number, block_hash, sw_features)
 }
 
+// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
+//
+// Solidity: function invalidate(address masternode) returns()
+func (_IMasternodeRegistry *IMasternodeRegistryTransactor) Invalidate(opts *bind.TransactOpts, masternode common.Address) (*types.Transaction, error) {
+	return _IMasternodeRegistry.contract.Transact(opts, "invalidate", masternode)
+}
+
+// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
+//
+// Solidity: function invalidate(address masternode) returns()
+func (_IMasternodeRegistry *IMasternodeRegistrySession) Invalidate(masternode common.Address) (*types.Transaction, error) {
+	return _IMasternodeRegistry.Contract.Invalidate(&_IMasternodeRegistry.TransactOpts, masternode)
+}
+
+// Invalidate is a paid mutator transaction binding the contract method 0x37a3931f.
+//
+// Solidity: function invalidate(address masternode) returns()
+func (_IMasternodeRegistry *IMasternodeRegistryTransactorSession) Invalidate(masternode common.Address) (*types.Transaction, error) {
+	return _IMasternodeRegistry.Contract.Invalidate(&_IMasternodeRegistry.TransactOpts, masternode)
+}
+
 // OnCollateralUpdate is a paid mutator transaction binding the contract method 0xcdc7d4ad.
 //
 // Solidity: function onCollateralUpdate(address owner) returns()
@@ -502,27 +549,6 @@ func (_IMasternodeRegistry *IMasternodeRegistrySession) OnCollateralUpdate(owner
 // Solidity: function onCollateralUpdate(address owner) returns()
 func (_IMasternodeRegistry *IMasternodeRegistryTransactorSession) OnCollateralUpdate(owner common.Address) (*types.Transaction, error) {
 	return _IMasternodeRegistry.Contract.OnCollateralUpdate(&_IMasternodeRegistry.TransactOpts, owner)
-}
-
-// Validate is a paid mutator transaction binding the contract method 0x207c64fb.
-//
-// Solidity: function validate(address masternode) returns()
-func (_IMasternodeRegistry *IMasternodeRegistryTransactor) Validate(opts *bind.TransactOpts, masternode common.Address) (*types.Transaction, error) {
-	return _IMasternodeRegistry.contract.Transact(opts, "validate", masternode)
-}
-
-// Validate is a paid mutator transaction binding the contract method 0x207c64fb.
-//
-// Solidity: function validate(address masternode) returns()
-func (_IMasternodeRegistry *IMasternodeRegistrySession) Validate(masternode common.Address) (*types.Transaction, error) {
-	return _IMasternodeRegistry.Contract.Validate(&_IMasternodeRegistry.TransactOpts, masternode)
-}
-
-// Validate is a paid mutator transaction binding the contract method 0x207c64fb.
-//
-// Solidity: function validate(address masternode) returns()
-func (_IMasternodeRegistry *IMasternodeRegistryTransactorSession) Validate(masternode common.Address) (*types.Transaction, error) {
-	return _IMasternodeRegistry.Contract.Validate(&_IMasternodeRegistry.TransactOpts, masternode)
 }
 
 // IMasternodeRegistryAnnouncedIterator is returned from FilterAnnounced and is used to iterate over the raw logs and unpacked data for Announced events raised by the IMasternodeRegistry contract.
@@ -744,10 +770,15 @@ type IMasternodeRegistryDeactivated struct {
 
 // FilterDeactivated is a free log retrieval operation binding the contract event 0x749cb6b4c510bc468cf6b9c2086d6f0a54d6b18e25d37bf3200e68eab0880c00.
 //
-// Solidity: event Deactivated(address masternode)
-func (_IMasternodeRegistry *IMasternodeRegistryFilterer) FilterDeactivated(opts *bind.FilterOpts) (*IMasternodeRegistryDeactivatedIterator, error) {
+// Solidity: event Deactivated(address indexed masternode)
+func (_IMasternodeRegistry *IMasternodeRegistryFilterer) FilterDeactivated(opts *bind.FilterOpts, masternode []common.Address) (*IMasternodeRegistryDeactivatedIterator, error) {
 
-	logs, sub, err := _IMasternodeRegistry.contract.FilterLogs(opts, "Deactivated")
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+
+	logs, sub, err := _IMasternodeRegistry.contract.FilterLogs(opts, "Deactivated", masternodeRule)
 	if err != nil {
 		return nil, err
 	}
@@ -756,10 +787,15 @@ func (_IMasternodeRegistry *IMasternodeRegistryFilterer) FilterDeactivated(opts 
 
 // WatchDeactivated is a free log subscription operation binding the contract event 0x749cb6b4c510bc468cf6b9c2086d6f0a54d6b18e25d37bf3200e68eab0880c00.
 //
-// Solidity: event Deactivated(address masternode)
-func (_IMasternodeRegistry *IMasternodeRegistryFilterer) WatchDeactivated(opts *bind.WatchOpts, sink chan<- *IMasternodeRegistryDeactivated) (event.Subscription, error) {
+// Solidity: event Deactivated(address indexed masternode)
+func (_IMasternodeRegistry *IMasternodeRegistryFilterer) WatchDeactivated(opts *bind.WatchOpts, sink chan<- *IMasternodeRegistryDeactivated, masternode []common.Address) (event.Subscription, error) {
 
-	logs, sub, err := _IMasternodeRegistry.contract.WatchLogs(opts, "Deactivated")
+	var masternodeRule []interface{}
+	for _, masternodeItem := range masternode {
+		masternodeRule = append(masternodeRule, masternodeItem)
+	}
+
+	logs, sub, err := _IMasternodeRegistry.contract.WatchLogs(opts, "Deactivated", masternodeRule)
 	if err != nil {
 		return nil, err
 	}
@@ -932,9 +968,9 @@ func (_IMasternodeRegistry *IMasternodeRegistryFilterer) WatchDenounced(opts *bi
 	}), nil
 }
 
-// IMasternodeRegistryValidationIterator is returned from FilterValidation and is used to iterate over the raw logs and unpacked data for Validation events raised by the IMasternodeRegistry contract.
-type IMasternodeRegistryValidationIterator struct {
-	Event *IMasternodeRegistryValidation // Event containing the contract specifics and raw log
+// IMasternodeRegistryInvalidationIterator is returned from FilterInvalidation and is used to iterate over the raw logs and unpacked data for Invalidation events raised by the IMasternodeRegistry contract.
+type IMasternodeRegistryInvalidationIterator struct {
+	Event *IMasternodeRegistryInvalidation // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -948,7 +984,7 @@ type IMasternodeRegistryValidationIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *IMasternodeRegistryValidationIterator) Next() bool {
+func (it *IMasternodeRegistryInvalidationIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -957,7 +993,7 @@ func (it *IMasternodeRegistryValidationIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(IMasternodeRegistryValidation)
+			it.Event = new(IMasternodeRegistryInvalidation)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -972,7 +1008,7 @@ func (it *IMasternodeRegistryValidationIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(IMasternodeRegistryValidation)
+		it.Event = new(IMasternodeRegistryInvalidation)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -988,28 +1024,28 @@ func (it *IMasternodeRegistryValidationIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *IMasternodeRegistryValidationIterator) Error() error {
+func (it *IMasternodeRegistryInvalidationIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *IMasternodeRegistryValidationIterator) Close() error {
+func (it *IMasternodeRegistryInvalidationIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// IMasternodeRegistryValidation represents a Validation event raised by the IMasternodeRegistry contract.
-type IMasternodeRegistryValidation struct {
+// IMasternodeRegistryInvalidation represents a Invalidation event raised by the IMasternodeRegistry contract.
+type IMasternodeRegistryInvalidation struct {
 	Masternode common.Address
 	Validator  common.Address
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterValidation is a free log retrieval operation binding the contract event 0xecf3d22a6c5bee8410ef008f28f974ab2b99754941406d83f2e79834bab78b6d.
+// FilterInvalidation is a free log retrieval operation binding the contract event 0x389d58799d7eca76264c556a007ffbc7c60caa4e3c8ea0564e791af3a1b9d331.
 //
-// Solidity: event Validation(address indexed masternode, address indexed validator)
-func (_IMasternodeRegistry *IMasternodeRegistryFilterer) FilterValidation(opts *bind.FilterOpts, masternode []common.Address, validator []common.Address) (*IMasternodeRegistryValidationIterator, error) {
+// Solidity: event Invalidation(address indexed masternode, address indexed validator)
+func (_IMasternodeRegistry *IMasternodeRegistryFilterer) FilterInvalidation(opts *bind.FilterOpts, masternode []common.Address, validator []common.Address) (*IMasternodeRegistryInvalidationIterator, error) {
 
 	var masternodeRule []interface{}
 	for _, masternodeItem := range masternode {
@@ -1020,17 +1056,17 @@ func (_IMasternodeRegistry *IMasternodeRegistryFilterer) FilterValidation(opts *
 		validatorRule = append(validatorRule, validatorItem)
 	}
 
-	logs, sub, err := _IMasternodeRegistry.contract.FilterLogs(opts, "Validation", masternodeRule, validatorRule)
+	logs, sub, err := _IMasternodeRegistry.contract.FilterLogs(opts, "Invalidation", masternodeRule, validatorRule)
 	if err != nil {
 		return nil, err
 	}
-	return &IMasternodeRegistryValidationIterator{contract: _IMasternodeRegistry.contract, event: "Validation", logs: logs, sub: sub}, nil
+	return &IMasternodeRegistryInvalidationIterator{contract: _IMasternodeRegistry.contract, event: "Invalidation", logs: logs, sub: sub}, nil
 }
 
-// WatchValidation is a free log subscription operation binding the contract event 0xecf3d22a6c5bee8410ef008f28f974ab2b99754941406d83f2e79834bab78b6d.
+// WatchInvalidation is a free log subscription operation binding the contract event 0x389d58799d7eca76264c556a007ffbc7c60caa4e3c8ea0564e791af3a1b9d331.
 //
-// Solidity: event Validation(address indexed masternode, address indexed validator)
-func (_IMasternodeRegistry *IMasternodeRegistryFilterer) WatchValidation(opts *bind.WatchOpts, sink chan<- *IMasternodeRegistryValidation, masternode []common.Address, validator []common.Address) (event.Subscription, error) {
+// Solidity: event Invalidation(address indexed masternode, address indexed validator)
+func (_IMasternodeRegistry *IMasternodeRegistryFilterer) WatchInvalidation(opts *bind.WatchOpts, sink chan<- *IMasternodeRegistryInvalidation, masternode []common.Address, validator []common.Address) (event.Subscription, error) {
 
 	var masternodeRule []interface{}
 	for _, masternodeItem := range masternode {
@@ -1041,7 +1077,7 @@ func (_IMasternodeRegistry *IMasternodeRegistryFilterer) WatchValidation(opts *b
 		validatorRule = append(validatorRule, validatorItem)
 	}
 
-	logs, sub, err := _IMasternodeRegistry.contract.WatchLogs(opts, "Validation", masternodeRule, validatorRule)
+	logs, sub, err := _IMasternodeRegistry.contract.WatchLogs(opts, "Invalidation", masternodeRule, validatorRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1051,8 +1087,8 @@ func (_IMasternodeRegistry *IMasternodeRegistryFilterer) WatchValidation(opts *b
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(IMasternodeRegistryValidation)
-				if err := _IMasternodeRegistry.contract.UnpackLog(event, "Validation", log); err != nil {
+				event := new(IMasternodeRegistryInvalidation)
+				if err := _IMasternodeRegistry.contract.UnpackLog(event, "Invalidation", log); err != nil {
 					return err
 				}
 				event.Raw = log
