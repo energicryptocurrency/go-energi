@@ -86,10 +86,10 @@ contract("MasternodeRegistryV1", async accounts => {
         const collateral3 = toWei('10000', 'ether');
         const reward = toBN(toWei('9.14', 'ether'));
 
-        const owner1 = accounts[0];
-        const owner2 = accounts[1];
-        const owner3 = accounts[2];
-        const not_owner = accounts[3];
+        const owner1 = accounts[1];
+        const owner2 = accounts[2];
+        const owner3 = accounts[3];
+        const not_owner = accounts[0];
 
         const masternode1 = accounts[9];
         const masternode2 = accounts[8];
@@ -173,18 +173,19 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
-            it('should refuse to validate() vote for self', async () => {
+            it('should refuse to invalidate() vote for self', async () => {
                 try {
-                    await s.token_abi.validate(owner1, common.zerofee_callopts);
+                    await s.token_abi.invalidate(
+                        owner1, {from: owner1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch(e) {
-                    assert.match(e.message, /Vote for self/);
+                    assert.match(e.message, /Invalidation for self/);
                 }
             });
 
-            it('should refuse to validate() not active', async () => {
+            it('should refuse to invalidate() not active', async () => {
                 try {
-                    await s.token_abi.validate(masternode2, common.zerofee_callopts);
+                    await s.token_abi.invalidate(masternode2, common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Not active caller/);
@@ -239,7 +240,7 @@ contract("MasternodeRegistryV1", async accounts => {
 
                     expect(r.toString()).eql(reward.toString());
                     await s.reward_abi.reward({
-                        from: accounts[0],
+                        from: not_owner,
                         value: r
                     });
                 }
@@ -926,15 +927,6 @@ contract("MasternodeRegistryV1", async accounts => {
                 let sb = false;
                 
                 for (let i = count; i > 0; --i) {
-                    if (i == 6 || i == 12) {
-                        await s.token_abi.validate(masternode2, {from:masternode1, ...common.zerofee_callopts});
-                        await s.token_abi.validate(masternode3, {from:masternode1, ...common.zerofee_callopts});
-                        await s.token_abi.validate(masternode1, {from:masternode2, ...common.zerofee_callopts});
-                        await s.token_abi.validate(masternode3, {from:masternode2, ...common.zerofee_callopts});
-                        await s.token_abi.validate(masternode1, {from:masternode3, ...common.zerofee_callopts});
-                        await s.token_abi.validate(masternode2, {from:masternode3, ...common.zerofee_callopts});
-                    }
-
                     let r = await s.reward_abi.getReward(i);
                     if (r.eq(toBN(0))) {
                         // superblock case
@@ -945,31 +937,66 @@ contract("MasternodeRegistryV1", async accounts => {
                     expect(r.toString()).eql(reward.toString());
 
                     await s.reward_abi.reward({
-                        from: accounts[3],
+                        from: not_owner,
                         value: r
                     });
+
+                    const target1 = await s.token_abi.validationTarget(masternode1);
+                    const target2 = await s.token_abi.validationTarget(masternode2);
+                    const target3 = await s.token_abi.validationTarget(masternode3);
+                    expect(target1).not.equal(masternode1);
+                    expect(target2).not.equal(masternode2);
+                    expect(target3).not.equal(masternode3);
+                    expect(target1).not.equal(target2);
+                    expect(target1).not.equal(target3);
                 }
 
                 expect(sb).true;
 
-                // The first cycle is paid to Treasury due to lack of votes
+                // No invalidations
                 const treasury_after = toBN(await web3.eth.getBalance(s.treasury_impl.address));
                 expect(treasury_after.sub(treasury_before).toString())
-                    .eql(reward.mul(toBN(6)).toString())
+                    .eql(toBN(0).toString())
 
                 const owner1_after = toBN(await web3.eth.getBalance(owner1));
                 const owner2_after = toBN(await web3.eth.getBalance(owner2));
                 const owner3_after = toBN(await web3.eth.getBalance(owner3));
                 expect(owner1_after.sub(owner1_before).toString())
-                    .eql(reward.mul(toBN(6)).toString());
+                    .eql(reward.mul(toBN(3+3+3)).toString());
                 expect(owner2_after.sub(owner2_before).toString())
-                    .eql(reward.mul(toBN(4)).toString());
+                    .eql(reward.mul(toBN(2+2+2)).toString());
                 expect(owner3_after.sub(owner3_before).toString())
-                    .eql(reward.mul(toBN(2)).toString());
+                    .eql(reward.mul(toBN(1+1+1)).toString());
             });
 
-            it('should process reward() no votes & deactivate missing heartbeat', async () => {
-                await common.moveTime(web3, 110*60);
+            it('should refuse invalidate() wrong target', async () => {
+                try {
+                    let target = await s.token_abi.validationTarget(masternode1);
+
+                    if (target == masternode2) {
+                        target = masternode3;
+                    } else {
+                        target = masternode2;
+                    }
+                    
+                    await s.token_abi.invalidate(target, {from:masternode1, ...common.zerofee_callopts});
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Invalid target/);
+                }
+            });
+
+            it('should process reward() deactivate missing heartbeat', async () => {
+                await common.moveTime(web3, 40*60);
+
+                {
+                    const b = await web3.eth.getBlock('latest');
+                    await s.token_abi.heartbeat(b.number, b.hash, '12', {from:masternode1, ...common.zerofee_callopts});
+                    await s.token_abi.heartbeat(b.number, b.hash, '23', {from:masternode2, ...common.zerofee_callopts});
+                    await s.token_abi.heartbeat(b.number, b.hash, '34', {from:masternode3, ...common.zerofee_callopts});
+                }
+
+                await common.moveTime(web3, 70*60);
 
                 const treasury_before = toBN(await web3.eth.getBalance(s.treasury_impl.address));
                 const owner1_before = toBN(await web3.eth.getBalance(owner1));
@@ -978,19 +1005,13 @@ contract("MasternodeRegistryV1", async accounts => {
                 const count = 18;
                 let sb = false;
 
-                // Once while active count is above validation barrier
-                await s.token_abi.validate(masternode3, {from:masternode1, ...common.zerofee_callopts});
-                await s.token_abi.validate(masternode1, {from:masternode2, ...common.zerofee_callopts});
-                await s.token_abi.validate(masternode3, {from:masternode2, ...common.zerofee_callopts});
-                await s.token_abi.validate(masternode1, {from:masternode3, ...common.zerofee_callopts});
-
                 for (let i = count; i > 0; --i) {
                     if (i == 12 || i == 8 || i == 4) {
                         const bn = await web3.eth.getBlockNumber();
                         const b = await web3.eth.getBlock(bn);
                         await s.token_abi.heartbeat(bn, b.hash, '12', {from:masternode1, ...common.zerofee_callopts});
                         await s.token_abi.heartbeat(bn, b.hash, '34', {from:masternode3, ...common.zerofee_callopts});
-                        await common.moveTime(web3, 90*60);
+                        await common.moveTime(web3, 91*60);
                     }
 
                     let r = await s.reward_abi.getReward(i);
@@ -1003,14 +1024,13 @@ contract("MasternodeRegistryV1", async accounts => {
                     expect(r.toString()).eql(reward.toString());
 
                     await s.reward_abi.reward({
-                        from: accounts[3],
+                        from: not_owner,
                         value: r,
                     });
                 }
 
                 expect(sb).true;
 
-                // The first cycle is paid to Treasury due to lack of votes
                 const treasury_after = toBN(await web3.eth.getBalance(s.treasury_impl.address));
                 const owner1_after = toBN(await web3.eth.getBalance(owner1));
                 const owner2_after = toBN(await web3.eth.getBalance(owner2));
@@ -1018,31 +1038,29 @@ contract("MasternodeRegistryV1", async accounts => {
 
                 // The treasury must get reward of nodes without votes by design
                 expect(treasury_after.sub(treasury_before).toString())
-                    .eql(reward.mul(toBN(2+1)).toString())
+                    .eql(reward.mul(toBN(0)).toString())
                 expect(owner1_after.sub(owner1_before).toString())
-                    .eql(reward.mul(toBN(3+9)).toString());
+                    .eql(reward.mul(toBN(3+3+3+3)).toString());
                 expect(owner2_after.sub(owner2_before).toString())
-                    .eql(reward.mul(toBN(0+0)).toString());
+                    .eql(reward.mul(toBN(2+0+0+0)).toString());
                 expect(owner3_after.sub(owner3_before).toString())
-                    .eql(reward.mul(toBN(1+2)).toString());
+                    .eql(reward.mul(toBN(1+1+1+1)).toString());
 
                 expect(await s.token_abi.isValid(masternode1)).true;
                 expect(await s.token_abi.isValid(masternode2)).false;
                 expect(await s.token_abi.isValid(masternode3)).true;
             });
 
-            it('should refuse validate() inactive node', async () => {
-                try {
-                    await s.token_abi.validate(masternode2, {from:masternode1, ...common.zerofee_callopts});
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Not active target/);
-                }
+            it('should skip inactive node from validation', async () => {
+                const target1 = await s.token_abi.validationTarget(masternode1);
+                const target3 = await s.token_abi.validationTarget(masternode3);
+                expect(target1).eql(masternode3);
+                expect(target3).eql(masternode1);
             });
 
-            it('should refuse validate() by inactive node', async () => {
+            it('should refuse invalidate() by inactive node', async () => {
                 try {
-                    await s.token_abi.validate(masternode1, {from:masternode2, ...common.zerofee_callopts});
+                    await s.token_abi.invalidate(masternode1, {from:masternode2, ...common.zerofee_callopts});
                     assert.fail('It must fail');
                 } catch (e) {
                     assert.match(e.message, /Not active caller/);
@@ -1082,7 +1100,7 @@ contract("MasternodeRegistryV1", async accounts => {
 
                 for (let i = 4; i > 0; --i) {
                     await s.reward_abi.reward({
-                        from: accounts[3],
+                        from: not_owner,
                         value: reward
                     });
                 }
