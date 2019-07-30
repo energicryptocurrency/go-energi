@@ -28,7 +28,7 @@ var (
 )
 
 // IMasternodeRegistryABI is the input ABI used to generate the binding from.
-const IMasternodeRegistryABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"name\":\"active\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"active_collateral\",\"type\":\"uint256\"},{\"name\":\"total_collateral\",\"type\":\"uint256\"},{\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"info\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"invalidate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isValid\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ownerInfo\",\"outputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validationTarget\",\"outputs\":[{\"name\":\"target\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"onCollateralUpdate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"indexed\":false,\"name\":\"collateral\",\"type\":\"uint256\"}],\"name\":\"Announced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Denounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"Invalidation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"Deactivated\",\"type\":\"event\"}]"
+const IMasternodeRegistryABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"name\":\"active\",\"type\":\"uint256\"},{\"name\":\"total\",\"type\":\"uint256\"},{\"name\":\"active_collateral\",\"type\":\"uint256\"},{\"name\":\"total_collateral\",\"type\":\"uint256\"},{\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"info\",\"outputs\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"invalidate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"block_number\",\"type\":\"uint256\"},{\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isActive\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury_proxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ownerInfo\",\"outputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"name\":\"collateral\",\"type\":\"uint256\"},{\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validationTarget\",\"outputs\":[{\"name\":\"target\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"onCollateralUpdate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"},{\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"name\":\"enode\",\"type\":\"bytes32[2]\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"indexed\":false,\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"indexed\":false,\"name\":\"collateral\",\"type\":\"uint256\"}],\"name\":\"Announced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Denounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"Invalidation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"Deactivated\",\"type\":\"event\"}]"
 
 // IMasternodeRegistry is an auto generated Go binding around an Ethereum contract.
 type IMasternodeRegistry struct {
@@ -246,6 +246,32 @@ func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) Enumerate() ([]com
 	return _IMasternodeRegistry.Contract.Enumerate(&_IMasternodeRegistry.CallOpts)
 }
 
+// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
+//
+// Solidity: function enumerateActive() constant returns(address[] masternodes)
+func (_IMasternodeRegistry *IMasternodeRegistryCaller) EnumerateActive(opts *bind.CallOpts) ([]common.Address, error) {
+	var (
+		ret0 = new([]common.Address)
+	)
+	out := ret0
+	err := _IMasternodeRegistry.contract.Call(opts, out, "enumerateActive")
+	return *ret0, err
+}
+
+// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
+//
+// Solidity: function enumerateActive() constant returns(address[] masternodes)
+func (_IMasternodeRegistry *IMasternodeRegistrySession) EnumerateActive() ([]common.Address, error) {
+	return _IMasternodeRegistry.Contract.EnumerateActive(&_IMasternodeRegistry.CallOpts)
+}
+
+// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
+//
+// Solidity: function enumerateActive() constant returns(address[] masternodes)
+func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) EnumerateActive() ([]common.Address, error) {
+	return _IMasternodeRegistry.Contract.EnumerateActive(&_IMasternodeRegistry.CallOpts)
+}
+
 // Info is a free data retrieval call binding the contract method 0x0aae7a6b.
 //
 // Solidity: function info(address masternode) constant returns(address owner, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block)
@@ -294,30 +320,30 @@ func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) Info(masternode co
 	return _IMasternodeRegistry.Contract.Info(&_IMasternodeRegistry.CallOpts, masternode)
 }
 
-// IsValid is a free data retrieval call binding the contract method 0x8b1b925f.
+// IsActive is a free data retrieval call binding the contract method 0x9f8a13d7.
 //
-// Solidity: function isValid(address masternode) constant returns(bool)
-func (_IMasternodeRegistry *IMasternodeRegistryCaller) IsValid(opts *bind.CallOpts, masternode common.Address) (bool, error) {
+// Solidity: function isActive(address masternode) constant returns(bool)
+func (_IMasternodeRegistry *IMasternodeRegistryCaller) IsActive(opts *bind.CallOpts, masternode common.Address) (bool, error) {
 	var (
 		ret0 = new(bool)
 	)
 	out := ret0
-	err := _IMasternodeRegistry.contract.Call(opts, out, "isValid", masternode)
+	err := _IMasternodeRegistry.contract.Call(opts, out, "isActive", masternode)
 	return *ret0, err
 }
 
-// IsValid is a free data retrieval call binding the contract method 0x8b1b925f.
+// IsActive is a free data retrieval call binding the contract method 0x9f8a13d7.
 //
-// Solidity: function isValid(address masternode) constant returns(bool)
-func (_IMasternodeRegistry *IMasternodeRegistrySession) IsValid(masternode common.Address) (bool, error) {
-	return _IMasternodeRegistry.Contract.IsValid(&_IMasternodeRegistry.CallOpts, masternode)
+// Solidity: function isActive(address masternode) constant returns(bool)
+func (_IMasternodeRegistry *IMasternodeRegistrySession) IsActive(masternode common.Address) (bool, error) {
+	return _IMasternodeRegistry.Contract.IsActive(&_IMasternodeRegistry.CallOpts, masternode)
 }
 
-// IsValid is a free data retrieval call binding the contract method 0x8b1b925f.
+// IsActive is a free data retrieval call binding the contract method 0x9f8a13d7.
 //
-// Solidity: function isValid(address masternode) constant returns(bool)
-func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) IsValid(masternode common.Address) (bool, error) {
-	return _IMasternodeRegistry.Contract.IsValid(&_IMasternodeRegistry.CallOpts, masternode)
+// Solidity: function isActive(address masternode) constant returns(bool)
+func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) IsActive(masternode common.Address) (bool, error) {
+	return _IMasternodeRegistry.Contract.IsActive(&_IMasternodeRegistry.CallOpts, masternode)
 }
 
 // OwnerInfo is a free data retrieval call binding the contract method 0xb83e1605.
