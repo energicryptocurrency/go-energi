@@ -1183,6 +1183,17 @@ func (pool *TxPool) demoteUnexecutables() {
 	}
 }
 
+func (pool *TxPool) RemoveZeroFee(sender common.Address) {
+	pool.mu.Lock()
+	defer pool.mu.Unlock()
+
+	if txs, ok := pool.queue[sender]; ok {
+		for _, tx := range txs.Flatten() {
+			pool.removeTx(tx.Hash(), true)
+		}
+	}
+}
+
 // addressByHeartbeat is an account address tagged with its last activity timestamp.
 type addressByHeartbeat struct {
 	address   common.Address

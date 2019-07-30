@@ -240,7 +240,12 @@ func (m *MasternodeService) loop() {
 
 func (m *MasternodeService) onChainHead(block *types.Block) {
 	if !m.isActive() {
+		do_cleanup := m.validator.target != common.Address{}
 		m.validator.cancel()
+
+		if do_cleanup {
+			m.eth.TxPool().RemoveZeroFee(m.address)
+		}
 		return
 	}
 
