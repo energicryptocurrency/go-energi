@@ -17,7 +17,9 @@
 package core
 
 import (
+	"errors"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -109,4 +111,99 @@ func IsMasternodeCall(tx *types.Transaction) bool {
 
 func IsBlacklisted(db vm.StateDB, addr common.Address) bool {
 	return db.GetState(energi_params.Energi_Blacklist, addr.Hash()) != common.Hash{}
+}
+
+//=============================================================================
+
+var (
+	zfCleanupTimeout        = time.Minute
+	zfMinHeartbeatPeriod    = time.Duration(30) * time.Minute
+	zfMinInvalidationPeriod = time.Duration(2) * time.Minute
+
+	ErrZeroFeeDoS = errors.New("zero-fee DoS")
+)
+
+type zeroFeeProtector struct {
+	mnHeartbeats    map[common.Address]time.Time
+	mnInvalidations map[common.Address]time.Time
+	nextCleanup     time.Time
+	timeNow         func() time.Time
+}
+
+func newZeroFeeProtector() *zeroFeeProtector {
+	return &zeroFeeProtector{
+		mnHeartbeats:    make(map[common.Address]time.Time),
+		mnInvalidations: make(map[common.Address]time.Time),
+		nextCleanup:     time.Now().Add(zfCleanupTimeout),
+		timeNow:         time.Now,
+	}
+}
+
+func (z *zeroFeeProtector) cleanupTimeout(
+	now time.Time,
+	timeMap map[common.Address]time.Time,
+	timeout time.Duration,
+) {
+	for k, v := range timeMap {
+		if now.Sub(v) > timeout {
+			delete(timeMap, k)
+		}
+	}
+}
+
+func (z *zeroFeeProtector) cleanupRoutine(now time.Time) {
+	if z.nextCleanup.After(now) {
+		return
+	}
+
+	z.nextCleanup = now.Add(zfCleanupTimeout)
+	//---
+
+	z.cleanupTimeout(now, z.mnHeartbeats, zfMinHeartbeatPeriod)
+	z.cleanupTimeout(now, z.mnInvalidations, zfMinInvalidationPeriod)
+}
+
+func (z *zeroFeeProtector) checkMasternode(
+	pool *TxPool,
+	sender common.Address,
+	now time.Time,
+	timeMap map[common.Address]time.Time,
+	timeout time.Duration,
+) error {
+	if v, ok := timeMap[sender]; ok && now.Sub(v) < timeout {
+		log.Debug("ZeroFee DoS by time", "sender", sender, "interval", now.Sub(v))
+		return ErrZeroFeeDoS
+	}
+
+	// NOTE: potential issue with nonce gap
+	mn_indicator := pool.currentState.GetState(
+		energi_params.Energi_MasternodeList, sender.Hash())
+	if (mn_indicator == common.Hash{}) {
+		log.Debug("ZeroFee DoS by inactive MN", "sender", sender)
+		return ErrZeroFeeDoS
+	}
+
+	timeMap[sender] = now
+	return nil
+}
+
+func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
+	now := z.timeNow()
+
+	defer z.cleanupRoutine(now)
+
+	sender, err := types.Sender(pool.signer, tx)
+	if err != nil {
+		return err
+	}
+
+	// NOTE: assumed to be called only on zero fee
+	if method := tx.MethodID(); method == energiMNHeartbeatID {
+		return z.checkMasternode(pool, sender, now, z.mnHeartbeats, zfMinHeartbeatPeriod)
+	} else if method == energiMNInvalidateID {
+		return z.checkMasternode(pool, sender, now, z.mnInvalidations, zfMinInvalidationPeriod)
+	} else if method == energiMigrateID {
+		return nil
+	}
+	return nil
 }

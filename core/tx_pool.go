@@ -229,6 +229,8 @@ type TxPool struct {
 
 	wg sync.WaitGroup // for shutdown sync
 
+	zfProtector *zeroFeeProtector
+
 	homestead bool
 }
 
@@ -272,6 +274,8 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 	}
 	// Subscribe events from blockchain
 	pool.chainHeadSub = pool.chain.SubscribeChainHeadEvent(pool.chainHeadCh)
+
+	pool.zfProtector = newZeroFeeProtector()
 
 	// Start the event loop and return
 	pool.wg.Add(1)
@@ -613,9 +617,11 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	if err != nil {
 		return ErrInvalidSender
 	}
+	// Energi: Treat properly created zero-fee local in this context
+	is_zerofee := IsValidZeroFee(tx)
 	// Drop non-local transactions under our own minimal accepted gas price
 	local = local || pool.locals.contains(from) // account may be local even if the transaction arrived from the network
-	if !local && pool.gasPrice.Cmp(tx.GasPrice()) > 0 && !IsValidZeroFee(tx) {
+	if !local && pool.gasPrice.Cmp(tx.GasPrice()) > 0 && !is_zerofee {
 		return ErrUnderpriced
 	}
 	// Ensure the transaction adheres to nonce ordering
@@ -633,6 +639,13 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 	}
 	if tx.Gas() < intrGas {
 		return ErrIntrinsicGas
+	}
+	// Energi: protect against zero-fee DoS
+	if is_zerofee && !local {
+		err = pool.zfProtector.checkDoS(pool, tx)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

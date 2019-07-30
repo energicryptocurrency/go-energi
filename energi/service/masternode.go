@@ -39,9 +39,12 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
+var (
+	heartbeatInterval = time.Duration(35) * time.Minute
+	recheckInterval   = time.Duration(5) * time.Minute
+)
+
 const (
-	heartbeatInterval uint64 = 35 * 60
-	recheckInterval   uint64 = 5 * 60
 	masternodeCallGas uint64 = 500000
 
 	txChanSize        = 4096
@@ -57,7 +60,7 @@ type MasternodeService struct {
 
 	address  common.Address
 	registry *energi_abi.IMasternodeRegistrySession
-	lastHB   uint64
+	nextHB   time.Time
 	features *big.Int
 
 	validator *peerValidator
@@ -69,7 +72,9 @@ func NewMasternodeService(ethServ *eth.Ethereum) (node.Service, error) {
 		quitCh:   make(chan struct{}),
 		inSync:   1,
 		features: big.NewInt(0),
-		lastHB:   uint64(time.Now().Unix()) + recheckInterval,
+		// NOTE: we need to avoid triggering DoS on restart.
+		// There is no reliable way to check blockchain and all pools in the network.
+		nextHB: time.Now().Add(heartbeatInterval),
 	}
 	go r.listenDownloader()
 	return r, nil
@@ -191,27 +196,25 @@ func (m *MasternodeService) loop() {
 
 	//---
 	for {
-		now := uint64(time.Now().Unix())
-		nextHB := m.lastHB + heartbeatInterval
+		now := time.Now()
 
-		if now > nextHB {
+		if now.After(m.nextHB) {
 			if m.isActive() {
 				current := bc.CurrentHeader()
 				tx, err := m.registry.Heartbeat(current.Number, current.Hash(), m.features)
 
 				if err == nil {
 					log.Info("Masternode Heartbeat", "tx", tx.Hash())
-					m.lastHB = now
-					nextHB = now + heartbeatInterval
+					m.nextHB = now.Add(heartbeatInterval)
 				} else {
 					log.Error("Failed to send Masternode Heartbeat", "err", err)
-					nextHB = now + recheckInterval
+					m.nextHB = now.Add(recheckInterval)
 				}
 			} else {
 				if atomic.LoadInt32(&m.inSync) == 1 {
 					log.Error("Masternode is not active!")
 				}
-				nextHB = now + recheckInterval
+				m.nextHB = now.Add(recheckInterval)
 			}
 		}
 
@@ -223,7 +226,7 @@ func (m *MasternodeService) loop() {
 			break
 		case <-txEventCh:
 			break
-		case <-time.After(time.Duration(nextHB-now) * time.Second):
+		case <-time.After(m.nextHB.Sub(now)):
 			break
 
 		// Shutdown
@@ -249,10 +252,14 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 	}
 
 	// MN-14: validation duty
-	if pv := m.validator; pv.target != target {
-		pv.cancel()
+	if old_target := m.validator.target; old_target != target {
+		m.validator.cancel()
 		m.validator = newPeerValidator(target, m)
-		go m.validator.validate()
+
+		// Skip the first validation cycle to prevent possible DoS trigger on restart
+		if (old_target != common.Address{}) {
+			go m.validator.validate()
+		}
 	}
 }
 

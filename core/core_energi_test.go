@@ -17,12 +17,16 @@
 package core
 
 import (
+	"math/big"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 
 	"github.com/stretchr/testify/assert"
@@ -186,4 +190,160 @@ func TestIsValidZeroFee(t *testing.T) {
 		invalidateCall,
 	))
 	assert.False(t, res, "Invalid MN validate - dst")
+}
+
+//---
+
+type fakeSigner struct {
+	sender common.Address
+}
+
+func (s *fakeSigner) Sender(tx *types.Transaction) (common.Address, error) {
+	return s.sender, nil
+}
+func (sg *fakeSigner) SignatureValues(tx *types.Transaction, sig []byte) (r, s, v *big.Int, err error) {
+	return common.Big0, common.Big0, common.Big0, nil
+}
+func (s *fakeSigner) Hash(tx *types.Transaction) common.Hash {
+	return common.Hash{}
+}
+func (s *fakeSigner) Equal(types.Signer) bool {
+	return true
+}
+
+func TestZeroFeeProtector(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	now := time.Now() // It can be fixed
+	adjust_time := time.Duration(0)
+
+	protector := newZeroFeeProtector()
+	protector.timeNow = func() time.Time {
+		return now.Add(adjust_time)
+	}
+
+	pool := &TxPool{}
+
+	signer := &fakeSigner{}
+	pool.signer = signer
+
+	testdb := ethdb.NewMemDatabase()
+	statedb, _ := state.New(common.Hash{}, state.NewDatabase(testdb))
+	pool.currentState = statedb
+
+	mn_active1 := common.HexToAddress("0x0000000000000000000000000000000022345678")
+	mn_active2 := common.HexToAddress("0x0000000000000000000000000000000022345679")
+	mn_inactive := common.HexToAddress("0x0000000000000000000000000000000022345680")
+
+	statedb.SetState(
+		energi_params.Energi_MasternodeList,
+		mn_active1.Hash(),
+		mn_inactive.Hash(),
+	)
+	statedb.SetState(
+		energi_params.Energi_MasternodeList,
+		mn_active2.Hash(),
+		mn_inactive.Hash(),
+	)
+
+	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	assert.Empty(t, err)
+	heartbeatCall, err := mnreg_abi.Pack("heartbeat", common.Big1, common.Hash{}, common.Big0)
+	assert.Empty(t, err)
+	invalidateCall, err := mnreg_abi.Pack("invalidate", common.Address{})
+	assert.Empty(t, err)
+
+	hbtx0 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
+	invtx0 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+	hbtx1 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
+	invtx1 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+	hbtx2 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
+	invtx2 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+
+	// Inactive MN
+	signer.sender = mn_inactive
+	err = protector.checkDoS(pool, hbtx0)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx0)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+
+	// Active MN
+	signer.sender = mn_active1
+	err = protector.checkDoS(pool, hbtx1)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, invtx1)
+	assert.Equal(t, nil, err)
+
+	// Active MN repeat interval
+	signer.sender = mn_active1
+	err = protector.checkDoS(pool, hbtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+
+	// Active another MV
+	signer.sender = mn_active2
+	err = protector.checkDoS(pool, hbtx2)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, invtx2)
+	assert.Equal(t, nil, err)
+
+	// Active MN after first period is over
+	adjust_time = time.Duration(5) * time.Minute
+
+	signer.sender = mn_active1
+	err = protector.checkDoS(pool, hbtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx1)
+	assert.Equal(t, nil, err)
+
+	signer.sender = mn_active2
+	err = protector.checkDoS(pool, hbtx2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx2)
+	assert.Equal(t, nil, err)
+
+	// Active MN after second period is over
+	adjust_time = time.Duration(30) * time.Minute
+
+	signer.sender = mn_active1
+	err = protector.checkDoS(pool, hbtx1)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, invtx1)
+	assert.Equal(t, nil, err)
+
+	signer.sender = mn_active2
+	err = protector.checkDoS(pool, hbtx2)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, invtx2)
+	assert.Equal(t, nil, err)
+
+	// Test automatic cleanup
+	signer.sender = mn_inactive
+
+	err = protector.checkDoS(pool, hbtx0)
+	assert.Equal(t, 2, len(protector.mnHeartbeats))
+	assert.Equal(t, 2, len(protector.mnInvalidations))
+
+	adjust_time = time.Duration(35) * time.Minute
+	err = protector.checkDoS(pool, hbtx0)
+	assert.Equal(t, 2, len(protector.mnHeartbeats))
+	assert.Equal(t, 0, len(protector.mnInvalidations))
+
+	adjust_time = time.Duration(59) * time.Minute
+	err = protector.checkDoS(pool, hbtx0)
+	assert.Equal(t, 2, len(protector.mnHeartbeats))
+	assert.Equal(t, 0, len(protector.mnInvalidations))
+
+	adjust_time = time.Duration(61) * time.Minute
+	err = protector.checkDoS(pool, hbtx0)
+	assert.Equal(t, 0, len(protector.mnHeartbeats))
+	assert.Equal(t, 0, len(protector.mnInvalidations))
 }
