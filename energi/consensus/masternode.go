@@ -32,7 +32,7 @@ func (e *Energi) processMasternodes(
 	statedb *state.StateDB,
 ) (err error) {
 	gp := new(core.GasPool)
-	blregistry := energi_params.Energi_MasternodeRegistry
+	mnregistry := energi_params.Energi_MasternodeRegistry
 
 	enumerateData, err := e.mnregAbi.Pack("enumerateActive")
 	if err != nil {
@@ -41,8 +41,8 @@ func (e *Energi) processMasternodes(
 	}
 
 	msg := types.NewMessage(
-		blregistry,
-		&blregistry,
+		mnregistry,
+		&mnregistry,
 		0,
 		common.Big0,
 		e.callGas,

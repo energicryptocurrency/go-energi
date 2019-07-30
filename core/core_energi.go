@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"math/big"
 	"strings"
 	"time"
 
@@ -36,7 +37,8 @@ const (
 )
 
 var (
-	energiMigrateID      types.MethodID
+	energiClaimID        types.MethodID
+	energiVerifyClaimID  types.MethodID
 	energiMNHeartbeatID  types.MethodID
 	energiMNInvalidateID types.MethodID
 )
@@ -47,7 +49,8 @@ func init() {
 		panic(err)
 	}
 
-	copy(energiMigrateID[:], migration_abi.Methods["claim"].Id())
+	copy(energiClaimID[:], migration_abi.Methods["claim"].Id())
+	copy(energiVerifyClaimID[:], migration_abi.Methods["verifyClaim"].Id())
 
 	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
 	if err != nil {
@@ -90,7 +93,7 @@ func IsGen2Migration(tx *types.Transaction) bool {
 
 	return (to != nil) &&
 		(*to == energi_params.Energi_MigrationContract) &&
-		(tx.MethodID() == energiMigrateID)
+		(tx.MethodID() == energiClaimID)
 }
 
 func IsMasternodeCall(tx *types.Transaction) bool {
@@ -119,6 +122,7 @@ var (
 	zfCleanupTimeout        = time.Minute
 	zfMinHeartbeatPeriod    = time.Duration(30) * time.Minute
 	zfMinInvalidationPeriod = time.Duration(2) * time.Minute
+	zfMinCoinClaimPeriod    = time.Duration(3) * time.Minute
 
 	ErrZeroFeeDoS = errors.New("zero-fee DoS")
 )
@@ -126,6 +130,7 @@ var (
 type zeroFeeProtector struct {
 	mnHeartbeats    map[common.Address]time.Time
 	mnInvalidations map[common.Address]time.Time
+	coinClaims      map[uint32]time.Time
 	nextCleanup     time.Time
 	timeNow         func() time.Time
 }
@@ -134,6 +139,7 @@ func newZeroFeeProtector() *zeroFeeProtector {
 	return &zeroFeeProtector{
 		mnHeartbeats:    make(map[common.Address]time.Time),
 		mnInvalidations: make(map[common.Address]time.Time),
+		coinClaims:      make(map[uint32]time.Time),
 		nextCleanup:     time.Now().Add(zfCleanupTimeout),
 		timeNow:         time.Now,
 	}
@@ -161,6 +167,12 @@ func (z *zeroFeeProtector) cleanupRoutine(now time.Time) {
 
 	z.cleanupTimeout(now, z.mnHeartbeats, zfMinHeartbeatPeriod)
 	z.cleanupTimeout(now, z.mnInvalidations, zfMinInvalidationPeriod)
+
+	for k, v := range z.coinClaims {
+		if now.Sub(v) > zfMinCoinClaimPeriod {
+			delete(z.coinClaims, k)
+		}
+	}
 }
 
 func (z *zeroFeeProtector) checkMasternode(
@@ -187,6 +199,74 @@ func (z *zeroFeeProtector) checkMasternode(
 	return nil
 }
 
+func (z *zeroFeeProtector) checkMigration(
+	pool *TxPool,
+	sender common.Address,
+	now time.Time,
+	tx *types.Transaction,
+) error {
+	callData := tx.Data()
+	item_id := uint32(new(big.Int).SetBytes(callData[4:36]).Uint64())
+
+	if v, ok := z.coinClaims[item_id]; ok && now.Sub(v) < zfMinCoinClaimPeriod {
+		log.Debug("ZeroFee DoS by time", "item_id", item_id, "interval", now.Sub(v))
+		return ErrZeroFeeDoS
+	}
+
+	// Check if call is valid
+	//---
+	copy(callData[0:3], energiVerifyClaimID[:])
+
+	msg := types.NewMessage(
+		sender,
+		tx.To(),
+		tx.Nonce(),
+		tx.Value(),
+		tx.Gas(),
+		tx.GasPrice(),
+		callData,
+		false,
+	)
+
+	// Just in case: safety measure
+	statedb := pool.currentState
+	snapshot := statedb.Snapshot()
+
+	bc := pool.chain.(*BlockChain)
+	if bc == nil {
+		log.Debug("ZeroFee DoS on missing blockchain")
+		return ErrZeroFeeDoS
+	}
+	vmc := bc.GetVMConfig()
+	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
+	ctx.GasLimit = ZeroFeeGasLimit
+	evm := vm.NewEVM(ctx, pool.currentState, bc.Config(), *vmc)
+
+	gp := new(GasPool).AddGas(tx.Gas())
+	output, _, failed, err := ApplyMessage(evm, msg, gp)
+	statedb.RevertToSnapshot(snapshot)
+	if failed || err != nil {
+		log.Debug("ZeroFee DoS by execution", "item", item_id, "err", err)
+		return ErrZeroFeeDoS
+	}
+
+	if len(output) != len(common.Hash{}) {
+		log.Debug("ZeroFee DoS by unpack", "item", item_id, "output", output)
+		return ErrZeroFeeDoS
+	}
+
+	amount := new(big.Int).SetBytes(output)
+
+	if amount.Cmp(common.Big0) <= 0 {
+		log.Debug("ZeroFee DoS by already claimed", "item", item_id)
+		return ErrZeroFeeDoS
+	}
+
+	//---
+	z.coinClaims[item_id] = now
+	return nil
+}
+
 func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 	now := z.timeNow()
 
@@ -202,8 +282,8 @@ func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 		return z.checkMasternode(pool, sender, now, z.mnHeartbeats, zfMinHeartbeatPeriod)
 	} else if method == energiMNInvalidateID {
 		return z.checkMasternode(pool, sender, now, z.mnInvalidations, zfMinInvalidationPeriod)
-	} else if method == energiMigrateID {
-		return nil
+	} else if method == energiClaimID {
+		return z.checkMigration(pool, sender, now, tx)
 	}
 	return nil
 }
