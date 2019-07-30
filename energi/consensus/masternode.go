@@ -34,9 +34,9 @@ func (e *Energi) processMasternodes(
 	gp := new(core.GasPool)
 	blregistry := energi_params.Energi_MasternodeRegistry
 
-	enumerateData, err := e.mnregAbi.Pack("enumerate")
+	enumerateData, err := e.mnregAbi.Pack("enumerateActive")
 	if err != nil {
-		log.Error("Fail to prepare enumerate() call", "err", err)
+		log.Error("Fail to prepare enumerateActive() call", "err", err)
 		return err
 	}
 
@@ -54,14 +54,14 @@ func (e *Energi) processMasternodes(
 	gp.AddGas(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, gp)
 	if err != nil {
-		log.Error("Failed in enumerate() call", "err", err)
+		log.Error("Failed in enumerateActive() call", "err", err)
 		return err
 	}
 
 	masternodes := new([]common.Address)
-	err = e.mnregAbi.Unpack(&masternodes, "enumerate", output)
+	err = e.mnregAbi.Unpack(&masternodes, "enumerateActive", output)
 	if err != nil {
-		log.Error("Failed to unpack enumerate() call", "err", err)
+		log.Error("Failed to unpack enumerateActive() call", "err", err)
 		return err
 	}
 
