@@ -19,6 +19,7 @@ package eth
 import (
 	"errors"
 	"math/big"
+	"sync/atomic"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -27,18 +28,23 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/eth"
+	"github.com/ethereum/go-ethereum/eth/downloader"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
+var (
+	heartbeatInterval = time.Duration(35) * time.Minute
+	recheckInterval   = time.Duration(5) * time.Minute
+)
+
 const (
-	heartbeatInterval uint64 = 35 * 60
-	recheckInterval   uint64 = 5 * 60
 	masternodeCallGas uint64 = 500000
 
 	txChanSize        = 4096
@@ -50,19 +56,28 @@ type MasternodeService struct {
 	eth    *eth.Ethereum
 
 	quitCh chan struct{}
+	inSync int32
 
 	address  common.Address
 	registry *energi_abi.IMasternodeRegistrySession
-	lastHB   uint64
+	nextHB   time.Time
 	features *big.Int
+
+	validator *peerValidator
 }
 
 func NewMasternodeService(ethServ *eth.Ethereum) (node.Service, error) {
-	return &MasternodeService{
+	r := &MasternodeService{
 		eth:      ethServ,
 		quitCh:   make(chan struct{}),
+		inSync:   1,
 		features: big.NewInt(0),
-	}, nil
+		// NOTE: we need to avoid triggering DoS on restart.
+		// There is no reliable way to check blockchain and all pools in the network.
+		nextHB: time.Now().Add(heartbeatInterval),
+	}
+	go r.listenDownloader()
+	return r, nil
 }
 
 func (m *MasternodeService) Protocols() []p2p.Protocol {
@@ -112,6 +127,7 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 	//---
 
 	m.server = server
+	m.validator = newPeerValidator(common.Address{}, m)
 	go m.loop()
 
 	log.Info("Started Energi Masternode", "addr", address)
@@ -122,8 +138,41 @@ func (m *MasternodeService) Stop() error {
 	return nil
 }
 
+func (m *MasternodeService) listenDownloader() {
+	events := m.eth.EventMux().Subscribe(
+		downloader.StartEvent{},
+		downloader.DoneEvent{},
+		downloader.FailedEvent{},
+	)
+	defer events.Unsubscribe()
+
+	for {
+		select {
+		case ev := <-events.Chan():
+			if ev == nil {
+				return
+			}
+			switch ev.Data.(type) {
+			case downloader.StartEvent:
+				atomic.StoreInt32(&m.inSync, 0)
+				log.Debug("Masternode is not in sync")
+			case downloader.DoneEvent, downloader.FailedEvent:
+				atomic.StoreInt32(&m.inSync, 1)
+				log.Debug("Masternode is in sync")
+				return
+			}
+		case <-m.quitCh:
+			return
+		}
+	}
+}
+
 func (m *MasternodeService) isActive() bool {
-	res, err := m.registry.IsValid(m.address)
+	if atomic.LoadInt32(&m.inSync) == 0 {
+		return false
+	}
+
+	res, err := m.registry.IsActive(m.address)
 
 	if err != nil {
 		log.Error("Masternode check failed", "err", err)
@@ -147,42 +196,152 @@ func (m *MasternodeService) loop() {
 
 	//---
 	for {
-		now := uint64(time.Now().Unix())
-		nextHB := m.lastHB + heartbeatInterval
+		now := time.Now()
 
-		if now > nextHB {
+		if now.After(m.nextHB) {
 			if m.isActive() {
 				current := bc.CurrentHeader()
 				tx, err := m.registry.Heartbeat(current.Number, current.Hash(), m.features)
 
 				if err == nil {
 					log.Info("Masternode Heartbeat", "tx", tx.Hash())
-					m.lastHB = now
-					nextHB = now + heartbeatInterval
+					m.nextHB = now.Add(heartbeatInterval)
 				} else {
 					log.Error("Failed to send Masternode Heartbeat", "err", err)
-					nextHB = now + recheckInterval
+					m.nextHB = now.Add(recheckInterval)
 				}
 			} else {
-				log.Error("Masternode is not active!")
-				nextHB = now + recheckInterval
+				if atomic.LoadInt32(&m.inSync) == 1 {
+					log.Error("Masternode is not active!")
+				}
+				m.nextHB = now.Add(recheckInterval)
 			}
 		}
 
 		select {
 		case <-m.quitCh:
 			return
-		case <-chainHeadCh:
+		case ev := <-chainHeadCh:
+			m.onChainHead(ev.Block)
 			break
 		case <-txEventCh:
 			break
-		case <-time.After(time.Duration(nextHB-now) * time.Second):
+		case <-time.After(m.nextHB.Sub(now)):
 			break
 
 		// Shutdown
 		case <-headSub.Err():
 			return
 		case <-txSub.Err():
+			return
+		}
+	}
+}
+
+func (m *MasternodeService) onChainHead(block *types.Block) {
+	if !m.isActive() {
+		do_cleanup := m.validator.target != common.Address{}
+		m.validator.cancel()
+
+		if do_cleanup {
+			m.eth.TxPool().RemoveZeroFee(m.address)
+		}
+		return
+	}
+
+	target, err := m.registry.ValidationTarget(m.address)
+	if err != nil {
+		log.Warn("MNTarget error", "mn", m.address, "err", err)
+		m.validator.cancel()
+		return
+	}
+
+	// MN-14: validation duty
+	if old_target := m.validator.target; old_target != target {
+		m.validator.cancel()
+		m.validator = newPeerValidator(target, m)
+
+		// Skip the first validation cycle to prevent possible DoS trigger on restart
+		if (old_target != common.Address{}) {
+			go m.validator.validate()
+		}
+	}
+}
+
+type peerValidator struct {
+	target   common.Address
+	mnsvc    *MasternodeService
+	cancelCh chan struct{}
+}
+
+func newPeerValidator(
+	target common.Address,
+	mnsvc *MasternodeService,
+) *peerValidator {
+	return &peerValidator{
+		target:   target,
+		mnsvc:    mnsvc,
+		cancelCh: make(chan struct{}),
+	}
+}
+
+func (v *peerValidator) cancel() {
+	if v.mnsvc != nil {
+		close(v.cancelCh)
+		v.mnsvc = nil
+	}
+}
+
+func (v *peerValidator) validate() {
+	log.Debug("Masternode validation started", "target", v.target.Hex())
+	defer log.Debug("Masternode validation stopped", "target", v.target.Hex())
+
+	mnsvc := v.mnsvc
+	if mnsvc == nil {
+		return
+	}
+	server := mnsvc.server
+
+	//---
+	mninfo, err := mnsvc.registry.Info(v.target)
+	if err != nil {
+		log.Warn("MNInfo error", "mn", v.target, "err", err)
+		return
+	}
+
+	cfg := mnsvc.eth.BlockChain().Config()
+	enode := energi_common.MastenodeEnode(mninfo.Ipv4address, mninfo.Enode, cfg)
+
+	peerCh := make(chan *p2p.PeerEvent)
+	defer close(peerCh)
+
+	peerSub := server.SubscribeEvents(peerCh)
+	defer peerSub.Unsubscribe()
+
+	server.AddPeer(enode)
+	defer server.RemovePeer(enode)
+
+	//---
+	deadline := time.Now().Add(time.Minute)
+
+	for {
+		select {
+		case <-mnsvc.quitCh:
+			return
+		case <-v.cancelCh:
+			return
+		case pe := <-peerCh:
+			if pe.Peer != enode.ID() || pe.Type != p2p.PeerEventTypeMsgRecv {
+				break
+			}
+			// TODO: validate block availability as per MN-14
+			return
+		case <-time.After(deadline.Sub(time.Now())):
+			log.Info("MN Invalidation", "mn", v.target, "err", err)
+			_, err := mnsvc.registry.Invalidate(v.target)
+			if err != nil {
+				log.Warn("MN Invalidate error", "mn", v.target, "err", err)
+			}
 			return
 		}
 	}

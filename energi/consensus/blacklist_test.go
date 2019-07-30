@@ -113,7 +113,7 @@ func TestBlacklist(t *testing.T) {
 	core.ApplyMessage(evm, msg, gp)
 	//---
 	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
-	callData, err = mnreg_abi.Pack("announce", blacklist_addr1, uint32(0), [2][32]byte{})
+	callData, err = mnreg_abi.Pack("announce", blacklist_addr1, uint32(130<<24), [2][32]byte{})
 	assert.Empty(t, err)
 	msg = types.NewMessage(
 		owner_addr,

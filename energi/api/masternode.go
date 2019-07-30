@@ -18,7 +18,6 @@ package api
 
 import (
 	"errors"
-	"net"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -30,6 +29,7 @@ import (
 	"github.com/ethereum/go-ethereum/p2p/enode"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -270,25 +270,14 @@ func (m *MasternodeAPI) Stats() (res struct {
 }
 
 func (m *MasternodeAPI) enode(ipv4address uint32, pubkey [2][32]byte) string {
-	ip := net.IPv4(
-		byte(ipv4address>>24),
-		byte(ipv4address>>16),
-		byte(ipv4address>>8),
-		byte(ipv4address),
-	)
+	cfg := m.backend.ChainConfig()
+	res := energi_common.MastenodeEnode(ipv4address, pubkey, cfg)
 
-	pubkey_buf := make([]byte, 33)
-	copy(pubkey_buf[:32], pubkey[0][:])
-	copy(pubkey_buf[32:33], pubkey[1][:])
-	pk, err := crypto.DecompressPubkey(pubkey_buf)
-	if err != nil {
-		log.Error("Failed to unmarshal pubkey")
+	if res == nil {
 		return ""
 	}
 
-	cfg := m.backend.ChainConfig()
-
-	return enode.NewV4(pk, ip, int(cfg.ChainID.Int64()), int(cfg.ChainID.Int64())).String()
+	return res.String()
 }
 
 func (m *MasternodeAPI) registry(

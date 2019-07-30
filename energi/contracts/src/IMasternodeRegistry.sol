@@ -42,12 +42,12 @@ interface IMasternodeRegistry {
         address indexed masternode,
         address indexed owner
     );
-    event Validation(
+    event Invalidation(
         address indexed masternode,
         address indexed validator
     );
     event Deactivated(
-        address masternode
+        address indexed masternode
     );
 
     function token_proxy() external view returns(IGovernedProxy);
@@ -56,8 +56,9 @@ interface IMasternodeRegistry {
     function announce(address masternode, uint32 ipv4address, bytes32[2] calldata enode) external;
     function denounce(address masternode) external;
     function heartbeat(uint block_number, bytes32 block_hash, uint sw_features) external;
-    function validate(address masternode) external;
-    function isValid(address masternode) external view
+    function invalidate(address masternode) external;
+    function validationTarget(address masternode) external view returns(address target);
+    function isActive(address masternode) external view
         returns(bool);
     function count() external view
         returns(
@@ -72,4 +73,5 @@ interface IMasternodeRegistry {
                 uint collateral, uint announced_block);
     function onCollateralUpdate(address owner) external;
     function enumerate() external view returns(address[] memory masternodes);
+    function enumerateActive() external view returns(address[] memory masternodes);
 }

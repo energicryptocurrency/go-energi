@@ -64,6 +64,7 @@ type Energi struct {
 	dposAbi      abi.ABI
 	blacklistAbi abi.ABI
 	sporkAbi     abi.ABI
+	mnregAbi     abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -98,6 +99,12 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
+	mngreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
 	return &Energi{
 		config:    config,
 		db:        db,
@@ -111,6 +118,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		dposAbi:      dpos_abi,
 		blacklistAbi: blacklist_abi,
 		sporkAbi:     spork_abi,
+		mnregAbi:     mngreg_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      0,
 		callGas:      30000,
@@ -444,6 +452,9 @@ func (e *Energi) govFinalize(
 	err = e.processConsensusGasLimits(chain, header, state)
 	if err == nil {
 		err = e.processBlockRewards(chain, header, state)
+	}
+	if err == nil {
+		err = e.processMasternodes(chain, header, state)
 	}
 	if err == nil {
 		err = e.processBlacklists(chain, header, state)

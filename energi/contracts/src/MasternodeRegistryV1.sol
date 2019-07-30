@@ -134,9 +134,8 @@ contract MasternodeRegistryV1 is
     );
 
     enum Config {
-        VotePerCycle,
-        RequireVoting,
-        VotesMax,
+        RequireValidation,
+        ValidationPeriod,
         CleanupPeriod,
         InitialEverCollateral
     }
@@ -148,32 +147,33 @@ contract MasternodeRegistryV1 is
     IGovernedProxy public token_proxy;
     IGovernedProxy public treasury_proxy;
 
-    uint32 public mn_announced;
+    uint public mn_announced;
 
     address public current_masternode;
-    uint8 public current_payouts;
-    uint public votes_per_cycle;
-    uint public require_voting_from;
-    uint public votes_max;
+    uint public current_payouts;
+    uint public require_validation;
+    uint public validation_period;
     uint public cleanup_period;
     //---------------------------------
 
     // Not for migration
     struct Status {
         uint256 sw_features;
-        uint64 last_heartbeat;
-        uint32 validations;
-        uint32 votes;
-        uint64 inactive_since;
-        uint8 seq_payouts;
+        uint last_heartbeat;
+        uint inactive_since;
+        uint validator_index;
+        uint invalidation_since;
+        uint invalidations;
+        uint seq_payouts;
     }
 
     uint public mn_ever_collateral;
     uint public mn_active_collateral;
     uint public mn_announced_collateral;
 
-    uint32 public mn_active;
+    uint public mn_active;
     mapping(address => Status) public mn_status;
+    address[] public validator_list;
     uint last_block_number;
     //---------------------------------
 
@@ -181,7 +181,7 @@ contract MasternodeRegistryV1 is
         address _proxy,
         IGovernedProxy _token_proxy,
         IGovernedProxy _treasury_proxy,
-        uint[5] memory _config
+        uint[4] memory _config
     )
         public
         GovernedContract(_proxy)
@@ -190,9 +190,8 @@ contract MasternodeRegistryV1 is
         token_proxy = _token_proxy;
         treasury_proxy = _treasury_proxy;
 
-        votes_per_cycle = _config[uint(Config.VotePerCycle)];
-        require_voting_from = _config[uint(Config.RequireVoting)];
-        votes_max = _config[uint(Config.VotesMax)];
+        require_validation = _config[uint(Config.RequireValidation)];
+        validation_period = _config[uint(Config.ValidationPeriod)];
         cleanup_period = _config[uint(Config.CleanupPeriod)];
 
         uint initial_ever_collateral = _config[uint(Config.InitialEverCollateral)];
@@ -204,7 +203,7 @@ contract MasternodeRegistryV1 is
     //---------------------------------
 
     enum ValidationStatus {
-        MNValid,
+        MNActive,
         MNCollaterIssue,
         MNNotActive,
         MNHeartbeat
@@ -252,8 +251,8 @@ contract MasternodeRegistryV1 is
         );
 
         Status storage mnstatus = mn_status[masternode];
-        mnstatus.last_heartbeat = uint64(block.timestamp);
-        mnstatus.seq_payouts = uint8(balance / MN_COLLATERAL_MIN);
+        mnstatus.last_heartbeat = block.timestamp;
+        mnstatus.seq_payouts = balance / MN_COLLATERAL_MIN;
         ++mn_active;
         ++mn_announced;
 
@@ -265,6 +264,12 @@ contract MasternodeRegistryV1 is
         if (announced_collateral > mn_ever_collateral) {
             mn_ever_collateral = announced_collateral;
         }
+
+        // Validator logic is de-coupled for easier changes
+        //---
+        mnstatus.invalidation_since = block.number;
+        mnstatus.validator_index = validator_list.length;
+        validator_list.push(masternode);
 
         // Event
         //---
@@ -299,12 +304,37 @@ contract MasternodeRegistryV1 is
     function _announce_check_ipv4(uint32 ipv4address) internal pure {
         uint a = ipv4address & 0xFF000000;
         uint b = ipv4address & 0x00FF0000;
+        uint c = ipv4address & 0x0000FF00;
+        // solium-disable operator-whitespace
         require(
+            // 127.0.0.0/8
             (a != (127 << 24)) &&
+            // 10.0.0.0/8
             (a != (10 << 24)) &&
+            // 192.168.0.0/16
             !((a == (192 << 24)) && (b == (168 << 16))) &&
-            !((a == (172 << 24)) && ((b & 0x00F00000) == (16 << 16))),
+            // 172.16.0.0/12
+            !((a == (172 << 24)) && ((b & 0x00F00000) == (16 << 16))) &&
+            // 0.0.0.0/8
+            (a != 0) &&
+            // 100.64.0.0/10
+            !((a == (100 << 24)) && ((b & 0x00C00000) == (64 << 16))) &&
+            // 169.254.0.0/16
+            !((a == (169 << 24)) && (b == (254 << 16))) &&
+            // 198.18.0.0/15
+            !((a == (198 << 24)) && ((b & 0x00FE0000) == (18 << 16))) &&
+            // 198.51.100.0/24
+            !((a == (198 << 24)) && (b == (51 << 16)) && (c == (100 << 8))) &&
+            // 203.0.113.0/24
+            !((a == (203 << 24)) && (b == (0 << 16)) && (c == (113 << 8))) &&
+            // 224.0.0.0/4
+            ((a & 0xF0000000) != (224 << 24)) &&
+            // 240.0.0.0/4
+            ((a & 0xF0000000) != (240 << 24)) &&
+            // 255.255.255.255/32
+            (ipv4address != 0xFFFFFFFF),
             "Wrong IP");
+        // solium-enable operator-whitespace
     }
 
     function _announce_insert(StorageMasternodeRegistryV1 mn_storage, address masternode)
@@ -385,11 +415,11 @@ contract MasternodeRegistryV1 is
 
         // Delete
         //---
+
         mn_announced_collateral -= mninfo.collateral;
 
         if (mn_status[masternode].seq_payouts > 0) {
-            --mn_active;
-            mn_active_collateral -= mninfo.collateral;
+            _deactive_common(masternode, mninfo.collateral);
         }
 
         delete mn_status[masternode];
@@ -399,6 +429,20 @@ contract MasternodeRegistryV1 is
 
         //---
         emit Denounced(masternode, mninfo.owner);
+    }
+
+    function _deactive_common(address masternode, uint collateral) internal {
+        // Remove from validators
+        address last_validator = validator_list[validator_list.length - 1];
+        uint validator_index = mn_status[masternode].validator_index;
+
+        mn_status[last_validator].validator_index = validator_index;
+        validator_list[validator_index] = last_validator;
+        validator_list.pop();
+
+        //--
+        --mn_active;
+        mn_active_collateral -= collateral;
     }
 
     function heartbeat(uint block_number, bytes32 block_hash, uint sw_features)
@@ -412,53 +456,61 @@ contract MasternodeRegistryV1 is
 
         Status storage s = mn_status[masternode];
 
-        require(s.seq_payouts > 0, "Not active");
+        require(_isActive(masternode, s), "Not active");
 
         uint hearbeat_delay = block.timestamp - s.last_heartbeat;
-        require(hearbeat_delay < MN_HEARTBEAT_INTERVAL_MAX, "Too late");
         require(hearbeat_delay > MN_HEARTBEAT_INTERVAL_MIN, "Too early");
 
-        s.last_heartbeat = uint64(block.timestamp);
+        s.last_heartbeat = block.timestamp;
         s.sw_features = sw_features;
 
         emit Heartbeat(masternode);
     }
 
-    function validate(address masternode)
+    function invalidate(address masternode)
         external
         noReentry
     {
         address caller = _callerAddress();
-        require(caller != masternode, "Vote for self");
+        require(caller != masternode, "Invalidation for self");
 
         //---
         Status storage cs = mn_status[caller];
-        require(_isValid(caller, cs), "Not active caller");
-        require(cs.votes > 0, "No more votes");
-
-        cs.votes--;
+        require(_isActive(caller, cs), "Not active caller");
+        require(validationTarget(caller) == masternode, "Invalid target");
 
         //---
         Status storage s = mn_status[masternode];
 
-        require(s.seq_payouts > 0, "Not active target");
+        require(_isActive(masternode, s), "Not active target");
 
-        if (s.validations < votes_max) {
-            s.validations++;
-        }
+        s.invalidations++;
 
-        emit Validation(masternode, caller);
+        emit Invalidation(masternode, caller);
     }
 
-    function isValid(address masternode) external view returns(bool) {
-        return _isValid(masternode, mn_status[masternode]);
+    function validationTarget(address masternode) public view returns(address target) {
+        uint offset = block.number % mn_announced;
+        uint index = mn_status[masternode].validator_index;
+        uint target_index = (index + offset) % validator_list.length;
+
+        // edge case
+        if (index == target_index) {
+            target_index = (target_index + 1) % validator_list.length;
+        }
+
+        return validator_list[target_index];
+    }
+
+    function isActive(address masternode) external view returns(bool) {
+        return _isActive(masternode, mn_status[masternode]);
     }
 
     //===
 
-    function _isValid(address masternode, Status storage mnstatus) internal view returns(bool) {
+    function _isActive(address masternode, Status storage mnstatus) internal view returns(bool) {
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
-        return _checkStatus(mnstatus, mninfo) == ValidationStatus.MNValid;
+        return _checkStatus(mnstatus, mninfo) == ValidationStatus.MNActive;
     }
 
     function _checkStatus(
@@ -468,6 +520,14 @@ contract MasternodeRegistryV1 is
         internal view
         returns(ValidationStatus)
     {
+        if (mnstatus.seq_payouts == 0) {
+            return ValidationStatus.MNNotActive;
+        }
+
+        if ((block.timestamp - mnstatus.last_heartbeat) >= MN_HEARTBEAT_INTERVAL_MAX) {
+            return ValidationStatus.MNHeartbeat;
+        }
+
         (uint balance, uint last_block) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(mninfo.owner);
 
         if (balance != mninfo.collateral) {
@@ -478,15 +538,7 @@ contract MasternodeRegistryV1 is
             return ValidationStatus.MNCollaterIssue;
         }
 
-        if (mnstatus.seq_payouts == 0) {
-            return ValidationStatus.MNNotActive;
-        }
-
-        if ((block.timestamp - mnstatus.last_heartbeat) >= MN_HEARTBEAT_INTERVAL_MAX) {
-            return ValidationStatus.MNHeartbeat;
-        }
-
-        return ValidationStatus.MNValid;
+        return ValidationStatus.MNActive;
     }
 
     //===
@@ -591,7 +643,6 @@ contract MasternodeRegistryV1 is
     {
         // NOTE: it should be OK for 0
         masternodes = new address[](mn_announced);
-
         address curr_mn = current_masternode;
 
         if (curr_mn == address(0)) {
@@ -608,6 +659,18 @@ contract MasternodeRegistryV1 is
             next = mninfo.next;
             ++i;
         } while (next != curr_mn);
+    }
+
+    function enumerateActive()
+        external view
+        returns(address[] memory masternodes)
+    {
+        // NOTE: this API is targeted at fast consensus execution
+        masternodes = new address[](mn_active);
+
+        for (uint i = 0; i < masternodes.length; ++i) {
+            masternodes[i] = validator_list[i];
+        }
     }
 
     // IGovernedContract
@@ -649,7 +712,7 @@ contract MasternodeRegistryV1 is
     function _reward() internal returns(bool) {
         //---
         address masternode = current_masternode;
-        uint8 payouts = current_payouts;
+        uint payouts = current_payouts;
 
         if (masternode == address(0)) {
             return true;
@@ -658,14 +721,15 @@ contract MasternodeRegistryV1 is
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
 
         Status storage mnstatus = mn_status[masternode];
-        mnstatus.votes = uint32(votes_per_cycle);
-        uint validations = mnstatus.validations;
+        uint invalidations = mnstatus.invalidations;
+        uint invalidation_since = mnstatus.invalidation_since;
         ++payouts;
 
         if (payouts < mnstatus.seq_payouts) {
             current_payouts = payouts;
         } else {
-            mnstatus.validations = 0;
+            mnstatus.invalidations = 0;
+            mnstatus.invalidation_since = block.number;
             current_masternode = mninfo.next;
             current_payouts = 0;
         }
@@ -674,11 +738,14 @@ contract MasternodeRegistryV1 is
         //---
         ValidationStatus status = _checkStatus(mnstatus, mninfo);
 
-        if (status == ValidationStatus.MNValid) {
-            // solium-disable-next-line security/no-send
-            if (!_canReward(validations) || mninfo.owner.send(msg.value)) {
+        if (status == ValidationStatus.MNActive) {
+            // solium-disable security/no-send
+            if (!_canReward(invalidations, invalidation_since) ||
+                mninfo.owner.send(msg.value)
+            ) {
                 return true;
             }
+            // solium-enable security/no-send
         }
 
         // When not valid
@@ -689,10 +756,8 @@ contract MasternodeRegistryV1 is
         } else if (mnstatus.seq_payouts > 0) {
             // Mark as inactive for later auto-cleanup
             mnstatus.seq_payouts = 0;
-            mnstatus.inactive_since = uint64(block.timestamp);
-            --mn_active;
-            mn_active_collateral -= mninfo.collateral;
-            mnstatus.validations = 0;
+            mnstatus.inactive_since = block.timestamp;
+            _deactive_common(masternode, mninfo.collateral);
             current_masternode = mninfo.next;
             current_payouts = 0;
 
@@ -705,21 +770,16 @@ contract MasternodeRegistryV1 is
         return false;
     }
 
-    function _canReward(uint validations) internal view returns(bool) {
-        uint active = mn_active;
-
-        if (active < require_voting_from) {
+    function _canReward(uint invalidations, uint invalidation_since) internal view returns(bool) {
+        if (mn_active < require_validation) {
             return true;
         }
 
-        uint required = active / 2;
-        uint max = votes_max;
+        uint threshold = invalidation_since - block.number;
+        threshold = (threshold / validation_period) + 1;
+        threshold /= 2;
 
-        if (required > max) {
-            required = max;
-        }
-
-        return (validations >= required);
+        return (invalidations < threshold);
     }
 
     //===
