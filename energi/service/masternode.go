@@ -167,7 +167,7 @@ func (m *MasternodeService) isActive() bool {
 		return false
 	}
 
-	res, err := m.registry.IsValid(m.address)
+	res, err := m.registry.IsActive(m.address)
 
 	if err != nil {
 		log.Error("Masternode check failed", "err", err)

@@ -58,7 +58,7 @@ interface IMasternodeRegistry {
     function heartbeat(uint block_number, bytes32 block_hash, uint sw_features) external;
     function invalidate(address masternode) external;
     function validationTarget(address masternode) external view returns(address target);
-    function isValid(address masternode) external view
+    function isActive(address masternode) external view
         returns(bool);
     function count() external view
         returns(
@@ -73,4 +73,5 @@ interface IMasternodeRegistry {
                 uint collateral, uint announced_block);
     function onCollateralUpdate(address owner) external;
     function enumerate() external view returns(address[] memory masternodes);
+    function enumerateActive() external view returns(address[] memory masternodes);
 }

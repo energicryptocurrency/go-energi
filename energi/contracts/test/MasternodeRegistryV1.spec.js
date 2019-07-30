@@ -192,8 +192,8 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
-            it('should not be isValid()', async () => {
-                const res = await s.token_abi.isValid(masternode1);
+            it('should not be isActive()', async () => {
+                const res = await s.token_abi.isActive(masternode1);
                 expect(res).false;
             });
 
@@ -426,9 +426,9 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
-            it('should be isValid()', async () => {
-                expect(await s.token_abi.isValid(masternode1)).true;
-                expect(await s.token_abi.isValid(masternode2)).false;
+            it('should be isActive()', async () => {
+                expect(await s.token_abi.isActive(masternode1)).true;
+                expect(await s.token_abi.isActive(masternode2)).false;
             });
 
             it('should heartbeat()', async () => {
@@ -532,11 +532,18 @@ contract("MasternodeRegistryV1", async accounts => {
                     await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
-                    assert.match(e.message, /Too late/);
+                    assert.match(e.message, /Not active/);
                 }
+
+                // Denounce does not happen on read-only
+                expect(await s.orig.getPastEvents(
+                    'Denounced', common.evt_last_block)).lengthOf(0);
             });
 
             it('should denounce() on collateral change', async() => {
+                await s.token_abi.announce(
+                    masternode1, ip1, enode1, { from: owner1 });
+
                 await s.mntoken_abi.depositCollateral({
                     from: owner1,
                     value: collateral1,
@@ -663,9 +670,9 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(0);
             });
 
-            it('should be isValid()', async () => {
+            it('should be isActive()', async () => {
                 for (let mn of nodes) {
-                    expect(await s.token_abi.isValid(mn.masternode)).true;
+                    expect(await s.token_abi.isActive(mn.masternode)).true;
                 }
             });
 
@@ -881,10 +888,10 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
-            it('should be isValid()', async () => {
+            it('should be isActive()', async () => {
                 for (let mn of nodes) {
-                    expect(await s.token_abi.isValid(mn.masternode)).true;
-                    expect(await s.token_abi.isValid(mn.owner)).false;
+                    expect(await s.token_abi.isActive(mn.masternode)).true;
+                    expect(await s.token_abi.isActive(mn.owner)).false;
                 }
             });
 
@@ -1046,9 +1053,9 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(owner3_after.sub(owner3_before).toString())
                     .eql(reward.mul(toBN(1+1+1+1)).toString());
 
-                expect(await s.token_abi.isValid(masternode1)).true;
-                expect(await s.token_abi.isValid(masternode2)).false;
-                expect(await s.token_abi.isValid(masternode3)).true;
+                expect(await s.token_abi.isActive(masternode1)).true;
+                expect(await s.token_abi.isActive(masternode2)).false;
+                expect(await s.token_abi.isActive(masternode3)).true;
             });
 
             it('should skip inactive node from validation', async () => {
@@ -1068,7 +1075,13 @@ contract("MasternodeRegistryV1", async accounts => {
             });
 
             it('should handle enumerate()', async () => {
-                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
+                expect(await s.token_abi.enumerate()).members([
+                    masternode1, masternode2, masternode3]);
+            });
+
+            it('should handle enumerateActive()', async () => {
+                expect(await s.token_abi.enumerateActive()).members([
+                    masternode1, masternode3]);
             });
 
             it('should denounce() on collateral change', async() => {

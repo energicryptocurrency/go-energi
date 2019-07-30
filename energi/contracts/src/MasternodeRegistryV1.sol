@@ -203,7 +203,7 @@ contract MasternodeRegistryV1 is
     //---------------------------------
 
     enum ValidationStatus {
-        MNValid,
+        MNActive,
         MNCollaterIssue,
         MNNotActive,
         MNHeartbeat
@@ -456,10 +456,9 @@ contract MasternodeRegistryV1 is
 
         Status storage s = mn_status[masternode];
 
-        require(s.seq_payouts > 0, "Not active");
+        require(_isActive(masternode, s), "Not active");
 
         uint hearbeat_delay = block.timestamp - s.last_heartbeat;
-        require(hearbeat_delay < MN_HEARTBEAT_INTERVAL_MAX, "Too late");
         require(hearbeat_delay > MN_HEARTBEAT_INTERVAL_MIN, "Too early");
 
         s.last_heartbeat = block.timestamp;
@@ -477,13 +476,13 @@ contract MasternodeRegistryV1 is
 
         //---
         Status storage cs = mn_status[caller];
-        require(_isValid(caller, cs), "Not active caller");
+        require(_isActive(caller, cs), "Not active caller");
         require(validationTarget(caller) == masternode, "Invalid target");
 
         //---
         Status storage s = mn_status[masternode];
 
-        require(s.seq_payouts > 0, "Not active target");
+        require(_isActive(masternode, s), "Not active target");
 
         s.invalidations++;
 
@@ -503,15 +502,15 @@ contract MasternodeRegistryV1 is
         return validator_list[target_index];
     }
 
-    function isValid(address masternode) external view returns(bool) {
-        return _isValid(masternode, mn_status[masternode]);
+    function isActive(address masternode) external view returns(bool) {
+        return _isActive(masternode, mn_status[masternode]);
     }
 
     //===
 
-    function _isValid(address masternode, Status storage mnstatus) internal view returns(bool) {
+    function _isActive(address masternode, Status storage mnstatus) internal view returns(bool) {
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
-        return _checkStatus(mnstatus, mninfo) == ValidationStatus.MNValid;
+        return _checkStatus(mnstatus, mninfo) == ValidationStatus.MNActive;
     }
 
     function _checkStatus(
@@ -521,6 +520,14 @@ contract MasternodeRegistryV1 is
         internal view
         returns(ValidationStatus)
     {
+        if (mnstatus.seq_payouts == 0) {
+            return ValidationStatus.MNNotActive;
+        }
+
+        if ((block.timestamp - mnstatus.last_heartbeat) >= MN_HEARTBEAT_INTERVAL_MAX) {
+            return ValidationStatus.MNHeartbeat;
+        }
+
         (uint balance, uint last_block) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(mninfo.owner);
 
         if (balance != mninfo.collateral) {
@@ -531,15 +538,7 @@ contract MasternodeRegistryV1 is
             return ValidationStatus.MNCollaterIssue;
         }
 
-        if (mnstatus.seq_payouts == 0) {
-            return ValidationStatus.MNNotActive;
-        }
-
-        if ((block.timestamp - mnstatus.last_heartbeat) >= MN_HEARTBEAT_INTERVAL_MAX) {
-            return ValidationStatus.MNHeartbeat;
-        }
-
-        return ValidationStatus.MNValid;
+        return ValidationStatus.MNActive;
     }
 
     //===
@@ -642,9 +641,6 @@ contract MasternodeRegistryV1 is
         external view
         returns(address[] memory masternodes)
     {
-        // NOTE: this enumeration is expected to follow the sequence, so
-        //       validator_list should not be copied.
-
         // NOTE: it should be OK for 0
         masternodes = new address[](mn_announced);
         address curr_mn = current_masternode;
@@ -663,6 +659,18 @@ contract MasternodeRegistryV1 is
             next = mninfo.next;
             ++i;
         } while (next != curr_mn);
+    }
+
+    function enumerateActive()
+        external view
+        returns(address[] memory masternodes)
+    {
+        // NOTE: this API is targeted at fast consensus execution
+        masternodes = new address[](mn_active);
+
+        for (uint i = 0; i < masternodes.length; ++i) {
+            masternodes[i] = validator_list[i];
+        }
     }
 
     // IGovernedContract
@@ -730,7 +738,7 @@ contract MasternodeRegistryV1 is
         //---
         ValidationStatus status = _checkStatus(mnstatus, mninfo);
 
-        if (status == ValidationStatus.MNValid) {
+        if (status == ValidationStatus.MNActive) {
             // solium-disable security/no-send
             if (!_canReward(invalidations, invalidation_since) ||
                 mninfo.owner.send(msg.value)
