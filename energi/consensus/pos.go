@@ -58,10 +58,6 @@ type timeTarget struct {
 	period_target uint64
 }
 
-func (e *Energi) now() uint64 {
-	return uint64(time.Now().Unix())
-}
-
 /**
  * Implements block time consensus
  *

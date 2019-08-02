@@ -38,4 +38,7 @@ var (
 	// ErrMissingState is returned when database is missing state root which is required
 	// for block validation.
 	ErrMissingState = errors.New("missing state")
+
+	// ErrDoSThrottle is returned when DoS protection gets triggered.
+	ErrDoSThrottle = errors.New("dos throttle")
 )

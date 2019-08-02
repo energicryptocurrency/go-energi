@@ -1205,6 +1205,14 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 	// TODO: schedule retrieval of missing pieces and re-try only if
 	//       the current head is stalled.
 	case err == consensus.ErrMissingState:
+		log.Debug("Missing state at", "number", block.Number(), "hash", block.Hash())
+		stats.ignored += len(it.chain)
+		return it.index, events, coalescedLogs, err
+
+	// DoS throttling. It does not mean that the block is invalid, but
+	// we refuse to accept one at the current moment to mitigate DoS.
+	case err == consensus.ErrDoSThrottle:
+		log.Debug("DoS throttling at", "number", block.Number(), "hash", block.Hash())
 		stats.ignored += len(it.chain)
 		return it.index, events, coalescedLogs, err
 
