@@ -19,6 +19,7 @@ package consensus
 import (
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	eth_consensus "github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core/types"
 
@@ -29,6 +30,21 @@ const (
 	oldForkPeriod = time.Duration(15) * time.Minute
 )
 
+type KnownStakeKey struct {
+	coinbase common.Address
+	parent   common.Hash
+}
+type KnownStakeValue struct {
+	block common.Hash
+	ts    uint64
+}
+
+func (ksv *KnownStakeValue) isActive(now uint64) bool {
+	return (now - ksv.ts) < energi_params.StakeThrottle
+}
+
+type KnownStakes map[KnownStakeKey]KnownStakeValue
+
 func (e *Energi) checkDoS(
 	chain ChainReader,
 	header *types.Header,
@@ -37,6 +53,7 @@ func (e *Energi) checkDoS(
 	old_fork_threshold := e.now() - energi_params.OldForkPeriod
 
 	// POS-8: allow old fork only if current head is not fresh enough
+	//---
 	if parent.Time < old_fork_threshold {
 		current := chain.CurrentHeader()
 
@@ -44,6 +61,38 @@ func (e *Energi) checkDoS(
 			return eth_consensus.ErrDoSThrottle
 		}
 	}
+
+	// POS-9: stake throttling
+	//---
+	now := e.now()
+
+	ksk := KnownStakeKey{
+		coinbase: header.Coinbase,
+		parent:   header.ParentHash,
+	}
+	ksv := KnownStakeValue{
+		block: header.Hash(),
+		ts:    now,
+	}
+
+	if prev_ksv, ok := e.knownStakes[ksk]; ok {
+		if prev_ksv.isActive(now) && prev_ksv.block != ksv.block {
+			return eth_consensus.ErrDoSThrottle
+		}
+	}
+
+	e.knownStakes[ksk] = ksv
+	//---
+	if e.nextKSPurge < now {
+		e.nextKSPurge = now + energi_params.StakeThrottle
+
+		for k, v := range e.knownStakes {
+			if !v.isActive(now) {
+				delete(e.knownStakes, k)
+			}
+		}
+	}
+	//---
 
 	return nil
 }

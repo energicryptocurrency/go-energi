@@ -75,45 +75,90 @@ func TestPoSDoS(t *testing.T) {
 	engine := New(nil, nil)
 	engine.now = func() uint64 { return curr_time }
 
-	// Regular grow
+	// POS-8: old fork protection
+	//============================
+
+	log.Trace("Regular grow")
 	curr_time = base
 	p.Time = base
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 
-	// Side chain as new fork
+	log.Trace("Side chain as new fork")
 	curr_time = base
 	p.Time = base - energi_params.OldForkPeriod
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 
-	// Side chain as old fork
+	log.Trace("Side chain as old fork")
 	curr_time = base + 1
 	p.Time = base - energi_params.OldForkPeriod
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap
 	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
 
-	// Side chain as old fork
+	log.Trace("Side chain as old fork")
 	curr_time = base
 	p.Time = base - energi_params.OldForkPeriod - 1
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap
 	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
 
-	// Side chain as old fork an near old current
+	log.Trace("Side chain as old fork an near old current")
 	curr_time = base + energi_params.OldForkPeriod - 1
 	p.Time = base - energi_params.OldForkPeriod - 1
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap
 	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
 
-	// Side chain as old fork an old current - allow old forks
+	log.Trace("Side chain as old fork an old current - allow old forks")
 	curr_time = base + energi_params.OldForkPeriod
 	p.Time = base - energi_params.OldForkPeriod - 1
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+
+	// POS-9: stake throttling
+	//============================
+
+	log.Trace("Another variation")
+	curr_time += energi_params.StakeThrottle
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	p.Time = base
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap + 1
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 1, len(engine.knownStakes))
+
+	log.Trace("Another coinbase")
+	h.Coinbase = common.HexToAddress("0x1234")
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 2, len(engine.knownStakes))
+
+	log.Trace("Another variation")
+	h.Root = common.HexToHash("0x1234")
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+
+	log.Trace("Should reset")
+	curr_time += energi_params.StakeThrottle
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+
+	log.Trace("Check correct cleanup")
+	h.Coinbase = common.HexToAddress("0x2345")
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	h.Coinbase = common.HexToAddress("0x3456")
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 3, len(engine.knownStakes))
+
+	curr_time += energi_params.StakeThrottle / 2
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	h.Time += 1
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 3, len(engine.knownStakes))
+
+	curr_time += energi_params.StakeThrottle
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 1, len(engine.knownStakes))
 }

@@ -74,6 +74,8 @@ type Energi struct {
 	diffFn       DiffFn
 	testing      bool
 	now          func() uint64
+	knownStakes  KnownStakes
+	nextKSPurge  uint64
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -126,6 +128,8 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		callGas:      30000,
 		diffFn:       calcPoSDifficultyV1,
 		now:          func() uint64 { return uint64(time.Now().Unix()) },
+		knownStakes:  make(KnownStakes),
+		nextKSPurge:  0,
 	}
 }
 
