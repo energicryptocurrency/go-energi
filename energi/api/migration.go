@@ -67,6 +67,8 @@ type Gen2Key struct {
 }
 
 func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin) {
+	log.Info("Preparing a coin list")
+
 	mgrt_contract, err := energi_abi.NewGen2MigrationCaller(
 		energi_params.Energi_MigrationContract, m.backend.(bind.ContractCaller))
 	if err != nil {
