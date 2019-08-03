@@ -58,10 +58,6 @@ type timeTarget struct {
 	period_target uint64
 }
 
-func (e *Energi) now() uint64 {
-	return uint64(time.Now().Unix())
-}
-
 /**
  * Implements block time consensus
  *
@@ -88,9 +84,10 @@ func (e *Energi) calcTimeTarget(
 	// POS-12: Block interval enforcement
 	//---
 	if block_number >= AverageTimeBlocks {
+		// TODO: LRU cache here for extra DoS mitigation
 		past := parent
 
-		// NOTE: we have to this way as parent may be not part of canonical
+		// NOTE: we have to do this way as parent may be not part of canonical
 		//       chain. As no mutex is held, we cannot do checks for canonical.
 		for i := AverageTimeBlocks - 1; i > 0; i-- {
 			past = chain.GetHeader(past.ParentHash, past.Number.Uint64()-1)
@@ -101,12 +98,11 @@ func (e *Energi) calcTimeTarget(
 			}
 		}
 
-		actual := parent.Time - past.Time
-		expected := TargetPeriodGap - TargetBlockGap
 		ret.period_target = past.Time + TargetPeriodGap
+		period_min_time := ret.period_target - MinBlockGap
 
-		if expected > actual {
-			ret.min_time = ret.period_target
+		if period_min_time > ret.min_time {
+			ret.min_time = period_min_time
 		}
 	}
 
@@ -156,6 +152,8 @@ func (e *Energi) calcPoSModifier(
 	time uint64,
 	parent *types.Header,
 ) (ret common.Hash) {
+	// TODO: LRU cache here for extra DoS mitigation
+
 	// Find maturity period border
 	maturity_border := time
 

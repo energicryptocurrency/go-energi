@@ -1856,7 +1856,7 @@ func TestZeroFee(t *testing.T) {
 		if err := pool.AddRemote(pricedTransaction(uint64(i), 50000, common.Big0, key)); err == nil {
 			t.Fatalf("tx %d: invalid zerofee got added: %v", i, err)
 		}
-		if err := pool.AddRemote(zerofeeTransaction(uint64(i), common.HexToAddress("0x308"), energiMigrateID[:], key)); err != nil {
+		if err := pool.AddRemote(zerofeeTransaction(uint64(i), common.HexToAddress("0x308"), energiClaimID[:], key)); err != nil {
 			t.Fatalf("tx %d: failed to add transaction: %v", i, err)
 		}
 		if len(pool.pending) != 0 {

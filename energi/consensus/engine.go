@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -72,6 +73,9 @@ type Energi struct {
 	accountsFn   AccountsFn
 	diffFn       DiffFn
 	testing      bool
+	now          func() uint64
+	knownStakes  KnownStakes
+	nextKSPurge  uint64
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -123,6 +127,9 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		xferGas:      0,
 		callGas:      30000,
 		diffFn:       calcPoSDifficultyV1,
+		now:          func() uint64 { return uint64(time.Now().Unix()) },
+		knownStakes:  make(KnownStakes),
+		nextKSPurge:  0,
 	}
 }
 
@@ -177,7 +184,7 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 	if parent == nil {
 		if header.Number.Cmp(common.Big0) != 0 {
 			log.Trace("Not found parent", "number", header.Number,
-				"hash", header.Hash, "parent", header.ParentHash)
+				"hash", header.Hash(), "parent", header.ParentHash)
 			return eth_consensus.ErrUnknownAncestor
 		}
 
@@ -251,8 +258,15 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		}
 	}
 
-	if err := misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
+	if err = misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
 		return err
+	}
+
+	// DoS protection
+	if seal && chain.GetHeader(header.Hash(), header.Number.Uint64()) == nil {
+		if err = e.checkDoS(chain, header, parent); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -654,10 +668,6 @@ func (e *Energi) APIs(chain ChainReader) []rpc.API {
 // Close terminates any background threads maintained by the consensus engine.
 func (e *Energi) Close() error {
 	return nil
-}
-
-func (e *Energi) Hashrate() float64 {
-	return 0
 }
 
 func (e *Energi) processConsensusGasLimits(

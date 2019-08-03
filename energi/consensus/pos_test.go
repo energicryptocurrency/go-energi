@@ -191,13 +191,13 @@ func TestPoSChain(t *testing.T) {
 			assert.Equal(t, tt.min_time, header.Time)
 			assert.Equal(t, tt.block_target, header.Time+30)
 		} else if i < 61 {
-			assert.Equal(t, header.Time, genesis.Time()+3600)
-			assert.Equal(t, header.Time, parent.Time+1830)
+			assert.Equal(t, header.Time, genesis.Time()+3570)
+			assert.Equal(t, header.Time, parent.Time+1800)
 
 			assert.Equal(t, tt.min_time, header.Time)
 			assert.Equal(t, tt.block_target, parent.Time+60)
 		} else if i < 62 {
-			assert.Equal(t, header.Time, genesis.Time()+3630)
+			assert.Equal(t, header.Time, genesis.Time()+3600)
 		}
 
 		assert.True(t, parent.Time < tt.min_time, "Header %v", i)

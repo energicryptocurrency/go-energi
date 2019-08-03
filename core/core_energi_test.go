@@ -24,10 +24,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/params"
 
 	"github.com/stretchr/testify/assert"
 
@@ -211,7 +214,7 @@ func (s *fakeSigner) Equal(types.Signer) bool {
 	return true
 }
 
-func TestZeroFeeProtector(t *testing.T) {
+func TestZeroFeeProtectorMasternode(t *testing.T) {
 	t.Parallel()
 	log.Root().SetHandler(log.StdoutHandler)
 
@@ -346,4 +349,108 @@ func TestZeroFeeProtector(t *testing.T) {
 	err = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
+}
+
+func TestZeroFeeProtectorMigration(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	now := time.Now() // It can be fixed
+	adjust_time := time.Duration(0)
+
+	protector := newZeroFeeProtector()
+	protector.timeNow = func() time.Time {
+		return now.Add(adjust_time)
+	}
+
+	pool := &TxPool{}
+
+	signer := &fakeSigner{}
+	pool.signer = signer
+	signer.sender = common.HexToAddress("0x0000000000000000000000000000000022345678")
+
+	testdb := ethdb.NewMemDatabase()
+	gspec := &Genesis{
+		Config: params.TestnetChainConfig,
+	}
+	gspec.MustCommit(testdb)
+	engine := ethash.NewFaker()
+
+	chain, err := NewBlockChain(
+		testdb, nil, gspec.Config,
+		engine, vm.Config{}, nil)
+	assert.Empty(t, err)
+	defer chain.Stop()
+	pool.chain = chain
+	pool.currentState, _ = chain.State()
+
+	migration_abi, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
+	assert.Empty(t, err)
+	claim1Call, err := migration_abi.Pack(
+		"claim", big.NewInt(1), common.Address{}, uint8(0), common.Hash{}, common.Hash{})
+	assert.Empty(t, err)
+	claim2Call, err := migration_abi.Pack(
+		"claim", big.NewInt(2), common.Address{}, uint8(0), common.Hash{}, common.Hash{})
+	assert.Empty(t, err)
+
+	claim1 := types.NewTransaction(
+		1, energi_params.Energi_MigrationContract, common.Big0, 100000, common.Big0, claim1Call)
+	claim2 := types.NewTransaction(
+		1, energi_params.Energi_MigrationContract, common.Big0, 100000, common.Big0, claim2Call)
+
+	pool.currentState.SetCode(
+		energi_params.Energi_MigrationContract,
+		// PUSH1 1 PUSH1 0 MSTORE PUSH1 1 PUSH1 0 RETURN
+		[]byte{0x60, 0x01, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xF3},
+	)
+
+	// Initial
+	err = protector.checkDoS(pool, claim1)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, claim2)
+	assert.Equal(t, nil, err)
+
+	// Before reset
+	adjust_time = time.Duration(2) * time.Minute
+
+	err = protector.checkDoS(pool, claim1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, claim2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+
+	// After reset + return 0
+	adjust_time = time.Duration(3) * time.Minute
+
+	err = protector.checkDoS(pool, claim1)
+	assert.Equal(t, nil, err)
+
+	pool.currentState.SetCode(
+		energi_params.Energi_MigrationContract,
+		// PUSH1 0 PUSH1 0 MSTORE PUSH1 1 PUSH1 0 RETURN
+		[]byte{0x60, 0x00, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xF3},
+	)
+
+	err = protector.checkDoS(pool, claim2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+
+	// After reset + revert 1
+	adjust_time = time.Duration(6) * time.Minute
+
+	pool.currentState.SetCode(
+		energi_params.Energi_MigrationContract,
+		// PUSH1 1 PUSH1 0 MSTORE PUSH1 1 PUSH1 0 RETURN
+		[]byte{0x60, 0x01, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xF3},
+	)
+
+	err = protector.checkDoS(pool, claim1)
+	assert.Equal(t, nil, err)
+
+	pool.currentState.SetCode(
+		energi_params.Energi_MigrationContract,
+		// PUSH1 1 PUSH1 0 MSTORE PUSH1 1 PUSH1 0 REVERT
+		[]byte{0x60, 0x01, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xFD},
+	)
+
+	err = protector.checkDoS(pool, claim2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
 }
