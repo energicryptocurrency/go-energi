@@ -11,6 +11,7 @@ Vagrant.configure("2") do |config|
             apt-get install -y python3-pip unzip;
             pip3 install -U futoin-cid;
             cid tool install docker;
+            sudo adduser vagrant docker;
         ]
     end
 end

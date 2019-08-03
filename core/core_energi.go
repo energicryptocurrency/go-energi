@@ -196,6 +196,7 @@ func (z *zeroFeeProtector) checkMasternode(
 	}
 
 	timeMap[sender] = now
+	log.Debug("ZeroFee masternode", "sender", sender, "now", now)
 	return nil
 }
 
@@ -215,7 +216,7 @@ func (z *zeroFeeProtector) checkMigration(
 
 	// Check if call is valid
 	//---
-	copy(callData[0:3], energiVerifyClaimID[:])
+	copy(callData[:], energiVerifyClaimID[:])
 
 	msg := types.NewMessage(
 		sender,
@@ -246,7 +247,8 @@ func (z *zeroFeeProtector) checkMigration(
 	output, _, failed, err := ApplyMessage(evm, msg, gp)
 	statedb.RevertToSnapshot(snapshot)
 	if failed || err != nil {
-		log.Debug("ZeroFee DoS by execution", "item", item_id, "err", err)
+		log.Debug("ZeroFee DoS by execution",
+			"item", item_id, "err", err, "output", output)
 		return ErrZeroFeeDoS
 	}
 
@@ -264,6 +266,7 @@ func (z *zeroFeeProtector) checkMigration(
 
 	//---
 	z.coinClaims[item_id] = now
+	log.Debug("ZeroFee migration", "item_id", item_id, "now", now)
 	return nil
 }
 
@@ -274,6 +277,7 @@ func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 
 	sender, err := types.Sender(pool.signer, tx)
 	if err != nil {
+		log.Debug("ZeroFee DoS sender error", "err", err)
 		return err
 	}
 
