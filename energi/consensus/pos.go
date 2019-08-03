@@ -86,7 +86,7 @@ func (e *Energi) calcTimeTarget(
 	if block_number >= AverageTimeBlocks {
 		past := parent
 
-		// NOTE: we have to this way as parent may be not part of canonical
+		// NOTE: we have to do this way as parent may be not part of canonical
 		//       chain. As no mutex is held, we cannot do checks for canonical.
 		for i := AverageTimeBlocks - 1; i > 0; i-- {
 			past = chain.GetHeader(past.ParentHash, past.Number.Uint64()-1)
@@ -97,12 +97,11 @@ func (e *Energi) calcTimeTarget(
 			}
 		}
 
-		actual := parent.Time - past.Time
-		expected := TargetPeriodGap - TargetBlockGap
 		ret.period_target = past.Time + TargetPeriodGap
+		period_min_time := ret.period_target - MinBlockGap
 
-		if expected > actual {
-			ret.min_time = ret.period_target
+		if period_min_time > ret.min_time {
+			ret.min_time = period_min_time
 		}
 	}
 
