@@ -24,6 +24,7 @@
     "bin"
   ],
   "actions": {
+    "clean" : "cte git clean -ffdx -e .vagrant/ . || true",
     "build": [
       "@cte make all"
     ],
