@@ -2,10 +2,22 @@
   "name": "energi3",
   "version": "0.2.0",
   "vcs": "git",
+  "plugins": {
+    "release": "futoin.cid.misc.releasetool"
+  },
+  "toolTune": {
+    "release": {
+      "changelog": [],
+      "go": [
+        "params/version.go"
+      ]
+    }
+  },
   "tools": {
     "go": "1.11.11",
     "make": true,
     "node": "8",
+    "release": true,
     "yarn": true
   },
   "package": [
