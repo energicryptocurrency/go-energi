@@ -84,6 +84,7 @@ func (e *Energi) calcTimeTarget(
 	// POS-12: Block interval enforcement
 	//---
 	if block_number >= AverageTimeBlocks {
+		// TODO: LRU cache here for extra DoS mitigation
 		past := parent
 
 		// NOTE: we have to do this way as parent may be not part of canonical
@@ -151,6 +152,8 @@ func (e *Energi) calcPoSModifier(
 	time uint64,
 	parent *types.Header,
 ) (ret common.Hash) {
+	// TODO: LRU cache here for extra DoS mitigation
+
 	// Find maturity period border
 	maturity_border := time
 
