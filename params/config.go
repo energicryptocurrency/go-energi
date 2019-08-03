@@ -27,10 +27,13 @@ import (
 // Genesis hashes to enforce below configs on.
 var (
 	MainnetGenesisHash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
-	TestnetGenesisHash = common.HexToHash("0xd0c355efe945736b66daf4dbd7e29433a50fee4458e3b737db0cb325fcd340f8")
+	TestnetGenesisHash = common.HexToHash("0x1d576a43f66e02b6830025b7de69b2aa9e00a5c42d8584e2eb23251876a9fad3")
 
 	MainnetMigrationSigner = common.HexToAddress("0x00")
 	TestnetMigrationSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
+
+	MainnetBackbone = common.HexToAddress("0x00")
+	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
@@ -59,7 +62,7 @@ var (
 		MNValidationPeriod:  big.NewInt(5),
 		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14),
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(1000000), big.NewInt(Ether)),
-		BackboneAddress:     common.Address{},
+		BackboneAddress:     MainnetBackbone,
 	}
 
 	EnergiTestnetChainConfig = &ChainConfig{
@@ -80,7 +83,7 @@ var (
 		MNValidationPeriod:  big.NewInt(5),
 		MNCleanupPeriod:     big.NewInt(60 * 60 * 3),
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
-		BackboneAddress:     common.Address{},
+		BackboneAddress:     TestnetBackbone,
 	}
 
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
