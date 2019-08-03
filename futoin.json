@@ -1,6 +1,6 @@
 {
   "name": "energi3",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "vcs": "git",
   "plugins": {
     "release": "futoin.cid.misc.releasetool"
@@ -24,7 +24,7 @@
     "bin"
   ],
   "actions": {
-    "clean" : "cte git clean -ffdx -e .vagrant/ . || true",
+    "clean": "cte git clean -ffdx -e .vagrant/ . || true",
     "build": [
       "@cte make all"
     ],
