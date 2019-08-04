@@ -207,6 +207,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.MinerNoVerfiyFlag,
 			utils.MinerDPoSFlag,
 			utils.MinerMigrationFlag,
+			utils.MinerNonceCapFlag,
 		},
 	},
 	{

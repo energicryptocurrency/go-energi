@@ -76,6 +76,7 @@ type Energi struct {
 	now          func() uint64
 	knownStakes  KnownStakes
 	nextKSPurge  uint64
+	nonceCap     uint64
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -644,6 +645,9 @@ func (e *Energi) SignatureHash(header *types.Header) (hash common.Hash) {
 	return hash
 }
 
+func (e *Energi) SetMinerNonceCap(nonceCap uint64) {
+	e.nonceCap = nonceCap
+}
 func (e *Energi) SetMinerCB(accountsFn AccountsFn, signerFn SignerFn) {
 	if e.signerFn != nil {
 		panic("Callbacks must be set only once!")

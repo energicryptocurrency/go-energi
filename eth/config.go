@@ -55,6 +55,7 @@ var DefaultConfig = Config{
 	MinerGasCeil:   16000000,
 	MinerGasPrice:  big.NewInt(params.GWei),
 	MinerRecommit:  3 * time.Second,
+	MinerNonceCap:  1000,
 
 	TxPool: core.DefaultTxPoolConfig,
 	GPO: gasprice.Config{
@@ -119,6 +120,7 @@ type Config struct {
 
 	MinerDPoS      DPoSMap `toml:",omitempty"`
 	MinerMigration string  `toml:",omitempty"`
+	MinerNonceCap  uint64  `toml:"-"`
 
 	// Ethash options
 	Ethash ethash.Config

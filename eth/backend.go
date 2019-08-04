@@ -188,6 +188,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	if eth.dpos == nil {
 		eth.dpos = make(DPoSMap)
 	}
+	if energi, ok := eth.engine.(*energi.Energi); ok {
+		energi.SetMinerNonceCap(config.MinerNonceCap)
+	}
 	eth.miner = miner.New(eth, eth.chainConfig, eth.EventMux(), eth.engine, config.MinerRecommit, config.MinerGasFloor, config.MinerGasCeil, eth.isLocalBlock)
 	eth.miner.SetExtra(makeExtraData(config.MinerExtraData))
 	eth.miner.SetMigration(config.MinerMigration)

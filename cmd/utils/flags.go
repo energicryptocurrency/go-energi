@@ -400,6 +400,10 @@ var (
 		Name:  "miner.migration",
 		Usage: "Enable Gen 2 migration mining with the specific snapshot file",
 	}
+	MinerNonceCapFlag = cli.Uint64Flag{
+		Name:  "miner.noncecap",
+		Usage: "Cap the maximum PoS Nonce value",
+	}
 	// Account settings
 	UnlockedAccountFlag = cli.StringFlag{
 		Name:  "unlock",
@@ -1270,6 +1274,9 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	}
 	if ctx.GlobalIsSet(MinerNoVerfiyFlag.Name) {
 		cfg.MinerNoverify = ctx.Bool(MinerNoVerfiyFlag.Name)
+	}
+	if ctx.GlobalIsSet(MinerNonceCapFlag.Name) {
+		cfg.MinerNonceCap = ctx.GlobalUint64(MinerNonceCapFlag.Name)
 	}
 	if ctx.GlobalIsSet(VMEnableDebugFlag.Name) {
 		// TODO(fjl): force-enable this in --dev mode
