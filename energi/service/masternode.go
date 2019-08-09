@@ -74,7 +74,7 @@ func NewMasternodeService(ethServ *eth.Ethereum) (node.Service, error) {
 		features: big.NewInt(0),
 		// NOTE: we need to avoid triggering DoS on restart.
 		// There is no reliable way to check blockchain and all pools in the network.
-		nextHB: time.Now().Add(heartbeatInterval),
+		nextHB: time.Now().Add(recheckInterval),
 	}
 	go r.listenDownloader()
 	return r, nil
@@ -196,28 +196,6 @@ func (m *MasternodeService) loop() {
 
 	//---
 	for {
-		now := time.Now()
-
-		if now.After(m.nextHB) {
-			if m.isActive() {
-				current := bc.CurrentHeader()
-				tx, err := m.registry.Heartbeat(current.Number, current.Hash(), m.features)
-
-				if err == nil {
-					log.Info("Masternode Heartbeat", "tx", tx.Hash())
-					m.nextHB = now.Add(heartbeatInterval)
-				} else {
-					log.Error("Failed to send Masternode Heartbeat", "err", err)
-					m.nextHB = now.Add(recheckInterval)
-				}
-			} else {
-				if atomic.LoadInt32(&m.inSync) == 1 {
-					log.Error("Masternode is not active!")
-				}
-				m.nextHB = now.Add(recheckInterval)
-			}
-		}
-
 		select {
 		case <-m.quitCh:
 			return
@@ -225,8 +203,6 @@ func (m *MasternodeService) loop() {
 			m.onChainHead(ev.Block)
 			break
 		case <-txEventCh:
-			break
-		case <-time.After(m.nextHB.Sub(now)):
 			break
 
 		// Shutdown
@@ -249,6 +225,32 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 		return
 	}
 
+	// MN-4 - Heartbeats
+	now := time.Now()
+
+	if now.After(m.nextHB) {
+		// Ensure heartbeat on clean queue
+		if !m.eth.TxPool().RemoveZeroFee(m.address) {
+			current := m.eth.BlockChain().CurrentHeader()
+			tx, err := m.registry.Heartbeat(current.Number, current.Hash(), m.features)
+
+			if err == nil {
+				log.Info("Masternode Heartbeat", "tx", tx.Hash())
+				m.nextHB = now.Add(heartbeatInterval)
+			} else {
+				log.Error("Failed to send Masternode Heartbeat", "err", err)
+				m.nextHB = now.Add(recheckInterval)
+			}
+		} else {
+			// NOTE: we need to recover from Nonce mismatch to enable heartbeats
+			//       as soon as possible. It is more important than invalidation duty.
+			log.Warn("Delaying Masternode Heartbeat due to pending zero-fee tx")
+			m.validator.cancel()
+			return
+		}
+	}
+
+	//
 	target, err := m.registry.ValidationTarget(m.address)
 	if err != nil {
 		log.Warn("MNTarget error", "mn", m.address, "err", err)
