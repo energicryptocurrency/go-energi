@@ -551,6 +551,9 @@ func (s *Ethereum) StartMining(threads int) error {
 					}
 					return wallet.SignHash(account, hash)
 				},
+				func() int {
+					return s.protocolManager.peers.Len()
+				},
 			)
 		}
 		// If mining is started, we can disable the transaction rejection mechanism

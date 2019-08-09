@@ -521,6 +521,11 @@ func (e *Energi) mine(
 			}
 		}
 
+		if e.peerCountFn() == 0 {
+			log.Trace("Skipping PoS miner due to missing peers")
+			continue
+		}
+
 		header.Time = blockTime
 		time_target, err = e.posPrepare(chain, header, parent)
 		if err != nil {

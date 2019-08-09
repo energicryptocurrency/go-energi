@@ -55,6 +55,7 @@ var (
 type ChainReader = eth_consensus.ChainReader
 type AccountsFn func() []common.Address
 type SignerFn func(common.Address, []byte) ([]byte, error)
+type PeerCountFn func() int
 type DiffFn func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int
 
 type Energi struct {
@@ -71,6 +72,7 @@ type Energi struct {
 	callGas      uint64
 	signerFn     SignerFn
 	accountsFn   AccountsFn
+	peerCountFn  PeerCountFn
 	diffFn       DiffFn
 	testing      bool
 	now          func() uint64
@@ -648,13 +650,18 @@ func (e *Energi) SignatureHash(header *types.Header) (hash common.Hash) {
 func (e *Energi) SetMinerNonceCap(nonceCap uint64) {
 	e.nonceCap = nonceCap
 }
-func (e *Energi) SetMinerCB(accountsFn AccountsFn, signerFn SignerFn) {
+func (e *Energi) SetMinerCB(
+	accountsFn AccountsFn,
+	signerFn SignerFn,
+	peerCountFn PeerCountFn,
+) {
 	if e.signerFn != nil {
 		panic("Callbacks must be set only once!")
 	}
 
 	e.signerFn = signerFn
 	e.accountsFn = accountsFn
+	e.peerCountFn = peerCountFn
 }
 
 // CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty

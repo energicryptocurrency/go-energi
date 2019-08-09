@@ -81,6 +81,7 @@ func TestPoSChain(t *testing.T) {
 		func(addr common.Address, hash []byte) ([]byte, error) {
 			return crypto.Sign(hash, signers[addr])
 		},
+		func() int { return 1 },
 	)
 
 	chainConfig := *params.EnergiTestnetChainConfig
