@@ -33,6 +33,7 @@ import (
 
 const (
 	proposalCallGas uint64 = 500000
+	upgradeCallGas  uint64 = 5000000
 )
 
 type GovernanceAPI struct {
@@ -280,7 +281,8 @@ func proposalInfo(backend Backend, address common.Address) *ProposalInfo {
 
 type UpgradeProposalInfo struct {
 	ProposalInfo
-	Impl common.Address
+	Impl  common.Address
+	Proxy common.Address
 }
 
 func (g *GovernanceAPI) upgradeProposalInfo(proxy common.Address) []UpgradeProposalInfo {
@@ -307,6 +309,7 @@ func (g *GovernanceAPI) upgradeProposalInfo(proxy common.Address) []UpgradePropo
 			continue
 		}
 		ret[i].Impl = impl
+		ret[i].Proxy = proxy
 	}
 	return ret
 }
@@ -344,7 +347,7 @@ func (g *GovernanceAPI) governedProxy(
 					account, password, tx, g.backend.ChainConfig().ChainID)
 			},
 			Value:    common.Big0,
-			GasLimit: proposalCallGas,
+			GasLimit: upgradeCallGas,
 		},
 	}
 	return

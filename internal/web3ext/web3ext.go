@@ -285,8 +285,10 @@ web3._extend({
 					var res_items = res[k] = [];
 
 					for (var j = 0; j < items.length; ++j) {
+						var item = items[j];
 						var res_item = proposalf(item);
 						res_item.impl = item.Impl;
+						res_item.proxy = item.Proxy;
 						res_items.push(res_item);
 					}
 				}
