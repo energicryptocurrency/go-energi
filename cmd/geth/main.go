@@ -338,11 +338,14 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 			}
 		}
 	}()
+	wallets := stack.AccountManager().Wallets()
 	// Start auxiliary services if enabled
-	if (ctx.GlobalBool(utils.MiningEnabledFlag.Name) ||
+	if ctx.GlobalBool(utils.MiningEnabledFlag.Name) ||
 		ctx.GlobalBool(utils.DeveloperFlag.Name) ||
 		// POS-25: enable staking by default
-		ctx.GlobalString(utils.MiningEnabledFlag.Name) != "") {
+		(ctx.GlobalString(utils.MiningEnabledFlag.Name) != "" &&
+			len(wallets) > 0 &&
+			len(wallets[0].Accounts()) > 0) {
 		// Mining only makes sense if a full Ethereum node is running
 		if ctx.GlobalString(utils.SyncModeFlag.Name) == "light" {
 			utils.Fatalf("Light clients do not support mining")
