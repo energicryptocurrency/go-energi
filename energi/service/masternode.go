@@ -93,6 +93,9 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 	m.address = address
 
 	//---
+	m.eth.TxPool().RemoveZeroFee(address)
+
+	//---
 	contract, err := energi_abi.NewIMasternodeRegistry(
 		energi_params.Energi_MasternodeRegistry, m.eth.APIBackend)
 	if err != nil {
@@ -135,6 +138,8 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 }
 
 func (m *MasternodeService) Stop() error {
+	log.Info("Shutting down Energi Masternode", "addr", m.address)
+	m.validator.cancel()
 	return nil
 }
 
@@ -229,6 +234,10 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 	now := time.Now()
 
 	if now.After(m.nextHB) {
+		// It is more important than invalidation duty.
+		// Some chance of race is still left, but at acceptable probability.
+		m.validator.cancel()
+
 		// Ensure heartbeat on clean queue
 		if !m.eth.TxPool().RemoveZeroFee(m.address) {
 			current := m.eth.BlockChain().CurrentHeader()
@@ -243,11 +252,11 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 			}
 		} else {
 			// NOTE: we need to recover from Nonce mismatch to enable heartbeats
-			//       as soon as possible. It is more important than invalidation duty.
+			//       as soon as possible.
 			log.Warn("Delaying Masternode Heartbeat due to pending zero-fee tx")
-			m.validator.cancel()
-			return
 		}
+
+		return
 	}
 
 	//
@@ -339,7 +348,12 @@ func (v *peerValidator) validate() {
 			// TODO: validate block availability as per MN-14
 			return
 		case <-time.After(deadline.Sub(time.Now())):
-			log.Info("MN Invalidation", "mn", v.target, "err", err)
+			if mnsvc.eth.TxPool().RemoveZeroFee(mnsvc.address) {
+				log.Warn("Skipping MN invalidation due to tx queue", "mn", v.target)
+				return
+			}
+
+			log.Info("MN Invalidation", "mn", v.target)
 			_, err := mnsvc.registry.Invalidate(v.target)
 			if err != nil {
 				log.Warn("MN Invalidate error", "mn", v.target, "err", err)
