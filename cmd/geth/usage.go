@@ -150,6 +150,7 @@ var AppHelpFlagGroups = []flagGroup{
 		Name: "ACCOUNT",
 		Flags: []cli.Flag{
 			utils.UnlockedAccountFlag,
+			utils.UnlockStakingOnlyFlag,
 			utils.PasswordFileFlag,
 		},
 	},
@@ -193,7 +194,7 @@ var AppHelpFlagGroups = []flagGroup{
 		},
 	},
 	{
-		Name: "MINER",
+		Name: "STAKING",
 		Flags: []cli.Flag{
 			utils.MiningEnabledFlag,
 			//utils.MinerThreadsFlag,
@@ -248,16 +249,18 @@ var AppHelpFlagGroups = []flagGroup{
 		Name:  "WHISPER (EXPERIMENTAL)",
 		Flags: whisperFlags,
 	},
-	{
-		Name: "DEPRECATED",
-		Flags: []cli.Flag{
-			utils.MinerLegacyThreadsFlag,
-			utils.MinerLegacyGasTargetFlag,
-			utils.MinerLegacyGasPriceFlag,
-			utils.MinerLegacyEtherbaseFlag,
-			utils.MinerLegacyExtraDataFlag,
+	/*
+		{
+			Name: "DEPRECATED",
+			Flags: []cli.Flag{
+				utils.MinerLegacyThreadsFlag,
+				utils.MinerLegacyGasTargetFlag,
+				utils.MinerLegacyGasPriceFlag,
+				utils.MinerLegacyEtherbaseFlag,
+				utils.MinerLegacyExtraDataFlag,
+			},
 		},
-	},
+	*/
 	{
 		Name: "MISC",
 	},

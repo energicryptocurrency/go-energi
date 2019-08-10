@@ -410,6 +410,10 @@ var (
 		Usage: "Comma separated list of accounts to unlock",
 		Value: "",
 	}
+	UnlockStakingOnlyFlag = cli.BoolFlag{
+		Name:  "unlock.staking",
+		Usage: "Unlock only for staking purposes (hash signing)",
+	}
 	PasswordFileFlag = cli.StringFlag{
 		Name:  "password",
 		Usage: "Password file to use for non-interactive password input",
@@ -1318,7 +1322,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 				Fatalf("Failed to create developer account: %v", err)
 			}
 		}
-		if err := ks.Unlock(developer, ""); err != nil {
+		if err := ks.Unlock(developer, "", false); err != nil {
 			Fatalf("Failed to unlock developer account: %v", err)
 		}
 		log.Info("Using developer account", "address", developer.Address)

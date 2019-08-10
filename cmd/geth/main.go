@@ -55,6 +55,7 @@ var (
 	nodeFlags = []cli.Flag{
 		utils.IdentityFlag,
 		utils.UnlockedAccountFlag,
+		utils.UnlockStakingOnlyFlag,
 		utils.PasswordFileFlag,
 		utils.BootnodesFlag,
 		utils.BootnodesV4Flag,
@@ -99,7 +100,7 @@ var (
 		utils.MaxPendingPeersFlag,
 		utils.MiningEnabledFlag,
 		//utils.MinerThreadsFlag,
-		utils.MinerLegacyThreadsFlag,
+		//utils.MinerLegacyThreadsFlag,
 		utils.MinerNotifyFlag,
 		utils.MinerGasTargetFlag,
 		utils.MinerLegacyGasTargetFlag,
@@ -109,7 +110,7 @@ var (
 		utils.MinerEtherbaseFlag,
 		utils.MinerLegacyEtherbaseFlag,
 		utils.MinerExtraDataFlag,
-		utils.MinerLegacyExtraDataFlag,
+		//utils.MinerLegacyExtraDataFlag,
 		utils.MinerRecommitIntervalFlag,
 		utils.MinerNoVerfiyFlag,
 		utils.MinerDPoSFlag,
@@ -292,9 +293,10 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 
 	passwords := utils.MakePasswordList(ctx)
 	unlocks := strings.Split(ctx.GlobalString(utils.UnlockedAccountFlag.Name), ",")
+	stakingOnly := ctx.GlobalBool(utils.UnlockStakingOnlyFlag.Name)
 	for i, account := range unlocks {
 		if trimmed := strings.TrimSpace(account); trimmed != "" {
-			unlockAccount(ctx, ks, trimmed, i, passwords)
+			unlockAccount(ctx, ks, trimmed, i, passwords, stakingOnly)
 		}
 	}
 	// Register wallet event handlers to open and auto-derive wallets

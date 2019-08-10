@@ -130,7 +130,7 @@ func TestTimedUnlock(t *testing.T) {
 	}
 
 	// Signing with passphrase works
-	if err = ks.TimedUnlock(a1, pass, 100*time.Millisecond); err != nil {
+	if err = ks.TimedUnlock(a1, pass, 100*time.Millisecond, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -159,7 +159,7 @@ func TestOverrideUnlock(t *testing.T) {
 	}
 
 	// Unlock indefinitely.
-	if err = ks.TimedUnlock(a1, pass, 5*time.Minute); err != nil {
+	if err = ks.TimedUnlock(a1, pass, 5*time.Minute, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -170,7 +170,7 @@ func TestOverrideUnlock(t *testing.T) {
 	}
 
 	// reset unlock to a shorter period, invalidates the previous unlock
-	if err = ks.TimedUnlock(a1, pass, 100*time.Millisecond); err != nil {
+	if err = ks.TimedUnlock(a1, pass, 100*time.Millisecond, false); err != nil {
 		t.Fatal(err)
 	}
 
@@ -199,7 +199,7 @@ func TestSignRace(t *testing.T) {
 		t.Fatal("could not create the test account", err)
 	}
 
-	if err := ks.TimedUnlock(a1, "", 15*time.Millisecond); err != nil {
+	if err := ks.TimedUnlock(a1, "", 15*time.Millisecond, false); err != nil {
 		t.Fatal("could not unlock the test account", err)
 	}
 	end := time.Now().Add(500 * time.Millisecond)

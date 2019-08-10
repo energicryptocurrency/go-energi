@@ -42,7 +42,11 @@ func (w *keystoreWallet) Status() (string, error) {
 	w.keystore.mu.RLock()
 	defer w.keystore.mu.RUnlock()
 
-	if _, ok := w.keystore.unlocked[w.account.Address]; ok {
+	if ke, ok := w.keystore.unlocked[w.account.Address]; ok {
+		if ke.stakingOnly {
+			return "Staking", nil
+		}
+
 		return "Unlocked", nil
 	}
 	return "Locked", nil
@@ -130,5 +134,5 @@ func (w *keystoreWallet) SignTxWithPassphrase(account accounts.Account, passphra
 func (w *keystoreWallet) IsUnlockedForStaking(account accounts.Account) bool {
 	// TODO: support special PoS unlock mode
 	s, _ := w.Status()
-	return s == "Unlocked"
+	return s == "Unlocked" || s == "Staking"
 }

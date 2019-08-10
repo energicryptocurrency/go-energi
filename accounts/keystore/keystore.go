@@ -73,6 +73,8 @@ type KeyStore struct {
 type unlocked struct {
 	*Key
 	abort chan struct{}
+
+	stakingOnly bool
 }
 
 // NewKeyStore creates a keystore for the given directory.
@@ -277,6 +279,9 @@ func (ks *KeyStore) SignTx(a accounts.Account, tx *types.Transaction, chainID *b
 	if !found {
 		return nil, ErrLocked
 	}
+	if unlockedKey.stakingOnly {
+		return nil, ErrLocked
+	}
 	// Depending on the presence of the chain ID, sign with EIP155 or homestead
 	if chainID != nil {
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), unlockedKey.PrivateKey)
@@ -313,8 +318,8 @@ func (ks *KeyStore) SignTxWithPassphrase(a accounts.Account, passphrase string, 
 }
 
 // Unlock unlocks the given account indefinitely.
-func (ks *KeyStore) Unlock(a accounts.Account, passphrase string) error {
-	return ks.TimedUnlock(a, passphrase, 0)
+func (ks *KeyStore) Unlock(a accounts.Account, passphrase string, stakingOnly bool) error {
+	return ks.TimedUnlock(a, passphrase, 0, stakingOnly)
 }
 
 // Lock removes the private key with the given address from memory.
@@ -336,7 +341,7 @@ func (ks *KeyStore) Lock(addr common.Address) error {
 // If the account address is already unlocked for a duration, TimedUnlock extends or
 // shortens the active unlock timeout. If the address was previously unlocked
 // indefinitely the timeout is not altered.
-func (ks *KeyStore) TimedUnlock(a accounts.Account, passphrase string, timeout time.Duration) error {
+func (ks *KeyStore) TimedUnlock(a accounts.Account, passphrase string, timeout time.Duration, stakingOnly bool) error {
 	a, key, err := ks.getDecryptedKey(a, passphrase)
 	if err != nil {
 		return err
@@ -356,10 +361,10 @@ func (ks *KeyStore) TimedUnlock(a accounts.Account, passphrase string, timeout t
 		close(u.abort)
 	}
 	if timeout > 0 {
-		u = &unlocked{Key: key, abort: make(chan struct{})}
+		u = &unlocked{Key: key, abort: make(chan struct{}), stakingOnly: stakingOnly}
 		go ks.expire(a.Address, u, timeout)
 	} else {
-		u = &unlocked{Key: key}
+		u = &unlocked{Key: key, stakingOnly: stakingOnly}
 	}
 	ks.unlocked[a.Address] = u
 	return nil

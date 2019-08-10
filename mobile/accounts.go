@@ -149,7 +149,7 @@ func (ks *KeyStore) SignTxPassphrase(account *Account, passphrase string, tx *Tr
 
 // Unlock unlocks the given account indefinitely.
 func (ks *KeyStore) Unlock(account *Account, passphrase string) error {
-	return ks.keystore.TimedUnlock(account.account, passphrase, 0)
+	return ks.keystore.TimedUnlock(account.account, passphrase, 0, false)
 }
 
 // Lock removes the private key with the given address from memory.
@@ -165,7 +165,7 @@ func (ks *KeyStore) Lock(address *Address) error {
 // shortens the active unlock timeout. If the address was previously unlocked
 // indefinitely the timeout is not altered.
 func (ks *KeyStore) TimedUnlock(account *Account, passphrase string, timeout int64) error {
-	return ks.keystore.TimedUnlock(account.account, passphrase, time.Duration(timeout))
+	return ks.keystore.TimedUnlock(account.account, passphrase, time.Duration(timeout), false)
 }
 
 // NewAccount generates a new key and stores it into the key directory,
