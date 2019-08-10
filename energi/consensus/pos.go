@@ -516,6 +516,8 @@ func (e *Energi) mine(
 			log.Trace("PoS miner is sleeping")
 			select {
 			case <-stop:
+				// NOTE: it's very important to ignore stop until all variants are tried
+				//       to prevent rogue stakers taking the initiative.
 				return false, nil
 			case <-time.After(time.Duration(blockTime-max_time) * time.Second):
 			}

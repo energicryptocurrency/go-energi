@@ -17,6 +17,8 @@
 package consensus
 
 import (
+	"crypto/ecdsa"
+	crand "crypto/rand"
 	"math/big"
 	"strings"
 	"testing"
@@ -24,8 +26,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
+	"github.com/ethereum/go-ethereum/core/rawdb"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
@@ -68,7 +72,14 @@ func TestBlacklist(t *testing.T) {
 	_, err = chain.InsertChain([]*types.Block{genesis})
 	assert.Empty(t, err)
 
-	header := chain.GetHeaderByHash(genesis.Hash())
+	header := &types.Header{
+		Number:     new(big.Int).Add(genesis.Number(), common.Big1),
+		ParentHash: genesis.Hash(),
+		Root:       genesis.Root(),
+		GasLimit:   genesis.GasLimit(),
+		Time:       genesis.Time(),
+		Difficulty: genesis.Difficulty(),
+	}
 	assert.NotEmpty(t, header)
 
 	blstate, err := chain.StateAt(header.Root)
@@ -77,7 +88,9 @@ func TestBlacklist(t *testing.T) {
 	err = engine.processConsensusGasLimits(chain, header, blstate)
 	assert.Empty(t, err)
 
-	blacklist_addr1 := common.HexToAddress("0x0000000000000000000000000000000012345678")
+	blacklist_key1, _ := ecdsa.GenerateKey(crypto.S256(), crand.Reader)
+
+	blacklist_addr1 := crypto.PubkeyToAddress(blacklist_key1.PublicKey)
 	blacklist_addr2 := common.HexToAddress("0x0000000000000000000000000000000012345679")
 	owner_addr := common.HexToAddress("0x0000000000000000000000000000000022345678")
 
@@ -201,6 +214,7 @@ func TestBlacklist(t *testing.T) {
 
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
+	assert.True(t, core.IsBlacklisted(blstate, blacklist_addr1))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
 	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
@@ -232,6 +246,22 @@ func TestBlacklist(t *testing.T) {
 	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	blstate.Database().TrieDB().Dereference(header.Root)
+
+	//====================================
+	log.Trace("coinbase blacklist")
+	rawdb.WriteHeader(testdb, header)
+
+	header2 := &*header
+	header2.ParentHash = header.Hash()
+	header2.Number = new(big.Int).Add(header.Number, common.Big1)
+	header2.Coinbase = blacklist_addr1
+
+	sighash := engine.SignatureHash(header2)
+	header2.Signature, err = crypto.Sign(sighash.Bytes(), blacklist_key1)
+	assert.Empty(t, err)
+
+	assert.True(t, core.IsBlacklisted(blstate, blacklist_addr1))
+	assert.Equal(t, errBlacklistedCoinbase, engine.VerifySeal(chain, header2))
 
 	//====================================
 	log.Info("Test: drain")
@@ -280,6 +310,7 @@ func TestBlacklist(t *testing.T) {
 
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
+	assert.True(t, core.IsBlacklisted(blstate, blacklist_addr1))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
 	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
@@ -299,6 +330,8 @@ func TestBlacklist(t *testing.T) {
 	log.Info("Test: no change")
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
+	assert.False(t, core.IsBlacklisted(blstate, blacklist_addr1))
+	assert.False(t, core.IsBlacklisted(blstate, blacklist_addr2))
 	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	err = engine.processDrainable(chain, header, blstate)
@@ -395,6 +428,7 @@ func TestBlacklist(t *testing.T) {
 
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
+	assert.False(t, core.IsBlacklisted(blstate, blacklist_addr1))
 	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr2, common.Big1))
 	assert.True(t, core.CanTransfer(blstate, energi_params.Energi_TreasuryV1, common.Big1))

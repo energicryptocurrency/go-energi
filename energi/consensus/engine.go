@@ -50,6 +50,8 @@ var (
 
 	errMissingSig = errors.New("Signature is missing")
 	errInvalidSig = errors.New("Invalid signature")
+
+	errBlacklistedCoinbase = errors.New("Blacklisted coinbase")
 )
 
 type ChainReader = eth_consensus.ChainReader
@@ -323,6 +325,19 @@ func (e *Energi) VerifyUncles(chain ChainReader, block *types.Block) error {
 // VerifySeal checks whether the crypto seal on a header is valid according to
 // the consensus rules of the given engine.
 func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
+	parent_number := header.Number.Uint64() - 1
+	blockst := chain.CalculateBlockState(header.ParentHash, parent_number)
+	if blockst == nil {
+		log.Error("PoS state root failure", "header", header.ParentHash)
+		return eth_consensus.ErrMissingState
+	}
+
+	// DBL-8: blacklist block generation
+	if core.IsBlacklisted(blockst, header.Coinbase) {
+		log.Debug("Blacklisted Coinbase", "addr", header.Coinbase)
+		return errBlacklistedCoinbase
+	}
+
 	// Retrieve the signature from the header extra-data
 	if len(header.Signature) != sealLen {
 		return errMissingSig
@@ -342,16 +357,9 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	if addr != header.Coinbase {
 		// POS-5: Delegated PoS
 		//--
-		parent_number := header.Number.Uint64() - 1
 		parent := chain.GetHeader(header.ParentHash, parent_number)
 		if parent == nil {
 			return eth_consensus.ErrUnknownAncestor
-		}
-
-		blockst := chain.CalculateBlockState(header.ParentHash, parent_number)
-		if blockst == nil {
-			log.Error("PoS state root failure", "header", header.ParentHash)
-			return eth_consensus.ErrMissingState
 		}
 
 		if blockst.GetCodeSize(header.Coinbase) > 0 {
