@@ -117,6 +117,7 @@ type Downloader struct {
 
 	lightchain LightChain
 	blockchain BlockChain
+	txpool     TxPool
 
 	// Callbacks
 	dropPeer peerDropFn // Drops a peer for misbehaving
@@ -206,8 +207,12 @@ type BlockChain interface {
 	InsertReceiptChain(types.Blocks, []types.Receipts) (int, error)
 }
 
+type TxPool interface {
+	PreBlacklistHook(blocks types.Blocks) types.Blocks
+}
+
 // New creates a new downloader to fetch hashes and blocks from remote peers.
-func New(mode SyncMode, checkpoint uint64, stateDb ethdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, dropPeer peerDropFn) *Downloader {
+func New(mode SyncMode, checkpoint uint64, stateDb ethdb.Database, mux *event.TypeMux, chain BlockChain, lightchain LightChain, txpool TxPool, dropPeer peerDropFn) *Downloader {
 	if lightchain == nil {
 		lightchain = chain
 	}
@@ -222,6 +227,7 @@ func New(mode SyncMode, checkpoint uint64, stateDb ethdb.Database, mux *event.Ty
 		rttConfidence:  uint64(1000000),
 		blockchain:     chain,
 		lightchain:     lightchain,
+		txpool:         txpool,
 		dropPeer:       dropPeer,
 		headerCh:       make(chan dataPack, 1),
 		bodyCh:         make(chan dataPack, 1),
@@ -1492,6 +1498,9 @@ func (d *Downloader) importBlockResults(results []*fetchResult) error {
 	blocks := make([]*types.Block, len(results))
 	for i, result := range results {
 		blocks[i] = types.NewBlockWithHeader(result.Header).WithBody(result.Transactions, result.Uncles)
+	}
+	if d.txpool != nil {
+		blocks = d.txpool.PreBlacklistHook(blocks)
 	}
 	if index, err := d.blockchain.InsertChain(blocks); err != nil {
 		if index < len(results) {

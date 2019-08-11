@@ -87,6 +87,7 @@ type BlockChain interface {
 type txPool interface {
 	AddRemotes(txs []*types.Transaction) []error
 	Status(hashes []common.Hash) []core.TxStatus
+	PreBlacklistHook(blocks types.Blocks) types.Blocks
 }
 
 type ProtocolManager struct {
@@ -159,7 +160,7 @@ func NewProtocolManager(chainConfig *params.ChainConfig, indexerConfig *light.In
 		if cht, ok := params.TrustedCheckpoints[blockchain.Genesis().Hash()]; ok {
 			checkpoint = (cht.SectionIndex+1)*params.CHTFrequencyClient - 1
 		}
-		manager.downloader = downloader.New(downloader.LightSync, checkpoint, chainDb, manager.eventMux, nil, blockchain, removePeer)
+		manager.downloader = downloader.New(downloader.LightSync, checkpoint, chainDb, manager.eventMux, nil, blockchain, txpool, removePeer)
 		manager.peers.notify((*downloaderPeerNotify)(manager))
 		manager.fetcher = newLightFetcher(manager)
 	}

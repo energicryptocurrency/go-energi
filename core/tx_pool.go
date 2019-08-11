@@ -229,7 +229,8 @@ type TxPool struct {
 
 	wg sync.WaitGroup // for shutdown sync
 
-	zfProtector *zeroFeeProtector
+	zfProtector  *zeroFeeProtector
+	preBlacklist *preBlacklist
 
 	homestead bool
 }
@@ -276,6 +277,7 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 	pool.chainHeadSub = pool.chain.SubscribeChainHeadEvent(pool.chainHeadCh)
 
 	pool.zfProtector = newZeroFeeProtector()
+	pool.preBlacklist = newPreBlacklist()
 
 	// Start the event loop and return
 	pool.wg.Add(1)
@@ -646,6 +648,11 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		if err != nil {
 			return err
 		}
+	}
+	// Energi: preliminary blacklist handling
+	err = pool.preBlacklist.processTx(pool, tx)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -1181,31 +1188,6 @@ func (pool *TxPool) demoteUnexecutables() {
 			delete(pool.beats, addr)
 		}
 	}
-}
-
-func (pool *TxPool) RemoveZeroFee(sender common.Address) bool {
-	pool.mu.Lock()
-	defer pool.mu.Unlock()
-
-	res := false
-
-	if txs, ok := pool.pending[sender]; ok {
-		for _, tx := range txs.Flatten() {
-			pool.removeTx(tx.Hash(), true)
-		}
-
-		res = true
-	}
-
-	if txs, ok := pool.queue[sender]; ok {
-		for _, tx := range txs.Flatten() {
-			pool.removeTx(tx.Hash(), true)
-		}
-
-		res = true
-	}
-
-	return res
 }
 
 // addressByHeartbeat is an account address tagged with its last activity timestamp.

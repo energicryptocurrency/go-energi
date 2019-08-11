@@ -208,10 +208,10 @@ func (sg *fakeSigner) SignatureValues(tx *types.Transaction, sig []byte) (r, s, 
 	return common.Big0, common.Big0, common.Big0, nil
 }
 func (s *fakeSigner) Hash(tx *types.Transaction) common.Hash {
-	return common.Hash{}
+	return tx.Hash()
 }
 func (s *fakeSigner) Equal(types.Signer) bool {
-	return true
+	return false
 }
 
 func TestZeroFeeProtectorMasternode(t *testing.T) {
@@ -453,4 +453,142 @@ func TestZeroFeeProtectorMigration(t *testing.T) {
 
 	err = protector.checkDoS(pool, claim2)
 	assert.Equal(t, ErrZeroFeeDoS, err)
+}
+
+func TestPreBlacklist(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	now := time.Now() // It can be fixed
+	adjust_time := time.Duration(0)
+
+	testdb := ethdb.NewMemDatabase()
+	gspec := &Genesis{
+		Config: params.TestnetChainConfig,
+	}
+	gspec.MustCommit(testdb)
+	engine := ethash.NewFaker()
+
+	chain, err := NewBlockChain(
+		testdb, nil, gspec.Config,
+		engine, vm.Config{}, nil)
+	assert.Empty(t, err)
+
+	pool := NewTxPool(TxPoolConfig{}, gspec.Config, chain)
+	prebl := pool.preBlacklist
+	prebl.timeNow = func() time.Time {
+		return now.Add(adjust_time)
+	}
+
+	bladdr1 := common.HexToAddress("0x1111")
+	bladdr2 := common.HexToAddress("0x2222")
+	sender := common.HexToAddress("0x3333")
+
+	signer := &fakeSigner{}
+	pool.signer = signer
+	signer.sender = sender
+
+	defer chain.Stop()
+	pool.chain = chain
+	pool.currentState, _ = chain.State()
+
+	blreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
+	assert.Empty(t, err)
+	propose1Call, err := blreg_abi.Pack("propose", bladdr1)
+	assert.Empty(t, err)
+	propose2Call, err := blreg_abi.Pack("propose", bladdr2)
+	assert.Empty(t, err)
+	revokeCall, err := blreg_abi.Pack("proposeRevoke", bladdr1)
+	assert.Empty(t, err)
+
+	propose1 := types.NewTransaction(
+		1, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, propose1Call)
+	propose2 := types.NewTransaction(
+		10, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, propose2Call)
+	revoke := types.NewTransaction(
+		1, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, revokeCall)
+
+	pool.currentState.SetCode(
+		energi_params.Energi_BlacklistRegistry,
+		// PUSH1 1 PUSH1 0 MSTORE PUSH1 1 PUSH1 0 RETURN
+		[]byte{0x60, 0x01, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xF3},
+	)
+
+	log.Trace("Make sure removed in pool")
+	signer.sender = bladdr1
+	err = pool.AddLocal(revoke)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(pool.queue[bladdr1].Flatten()))
+	signer.sender = sender
+
+	log.Trace("Initial")
+	err = prebl.processTx(pool, revoke)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 0, len(prebl.proposed))
+
+	err = prebl.processTx(pool, propose1)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(prebl.proposed))
+
+	adjust_time = time.Duration(10) * time.Minute
+
+	err = prebl.processTx(pool, propose2)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 2, len(prebl.proposed))
+
+	log.Trace("Check if filtered properly")
+	signer.sender = bladdr1
+	err = prebl.processTx(pool, revoke)
+	assert.Equal(t, ErrPreBlacklist, err)
+
+	signer.sender = sender
+	err = prebl.processTx(pool, revoke)
+	assert.Equal(t, nil, err)
+
+	signer.sender = bladdr2
+	err = prebl.processTx(pool, revoke)
+	assert.Equal(t, ErrPreBlacklist, err)
+
+	signer.sender = sender
+
+	log.Trace("Check block filter hook")
+	blocks := make(types.Blocks, 0, 3)
+	blocks = append(blocks, types.NewBlockWithHeader(&types.Header{Coinbase: sender}))
+	blocks = append(blocks, types.NewBlockWithHeader(&types.Header{Coinbase: bladdr1}))
+	blocks = append(blocks, types.NewBlockWithHeader(&types.Header{Coinbase: sender}))
+	blocks = pool.PreBlacklistHook(blocks)
+	assert.Equal(t, 1, len(blocks))
+	assert.Equal(t, sender, blocks[0].Coinbase())
+
+	log.Trace("After timeout")
+	adjust_time = pbPeriod + time.Minute
+
+	err = prebl.processTx(pool, revoke)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 1, len(prebl.proposed))
+
+	err = prebl.processTx(pool, propose1)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 2, len(prebl.proposed))
+
+	err = prebl.processTx(pool, propose2)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 2, len(prebl.proposed))
+
+	adjust_time *= time.Duration(2)
+	err = prebl.processTx(pool, revoke)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 0, len(prebl.proposed))
+
+	log.Trace("Ignore not valid proposals")
+
+	pool.currentState.SetCode(
+		energi_params.Energi_BlacklistRegistry,
+		// PUSH1 1 PUSH1 0 MSTORE PUSH1 1 PUSH1 0 REVERT
+		[]byte{0x60, 0x01, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xFD},
+	)
+
+	err = prebl.processTx(pool, propose1)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 0, len(prebl.proposed))
 }

@@ -93,7 +93,7 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 	m.address = address
 
 	//---
-	m.eth.TxPool().RemoveZeroFee(address)
+	m.eth.TxPool().RemoveBySender(address)
 
 	//---
 	contract, err := energi_abi.NewIMasternodeRegistry(
@@ -225,7 +225,7 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 		m.validator.cancel()
 
 		if do_cleanup {
-			m.eth.TxPool().RemoveZeroFee(m.address)
+			m.eth.TxPool().RemoveBySender(m.address)
 		}
 		return
 	}
@@ -239,7 +239,7 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 		m.validator.cancel()
 
 		// Ensure heartbeat on clean queue
-		if !m.eth.TxPool().RemoveZeroFee(m.address) {
+		if !m.eth.TxPool().RemoveBySender(m.address) {
 			current := m.eth.BlockChain().CurrentHeader()
 			tx, err := m.registry.Heartbeat(current.Number, current.Hash(), m.features)
 
@@ -348,7 +348,7 @@ func (v *peerValidator) validate() {
 			// TODO: validate block availability as per MN-14
 			return
 		case <-time.After(deadline.Sub(time.Now())):
-			if mnsvc.eth.TxPool().RemoveZeroFee(mnsvc.address) {
+			if mnsvc.eth.TxPool().RemoveBySender(mnsvc.address) {
 				log.Warn("Skipping MN invalidation due to tx queue", "mn", v.target)
 				return
 			}

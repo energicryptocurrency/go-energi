@@ -41,6 +41,7 @@ var (
 	energiVerifyClaimID  types.MethodID
 	energiMNHeartbeatID  types.MethodID
 	energiMNInvalidateID types.MethodID
+	energiBLProposeID    types.MethodID
 )
 
 func init() {
@@ -58,6 +59,12 @@ func init() {
 	}
 	copy(energiMNHeartbeatID[:], mnreg_abi.Methods["heartbeat"].Id())
 	copy(energiMNInvalidateID[:], mnreg_abi.Methods["invalidate"].Id())
+
+	bl_abi, err := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
+	if err != nil {
+		panic(err)
+	}
+	copy(energiBLProposeID[:], bl_abi.Methods["propose"].Id())
 }
 
 /**
@@ -290,4 +297,196 @@ func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 		return z.checkMigration(pool, sender, now, tx)
 	}
 	return nil
+}
+
+//=============================================================================
+
+var (
+	pbCleanupTimeout = time.Minute
+	pbPeriod         = time.Hour
+
+	ErrPreBlacklist = errors.New("preliminary blacklisted")
+)
+
+type preBlacklist struct {
+	proposed    map[common.Address]time.Time
+	nextCleanup time.Time
+	timeNow     func() time.Time
+}
+
+func newPreBlacklist() *preBlacklist {
+	return &preBlacklist{
+		proposed:    make(map[common.Address]time.Time),
+		nextCleanup: time.Now().Add(pbCleanupTimeout),
+		timeNow:     time.Now,
+	}
+}
+
+func (pb *preBlacklist) cleanupRoutine(now time.Time) {
+	if pb.nextCleanup.After(now) {
+		return
+	}
+
+	pb.nextCleanup = now.Add(pbCleanupTimeout)
+	//---
+	for k, v := range pb.proposed {
+		if now.Sub(v) > pbPeriod {
+			delete(pb.proposed, k)
+		}
+	}
+}
+
+func (pb *preBlacklist) processTx(pool *TxPool, tx *types.Transaction) error {
+	now := pb.timeNow()
+
+	pb.cleanupRoutine(now)
+
+	// Check if know preliminary blacklist
+	//---
+	sender, err := types.Sender(pool.signer, tx)
+	if err != nil {
+		log.Debug("Pre-blacklist sender error", "err", err)
+		return err
+	}
+
+	if pb.isActive(sender, now) {
+		log.Debug("Pre-blacklisted sender", "sender", sender)
+		return ErrPreBlacklist
+	}
+
+	// Check if the call is valid
+	//---
+	pb.processProposal(pool, sender, now, tx)
+
+	return nil
+}
+
+func (pb *preBlacklist) isActive(sender common.Address, now time.Time) bool {
+	if t, ok := pb.proposed[sender]; ok && now.Sub(t) <= pbPeriod {
+		return true
+	}
+
+	return false
+}
+
+func (pb *preBlacklist) processProposal(
+	pool *TxPool,
+	sender common.Address,
+	now time.Time,
+	tx *types.Transaction,
+) {
+	// Check if a new blacklist proposal
+	//---
+	if to := tx.To(); to == nil || *to != energi_params.Energi_BlacklistRegistry {
+		return
+	}
+	if method := tx.MethodID(); method != energiBLProposeID {
+		return
+	}
+
+	//---
+	var target common.Address
+
+	// Do not reset timeout, if already known!
+	if _, ok := pb.proposed[target]; ok {
+		return
+	}
+
+	callData := tx.Data()
+	copy(target[:], callData[16:36])
+	msg := types.NewMessage(
+		sender,
+		tx.To(),
+		tx.Nonce(),
+		tx.Value(),
+		tx.Gas(),
+		tx.GasPrice(),
+		callData,
+		false,
+	)
+
+	// Just in case: safety measure
+	statedb := pool.currentState
+	snapshot := statedb.Snapshot()
+
+	bc := pool.chain.(*BlockChain)
+	if bc == nil {
+		log.Debug("PreBlacklist on missing blockchain")
+		return
+	}
+	vmc := bc.GetVMConfig()
+	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
+	ctx.GasLimit = ZeroFeeGasLimit
+	evm := vm.NewEVM(ctx, pool.currentState, bc.Config(), *vmc)
+
+	gp := new(GasPool).AddGas(tx.Gas())
+	output, _, failed, err := ApplyMessage(evm, msg, gp)
+	statedb.RevertToSnapshot(snapshot)
+	if failed || err != nil {
+		log.Debug("PreBlacklist failure at execution",
+			"sender", sender, "target", target, "err", err, "output", output)
+		return
+	}
+
+	if len(output) != len(common.Hash{}) {
+		log.Debug("PreBlacklist at unpack",
+			"sender", sender, "target", target, "output", output)
+		return
+	}
+
+	// New pre-blacklist item
+	//---
+	log.Warn("New pre-liminary blacklist", "target", target, "sender", sender)
+	pb.proposed[target] = now
+	pool.removeBySenderLocked(target)
+}
+
+func (pb *preBlacklist) filterBlocks(blocks types.Blocks) types.Blocks {
+	pb.cleanupRoutine(pb.timeNow())
+
+	for i, b := range blocks {
+		if _, ok := pb.proposed[b.Coinbase()]; ok {
+			return blocks[:i]
+		}
+	}
+
+	return blocks
+}
+
+//=============================================================================
+
+func (pool *TxPool) PreBlacklistHook(blocks types.Blocks) types.Blocks {
+	pool.mu.Lock()
+	defer pool.mu.Unlock()
+
+	return pool.preBlacklist.filterBlocks(blocks)
+}
+
+func (pool *TxPool) RemoveBySender(sender common.Address) bool {
+	pool.mu.Lock()
+	defer pool.mu.Unlock()
+
+	return pool.removeBySenderLocked(sender)
+}
+
+func (pool *TxPool) removeBySenderLocked(sender common.Address) bool {
+	res := false
+
+	if txs, ok := pool.pending[sender]; ok {
+		for _, tx := range txs.Flatten() {
+			pool.removeTx(tx.Hash(), true)
+		}
+
+		res = true
+	}
+
+	if txs, ok := pool.queue[sender]; ok {
+		for _, tx := range txs.Flatten() {
+			pool.removeTx(tx.Hash(), true)
+		}
+
+		res = true
+	}
+
+	return res
 }
