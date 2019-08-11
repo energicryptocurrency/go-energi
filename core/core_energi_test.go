@@ -483,12 +483,14 @@ func TestPreBlacklist(t *testing.T) {
 	bladdr1 := common.HexToAddress("0x1111")
 	bladdr2 := common.HexToAddress("0x2222")
 	sender := common.HexToAddress("0x3333")
+	wladdr1 := common.HexToAddress("0x4444")
 
 	signer := &fakeSigner{}
 	pool.signer = signer
 	signer.sender = sender
 
 	defer chain.Stop()
+	defer pool.Stop()
 	pool.chain = chain
 	pool.currentState, _ = chain.State()
 
@@ -498,21 +500,31 @@ func TestPreBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	propose2Call, err := blreg_abi.Pack("propose", bladdr2)
 	assert.Empty(t, err)
+	proposeWLCall, err := blreg_abi.Pack("propose", wladdr1)
+	assert.Empty(t, err)
 	revokeCall, err := blreg_abi.Pack("proposeRevoke", bladdr1)
 	assert.Empty(t, err)
 
 	propose1 := types.NewTransaction(
 		1, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, propose1Call)
 	propose2 := types.NewTransaction(
-		10, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, propose2Call)
+		2, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, propose2Call)
+	proposeWL := types.NewTransaction(
+		3, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, proposeWLCall)
 	revoke := types.NewTransaction(
-		1, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, revokeCall)
+		4, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, revokeCall)
 
 	pool.currentState.SetCode(
 		energi_params.Energi_BlacklistRegistry,
 		// PUSH1 1 PUSH1 0 MSTORE PUSH1 1 PUSH1 0 RETURN
 		[]byte{0x60, 0x01, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xF3},
 	)
+	pool.currentState.SetState(
+		energi_params.Energi_Whitelist,
+		wladdr1.Hash(),
+		common.BytesToHash([]byte{0x01}),
+	)
+	assert.True(t, IsWhitelisted(pool.currentState, wladdr1))
 
 	log.Trace("Make sure removed in pool")
 	signer.sender = bladdr1
@@ -525,16 +537,25 @@ func TestPreBlacklist(t *testing.T) {
 	err = prebl.processTx(pool, revoke)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 0, len(prebl.proposed))
+	assert.Equal(t, 1, len(pool.queue[bladdr1].Flatten()))
 
 	err = prebl.processTx(pool, propose1)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, len(prebl.proposed))
+	if qb, ok := pool.queue[bladdr1]; ok {
+		assert.Equal(t, 1, len(qb.Flatten()))
+	}
 
 	adjust_time = time.Duration(10) * time.Minute
 
 	err = prebl.processTx(pool, propose2)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 2, len(prebl.proposed))
+
+	err = prebl.processTx(pool, proposeWL)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 2, len(prebl.proposed))
+	assert.True(t, IsWhitelisted(pool.currentState, wladdr1))
 
 	log.Trace("Check if filtered properly")
 	signer.sender = bladdr1

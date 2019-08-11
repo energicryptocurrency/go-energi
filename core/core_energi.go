@@ -123,6 +123,10 @@ func IsBlacklisted(db vm.StateDB, addr common.Address) bool {
 	return db.GetState(energi_params.Energi_Blacklist, addr.Hash()) != common.Hash{}
 }
 
+func IsWhitelisted(db vm.StateDB, addr common.Address) bool {
+	return db.GetState(energi_params.Energi_Whitelist, addr.Hash()) != common.Hash{}
+}
+
 //=============================================================================
 
 var (
@@ -237,8 +241,7 @@ func (z *zeroFeeProtector) checkMigration(
 	)
 
 	// Just in case: safety measure
-	statedb := pool.currentState
-	snapshot := statedb.Snapshot()
+	statedb := pool.currentState.Copy()
 
 	bc := pool.chain.(*BlockChain)
 	if bc == nil {
@@ -248,11 +251,10 @@ func (z *zeroFeeProtector) checkMigration(
 	vmc := bc.GetVMConfig()
 	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
 	ctx.GasLimit = ZeroFeeGasLimit
-	evm := vm.NewEVM(ctx, pool.currentState, bc.Config(), *vmc)
+	evm := vm.NewEVM(ctx, statedb, bc.Config(), *vmc)
 
 	gp := new(GasPool).AddGas(tx.Gas())
 	output, _, failed, err := ApplyMessage(evm, msg, gp)
-	statedb.RevertToSnapshot(snapshot)
 	if failed || err != nil {
 		log.Debug("ZeroFee DoS by execution",
 			"item", item_id, "err", err, "output", output)
@@ -386,14 +388,22 @@ func (pb *preBlacklist) processProposal(
 
 	//---
 	var target common.Address
+	callData := tx.Data()
+	copy(target[:], callData[16:36])
 
 	// Do not reset timeout, if already known!
 	if _, ok := pb.proposed[target]; ok {
 		return
 	}
 
-	callData := tx.Data()
-	copy(target[:], callData[16:36])
+	statedb := pool.currentState.Copy()
+
+	if IsWhitelisted(statedb, target) {
+		log.Warn("Skipping preliminary blacklist for whitelisted target",
+			"target", target.Hex(), "sender", sender.Hex())
+		return
+	}
+
 	msg := types.NewMessage(
 		sender,
 		tx.To(),
@@ -405,10 +415,6 @@ func (pb *preBlacklist) processProposal(
 		false,
 	)
 
-	// Just in case: safety measure
-	statedb := pool.currentState
-	snapshot := statedb.Snapshot()
-
 	bc := pool.chain.(*BlockChain)
 	if bc == nil {
 		log.Debug("PreBlacklist on missing blockchain")
@@ -417,26 +423,25 @@ func (pb *preBlacklist) processProposal(
 	vmc := bc.GetVMConfig()
 	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
 	ctx.GasLimit = ZeroFeeGasLimit
-	evm := vm.NewEVM(ctx, pool.currentState, bc.Config(), *vmc)
+	evm := vm.NewEVM(ctx, statedb, bc.Config(), *vmc)
 
 	gp := new(GasPool).AddGas(tx.Gas())
 	output, _, failed, err := ApplyMessage(evm, msg, gp)
-	statedb.RevertToSnapshot(snapshot)
 	if failed || err != nil {
 		log.Debug("PreBlacklist failure at execution",
-			"sender", sender, "target", target, "err", err, "output", output)
+			"sender", sender, "target", target.Hex(), "err", err, "output", output)
 		return
 	}
 
 	if len(output) != len(common.Hash{}) {
 		log.Debug("PreBlacklist at unpack",
-			"sender", sender, "target", target, "output", output)
+			"sender", sender, "target", target.Hex(), "output", output)
 		return
 	}
 
 	// New pre-blacklist item
 	//---
-	log.Warn("New pre-liminary blacklist", "target", target, "sender", sender)
+	log.Warn("New preliminary blacklist", "target", target.Hex(), "sender", sender.Hex())
 	pb.proposed[target] = now
 	pool.removeBySenderLocked(target)
 }
@@ -474,7 +479,9 @@ func (pool *TxPool) removeBySenderLocked(sender common.Address) bool {
 
 	if txs, ok := pool.pending[sender]; ok {
 		for _, tx := range txs.Flatten() {
-			pool.removeTx(tx.Hash(), true)
+			txhash := tx.Hash()
+			log.Trace("Removing by sender", "txhash", txhash, "sender", sender)
+			pool.removeTx(txhash, true)
 		}
 
 		res = true
@@ -482,7 +489,9 @@ func (pool *TxPool) removeBySenderLocked(sender common.Address) bool {
 
 	if txs, ok := pool.queue[sender]; ok {
 		for _, tx := range txs.Flatten() {
-			pool.removeTx(tx.Hash(), true)
+			txhash := tx.Hash()
+			log.Trace("Removing by sender", "txhash", txhash, "sender", sender)
+			pool.removeTx(txhash, true)
 		}
 
 		res = true
