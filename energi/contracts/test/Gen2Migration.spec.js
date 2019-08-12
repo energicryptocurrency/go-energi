@@ -41,6 +41,7 @@ contract("Gen2Migration", async accounts => {
         blacklist_registry = await MockGen2MigrationBlacklist.new(
             blacklist_proxy.address, await blacklist_registry.mnregistry_proxy(),
             orig.address, await blacklist_registry.compensation_fund(),
+            accounts[9],
             { gas: "30000000" });
         await blacklist_proxy.setImpl(blacklist_registry.address);
     });

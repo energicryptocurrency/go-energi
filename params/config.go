@@ -32,6 +32,9 @@ var (
 	MainnetMigrationSigner = common.HexToAddress("0x00")
 	TestnetMigrationSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
 
+	MainnetEBISigner = common.HexToAddress("0x00")
+	TestnetEBISigner = common.HexToAddress("0x25bbaaaf27ab1966c3ab9faf31277a1db7601f3f")
+
 	MainnetBackbone = common.HexToAddress("0x00")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 )
@@ -55,14 +58,15 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Energi: &EnergiConfig{
+			BackboneAddress: MainnetBackbone,
 			MigrationSigner: MainnetMigrationSigner,
+			EBISigner:       MainnetEBISigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24 * 14),
 		MNRequireValidation: big.NewInt(10),
 		MNValidationPeriod:  big.NewInt(5),
 		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14),
-		MNEverCollateral:    new(big.Int).Mul(big.NewInt(1000000), big.NewInt(Ether)),
-		BackboneAddress:     MainnetBackbone,
+		MNEverCollateral:    new(big.Int).Mul(big.NewInt(3000000), big.NewInt(Ether)),
 	}
 
 	EnergiTestnetChainConfig = &ChainConfig{
@@ -76,14 +80,15 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Energi: &EnergiConfig{
+			BackboneAddress: TestnetBackbone,
 			MigrationSigner: TestnetMigrationSigner,
+			EBISigner:       TestnetEBISigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24),
 		MNRequireValidation: big.NewInt(5),
 		MNValidationPeriod:  big.NewInt(5),
 		MNCleanupPeriod:     big.NewInt(60 * 60 * 3),
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
-		BackboneAddress:     TestnetBackbone,
 	}
 
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
@@ -137,16 +142,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -195,8 +200,6 @@ type ChainConfig struct {
 	MNValidationPeriod  *big.Int `json:"mnValidationPeriod"`
 	MNCleanupPeriod     *big.Int `json:"mnCleanupPeriod"`
 	MNEverCollateral    *big.Int `json:"mnEverCollateral"`
-
-	BackboneAddress common.Address `json:"backboneAddress"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -220,7 +223,9 @@ func (c *CliqueConfig) String() string {
 
 // EnergiConfig is the consensus engine config for proof-of-stake based sealing.
 type EnergiConfig struct {
-	MigrationSigner common.Address
+	BackboneAddress common.Address `json:"backboneAddress"`
+	MigrationSigner common.Address `json:"migrationSigner"`
+	EBISigner       common.Address `json:"ebiSigner"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.

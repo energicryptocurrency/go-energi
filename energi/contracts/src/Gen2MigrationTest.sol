@@ -48,9 +48,9 @@ contract MockGen2Migration is Gen2Migration {
 contract MockGen2MigrationBlacklist is BlacklistRegistryV1 {
     mapping(address => bool) is_blacklisted;
 
-    constructor(address _proxy, IGovernedProxy _mnregistry_proxy, Gen2Migration _migration, ITreasury _fund)
+    constructor(address _proxy, IGovernedProxy _mnregistry_proxy, Gen2Migration _migration, ITreasury _fund, address _ebi)
         public
-        BlacklistRegistryV1(_proxy, _mnregistry_proxy, _migration, _fund)
+        BlacklistRegistryV1(_proxy, _mnregistry_proxy, _migration, _fund, _ebi)
     // solium-disable-next-line no-empty-blocks
     {}
 

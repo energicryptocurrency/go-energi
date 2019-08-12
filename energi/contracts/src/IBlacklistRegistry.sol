@@ -54,6 +54,7 @@ interface IBlacklistRegistry {
     );
 
     function compensation_fund() external view returns(ITreasury);
+    function EBI_signer() external view returns(address);
 
     function proposals(address) external view returns(
         IBlacklistProposal enforce,

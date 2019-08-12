@@ -47,6 +47,7 @@ module.exports = async (deployer, _, accounts) => {
         await deploy_common(BlacklistRegistryV1,
             blacklist_registry, mn_registry_proxy,
             Gen2Migration.address, compensation_fund.address,
+            accounts[3],
             { gas: "30000000" });
         await deploy_common(BackboneRewardV1, undefined, accounts[5]);
         await deploy_common(CheckpointRegistryV1);

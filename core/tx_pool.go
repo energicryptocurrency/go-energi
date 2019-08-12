@@ -253,6 +253,10 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 		all:         newTxLookup(),
 		chainHeadCh: make(chan ChainHeadEvent, chainHeadChanSize),
 		gasPrice:    new(big.Int).SetUint64(config.PriceLimit),
+
+		// Ensure to initialize before the tx processing
+		zfProtector:  newZeroFeeProtector(),
+		preBlacklist: newPreBlacklist(),
 	}
 	pool.locals = newAccountSet(pool.signer)
 	for _, addr := range config.Locals {
@@ -275,9 +279,6 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 	}
 	// Subscribe events from blockchain
 	pool.chainHeadSub = pool.chain.SubscribeChainHeadEvent(pool.chainHeadCh)
-
-	pool.zfProtector = newZeroFeeProtector()
-	pool.preBlacklist = newPreBlacklist()
 
 	// Start the event loop and return
 	pool.wg.Add(1)

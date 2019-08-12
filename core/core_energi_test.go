@@ -513,6 +513,8 @@ func TestPreBlacklist(t *testing.T) {
 		3, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, proposeWLCall)
 	revoke := types.NewTransaction(
 		4, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big0, revokeCall)
+	proposePaid := types.NewTransaction(
+		1, energi_params.Energi_BlacklistRegistry, common.Big0, 1000000, common.Big1, propose1Call)
 
 	pool.currentState.SetCode(
 		energi_params.Energi_BlacklistRegistry,
@@ -556,6 +558,11 @@ func TestPreBlacklist(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 2, len(prebl.proposed))
 	assert.True(t, IsWhitelisted(pool.currentState, wladdr1))
+
+	// Non-EBI
+	err = prebl.processTx(pool, proposePaid)
+	assert.Equal(t, nil, err)
+	assert.Equal(t, 2, len(prebl.proposed))
 
 	log.Trace("Check if filtered properly")
 	signer.sender = bladdr1
