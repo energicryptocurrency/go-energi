@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 
 import { Gen2Migration } from "./Gen2Migration.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
