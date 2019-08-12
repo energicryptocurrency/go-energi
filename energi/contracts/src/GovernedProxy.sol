@@ -23,7 +23,7 @@ pragma solidity 0.5.9;
 
 import { IGovernedContract } from "./IGovernedContract.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
-import { IProposal } from "./IProposal.sol";
+import { IUpgradeProposal } from "./IUpgradeProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { NonReentrant } from "./NonReentrant.sol";
 
@@ -48,7 +48,7 @@ contract GovernedProxy is
     IGovernedContract public impl;
     IGovernedProxy public spork_proxy;
     mapping(address => IGovernedContract) public upgrade_proposals;
-    IProposal[] public upgrade_proposal_list;
+    IUpgradeProposal[] public upgrade_proposal_list;
 
     constructor(IGovernedContract _impl, IGovernedProxy _sporkProxy) public {
         impl = _impl;
@@ -63,13 +63,13 @@ contract GovernedProxy is
         external payable
         senderOrigin
         noReentry
-        returns(IProposal)
+        returns(IUpgradeProposal)
     {
         require(_newImpl != impl, "Already active!");
         require(_newImpl.proxy() == address(this), "Wrong proxy!");
 
         ISporkRegistry spork_reg = ISporkRegistry(address(spork_proxy.impl()));
-        IProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period, msg.sender);
+        IUpgradeProposal proposal = spork_reg.createUpgradeProposal.value(msg.value)(_newImpl, _period, msg.sender);
 
         upgrade_proposals[address(proposal)] = _newImpl;
         upgrade_proposal_list.push(proposal);
@@ -82,7 +82,7 @@ contract GovernedProxy is
     /**
      * Once proposal is accepted, anyone can activate that.
      */
-    function upgrade(IProposal _proposal)
+    function upgrade(IUpgradeProposal _proposal)
         external
         noReentry
     {
@@ -109,7 +109,7 @@ contract GovernedProxy is
     /**
      * Map proposal to implementation
      */
-    function upgradeProposalImpl(IProposal _proposal)
+    function upgradeProposalImpl(IUpgradeProposal _proposal)
         external view
         returns(IGovernedContract new_impl)
     {
@@ -121,10 +121,10 @@ contract GovernedProxy is
      */
     function listUpgradeProposals()
         external view
-        returns(IProposal[] memory proposals)
+        returns(IUpgradeProposal[] memory proposals)
     {
         uint len = upgrade_proposal_list.length;
-        proposals = new IProposal[](len);
+        proposals = new IUpgradeProposal[](len);
 
         for (uint i = 0; i < len; ++i) {
             proposals[i] = upgrade_proposal_list[i];
@@ -136,7 +136,7 @@ contract GovernedProxy is
     /**
      * Once proposal is reject, anyone can start collect procedure.
      */
-    function collectUpgradeProposal(IProposal _proposal)
+    function collectUpgradeProposal(IUpgradeProposal _proposal)
         external
         noReentry
     {
@@ -148,7 +148,7 @@ contract GovernedProxy is
         _cleanupProposal(_proposal);
     }
 
-    function _cleanupProposal(IProposal _proposal) internal {
+    function _cleanupProposal(IUpgradeProposal _proposal) internal {
         delete upgrade_proposals[address(_proposal)];
 
         uint len = upgrade_proposal_list.length;

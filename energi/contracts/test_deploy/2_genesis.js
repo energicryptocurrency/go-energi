@@ -63,7 +63,7 @@ module.exports = async (deployer, _, accounts) => {
         await deployer.deploy(MockProxy);
         await deployer.deploy(MockContract, MockProxy.address);
         await deployer.deploy(MockSporkRegistry, MockProxy.address);
-        await deployer.deploy(MockProposal);
+        await deployer.deploy(MockProposal, MockProxy.address, MockContract.address);
         //await deployer.deploy(GenericProposalV1, mn_registry_proxy, 1, 1, mn_registry_proxy)
     } catch (e) {
         // eslint-disable-next-line no-console

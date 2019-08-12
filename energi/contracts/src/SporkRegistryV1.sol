@@ -24,9 +24,55 @@ pragma solidity 0.5.9;
 import { GlobalConstants } from "./constants.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
-import { IProposal } from "./IProposal.sol";
+import { IUpgradeProposal } from "./IUpgradeProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { GenericProposalV1 } from "./GenericProposalV1.sol";
+
+contract UpgradeProposalV1 is
+    GenericProposalV1,
+    IUpgradeProposal
+{
+    IGovernedContract public impl;
+    address public creator;
+
+    /**
+     * C-tor
+     *
+     * @param _parent - actual parent, but not the caller
+     * @param _impl - associated contract implementation
+     * @param _mnregistry_proxy - IMasternodeRegistry proxy
+     * @param _period - in seconds until deadline
+     * @param _feePayer - the proposal initiator
+     */
+    constructor(
+        address _parent,
+        IGovernedContract _impl,
+        IGovernedProxy _mnregistry_proxy,
+        uint _period,
+        address payable _feePayer
+    )
+        public
+        GenericProposalV1(
+            _mnregistry_proxy,
+            QUORUM_MAJORITY,
+            _period,
+            _feePayer
+        )
+    {
+        creator = msg.sender;
+        parent = _parent;
+        impl = _impl;
+    }
+
+    /**
+     * Set fee amount by parent
+     */
+    function setFee() external payable {
+        require(msg.sender == creator, "Only parent");
+        // NOTE: make sure it correctly handles multiple calls
+        fee_amount += msg.value;
+    }
+}
 
 /**
  * Genesis hardcoded version of SporkRegistry
@@ -50,19 +96,19 @@ contract SporkRegistryV1 is
 
     // ISporkRegistry
     //---------------------------------
-    function createUpgradeProposal(IGovernedContract, uint _period, address payable _fee_payer)
+    function createUpgradeProposal(IGovernedContract _impl, uint _period, address payable _fee_payer)
         external payable
-        returns (IProposal proposal)
+        returns (IUpgradeProposal proposal)
     {
         require(msg.value == FEE_UPGRADE_V1, "Invalid fee");
         require(_period >= PERIOD_UPGRADE_MIN, "Period min");
         require(_period <= PERIOD_UPGRADE_MAX, "Period max");
 
-        proposal = new GenericProposalV1(
+        proposal = new UpgradeProposalV1(
+            msg.sender,
+            _impl,
             mnregistry_proxy,
-            QUORUM_MAJORITY,
             _period,
-            // solium-disable-next-line security/no-tx-origin
             _fee_payer
         );
 

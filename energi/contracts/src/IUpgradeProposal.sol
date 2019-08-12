@@ -21,19 +21,12 @@
 pragma solidity 0.5.9;
 //pragma experimental SMTChecker;
 
+import { IProposal } from "./IProposal.sol";
 import { IGovernedContract } from "./IGovernedContract.sol";
-import { IUpgradeProposal } from "./IUpgradeProposal.sol";
 
-interface ISporkRegistry {
-    function createUpgradeProposal(
-        IGovernedContract _impl,
-        uint _period,
-        address payable _fee_payer
-    )
-        external payable
-        returns (IUpgradeProposal);
-
-    function consensusGasLimits()
-        external view
-        returns(uint callGas, uint xferGas);
+/**
+ * Interface of UpgradeProposal
+ */
+contract IUpgradeProposal is IProposal {
+    function impl() external view returns(IGovernedContract);
 }

@@ -140,7 +140,7 @@ contract("GovernedProxy", async accounts => {
     });
 
     it('should refuse upgrade - Not registered!', async () => {
-        let proposal = await MockProposal.new();
+        let proposal = await MockProposal.new(proxy.address, fourth.address);
 
         try {
             await proxy.upgrade(proposal.address);
@@ -209,7 +209,7 @@ contract("GovernedProxy", async accounts => {
     });
 
     it('should refuse collect - Not registered!', async () => {
-        let proposal = await MockProposal.new();
+        let proposal = await MockProposal.new(proxy.address, fourth.address);
 
         try {
             await proxy.collectUpgradeProposal(proposal.address);
