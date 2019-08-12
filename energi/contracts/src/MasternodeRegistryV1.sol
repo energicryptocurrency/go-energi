@@ -165,6 +165,7 @@ contract MasternodeRegistryV1 is
         uint invalidation_since;
         uint invalidations;
         uint seq_payouts;
+        uint last_vote_epoch;
     }
 
     uint public mn_ever_collateral;
@@ -474,9 +475,12 @@ contract MasternodeRegistryV1 is
         address caller = _callerAddress();
         require(caller != masternode, "Invalidation for self");
 
+        uint vote_epoch = block.number / validation_period;
+
         //---
         Status storage cs = mn_status[caller];
         require(_isActive(caller, cs), "Not active caller");
+        require(cs.last_vote_epoch < vote_epoch, "Already invalidated");
         require(validationTarget(caller) == masternode, "Invalid target");
 
         //---
@@ -484,6 +488,8 @@ contract MasternodeRegistryV1 is
 
         require(_isActive(masternode, s), "Not active target");
 
+        //---
+        cs.last_vote_epoch = vote_epoch;
         s.invalidations++;
 
         emit Invalidation(masternode, caller);

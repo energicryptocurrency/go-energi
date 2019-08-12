@@ -956,14 +956,24 @@ contract("MasternodeRegistryV1", async accounts => {
                     expect(target3).not.equal(masternode3);
                     expect(target1).not.equal(target2);
                     expect(target1).not.equal(target3);
+
+                    if (i === 13 || i == 11 || i == 9) {
+                        let invalidator = masternode1;
+
+                        if ( target2 === masternode3) {
+                            invalidator = masternode2;
+                        }
+
+                        await s.token_abi.invalidate(masternode3, {from: invalidator});
+                    }
                 }
 
                 expect(sb).true;
 
-                // No invalidations
+                // One invalidation at round 2
                 const treasury_after = toBN(await web3.eth.getBalance(s.treasury_impl.address));
                 expect(treasury_after.sub(treasury_before).toString())
-                    .eql(toBN(0).toString())
+                    .eql(reward.mul(toBN(1)).toString())
 
                 const owner1_after = toBN(await web3.eth.getBalance(owner1));
                 const owner2_after = toBN(await web3.eth.getBalance(owner2));
@@ -973,7 +983,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(owner2_after.sub(owner2_before).toString())
                     .eql(reward.mul(toBN(2+2+2)).toString());
                 expect(owner3_after.sub(owner3_before).toString())
-                    .eql(reward.mul(toBN(1+1+1)).toString());
+                    .eql(reward.mul(toBN(1+0+1)).toString());
             });
 
 
@@ -1099,6 +1109,19 @@ contract("MasternodeRegistryV1", async accounts => {
                     assert.fail('It must fail');
                 } catch (e) {
                     assert.match(e.message, /Not active caller/);
+                }
+            });
+
+            it('should refuse double invalidate()', async () => {
+                await s.token_abi.invalidate(masternode3, {from:masternode1, ...common.zerofee_callopts});
+
+                try {
+                    for (let i = 0; i < common.mnregistry_config[1]; ++i) {
+                        await s.token_abi.invalidate(masternode3, {from:masternode1, ...common.zerofee_callopts});
+                    }
+                    assert.fail('It must fail');
+                } catch (e) {
+                    assert.match(e.message, /Already invalidated/);
                 }
             });
 
