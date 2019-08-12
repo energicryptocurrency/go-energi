@@ -950,6 +950,9 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		}
 	}
 	zerofeeTxs := make(map[common.Address]types.Transactions)
+	zerofeeGas := uint64(0)
+	zerofeeGasLimit := header.GasLimit / 2
+zfLoop:
 	for account, txs := range remoteTxs {
 		for _, tx := range txs {
 			if core.IsValidZeroFee(tx) {
@@ -958,12 +961,19 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 
 				// NOTE: zero-fee is not emitted in regular operations
 				//       so expect no regular xfers are present.
+				// NOTE: The only exception is initial migration.
 				if ztxs, ok = zerofeeTxs[account]; !ok {
 					ztxs = make(types.Transactions, 0)
 					delete(remoteTxs, account)
 				}
 
 				zerofeeTxs[account] = append(ztxs, tx)
+				zerofeeGas += tx.Gas()
+
+				// MISC-8: suggested limit
+				if zerofeeGas > zerofeeGasLimit {
+					break zfLoop
+				}
 			}
 		}
 	}
