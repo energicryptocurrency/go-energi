@@ -172,6 +172,8 @@ func (pm *ProtocolManager) synchronise(peer *peer) {
 
 	pHead, pTd := peer.Head()
 	if pTd.Cmp(td) <= 0 {
+		// Kick miner
+		pm.eventMux.Post(downloader.DoneEvent{})
 		return
 	}
 	// Otherwise try to sync with the downloader
