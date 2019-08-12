@@ -976,6 +976,34 @@ contract("MasternodeRegistryV1", async accounts => {
                     .eql(reward.mul(toBN(1+1+1)).toString());
             });
 
+
+            it('should calculate validation target by periods', async () => {
+                let bn = await web3.eth.getBlockNumber();
+                const valTarget = () => {
+                    return s.token_abi.methods['validationTarget(address)'](masternode1, bn);
+                }
+
+                let tmp = await valTarget();
+                let target = tmp;
+
+                do {
+                    --bn;
+                    target = await valTarget();
+                } while ( target === tmp );
+
+                for (let k = 0; k < 3; ++k) {
+                    for (let i = common.mnregistry_config[1]; i > 0; --i, --bn) {
+                        tmp = await valTarget();
+                        expect(tmp).equal(target);
+                    }
+
+                    for (let i = common.mnregistry_config[1]; i > 0; --i, --bn) {
+                        tmp = await valTarget();
+                        expect(tmp).not.equal(target);
+                    }
+                }
+            });
+
             it('should refuse invalidate() wrong target', async () => {
                 try {
                     let target = await s.token_abi.validationTarget(masternode1);
