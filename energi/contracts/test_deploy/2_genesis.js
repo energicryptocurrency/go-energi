@@ -50,7 +50,7 @@ module.exports = async (deployer, _, accounts) => {
             accounts[3],
             { gas: "30000000" });
         await deploy_common(BackboneRewardV1, undefined, accounts[5]);
-        await deploy_common(CheckpointRegistryV1);
+        await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, accounts[3]);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
