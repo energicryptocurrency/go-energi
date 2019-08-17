@@ -70,15 +70,17 @@ contract CheckpointV1 is ICheckpoint {
 
     uint internal number;
     bytes32 internal hash;
+    bytes32 public signatureBase;
     mapping(address => uint) internal signers;
 
     bytes[] internal signature_list;
 
-    constructor(IGovernedProxy _mnregistry_proxy, uint _number, bytes32 _hash) public {
+    constructor(IGovernedProxy _mnregistry_proxy, uint _number, bytes32 _hash, bytes32 _sigbase) public {
         mnregistry_proxy = _mnregistry_proxy;
         start = block.number;
         number = _number;
         hash = _hash;
+        signatureBase = _sigbase;
     }
 
     function info() external view returns(uint, bytes32) {
@@ -90,8 +92,7 @@ contract CheckpointV1 is ICheckpoint {
 
         require(signature.length == 65, "Invalid signature length");
         (bytes32 r, bytes32 s) = abi.decode(signature, (bytes32, bytes32));
-        address masternode = ecrecover(hash, uint8(signature[64]), r, s);
-        //assert(masternode == tx.origin);
+        address masternode = ecrecover(signatureBase, uint8(signature[64]), r, s);
 
         require(signers[masternode] == 0, "Already signed");
 
@@ -149,11 +150,37 @@ contract CheckpointRegistryV1 is
 
     // ICheckpointRegistry
     //---------------------------------
-    function propose(uint number, bytes32 hash) external returns(ICheckpoint checkpoint) {
-        require(_callerAddress() == CPP_signer, "Invalid caller");
+    function signatureBase(uint number, bytes32 hash)
+        public view
+        returns(bytes32 sigbase)
+    {
+        sigbase = keccak256(
+            abi.encodePacked(
+                "||Energi Blockchain Checkpoint||",
+                number,
+                hash
+            )
+        );
+    }
 
-        checkpoint = new CheckpointV1(mnregistry_proxy, number, hash);
+    function propose(uint number, bytes32 hash, bytes calldata signature) external returns(ICheckpoint checkpoint) {
+        // Allow to propose by any caller as far as signature is correct.
+        // This leaves us possibility of automatic checkpoint creation.
+        //require(_callerAddress() == CPP_signer, "Invalid caller");
+
+        bytes32 sigbase = signatureBase(number, hash);
+        require(signature.length == 65, "Invalid signature length");
+        (bytes32 r, bytes32 s) = abi.decode(signature, (bytes32, bytes32));
+        require(ecrecover(sigbase, uint8(signature[64]), r, s) == CPP_signer, "Invalid signer");
+
+        checkpoint = new CheckpointV1(mnregistry_proxy, number, hash, sigbase);
         v1storage.add(checkpoint);
+
+        emit Checkpoint(
+            number,
+            hash,
+            checkpoint
+        );
     }
 
     function checkpoints() external view returns(ICheckpoint[] memory) {

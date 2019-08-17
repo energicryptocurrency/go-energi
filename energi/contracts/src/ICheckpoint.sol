@@ -32,4 +32,5 @@ interface ICheckpoint {
     function sign(bytes calldata signature) external;
     function signatures() external view returns(bytes[] memory siglist);
     function signature(address masternode) external view returns(bytes memory);
+    function signatureBase() external view returns(bytes32 sigbase);
 }

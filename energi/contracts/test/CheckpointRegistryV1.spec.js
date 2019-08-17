@@ -71,6 +71,8 @@ contract("CheckpointRegistryV1", async accounts => {
 
         const collateral1 = toBN(toWei('50000', 'ether'));
         const owner1 = accounts[0];
+        const sigacc = web3.eth.accounts.privateKeyToAccount(
+            '0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878');
         const mnacc1 = web3.eth.accounts.create();
         const nonmnacc1 = web3.eth.accounts.create();
         const masternode1 = mnacc1.address;
@@ -90,7 +92,17 @@ contract("CheckpointRegistryV1", async accounts => {
         const cp_sign = cp_count - 1;
         const block_hash = '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
         let cp_list;
-        const mn_sig = ecsign(mnacc1, block_hash);
+        let mn_sig;
+
+        const mn_sig_reg = async (acc, num, block_hash) => {
+            const sigbase = await s.token_abi.signatureBase(num, block_hash); 
+            return ecsign(acc, sigbase);
+        };
+        const mn_sig_cp = async (acc, cp_address) => {
+            const cp = await ICheckpoint.at(cp_address);
+            const sigbase = await cp.signatureBase();
+            return ecsign(acc, sigbase);
+        };
 
         before(async () => {
             await s.mntoken.depositCollateral({
@@ -106,18 +118,31 @@ contract("CheckpointRegistryV1", async accounts => {
             });
         });
 
-        it('should refuse propose() from invalid signer', async () => {
+        it('should refuse propose() with invalid signature length', async () => {
             try {
-                await s.token_abi.propose(1, block_hash);
+                await s.token_abi.propose(1, block_hash, block_hash);
                 assert.fail('It must fail');
             } catch (e) {
-                assert.match(e.message, /Invalid caller/);
+                assert.match(e.message, /Invalid signature length/);
+            }
+        });
+
+        it('should refuse propose() from invalid signer', async () => {
+            try {
+                await s.token_abi.propose(
+                    1, block_hash, await mn_sig_reg(mnacc1, 1, block_hash));
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid signer/);
             }
         });
 
         it('should propose() from valid signer', async () => {
             for (let i = 1; i <= cp_count; ++i) {
-                await s.token_abi.propose(parseInt(i/2), block_hash, {from: accounts[3]});
+                const num = parseInt(i/2);
+                await s.token_abi.propose(
+                    num, block_hash,
+                    await mn_sig_reg(sigacc, num, block_hash));
             }
         });
 
@@ -145,16 +170,27 @@ contract("CheckpointRegistryV1", async accounts => {
         });
 
         it('should sign() by MN', async() => {
+            mn_sig = await mn_sig_cp(mnacc1, cp_list[cp_sign]);
             await s.token_abi.sign(cp_list[cp_sign], mn_sig);
         });
 
         it('should refuse to sign() by already signed MN', async() => {
             try {
-                await s.token_abi.sign(cp_list[cp_sign], mn_sig);
+                await s.token_abi.sign(cp_list[cp_sign], await mn_sig_cp(mnacc1, cp_list[cp_sign]));
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Already signed/);
             }
+        });
+
+        it('should have correct signatureBase()', async () => {
+            const hash = await s.token_abi.signatureBase(cp_sign+1, block_hash);
+            const reqhash = web3.utils.soliditySha3(
+                "||Energi Blockchain Checkpoint||",
+                toBN(cp_sign + 1),
+                toBN(block_hash),
+            );
+            expect(hash.toString()).equal(reqhash.toString());
         });
 
         describe('CheckpointV1', async () => {
@@ -192,6 +228,17 @@ contract("CheckpointRegistryV1", async accounts => {
                 const res = await cp.signature(masternode1);
 
                 expect(res).equal(mn_sig);
+            });
+
+            it('should have correct signatureBase()', async () => {
+                const cp = await ICheckpoint.at(cp_list[cp_sign]);
+                const hash = await cp.signatureBase();
+                const reqhash = web3.utils.soliditySha3(
+                    "||Energi Blockchain Checkpoint||",
+                    toBN(parseInt((cp_sign+1)/2)),
+                    toBN(block_hash),
+                );
+                expect(hash.toString()).equal(reqhash.toString());
             });
         });
     });

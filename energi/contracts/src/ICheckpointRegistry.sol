@@ -30,9 +30,16 @@ import { ICheckpoint } from "./ICheckpoint.sol";
  * NOTE: it MUST NOT change after blockchain launch!
  */
 interface ICheckpointRegistry {
+    event Checkpoint(
+        uint indexed number,
+        bytes32 hash,
+        ICheckpoint checkpoint
+    );
+
     function CPP_signer() external view returns(address);
 
-    function propose(uint number, bytes32 hash) external returns(ICheckpoint);
+    function propose(uint number, bytes32 hash, bytes calldata signature) external returns(ICheckpoint);
     function checkpoints() external view returns(ICheckpoint[] memory);
+    function signatureBase(uint number, bytes32 hash) external view returns(bytes32 sigbase);
     function sign(ICheckpoint checkpoint, bytes calldata signature) external;
 }
