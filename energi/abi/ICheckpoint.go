@@ -28,7 +28,7 @@ var (
 )
 
 // ICheckpointABI is the input ABI used to generate the binding from.
-const ICheckpointABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"signatureBase\",\"outputs\":[{\"name\":\"sigbase\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"signature\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"info\",\"outputs\":[{\"name\":\"number\",\"type\":\"uint256\"},{\"name\":\"hash\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"sign\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"signatures\",\"outputs\":[{\"name\":\"siglist\",\"type\":\"bytes[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const ICheckpointABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"signatureBase\",\"outputs\":[{\"name\":\"sigbase\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"signature\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"info\",\"outputs\":[{\"name\":\"number\",\"type\":\"uint256\"},{\"name\":\"hash\",\"type\":\"bytes32\"},{\"name\":\"since\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"sign\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"signatures\",\"outputs\":[{\"name\":\"siglist\",\"type\":\"bytes[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // ICheckpoint is an auto generated Go binding around an Ethereum contract.
 type ICheckpoint struct {
@@ -174,14 +174,16 @@ func (_ICheckpoint *ICheckpointTransactorRaw) Transact(opts *bind.TransactOpts, 
 
 // Info is a free data retrieval call binding the contract method 0x370158ea.
 //
-// Solidity: function info() constant returns(uint256 number, bytes32 hash)
+// Solidity: function info() constant returns(uint256 number, bytes32 hash, uint256 since)
 func (_ICheckpoint *ICheckpointCaller) Info(opts *bind.CallOpts) (struct {
 	Number *big.Int
 	Hash   [32]byte
+	Since  *big.Int
 }, error) {
 	ret := new(struct {
 		Number *big.Int
 		Hash   [32]byte
+		Since  *big.Int
 	})
 	out := ret
 	err := _ICheckpoint.contract.Call(opts, out, "info")
@@ -190,20 +192,22 @@ func (_ICheckpoint *ICheckpointCaller) Info(opts *bind.CallOpts) (struct {
 
 // Info is a free data retrieval call binding the contract method 0x370158ea.
 //
-// Solidity: function info() constant returns(uint256 number, bytes32 hash)
+// Solidity: function info() constant returns(uint256 number, bytes32 hash, uint256 since)
 func (_ICheckpoint *ICheckpointSession) Info() (struct {
 	Number *big.Int
 	Hash   [32]byte
+	Since  *big.Int
 }, error) {
 	return _ICheckpoint.Contract.Info(&_ICheckpoint.CallOpts)
 }
 
 // Info is a free data retrieval call binding the contract method 0x370158ea.
 //
-// Solidity: function info() constant returns(uint256 number, bytes32 hash)
+// Solidity: function info() constant returns(uint256 number, bytes32 hash, uint256 since)
 func (_ICheckpoint *ICheckpointCallerSession) Info() (struct {
 	Number *big.Int
 	Hash   [32]byte
+	Since  *big.Int
 }, error) {
 	return _ICheckpoint.Contract.Info(&_ICheckpoint.CallOpts)
 }
