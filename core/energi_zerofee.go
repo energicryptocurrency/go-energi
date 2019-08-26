@@ -41,6 +41,7 @@ var (
 	energiVerifyClaimID  types.MethodID
 	energiMNHeartbeatID  types.MethodID
 	energiMNInvalidateID types.MethodID
+	energiCPSignID       types.MethodID
 )
 
 func init() {
@@ -58,6 +59,12 @@ func init() {
 	}
 	copy(energiMNHeartbeatID[:], mnreg_abi.Methods["heartbeat"].Id())
 	copy(energiMNInvalidateID[:], mnreg_abi.Methods["invalidate"].Id())
+
+	cpreg_abi, err := abi.JSON(strings.NewReader(energi_abi.ICheckpointRegistryABI))
+	if err != nil {
+		panic(err)
+	}
+	copy(energiCPSignID[:], cpreg_abi.Methods["sign"].Id())
 }
 
 /**
@@ -82,6 +89,10 @@ func IsValidZeroFee(tx *types.Transaction) bool {
 	}
 
 	if IsMasternodeCall(tx) {
+		return true
+	}
+
+	if IsCheckpointCall(tx) {
 		return true
 	}
 
@@ -112,6 +123,16 @@ func IsMasternodeCall(tx *types.Transaction) bool {
 	return false
 }
 
+func IsCheckpointCall(tx *types.Transaction) bool {
+	to := tx.To()
+
+	if (to == nil) || (*to != energi_params.Energi_CheckpointRegistry) {
+		return false
+	}
+
+	return tx.MethodID() == energiCPSignID
+}
+
 func IsBlacklisted(db vm.StateDB, addr common.Address) bool {
 	return db.GetState(energi_params.Energi_Blacklist, addr.Hash()) != common.Hash{}
 }
@@ -127,6 +148,7 @@ var (
 	zfMinHeartbeatPeriod    = time.Duration(30) * time.Minute
 	zfMinInvalidationPeriod = time.Duration(2) * time.Minute
 	zfMinCoinClaimPeriod    = time.Duration(3) * time.Minute
+	zfMinCheckpointPeriod   = time.Duration(10) * time.Minute
 
 	ErrZeroFeeDoS = errors.New("zero-fee DoS")
 )
@@ -134,6 +156,7 @@ var (
 type zeroFeeProtector struct {
 	mnHeartbeats    map[common.Address]time.Time
 	mnInvalidations map[common.Address]time.Time
+	mnCheckpoints   map[common.Address]time.Time
 	coinClaims      map[uint32]time.Time
 	nextCleanup     time.Time
 	timeNow         func() time.Time
@@ -143,6 +166,7 @@ func newZeroFeeProtector() *zeroFeeProtector {
 	return &zeroFeeProtector{
 		mnHeartbeats:    make(map[common.Address]time.Time),
 		mnInvalidations: make(map[common.Address]time.Time),
+		mnCheckpoints:   make(map[common.Address]time.Time),
 		coinClaims:      make(map[uint32]time.Time),
 		nextCleanup:     time.Now().Add(zfCleanupTimeout),
 		timeNow:         time.Now,
@@ -171,6 +195,7 @@ func (z *zeroFeeProtector) cleanupRoutine(now time.Time) {
 
 	z.cleanupTimeout(now, z.mnHeartbeats, zfMinHeartbeatPeriod)
 	z.cleanupTimeout(now, z.mnInvalidations, zfMinInvalidationPeriod)
+	z.cleanupTimeout(now, z.mnCheckpoints, zfMinCheckpointPeriod)
 
 	for k, v := range z.coinClaims {
 		if now.Sub(v) > zfMinCoinClaimPeriod {
@@ -290,6 +315,8 @@ func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 		return z.checkMasternode(pool, sender, now, z.mnInvalidations, zfMinInvalidationPeriod)
 	} else if method == energiClaimID {
 		return z.checkMigration(pool, sender, now, tx)
+	} else if method == energiCPSignID {
+		return z.checkMasternode(pool, sender, now, z.mnCheckpoints, zfMinCheckpointPeriod)
 	}
 	return nil
 }

@@ -54,6 +54,10 @@ func TestIsValidZeroFee(t *testing.T) {
 	assert.Empty(t, err)
 	invalidateCall, err := mnreg_abi.Pack("invalidate", common.Address{})
 	assert.Empty(t, err)
+	cpreg_abi, err := abi.JSON(strings.NewReader(energi_abi.ICheckpointRegistryABI))
+	assert.Empty(t, err)
+	cpsignCall, err := cpreg_abi.Pack("sign", common.Address{}, []byte{})
+	assert.Empty(t, err)
 
 	res := false
 
@@ -193,6 +197,25 @@ func TestIsValidZeroFee(t *testing.T) {
 		invalidateCall,
 	))
 	assert.False(t, res, "Invalid MN validate - dst")
+	//
+	res = IsValidZeroFee(types.NewTransaction(
+		0,
+		energi_params.Energi_CheckpointRegistry,
+		common.Big0,
+		10000,
+		common.Big0,
+		cpsignCall,
+	))
+	assert.True(t, res, "Valid MN CP sign")
+	res = IsValidZeroFee(types.NewTransaction(
+		0,
+		energi_params.Energi_CheckpointRegistry,
+		common.Big0,
+		10000,
+		common.Big0,
+		claimCall,
+	))
+	assert.False(t, res, "Invalid MN CP sign - data")
 }
 
 //---
@@ -256,25 +279,36 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Empty(t, err)
 	invalidateCall, err := mnreg_abi.Pack("invalidate", common.Address{})
 	assert.Empty(t, err)
+	cpreg_abi, err := abi.JSON(strings.NewReader(energi_abi.ICheckpointRegistryABI))
+	cpsignCall, err := cpreg_abi.Pack("sign", common.Address{}, []byte{})
+	assert.Empty(t, err)
 
 	hbtx0 := types.NewTransaction(
 		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
 	invtx0 := types.NewTransaction(
 		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+	sigtx0 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, cpsignCall)
 	hbtx1 := types.NewTransaction(
 		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
 	invtx1 := types.NewTransaction(
 		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+	sigtx1 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, cpsignCall)
 	hbtx2 := types.NewTransaction(
 		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
 	invtx2 := types.NewTransaction(
 		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+	sigtx2 := types.NewTransaction(
+		1, common.Address{}, common.Big0, 100000, common.Big0, cpsignCall)
 
 	// Inactive MN
 	signer.sender = mn_inactive
 	err = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, ErrZeroFeeDoS, err)
 	err = protector.checkDoS(pool, invtx0)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, sigtx0)
 	assert.Equal(t, ErrZeroFeeDoS, err)
 
 	// Active MN
@@ -283,12 +317,16 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx1)
 	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx1)
+	assert.Equal(t, nil, err)
 
 	// Active MN repeat interval
 	signer.sender = mn_active1
 	err = protector.checkDoS(pool, hbtx1)
 	assert.Equal(t, ErrZeroFeeDoS, err)
 	err = protector.checkDoS(pool, invtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, sigtx1)
 	assert.Equal(t, ErrZeroFeeDoS, err)
 
 	// Active another MV
@@ -297,8 +335,10 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx2)
 	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx2)
+	assert.Equal(t, nil, err)
 
-	// Active MN after first period is over
+	// Active MN after invalidation period is over
 	adjust_time = time.Duration(5) * time.Minute
 
 	signer.sender = mn_active1
@@ -306,14 +346,37 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Equal(t, ErrZeroFeeDoS, err)
 	err = protector.checkDoS(pool, invtx1)
 	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
 
 	signer.sender = mn_active2
 	err = protector.checkDoS(pool, hbtx2)
 	assert.Equal(t, ErrZeroFeeDoS, err)
 	err = protector.checkDoS(pool, invtx2)
 	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
 
-	// Active MN after second period is over
+	// Active MN after checkpoint period is over
+	adjust_time = time.Duration(10) * time.Minute
+
+	signer.sender = mn_active1
+	err = protector.checkDoS(pool, hbtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx1)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx1)
+	assert.Equal(t, nil, err)
+
+	signer.sender = mn_active2
+	err = protector.checkDoS(pool, hbtx2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx2)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx2)
+	assert.Equal(t, nil, err)
+
+	// Active MN after heartbeat period is over
 	adjust_time = time.Duration(30) * time.Minute
 
 	signer.sender = mn_active1
@@ -321,11 +384,15 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx1)
 	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx1)
+	assert.Equal(t, nil, err)
 
 	signer.sender = mn_active2
 	err = protector.checkDoS(pool, hbtx2)
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx2)
+	assert.Equal(t, nil, err)
+	err = protector.checkDoS(pool, sigtx2)
 	assert.Equal(t, nil, err)
 
 	// Test automatic cleanup
@@ -334,21 +401,25 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	err = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 2, len(protector.mnHeartbeats))
 	assert.Equal(t, 2, len(protector.mnInvalidations))
+	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
 	adjust_time = time.Duration(35) * time.Minute
 	err = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 2, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
+	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
 	adjust_time = time.Duration(59) * time.Minute
 	err = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 2, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
+	assert.Equal(t, 0, len(protector.mnCheckpoints))
 
 	adjust_time = time.Duration(61) * time.Minute
 	err = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
+	assert.Equal(t, 0, len(protector.mnCheckpoints))
 }
 
 func TestZeroFeeProtectorMigration(t *testing.T) {
