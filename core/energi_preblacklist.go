@@ -36,7 +36,7 @@ const (
 )
 
 var (
-	energiBLProposeID    types.MethodID
+	energiBLProposeID types.MethodID
 )
 
 func init() {

@@ -607,6 +607,8 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_abi.CheckpointRegistryV1ABI,
 		energi_abi.CheckpointRegistryV1Bin,
 		energi_params.Energi_CheckpointRegistry,
+		energi_params.Energi_MasternodeRegistry,
+		config.Energi.CPPSigner,
 	)
 	deployEnergiContract(
 		&xfers,

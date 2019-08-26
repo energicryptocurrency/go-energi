@@ -32,4 +32,7 @@ var (
 	// ErrNonceTooHigh is returned if the nonce of a transaction is higher than the
 	// next one expected based on the local chain.
 	ErrNonceTooHigh = errors.New("nonce too high")
+
+	// ErrCheckpointMismatch is returned if a block to import does not match checkpoint
+	ErrCheckpointMismatch = errors.New("checkpoint mismatch")
 )

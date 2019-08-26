@@ -454,4 +454,3 @@ func TestZeroFeeProtectorMigration(t *testing.T) {
 	err = protector.checkDoS(pool, claim2)
 	assert.Equal(t, ErrZeroFeeDoS, err)
 }
-

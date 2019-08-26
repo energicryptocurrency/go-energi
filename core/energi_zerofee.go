@@ -293,4 +293,3 @@ func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 	}
 	return nil
 }
-

@@ -35,6 +35,9 @@ var (
 	MainnetEBISigner = common.HexToAddress("0x00")
 	TestnetEBISigner = common.HexToAddress("0x25bbaaaf27ab1966c3ab9faf31277a1db7601f3f")
 
+	MainnetCPPSigner = common.HexToAddress("0x00")
+	TestnetCPPSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
+
 	MainnetBackbone = common.HexToAddress("0x00")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 )
@@ -61,6 +64,7 @@ var (
 			BackboneAddress: MainnetBackbone,
 			MigrationSigner: MainnetMigrationSigner,
 			EBISigner:       MainnetEBISigner,
+			CPPSigner:       MainnetCPPSigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24 * 14),
 		MNRequireValidation: big.NewInt(10),
@@ -83,6 +87,7 @@ var (
 			BackboneAddress: TestnetBackbone,
 			MigrationSigner: TestnetMigrationSigner,
 			EBISigner:       TestnetEBISigner,
+			CPPSigner:       TestnetCPPSigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24),
 		MNRequireValidation: big.NewInt(5),
@@ -226,6 +231,7 @@ type EnergiConfig struct {
 	BackboneAddress common.Address `json:"backboneAddress"`
 	MigrationSigner common.Address `json:"migrationSigner"`
 	EBISigner       common.Address `json:"ebiSigner"`
+	CPPSigner       common.Address `json:"cppSigner"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
