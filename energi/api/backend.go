@@ -70,4 +70,7 @@ type Backend interface {
 
 	ChainConfig() *params.ChainConfig
 	CurrentBlock() *types.Block
+
+	AddLocalCheckpoint(num uint64, hash common.Hash) error
+	ListCheckpoints() []core.Checkpoint
 }

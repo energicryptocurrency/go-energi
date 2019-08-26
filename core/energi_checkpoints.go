@@ -19,6 +19,7 @@ package core
 import (
 	"errors"
 	"math/big"
+	"sort"
 	"sync"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -216,4 +217,23 @@ func (bc *BlockChain) EnforceCheckpoint(cp Checkpoint) error {
 	}
 
 	return nil
+}
+
+func (bc *BlockChain) ListCheckpoints() []Checkpoint {
+	cm := bc.checkpoints
+
+	cm.mtx.Lock()
+	defer cm.mtx.Unlock()
+
+	res := make([]Checkpoint, 0, len(cm.validated))
+
+	for _, v := range cm.validated {
+		res = append(res, v)
+	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].Number < res[j].Number
+	})
+
+	return res
 }
