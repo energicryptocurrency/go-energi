@@ -203,6 +203,7 @@ contract("CheckpointRegistryV1", async accounts => {
                     number: toBN(parseInt((cp_sign+1)/2)).toString(),
                     hash:   block_hash,
                 });
+                expect(res).include.keys('since');
             });
 
             it('should show signature()', async () => {

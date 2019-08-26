@@ -28,7 +28,7 @@ pragma experimental ABIEncoderV2;
  * NOTE: it MUST NOT change after blockchain launch!
  */
 interface ICheckpoint {
-    function info() external view returns(uint number, bytes32 hash);
+    function info() external view returns(uint number, bytes32 hash, uint since);
     function sign(bytes calldata signature) external;
     function signatures() external view returns(bytes[] memory siglist);
     function signature(address masternode) external view returns(bytes memory);

@@ -66,7 +66,7 @@ contract CheckpointV1 is ICheckpoint {
     uint constant internal SIGNING_PERIOD = 24 * 60;
 
     IGovernedProxy internal mnregistry_proxy;
-    uint public start;
+    uint internal since;
 
     uint internal number;
     bytes32 internal hash;
@@ -77,18 +77,18 @@ contract CheckpointV1 is ICheckpoint {
 
     constructor(IGovernedProxy _mnregistry_proxy, uint _number, bytes32 _hash, bytes32 _sigbase) public {
         mnregistry_proxy = _mnregistry_proxy;
-        start = block.number;
+        since = block.number;
         number = _number;
         hash = _hash;
         signatureBase = _sigbase;
     }
 
-    function info() external view returns(uint, bytes32) {
-        return(number, hash);
+    function info() external view returns(uint, bytes32, uint) {
+        return(number, hash, since);
     }
 
     function sign(bytes calldata signature) external {
-        require((block.number - start) < SIGNING_PERIOD, "Signing has ended");
+        require((block.number - since) < SIGNING_PERIOD, "Signing has ended");
 
         require(signature.length == 65, "Invalid signature length");
         (bytes32 r, bytes32 s) = abi.decode(signature, (bytes32, bytes32));
