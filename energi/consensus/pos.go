@@ -17,6 +17,7 @@
 package consensus
 
 import (
+	"encoding/binary"
 	"errors"
 	"math/big"
 	"sort"
@@ -295,7 +296,11 @@ func (e *Energi) calcPoSHash(
 	target *big.Int,
 	weight uint64,
 ) (poshash *big.Int, used_weight uint64) {
+	betime64 := [8]byte{}
+	binary.BigEndian.PutUint64(betime64[:], header.Time)
+
 	poshash = new(big.Int).SetBytes(crypto.Keccak256(
+		betime64[:],
 		header.MixDigest.Bytes(),
 		header.Coinbase.Bytes(),
 	))
