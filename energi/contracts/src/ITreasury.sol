@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
 
 import { IBudgetProposal } from "./IBudgetProposal.sol";

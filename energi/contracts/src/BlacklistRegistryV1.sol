@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
 
 import { GlobalConstants } from "./constants.sol";
@@ -166,19 +166,23 @@ contract BlacklistRegistryV1 is
     IGovernedProxy public mnregistry_proxy;
     Gen2Migration public migration;
     ITreasury public compensation_fund;
+    address public EBI_signer;
     //---------------------------------
 
     constructor(
         address _proxy,
         IGovernedProxy _mnregistry_proxy,
         Gen2Migration _migration,
-        ITreasury _compensatin_fund
+        ITreasury _compensatin_fund,
+        address _ebi_signer
     )
-        public GovernedContract(_proxy) {
+        public GovernedContract(_proxy)
+    {
         v1storage = new StorageBlacklistRegistryV1();
         mnregistry_proxy = _mnregistry_proxy;
         migration = _migration;
         compensation_fund = _compensatin_fund;
+        EBI_signer = _ebi_signer;
     }
 
     // IGovernedContract
@@ -206,12 +210,21 @@ contract BlacklistRegistryV1 is
         return proposal;
     }
 
+    // solium-disable-next-line security/no-assign-params
+    function _requireFee(uint fee) internal {
+        if (_callerAddress() == EBI_signer) {
+            fee = 0;
+        }
+
+        require(msg.value == fee, "Invalid fee");
+    }
+
     function propose(address addr)
         external payable
         noReentry
         returns(IBlacklistProposal)
     {
-        require(msg.value == FEE_BLACKLIST_V1, "Invalid fee");
+        _requireFee(FEE_BLACKLIST_V1);
 
         StorageBlacklistRegistryV1 store = v1storage;
         (IBlacklistProposal enforce, IBlacklistProposal revoke, IBlacklistProposal drain,) = store.address_info(addr);
@@ -257,7 +270,7 @@ contract BlacklistRegistryV1 is
         noReentry
         returns(IBlacklistProposal)
     {
-        require(msg.value == FEE_BLACKLIST_REVOKE_V1, "Invalid fee");
+        _requireFee(FEE_BLACKLIST_REVOKE_V1);
 
         StorageBlacklistRegistryV1 store = v1storage;
         (IBlacklistProposal enforce, IBlacklistProposal revoke,,) = store.address_info(addr);
@@ -293,7 +306,7 @@ contract BlacklistRegistryV1 is
         noReentry
         returns(IBlacklistProposal)
     {
-        require(msg.value == FEE_BLACKLIST_DRAIN_V1, "Invalid fee");
+        _requireFee(FEE_BLACKLIST_DRAIN_V1);
 
         require(isBlacklisted(address(addr)), "Not blacklisted");
 

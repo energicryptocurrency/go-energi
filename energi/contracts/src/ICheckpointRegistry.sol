@@ -18,17 +18,28 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
+pragma experimental ABIEncoderV2;
 
-// solium-disable no-empty-blocks
+import { ICheckpoint } from "./ICheckpoint.sol";
 
 /**
  * Genesis version of CheckpointRegistry interface.
  *
- * Base Consensus interface for contracts which receive block rewards.
- *
  * NOTE: it MUST NOT change after blockchain launch!
  */
 interface ICheckpointRegistry {
+    event Checkpoint(
+        uint indexed number,
+        bytes32 hash,
+        ICheckpoint checkpoint
+    );
+
+    function CPP_signer() external view returns(address);
+
+    function propose(uint number, bytes32 hash, bytes calldata signature) external returns(ICheckpoint);
+    function checkpoints() external view returns(ICheckpoint[] memory);
+    function signatureBase(uint number, bytes32 hash) external view returns(bytes32 sigbase);
+    function sign(ICheckpoint checkpoint, bytes calldata signature) external;
 }

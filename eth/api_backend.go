@@ -227,3 +227,18 @@ func (b *EthAPIBackend) ServiceFilter(ctx context.Context, session *bloombits.Ma
 		go session.Multiplex(bloomRetrievalBatch, bloomRetrievalWait, b.eth.bloomRequests)
 	}
 }
+
+func (b *EthAPIBackend) AddLocalCheckpoint(num uint64, hash common.Hash) error {
+	return b.eth.blockchain.AddCheckpoint(
+		core.Checkpoint{
+			Number: num,
+			Hash:   hash,
+		},
+		[]core.CheckpointSignature{},
+		true,
+	)
+}
+
+func (b *EthAPIBackend) ListCheckpoints() []core.Checkpoint {
+	return b.eth.blockchain.ListCheckpoints()
+}

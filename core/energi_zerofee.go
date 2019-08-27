@@ -41,7 +41,7 @@ var (
 	energiVerifyClaimID  types.MethodID
 	energiMNHeartbeatID  types.MethodID
 	energiMNInvalidateID types.MethodID
-	energiBLProposeID    types.MethodID
+	energiCPSignID       types.MethodID
 )
 
 func init() {
@@ -60,11 +60,11 @@ func init() {
 	copy(energiMNHeartbeatID[:], mnreg_abi.Methods["heartbeat"].Id())
 	copy(energiMNInvalidateID[:], mnreg_abi.Methods["invalidate"].Id())
 
-	bl_abi, err := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
+	cpreg_abi, err := abi.JSON(strings.NewReader(energi_abi.ICheckpointRegistryABI))
 	if err != nil {
 		panic(err)
 	}
-	copy(energiBLProposeID[:], bl_abi.Methods["propose"].Id())
+	copy(energiCPSignID[:], cpreg_abi.Methods["sign"].Id())
 }
 
 /**
@@ -89,6 +89,10 @@ func IsValidZeroFee(tx *types.Transaction) bool {
 	}
 
 	if IsMasternodeCall(tx) {
+		return true
+	}
+
+	if IsCheckpointCall(tx) {
 		return true
 	}
 
@@ -119,6 +123,16 @@ func IsMasternodeCall(tx *types.Transaction) bool {
 	return false
 }
 
+func IsCheckpointCall(tx *types.Transaction) bool {
+	to := tx.To()
+
+	if (to == nil) || (*to != energi_params.Energi_CheckpointRegistry) {
+		return false
+	}
+
+	return tx.MethodID() == energiCPSignID
+}
+
 func IsBlacklisted(db vm.StateDB, addr common.Address) bool {
 	return db.GetState(energi_params.Energi_Blacklist, addr.Hash()) != common.Hash{}
 }
@@ -134,6 +148,7 @@ var (
 	zfMinHeartbeatPeriod    = time.Duration(30) * time.Minute
 	zfMinInvalidationPeriod = time.Duration(2) * time.Minute
 	zfMinCoinClaimPeriod    = time.Duration(3) * time.Minute
+	zfMinCheckpointPeriod   = time.Duration(10) * time.Minute
 
 	ErrZeroFeeDoS = errors.New("zero-fee DoS")
 )
@@ -141,6 +156,7 @@ var (
 type zeroFeeProtector struct {
 	mnHeartbeats    map[common.Address]time.Time
 	mnInvalidations map[common.Address]time.Time
+	mnCheckpoints   map[common.Address]time.Time
 	coinClaims      map[uint32]time.Time
 	nextCleanup     time.Time
 	timeNow         func() time.Time
@@ -150,6 +166,7 @@ func newZeroFeeProtector() *zeroFeeProtector {
 	return &zeroFeeProtector{
 		mnHeartbeats:    make(map[common.Address]time.Time),
 		mnInvalidations: make(map[common.Address]time.Time),
+		mnCheckpoints:   make(map[common.Address]time.Time),
 		coinClaims:      make(map[uint32]time.Time),
 		nextCleanup:     time.Now().Add(zfCleanupTimeout),
 		timeNow:         time.Now,
@@ -178,6 +195,7 @@ func (z *zeroFeeProtector) cleanupRoutine(now time.Time) {
 
 	z.cleanupTimeout(now, z.mnHeartbeats, zfMinHeartbeatPeriod)
 	z.cleanupTimeout(now, z.mnInvalidations, zfMinInvalidationPeriod)
+	z.cleanupTimeout(now, z.mnCheckpoints, zfMinCheckpointPeriod)
 
 	for k, v := range z.coinClaims {
 		if now.Sub(v) > zfMinCoinClaimPeriod {
@@ -297,205 +315,8 @@ func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 		return z.checkMasternode(pool, sender, now, z.mnInvalidations, zfMinInvalidationPeriod)
 	} else if method == energiClaimID {
 		return z.checkMigration(pool, sender, now, tx)
+	} else if method == energiCPSignID {
+		return z.checkMasternode(pool, sender, now, z.mnCheckpoints, zfMinCheckpointPeriod)
 	}
 	return nil
-}
-
-//=============================================================================
-
-var (
-	pbCleanupTimeout = time.Minute
-	pbPeriod         = time.Hour
-
-	ErrPreBlacklist = errors.New("preliminary blacklisted")
-)
-
-type preBlacklist struct {
-	proposed    map[common.Address]time.Time
-	nextCleanup time.Time
-	timeNow     func() time.Time
-}
-
-func newPreBlacklist() *preBlacklist {
-	return &preBlacklist{
-		proposed:    make(map[common.Address]time.Time),
-		nextCleanup: time.Now().Add(pbCleanupTimeout),
-		timeNow:     time.Now,
-	}
-}
-
-func (pb *preBlacklist) cleanupRoutine(now time.Time) {
-	if pb.nextCleanup.After(now) {
-		return
-	}
-
-	pb.nextCleanup = now.Add(pbCleanupTimeout)
-	//---
-	for k, v := range pb.proposed {
-		if now.Sub(v) > pbPeriod {
-			delete(pb.proposed, k)
-		}
-	}
-}
-
-func (pb *preBlacklist) processTx(pool *TxPool, tx *types.Transaction) error {
-	now := pb.timeNow()
-
-	pb.cleanupRoutine(now)
-
-	// Check if know preliminary blacklist
-	//---
-	sender, err := types.Sender(pool.signer, tx)
-	if err != nil {
-		log.Debug("Pre-blacklist sender error", "err", err)
-		return err
-	}
-
-	if pb.isActive(sender, now) {
-		log.Debug("Pre-blacklisted sender", "sender", sender)
-		return ErrPreBlacklist
-	}
-
-	// Check if the call is valid
-	//---
-	pb.processProposal(pool, sender, now, tx)
-
-	return nil
-}
-
-func (pb *preBlacklist) isActive(sender common.Address, now time.Time) bool {
-	if t, ok := pb.proposed[sender]; ok && now.Sub(t) <= pbPeriod {
-		return true
-	}
-
-	return false
-}
-
-func (pb *preBlacklist) processProposal(
-	pool *TxPool,
-	sender common.Address,
-	now time.Time,
-	tx *types.Transaction,
-) {
-	// Check if a new blacklist proposal
-	//---
-	if to := tx.To(); to == nil || *to != energi_params.Energi_BlacklistRegistry {
-		return
-	}
-	if method := tx.MethodID(); method != energiBLProposeID {
-		return
-	}
-
-	//---
-	var target common.Address
-	callData := tx.Data()
-	copy(target[:], callData[16:36])
-
-	// Do not reset timeout, if already known!
-	if _, ok := pb.proposed[target]; ok {
-		return
-	}
-
-	statedb := pool.currentState.Copy()
-
-	if IsWhitelisted(statedb, target) {
-		log.Warn("Skipping preliminary blacklist for whitelisted target",
-			"target", target.Hex(), "sender", sender.Hex())
-		return
-	}
-
-	msg := types.NewMessage(
-		sender,
-		tx.To(),
-		tx.Nonce(),
-		tx.Value(),
-		tx.Gas(),
-		tx.GasPrice(),
-		callData,
-		false,
-	)
-
-	bc := pool.chain.(*BlockChain)
-	if bc == nil {
-		log.Debug("PreBlacklist on missing blockchain")
-		return
-	}
-	vmc := bc.GetVMConfig()
-	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
-	ctx.GasLimit = ZeroFeeGasLimit
-	evm := vm.NewEVM(ctx, statedb, bc.Config(), *vmc)
-
-	gp := new(GasPool).AddGas(tx.Gas())
-	output, _, failed, err := ApplyMessage(evm, msg, gp)
-	if failed || err != nil {
-		log.Debug("PreBlacklist failure at execution",
-			"sender", sender, "target", target.Hex(), "err", err, "output", output)
-		return
-	}
-
-	if len(output) != len(common.Hash{}) {
-		log.Debug("PreBlacklist at unpack",
-			"sender", sender, "target", target.Hex(), "output", output)
-		return
-	}
-
-	// New pre-blacklist item
-	//---
-	log.Warn("New preliminary blacklist", "target", target.Hex(), "sender", sender.Hex())
-	pb.proposed[target] = now
-	pool.removeBySenderLocked(target)
-}
-
-func (pb *preBlacklist) filterBlocks(blocks types.Blocks) types.Blocks {
-	pb.cleanupRoutine(pb.timeNow())
-
-	for i, b := range blocks {
-		if _, ok := pb.proposed[b.Coinbase()]; ok {
-			return blocks[:i]
-		}
-	}
-
-	return blocks
-}
-
-//=============================================================================
-
-func (pool *TxPool) PreBlacklistHook(blocks types.Blocks) types.Blocks {
-	pool.mu.Lock()
-	defer pool.mu.Unlock()
-
-	return pool.preBlacklist.filterBlocks(blocks)
-}
-
-func (pool *TxPool) RemoveBySender(sender common.Address) bool {
-	pool.mu.Lock()
-	defer pool.mu.Unlock()
-
-	return pool.removeBySenderLocked(sender)
-}
-
-func (pool *TxPool) removeBySenderLocked(sender common.Address) bool {
-	res := false
-
-	if txs, ok := pool.pending[sender]; ok {
-		for _, tx := range txs.Flatten() {
-			txhash := tx.Hash()
-			log.Trace("Removing by sender", "txhash", txhash, "sender", sender)
-			pool.removeTx(txhash, true)
-		}
-
-		res = true
-	}
-
-	if txs, ok := pool.queue[sender]; ok {
-		for _, tx := range txs.Flatten() {
-			txhash := tx.Hash()
-			log.Trace("Removing by sender", "txhash", txhash, "sender", sender)
-			pool.removeTx(txhash, true)
-		}
-
-		res = true
-	}
-
-	return res
 }

@@ -16,17 +16,13 @@
 
 package params
 
-const (
-	MaturityPeriod    uint64 = 60 * 60
-	AverageTimeBlocks uint64 = 60
-	TargetBlockGap    uint64 = 60
-	MinBlockGap       uint64 = 30
-	MaxFutureGap      uint64 = 3
-	TargetPeriodGap   uint64 = AverageTimeBlocks * TargetBlockGap
-
-	// DoS protection
-	OldForkPeriod uint64 = 15 * 60
-	StakeThrottle uint64 = 60
-
-	UnlimitedGas uint64 = (1 << 40)
+import (
+	"github.com/ethereum/go-ethereum/common"
+	eth_params "github.com/ethereum/go-ethereum/params"
 )
+
+// map Genesis to map of checkpoints
+var EnergiCheckpoints = map[common.Hash]map[uint64]common.Hash{
+	eth_params.MainnetGenesisHash: {},
+	eth_params.TestnetGenesisHash: {},
+}

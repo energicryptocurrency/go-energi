@@ -65,6 +65,8 @@ type HeaderChain struct {
 
 	rand   *mrand.Rand
 	engine consensus.Engine
+
+	checkpoints *checkpointManager
 }
 
 // NewHeaderChain creates a new HeaderChain structure.
@@ -91,6 +93,7 @@ func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, engine c
 		procInterrupt: procInterrupt,
 		rand:          mrand.New(mrand.NewSource(seed.Int64())),
 		engine:        engine,
+		checkpoints:   newCheckpointManager(),
 	}
 
 	hc.genesisHeader = hc.GetHeaderByNumber(0)
@@ -246,6 +249,9 @@ func (hc *HeaderChain) ValidateHeaderChain(chain []*types.Header, checkFreq int)
 		// If the header is a banned one, straight out abort
 		if BadHashes[header.Hash()] {
 			return i, ErrBlacklistedHash
+		}
+		if err := hc.checkpoints.validate(hc, header.Number.Uint64(), header.Hash()); err != nil {
+			return i, err
 		}
 		if ready != nil {
 			ready <- true

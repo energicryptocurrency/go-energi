@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
 
 import { IProposal } from "./IProposal.sol";
@@ -54,6 +54,7 @@ interface IBlacklistRegistry {
     );
 
     function compensation_fund() external view returns(ITreasury);
+    function EBI_signer() external view returns(address);
 
     function proposals(address) external view returns(
         IBlacklistProposal enforce,

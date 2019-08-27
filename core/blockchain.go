@@ -148,6 +148,8 @@ type BlockChain struct {
 
 	badBlocks      *lru.Cache              // Bad block cache
 	shouldPreserve func(*types.Block) bool // Function used to determine whether should preserve the given block.
+
+	checkpoints *checkpointManager
 }
 
 // NewBlockChain returns a fully initialised block chain using information
@@ -194,6 +196,7 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *par
 	if err != nil {
 		return nil, err
 	}
+	bc.checkpoints = bc.hc.checkpoints
 	bc.genesisBlock = bc.GetBlockByNumber(0)
 	if bc.genesisBlock == nil {
 		return nil, ErrNoGenesis
@@ -214,6 +217,7 @@ func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *par
 			}
 		}
 	}
+	bc.checkpoints.setup(bc)
 	// Take ownership of this particular state
 	go bc.update()
 	return bc, nil
@@ -1233,6 +1237,10 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals bool) (int, []
 		if BadHashes[block.Hash()] {
 			bc.reportBlock(block, nil, ErrBlacklistedHash)
 			return it.index, events, coalescedLogs, ErrBlacklistedHash
+		}
+		if err = bc.checkpoints.validate(bc, block.NumberU64(), block.Hash()); err != nil {
+			bc.reportBlock(block, nil, err)
+			return it.index, events, coalescedLogs, err
 		}
 		// Retrieve the parent block and it's state to execute on top
 		start := time.Now()

@@ -19,10 +19,14 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.10;
+//pragma experimental SMTChecker;
 
-contract DummyAccount {
-    // solium-disable-next-line no-empty-blocks
-    function () external payable {
-        revert("Dummy");
-    }
+import { IProposal } from "./IProposal.sol";
+import { IGovernedContract } from "./IGovernedContract.sol";
+
+/**
+ * Interface of UpgradeProposal
+ */
+contract IUpgradeProposal is IProposal {
+    function impl() external view returns(IGovernedContract);
 }

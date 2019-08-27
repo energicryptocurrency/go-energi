@@ -22,6 +22,7 @@ const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
 const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const ISporkRegistry = artifacts.require('ISporkRegistry');
+const UpgradeProposalV1 = artifacts.require('UpgradeProposalV1');
 
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
@@ -144,6 +145,36 @@ contract("SporkRegistryV1", async accounts => {
             const res = await s.token_abi.consensusGasLimits();
             expect(res[0].toString()).eql(web3.utils.toBN(15e6).toString());
             expect(res[1].toString()).eql(web3.utils.toBN(30e6).toString());
+        });
+
+        describe('UpgradeProposalV1', () => {
+            it ('show allow setFee() only by creator', async () => {
+                const proposal = await UpgradeProposalV1.new(
+                    accounts[2], s.fake.address, s.mnregistry_proxy.address,
+                    14*24*60*60, accounts[1]);
+
+                try {
+                    await proposal.setFee({ value: 1, from: accounts[2] });
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Only parent/);
+                }
+            });
+
+            it ('show allow setFee() only by proxy', async () => {
+                const proposal = await UpgradeProposalV1.new(
+                    accounts[2], s.fake.address, s.mnregistry_proxy.address,
+                    14*24*60*60, accounts[1]);
+
+                try {
+                    await proposal.destroy();
+                    assert.fail('It should fail');
+                } catch (e) {
+                    assert.match(e.message, /Only parent/);
+                }
+
+                await proposal.destroy({ from: accounts[2] });
+            });
         });
     });
 

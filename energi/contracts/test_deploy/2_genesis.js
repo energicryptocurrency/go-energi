@@ -47,9 +47,10 @@ module.exports = async (deployer, _, accounts) => {
         await deploy_common(BlacklistRegistryV1,
             blacklist_registry, mn_registry_proxy,
             Gen2Migration.address, compensation_fund.address,
+            accounts[3],
             { gas: "30000000" });
         await deploy_common(BackboneRewardV1, undefined, accounts[5]);
-        await deploy_common(CheckpointRegistryV1);
+        await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
@@ -63,7 +64,7 @@ module.exports = async (deployer, _, accounts) => {
         await deployer.deploy(MockProxy);
         await deployer.deploy(MockContract, MockProxy.address);
         await deployer.deploy(MockSporkRegistry, MockProxy.address);
-        await deployer.deploy(MockProposal);
+        await deployer.deploy(MockProposal, MockProxy.address, MockContract.address);
         //await deployer.deploy(GenericProposalV1, mn_registry_proxy, 1, 1, mn_registry_proxy)
     } catch (e) {
         // eslint-disable-next-line no-console

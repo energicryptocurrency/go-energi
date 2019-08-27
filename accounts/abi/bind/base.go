@@ -40,6 +40,7 @@ type CallOpts struct {
 	From        common.Address  // Optional the sender address, otherwise the first account is used
 	BlockNumber *big.Int        // Optional the block number on which the call should be performed
 	Context     context.Context // Network context to support cancellation and timeouts (nil = no timeout)
+	GasLimit    uint64          // Gas limit to set for the call execution (0 = default)
 }
 
 // TransactOpts is the collection of authorization data required to create a
@@ -128,7 +129,7 @@ func (c *BoundContract) Call(opts *CallOpts, result interface{}, method string, 
 		return err
 	}
 	var (
-		msg    = ethereum.CallMsg{From: opts.From, To: &c.address, Data: input}
+		msg    = ethereum.CallMsg{From: opts.From, To: &c.address, Data: input, Gas: opts.GasLimit}
 		ctx    = ensureContext(opts.Context)
 		code   []byte
 		output []byte

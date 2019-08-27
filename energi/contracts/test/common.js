@@ -27,6 +27,7 @@ exports.mnregistry_config = [
 exports.superblock_cycles = 8;
 exports.chain_id = 49797;
 exports.migration_signer = '0x0000000000000000000000000000000012345678';
+exports.cpp_signer = '0x2D0bc327d0843CAF6Fd9ae1eFaB0bF7196Fc2FC8';
 exports.zerofee_callopts = {
     gas: 120000, // real max is 500000
 };

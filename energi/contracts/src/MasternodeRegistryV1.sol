@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
 
 import { GlobalConstants } from "./constants.sol";
@@ -165,6 +165,7 @@ contract MasternodeRegistryV1 is
         uint invalidation_since;
         uint invalidations;
         uint seq_payouts;
+        uint last_vote_epoch;
     }
 
     uint public mn_ever_collateral;
@@ -474,9 +475,12 @@ contract MasternodeRegistryV1 is
         address caller = _callerAddress();
         require(caller != masternode, "Invalidation for self");
 
+        uint vote_epoch = block.number / validation_period;
+
         //---
         Status storage cs = mn_status[caller];
         require(_isActive(caller, cs), "Not active caller");
+        require(cs.last_vote_epoch < vote_epoch, "Already invalidated");
         require(validationTarget(caller) == masternode, "Invalid target");
 
         //---
@@ -484,20 +488,21 @@ contract MasternodeRegistryV1 is
 
         require(_isActive(masternode, s), "Not active target");
 
+        //---
+        cs.last_vote_epoch = vote_epoch;
         s.invalidations++;
 
         emit Invalidation(masternode, caller);
     }
 
     function validationTarget(address masternode) public view returns(address target) {
-        uint offset = block.number % mn_announced;
-        uint index = mn_status[masternode].validator_index;
-        uint target_index = (index + offset) % validator_list.length;
+        uint total = validator_list.length;
 
-        // edge case
-        if (index == target_index) {
-            target_index = (target_index + 1) % validator_list.length;
-        }
+        uint vperiod = validation_period;
+        uint offset = (block.number / vperiod % (total - 1)) + 1;
+
+        uint target_index = mn_status[masternode].validator_index;
+        target_index = (target_index + offset) % total;
 
         return validator_list[target_index];
     }
@@ -775,7 +780,7 @@ contract MasternodeRegistryV1 is
             return true;
         }
 
-        uint threshold = invalidation_since - block.number;
+        uint threshold = block.number - invalidation_since;
         threshold = (threshold / validation_period) + 1;
         threshold /= 2;
 

@@ -31,7 +31,6 @@ func (e *Energi) processBlacklists(
 	header *types.Header,
 	statedb *state.StateDB,
 ) (err error) {
-	gp := new(core.GasPool)
 	blregistry := energi_params.Energi_BlacklistRegistry
 
 	enumerateData, err := e.blacklistAbi.Pack("enumerateBlocked")
@@ -45,17 +44,22 @@ func (e *Energi) processBlacklists(
 		&blregistry,
 		0,
 		common.Big0,
-		e.callGas,
+		e.unlimitedGas,
 		common.Big0,
 		enumerateData,
 		false,
 	)
 	evm := e.createEVM(msg, chain, header, statedb)
-	gp.AddGas(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, gp)
+	gp := core.GasPool(e.unlimitedGas)
+	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
 		log.Error("Failed in enumerateBlocked() call", "err", err)
 		return err
+	}
+
+	if gas_used > e.callGas {
+		log.Warn("BlacklistRegistry::enumerateDrainable() took excessive gas",
+			"gas", gas_used, "limit", e.callGas)
 	}
 
 	address_list := new([]common.Address)
@@ -150,7 +154,6 @@ func (e *Energi) processDrainable(
 	header *types.Header,
 	statedb *state.StateDB,
 ) (err error) {
-	gp := new(core.GasPool)
 	blregistry := energi_params.Energi_BlacklistRegistry
 	var comp_fund common.Address
 
@@ -170,17 +173,22 @@ func (e *Energi) processDrainable(
 		&blregistry,
 		0,
 		common.Big0,
-		e.callGas,
+		e.unlimitedGas,
 		common.Big0,
 		enumerateData,
 		false,
 	)
 	evm := e.createEVM(msg, chain, header, statedb)
-	gp.AddGas(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, gp)
+	gp := core.GasPool(e.unlimitedGas)
+	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
 		log.Error("Failed in enumerateDrainable() call", "err", err)
 		return err
+	}
+
+	if gas_used > e.callGas {
+		log.Warn("BlacklistRegistry::enumerateDrainable() took excessive gas",
+			"gas", gas_used, "limit", e.callGas)
 	}
 
 	address_list := new([]common.Address)
@@ -211,8 +219,8 @@ func (e *Energi) processDrainable(
 			false,
 		)
 		evm := e.createEVM(msg, chain, header, statedb)
-		gp.AddGas(e.callGas)
-		output, _, _, err := core.ApplyMessage(evm, msg, gp)
+		gp = core.GasPool(e.callGas)
+		output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 		if err != nil {
 			log.Error("Failed in compensation_fund() call", "err", err)
 			return err
@@ -263,14 +271,14 @@ func (e *Energi) processDrainable(
 			&blregistry,
 			0,
 			common.Big0,
-			e.callGas,
+			e.xferGas,
 			common.Big0,
 			collectData,
 			false,
 		)
 		evm = e.createEVM(msg, chain, header, statedb)
-		gp.AddGas(e.callGas)
-		_, _, _, err = core.ApplyMessage(evm, msg, gp)
+		gp = core.GasPool(e.xferGas)
+		_, _, _, err = core.ApplyMessage(evm, msg, &gp)
 		if err != nil {
 			log.Trace("Failed in onDrain() call", "err", err, "addr", addr)
 			return err

@@ -18,11 +18,11 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
 
 import { IGovernedContract } from "./IGovernedContract.sol";
-import { IProposal } from "./IProposal.sol";
+import { IUpgradeProposal } from "./IUpgradeProposal.sol";
 
 interface ISporkRegistry {
     function createUpgradeProposal(
@@ -31,7 +31,7 @@ interface ISporkRegistry {
         address payable _fee_payer
     )
         external payable
-        returns (IProposal);
+        returns (IUpgradeProposal);
 
     function consensusGasLimits()
         external view

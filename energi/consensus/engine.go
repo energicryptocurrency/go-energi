@@ -72,6 +72,7 @@ type Energi struct {
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
+	unlimitedGas uint64
 	signerFn     SignerFn
 	accountsFn   AccountsFn
 	peerCountFn  PeerCountFn
@@ -131,6 +132,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      0,
 		callGas:      30000,
+		unlimitedGas: energi_params.UnlimitedGas,
 		diffFn:       calcPoSDifficultyV1,
 		now:          func() uint64 { return uint64(time.Now().Unix()) },
 		knownStakes:  make(KnownStakes),
@@ -346,6 +348,14 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	sighash := e.SignatureHash(header)
 	log.Trace("PoS verify signature hash", "sighash", sighash)
 
+	r := new(big.Int).SetBytes(header.Signature[:32])
+	s := new(big.Int).SetBytes(header.Signature[32:64])
+	v := header.Signature[64]
+
+	if !crypto.ValidateSignatureValues(v, r, s, true) {
+		return types.ErrInvalidSig
+	}
+
 	pubkey, err := crypto.Ecrecover(sighash.Bytes(), header.Signature)
 	if err != nil {
 		return err
@@ -369,7 +379,6 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 				return err
 			}
 
-			blockst.SetBalance(e.systemFaucet, new(big.Int).SetUint64(e.callGas))
 			msg := types.NewMessage(
 				e.systemFaucet,
 				&header.Coinbase,
@@ -382,8 +391,8 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 			)
 
 			evm := e.createEVM(msg, chain, parent, blockst)
-			gp := new(core.GasPool).AddGas(e.callGas)
-			output, _, _, err := core.ApplyMessage(evm, msg, gp)
+			gp := core.GasPool(e.callGas)
+			output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 			if err != nil {
 				log.Trace("Fail to get signerAddress()", "err", err)
 				return err
@@ -712,8 +721,8 @@ func (e *Energi) processConsensusGasLimits(
 		false,
 	)
 	evm := e.createEVM(msg, chain, header, state)
-	gp := new(core.GasPool).AddGas(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, gp)
+	gp := core.GasPool(e.callGas)
+	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
 		log.Error("Failed in consensusGasLimits() call", "err", err)
 		return err

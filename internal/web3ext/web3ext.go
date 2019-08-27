@@ -374,6 +374,58 @@ web3._extend({
 			outputFormatter: console.log,
 		}),
 
+		// Checkpoints
+		new web3._extend.Method({
+			name: 'checkpointInfo',
+			call: 'energi_checkpointInfo',
+			params: 0
+			outputFormatter: function(status) {
+				var res = {
+					registry: [],
+					active: [],
+				};
+				var cpinfo = function(cp) {
+					return {
+						number: cp.Number,
+						hash: cp.Hash,
+						since: cp.Since,
+						sigCount: cp.SigCount,
+					};
+				};
+				var raw_registry = status.Registry;
+				for (var i = 0; i < raw_registry.length; ++i) {
+					var raw_item = raw_registry[i];
+					res.registry.push(cpinfo(raw_registry[i]));
+				}
+				var raw_active = status.Active;
+				for (var i = 0; i < raw_active.length; ++i) {
+					var raw_item = raw_active[i];
+					res.active.push(cpinfo(raw_active[i]));
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'checkpointPropose',
+			call: 'energi_checkpointPropose',
+			params: 3
+			inputFormatter: [
+				null,
+				null,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'checkpointLocal',
+			call: 'energi_checkpointLocal',
+			params: 2
+			inputFormatter: [
+				null,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
 	],
 	properties: [
 	]

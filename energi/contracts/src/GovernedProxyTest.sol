@@ -18,13 +18,13 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
 
 // solium-disable no-empty-blocks
 
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
-import { IProposal } from "./IProposal.sol";
+import { IUpgradeProposal } from "./IUpgradeProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { IGovernedProxy, GovernedProxy } from "./GovernedProxy.sol";
 import { StorageBase } from "./StorageBase.sol";
@@ -77,11 +77,11 @@ contract MockProxy is GovernedProxy
 contract MockSporkRegistry is MockContract, ISporkRegistry {
     constructor(address _proxy) public MockContract(_proxy) {}
 
-    function createUpgradeProposal(IGovernedContract, uint, address payable)
+    function createUpgradeProposal(IGovernedContract impl, uint, address payable)
         external payable
-        returns (IProposal)
+        returns (IUpgradeProposal)
     {
-        return new MockProposal();
+        return new MockProposal(msg.sender, impl);
     }
 
     function consensusGasLimits()
@@ -90,8 +90,15 @@ contract MockSporkRegistry is MockContract, ISporkRegistry {
     {}
 }
 
-contract MockProposal is IProposal {
+contract MockProposal is IUpgradeProposal {
     bool accepted;
+    address public parent;
+    IGovernedContract public impl;
+
+    constructor(address _parent, IGovernedContract _impl) public {
+        parent = _parent;
+        impl = _impl;
+    }
 
     function isAccepted() external view returns(bool) {
         return accepted;
@@ -100,9 +107,6 @@ contract MockProposal is IProposal {
         accepted = true;
     }
     function () external payable {}
-    function parent() external view returns(address) {
-        return address(0);
-    }
     function created_block() external view returns(uint) {
         return 0;
     }
@@ -131,7 +135,9 @@ contract MockProposal is IProposal {
         return false;
     }
     function withdraw() external {}
-    function destroy() external {}
+    function destroy() external {
+        require(msg.sender == parent, "Not Owner");
+    }
     function collect() external {}
     function voteAccept() external {}
     function voteReject() external {}

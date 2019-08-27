@@ -19,10 +19,18 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.10;
+//pragma experimental SMTChecker;
+pragma experimental ABIEncoderV2;
 
-contract DummyAccount {
-    // solium-disable-next-line no-empty-blocks
-    function () external payable {
-        revert("Dummy");
-    }
+/**
+ * Genesis version of Checkpoint interface.
+ *
+ * NOTE: it MUST NOT change after blockchain launch!
+ */
+interface ICheckpoint {
+    function info() external view returns(uint number, bytes32 hash, uint since);
+    function sign(bytes calldata signature) external;
+    function signatures() external view returns(bytes[] memory siglist);
+    function signature(address masternode) external view returns(bytes memory);
+    function signatureBase() external view returns(bytes32 sigbase);
 }

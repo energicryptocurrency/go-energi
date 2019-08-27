@@ -58,7 +58,8 @@ func (b *BlacklistAPI) registry(
 	session = &energi_abi.IBlacklistRegistrySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
-			From: dst,
+			From:     dst,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
 			From: dst,
@@ -93,7 +94,9 @@ func (b *BlacklistAPI) BlacklistInfo() (res []BLInfo) {
 		return nil
 	}
 
-	call_opts := &bind.CallOpts{}
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
+	}
 	addresses, err := registry.EnumerateAll(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)

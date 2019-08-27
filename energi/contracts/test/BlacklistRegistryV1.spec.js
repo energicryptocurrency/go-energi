@@ -67,6 +67,7 @@ contract("BlacklistRegistryV1", async accounts => {
         const impl = await BlacklistRegistryV1.new(
             s.proxy.address, s.mnregistry_proxy.address,
             Gen2Migration.address, s.compensation_fund,
+            accounts[9],
             { gas: "10000000" });
         await s.proxy.setImpl(impl.address);
     });
@@ -108,6 +109,10 @@ contract("BlacklistRegistryV1", async accounts => {
             expect(await s.token_abi.isBlacklisted(target1)).false;
         });
 
+        it('should return EBI signer', async () => {
+            expect(await s.token_abi.EBI_signer()).equal(accounts[3]);
+        });
+
         it('should refuse propose() without proper fee', async () => {
             try {
                 await s.token_abi.propose(target1, { value: enforce_fee.sub(toBN(1)) });
@@ -118,6 +123,14 @@ contract("BlacklistRegistryV1", async accounts => {
 
             try {
                 await s.token_abi.propose(target1, { value: enforce_fee.add(toBN(1)) });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid fee/);
+            }
+
+            try {
+                await s.token_abi.propose(target1, {
+                    value: enforce_fee, from: await s.token_abi.EBI_signer()});
                 assert.fail('It should fail');
             } catch (e) {
                 assert.match(e.message, /Invalid fee/);
@@ -134,6 +147,39 @@ contract("BlacklistRegistryV1", async accounts => {
 
             try {
                 await s.token_abi.propose(target1, { value: revoke_fee.add(toBN(1)) });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid fee/);
+            }
+
+            try {
+                await s.token_abi.propose(target1, {
+                    value: revoke_fee, from: await s.token_abi.EBI_signer()});
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid fee/);
+            }
+        });
+
+
+        it('should refuse proposeDrain() without proper fee', async () => {
+            try {
+                await s.token_abi.proposeDrain(target1, { value: drain_fee.sub(toBN(1)) });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid fee/);
+            }
+
+            try {
+                await s.token_abi.proposeDrain(target1, { value: drain_fee.add(toBN(1)) });
+                assert.fail('It should fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid fee/);
+            }
+
+            try {
+                await s.token_abi.proposeDrain(target1, {
+                    value: drain_fee, from: await s.token_abi.EBI_signer()});
                 assert.fail('It should fail');
             } catch (e) {
                 assert.match(e.message, /Invalid fee/);

@@ -18,11 +18,11 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.9;
+pragma solidity 0.5.10;
 //pragma experimental SMTChecker;
 
 import { IGovernedContract } from "./IGovernedContract.sol";
-import { IProposal } from "./IProposal.sol";
+import { IUpgradeProposal } from "./IUpgradeProposal.sol";
 
 /**
  * Genesis version of IGovernedProxy interface.
@@ -36,20 +36,20 @@ import { IProposal } from "./IProposal.sol";
 interface IGovernedProxy {
     event UpgradeProposal(
         IGovernedContract indexed impl,
-        IProposal proposal
+        IUpgradeProposal proposal
     );
     event Upgraded(
         IGovernedContract indexed impl,
-        IProposal proposal
+        IUpgradeProposal proposal
     );
 
     function impl() external view returns(IGovernedContract);
     function proposeUpgrade(IGovernedContract _newImpl, uint _period)
-        external payable returns(IProposal);
-    function upgrade(IProposal _proposal) external;
-    function upgradeProposalImpl(IProposal _proposal) external view returns(IGovernedContract new_impl);
-    function listUpgradeProposals() external view returns(IProposal[] memory proposals);
-    function collectUpgradeProposal(IProposal _proposal) external;
+        external payable returns(IUpgradeProposal);
+    function upgrade(IUpgradeProposal _proposal) external;
+    function upgradeProposalImpl(IUpgradeProposal _proposal) external view returns(IGovernedContract new_impl);
+    function listUpgradeProposals() external view returns(IUpgradeProposal[] memory proposals);
+    function collectUpgradeProposal(IUpgradeProposal _proposal) external;
 
     function () external payable;
 }

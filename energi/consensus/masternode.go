@@ -31,7 +31,6 @@ func (e *Energi) processMasternodes(
 	header *types.Header,
 	statedb *state.StateDB,
 ) (err error) {
-	gp := new(core.GasPool)
 	mnregistry := energi_params.Energi_MasternodeRegistry
 
 	enumerateData, err := e.mnregAbi.Pack("enumerateActive")
@@ -45,17 +44,22 @@ func (e *Energi) processMasternodes(
 		&mnregistry,
 		0,
 		common.Big0,
-		e.callGas,
+		e.unlimitedGas,
 		common.Big0,
 		enumerateData,
 		false,
 	)
 	evm := e.createEVM(msg, chain, header, statedb)
-	gp.AddGas(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, gp)
+	gp := core.GasPool(e.unlimitedGas)
+	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
 		log.Error("Failed in enumerateActive() call", "err", err)
 		return err
+	}
+
+	if gas_used > e.callGas {
+		log.Warn("MasternodeRegistry::enumerateActive() took excessive gas",
+			"gas", gas_used, "limit", e.callGas)
 	}
 
 	masternodes := new([]common.Address)

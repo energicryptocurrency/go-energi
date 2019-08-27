@@ -589,7 +589,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_abi.BackboneRewardV1ABI,
 		energi_abi.BackboneRewardV1Bin,
 		energi_params.Energi_BackboneReward,
-		config.BackboneAddress,
+		config.Energi.BackboneAddress,
 	)
 	deployEnergiContract(
 		&xfers,
@@ -607,6 +607,8 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_abi.CheckpointRegistryV1ABI,
 		energi_abi.CheckpointRegistryV1Bin,
 		energi_params.Energi_CheckpointRegistry,
+		energi_params.Energi_MasternodeRegistry,
+		config.Energi.CPPSigner,
 	)
 	deployEnergiContract(
 		&xfers,
@@ -618,6 +620,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_params.Energi_MasternodeRegistry,
 		energi_params.Energi_MigrationContract,
 		energi_params.Energi_CompensationFundV1,
+		config.Energi.EBISigner,
 	)
 	deployEnergiContract(
 		&xfers,

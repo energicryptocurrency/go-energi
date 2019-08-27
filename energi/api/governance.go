@@ -65,7 +65,8 @@ func (g *GovernanceAPI) proposal(
 	session = &energi_abi.IProposalSession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
-			From: owner,
+			From:     owner,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
 			From: owner,
@@ -200,10 +201,8 @@ func proposalInfo(backend Backend, address common.Address) *ProposalInfo {
 		return nil
 	}
 
-	call_opts := &bind.CallOpts{}
-	if err != nil {
-		log.Error("Failed at CallOpts", "err", err)
-		return nil
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
 	}
 
 	proposer, err := proposal.FeePayer(call_opts)
@@ -293,7 +292,9 @@ func (g *GovernanceAPI) upgradeProposalInfo(proxy common.Address) []UpgradePropo
 		return nil
 	}
 
-	call_opts := &bind.CallOpts{}
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
+	}
 	proposals, err := proxy_obj.ListUpgradeProposals(call_opts)
 	if err != nil {
 		log.Error("Failed ListUpgradeProposals", "err", err)
@@ -334,7 +335,8 @@ func (g *GovernanceAPI) governedProxy(
 	session = &energi_abi.IGovernedProxySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
-			From: owner,
+			From:     owner,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
 			From: owner,
@@ -469,7 +471,8 @@ func (g *GovernanceAPI) treasury(
 	session = &energi_abi.ITreasurySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
-			From: payer,
+			From:     payer,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
 			From: payer,
@@ -515,7 +518,9 @@ func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
 		return nil
 	}
 
-	call_opts := &bind.CallOpts{}
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
+	}
 
 	proposals, err := treasury.ListProposals(call_opts)
 	if err != nil {
