@@ -346,6 +346,14 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	sighash := e.SignatureHash(header)
 	log.Trace("PoS verify signature hash", "sighash", sighash)
 
+	r := new(big.Int).SetBytes(header.Signature[:32])
+	s := new(big.Int).SetBytes(header.Signature[32:64])
+	v := header.Signature[64]
+
+	if !crypto.ValidateSignatureValues(v, r, s, true) {
+		return types.ErrInvalidSig
+	}
+
 	pubkey, err := crypto.Ecrecover(sighash.Bytes(), header.Signature)
 	if err != nil {
 		return err
