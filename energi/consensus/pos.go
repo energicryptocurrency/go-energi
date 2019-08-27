@@ -434,7 +434,7 @@ func (e *Energi) lookupStakeWeight(
 	}
 
 	if weight < total_staked {
-		log.Error("PoS consensus bug",
+		log.Debug("Nothing to stake",
 			"addr", addr, "since", since, "weight", weight, "total_staked", total_staked)
 		weight = 0
 	} else {
