@@ -37,7 +37,6 @@ func (e *Energi) processBlockRewards(
 	header *types.Header,
 	statedb *state.StateDB,
 ) error {
-	gp := new(core.GasPool)
 	systemFaucet := e.systemFaucet
 
 	// Temporary balance setup & clean up
@@ -73,8 +72,8 @@ func (e *Energi) processBlockRewards(
 			false,
 		)
 		evm := e.createEVM(msg, chain, header, statedb)
-		gp.AddGas(e.callGas)
-		output, gas1, _, err := core.ApplyMessage(evm, msg, gp)
+		gp := core.GasPool(e.callGas)
+		output, gas1, _, err := core.ApplyMessage(evm, msg, &gp)
 		if err != nil {
 			log.Error("Failed in getReward() call", "err", err)
 			continue
@@ -100,8 +99,8 @@ func (e *Energi) processBlockRewards(
 			false,
 		)
 		evm = e.createEVM(msg, chain, header, statedb)
-		gp.AddGas(e.xferGas)
-		_, gas2, _, err := core.ApplyMessage(evm, msg, gp)
+		gp = core.GasPool(e.xferGas)
+		_, gas2, _, err := core.ApplyMessage(evm, msg, &gp)
 		if err != nil {
 			log.Error("Failed in reward() call", "err", err)
 			continue

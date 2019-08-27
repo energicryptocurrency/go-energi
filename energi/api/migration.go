@@ -76,7 +76,9 @@ func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin) {
 		return []Gen2Coin{}
 	}
 
-	call_opts := &bind.CallOpts{}
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
+	}
 	bigItems, err := mgrt_contract.ItemCount(call_opts)
 	if err != nil {
 		log.Error("Failed to get coin count", "err", err)
@@ -361,7 +363,8 @@ func (m *MigrationAPI) claimGen2Coins(
 	mgrt_contract := energi_abi.Gen2MigrationSession{
 		Contract: mgrt_contract_obj,
 		CallOpts: bind.CallOpts{
-			From: dst,
+			From:     dst,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
 			From: dst,

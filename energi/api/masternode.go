@@ -72,7 +72,8 @@ func (m *MasternodeAPI) token(
 	session = &energi_abi.IMasternodeTokenSession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
-			From: dst,
+			From:     dst,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
 			From: dst,
@@ -106,7 +107,8 @@ func (m *MasternodeAPI) CollateralBalance(
 
 	res, err := token.BalanceInfo(
 		&bind.CallOpts{
-			From: dst,
+			From:     dst,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		dst,
 	)
@@ -177,7 +179,9 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
 		return nil
 	}
 
-	call_opts := &bind.CallOpts{}
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
+	}
 	masternodes, err := registry.Enumerate(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)
@@ -213,7 +217,9 @@ func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNInfo) 
 		return
 	}
 
-	call_opts := &bind.CallOpts{}
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
+	}
 	mninfo, err := registry.Info(call_opts, owner_or_mn)
 
 	if err == nil {
@@ -253,7 +259,9 @@ func (m *MasternodeAPI) Stats() (res struct {
 		return
 	}
 
-	call_opts := &bind.CallOpts{}
+	call_opts := &bind.CallOpts{
+		GasLimit: energi_params.UnlimitedGas,
+	}
 	count, err := registry.Count(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)
@@ -298,7 +306,8 @@ func (m *MasternodeAPI) registry(
 	session = &energi_abi.IMasternodeRegistrySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
-			From: dst,
+			From:     dst,
+			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
 			From: dst,

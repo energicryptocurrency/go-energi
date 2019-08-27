@@ -83,8 +83,8 @@ func (e *Energi) finalizeMigration(
 		false,
 	)
 	evm := e.createEVM(msg, chain, header, statedb)
-	gp := new(core.GasPool).AddGas(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, gp)
+	gp := core.GasPool(e.callGas)
+	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
 		log.Error("Failed in totalAmount() call", "err", err)
 		return err

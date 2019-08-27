@@ -27,4 +27,6 @@ const (
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
 	StakeThrottle uint64 = 60
+
+	UnlimitedGas uint64 = (1 << 40)
 )
