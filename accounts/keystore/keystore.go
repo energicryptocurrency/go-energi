@@ -42,6 +42,7 @@ import (
 
 var (
 	ErrLocked  = accounts.NewAuthNeededError("password or unlock")
+	ErrStaking = accounts.NewAuthNeededError("only staking")
 	ErrNoMatch = errors.New("no key for given address or file")
 	ErrDecrypt = errors.New("could not decrypt key with given passphrase")
 )
@@ -280,7 +281,7 @@ func (ks *KeyStore) SignTx(a accounts.Account, tx *types.Transaction, chainID *b
 		return nil, ErrLocked
 	}
 	if unlockedKey.stakingOnly {
-		return nil, ErrLocked
+		return nil, ErrStaking
 	}
 	// Depending on the presence of the chain ID, sign with EIP155 or homestead
 	if chainID != nil {
@@ -355,6 +356,11 @@ func (ks *KeyStore) TimedUnlock(a accounts.Account, passphrase string, timeout t
 			// The address was unlocked indefinitely, so unlocking
 			// it with a timeout would be confusing.
 			zeroKey(key.PrivateKey)
+
+			// Allow to easy protection level
+			if !stakingOnly {
+				ks.unlocked[a.Address].stakingOnly = stakingOnly
+			}
 			return nil
 		}
 		// Terminate the expire goroutine and replace it below.
