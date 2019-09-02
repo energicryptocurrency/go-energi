@@ -350,10 +350,6 @@ func (pool *TxPool) loop() {
 				// Any non-locals old enough should be removed
 				if time.Since(pool.beats[addr]) > pool.config.Lifetime {
 					for _, tx := range pool.queue[addr].Flatten() {
-						// Do not evict eligible zero-fee
-						if IsValidZeroFee(tx) {
-							continue
-						}
 						pool.removeTx(tx.Hash(), true)
 					}
 				}
@@ -774,6 +770,10 @@ func (pool *TxPool) journalTx(from common.Address, tx *types.Transaction) {
 	if pool.journal == nil || !pool.locals.contains(from) {
 		return
 	}
+	// Avoid journaling zero-fees
+	if IsValidZeroFee(tx) {
+		return
+	}
 	if err := pool.journal.insert(tx); err != nil {
 		log.Warn("Failed to journal local transaction", "err", err)
 	}
@@ -1013,10 +1013,6 @@ func (pool *TxPool) promoteExecutables(accounts []common.Address) {
 		// Drop all transactions over the allowed limit
 		if !pool.locals.contains(addr) {
 			for _, tx := range list.Cap(int(pool.config.AccountQueue)) {
-				if IsValidZeroFee(tx) {
-					continue
-				}
-
 				hash := tx.Hash()
 				pool.all.Remove(hash)
 				pool.priced.Removed()
