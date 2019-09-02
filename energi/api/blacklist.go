@@ -16,11 +16,9 @@ package api
 import (
 	"errors"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
@@ -40,15 +38,9 @@ const (
 )
 
 func (b *BlacklistAPI) registry(
-	password string,
+	password *string,
 	dst common.Address,
 ) (session *energi_abi.IBlacklistRegistrySession, err error) {
-	account := accounts.Account{Address: dst}
-	wallet, err := b.backend.AccountManager().Find(account)
-	if err != nil {
-		return nil, err
-	}
-
 	contract, err := energi_abi.NewIBlacklistRegistry(
 		energi_params.Energi_BlacklistRegistry, b.backend.(bind.ContractBackend))
 	if err != nil {
@@ -62,15 +54,8 @@ func (b *BlacklistAPI) registry(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: dst,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, b.backend.ChainConfig().ChainID)
-			},
+			From:     dst,
+			Signer:   createSignerCallback(b.backend, password),
 			Value:    common.Big0,
 			GasLimit: blacklistCallGas,
 		},
@@ -134,7 +119,7 @@ func (b *BlacklistAPI) BlacklistEnforce(
 	address common.Address,
 	fee *hexutil.Big,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {
@@ -156,7 +141,7 @@ func (b *BlacklistAPI) BlacklistRevoke(
 	address common.Address,
 	fee *hexutil.Big,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {
@@ -187,7 +172,7 @@ func (b *BlacklistAPI) BlacklistDrain(
 	address common.Address,
 	fee *hexutil.Big,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {
@@ -217,7 +202,7 @@ func (b *BlacklistAPI) BlacklistDrain(
 func (b *BlacklistAPI) BlacklistCollect(
 	target common.Address,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	registry, err := b.registry(password, payer)
 	if err != nil {

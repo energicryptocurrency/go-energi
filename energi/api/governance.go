@@ -19,11 +19,9 @@ import (
 
 	"github.com/pborman/uuid"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 
@@ -47,16 +45,10 @@ func NewGovernanceAPI(b Backend) *GovernanceAPI {
 //=============================================================================
 
 func (g *GovernanceAPI) proposal(
-	password string,
+	password *string,
 	owner common.Address,
 	proposal common.Address,
 ) (session *energi_abi.IProposalSession, err error) {
-	account := accounts.Account{Address: owner}
-	wallet, err := g.backend.AccountManager().Find(account)
-	if err != nil {
-		return nil, err
-	}
-
 	contract, err := energi_abi.NewIProposal(proposal, g.backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, err
@@ -69,15 +61,8 @@ func (g *GovernanceAPI) proposal(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: owner,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, g.backend.ChainConfig().ChainID)
-			},
+			From:     owner,
+			Signer:   createSignerCallback(g.backend, password),
 			Value:    common.Big0,
 			GasLimit: proposalCallGas,
 		},
@@ -92,7 +77,7 @@ func (g *GovernanceAPI) proposal(
 func (g *GovernanceAPI) VoteAccept(
 	proposal common.Address,
 	mn_owner common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	contract, err := g.proposal(password, mn_owner, proposal)
 	if err != nil {
@@ -113,7 +98,7 @@ func (g *GovernanceAPI) VoteAccept(
 func (g *GovernanceAPI) VoteReject(
 	proposal common.Address,
 	mn_owner common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	contract, err := g.proposal(password, mn_owner, proposal)
 	if err != nil {
@@ -134,7 +119,7 @@ func (g *GovernanceAPI) VoteReject(
 func (g *GovernanceAPI) WithdrawFee(
 	proposal common.Address,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	contract, err := g.proposal(password, payer, proposal)
 	if err != nil {
@@ -316,16 +301,10 @@ func (g *GovernanceAPI) upgradeProposalInfo(proxy common.Address) []UpgradePropo
 }
 
 func (g *GovernanceAPI) governedProxy(
-	password string,
+	password *string,
 	owner common.Address,
 	proxy common.Address,
 ) (session *energi_abi.IGovernedProxySession, err error) {
-	account := accounts.Account{Address: owner}
-	wallet, err := g.backend.AccountManager().Find(account)
-	if err != nil {
-		return nil, err
-	}
-
 	contract, err := energi_abi.NewIGovernedProxy(
 		proxy, g.backend.(bind.ContractBackend))
 	if err != nil {
@@ -339,15 +318,8 @@ func (g *GovernanceAPI) governedProxy(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: owner,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, g.backend.ChainConfig().ChainID)
-			},
+			From:     owner,
+			Signer:   createSignerCallback(g.backend, password),
 			Value:    common.Big0,
 			GasLimit: upgradeCallGas,
 		},
@@ -385,7 +357,7 @@ func (g *GovernanceAPI) UpgradePropose(
 	period uint64,
 	fee *hexutil.Big,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	session, err := g.governedProxy(password, payer, proxy)
 	if err != nil {
@@ -408,7 +380,7 @@ func (g *GovernanceAPI) UpgradePerform(
 	proxy common.Address,
 	proposal common.Address,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	session, err := g.governedProxy(password, payer, proxy)
 	if err != nil {
@@ -430,7 +402,7 @@ func (g *GovernanceAPI) UpgradeCollect(
 	proxy common.Address,
 	proposal common.Address,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	session, err := g.governedProxy(password, payer, proxy)
 	if err != nil {
@@ -453,15 +425,9 @@ func (g *GovernanceAPI) UpgradeCollect(
 //=============================================================================
 
 func (g *GovernanceAPI) treasury(
-	password string,
+	password *string,
 	payer common.Address,
 ) (session *energi_abi.ITreasurySession, err error) {
-	account := accounts.Account{Address: payer}
-	wallet, err := g.backend.AccountManager().Find(account)
-	if err != nil {
-		return nil, err
-	}
-
 	contract, err := energi_abi.NewITreasury(
 		energi_params.Energi_Treasury, g.backend.(bind.ContractBackend))
 	if err != nil {
@@ -475,15 +441,8 @@ func (g *GovernanceAPI) treasury(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: payer,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, g.backend.ChainConfig().ChainID)
-			},
+			From:     payer,
+			Signer:   createSignerCallback(g.backend, password),
 			Value:    common.Big0,
 			GasLimit: proposalCallGas,
 		},
@@ -577,7 +536,7 @@ func (g *GovernanceAPI) BudgetPropose(
 	period uint64,
 	fee *hexutil.Big,
 	payer common.Address,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	session, err := g.treasury(password, payer)
 	if err != nil {

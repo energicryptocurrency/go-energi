@@ -19,7 +19,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
@@ -39,19 +38,13 @@ const (
 )
 
 func (b *CheckpointAPI) registry(
-	password string,
+	password *string,
 	from common.Address,
 ) (
 	session *energi_abi.ICheckpointRegistrySession,
 	hashsig func(common.Hash) ([]byte, error),
 	err error,
 ) {
-	account := accounts.Account{Address: from}
-	wallet, err := b.backend.AccountManager().Find(account)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	contract, err := energi_abi.NewICheckpointRegistry(
 		energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractBackend))
 	if err != nil {
@@ -59,7 +52,17 @@ func (b *CheckpointAPI) registry(
 	}
 
 	hashsig = func(h common.Hash) ([]byte, error) {
-		return wallet.SignHashWithPassphrase(account, password, h.Bytes())
+		account := accounts.Account{Address: from}
+		wallet, err := b.backend.AccountManager().Find(account)
+		if err != nil {
+			return nil, err
+		}
+
+		if password == nil {
+			return wallet.SignHash(account, h.Bytes())
+		}
+
+		return wallet.SignHashWithPassphrase(account, *password, h.Bytes())
 	}
 
 	session = &energi_abi.ICheckpointRegistrySession{
@@ -69,15 +72,8 @@ func (b *CheckpointAPI) registry(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: from,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, b.backend.ChainConfig().ChainID)
-			},
+			From:     from,
+			Signer:   createSignerCallback(b.backend, password),
 			GasLimit: checkpointCallGas,
 		},
 	}
@@ -161,7 +157,7 @@ func (b *CheckpointAPI) CheckpointInfo() (res AllCheckpointInfo, err error) {
 func (b *CheckpointAPI) CheckpointPropose(
 	number uint64,
 	hash common.Hash,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	registry, hashsig, err := b.registry(password, b.backend.ChainConfig().Energi.CPPSigner)
 	if err != nil {

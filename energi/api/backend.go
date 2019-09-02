@@ -22,6 +22,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/state"
@@ -73,4 +74,31 @@ type Backend interface {
 
 	AddLocalCheckpoint(num uint64, hash common.Hash) error
 	ListCheckpoints() []core.Checkpoint
+}
+
+func createSignerCallback(
+	backend Backend,
+	password *string,
+) bind.SignerFn {
+	return func(
+		signer types.Signer,
+		addr common.Address,
+		tx *types.Transaction,
+	) (*types.Transaction, error) {
+		account := accounts.Account{Address: addr}
+		wallet, err := backend.AccountManager().Find(account)
+		if err != nil {
+			return nil, err
+		}
+
+		chain_id := backend.ChainConfig().ChainID
+
+		if password == nil {
+			return wallet.SignTx(
+				account, tx, chain_id)
+		}
+
+		return wallet.SignTxWithPassphrase(
+			account, *password, tx, chain_id)
+	}
 }

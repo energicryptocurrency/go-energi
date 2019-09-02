@@ -19,11 +19,9 @@ package api
 import (
 	"errors"
 
-	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/p2p/enode"
@@ -46,23 +44,10 @@ func NewMasternodeAPI(b Backend) *MasternodeAPI {
 	return &MasternodeAPI{b}
 }
 
-func (m *MasternodeAPI) getAddress(
-	dst common.Address,
-) (account accounts.Account, wallet accounts.Wallet, err error) {
-	account = accounts.Account{Address: dst}
-	wallet, err = m.backend.AccountManager().Find(account)
-	return
-}
-
 func (m *MasternodeAPI) token(
-	password string,
+	password *string,
 	dst common.Address,
 ) (session *energi_abi.IMasternodeTokenSession, err error) {
-	account, wallet, err := m.getAddress(dst)
-	if err != nil {
-		return nil, err
-	}
-
 	contract, err := energi_abi.NewIMasternodeToken(
 		energi_params.Energi_MasternodeToken, m.backend.(bind.ContractBackend))
 	if err != nil {
@@ -76,15 +61,8 @@ func (m *MasternodeAPI) token(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: dst,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, m.backend.ChainConfig().ChainID)
-			},
+			From:     dst,
+			Signer:   createSignerCallback(m.backend, password),
 			Value:    common.Big0,
 			GasLimit: mntokenCallGas,
 		},
@@ -125,7 +103,7 @@ func (m *MasternodeAPI) CollateralBalance(
 func (m *MasternodeAPI) DepositCollateral(
 	dst common.Address,
 	amount *hexutil.Big,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	token, err := m.token(password, dst)
 	if err != nil {
@@ -146,7 +124,7 @@ func (m *MasternodeAPI) DepositCollateral(
 func (m *MasternodeAPI) WithdrawCollateral(
 	dst common.Address,
 	amount *hexutil.Big,
-	password string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	token, err := m.token(password, dst)
 	if err != nil {
@@ -289,14 +267,9 @@ func (m *MasternodeAPI) enode(ipv4address uint32, pubkey [2][32]byte) string {
 }
 
 func (m *MasternodeAPI) registry(
-	password string,
+	password *string,
 	dst common.Address,
 ) (session *energi_abi.IMasternodeRegistrySession, err error) {
-	account, wallet, err := m.getAddress(dst)
-	if err != nil {
-		return nil, err
-	}
-
 	contract, err := energi_abi.NewIMasternodeRegistry(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractBackend))
 	if err != nil {
@@ -310,15 +283,8 @@ func (m *MasternodeAPI) registry(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: dst,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, m.backend.ChainConfig().ChainID)
-			},
+			From:     dst,
+			Signer:   createSignerCallback(m.backend, password),
 			Value:    common.Big0,
 			GasLimit: masternodeCallGas,
 		},
@@ -328,7 +294,8 @@ func (m *MasternodeAPI) registry(
 
 func (m *MasternodeAPI) Announce(
 	owner common.Address,
-	enode_url, password string,
+	enode_url string,
+	password *string,
 ) (txhash common.Hash, err error) {
 	registry, err := m.registry(password, owner)
 	if err != nil {
@@ -395,7 +362,8 @@ func (m *MasternodeAPI) Announce(
 }
 
 func (m *MasternodeAPI) Denounce(
-	owner common.Address, password string,
+	owner common.Address,
+	password *string,
 ) (txhash common.Hash, err error) {
 	registry, err := m.registry(password, owner)
 	if err != nil {

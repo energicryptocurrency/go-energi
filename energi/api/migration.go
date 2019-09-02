@@ -29,7 +29,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 
@@ -240,7 +239,7 @@ func (m *MigrationAPI) parseGen2Key(tkey string) (*Gen2Key, error) {
 }
 
 func (m *MigrationAPI) ClaimGen2CoinsDirect(
-	password string,
+	password *string,
 	dst common.Address,
 	tkey string,
 ) error {
@@ -267,7 +266,7 @@ func (m *MigrationAPI) ClaimGen2CoinsDirect(
 }
 
 func (m *MigrationAPI) ClaimGen2CoinsCombined(
-	password string,
+	password *string,
 	dst common.Address,
 	file string,
 ) error {
@@ -333,7 +332,7 @@ func (m *MigrationAPI) ClaimGen2CoinsImport(password string, file string) error 
 		evtsub.Unsubscribe()
 		//----
 
-		err = m.claimGen2Coins(password, dst, &c, key)
+		err = m.claimGen2Coins(&password, dst, &c, key)
 		if err != nil {
 			return err
 		}
@@ -343,17 +342,11 @@ func (m *MigrationAPI) ClaimGen2CoinsImport(password string, file string) error 
 }
 
 func (m *MigrationAPI) claimGen2Coins(
-	password string,
+	password *string,
 	dst common.Address,
 	coin *Gen2Coin,
 	key *Gen2Key,
 ) error {
-	account := accounts.Account{Address: dst}
-	wallet, err := m.backend.AccountManager().Find(accounts.Account{Address: dst})
-	if err != nil {
-		return err
-	}
-
 	mgrt_contract_obj, err := energi_abi.NewGen2Migration(
 		energi_params.Energi_MigrationContract, m.backend.(bind.ContractBackend))
 	if err != nil {
@@ -367,15 +360,8 @@ func (m *MigrationAPI) claimGen2Coins(
 			GasLimit: energi_params.UnlimitedGas,
 		},
 		TransactOpts: bind.TransactOpts{
-			From: dst,
-			Signer: func(
-				signer types.Signer,
-				addr common.Address,
-				tx *types.Transaction,
-			) (*types.Transaction, error) {
-				return wallet.SignTxWithPassphrase(
-					account, password, tx, m.backend.ChainConfig().ChainID)
-			},
+			From:     dst,
+			Signer:   createSignerCallback(m.backend, password),
 			Value:    common.Big0,
 			GasPrice: common.Big0,
 			GasLimit: migrationGas,
