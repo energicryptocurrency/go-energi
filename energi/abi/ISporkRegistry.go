@@ -28,7 +28,7 @@ var (
 )
 
 // ISporkRegistryABI is the input ABI used to generate the binding from.
-const ISporkRegistryABI = "[{\"constant\":false,\"inputs\":[{\"name\":\"_impl\",\"type\":\"address\"},{\"name\":\"_period\",\"type\":\"uint256\"},{\"name\":\"_fee_payer\",\"type\":\"address\"}],\"name\":\"createUpgradeProposal\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"consensusGasLimits\",\"outputs\":[{\"name\":\"callGas\",\"type\":\"uint256\"},{\"name\":\"xferGas\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const ISporkRegistryABI = "[{\"constant\":false,\"inputs\":[{\"internalType\":\"contractIGovernedContract\",\"name\":\"_impl\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_period\",\"type\":\"uint256\"},{\"internalType\":\"addresspayable\",\"name\":\"_fee_payer\",\"type\":\"address\"}],\"name\":\"createUpgradeProposal\",\"outputs\":[{\"internalType\":\"contractIUpgradeProposal\",\"name\":\"\",\"type\":\"address\"}],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"consensusGasLimits\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"callGas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"xferGas\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // ISporkRegistry is an auto generated Go binding around an Ethereum contract.
 type ISporkRegistry struct {

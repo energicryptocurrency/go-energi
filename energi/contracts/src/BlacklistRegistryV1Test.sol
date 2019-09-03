@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.10;
+pragma solidity 0.5.11;
 
 import { BlacklistProposalV1 } from "./BlacklistRegistryV1.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";

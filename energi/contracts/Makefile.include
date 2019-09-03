@@ -2,7 +2,8 @@
 .PHONY: solc abigen energi-contracts
 
 # ---
-SOLC_VERSION := 0.5.10
+SOLC_VERSION := 0.5.11
+SOLC_SHA256 := 350d5abc5862dca43292426b6d4e592f81f40b02cda833f38406ba0047b6b9d0
 SOLC ?= build/_workspace/bin/solc-$(SOLC_VERSION)
 SOLC_OPTIONS := \
   --asm \
@@ -20,7 +21,7 @@ solc: $(SOLC)
 $(SOLC):
 	@mkdir -p $$(dirname $(SOLC))
 	@wget -q -O $(SOLC).tmp 'https://github.com/ethereum/solidity/releases/download/v$(SOLC_VERSION)/solc-static-linux'
-	@test "$$(sha256sum $(SOLC).tmp | cut -f1 -d' ')" = "3c9b2e8eb98d4294fc45326dafcbccb46a70993c346c7d3b55aa0292b3ca0334"
+	@test "$$(sha256sum $(SOLC).tmp | cut -f1 -d' ')" = "$(SOLC_SHA256)"
 	@chmod +x $(SOLC).tmp
 	@mv -f $(SOLC).tmp $(SOLC)
 
