@@ -41,4 +41,7 @@ var (
 
 	// ErrDoSThrottle is returned when DoS protection gets triggered.
 	ErrDoSThrottle = errors.New("dos throttle")
+
+	// Issue in consensus transactions
+	ErrInvalidConsensusTx = errors.New("wrong consensus tx")
 )

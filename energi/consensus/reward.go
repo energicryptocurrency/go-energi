@@ -17,7 +17,6 @@
 package consensus
 
 import (
-	"errors"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -36,7 +35,9 @@ func (e *Energi) processBlockRewards(
 	chain ChainReader,
 	header *types.Header,
 	statedb *state.StateDB,
-) error {
+	txs types.Transactions,
+	receipts types.Receipts,
+) (types.Transactions, types.Receipts, error) {
 	systemFaucet := e.systemFaucet
 
 	// Temporary balance setup & clean up

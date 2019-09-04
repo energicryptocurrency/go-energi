@@ -153,7 +153,9 @@ func (e *Energi) processDrainable(
 	chain ChainReader,
 	header *types.Header,
 	statedb *state.StateDB,
-) (err error) {
+	txs types.Transactions,
+	receipts types.Receipts,
+) (types.Transactions, types.Receipts, error) {
 	blregistry := energi_params.Energi_BlacklistRegistry
 	var comp_fund common.Address
 
@@ -165,7 +167,7 @@ func (e *Energi) processDrainable(
 	enumerateData, err := e.blacklistAbi.Pack("enumerateDrainable")
 	if err != nil {
 		log.Error("Fail to prepare enumerateDrainable() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
 	msg := types.NewMessage(
@@ -183,7 +185,7 @@ func (e *Energi) processDrainable(
 	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
 		log.Error("Failed in enumerateDrainable() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
 	if gas_used > e.callGas {
@@ -195,7 +197,7 @@ func (e *Energi) processDrainable(
 	err = e.blacklistAbi.Unpack(&address_list, "enumerateDrainable", output)
 	if err != nil {
 		log.Error("Failed to unpack enumerateDrainable() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
 	log.Debug("Address drain list", "address_list", address_list)
@@ -205,7 +207,7 @@ func (e *Energi) processDrainable(
 		enumerateData, err := e.blacklistAbi.Pack("compensation_fund")
 		if err != nil {
 			log.Error("Fail to prepare compensation_fund() call", "err", err)
-			return err
+			return nil, nil, err
 		}
 
 		msg := types.NewMessage(
@@ -223,13 +225,13 @@ func (e *Energi) processDrainable(
 		output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 		if err != nil {
 			log.Error("Failed in compensation_fund() call", "err", err)
-			return err
+			return nil, nil, err
 		}
 
 		err = e.blacklistAbi.Unpack(&comp_fund, "compensation_fund", output)
 		if err != nil {
 			log.Error("Failed to unpack compensation_fund() call", "err", err)
-			return err
+			return nil, nil, err
 		}
 	}
 

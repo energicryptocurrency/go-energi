@@ -162,7 +162,7 @@ func TestPoSChain(t *testing.T) {
 			txs = append(txs, tx)
 			receipts = append(receipts, receipt)
 		}
-		block, err := engine.Finalize(
+		block, receipts, err := engine.Finalize(
 			chain, header, blstate, txs, nil, receipts)
 		assert.Empty(t, err)
 
