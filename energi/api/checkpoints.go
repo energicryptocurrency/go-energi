@@ -185,7 +185,15 @@ func (b *CheckpointAPI) CheckpointPropose(
 	return
 }
 
-func (b *CheckpointAPI) CheckpointLocal(
+type CheckpointAdminAPI struct {
+	backend Backend
+}
+
+func NewCheckpointAdminAPI(b Backend) *CheckpointAdminAPI {
+	return &CheckpointAdminAPI{b}
+}
+
+func (b *CheckpointAdminAPI) CheckpointLocal(
 	number uint64,
 	hash common.Hash,
 ) error {

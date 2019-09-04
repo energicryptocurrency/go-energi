@@ -340,6 +340,11 @@ func (s *Ethereum) APIs() []rpc.API {
 			Public:    true,
 		},
 		{
+			Namespace: "admin",
+			Version:   "1.0",
+			Service:   energi_api.NewCheckpointAdminAPI(s.APIBackend),
+		},
+		{
 			Namespace: "energi",
 			Version:   "1.0",
 			Service:   energi_api.NewGovernanceAPI(s.APIBackend),

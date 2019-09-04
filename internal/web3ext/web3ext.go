@@ -416,16 +416,6 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
-		new web3._extend.Method({
-			name: 'checkpointLocal',
-			call: 'energi_checkpointLocal',
-			params: 2
-			inputFormatter: [
-				null,
-				null,
-			],
-			outputFormatter: console.log,
-		}),
 	],
 	properties: [
 	]
@@ -519,6 +509,16 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'stopWS',
 			call: 'admin_stopWS'
+		}),
+		new web3._extend.Method({
+			name: 'checkpointLocal',
+			call: 'admin_checkpointLocal',
+			params: 2
+			inputFormatter: [
+				null,
+				null,
+			],
+			outputFormatter: console.log,
 		}),
 	],
 	properties: [
