@@ -541,6 +541,20 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	// Hardcoded Governance V1
 	deployEnergiContract(
 		&xfers,
+		energi_params.Energi_BlockRewardV1,
+		nil,
+		energi_abi.BlockRewardV1ABI,
+		energi_abi.BlockRewardV1Bin,
+		energi_params.Energi_BlockReward,
+		[4]common.Address{
+			energi_params.Energi_StakerReward,
+			energi_params.Energi_BackboneReward,
+			energi_params.Energi_Treasury,
+			energi_params.Energi_MasternodeRegistry,
+		},
+	)
+	deployEnergiContract(
+		&xfers,
 		energi_params.Energi_TreasuryV1,
 		nil,
 		energi_abi.TreasuryV1ABI,
@@ -666,6 +680,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 
 	// Proxy List
 	proxies := map[common.Address]common.Address{
+		energi_params.Energi_BlockReward:        energi_params.Energi_BlockRewardV1,
 		energi_params.Energi_Treasury:           energi_params.Energi_TreasuryV1,
 		energi_params.Energi_MasternodeRegistry: energi_params.Energi_MasternodeRegistryV1,
 		energi_params.Energi_StakerReward:       energi_params.Energi_StakerRewardV1,
