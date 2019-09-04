@@ -53,9 +53,11 @@ func (e *Energi) processBlacklists(
 		enumerateData,
 		false,
 	)
+	rev_id := statedb.Snapshot()
 	evm := e.createEVM(msg, chain, header, statedb)
 	gp := core.GasPool(e.unlimitedGas)
 	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
+	statedb.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in enumerateBlocked() call", "err", err)
 		return err
@@ -183,9 +185,11 @@ func (e *Energi) processDrainable(
 		enumerateData,
 		false,
 	)
+	rev_id := statedb.Snapshot()
 	evm := e.createEVM(msg, chain, header, statedb)
 	gp := core.GasPool(e.unlimitedGas)
 	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
+	statedb.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in enumerateDrainable() call", "err", err)
 		return nil, nil, err
@@ -223,9 +227,11 @@ func (e *Energi) processDrainable(
 			enumerateData,
 			false,
 		)
+		rev_id := statedb.Snapshot()
 		evm := e.createEVM(msg, chain, header, statedb)
 		gp = core.GasPool(e.callGas)
 		output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+		statedb.RevertToSnapshot(rev_id)
 		if err != nil {
 			log.Error("Failed in compensation_fund() call", "err", err)
 			return nil, nil, err

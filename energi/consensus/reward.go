@@ -71,9 +71,11 @@ func (e *Energi) processBlockRewards(
 		getRewardData,
 		false,
 	)
+	rev_id := statedb.Snapshot()
 	evm := e.createEVM(msg, chain, header, statedb)
 	gp := core.GasPool(msg.Gas())
 	output, gas1, _, err := core.ApplyMessage(evm, msg, &gp)
+	statedb.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in getReward() call", "err", err)
 		return nil, nil, err

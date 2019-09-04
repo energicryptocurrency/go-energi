@@ -391,9 +391,11 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 				false,
 			)
 
+			rev_id := blockst.Snapshot()
 			evm := e.createEVM(msg, chain, parent, blockst)
 			gp := core.GasPool(e.callGas)
 			output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+			blockst.RevertToSnapshot(rev_id)
 			if err != nil {
 				log.Trace("Fail to get signerAddress()", "err", err)
 				return err
@@ -761,9 +763,11 @@ func (e *Energi) processConsensusGasLimits(
 		callData,
 		false,
 	)
+	rev_id := state.Snapshot()
 	evm := e.createEVM(msg, chain, header, state)
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+	state.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in consensusGasLimits() call", "err", err)
 		return err
