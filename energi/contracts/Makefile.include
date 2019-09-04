@@ -41,6 +41,7 @@ ENERGI_CONTRACT_ABIGEN_DIR := energi/abi
 ENERGI_CONTRACTS := \
   BackboneRewardV1.sol \
   BlacklistRegistryV1.sol \
+  BlockRewardV1.sol \
   CheckpointRegistryV1.sol \
   DummyAccount.sol \
   IBlacklistRegistry.sol \
