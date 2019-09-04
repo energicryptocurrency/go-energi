@@ -2,6 +2,7 @@
 
 const BackboneRewardV1 = artifacts.require('BackboneRewardV1');
 const BlacklistRegistryV1 = artifacts.require('BlacklistRegistryV1');
+const BlockRewardV1 = artifacts.require('BlockRewardV1');
 const CheckpointRegistryV1 = artifacts.require('CheckpointRegistryV1');
 const Gen2Migration = artifacts.require('Gen2Migration');
 //const GenericProposalV1 = artifacts.require('GenericProposalV1');
@@ -30,6 +31,10 @@ module.exports = async (deployer, _, accounts) => {
         const blacklist_registry = MockProxy.address;
         await deployer.deploy(MockProxy);
         const mn_registry_proxy = MockProxy.address;
+        await deployer.deploy(MockProxy);
+        const staker_proxy = MockProxy.address;
+        await deployer.deploy(MockProxy);
+        const backbone_proxy = MockProxy.address;
 
         const deploy_common = async (type, proxy, ...args) => {
             if (!proxy) {
@@ -49,15 +54,21 @@ module.exports = async (deployer, _, accounts) => {
             Gen2Migration.address, compensation_fund.address,
             accounts[3],
             { gas: "30000000" });
-        await deploy_common(BackboneRewardV1, undefined, accounts[5]);
+        await deploy_common(BackboneRewardV1, backbone_proxy, accounts[5]);
         await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
             common.mnregistry_config);
         await deploy_common(SporkRegistryV1, undefined, mn_registry_proxy);
-        await deploy_common(StakerRewardV1);
+        await deploy_common(StakerRewardV1, staker_proxy);
         await deploy_common(TreasuryV1, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
+        await deploy_common(BlockRewardV1, undefined, [
+            staker_proxy,
+            backbone_proxy,
+            treasury_proxy,
+            mn_registry_proxy,
+        ]);
 
         // For unit test
         await deployer.deploy(GovernedProxy, BackboneRewardV1.address, SporkRegistryV1.address);

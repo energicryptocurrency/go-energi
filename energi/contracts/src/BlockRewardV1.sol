@@ -21,37 +21,62 @@
 pragma solidity 0.5.11;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
-import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
+import { GovernedContract } from "./GovernedContract.sol";
 import { IBlockReward } from "./IBlockReward.sol";
+import { IGovernedProxy } from "./IGovernedProxy.sol";
+import { NonReentrant } from "./NonReentrant.sol";
 
 /**
  * Genesis hardcoded version of SporkReward
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract StakerRewardV1 is
-    GlobalConstants,
+contract BlockRewardV1 is
     GovernedContract,
-    IBlockReward
+    IBlockReward,
+    NonReentrant
 {
+    uint constant internal GET_GAS = 10000;
+
+    IGovernedProxy[] public reward_proxies;
+
     // IGovernedContract
     //---------------------------------
-    // solium-disable-next-line no-empty-blocks
-    constructor(address _proxy) public GovernedContract(_proxy) {}
+    constructor(address _proxy, IGovernedProxy[] memory _reward_proxies)
+        public
+        GovernedContract(_proxy)
+    {
+        for (uint i = 0; i < _reward_proxies.length; ++i) {
+            reward_proxies.push(_reward_proxies[i]);
+        }
+    }
 
     // IBlockReward
     //---------------------------------
-    function reward() external payable {
-        block.coinbase.transfer(msg.value);
+    function reward()
+        external payable
+        noReentry
+    {
+        uint len = reward_proxies.length;
+        uint gas_per_reward = (gasleft() / len) - GET_GAS;
+
+        for (uint i = 0; i < len; ++i) {
+            IBlockReward impl = IBlockReward(address(reward_proxies[i].impl()));
+
+            uint amount = impl.getReward.gas(GET_GAS)(block.number);
+
+            // solium-disable-next-line security/no-call-value
+            address(impl).call.value(amount).gas(gas_per_reward)(abi.encode(impl.reward.selector));
+        }
     }
 
     function getReward(uint _blockNumber)
         external view
         returns(uint amount)
     {
-        if (_blockNumber > 0) {
-            amount = REWARD_STAKER_V1;
+        for (uint i = reward_proxies.length; i-- > 0;) {
+            IBlockReward impl = IBlockReward(address(reward_proxies[i].impl()));
+            amount += impl.getReward(_blockNumber);
         }
     }
 

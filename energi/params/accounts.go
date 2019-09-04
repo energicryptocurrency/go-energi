@@ -23,6 +23,7 @@ import (
 )
 
 var (
+	Energi_BlockReward        = common.BigToAddress(big.NewInt(0x300))
 	Energi_Treasury           = common.BigToAddress(big.NewInt(0x301))
 	Energi_MasternodeRegistry = common.BigToAddress(big.NewInt(0x302))
 	Energi_StakerReward       = common.BigToAddress(big.NewInt(0x303))
@@ -35,8 +36,8 @@ var (
 	Energi_Blacklist          = common.BigToAddress(big.NewInt(0x30A))
 	Energi_Whitelist          = common.BigToAddress(big.NewInt(0x30B))
 	Energi_MasternodeList     = common.BigToAddress(big.NewInt(0x30C))
-	Energi_SystemFaucet       = common.BigToAddress(big.NewInt(0x310))
 
+	Energi_BlockRewardV1        = common.BigToAddress(big.NewInt(0x310))
 	Energi_TreasuryV1           = common.BigToAddress(big.NewInt(0x311))
 	Energi_MasternodeRegistryV1 = common.BigToAddress(big.NewInt(0x312))
 	Energi_StakerRewardV1       = common.BigToAddress(big.NewInt(0x313))
@@ -46,6 +47,8 @@ var (
 	Energi_BlacklistRegistryV1  = common.BigToAddress(big.NewInt(0x317))
 	Energi_CompensationFundV1   = common.BigToAddress(big.NewInt(0x318))
 	Energi_MasternodeTokenV1    = common.BigToAddress(big.NewInt(0x319))
+
+	Energi_SystemFaucet = common.BigToAddress(big.NewInt(0x320))
 
 	// NOTE: this is NOT very safe, but it optimizes significantly
 	Storage_ProxyImpl = common.BigToHash(big.NewInt(0x01))

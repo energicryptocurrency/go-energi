@@ -26,6 +26,10 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
+var (
+	blacklistValue = common.BytesToHash([]byte{0x01})
+)
+
 func (e *Energi) processBlacklists(
 	chain ChainReader,
 	header *types.Header,
@@ -49,9 +53,11 @@ func (e *Energi) processBlacklists(
 		enumerateData,
 		false,
 	)
+	rev_id := statedb.Snapshot()
 	evm := e.createEVM(msg, chain, header, statedb)
 	gp := core.GasPool(e.unlimitedGas)
 	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
+	statedb.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in enumerateBlocked() call", "err", err)
 		return err
@@ -73,7 +79,6 @@ func (e *Energi) processBlacklists(
 	empty_addr := common.Address{}
 	state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Blacklist)
 	db := statedb.Database()
-	value := common.BytesToHash([]byte{0x01})
 	keep := make(state.KeepStorage, len(*address_list))
 	whitelist := e.createWhitelist(statedb)
 
@@ -86,7 +91,7 @@ func (e *Energi) processBlacklists(
 			}
 
 			log.Trace("Blacklisting account", "addr", addr)
-			state_obj.SetState(db, addr_hash, value)
+			state_obj.SetState(db, addr_hash, blacklistValue)
 			keep[addr_hash] = true
 		}
 	}
@@ -104,7 +109,7 @@ func (e *Energi) processBlacklists(
 		}
 
 		log.Trace("Whitelisting account", "addr", addr)
-		wl_state_obj.SetState(db, addr_hash, value)
+		wl_state_obj.SetState(db, addr_hash, blacklistValue)
 		wl_keep[addr_hash] = true
 	}
 
@@ -153,7 +158,9 @@ func (e *Energi) processDrainable(
 	chain ChainReader,
 	header *types.Header,
 	statedb *state.StateDB,
-) (err error) {
+	txs types.Transactions,
+	receipts types.Receipts,
+) (types.Transactions, types.Receipts, error) {
 	blregistry := energi_params.Energi_BlacklistRegistry
 	var comp_fund common.Address
 
@@ -165,7 +172,7 @@ func (e *Energi) processDrainable(
 	enumerateData, err := e.blacklistAbi.Pack("enumerateDrainable")
 	if err != nil {
 		log.Error("Fail to prepare enumerateDrainable() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
 	msg := types.NewMessage(
@@ -178,12 +185,14 @@ func (e *Energi) processDrainable(
 		enumerateData,
 		false,
 	)
+	rev_id := statedb.Snapshot()
 	evm := e.createEVM(msg, chain, header, statedb)
 	gp := core.GasPool(e.unlimitedGas)
 	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
+	statedb.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in enumerateDrainable() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
 	if gas_used > e.callGas {
@@ -195,7 +204,7 @@ func (e *Energi) processDrainable(
 	err = e.blacklistAbi.Unpack(&address_list, "enumerateDrainable", output)
 	if err != nil {
 		log.Error("Failed to unpack enumerateDrainable() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
 	log.Debug("Address drain list", "address_list", address_list)
@@ -205,7 +214,7 @@ func (e *Energi) processDrainable(
 		enumerateData, err := e.blacklistAbi.Pack("compensation_fund")
 		if err != nil {
 			log.Error("Fail to prepare compensation_fund() call", "err", err)
-			return err
+			return nil, nil, err
 		}
 
 		msg := types.NewMessage(
@@ -218,18 +227,20 @@ func (e *Energi) processDrainable(
 			enumerateData,
 			false,
 		)
+		rev_id := statedb.Snapshot()
 		evm := e.createEVM(msg, chain, header, statedb)
 		gp = core.GasPool(e.callGas)
 		output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+		statedb.RevertToSnapshot(rev_id)
 		if err != nil {
 			log.Error("Failed in compensation_fund() call", "err", err)
-			return err
+			return nil, nil, err
 		}
 
 		err = e.blacklistAbi.Unpack(&comp_fund, "compensation_fund", output)
 		if err != nil {
 			log.Error("Failed to unpack compensation_fund() call", "err", err)
-			return err
+			return nil, nil, err
 		}
 	}
 
@@ -255,35 +266,95 @@ func (e *Energi) processDrainable(
 			continue
 		}
 
-		statedb.AddBalance(comp_fund, bal)
-		statedb.SetBalance(addr, common.Big0)
 		log.Trace("Draining account", "fund", comp_fund, "addr", addr, "bal", bal)
 
-		//--
+		//====================================
+		contributeData, err := e.treasuryAbi.Pack("contribute")
+		if err != nil {
+			log.Error("Fail to prepare contribute() call", "err", err)
+			return nil, nil, err
+		}
+
+		tx := types.NewTransaction(
+			statedb.GetNonce(addr),
+			comp_fund,
+			bal,
+			e.xferGas,
+			common.Big0,
+			contributeData)
+		tx = tx.WithConsensusSender(addr)
+
+		statedb.Prepare(tx.Hash(), common.Hash{}, len(txs))
+
+		msg, err = tx.AsMessage(&ConsensusSigner{})
+		if err != nil {
+			log.Error("Failed in onDrain() msg", "err", err)
+			return nil, nil, err
+		}
+
+		statedb.SetState(energi_params.Energi_Blacklist, addr.Hash(), common.Hash{})
+		evm = e.createEVM(msg, chain, header, statedb)
+		gp = core.GasPool(msg.Gas())
+		_, gas1, failed, err := core.ApplyMessage(evm, msg, &gp)
+		statedb.SetState(energi_params.Energi_Blacklist, addr.Hash(), blacklistValue)
+
+		if err != nil {
+			log.Error("Failed in onDrain() call", "err", err)
+			return nil, nil, err
+		}
+
+		root := statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+		receipt := types.NewReceipt(root.Bytes(), failed, header.GasUsed)
+		receipt.TxHash = tx.Hash()
+		receipt.GasUsed = gas1
+		receipt.Logs = statedb.GetLogs(tx.Hash())
+		receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+
+		txs = append(txs, tx)
+		receipts = append(receipts, receipt)
+
+		//====================================
 		collectData, err := e.blacklistAbi.Pack("onDrain", addr)
 		if err != nil {
 			log.Error("Fail to prepare onDrain() call", "err", err, "addr", addr)
-			return err
+			return nil, nil, err
 		}
 
-		msg := types.NewMessage(
+		tx = types.NewTransaction(
+			statedb.GetNonce(blregistry),
 			blregistry,
-			&blregistry,
-			0,
 			common.Big0,
 			e.xferGas,
 			common.Big0,
-			collectData,
-			false,
-		)
-		evm = e.createEVM(msg, chain, header, statedb)
-		gp = core.GasPool(e.xferGas)
-		_, _, _, err = core.ApplyMessage(evm, msg, &gp)
+			collectData)
+		tx = tx.WithConsensusSender(blregistry)
+
+		statedb.Prepare(tx.Hash(), common.Hash{}, len(txs))
+
+		msg, err = tx.AsMessage(&ConsensusSigner{})
 		if err != nil {
-			log.Trace("Failed in onDrain() call", "err", err, "addr", addr)
-			return err
+			log.Error("Failed in onDrain() msg", "err", err)
+			return nil, nil, err
 		}
+
+		evm = e.createEVM(msg, chain, header, statedb)
+		gp = core.GasPool(msg.Gas())
+		_, gas2, failed, err := core.ApplyMessage(evm, msg, &gp)
+		if err != nil {
+			log.Error("Failed in onDrain() call", "err", err)
+			return nil, nil, err
+		}
+
+		root = statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+		receipt = types.NewReceipt(root.Bytes(), failed, header.GasUsed)
+		receipt.TxHash = tx.Hash()
+		receipt.GasUsed = gas2
+		receipt.Logs = statedb.GetLogs(tx.Hash())
+		receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+
+		txs = append(txs, tx)
+		receipts = append(receipts, receipt)
 	}
 
-	return nil
+	return txs, receipts, nil
 }

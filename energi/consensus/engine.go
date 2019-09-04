@@ -64,11 +64,11 @@ type Energi struct {
 	config       *params.EnergiConfig
 	db           ethdb.Database
 	rewardAbi    abi.ABI
-	rewardGov    []common.Address
 	dposAbi      abi.ABI
 	blacklistAbi abi.ABI
 	sporkAbi     abi.ABI
 	mnregAbi     abi.ABI
+	treasuryAbi  abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -115,20 +115,21 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
+	treasury_abi, err := abi.JSON(strings.NewReader(energi_abi.ITreasuryABI))
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
 	return &Energi{
-		config:    config,
-		db:        db,
-		rewardAbi: reward_abi,
-		rewardGov: []common.Address{
-			energi_params.Energi_Treasury,
-			energi_params.Energi_MasternodeRegistry,
-			energi_params.Energi_BackboneReward,
-			energi_params.Energi_StakerReward,
-		},
+		config:       config,
+		db:           db,
+		rewardAbi:    reward_abi,
 		dposAbi:      dpos_abi,
 		blacklistAbi: blacklist_abi,
 		sporkAbi:     spork_abi,
 		mnregAbi:     mngreg_abi,
+		treasuryAbi:  treasury_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      0,
 		callGas:      30000,
@@ -390,9 +391,11 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 				false,
 			)
 
+			rev_id := blockst.Snapshot()
 			evm := e.createEVM(msg, chain, parent, blockst)
 			gp := core.GasPool(e.callGas)
 			output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+			blockst.RevertToSnapshot(rev_id)
 			if err != nil {
 				log.Trace("Fail to get signerAddress()", "err", err)
 				return err
@@ -464,17 +467,56 @@ func (e *Energi) posPrepare(
 func (e *Energi) Finalize(
 	chain ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction,
 	uncles []*types.Header, receipts []*types.Receipt,
-) (
-	block *types.Block, err error,
-) {
+) (*types.Block, []*types.Receipt, error) {
+	ctxs := types.Transactions{}
+
+	for i := (len(txs) - 1); i >= 0; i-- {
+		if !txs[i].IsConsensus() {
+			i++
+			ctxs = txs[i:]
+			txs = txs[:i]
+			break
+		} else if i == 0 {
+			ctxs = txs[:]
+			txs = txs[:0]
+			break
+		}
+	}
+
+	block, receipts, err := e.finalize(chain, header, state, txs, receipts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ntxs := block.Transactions()[len(txs):]
+	if len(ntxs) != len(ctxs) {
+		log.Trace("Consensus TX length mismatch", "ntxs", len(ntxs), "ctxs", len(ctxs))
+		return nil, nil, eth_consensus.ErrInvalidConsensusTx
+	}
+	for i, tx := range ntxs {
+		if tx.Hash() != ctxs[i].Hash() {
+			log.Trace("Consensus TX hash mismatch", "pos", i, "ctx", ctxs[i].Hash(), "ntx", tx.Hash())
+			return nil, nil, eth_consensus.ErrInvalidConsensusTx
+		}
+	}
+
+	return block, receipts, err
+}
+
+func (e *Energi) finalize(
+	chain ChainReader, header *types.Header, state *state.StateDB,
+	txs []*types.Transaction, receipts []*types.Receipt,
+) (*types.Block, []*types.Receipt, error) {
+	var err error
+
 	// Do not finalize too early in mining
 	if (header.Coinbase != common.Address{}) {
-		err = e.govFinalize(chain, header, state, txs)
+		txs, receipts, err = e.govFinalize(chain, header, state, txs, receipts)
 	}
 
 	header.UncleHash = uncleHash
 
-	return types.NewBlock(header, txs, nil, receipts), err
+	return types.NewBlock(header, txs, nil, receipts), receipts, err
 }
 
 func (e *Energi) govFinalize(
@@ -482,10 +524,11 @@ func (e *Energi) govFinalize(
 	header *types.Header,
 	state *state.StateDB,
 	txs types.Transactions,
-) (err error) {
-	err = e.processConsensusGasLimits(chain, header, state)
+	receipts types.Receipts,
+) (types.Transactions, types.Receipts, error) {
+	err := e.processConsensusGasLimits(chain, header, state)
 	if err == nil {
-		err = e.processBlockRewards(chain, header, state)
+		txs, receipts, err = e.processBlockRewards(chain, header, state, txs, receipts)
 	}
 	if err == nil {
 		err = e.processMasternodes(chain, header, state)
@@ -494,13 +537,13 @@ func (e *Energi) govFinalize(
 		err = e.processBlacklists(chain, header, state)
 	}
 	if err == nil {
-		err = e.processDrainable(chain, header, state)
+		txs, receipts, err = e.processDrainable(chain, header, state, txs, receipts)
 	}
 	if err == nil {
 		err = e.finalizeMigration(chain, header, state, txs)
 	}
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-	return
+	return txs, receipts, err
 }
 
 // Seal generates a new sealing request for the given input block and pushes
@@ -516,7 +559,7 @@ func (e *Energi) Seal(
 ) (err error) {
 	go func() {
 		header := block.Header()
-		result := eth_consensus.NewSealResult(block, nil)
+		result := eth_consensus.NewSealResult(block, nil, nil)
 
 		if header.Number.Cmp(common.Big0) != 0 {
 			success, err := e.mine(chain, header, stop)
@@ -536,7 +579,7 @@ func (e *Energi) Seal(
 
 			if !success {
 				select {
-				case results <- eth_consensus.NewSealResult(nil, nil):
+				case results <- eth_consensus.NewSealResult(nil, nil, nil):
 				default:
 				}
 				return
@@ -608,8 +651,8 @@ func (e *Energi) recreateBlock(
 	header.GasUsed = *usedGas
 	header.Bloom = types.Bloom{}
 
-	block, err := e.Finalize(chain, header, blstate, txs, nil, receipts)
-	return eth_consensus.NewSealResult(block, blstate), err
+	block, receipts, err := e.finalize(chain, header, blstate, txs, receipts)
+	return eth_consensus.NewSealResult(block, blstate, receipts), err
 }
 
 // SealHash returns the hash of a block prior to it being sealed.
@@ -622,7 +665,7 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 		header.UncleHash,
 		//header.Coinbase,
 		//header.Root,
-		header.TxHash,
+		//header.TxHash,
 		//header.ReceiptHash,
 		//header.Bloom,
 		//header.Difficulty,
@@ -720,9 +763,11 @@ func (e *Energi) processConsensusGasLimits(
 		callData,
 		false,
 	)
+	rev_id := state.Snapshot()
 	evm := e.createEVM(msg, chain, header, state)
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+	state.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in consensusGasLimits() call", "err", err)
 		return err

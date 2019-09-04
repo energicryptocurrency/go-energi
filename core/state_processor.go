@@ -59,9 +59,20 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 		header   = block.Header()
 		allLogs  []*types.Log
 		gp       = new(GasPool).AddGas(block.GasLimit())
+
+		consensusStarted = false
 	)
 	// Iterate over and process the individual transactions
 	for i, tx := range block.Transactions() {
+		// Energi-specific
+		if tx.IsConsensus() {
+			consensusStarted = true
+			continue
+		} else if consensusStarted {
+			// Consensus txs must be at the end
+			return nil, nil, 0, consensus.ErrInvalidConsensusTx
+		}
+
 		statedb.Prepare(tx.Hash(), block.Hash(), i)
 		receipt, _, err := ApplyTransaction(p.config, p.bc, nil, gp, statedb, header, tx, usedGas, cfg)
 		if err != nil {
@@ -71,9 +82,18 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 		allLogs = append(allLogs, receipt.Logs...)
 	}
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
-	_, err := p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts)
+	_, finReceipts, err := p.engine.Finalize(p.bc, header, statedb, block.Transactions(), block.Uncles(), receipts)
 	if err != nil {
 		return nil, nil, 0, err
+	}
+	for _, receipt := range finReceipts[len(receipts):] {
+		receipts = append(receipts, receipt)
+		allLogs = append(allLogs, receipt.Logs...)
+	}
+
+	// Just-in-case for non-Energi code
+	if consensusStarted && p.config.Energi == nil {
+		return nil, nil, 0, consensus.ErrInvalidConsensusTx
 	}
 
 	return receipts, allLogs, *usedGas, nil

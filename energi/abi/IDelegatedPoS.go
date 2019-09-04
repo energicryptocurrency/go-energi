@@ -28,7 +28,7 @@ var (
 )
 
 // IDelegatedPoSABI is the input ABI used to generate the binding from.
-const IDelegatedPoSABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"signerAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const IDelegatedPoSABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"signerAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // IDelegatedPoS is an auto generated Go binding around an Ethereum contract.
 type IDelegatedPoS struct {

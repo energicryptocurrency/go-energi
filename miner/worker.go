@@ -574,12 +574,16 @@ func (w *worker) resultLoop() {
 			if statedb == nil {
 				statedb = task.state
 			}
+			resReceipts := result.Receipts
+			if resReceipts == nil {
+				resReceipts = task.receipts
+			}
 			// Different block could share same sealhash, deep copy here to prevent write-write conflict.
 			var (
-				receipts = make([]*types.Receipt, len(task.receipts))
+				receipts = make([]*types.Receipt, len(resReceipts))
 				logs     []*types.Log
 			)
-			for i, receipt := range task.receipts {
+			for i, receipt := range resReceipts {
 				receipts[i] = new(types.Receipt)
 				*receipts[i] = *receipt
 				// Update the block hash in all logs since it is now available and not when the
@@ -1008,7 +1012,7 @@ func (w *worker) commit(uncles []*types.Header, interval func(), update bool, st
 		*receipts[i] = *l
 	}
 	s := w.current.state.Copy()
-	block, err := w.engine.Finalize(w.chain, w.current.header, s, w.current.txs, uncles, w.current.receipts)
+	block, receipts, err := w.engine.Finalize(w.chain, w.current.header, s, w.current.txs, uncles, w.current.receipts)
 	if err != nil {
 		return err
 	}

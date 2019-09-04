@@ -54,7 +54,7 @@ func (ethash *Ethash) Seal(chain consensus.ChainReader, block *types.Block, resu
 		header := block.Header()
 		header.Nonce, header.MixDigest = types.BlockNonce{}, common.Hash{}
 		select {
-		case results <- consensus.NewSealResult(block.WithSeal(header), nil):
+		case results <- consensus.NewSealResult(block.WithSeal(header), nil, nil):
 		default:
 			log.Warn("Sealing result is not read by miner", "mode", "fake", "sealhash", ethash.SealHash(block.Header()))
 		}
@@ -109,7 +109,7 @@ func (ethash *Ethash) Seal(chain consensus.ChainReader, block *types.Block, resu
 		case result = <-locals:
 			// One of the threads found a block, abort all others
 			select {
-			case results <- consensus.NewSealResult(result, nil):
+			case results <- consensus.NewSealResult(result, nil, nil):
 			default:
 				log.Warn("Sealing result is not read by miner", "mode", "local", "sealhash", ethash.SealHash(block.Header()))
 			}
@@ -287,7 +287,7 @@ func (ethash *Ethash) remote(notify []string, noverify bool) {
 		// The submitted solution is within the scope of acceptance.
 		if solution.NumberU64()+staleThreshold > currentBlock.NumberU64() {
 			select {
-			case results <- consensus.NewSealResult(solution, nil):
+			case results <- consensus.NewSealResult(solution, nil, nil):
 				log.Debug("Work submitted is acceptable", "number", solution.NumberU64(), "sealhash", sealhash, "hash", solution.Hash())
 				return true
 			default:

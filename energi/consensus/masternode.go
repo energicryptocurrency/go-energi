@@ -49,9 +49,11 @@ func (e *Energi) processMasternodes(
 		enumerateData,
 		false,
 	)
+	rev_id := statedb.Snapshot()
 	evm := e.createEVM(msg, chain, header, statedb)
 	gp := core.GasPool(e.unlimitedGas)
 	output, gas_used, _, err := core.ApplyMessage(evm, msg, &gp)
+	statedb.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in enumerateActive() call", "err", err)
 		return err

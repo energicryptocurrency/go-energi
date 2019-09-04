@@ -962,6 +962,7 @@ type RPCTransaction struct {
 	V                *hexutil.Big    `json:"v"`
 	R                *hexutil.Big    `json:"r"`
 	S                *hexutil.Big    `json:"s"`
+	consensus        bool            `json:"consensus,omitempty"`
 }
 
 // newRPCTransaction returns a transaction that will serialize to the RPC
@@ -973,6 +974,11 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 	}
 	from, _ := types.Sender(signer, tx)
 	v, r, s := tx.RawSignatureValues()
+
+	consensus := tx.IsConsensus()
+	if consensus {
+		from = tx.ConsensusSender()
+	}
 
 	result := &RPCTransaction{
 		From:     from,
@@ -986,6 +992,8 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		V:        (*hexutil.Big)(v),
 		R:        (*hexutil.Big)(r),
 		S:        (*hexutil.Big)(s),
+		// Energi-specific
+		consensus: consensus,
 	}
 	if blockHash != (common.Hash{}) {
 		result.BlockHash = blockHash
@@ -1159,6 +1167,11 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 	}
 	from, _ := types.Sender(signer, tx)
 
+	consensus := tx.IsConsensus()
+	if consensus {
+		from = tx.ConsensusSender()
+	}
+
 	fields := map[string]interface{}{
 		"blockHash":         blockHash,
 		"blockNumber":       hexutil.Uint64(blockNumber),
@@ -1185,6 +1198,9 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 	// If the ContractAddress is 20 0x0 bytes, assume it is not a contract creation
 	if receipt.ContractAddress != (common.Address{}) {
 		fields["contractAddress"] = receipt.ContractAddress
+	}
+	if consensus {
+		fields["consensus"] = consensus
 	}
 	return fields, nil
 }

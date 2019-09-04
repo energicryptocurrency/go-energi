@@ -54,7 +54,8 @@ func (e *Energi) finalizeMigration(
 		return nil
 	}
 
-	if len(txs) != 1 {
+	// One migration and one block reward
+	if len(txs) != 2 {
 		err := errors.New("Wrong number of migration block txs")
 		log.Error("Failed to finalize migration", "err", err)
 		return err
@@ -82,9 +83,11 @@ func (e *Energi) finalizeMigration(
 		callData,
 		false,
 	)
+	rev_id := statedb.Snapshot()
 	evm := e.createEVM(msg, chain, header, statedb)
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+	statedb.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Error("Failed in totalAmount() call", "err", err)
 		return err
