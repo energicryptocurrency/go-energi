@@ -197,8 +197,7 @@ func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*
 		b.header.ReceiptHash = EmptyRootHash
 	} else {
 		b.header.ReceiptHash = DeriveSha(Receipts(receipts))
-		bloom := CreateBloom(receipts)
-		b.header.Bloom.AddBloom(&bloom)
+		b.header.Bloom = CreateBloom(receipts)
 	}
 
 	if len(uncles) == 0 {
