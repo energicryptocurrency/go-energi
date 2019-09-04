@@ -68,6 +68,7 @@ type Energi struct {
 	blacklistAbi abi.ABI
 	sporkAbi     abi.ABI
 	mnregAbi     abi.ABI
+	treasuryAbi  abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -114,6 +115,12 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
+	treasury_abi, err := abi.JSON(strings.NewReader(energi_abi.ITreasuryABI))
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
 	return &Energi{
 		config:       config,
 		db:           db,
@@ -122,6 +129,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		blacklistAbi: blacklist_abi,
 		sporkAbi:     spork_abi,
 		mnregAbi:     mngreg_abi,
+		treasuryAbi:  treasury_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      0,
 		callGas:      30000,
@@ -460,10 +468,15 @@ func (e *Energi) Finalize(
 ) (*types.Block, []*types.Receipt, error) {
 	ctxs := types.Transactions{}
 
-	for i, tx := range txs {
-		if tx.IsConsensus() {
+	for i := (len(txs) - 1); i >= 0; i-- {
+		if !txs[i].IsConsensus() {
+			i++
 			ctxs = txs[i:]
 			txs = txs[:i]
+			break
+		} else if i == 0 {
+			ctxs = txs[:]
+			txs = txs[:0]
 			break
 		}
 	}
@@ -475,10 +488,12 @@ func (e *Energi) Finalize(
 
 	ntxs := block.Transactions()[len(txs):]
 	if len(ntxs) != len(ctxs) {
+		log.Trace("Consensus TX length mismatch", "ntxs", len(ntxs), "ctxs", len(ctxs))
 		return nil, nil, eth_consensus.ErrInvalidConsensusTx
 	}
 	for i, tx := range ntxs {
 		if tx.Hash() != ctxs[i].Hash() {
+			log.Trace("Consensus TX hash mismatch", "pos", i, "ctx", ctxs[i].Hash(), "ntx", tx.Hash())
 			return nil, nil, eth_consensus.ErrInvalidConsensusTx
 		}
 	}
@@ -648,7 +663,7 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 		header.UncleHash,
 		//header.Coinbase,
 		//header.Root,
-		header.TxHash,
+		//header.TxHash,
 		//header.ReceiptHash,
 		//header.Bloom,
 		//header.Difficulty,

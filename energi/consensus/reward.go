@@ -25,6 +25,8 @@ import (
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
+
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 var (
@@ -48,78 +50,78 @@ func (e *Energi) processBlockRewards(
 	getRewardData, err := e.rewardAbi.Pack("getReward", header.Number)
 	if err != nil {
 		log.Error("Fail to prepare getReward() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
 	rewardData, err := e.rewardAbi.Pack("reward")
 	if err != nil {
 		log.Error("Fail to prepare reward() call", "err", err)
-		return err
+		return nil, nil, err
 	}
 
-	txhash := common.Hash{}
-	statedb.Prepare(txhash, common.Hash{}, 0)
-
-	for i, caddr := range e.rewardGov {
-		// GetReward()
-		msg := types.NewMessage(
-			systemFaucet,
-			&caddr,
-			0,
-			common.Big0,
-			e.callGas,
-			common.Big0,
-			getRewardData,
-			false,
-		)
-		evm := e.createEVM(msg, chain, header, statedb)
-		gp := core.GasPool(e.callGas)
-		output, gas1, _, err := core.ApplyMessage(evm, msg, &gp)
-		if err != nil {
-			log.Error("Failed in getReward() call", "err", err)
-			continue
-		}
-
-		//
-		value := big.NewInt(0)
-		err = e.rewardAbi.Unpack(&value, "getReward", output)
-		if err != nil {
-			log.Error("Failed to unpack getReward() call", "err", err)
-			continue
-		}
-
-		// Reward
-		msg = types.NewMessage(
-			systemFaucet,
-			&caddr,
-			0,
-			value,
-			e.xferGas,
-			common.Big0,
-			rewardData,
-			false,
-		)
-		evm = e.createEVM(msg, chain, header, statedb)
-		gp = core.GasPool(e.xferGas)
-		_, gas2, _, err := core.ApplyMessage(evm, msg, &gp)
-		if err != nil {
-			log.Error("Failed in reward() call", "err", err)
-			continue
-		}
-
-		log.Trace("Block reward", "id", i, "addr", caddr,
-			"reward", value, "gas", gas1+gas2)
+	// GetReward()
+	//====================================
+	msg := types.NewMessage(
+		systemFaucet,
+		&energi_params.Energi_BlockReward,
+		0,
+		common.Big0,
+		e.callGas,
+		common.Big0,
+		getRewardData,
+		false,
+	)
+	evm := e.createEVM(msg, chain, header, statedb)
+	gp := core.GasPool(msg.Gas())
+	output, gas1, _, err := core.ApplyMessage(evm, msg, &gp)
+	if err != nil {
+		log.Error("Failed in getReward() call", "err", err)
+		return nil, nil, err
 	}
 
-	bloom := types.BytesToBloom(types.LogsBloom(statedb.GetLogs(txhash)).Bytes())
-
-	if header.Signature == nil || len(header.Signature) == 0 {
-		// In generation
-		header.Bloom.AddBloom(&bloom)
-	} else if !header.Bloom.ContainsBloom(&bloom) {
-		// In replication
-		return errors.New("Invalid Bloom value")
+	//
+	total_reward := big.NewInt(0)
+	err = e.rewardAbi.Unpack(&total_reward, "getReward", output)
+	if err != nil {
+		log.Error("Failed to unpack getReward() call", "err", err)
+		return nil, nil, err
 	}
 
-	return nil
+	// Reward
+	//====================================
+	tx := types.NewTransaction(
+		statedb.GetNonce(systemFaucet),
+		energi_params.Energi_BlockReward,
+		total_reward,
+		e.xferGas,
+		common.Big0,
+		rewardData)
+	tx = tx.WithConsensusSender(systemFaucet)
+
+	statedb.Prepare(tx.Hash(), common.Hash{}, len(txs))
+
+	msg, err = tx.AsMessage(&ConsensusSigner{})
+	if err != nil {
+		log.Error("Failed in BlockReward AsMessage()", "err", err)
+		return nil, nil, err
+	}
+
+	evm = e.createEVM(msg, chain, header, statedb)
+	gp = core.GasPool(msg.Gas())
+	_, gas2, failed, err := core.ApplyMessage(evm, msg, &gp)
+	if err != nil {
+		log.Error("Failed in reward() call", "err", err)
+		return nil, nil, err
+	}
+
+	root := statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+	receipt := types.NewReceipt(root.Bytes(), failed, header.GasUsed)
+	receipt.TxHash = tx.Hash()
+	receipt.GasUsed = gas2
+	receipt.Logs = statedb.GetLogs(tx.Hash())
+	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+
+	log.Trace("Block reward", "reward", total_reward, "gas", gas1+gas2)
+
+	return append(txs, tx), append(receipts, receipt), nil
 }

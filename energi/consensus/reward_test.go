@@ -72,7 +72,9 @@ func TestBlockRewards(t *testing.T) {
 
 	for i := 0; i < 5; i++ {
 		// TODO: check balance changes
-		err = engine.processBlockRewards(chain, header, statedb)
+		txs, receipts, err := engine.processBlockRewards(chain, header, statedb, nil, nil)
+		assert.Equal(t, 1, len(txs))
+		assert.Equal(t, 1, len(receipts))
 
 		if err != nil {
 			panic(err)

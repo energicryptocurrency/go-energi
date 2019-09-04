@@ -166,6 +166,12 @@ func TestPoSChain(t *testing.T) {
 			chain, header, blstate, txs, nil, receipts)
 		assert.Empty(t, err)
 
+		if i == 1 {
+			assert.Equal(t, 1, len(receipts))
+		} else {
+			assert.Empty(t, receipts)
+		}
+
 		//---
 		err = engine.Seal(chain, block, results, stop)
 		assert.Empty(t, err)
@@ -173,12 +179,38 @@ func TestPoSChain(t *testing.T) {
 		seal_res := <-results
 		block = seal_res.Block
 		blstate = seal_res.NewState
+		receipts = seal_res.Receipts
 		assert.NotEmpty(t, block)
+		assert.NotEmpty(t, blstate)
+		assert.NotEmpty(t, receipts)
 		header = block.Header()
 		//assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
 		assert.NotEqual(t, parent.Coinbase, common.Address{}, "Header %v", i)
 		err = engine.VerifySeal(chain, header)
 		assert.Empty(t, err)
+
+		// Test consensus tx check during block processing
+		//---
+		if i == 2 {
+			tmptxs := block.Transactions()
+			tmpheader := *header
+
+			assert.Equal(t, len(tmptxs), 1)
+
+			_, _, err = engine.Finalize(
+				chain, &tmpheader, blstate.Copy(), tmptxs, nil, receipts)
+			assert.Empty(t, err)
+
+			_, _, err = engine.Finalize(
+				chain, &tmpheader, blstate.Copy(), append(tmptxs, tmptxs[len(tmptxs)-1]), nil, receipts)
+			assert.Equal(t, eth_consensus.ErrInvalidConsensusTx, err)
+
+			_, _, err = engine.Finalize(
+				chain, &tmpheader, blstate.Copy(),
+				append(tmptxs[:len(tmptxs)-1], tmptxs[len(tmptxs)-1].WithConsensusSender(common.Address{})),
+				nil, receipts)
+			assert.Equal(t, eth_consensus.ErrInvalidConsensusTx, err)
+		}
 
 		// Time tests
 		//---

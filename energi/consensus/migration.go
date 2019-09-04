@@ -54,7 +54,8 @@ func (e *Energi) finalizeMigration(
 		return nil
 	}
 
-	if len(txs) != 1 {
+	// One migration and one block reward
+	if len(txs) != 2 {
 		err := errors.New("Wrong number of migration block txs")
 		log.Error("Failed to finalize migration", "err", err)
 		return err
