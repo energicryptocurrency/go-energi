@@ -147,6 +147,7 @@ type MNInfo struct {
 	Enode          string
 	Collateral     *hexutil.Big
 	AnnouncedBlock uint64
+	IsActive       bool
 }
 
 func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
@@ -175,12 +176,19 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
 			continue
 		}
 
+		isActive, err := registry.IsActive(call_opts, mn)
+		if err != nil {
+			log.Warn("IsActive error", "mn", mn, "err", err)
+			continue
+		}
+
 		res = append(res, MNInfo{
 			Masternode:     mn,
 			Owner:          mninfo.Owner,
 			Enode:          m.enode(mninfo.Ipv4address, mninfo.Enode),
 			Collateral:     (*hexutil.Big)(mninfo.Collateral),
 			AnnouncedBlock: mninfo.AnnouncedBlock.Uint64(),
+			IsActive:       isActive,
 		})
 	}
 
