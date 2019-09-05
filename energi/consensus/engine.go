@@ -38,6 +38,7 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 
+	lru "github.com/hashicorp/golang-lru"
 	"golang.org/x/crypto/sha3"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
@@ -82,6 +83,7 @@ type Energi struct {
 	knownStakes  KnownStakes
 	nextKSPurge  uint64
 	nonceCap     uint64
+	txhashMap    *lru.Cache
 }
 
 func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
@@ -121,6 +123,12 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
+	txhashMap, err := lru.New(8)
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
 	return &Energi{
 		config:       config,
 		db:           db,
@@ -138,6 +146,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		now:          func() uint64 { return uint64(time.Now().Unix()) },
 		knownStakes:  make(KnownStakes),
 		nextKSPurge:  0,
+		txhashMap:    txhashMap,
 	}
 }
 
@@ -559,6 +568,7 @@ func (e *Energi) Seal(
 ) (err error) {
 	go func() {
 		header := block.Header()
+		txhash := header.TxHash
 		result := eth_consensus.NewSealResult(block, nil, nil)
 
 		if header.Number.Cmp(common.Big0) != 0 {
@@ -598,6 +608,7 @@ func (e *Energi) Seal(
 		}
 
 		result.Block = result.Block.WithSeal(header)
+		e.txhashMap.Add(header.TxHash, txhash)
 
 		select {
 		case results <- result:
@@ -659,13 +670,19 @@ func (e *Energi) recreateBlock(
 func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 	hasher := sha3.NewLegacyKeccak256()
 
+	txhash := header.TxHash
+
+	if item, ok := e.txhashMap.Get(txhash); ok {
+		txhash = item.(common.Hash)
+	}
+
 	rlp.Encode(hasher, []interface{}{
 		// NOTE: commented parts are part of "mining" process
 		header.ParentHash,
 		header.UncleHash,
 		//header.Coinbase,
 		//header.Root,
-		//header.TxHash,
+		txhash,
 		//header.ReceiptHash,
 		//header.Bloom,
 		//header.Difficulty,
