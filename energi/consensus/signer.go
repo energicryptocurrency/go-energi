@@ -27,6 +27,10 @@ import (
 // NOTE: it MUST NOT for untrusted transactions
 type ConsensusSigner struct{}
 
+func NewConsensusSigner() *ConsensusSigner {
+	return &ConsensusSigner{}
+}
+
 func (cs ConsensusSigner) Equal(s2 types.Signer) bool {
 	_, ok := s2.(ConsensusSigner)
 	return ok

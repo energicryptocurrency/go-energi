@@ -173,9 +173,13 @@ func (gpo *Oracle) getBlockPrices(ctx context.Context, signer types.Signer, bloc
 	sort.Sort(transactionsByGasPrice(txs))
 
 	for _, tx := range txs {
+		// Skip consensus & zero-fee
+		if tx.GasPrice().Sign() == 0 {
+			continue
+		}
+
 		sender, err := types.Sender(signer, tx)
-		if err == nil && sender != block.Coinbase() &&
-			tx.GasPrice().Cmp(common.Big0) > 0 {
+		if err == nil && sender != block.Coinbase() {
 			ch <- getBlockPricesResult{tx.GasPrice(), nil}
 			return
 		}

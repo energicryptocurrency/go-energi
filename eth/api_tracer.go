@@ -41,6 +41,9 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/ethereum/go-ethereum/trie"
+
+	energi_consensus "energi.world/core/gen3/energi/consensus"
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 const (
@@ -205,6 +208,8 @@ func (api *PrivateDebugAPI) traceChain(ctx context.Context, start, end *types.Bl
 
 				// Trace all the transactions contained within
 				for i, tx := range task.block.Transactions() {
+					signer = api.handleConsensusTx(statedb, tx, signer)
+
 					msg, _ := tx.AsMessage(signer)
 					vmctx := core.NewEVMContext(msg, task.block.Header(), api.eth.blockchain, nil)
 
@@ -479,6 +484,8 @@ func (api *PrivateDebugAPI) traceBlock(ctx context.Context, block *types.Block, 
 
 			// Fetch and execute the next transaction trace tasks
 			for task := range jobs {
+				signer = api.handleConsensusTx(statedb, txs[task.index], signer)
+
 				msg, _ := txs[task.index].AsMessage(signer)
 				vmctx := core.NewEVMContext(msg, block.Header(), api.eth.blockchain, nil)
 
@@ -571,6 +578,8 @@ func (api *PrivateDebugAPI) standardTraceBlockToFile(ctx context.Context, block 
 		dumps  []string
 	)
 	for i, tx := range block.Transactions() {
+		signer = api.handleConsensusTx(statedb, tx, signer)
+
 		// Prepare the trasaction for un-traced execution
 		var (
 			msg, _ = tx.AsMessage(signer)
@@ -790,6 +799,8 @@ func (api *PrivateDebugAPI) computeTxEnv(blockHash common.Hash, txIndex int, ree
 	signer := types.MakeSigner(api.config, block.Number())
 
 	for idx, tx := range block.Transactions() {
+		signer = api.handleConsensusTx(statedb, tx, signer)
+
 		// Assemble the transaction call message and return if the requested offset
 		msg, _ := tx.AsMessage(signer)
 		context := core.NewEVMContext(msg, block.Header(), api.eth.blockchain, nil)
@@ -806,4 +817,21 @@ func (api *PrivateDebugAPI) computeTxEnv(blockHash common.Hash, txIndex int, ree
 		statedb.Finalise(vmenv.ChainConfig().IsEIP158(block.Number()))
 	}
 	return nil, vm.Context{}, nil, fmt.Errorf("transaction index %d out of range for block %#x", txIndex, blockHash)
+}
+
+var gConsensusSigner = energi_consensus.NewConsensusSigner()
+
+func (api *PrivateDebugAPI) handleConsensusTx(
+	statedb *state.StateDB,
+	tx *types.Transaction,
+	signer types.Signer,
+) types.Signer {
+	if tx.IsConsensus() {
+		if tx.ConsensusSender() == energi_params.Energi_SystemFaucet {
+			statedb.SetBalance(energi_params.Energi_SystemFaucet, tx.Value())
+		}
+		return gConsensusSigner
+	}
+
+	return signer
 }
