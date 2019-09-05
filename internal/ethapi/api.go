@@ -962,7 +962,9 @@ type RPCTransaction struct {
 	V                *hexutil.Big    `json:"v"`
 	R                *hexutil.Big    `json:"r"`
 	S                *hexutil.Big    `json:"s"`
-	consensus        bool            `json:"consensus,omitempty"`
+
+	// Causes troubles for external tools
+	//consensus        bool            `json:"consensus,omitempty"`
 }
 
 // newRPCTransaction returns a transaction that will serialize to the RPC
@@ -993,7 +995,7 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		R:        (*hexutil.Big)(r),
 		S:        (*hexutil.Big)(s),
 		// Energi-specific
-		consensus: consensus,
+		//consensus: consensus,
 	}
 	if blockHash != (common.Hash{}) {
 		result.BlockHash = blockHash
@@ -1199,9 +1201,10 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 	if receipt.ContractAddress != (common.Address{}) {
 		fields["contractAddress"] = receipt.ContractAddress
 	}
-	if consensus {
-		fields["consensus"] = consensus
-	}
+	// NOTE: it causes troubles for external tools for now.
+	// if consensus {
+	// 	fields["consensus"] = consensus
+	// }
 	return fields, nil
 }
 
