@@ -208,6 +208,7 @@ func (api *PrivateDebugAPI) traceChain(ctx context.Context, start, end *types.Bl
 
 				// Trace all the transactions contained within
 				for i, tx := range task.block.Transactions() {
+					// Consensus - always the last
 					signer = api.handleConsensusTx(statedb, tx, signer)
 
 					msg, _ := tx.AsMessage(signer)
@@ -484,6 +485,7 @@ func (api *PrivateDebugAPI) traceBlock(ctx context.Context, block *types.Block, 
 
 			// Fetch and execute the next transaction trace tasks
 			for task := range jobs {
+				// Consensus - always the last
 				signer = api.handleConsensusTx(statedb, txs[task.index], signer)
 
 				msg, _ := txs[task.index].AsMessage(signer)
@@ -578,6 +580,7 @@ func (api *PrivateDebugAPI) standardTraceBlockToFile(ctx context.Context, block 
 		dumps  []string
 	)
 	for i, tx := range block.Transactions() {
+		// Consensus - always the last
 		signer = api.handleConsensusTx(statedb, tx, signer)
 
 		// Prepare the trasaction for un-traced execution
@@ -728,6 +731,7 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 		tracer vm.Tracer
 		err    error
 	)
+
 	switch {
 	case config != nil && config.Tracer != nil:
 		// Define a meaningful timeout of a single transaction trace
@@ -750,7 +754,12 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 		defer cancel()
 
 	case config == nil:
-		tracer = vm.NewStructLogger(nil)
+		tracer = vm.NewStructLogger(&vm.LogConfig{
+			DisableMemory:  true,
+			DisableStack:   true,
+			DisableStorage: true,
+			Limit:          100000,
+		})
 
 	default:
 		tracer = vm.NewStructLogger(config.LogConfig)
@@ -799,6 +808,7 @@ func (api *PrivateDebugAPI) computeTxEnv(blockHash common.Hash, txIndex int, ree
 	signer := types.MakeSigner(api.config, block.Number())
 
 	for idx, tx := range block.Transactions() {
+		// Consensus - always the last
 		signer = api.handleConsensusTx(statedb, tx, signer)
 
 		// Assemble the transaction call message and return if the requested offset
