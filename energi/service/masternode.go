@@ -323,14 +323,31 @@ func (v *peerValidator) validate() {
 	cfg := mnsvc.eth.BlockChain().Config()
 	enode := energi_common.MastenodeEnode(mninfo.Ipv4address, mninfo.Enode, cfg)
 
+	// Check if the node is already connected as a peer and
+	// skip MN Validation if true.
+	if isFound := server.IsPeerActive(enode); isFound {
+		log.Debug("Masternode validation skipped since peer is already connected",
+			"target", v.target.Hex())
+		return
+	}
+
 	peerCh := make(chan *p2p.PeerEvent)
 	defer close(peerCh)
 
 	peerSub := server.SubscribeEvents(peerCh)
+
+	// EnableMsg Events.
+	server.EnableMsgEvents = true
 	defer peerSub.Unsubscribe()
 
 	server.AddPeer(enode)
-	defer server.RemovePeer(enode)
+
+	defer func() {
+		// Disconnect this peer if more than half of the max peers are connected.
+		if server.PeerCount() > server.MaxPeers/2 {
+			server.RemovePeer(enode)
+		}
+	}()
 
 	//---
 	deadline := time.Now().Add(time.Minute)
