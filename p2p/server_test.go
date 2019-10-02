@@ -182,6 +182,12 @@ func TestServerDial(t *testing.T) {
 				if peer := srv.Peers()[0]; !peer.Info().Network.Trusted {
 					t.Errorf("peer is not trusted after AddTrustedPeer: %v", peer)
 				}
+
+				// Test if the trusted peer is already connected.
+				if isConnected := srv.IsPeerActive(node); !isConnected {
+					t.Errorf("expected the peer to be connected but its not: %v", peer)
+				}
+
 				srv.RemoveTrustedPeer(node)
 				if peer := srv.Peers()[0]; peer.Info().Network.Trusted {
 					t.Errorf("peer is trusted after RemoveTrustedPeer: %v", peer)
