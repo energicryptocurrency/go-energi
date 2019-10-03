@@ -26,6 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -35,11 +36,17 @@ const (
 )
 
 type GovernanceAPI struct {
-	backend Backend
+	backend    Backend
+	uInfoCache *energi_common.CacheStorage
+	bInfoCache *energi_common.CacheStorage
 }
 
 func NewGovernanceAPI(b Backend) *GovernanceAPI {
-	return &GovernanceAPI{b}
+	return &GovernanceAPI{
+		backend:    b,
+		uInfoCache: energi_common.NewCacheStorage(),
+		bInfoCache: energi_common.NewCacheStorage(),
+	}
 }
 
 //=============================================================================
@@ -339,6 +346,17 @@ type UpgradeProposals struct {
 }
 
 func (g *GovernanceAPI) UpgradeInfo() *UpgradeProposals {
+	data, err := g.uInfoCache.Get(g.backend, g.upgradeInfo)
+	if err != nil || data == nil {
+		log.Error("UpgradeInfo failed", "err", err)
+		return nil
+	}
+
+	res := data.(UpgradeProposals)
+	return &res
+}
+
+func (g *GovernanceAPI) upgradeInfo(blockhash common.Hash) (interface{}, error) {
 	ret := new(UpgradeProposals)
 	ret.Treasury = g.upgradeProposalInfo(energi_params.Energi_Treasury)
 	ret.MasternodeRegistry = g.upgradeProposalInfo(energi_params.Energi_MasternodeRegistry)
@@ -348,7 +366,7 @@ func (g *GovernanceAPI) UpgradeInfo() *UpgradeProposals {
 	ret.CheckpointRegistry = g.upgradeProposalInfo(energi_params.Energi_CheckpointRegistry)
 	ret.BlacklistRegistry = g.upgradeProposalInfo(energi_params.Energi_BlacklistRegistry)
 	ret.MasternodeToken = g.upgradeProposalInfo(energi_params.Energi_MasternodeToken)
-	return ret
+	return ret, nil
 }
 
 func (g *GovernanceAPI) UpgradePropose(
@@ -463,18 +481,30 @@ type BudgetInfo struct {
 }
 
 func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
+	data, err := g.bInfoCache.Get(g.backend, g.budgetInfo)
+	if err != nil || data == nil {
+		log.Error("BudgetInfo failed", "err", err)
+		return nil
+	}
+
+	res := data.(BudgetInfo)
+
+	return &res
+}
+
+func (g *GovernanceAPI) budgetInfo(blockhash common.Hash) (interface{}, error) {
 	treasury, err := energi_abi.NewITreasuryCaller(
 		energi_params.Energi_Treasury, g.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed NewITreasuryCaller", "err", err)
-		return nil
+		return nil, err
 	}
 
 	proxy, err := energi_abi.NewIGovernedProxyCaller(
 		energi_params.Energi_Treasury, g.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed NewITreasuryCaller", "err", err)
-		return nil
+		return nil, err
 	}
 
 	call_opts := &bind.CallOpts{
@@ -484,13 +514,13 @@ func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
 	proposals, err := treasury.ListProposals(call_opts)
 	if err != nil {
 		log.Error("Failed ListProposals", "err", err)
-		return nil
+		return nil, err
 	}
 
 	impl, err := proxy.Impl(call_opts)
 	if err != nil {
 		log.Error("Failed Impl", "err", err)
-		return nil
+		return nil, err
 	}
 
 	ret := make([]BudgetProposalInfo, len(proposals))
@@ -501,7 +531,7 @@ func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
 			p, g.backend.(bind.ContractCaller))
 		if err != nil {
 			log.Error("Failed at NewIBudgetProposalCaller", "err", err)
-			return nil
+			return nil, err
 		}
 
 		proposed_amount, err := budger_proposal.ProposedAmount(call_opts)
@@ -524,10 +554,12 @@ func (g *GovernanceAPI) BudgetInfo() *BudgetInfo {
 		ret[i].RefUUID = uuid.UUID(common.LeftPadBytes(ref_uuid.Bytes(), 16)).String()
 	}
 
-	return &BudgetInfo{
+	budget := BudgetInfo{
 		Balance:   getBalance(g.backend, impl),
 		Proposals: ret,
 	}
+
+	return budget, nil
 }
 
 func (g *GovernanceAPI) BudgetPropose(

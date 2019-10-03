@@ -22,15 +22,20 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
 type CheckpointAPI struct {
 	backend Backend
+	cpCache *energi_common.CacheStorage
 }
 
 func NewCheckpointAPI(b Backend) *CheckpointAPI {
-	return &CheckpointAPI{b}
+	return &CheckpointAPI{
+		backend: b,
+		cpCache: energi_common.NewCacheStorage(),
+	}
 }
 
 const (
@@ -93,11 +98,24 @@ type AllCheckpointInfo struct {
 }
 
 func (b *CheckpointAPI) CheckpointInfo() (res AllCheckpointInfo, err error) {
+	var data interface{}
+	data, err = b.cpCache.Get(b.backend, b.checkpointInfo)
+	if err != nil || data == nil {
+		log.Error("CheckpointInfo failed", "err", err)
+		return
+	}
+
+	res = data.(AllCheckpointInfo)
+
+	return
+}
+
+func (b *CheckpointAPI) checkpointInfo(blockhash common.Hash) (interface{}, error) {
 	registry, err := energi_abi.NewICheckpointRegistryCaller(
 		energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return res, err
+		return nil, err
 	}
 
 	call_opts := &bind.CallOpts{
@@ -106,9 +124,10 @@ func (b *CheckpointAPI) CheckpointInfo() (res AllCheckpointInfo, err error) {
 	addresses, err := registry.Checkpoints(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return res, err
+		return nil, err
 	}
 
+	var res AllCheckpointInfo
 	res.Registry = make([]CheckpointInfo, 0, len(addresses))
 
 	for _, addr := range addresses {
@@ -151,7 +170,7 @@ func (b *CheckpointAPI) CheckpointInfo() (res AllCheckpointInfo, err error) {
 		})
 	}
 
-	return
+	return res, nil
 }
 
 func (b *CheckpointAPI) CheckpointPropose(

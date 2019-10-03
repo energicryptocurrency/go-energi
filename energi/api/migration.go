@@ -36,6 +36,7 @@ import (
 	"golang.org/x/crypto/ripemd160"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -46,11 +47,15 @@ const (
 )
 
 type MigrationAPI struct {
-	backend Backend
+	backend    Backend
+	coinsCache *energi_common.CacheStorage
 }
 
 func NewMigrationAPI(b Backend) *MigrationAPI {
-	return &MigrationAPI{b}
+	return &MigrationAPI{
+		backend:    b,
+		coinsCache: energi_common.NewCacheStorage(),
+	}
 }
 
 type Gen2Coin struct {
@@ -68,11 +73,23 @@ type Gen2Key struct {
 func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin) {
 	log.Info("Preparing a coin list")
 
+	data, err := m.coinsCache.Get(m.backend, m.listGen2Coins)
+	if err != nil || data == nil {
+		log.Error("ListGen2Coins failed", "err", err)
+		return
+	}
+
+	coins = data.([]Gen2Coin)
+
+	return
+}
+
+func (m *MigrationAPI) listGen2Coins(blockhash common.Hash) (interface{}, error) {
 	mgrt_contract, err := energi_abi.NewGen2MigrationCaller(
 		energi_params.Energi_MigrationContract, m.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed to create contract face", "err", err)
-		return []Gen2Coin{}
+		return nil, err
 	}
 
 	call_opts := &bind.CallOpts{
@@ -81,11 +98,11 @@ func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin) {
 	bigItems, err := mgrt_contract.ItemCount(call_opts)
 	if err != nil {
 		log.Error("Failed to get coin count", "err", err)
-		return []Gen2Coin{}
+		return nil, err
 	}
 
 	items := bigItems.Int64()
-	coins = make([]Gen2Coin, 0, items)
+	coins := make([]Gen2Coin, 0, items)
 
 	prefix := byte(33)
 	if m.backend.ChainConfig().ChainID.Int64() == 49797 {
@@ -96,7 +113,7 @@ func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin) {
 		res, err := mgrt_contract.Coins(call_opts, big.NewInt(i))
 		if err != nil {
 			log.Error("Failed to get coin info", "err", err)
-			return []Gen2Coin{}
+			return nil, err
 		}
 
 		owner := make([]byte, 25)
@@ -114,7 +131,7 @@ func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin) {
 		})
 	}
 
-	return
+	return coins, nil
 }
 
 func (m *MigrationAPI) SearchGen2Coins(
