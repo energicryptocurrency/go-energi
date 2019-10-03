@@ -1849,6 +1849,9 @@ func (bc *BlockChain) CalculateBlockState(
 		"block", hash, "number", number,
 		"len", len(hh_stack))
 
+	bc.mu.Lock()
+	defer bc.mu.Unlock()
+
 	// re-create state
 	for i := len(hh_stack) - 2; i >= 0; i-- {
 		tmp_hash = &hh_stack[i]
