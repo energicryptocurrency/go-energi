@@ -37,11 +37,25 @@ const (
 )
 
 type MasternodeAPI struct {
-	backend Backend
+	backend    Backend
+	nodesCache *energi_common.CacheStorage
+	statsCache *energi_common.CacheStorage
 }
 
 func NewMasternodeAPI(b Backend) *MasternodeAPI {
-	return &MasternodeAPI{b}
+	return &MasternodeAPI{
+		backend:    b,
+		nodesCache: energi_common.NewCacheStorage(),
+		statsCache: energi_common.NewCacheStorage(),
+	}
+}
+
+type MasternodeStats struct {
+	Active           uint64
+	Total            uint64
+	ActiveCollateral *hexutil.Big
+	TotalCollateral  *hexutil.Big
+	MaxOfAllTimes    *hexutil.Big
 }
 
 func (m *MasternodeAPI) token(
@@ -151,11 +165,23 @@ type MNInfo struct {
 }
 
 func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
+	data, err := m.nodesCache.Get(m.backend, m.listMasternodes)
+	if err != nil || data == nil {
+		log.Error("ListMasternodes failed", "err", err)
+		return
+	}
+
+	res = data.([]MNInfo)
+
+	return
+}
+
+func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, error) {
 	registry, err := energi_abi.NewIMasternodeRegistryCaller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return nil
+		return nil, err
 	}
 
 	call_opts := &bind.CallOpts{
@@ -164,11 +190,10 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
 	masternodes, err := registry.Enumerate(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return nil
+		return nil, err
 	}
 
-	res = make([]MNInfo, 0, len(masternodes))
-
+	res := make([]MNInfo, 0, len(masternodes))
 	for _, mn := range masternodes {
 		mninfo, err := registry.Info(call_opts, mn)
 		if err != nil {
@@ -192,57 +217,38 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
 		})
 	}
 
-	return
+	return res, err
 }
 
 func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNInfo) {
-	registry, err := energi_abi.NewIMasternodeRegistryCaller(
-		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
-	if err != nil {
-		log.Error("Failed", "err", err)
-		return
+	for _, node := range m.ListMasternodes() {
+		if node.Masternode == owner_or_mn || node.Owner == owner_or_mn {
+			res = node
+			break
+		}
 	}
 
-	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
-	}
-	mninfo, err := registry.Info(call_opts, owner_or_mn)
-
-	if err == nil {
-		res.Masternode = owner_or_mn
-		res.Owner = mninfo.Owner
-		res.Enode = m.enode(mninfo.Ipv4address, mninfo.Enode)
-		res.Collateral = (*hexutil.Big)(mninfo.Collateral)
-		res.AnnouncedBlock = mninfo.AnnouncedBlock.Uint64()
-		return
-	}
-
-	ownerinfo, err := registry.OwnerInfo(call_opts, owner_or_mn)
-	if err != nil {
-		log.Error("Not found", "mn", owner_or_mn)
-		return
-	}
-
-	res.Masternode = ownerinfo.Masternode
-	res.Owner = owner_or_mn
-	res.Enode = m.enode(ownerinfo.Ipv4address, ownerinfo.Enode)
-	res.Collateral = (*hexutil.Big)(ownerinfo.Collateral)
-	res.AnnouncedBlock = ownerinfo.AnnouncedBlock.Uint64()
 	return
 }
 
-func (m *MasternodeAPI) Stats() (res struct {
-	Active           uint64
-	Total            uint64
-	ActiveCollateral *hexutil.Big
-	TotalCollateral  *hexutil.Big
-	MaxOfAllTimes    *hexutil.Big
-}) {
+func (m *MasternodeAPI) Stats() (res MasternodeStats) {
+	data, err := m.statsCache.Get(m.backend, m.stats)
+
+	if err != nil || data == nil {
+		log.Error("Stats failed", "err", err)
+		return
+	}
+
+	res = data.(MasternodeStats)
+	return
+}
+
+func (m *MasternodeAPI) stats(blockhash common.Hash) (interface{}, error) {
 	registry, err := energi_abi.NewIMasternodeRegistryCaller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return
+		return nil, err
 	}
 
 	call_opts := &bind.CallOpts{
@@ -251,16 +257,17 @@ func (m *MasternodeAPI) Stats() (res struct {
 	count, err := registry.Count(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return
+		return nil, err
 	}
 
+	var res MasternodeStats
 	res.Active = count.Active.Uint64()
 	res.Total = count.Total.Uint64()
 	res.ActiveCollateral = (*hexutil.Big)(count.ActiveCollateral)
 	res.TotalCollateral = (*hexutil.Big)(count.TotalCollateral)
 	res.MaxOfAllTimes = (*hexutil.Big)(count.MaxOfAllTimes)
 
-	return
+	return res, nil
 }
 
 func (m *MasternodeAPI) enode(ipv4address uint32, pubkey [2][32]byte) string {

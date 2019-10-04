@@ -22,15 +22,20 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
 type BlacklistAPI struct {
-	backend Backend
+	backend   Backend
+	infoCache *energi_common.CacheStorage
 }
 
 func NewBlacklistAPI(b Backend) *BlacklistAPI {
-	return &BlacklistAPI{b}
+	return &BlacklistAPI{
+		backend:   b,
+		infoCache: energi_common.NewCacheStorage(),
+	}
 }
 
 const (
@@ -72,11 +77,23 @@ type BLInfo struct {
 }
 
 func (b *BlacklistAPI) BlacklistInfo() (res []BLInfo) {
+	data, err := b.infoCache.Get(b.backend, b.blacklistInfo)
+	if err != nil || data == nil {
+		log.Error("BlacklistInfo failed", "err", err)
+		return
+	}
+
+	res = data.([]BLInfo)
+
+	return
+}
+
+func (b *BlacklistAPI) blacklistInfo(blockhash common.Hash) (interface{}, error) {
 	registry, err := energi_abi.NewIBlacklistRegistryCaller(
 		energi_params.Energi_BlacklistRegistry, b.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return nil
+		return nil, err
 	}
 
 	call_opts := &bind.CallOpts{
@@ -85,10 +102,10 @@ func (b *BlacklistAPI) BlacklistInfo() (res []BLInfo) {
 	addresses, err := registry.EnumerateAll(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return nil
+		return nil, err
 	}
 
-	res = make([]BLInfo, 0, len(addresses))
+	res := make([]BLInfo, 0, len(addresses))
 
 	for _, addr := range addresses {
 		blocked, err := registry.IsBlacklisted(call_opts, addr)
@@ -112,7 +129,7 @@ func (b *BlacklistAPI) BlacklistInfo() (res []BLInfo) {
 		})
 	}
 
-	return
+	return res, nil
 }
 
 func (b *BlacklistAPI) BlacklistEnforce(
