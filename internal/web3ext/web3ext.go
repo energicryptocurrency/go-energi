@@ -153,7 +153,8 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'claimGen2CoinsDirect',
 			call: 'energi_claimGen2CoinsDirect',
-			params: 3
+			params: 3,
+			outputFormatter: console.log
 		}),
 		new web3._extend.Method({
 			name: 'claimGen2CoinsCombined',
