@@ -89,12 +89,12 @@ func (m *MasternodeAPI) CollateralBalance(
 ) (ret struct {
 	Balance   *hexutil.Big
 	LastBlock *hexutil.Big
-}) {
+}, err error) {
 	token, err := energi_abi.NewIMasternodeTokenCaller(
 		energi_params.Energi_MasternodeToken, m.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return ret
+		return ret, err
 	}
 
 	res, err := token.BalanceInfo(
@@ -106,12 +106,12 @@ func (m *MasternodeAPI) CollateralBalance(
 	)
 	if err != nil {
 		log.Error("Failed", "err", err)
-		return ret
+		return ret, err
 	}
 
 	ret.Balance = (*hexutil.Big)(res.Balance)
 	ret.LastBlock = (*hexutil.Big)(res.LastBlock)
-	return ret
+	return ret, nil
 }
 
 func (m *MasternodeAPI) DepositCollateral(
@@ -164,7 +164,7 @@ type MNInfo struct {
 	IsActive       bool
 }
 
-func (m *MasternodeAPI) ListMasternodes() (res []MNInfo) {
+func (m *MasternodeAPI) ListMasternodes() (res []MNInfo, err error) {
 	data, err := m.nodesCache.Get(m.backend, m.listMasternodes)
 	if err != nil || data == nil {
 		log.Error("ListMasternodes failed", "err", err)
@@ -220,8 +220,14 @@ func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, err
 	return res, err
 }
 
-func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNInfo) {
-	for _, node := range m.ListMasternodes() {
+func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNInfo, err error) {
+	Mns, err := m.ListMasternodes()
+	if err != nil {
+		log.Error("Failed at m.ListMasternodes", "err", err)
+		return
+	}
+
+	for _, node := range Mns {
 		if node.Masternode == owner_or_mn || node.Owner == owner_or_mn {
 			res = node
 			break
@@ -231,7 +237,7 @@ func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNInfo) 
 	return
 }
 
-func (m *MasternodeAPI) Stats() (res MasternodeStats) {
+func (m *MasternodeAPI) Stats() (res MasternodeStats, err error) {
 	data, err := m.statsCache.Get(m.backend, m.stats)
 
 	if err != nil || data == nil {
