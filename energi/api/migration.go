@@ -259,37 +259,37 @@ func (m *MigrationAPI) ClaimGen2CoinsDirect(
 	password *string,
 	dst common.Address,
 	tkey string,
-) error {
+) (txhash common.Hash, err error) {
 	key, err := m.parseGen2Key(tkey)
 	if err != nil {
 		log.Error("Failed to parse key", "err", err)
-		return err
+		return
 	}
 
 	coins := m.SearchRawGen2Coins([]common.Address{key.RawOwner}, false)
 
 	if len(coins) != 1 {
 		log.Error("Unable to find coins")
-		return errors.New("No coins found")
+		err = errors.New("No coins found")
+		return
 	}
 
-	err = m.claimGen2Coins(password, dst, &coins[0], key)
+	txhash, err = m.claimGen2Coins(password, dst, &coins[0], key)
 	if err != nil {
 		log.Error("Failed to claim", "err", err)
-		return err
 	}
 
-	return nil
+	return
 }
 
 func (m *MigrationAPI) ClaimGen2CoinsCombined(
 	password *string,
 	dst common.Address,
 	file string,
-) error {
+) (txhashes []common.Hash, err error) {
 	keys, err := m.loadGen2Dump(file)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	raw_owners := make([]common.Address, len(keys))
@@ -301,20 +301,26 @@ func (m *MigrationAPI) ClaimGen2CoinsCombined(
 
 	coins := m.SearchRawGen2Coins(raw_owners, false)
 
+	txhashes = make([]common.Hash, len(coins))
 	for _, c := range coins {
-		err = m.claimGen2Coins(password, dst, &c, owner2key[c.RawOwner])
+		txhash, err := m.claimGen2Coins(password, dst, &c, owner2key[c.RawOwner])
 		if err != nil {
-			return err
+			return nil, err
 		}
+
+		txhashes = append(txhashes, txhash)
 	}
 
-	return nil
+	return txhashes, nil
 }
 
-func (m *MigrationAPI) ClaimGen2CoinsImport(password string, file string) error {
+func (m *MigrationAPI) ClaimGen2CoinsImport(
+	password string,
+	file string,
+) (txhashes []common.Hash, err error) {
 	keys, err := m.loadGen2Dump(file)
 	if err != nil {
-		return err
+		return
 	}
 
 	raw_owners := make([]common.Address, len(keys))
@@ -328,6 +334,7 @@ func (m *MigrationAPI) ClaimGen2CoinsImport(password string, file string) error 
 	am := m.backend.AccountManager()
 	ks := am.Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
 
+	txhashes = make([]common.Hash, len(coins))
 	for _, c := range coins {
 		key := owner2key[c.RawOwner]
 		dst := crypto.PubkeyToAddress(key.Key.PublicKey)
@@ -349,13 +356,15 @@ func (m *MigrationAPI) ClaimGen2CoinsImport(password string, file string) error 
 		evtsub.Unsubscribe()
 		//----
 
-		err = m.claimGen2Coins(&password, dst, &c, key)
+		txhash, err := m.claimGen2Coins(&password, dst, &c, key)
 		if err != nil {
-			return err
+			return nil, err
 		}
+
+		txhashes = append(txhashes, txhash)
 	}
 
-	return nil
+	return txhashes, nil
 }
 
 func (m *MigrationAPI) claimGen2Coins(
@@ -363,11 +372,11 @@ func (m *MigrationAPI) claimGen2Coins(
 	dst common.Address,
 	coin *Gen2Coin,
 	key *Gen2Key,
-) error {
+) (txhash common.Hash, err error) {
 	mgrt_contract_obj, err := energi_abi.NewGen2Migration(
 		energi_params.Energi_MigrationContract, m.backend.(bind.ContractBackend))
 	if err != nil {
-		return err
+		return
 	}
 
 	mgrt_contract := energi_abi.Gen2MigrationSession{
@@ -387,16 +396,17 @@ func (m *MigrationAPI) claimGen2Coins(
 
 	hts, err := mgrt_contract.HashToSign(dst)
 	if err != nil {
-		return err
+		return
 	}
 
 	sig, err := crypto.Sign(hts[:], key.Key)
 	if err != nil {
-		return err
+		return
 	}
 
 	if len(sig) != 65 {
-		return errors.New("Wrong signature size")
+		err = errors.New("Wrong signature size")
+		return
 	}
 
 	item := new(big.Int).SetUint64(coin.ItemID)
@@ -408,16 +418,19 @@ func (m *MigrationAPI) claimGen2Coins(
 
 	amt, err := mgrt_contract.VerifyClaim(item, dst, v, r, s)
 	if err != nil {
-		return err
+		return
 	}
 
 	if amt.Cmp(common.Big0) == 0 {
 		log.Warn("Already claimed", "coins", coin.Owner)
-		return nil
+		return
 	}
 
 	tx, err := mgrt_contract.Claim(item, dst, v, r, s)
-	log.Info("Sent migration transaction", "tx", tx.Hash(), "coins", coin.Owner)
+	if tx != nil {
+		txhash = tx.Hash()
+		log.Info("Sent migration transaction", "tx", tx.Hash(), "coins", coin.Owner)
+	}
 
-	return err
+	return
 }
