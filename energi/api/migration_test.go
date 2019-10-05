@@ -65,11 +65,8 @@ func TestSearchCoins(t *testing.T) {
 
 	m := NewMigrationAPI(nil)
 
-	res := m.searchGen2Coins(
-		[]common.Address{
-			common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-		},
-		[]Gen2Coin{
+	listCoins := func() ([]Gen2Coin, error) {
+		return []Gen2Coin{
 			{
 				ItemID:   77,
 				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
@@ -85,18 +82,23 @@ func TestSearchCoins(t *testing.T) {
 				RawOwner: common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
 				Amount:   big.NewInt(10),
 			},
+		}, nil
+	}
+
+	res, err := m.searchGen2Coins(
+		[]common.Address{
+			common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
 		},
+		listCoins,
 		true,
 	)
 	assert.Equal(t, 2, len(res))
+	assert.Equal(t, err, nil)
 	assert.Equal(t, uint64(77), res[0].ItemID)
 	assert.Equal(t, uint64(78), res[1].ItemID)
 
-	res = m.searchGen2Coins(
-		[]common.Address{
-			common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-		},
-		[]Gen2Coin{
+	listCoins = func() ([]Gen2Coin, error) {
+		return []Gen2Coin{
 			{
 				ItemID:   77,
 				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
@@ -112,9 +114,17 @@ func TestSearchCoins(t *testing.T) {
 				RawOwner: common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
 				Amount:   big.NewInt(10),
 			},
+		}, nil
+	}
+
+	res, err = m.searchGen2Coins(
+		[]common.Address{
+			common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
 		},
+		listCoins,
 		false,
 	)
+	assert.Equal(t, err, nil)
 	assert.Equal(t, 1, len(res))
 	assert.Equal(t, uint64(78), res[0].ItemID)
 }

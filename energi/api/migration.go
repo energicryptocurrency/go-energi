@@ -70,7 +70,7 @@ type Gen2Key struct {
 	Key      *ecdsa.PrivateKey
 }
 
-func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin) {
+func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin, err error) {
 	log.Info("Preparing a coin list")
 
 	data, err := m.coinsCache.Get(m.backend, m.listGen2Coins)
@@ -137,7 +137,7 @@ func (m *MigrationAPI) listGen2Coins(blockhash common.Hash) (interface{}, error)
 func (m *MigrationAPI) SearchGen2Coins(
 	owners []string,
 	include_empty bool,
-) (coins []Gen2Coin) {
+) (coins []Gen2Coin, err error) {
 	rawOwners := make([]common.Address, len(owners))
 	for i, o := range owners {
 		ro, err := base58.Decode(o, base58.BitcoinAlphabet)
@@ -147,21 +147,23 @@ func (m *MigrationAPI) SearchGen2Coins(
 		}
 		rawOwners[i] = common.BytesToAddress(ro[1 : len(ro)-4])
 	}
-	return m.searchGen2Coins(rawOwners, m.ListGen2Coins(), include_empty)
+	return m.searchGen2Coins(rawOwners, m.ListGen2Coins, include_empty)
 }
 
 func (m *MigrationAPI) SearchRawGen2Coins(
 	rawOwners []common.Address,
 	include_empty bool,
-) (coins []Gen2Coin) {
-	return m.searchGen2Coins(rawOwners, m.ListGen2Coins(), include_empty)
+) (coins []Gen2Coin, err error) {
+	return m.searchGen2Coins(rawOwners, m.ListGen2Coins, include_empty)
 }
+
+type listCoins func() (coins []Gen2Coin, err error)
 
 func (m *MigrationAPI) searchGen2Coins(
 	owners []common.Address,
-	all_coins []Gen2Coin,
+	all_coins listCoins,
 	include_empty bool,
-) (coins []Gen2Coin) {
+) (coins []Gen2Coin, err error) {
 	coins = make([]Gen2Coin, 0, len(owners))
 
 	owners_map := make(map[common.Address]bool)
@@ -169,7 +171,13 @@ func (m *MigrationAPI) searchGen2Coins(
 		owners_map[o] = true
 	}
 
-	for _, c := range all_coins {
+	list, err := all_coins()
+	if err != nil {
+		log.Error("Failed to get all coins", "err", err)
+		return
+	}
+
+	for _, c := range list {
 		if _, ok := owners_map[c.RawOwner]; ok {
 			if include_empty || c.Amount.Cmp(common.Big0) > 0 {
 				coins = append(coins, c)
@@ -177,7 +185,7 @@ func (m *MigrationAPI) searchGen2Coins(
 		}
 	}
 
-	return coins
+	return coins, nil
 }
 
 func (m *MigrationAPI) loadGen2Dump(file string) (keys []Gen2Key, err error) {
@@ -266,7 +274,10 @@ func (m *MigrationAPI) ClaimGen2CoinsDirect(
 		return
 	}
 
-	coins := m.SearchRawGen2Coins([]common.Address{key.RawOwner}, false)
+	coins, err := m.SearchRawGen2Coins([]common.Address{key.RawOwner}, false)
+	if err != nil {
+		return
+	}
 
 	if len(coins) != 1 {
 		log.Error("Unable to find coins")
@@ -299,7 +310,10 @@ func (m *MigrationAPI) ClaimGen2CoinsCombined(
 		owner2key[k.RawOwner] = &keys[i]
 	}
 
-	coins := m.SearchRawGen2Coins(raw_owners, false)
+	coins, err := m.SearchRawGen2Coins(raw_owners, false)
+	if err != nil {
+		return
+	}
 
 	txhashes = make([]common.Hash, len(coins))
 	for _, c := range coins {
@@ -330,7 +344,11 @@ func (m *MigrationAPI) ClaimGen2CoinsImport(
 		owner2key[k.RawOwner] = &keys[i]
 	}
 
-	coins := m.SearchRawGen2Coins(raw_owners, false)
+	coins, err := m.SearchRawGen2Coins(raw_owners, false)
+	if err != nil {
+		return
+	}
+
 	am := m.backend.AccountManager()
 	ks := am.Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
 

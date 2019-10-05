@@ -76,7 +76,7 @@ type BLInfo struct {
 	Blocked bool
 }
 
-func (b *BlacklistAPI) BlacklistInfo() (res []BLInfo) {
+func (b *BlacklistAPI) BlacklistInfo() (res []BLInfo, err error) {
 	data, err := b.infoCache.Get(b.backend, b.blacklistInfo)
 	if err != nil || data == nil {
 		log.Error("BlacklistInfo failed", "err", err)
@@ -120,11 +120,26 @@ func (b *BlacklistAPI) blacklistInfo(blockhash common.Hash) (interface{}, error)
 			continue
 		}
 
+		enforceInfo, err := proposalInfo(b.backend, proposals.Enforce)
+		if err != nil {
+			log.Warn("Enforce info error", "addr", addr, "err", err)
+		}
+
+		revokeInfo, err := proposalInfo(b.backend, proposals.Revoke)
+		if err != nil {
+			log.Warn("Revoke info error", "addr", addr, "err", err)
+		}
+
+		drainInfo, err := proposalInfo(b.backend, proposals.Drain)
+		if err != nil {
+			log.Warn("Drain info error", "addr", addr, "err", err)
+		}
+
 		res = append(res, BLInfo{
 			Target:  addr,
-			Enforce: proposalInfo(b.backend, proposals.Enforce),
-			Revoke:  proposalInfo(b.backend, proposals.Revoke),
-			Drain:   proposalInfo(b.backend, proposals.Drain),
+			Enforce: enforceInfo,
+			Revoke:  revokeInfo,
+			Drain:   drainInfo,
 			Blocked: blocked,
 		})
 	}
