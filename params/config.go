@@ -26,19 +26,19 @@ import (
 
 // Genesis hashes to enforce below configs on.
 var (
-	MainnetGenesisHash = common.HexToHash("0x0000000000000000000000000000000000000000000000000000000000000000")
+	MainnetGenesisHash = common.HexToHash("0x23a0bfb8639ab2b590ca03314138b3ff1fa1adc0cde453b312c0e320a3ad9fde")
 	TestnetGenesisHash = common.HexToHash("0x32370ea960082856c75cd5f20a5bf060e0a5f1435ebcd12a1456a1fb6569804e")
 
-	MainnetMigrationSigner = common.HexToAddress("0x00")
+	MainnetMigrationSigner = common.HexToAddress("0xac34a2555de08384cd7960f35d3ab048fcf9f83a")
 	TestnetMigrationSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
 
-	MainnetEBISigner = common.HexToAddress("0x00")
+	MainnetEBISigner = common.HexToAddress("0xf7ec1411b51eebd813f71545ec6b5dc8a7ab71bc")
 	TestnetEBISigner = common.HexToAddress("0x25bbaaaf27ab1966c3ab9faf31277a1db7601f3f")
 
-	MainnetCPPSigner = common.HexToAddress("0x00")
+	MainnetCPPSigner = common.HexToAddress("0xa7acab32c9b29c116825b85d61e1e5587d7db7e4")
 	TestnetCPPSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
 
-	MainnetBackbone = common.HexToAddress("0x00")
+	MainnetBackbone = common.HexToAddress("0x4d11f979cc5813f85436bdd4ab530a3768d34ae3")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 )
 
