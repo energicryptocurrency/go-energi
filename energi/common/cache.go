@@ -67,6 +67,8 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 		if c.entry == nil {
 			return nil, ErrInvalidData
 		}
+
+		c.blockHash = blockhash
 	}
 
 	return c.entry, nil
