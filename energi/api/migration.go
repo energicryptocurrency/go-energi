@@ -71,8 +71,6 @@ type Gen2Key struct {
 }
 
 func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin, err error) {
-	log.Info("Preparing a coin list")
-
 	data, err := m.coinsCache.Get(m.backend, m.listGen2Coins)
 	if err != nil || data == nil {
 		log.Error("ListGen2Coins failed", "err", err)
@@ -85,6 +83,8 @@ func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin, err error) {
 }
 
 func (m *MigrationAPI) listGen2Coins(blockhash common.Hash) (interface{}, error) {
+	log.Info("Preparing a coin list")
+
 	mgrt_contract, err := energi_abi.NewGen2MigrationCaller(
 		energi_params.Energi_MigrationContract, m.backend.(bind.ContractCaller))
 	if err != nil {
