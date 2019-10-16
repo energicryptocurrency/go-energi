@@ -19,7 +19,6 @@ package eth
 import (
 	"errors"
 	"math/big"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -59,10 +58,9 @@ const (
 	chainHeadChanSize = 10
 )
 
-type checkpointConfig struct {
-	mtx          sync.RWMutex
-	isSubscribed bool
-	lastCPBlock  uint64
+type checkpointVote struct {
+	address   common.Address
+	signature []byte
 }
 
 type MasternodeService struct {
@@ -75,9 +73,9 @@ type MasternodeService struct {
 	address  common.Address
 	registry *energi_abi.IMasternodeRegistrySession
 
-	cpConfig   checkpointConfig
-	cpRegistry *energi_abi.ICheckpointRegistrySession
-	cpChan     chan *energi_abi.ICheckpointRegistryCheckpoint
+	cpRegistry  *energi_abi.ICheckpointRegistrySession
+	lastCPBlock uint64
+	cpVoteChan  chan *checkpointVote
 
 	nextHB   time.Time
 	features *big.Int
@@ -94,7 +92,8 @@ func NewMasternodeService(ethServ *eth.Ethereum) (node.Service, error) {
 		// NOTE: we need to avoid triggering DoS on restart.
 		// There is no reliable way to check blockchain and all pools in the network.
 		nextHB: time.Now().Add(recheckInterval),
-		cpChan: make(chan *energi_abi.ICheckpointRegistryCheckpoint, cpChanBufferSize),
+
+		cpVoteChan: make(chan *checkpointVote, cpChanBufferSize),
 	}
 	go r.listenDownloader()
 	return r, nil
@@ -166,7 +165,7 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 	go m.loop()
 
 	// fetch all checkpoints since block number zero.
-	go m.checkpointSubscription()
+	go m.getMNCheckpoint()
 
 	log.Info("Started Energi Masternode", "addr", address)
 	return nil
@@ -254,48 +253,25 @@ func (m *MasternodeService) loop() {
 	}
 }
 
-// checkpointSubscription initiates the handlers that subscribe to checkpoints.
-func (m *MasternodeService) checkpointSubscription() {
-	m.cpConfig.mtx.RLock()
-	log.Info("Running checkpoints fetch from", "block", m.cpConfig.lastCPBlock)
-	m.cpConfig.mtx.RUnlock()
-
-	if err := m.getMNCheckpoint(); err != nil {
-		m.cpConfig.mtx.RLock()
-		log.Debug("Exiting checkpoint subscription", "block", m.cpConfig.lastCPBlock, "err", err)
-		m.cpConfig.mtx.RUnlock()
-
-		return
-	}
-}
-
 // getMNCheckpoint identifies the checkpoint indexed by the lastCPBlock value.
-// The identified checkpoints are pushed to the cpChan for further processing
-// after invalidations and heartbeat operations.
+// The identified checkpoints are signed and the pushed to the cpVoteChan for
+// further voting after heartbeat operations finish.
 func (m *MasternodeService) getMNCheckpoint() error {
-	m.cpConfig.mtx.RLock()
-	watchOpts := &bind.WatchOpts{Start: &m.cpConfig.lastCPBlock}
-	m.cpConfig.mtx.RUnlock()
+	log.Info("Running checkpoints fetch from", "block", m.lastCPBlock)
 
-	subscribe, err := m.cpRegistry.Contract.WatchCheckpoint(watchOpts, m.cpChan, []*big.Int{})
+	cpChan := make(chan *energi_abi.ICheckpointRegistryCheckpoint, cpChanBufferSize)
+	watchOpts := &bind.WatchOpts{Start: &m.lastCPBlock}
+
+	subscribe, err := m.cpRegistry.Contract.WatchCheckpoint(watchOpts, cpChan, []*big.Int{})
 	if err != nil {
-		m.cpConfig.mtx.RLock()
-		log.Error("Failed checkpoint subscription", "block", m.cpConfig.lastCPBlock, "err", err)
-		m.cpConfig.mtx.RUnlock()
+		log.Error("Failed checkpoint subscription", "block", m.lastCPBlock, "err", err)
 
 		return err
 	}
 
-	m.cpConfig.mtx.Lock()
-	m.cpConfig.isSubscribed = true
-	m.cpConfig.mtx.Unlock()
-
 	defer func() {
 		subscribe.Unsubscribe()
-
-		m.cpConfig.mtx.Lock()
-		m.cpConfig.isSubscribed = false
-		m.cpConfig.mtx.Unlock()
+		log.Debug("Exiting checkpoint subscription", "block", m.lastCPBlock, "err", err)
 	}()
 
 	for {
@@ -306,19 +282,8 @@ func (m *MasternodeService) getMNCheckpoint() error {
 		case err = <-subscribe.Err():
 			log.Error("checkpoint subscription error", "err", err)
 			return err
-		}
-	}
-}
 
-// voteOnCheckpoints recieves the identified checkpoints and attempts to sign
-// & sign on any checkpoint that hasn't yet.
-func (m *MasternodeService) voteOnCheckpoints() {
-	for {
-		select {
-		case <-m.quitCh:
-			return
-
-		case cpData := <-m.cpChan:
+		case cpData := <-cpChan:
 			cpAddr := cpData.Checkpoint
 			cp, err := energi_abi.NewICheckpointCaller(cpAddr, m.eth.APIBackend)
 			if err != nil {
@@ -327,9 +292,7 @@ func (m *MasternodeService) voteOnCheckpoints() {
 			}
 
 			// Update the current checkpoint height.
-			m.cpConfig.mtx.Lock()
-			m.cpConfig.lastCPBlock = cpData.Number.Uint64()
-			m.cpConfig.mtx.Unlock()
+			m.lastCPBlock = cpData.Number.Uint64()
 
 			// Check if the current masternode has voted and vote on it if not yet.
 			_, err = cp.Signature(&m.cpRegistry.CallOpts, m.address)
@@ -348,14 +311,37 @@ func (m *MasternodeService) voteOnCheckpoints() {
 					continue
 				}
 
-				tx, err := m.cpRegistry.Sign(cpAddr, signature)
-				if tx != nil {
-					txhash := tx.Hash()
-					log.Info("Note: please wait until the vote TX gets into a block!", "tx", txhash.Hex())
+				// Push the processed signature and the checkpoint address to channel
+				// for later processing.
+				m.cpVoteChan <- &checkpointVote{
+					address:   cpAddr,
+					signature: signature,
 				}
 			}
 
 			log.Debug("MN has already voted", "MN", m.address, "checkpoint", cpAddr)
+		}
+	}
+}
+
+// voteOnCheckpoints recieves the identified checkpoints vote information and
+// attempts to vote them in.
+func (m *MasternodeService) voteOnCheckpoints() {
+	for {
+		select {
+		case <-m.quitCh:
+			return
+
+		case cpVote := <-m.cpVoteChan:
+			tx, err := m.cpRegistry.Sign(cpVote.address, cpVote.signature)
+			if tx != nil {
+				txhash := tx.Hash()
+				log.Info("Note: please wait until the vote TX gets into a block!", "tx", txhash.Hex())
+			}
+
+			if err != nil {
+				log.Error("Checkpoint vote failed", "checkpoint", cpVote.address, "err", err)
+			}
 
 		default:
 			// This triggers loop ending to allow the priority zero-fee txs to be
@@ -374,16 +360,6 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 			m.eth.TxPool().RemoveBySender(m.address)
 		}
 		return
-	}
-
-	// Fetch the latest checkpoint(s) to be indexed.
-	m.cpConfig.mtx.RLock()
-	isSubscribed := m.cpConfig.isSubscribed
-	m.cpConfig.mtx.RUnlock()
-
-	// Check if the checkpoints are subscribed and if not subscribe to receive them.
-	if !isSubscribed {
-		go m.checkpointSubscription()
 	}
 
 	// MN-4 - Heartbeats
@@ -415,6 +391,9 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 		return
 	}
 
+	// Vote on the identified checkpoints.
+	m.voteOnCheckpoints()
+
 	//
 	target, err := m.registry.ValidationTarget(m.address)
 	if err != nil {
@@ -433,9 +412,6 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 			go m.validator.validate()
 		}
 	}
-
-	// Process the identified checkpoints.
-	m.voteOnCheckpoints()
 }
 
 type peerValidator struct {

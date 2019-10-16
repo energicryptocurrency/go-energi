@@ -26,6 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/rpc"
 
 	energi_params "energi.world/core/gen3/energi/params"
@@ -125,5 +126,49 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 	query ethereum.FilterQuery,
 	ch chan<- types.Log,
 ) (ethereum.Subscription, error) {
-	return nil, errors.New("Not implemented")
+	// Subscribe to all contract events
+	sinkLogs := make(chan []*types.Log)
+
+	sub := b.SubscribeLogsEvent(sinkLogs)
+	// Since we're getting logs in batches, we need to flatten them into a plain stream
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case logs := <-sinkLogs:
+				for _, log := range logs {
+					// Select the required logs only.
+					if !b.isFilteredLog(query, log) {
+						continue
+					}
+
+					select {
+					case ch <- *log:
+					case err := <-sub.Err():
+						return err
+					case <-quit:
+						return nil
+					}
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+func (b *EthAPIBackend) isFilteredLog(
+	q ethereum.FilterQuery,
+	log *types.Log,
+) bool {
+	var hasRequiredAddr bool
+	for _, addr := range q.Addresses {
+		if addr == log.Address {
+			hasRequiredAddr = true
+			break
+		}
+	}
+	return hasRequiredAddr
 }
