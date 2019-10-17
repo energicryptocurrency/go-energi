@@ -45,6 +45,14 @@ var (
 
 	// errInvalidSubscription is returned if valid subscription cannot be established.
 	errInvalidSubscription = errors.New("Invalid subscription")
+
+	// cppSyncDelay defines the time in which the process retrieving checkpoints
+	// is made to wait for the background sync to complete first.
+	cppSyncDelay = 1 * time.Minute
+
+	// durationValidity refers to the time from the current header where voting
+	// on a checkpoint is permitted.
+	durationValidity = (24 * time.Hour) - (15 * time.Minute) // 23hrs 45min
 )
 
 const (
@@ -52,7 +60,7 @@ const (
 
 	// cpChanBufferSize defines the number of checkpoint to be pushed into the
 	// checkpoints channel before it can be considered to be full.
-	cpChanBufferSize = 500
+	cpChanBufferSize = 16
 
 	txChanSize        = 4096
 	chainHeadChanSize = 10
@@ -164,7 +172,6 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 	m.validator = newPeerValidator(common.Address{}, m)
 	go m.loop()
 
-	// fetch all checkpoints since block number zero.
 	go m.getMNCheckpoint()
 
 	log.Info("Started Energi Masternode", "addr", address)
@@ -253,14 +260,68 @@ func (m *MasternodeService) loop() {
 	}
 }
 
-// getMNCheckpoint identifies the checkpoint indexed by the lastCPBlock value.
-// The identified checkpoints are signed and the pushed to the cpVoteChan for
-// further voting after heartbeat operations finish.
-func (m *MasternodeService) getMNCheckpoint() error {
+// isActiveCPBlock checks if the blocktime is within the last 23 hrs and 45 min.
+func (m *MasternodeService) isActiveCPBlock(blockNumber uint64) bool {
+	blockHeader := m.eth.BlockChain().GetHeaderByNumber(blockNumber)
+	timestamp := time.Unix(int64(blockHeader.Time), 0)
+
+	// Subtract the durationValidity duration from time.now().
+	validityStart := time.Now().Add(durationValidity * time.Duration(-1))
+	return validityStart.After(timestamp)
+}
+
+// getMNCheckpoint identifies the checkpoint indexed since the lastCPBlock,
+// signs them and pipes them to cpVoteChan for voting after MN heartbeat
+// operation finishes.
+func (m *MasternodeService) getMNCheckpoint() (err error) {
+	// Wait for the possible running background sync to complete or system quit
+	// event to be sent.
+	select {
+	case <-time.After(cppSyncDelay):
+	case <-m.quitCh:
+		return nil
+	}
+
+	m.lastCPBlock = 0
+	bestBlockHeight := m.eth.BlockChain().CurrentHeader().Number.Uint64()
+
+	if bestBlockHeight > energi_params.MaxCheckpointVoteBlockAge {
+		m.lastCPBlock = bestBlockHeight - energi_params.MaxCheckpointVoteBlockAge
+	}
+
+	// If sync start block is older than 23hrs 45min, get a start block not older.
+	for !m.isActiveCPBlock(m.lastCPBlock) && m.lastCPBlock < bestBlockHeight {
+		m.lastCPBlock++
+	}
+
 	log.Info("Running checkpoints fetch from", "block", m.lastCPBlock)
+	defer log.Debug("Exiting checkpoint subscription", "block", m.lastCPBlock, "err", err)
 
 	cpChan := make(chan *energi_abi.ICheckpointRegistryCheckpoint, cpChanBufferSize)
-	watchOpts := &bind.WatchOpts{Start: &m.lastCPBlock}
+
+	// Fetch old checkpoints first then subscribe to any future updates later.
+	if m.lastCPBlock < bestBlockHeight {
+		var oldCPs *energi_abi.ICheckpointRegistryCheckpointIterator
+
+		endBlock := bestBlockHeight - 1
+		filterQuery := &bind.FilterOpts{
+			Start: m.lastCPBlock,
+			End:   &endBlock,
+		}
+
+		oldCPs, err = m.cpRegistry.Contract.FilterCheckpoint(filterQuery, []*big.Int{})
+		if err != nil {
+			log.Error("Failed old checkpoints filter", "block", m.lastCPBlock, "err", err)
+			return
+		}
+
+		for oldCPs.Next() {
+			cpChan <- oldCPs.Event
+		}
+	}
+
+	// Only subscribe to future checkpoint updates after fetching old checkpoints.
+	watchOpts := new(bind.WatchOpts)
 
 	subscribe, err := m.cpRegistry.Contract.WatchCheckpoint(watchOpts, cpChan, []*big.Int{})
 	if err != nil {
@@ -269,10 +330,7 @@ func (m *MasternodeService) getMNCheckpoint() error {
 		return err
 	}
 
-	defer func() {
-		subscribe.Unsubscribe()
-		log.Debug("Exiting checkpoint subscription", "block", m.lastCPBlock, "err", err)
-	}()
+	defer subscribe.Unsubscribe()
 
 	for {
 		select {
@@ -281,7 +339,7 @@ func (m *MasternodeService) getMNCheckpoint() error {
 
 		case err = <-subscribe.Err():
 			log.Error("checkpoint subscription error", "err", err)
-			return err
+			return
 
 		case cpData := <-cpChan:
 			cpAddr := cpData.Checkpoint
@@ -310,6 +368,8 @@ func (m *MasternodeService) getMNCheckpoint() error {
 					log.Error("Failed to sign base hash", "err", err)
 					continue
 				}
+
+				signature[64] += 27
 
 				// Push the processed signature and the checkpoint address to channel
 				// for later processing.

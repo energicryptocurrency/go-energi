@@ -114,13 +114,47 @@ func (b *EthAPIBackend) SendTransaction(
 	return b.SendTx(ctx, tx)
 }
 
+// FilterLogs is a less effecient method of fetching the logs in a given block.
 func (b *EthAPIBackend) FilterLogs(
 	ctx context.Context,
 	query ethereum.FilterQuery,
 ) ([]types.Log, error) {
-	return nil, errors.New("Not implemented")
+	toBlock := rpc.LatestBlockNumber
+	if query.ToBlock != nil {
+		toBlock = rpc.BlockNumber(query.ToBlock.Int64())
+	}
+
+	rpcBlockNumber := toBlock
+	if query.FromBlock != nil {
+		rpcBlockNumber = rpc.BlockNumber(query.FromBlock.Int64())
+	}
+
+	requiredLogs := make([]types.Log, 0, int(toBlock-rpcBlockNumber))
+	for i := rpcBlockNumber; i <= toBlock; i++ {
+		header, err := b.HeaderByNumber(ctx, rpcBlockNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		// Fetch txs in the block with the provided block hash
+		allLogs, err := b.GetLogs(ctx, header.Hash())
+		if err != nil {
+			return nil, err
+		}
+
+		for _, logs := range allLogs {
+			for _, log := range logs {
+				if b.isFilteredLog(query, log) {
+					requiredLogs = append(requiredLogs, *log)
+				}
+			}
+		}
+	}
+
+	return requiredLogs, nil
 }
 
+// SubscribeFilterLogs returns the logs that are created after subscription.
 func (b *EthAPIBackend) SubscribeFilterLogs(
 	ctx context.Context,
 	query ethereum.FilterQuery,
