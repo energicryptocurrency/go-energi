@@ -144,7 +144,6 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		unlimitedGas: energi_params.UnlimitedGas,
 		diffFn:       calcPoSDifficultyV1,
 		now:          func() uint64 { return uint64(time.Now().Unix()) },
-		knownStakes:  make(KnownStakes),
 		nextKSPurge:  0,
 		txhashMap:    txhashMap,
 	}

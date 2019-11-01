@@ -17,6 +17,7 @@
 package consensus
 
 import (
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -43,7 +44,7 @@ func (ksv *KnownStakeValue) isActive(now uint64) bool {
 	return (now - ksv.ts) < energi_params.StakeThrottle
 }
 
-type KnownStakes map[KnownStakeKey]KnownStakeValue
+type KnownStakes = sync.Map
 
 func (e *Energi) checkDoS(
 	chain ChainReader,
@@ -64,33 +65,38 @@ func (e *Energi) checkDoS(
 
 	// POS-9: stake throttling
 	//---
+
 	now := e.now()
 
 	ksk := KnownStakeKey{
 		coinbase: header.Coinbase,
 		parent:   header.ParentHash,
 	}
-	ksv := KnownStakeValue{
+	ksv := &KnownStakeValue{
 		block: header.Hash(),
 		ts:    now,
 	}
 
-	if prev_ksv, ok := e.knownStakes[ksk]; ok {
+	if prev_ksvi, ok := e.knownStakes.LoadOrStore(ksk, ksv); ok {
+		prev_ksv := prev_ksvi.(*KnownStakeValue)
 		if prev_ksv.isActive(now) && prev_ksv.block != ksv.block {
 			return eth_consensus.ErrDoSThrottle
 		}
+
+		e.knownStakes.Store(ksk, ksv)
 	}
 
-	e.knownStakes[ksk] = ksv
 	//---
 	if e.nextKSPurge < now {
 		e.nextKSPurge = now + energi_params.StakeThrottle
 
-		for k, v := range e.knownStakes {
-			if !v.isActive(now) {
-				delete(e.knownStakes, k)
+		e.knownStakes.Range(func(k, v interface{}) bool {
+			if !v.(*KnownStakeValue).isActive(now) {
+				e.knownStakes.Delete(k)
 			}
-		}
+
+			return true
+		})
 	}
 	//---
 

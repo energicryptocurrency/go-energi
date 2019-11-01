@@ -58,6 +58,14 @@ func (fc *fakeDoSChain) CalculateBlockState(hash common.Hash, number uint64) *st
 	panic("Not impl")
 }
 
+func KnownStakesTestCount(ks *KnownStakes) (ret int) {
+	ks.Range(func(_, _ interface{}) bool {
+		ret++
+		return true
+	})
+	return
+}
+
 func TestPoSDoS(t *testing.T) {
 	t.Parallel()
 	log.Root().SetHandler(log.StdoutHandler)
@@ -130,12 +138,12 @@ func TestPoSDoS(t *testing.T) {
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap + 1
 	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-	assert.Equal(t, 1, len(engine.knownStakes))
+	assert.Equal(t, 1, KnownStakesTestCount(&engine.knownStakes))
 
 	log.Trace("Another coinbase")
 	h.Coinbase = common.HexToAddress("0x1234")
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-	assert.Equal(t, 2, len(engine.knownStakes))
+	assert.Equal(t, 2, KnownStakesTestCount(&engine.knownStakes))
 
 	log.Trace("Another variation")
 	h.Root = common.HexToHash("0x1234")
@@ -150,15 +158,15 @@ func TestPoSDoS(t *testing.T) {
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 	h.Coinbase = common.HexToAddress("0x3456")
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-	assert.Equal(t, 3, len(engine.knownStakes))
+	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
 
 	curr_time += energi_params.StakeThrottle / 2
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 	h.Time += 1
 	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-	assert.Equal(t, 3, len(engine.knownStakes))
+	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
 
 	curr_time += energi_params.StakeThrottle
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-	assert.Equal(t, 1, len(engine.knownStakes))
+	assert.Equal(t, 1, KnownStakesTestCount(&engine.knownStakes))
 }
