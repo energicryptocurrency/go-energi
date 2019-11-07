@@ -194,6 +194,9 @@ func (b *CheckpointAPI) CheckpointPropose(
 		return
 	}
 
+	// NOTE: compatibility with ecrecover opcode.
+	sig[64] += 27
+
 	tx, err := registry.Propose(bnum, hash, sig)
 
 	if tx != nil {
