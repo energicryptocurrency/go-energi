@@ -29,4 +29,9 @@ const (
 	StakeThrottle uint64 = 60
 
 	UnlimitedGas uint64 = (1 << 40)
+
+	// MaxCheckpointVoteBlockAge defines the period in blocks count from the time
+	// the checkpoint signer account proposes a checkpoint in which its voting
+	// is permitted.
+	MaxCheckpointVoteBlockAge = 1440
 )

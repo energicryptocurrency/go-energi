@@ -26,6 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/rpc"
 
 	energi_params "energi.world/core/gen3/energi/params"
@@ -113,17 +114,95 @@ func (b *EthAPIBackend) SendTransaction(
 	return b.SendTx(ctx, tx)
 }
 
+// FilterLogs is a less effecient method of fetching the logs in a given block.
 func (b *EthAPIBackend) FilterLogs(
 	ctx context.Context,
 	query ethereum.FilterQuery,
 ) ([]types.Log, error) {
-	return nil, errors.New("Not implemented")
+	toBlock := rpc.LatestBlockNumber
+	if query.ToBlock != nil {
+		toBlock = rpc.BlockNumber(query.ToBlock.Int64())
+	}
+
+	rpcBlockNumber := toBlock
+	if query.FromBlock != nil {
+		rpcBlockNumber = rpc.BlockNumber(query.FromBlock.Int64())
+	}
+
+	requiredLogs := make([]types.Log, 0, int(toBlock-rpcBlockNumber))
+	for i := rpcBlockNumber; i <= toBlock; i++ {
+		header, err := b.HeaderByNumber(ctx, rpcBlockNumber)
+		if err != nil {
+			return nil, err
+		}
+
+		// Fetch txs in the block with the provided block hash
+		allLogs, err := b.GetLogs(ctx, header.Hash())
+		if err != nil {
+			return nil, err
+		}
+
+		for _, logs := range allLogs {
+			for _, log := range logs {
+				if b.isFilteredLog(query, log) {
+					requiredLogs = append(requiredLogs, *log)
+				}
+			}
+		}
+	}
+
+	return requiredLogs, nil
 }
 
+// SubscribeFilterLogs returns the logs that are created after subscription.
 func (b *EthAPIBackend) SubscribeFilterLogs(
 	ctx context.Context,
 	query ethereum.FilterQuery,
 	ch chan<- types.Log,
 ) (ethereum.Subscription, error) {
-	return nil, errors.New("Not implemented")
+	// Subscribe to all contract events
+	sinkLogs := make(chan []*types.Log)
+
+	sub := b.SubscribeLogsEvent(sinkLogs)
+	// Since we're getting logs in batches, we need to flatten them into a plain stream
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case logs := <-sinkLogs:
+				for _, log := range logs {
+					// Select the required logs only.
+					if !b.isFilteredLog(query, log) {
+						continue
+					}
+
+					select {
+					case ch <- *log:
+					case err := <-sub.Err():
+						return err
+					case <-quit:
+						return nil
+					}
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+func (b *EthAPIBackend) isFilteredLog(
+	q ethereum.FilterQuery,
+	log *types.Log,
+) bool {
+	var hasRequiredAddr bool
+	for _, addr := range q.Addresses {
+		if addr == log.Address {
+			hasRequiredAddr = true
+			break
+		}
+	}
+	return hasRequiredAddr
 }
