@@ -518,6 +518,11 @@ func (v *peerValidator) validate() {
 	cfg := mnsvc.eth.BlockChain().Config()
 	enode := energi_common.MastenodeEnode(mninfo.Ipv4address, mninfo.Enode, cfg)
 
+	if enode == nil {
+		log.Debug("Invalid ipv4address or public key was used")
+		return
+	}
+
 	// Check if the node is already connected as a peer and
 	// skip MN Validation if true.
 	if isFound := server.IsPeerActive(enode); isFound {

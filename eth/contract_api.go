@@ -19,7 +19,6 @@ package eth
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
@@ -214,7 +213,6 @@ func (b *EthAPIBackend) isFilteredLog(
 		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
 	}
 
-	fmt.Println(" >>>>>> Detected Log Addr: ", log.Address.Hash().String())
 	var hasRequiredAddr bool
 	for _, addr := range q.Addresses {
 		if addr == log.Address || proxyAddrMap[addr] == log.Address {

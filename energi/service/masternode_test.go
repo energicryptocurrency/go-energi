@@ -41,6 +41,7 @@ const (
 
 	accountPass     = "secret-pass"
 	peerConInterval = 1 * time.Minute
+	miningInterval  = 180 * time.Second
 
 	gasLimit          = 40000000
 	mnPrepareGasLimit = 3900000
@@ -559,7 +560,11 @@ func sendMoreTxs(mnPrivKey *ecdsa.PrivateKey) error {
 }
 
 // networkEventsLoop receives all new changes that are mdae to the network.
-func networkEventsLoop(quitCh chan struct{}, ethService *eth.Ethereum) {
+func networkEventsLoop(
+	quitCh chan struct{},
+	isSignedCPP chan struct{},
+	ethService *eth.Ethereum,
+) {
 	bc := ethService.BlockChain()
 	txpool := ethService.TxPool()
 
@@ -587,6 +592,10 @@ func networkEventsLoop(quitCh chan struct{}, ethService *eth.Ethereum) {
 		case txEvent := <-txEventCh:
 			for _, tx := range txEvent.Txs {
 				fmt.Printf("\t\t _____ (%s) Tx Announced  %v _____ \n", checkTxDesc(tx), tx.Hash().String())
+
+				if isSignedCheckpointTx(tx) {
+					isSignedCPP <- struct{}{}
+				}
 			}
 			break
 
@@ -599,6 +608,39 @@ func networkEventsLoop(quitCh chan struct{}, ethService *eth.Ethereum) {
 	}
 }
 
+// Detect the checkpoint signed by the current masternode and check if its valid.
+func isSignedCheckpointTx(tx *types.Transaction) bool {
+	if *tx.To() == energi_params.Energi_CheckpointRegistry {
+		for _, node := range nodesInfo {
+			if !node.isMN {
+				// expected only masternodes to be used
+				continue
+			}
+
+			var ethServ *eth.Ethereum
+			node.stack.Service(&ethServ)
+
+			signer := types.NewEIP155Signer(ethServ.BlockChain().Config().ChainID)
+			from, err := types.Sender(signer, tx)
+			if err != nil {
+				continue
+			}
+
+			if node.address == from {
+				// found the recovered address in one of the masternodes.
+				fmt.Println("found the recovered address in one of the masternodes")
+				return true
+			}
+		}
+		// could not match the recovered address to a mn address: not required tx.
+		fmt.Println("could not match the recovered address to a mn address: not required tx")
+		return false
+	}
+
+	// invalid recipient address found: Not Required tx
+	// fmt.Println("invalid recipient address found: Not Required tx")
+	return false
+}
 func TestMasternodeSigning(t *testing.T) {
 	// masternode mn node picked is at index 1.
 	mn := nodesInfo[mnIndex]
@@ -606,8 +648,9 @@ func TestMasternodeSigning(t *testing.T) {
 	mn.stack.Service(&mnEthService)
 
 	quitChan := make(chan struct{}, 1)
+	isCPPChan := make(chan struct{}, 1)
 	// Listen to the network events
-	go networkEventsLoop(quitChan, mnEthService)
+	go networkEventsLoop(quitChan, isCPPChan, mnEthService)
 
 	mnServer := mn.stack.Server()
 	peerCh := make(chan *p2p.PeerEvent)
@@ -716,16 +759,17 @@ func TestMasternodeSigning(t *testing.T) {
 		txPoolContents(queued, "(BEFORE) ____ MN queued")
 	}
 
-	// var count int
-	// Wait to receive for msgrecv events from the signer peer whose count should
-	// match the previous count of queued txs or till timer expires.
+	// Wait for a checkpoint signed by a masternode to be discovered or the max
+	// mining interval to expire.
 
-	// Detect the checkpoint signed by the current masternode and check if its valid.
 	select {
-	case <-time.After(180 * time.Second):
-		// Timeout: quit the listening of network events.
-		// quitChan <- struct{}{}
+	case <-isCPPChan:
+		fmt.Println(" _______ A checkpoint signed by a masternode was found _____")
+
+	case <-time.After(miningInterval):
 	}
+	// Timeout: quit the listening of network events.
+	quitChan <- struct{}{}
 
 	fmt.Println(" _______ CHECK TX POOL AFTER WAITING _____")
 	{
@@ -741,9 +785,6 @@ func TestMasternodeSigning(t *testing.T) {
 		txPoolContents(pending, "(AFTER) ____ CPP Signer Pending")
 		txPoolContents(queued, "(AFTER) ____ CPP Signer queued")
 	}
-
-	// Timeout: quit the listening of network events.
-	quitChan <- struct{}{}
 
 	fmt.Println(" >>>>>>>> Test Complete <<<<<<<<<<")
 }
