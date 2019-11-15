@@ -19,6 +19,7 @@ package eth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
@@ -179,13 +180,17 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 					select {
 					case ch <- *log:
 					case err := <-sub.Err():
-						return err
+						if err != nil {
+							return err
+						}
 					case <-quit:
 						return nil
 					}
 				}
 			case err := <-sub.Err():
-				return err
+				if err != nil {
+					return err
+				}
 			case <-quit:
 				return nil
 			}
@@ -197,9 +202,22 @@ func (b *EthAPIBackend) isFilteredLog(
 	q ethereum.FilterQuery,
 	log *types.Log,
 ) bool {
+	proxyAddrMap := map[common.Address]common.Address{
+		energi_params.Energi_BlockReward:        energi_params.Energi_BlockRewardV1,
+		energi_params.Energi_Treasury:           energi_params.Energi_TreasuryV1,
+		energi_params.Energi_MasternodeRegistry: energi_params.Energi_MasternodeRegistryV1,
+		energi_params.Energi_StakerReward:       energi_params.Energi_StakerRewardV1,
+		energi_params.Energi_BackboneReward:     energi_params.Energi_BackboneRewardV1,
+		energi_params.Energi_SporkRegistry:      energi_params.Energi_SporkRegistryV1,
+		energi_params.Energi_CheckpointRegistry: energi_params.Energi_CheckpointRegistryV1,
+		energi_params.Energi_BlacklistRegistry:  energi_params.Energi_BlacklistRegistryV1,
+		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
+	}
+
+	fmt.Println(" >>>>>> Detected Log Addr: ", log.Address.Hash().String())
 	var hasRequiredAddr bool
 	for _, addr := range q.Addresses {
-		if addr == log.Address {
+		if addr == log.Address || proxyAddrMap[addr] == log.Address {
 			hasRequiredAddr = true
 			break
 		}
