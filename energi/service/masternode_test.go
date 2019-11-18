@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/big"
+	"net"
 	"os"
 	"sync"
 	"testing"
@@ -25,6 +26,7 @@ import (
 	//"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/p2p"
+	"github.com/ethereum/go-ethereum/p2p/nat"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/shengdoushi/base58"
 	"github.com/stretchr/testify/assert"
@@ -286,6 +288,18 @@ func TestMain(m *testing.M) {
 		err = data.stack.Start()
 		withErr("Failed to start the protocol stack", err)
 
+		srv := data.stack.Server()
+		addr, _ := net.ResolveUDPAddr("udp", srv.ListenAddr)
+		conn, _ := net.ListenUDP("udp", addr)
+		realAdr := conn.LocalAddr().(*net.UDPAddr)
+		quit := make(chan struct{})
+		if !realAdr.IP.IsLoopback() && srv.NAT != nil {
+			go nat.Map(srv.NAT, quit, "udp", realAdr.Port, realAdr.Port, "ethereum discovery")
+		}
+
+		// trigger external IP Address to be set.
+		srv.NAT.ExternalIP()
+
 		var ethService *eth.Ethereum
 		data.stack.Service(&ethService)
 
@@ -337,6 +351,7 @@ func newNode(privKey *ecdsa.PrivateKey, presale core.GenesisAlloc) (*node.Node, 
 	config := &node.Config{
 		P2P: p2p.Config{
 			ListenAddr:  "0.0.0.0:0",
+			NAT:         nat.Any(),
 			NoDiscovery: true,
 			MaxPeers:    25,
 			PrivateKey:  privKey,
@@ -474,6 +489,7 @@ func announceMN(
 	ethService *eth.Ethereum,
 	transactOpts bind.TransactOpts,
 	mnAddr common.Address,
+	ip net.IP,
 ) error {
 	registry, err := energi_abi.NewIMasternodeRegistryTransactor(
 		energi_params.Energi_MasternodeRegistry, ethService.APIBackend)
@@ -481,7 +497,14 @@ func announceMN(
 		return err
 	}
 
-	ipv4address := uint32(130 << 24)
+	var ipv4address = uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 | uint32(ip[3])
+	if ip[0] == byte(127) || ip[0] == byte(10) ||
+		(ip[0] == byte(192) && ip[1] == byte(168)) ||
+		(ip[0] == byte(172) && (ip[1]&0xF0) == byte(16)) {
+
+		// Use a mocked IP address if a proper external IP address cannot be obtained.
+		ipv4address = uint32(130 << 24)
+	}
 
 	tx, err := registry.Announce(&transactOpts, mnAddr, ipv4address, [2][32]byte{})
 	if err != nil {
@@ -516,8 +539,9 @@ func mnPrepare(nodes []nodeConfig) error {
 			return err
 		}
 
+		ip := n.stack.Server().Self().IP().To4()
 		fmt.Printf("\t _______ ANNOUNCE %v TO THE NETWORK_____ \n", n.address.Hash().String())
-		if err := announceMN(i, ethService, transactOpts, n.address); err != nil {
+		if err := announceMN(i, ethService, transactOpts, n.address, ip); err != nil {
 			return err
 		}
 	}
