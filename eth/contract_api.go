@@ -27,6 +27,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 
 	energi_params "energi.world/core/gen3/energi/params"
@@ -131,7 +132,8 @@ func (b *EthAPIBackend) FilterLogs(
 
 	requiredLogs := make([]types.Log, 0, int(toBlock-rpcBlockNumber))
 	for i := rpcBlockNumber; i <= toBlock; i++ {
-		header, err := b.HeaderByNumber(ctx, rpcBlockNumber)
+		currentBlock := rpc.BlockNumber(i)
+		header, err := b.HeaderByNumber(ctx, currentBlock)
 		if err != nil {
 			return nil, err
 		}
@@ -144,7 +146,7 @@ func (b *EthAPIBackend) FilterLogs(
 
 		for _, logs := range allLogs {
 			for _, log := range logs {
-				if b.isFilteredLog(query, log) {
+				if b.isFilteredLog(ctx, query, log, currentBlock) {
 					requiredLogs = append(requiredLogs, *log)
 				}
 			}
@@ -172,7 +174,7 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 			case logs := <-sinkLogs:
 				for _, log := range logs {
 					// Select the required logs only.
-					if !b.isFilteredLog(query, log) {
+					if !b.isFilteredLog(ctx, query, log, rpc.LatestBlockNumber) {
 						continue
 					}
 
@@ -198,24 +200,22 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 }
 
 func (b *EthAPIBackend) isFilteredLog(
+	ctx context.Context,
 	q ethereum.FilterQuery,
-	log *types.Log,
+	tlog *types.Log,
+	blockNo rpc.BlockNumber,
 ) bool {
-	proxyAddrMap := map[common.Address]common.Address{
-		energi_params.Energi_BlockReward:        energi_params.Energi_BlockRewardV1,
-		energi_params.Energi_Treasury:           energi_params.Energi_TreasuryV1,
-		energi_params.Energi_MasternodeRegistry: energi_params.Energi_MasternodeRegistryV1,
-		energi_params.Energi_StakerReward:       energi_params.Energi_StakerRewardV1,
-		energi_params.Energi_BackboneReward:     energi_params.Energi_BackboneRewardV1,
-		energi_params.Energi_SporkRegistry:      energi_params.Energi_SporkRegistryV1,
-		energi_params.Energi_CheckpointRegistry: energi_params.Energi_CheckpointRegistryV1,
-		energi_params.Energi_BlacklistRegistry:  energi_params.Energi_BlacklistRegistryV1,
-		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
+	statedb, _, err := b.StateAndHeaderByNumber(ctx, blockNo)
+	if err != nil {
+		log.Error("Getting state failed", "err", err)
+		return false
 	}
 
 	var hasRequiredAddr bool
 	for _, addr := range q.Addresses {
-		if addr == log.Address || proxyAddrMap[addr] == log.Address {
+		proxyAddrHash := statedb.GetState(addr, energi_params.Storage_ProxyImpl)
+
+		if addr == tlog.Address || proxyAddrHash == tlog.Address.Hash() {
 			hasRequiredAddr = true
 			break
 		}
