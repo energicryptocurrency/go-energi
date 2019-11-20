@@ -4,11 +4,29 @@ Official golang implementation of the Energi Core based on Ethereum protocol.
 
 ## Building the source
 
+### Build with FutoIn CID
+
 Local build from the source is supported via [FutoIn CID](https://futoin.org/docs/cid/).
 
     cid prepare
     cid build
     cid package
+
+### (Optional) Build with Vagrant
+
+A consistent build environment can be provided with Vagrant.
+
+    vagrant up
+    vagrant ssh builder
+    cd /vagrant
+
+From within the Vagrant environment, follow the steps to build with FutoIn CID.
+
+### (Optional) Build with Docker
+
+A consistent build environment can be provided with Docker. Release builds are produced through this process.
+
+    docker build -t energi3 .
 
 ## Executables
 
@@ -77,7 +95,7 @@ Specifying the `--testnet` flag however will reconfigure your Energi Core instan
    `energi3 attach <datadir>/testnet/energi3.ipc`. Windows users are not affected by this.
  * Instead of connecting the main Energi network, the client will connect to the test network,
    which uses different P2P bootnodes, different network IDs and genesis states.
-   
+
 *Note: Although there are some internal protective measures to prevent transactions from crossing
 over between the main network and test network, you should make sure to always use separate accounts
 for play-money and real-money. Unless you manually move accounts, Energi Core will by default correctly
