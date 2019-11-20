@@ -23,7 +23,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/eth"
 
-	//"github.com/ethereum/go-ethereum/log"
+	// "github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/p2p/nat"
@@ -43,7 +43,7 @@ const (
 
 	accountPass     = "secret-pass"
 	peerConInterval = 1 * time.Minute
-	miningInterval  = 180 * time.Second
+	miningInterval  = 4 * time.Minute
 
 	gasLimit          = 40000000
 	mnPrepareGasLimit = 3900000
@@ -158,7 +158,7 @@ func getMigration(chainID uint64) ([]byte, error) {
 }
 
 func TestMain(m *testing.M) {
-	//log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	// Reduce the cppSyncDelay interval to a negligible value.
 	cppSyncDelay = 1 * time.Microsecond
@@ -308,10 +308,11 @@ func TestMain(m *testing.M) {
 		injectAccount(store, signers[data.address])
 
 		// Add delegated POS accounts to every node.
-		for _, addr := range delPoSAddr {
+		for i, addr := range delPoSAddr {
 			injectAccount(store, signers[addr])
 
-			ethService.AddDPoS(addr, crypto.PubkeyToAddress(signers[addr].PublicKey))
+			contractAddr := delegatedPOS[i]
+			ethService.AddDPoS(contractAddr, crypto.PubkeyToAddress(signers[addr].PublicKey))
 		}
 	}
 
@@ -342,7 +343,8 @@ func serviceConfig(presale core.GenesisAlloc) *eth.Config {
 	ethConfig.Genesis.Xfers = core.DeployEnergiGovernance(ethConfig.Genesis.Config)
 	ethConfig.Genesis.Difficulty = big.NewInt(1)
 	ethConfig.Genesis.Coinbase = energi_params.Energi_Treasury
-	ethConfig.Genesis.Timestamp = 100
+	ethConfig.Genesis.Timestamp = 12900000
+	ethConfig.Genesis.Coinbase = mgSigner
 	return ethConfig
 }
 
@@ -421,6 +423,7 @@ func cpPropose(hash common.Hash, blockNo *big.Int) error {
 	var ethServ *eth.Ethereum
 	signer.stack.Service(&ethServ)
 
+	// Governed Proxy Contract
 	cpRegistry, err := energi_abi.NewCheckpointRegistryV1(
 		energi_params.Energi_CheckpointRegistry, ethServ.APIBackend,
 	)
@@ -611,15 +614,16 @@ func networkEventsLoop(
 			for _, tx := range ev.Block.Transactions() {
 				fmt.Printf("\t BlockNo: %v, Tx Desc: %v, Tx Hash: %v, Nonce: %v, GasPrice: %v, Gas: %v, To Address: %v \n",
 					ev.Block.Number(), checkTxDesc(tx), tx.Hash().String(), tx.Nonce(), tx.GasPrice(), tx.Gas(), tx.To().Hash().String())
+
+				// Waits until the tx from the mn signed checkpoint to be mined into a block.
+				if isSignedCheckpointTx(tx) {
+					isSignedCPP <- struct{}{}
+				}
 			}
 			break
 		case txEvent := <-txEventCh:
 			for _, tx := range txEvent.Txs {
 				fmt.Printf("\t\t _____ (%s) Tx Announced  %v _____ \n", checkTxDesc(tx), tx.Hash().String())
-
-				if isSignedCheckpointTx(tx) {
-					isSignedCPP <- struct{}{}
-				}
 			}
 			break
 
@@ -788,11 +792,15 @@ func TestMasternodeSigning(t *testing.T) {
 
 	select {
 	case <-isCPPChan:
+		// Test Passed
 		fmt.Println(" _______ A checkpoint signed by a masternode was found _____")
 
 	case <-time.After(miningInterval):
+		// Test Failed
+		t.Fatalf(" _______ signed Checkpoint NOT found: mining interval expired _____")
 	}
-	// Timeout: quit the listening of network events.
+
+	// Now quit the listening of network events.
 	quitChan <- struct{}{}
 
 	fmt.Println(" _______ CHECK TX POOL AFTER WAITING _____")
@@ -810,7 +818,7 @@ func TestMasternodeSigning(t *testing.T) {
 		txPoolContents(queued, "(AFTER) ____ CPP Signer queued")
 	}
 
-	fmt.Println(" >>>>>>>> Test Complete <<<<<<<<<<")
+	fmt.Println(" >>>>>>>> MN Checkpoint Signing Test Complete <<<<<<<<<<")
 }
 
 func txPoolContents(addrMap map[common.Address]types.Transactions, descr string) {

@@ -16,6 +16,8 @@
 
 package params
 
+type ctxKey string
+
 const (
 	MaturityPeriod    uint64 = 60 * 60
 	AverageTimeBlocks uint64 = 60
@@ -34,4 +36,8 @@ const (
 	// the checkpoint signer account proposes a checkpoint in which its voting
 	// is permitted.
 	MaxCheckpointVoteBlockAge = 1440
+
+	// GeneralProxyCtxKey is used to pass the governed proxy address hash to
+	// the filter logs interface.
+	GeneralProxyCtxKey = ctxKey("governedProxyAddressHash")
 )

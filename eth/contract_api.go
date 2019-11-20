@@ -27,9 +27,9 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -132,8 +132,7 @@ func (b *EthAPIBackend) FilterLogs(
 
 	requiredLogs := make([]types.Log, 0, int(toBlock-rpcBlockNumber))
 	for i := rpcBlockNumber; i <= toBlock; i++ {
-		currentBlock := rpc.BlockNumber(i)
-		header, err := b.HeaderByNumber(ctx, currentBlock)
+		header, err := b.HeaderByNumber(ctx, i)
 		if err != nil {
 			return nil, err
 		}
@@ -144,12 +143,18 @@ func (b *EthAPIBackend) FilterLogs(
 			return nil, err
 		}
 
+		blockNo := uint64(i)
 		for _, logs := range allLogs {
 			for _, log := range logs {
-				if b.isFilteredLog(ctx, query, log, currentBlock) {
+				if b.isFilteredLog(ctx, query, log, &blockNo) {
 					requiredLogs = append(requiredLogs, *log)
 				}
 			}
+		}
+
+		// When fetching the latest block, do not loop more than once
+		if i == rpc.LatestBlockNumber {
+			break
 		}
 	}
 
@@ -174,7 +179,7 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 			case logs := <-sinkLogs:
 				for _, log := range logs {
 					// Select the required logs only.
-					if !b.isFilteredLog(ctx, query, log, rpc.LatestBlockNumber) {
+					if !b.isFilteredLog(ctx, query, log, nil) {
 						continue
 					}
 
@@ -202,23 +207,20 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 func (b *EthAPIBackend) isFilteredLog(
 	ctx context.Context,
 	q ethereum.FilterQuery,
-	tlog *types.Log,
-	blockNo rpc.BlockNumber,
+	log *types.Log,
+	blockNo *uint64,
 ) bool {
-	statedb, _, err := b.StateAndHeaderByNumber(ctx, blockNo)
-	if err != nil {
-		log.Error("Getting state failed", "err", err)
-		return false
-	}
 
-	var hasRequiredAddr bool
 	for _, addr := range q.Addresses {
-		proxyAddrHash := statedb.GetState(addr, energi_params.Storage_ProxyImpl)
+		generalProxyHash := energi_common.GeneralProxyHashExtractor(ctx, addr, blockNo)
+		if generalProxyHash != nil && log.Address.Hash() == *generalProxyHash {
+			return true
+		}
 
-		if addr == tlog.Address || proxyAddrHash == tlog.Address.Hash() {
-			hasRequiredAddr = true
-			break
+		if addr == log.Address {
+			return true
 		}
 	}
-	return hasRequiredAddr
+
+	return false
 }
