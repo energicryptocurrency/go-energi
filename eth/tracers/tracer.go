@@ -96,7 +96,7 @@ func (mw *memoryWrapper) slice(begin, end int64) []byte {
 	if mw.memory.Len() < int(end) {
 		// TODO(karalabe): We can't js-throw from Go inside duktape inside Go. The Go
 		// runtime goes belly up https://github.com/golang/go/issues/15639.
-		log.Warn("Tracer accessed out of bound memory", "available", mw.memory.Len(), "offset", begin, "size", end-begin)
+		log.Debug("Tracer accessed out of bound memory", "available", mw.memory.Len(), "offset", begin, "size", end-begin)
 		return nil
 	}
 	return mw.memory.Get(begin, end-begin)
@@ -107,7 +107,7 @@ func (mw *memoryWrapper) getUint(addr int64) *big.Int {
 	if mw.memory.Len() < int(addr)+32 {
 		// TODO(karalabe): We can't js-throw from Go inside duktape inside Go. The Go
 		// runtime goes belly up https://github.com/golang/go/issues/15639.
-		log.Warn("Tracer accessed out of bound memory", "available", mw.memory.Len(), "offset", addr, "size", 32)
+		log.Debug("Tracer accessed out of bound memory", "available", mw.memory.Len(), "offset", addr, "size", 32)
 		return new(big.Int)
 	}
 	return new(big.Int).SetBytes(mw.memory.GetPtr(addr, 32))
@@ -150,7 +150,7 @@ func (sw *stackWrapper) peek(idx int) *big.Int {
 	if len(sw.stack.Data()) <= idx {
 		// TODO(karalabe): We can't js-throw from Go inside duktape inside Go. The Go
 		// runtime goes belly up https://github.com/golang/go/issues/15639.
-		log.Warn("Tracer accessed out of bound stack", "size", len(sw.stack.Data()), "index", idx)
+		log.Debug("Tracer accessed out of bound stack", "size", len(sw.stack.Data()), "index", idx)
 		return new(big.Int)
 	}
 	return sw.stack.Data()[len(sw.stack.Data())-idx-1]
