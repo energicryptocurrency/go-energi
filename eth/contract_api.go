@@ -29,6 +29,7 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/rpc"
 
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -131,7 +132,7 @@ func (b *EthAPIBackend) FilterLogs(
 
 	requiredLogs := make([]types.Log, 0, int(toBlock-rpcBlockNumber))
 	for i := rpcBlockNumber; i <= toBlock; i++ {
-		header, err := b.HeaderByNumber(ctx, rpcBlockNumber)
+		header, err := b.HeaderByNumber(ctx, i)
 		if err != nil {
 			return nil, err
 		}
@@ -142,12 +143,18 @@ func (b *EthAPIBackend) FilterLogs(
 			return nil, err
 		}
 
+		blockNo := uint64(i)
 		for _, logs := range allLogs {
 			for _, log := range logs {
-				if b.isFilteredLog(query, log) {
+				if b.isFilteredLog(ctx, query, log, &blockNo) {
 					requiredLogs = append(requiredLogs, *log)
 				}
 			}
+		}
+
+		// When fetching the latest block, do not loop more than once
+		if i == rpc.LatestBlockNumber {
+			break
 		}
 	}
 
@@ -172,20 +179,24 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 			case logs := <-sinkLogs:
 				for _, log := range logs {
 					// Select the required logs only.
-					if !b.isFilteredLog(query, log) {
+					if !b.isFilteredLog(ctx, query, log, nil) {
 						continue
 					}
 
 					select {
 					case ch <- *log:
 					case err := <-sub.Err():
-						return err
+						if err != nil {
+							return err
+						}
 					case <-quit:
 						return nil
 					}
 				}
 			case err := <-sub.Err():
-				return err
+				if err != nil {
+					return err
+				}
 			case <-quit:
 				return nil
 			}
@@ -194,15 +205,22 @@ func (b *EthAPIBackend) SubscribeFilterLogs(
 }
 
 func (b *EthAPIBackend) isFilteredLog(
+	ctx context.Context,
 	q ethereum.FilterQuery,
 	log *types.Log,
+	blockNo *uint64,
 ) bool {
-	var hasRequiredAddr bool
+
 	for _, addr := range q.Addresses {
+		generalProxyHash := energi_common.GeneralProxyHashExtractor(ctx, addr, blockNo)
+		if generalProxyHash != nil && log.Address.Hash() == *generalProxyHash {
+			return true
+		}
+
 		if addr == log.Address {
-			hasRequiredAddr = true
-			break
+			return true
 		}
 	}
-	return hasRequiredAddr
+
+	return false
 }

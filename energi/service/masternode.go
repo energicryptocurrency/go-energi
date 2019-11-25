@@ -17,6 +17,7 @@
 package eth
 
 import (
+	"context"
 	"errors"
 	"math/big"
 	"sync/atomic"
@@ -299,14 +300,21 @@ func (m *MasternodeService) getMNCheckpoint() (err error) {
 
 	cpChan := make(chan *energi_abi.ICheckpointRegistryCheckpoint, cpChanBufferSize)
 
+	ctx := context.WithValue(
+		context.Background(),
+		energi_params.GeneralProxyCtxKey,
+		energi_common.GeneralProxyHashGen(m.eth.BlockChain()),
+	)
+
 	// Fetch old checkpoints first then subscribe to any future updates later.
 	if m.lastCPBlock < bestBlockHeight {
 		var oldCPs *energi_abi.ICheckpointRegistryCheckpointIterator
 
 		endBlock := bestBlockHeight - 1
 		filterQuery := &bind.FilterOpts{
-			Start: m.lastCPBlock,
-			End:   &endBlock,
+			Start:   m.lastCPBlock,
+			End:     &endBlock,
+			Context: ctx,
 		}
 
 		oldCPs, err = m.cpRegistry.Contract.FilterCheckpoint(filterQuery, []*big.Int{})
@@ -321,7 +329,9 @@ func (m *MasternodeService) getMNCheckpoint() (err error) {
 	}
 
 	// Only subscribe to future checkpoint updates after fetching old checkpoints.
-	watchOpts := new(bind.WatchOpts)
+	watchOpts := &bind.WatchOpts{
+		Context: ctx,
+	}
 
 	subscribe, err := m.cpRegistry.Contract.WatchCheckpoint(watchOpts, cpChan, []*big.Int{})
 	if err != nil {
@@ -355,7 +365,7 @@ func (m *MasternodeService) getMNCheckpoint() (err error) {
 			// Check if the current masternode has voted and vote on it if not yet.
 			_, err = cp.Signature(&m.cpRegistry.CallOpts, m.address)
 			if err != nil {
-				log.Debug("MN signature fetch failed", "err", err)
+				log.Debug("MN signature not found, now generating a new one")
 
 				baseHash, err := m.cpRegistry.SignatureBase(cpData.Number, cpAddr.Hash())
 				if err != nil {
@@ -517,6 +527,11 @@ func (v *peerValidator) validate() {
 
 	cfg := mnsvc.eth.BlockChain().Config()
 	enode := energi_common.MastenodeEnode(mninfo.Ipv4address, mninfo.Enode, cfg)
+
+	if enode == nil {
+		log.Debug("Invalid ipv4address or public key was used")
+		return
+	}
 
 	// Check if the node is already connected as a peer and
 	// skip MN Validation if true.
