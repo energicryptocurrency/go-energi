@@ -758,6 +758,7 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 			DisableMemory:  true,
 			DisableStack:   true,
 			DisableStorage: true,
+			OnlyValueXfers: true,
 			Limit:          100000,
 		})
 

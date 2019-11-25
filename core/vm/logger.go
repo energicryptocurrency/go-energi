@@ -47,6 +47,7 @@ type LogConfig struct {
 	DisableMemory  bool // disable memory capture
 	DisableStack   bool // disable stack capture
 	DisableStorage bool // disable storage capture
+	OnlyValueXfers bool // capture only calls with value
 	Debug          bool // print output during capture end
 	Limit          int  // maximum length of output, but zero means unlimited
 }
@@ -141,6 +142,20 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 	// check if already accumulated the specified number of logs
 	if l.cfg.Limit != 0 && l.cfg.Limit <= len(l.logs) {
 		return ErrTraceLimitReached
+	}
+
+	if l.cfg.OnlyValueXfers {
+		switch op {
+		case CREATE, CREATE2, SELFDESTRUCT:
+			// Due to less widespread and for simplicity - always include
+			break
+		case CALL, CALLCODE:
+			if stack.len() < 3 || stack.data[stack.len()-3].Cmp(common.Big0) == 0 {
+				return nil
+			}
+		default:
+			return nil
+		}
 	}
 
 	// initialise new changed values storage container for this contract
