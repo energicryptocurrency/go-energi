@@ -1,6 +1,6 @@
 {
   "name": "energi3",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "vcs": "git",
   "plugins": {
     "release": "futoin.cid.misc.releasetool"
