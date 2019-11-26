@@ -169,6 +169,9 @@ func ExpandPackagesNoVendor(patterns []string) []string {
 		}
 		var packages []string
 		for _, line := range strings.Split(string(out), "\n") {
+			if strings.Contains(line, "go: ") {
+				continue
+			}
 			if strings.Contains(line, "/energi/") {
 				continue
 			}
