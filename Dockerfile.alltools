@@ -1,5 +1,5 @@
 # Build energi3 in a stock Go builder container
-FROM golang:1.12.7-alpine as builder
+FROM golang:1.13.4-alpine as builder
 
 RUN apk add --no-cache make gcc musl-dev linux-headers
 
