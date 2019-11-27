@@ -12,6 +12,7 @@
 include energi/contracts/Makefile.include
 
 GOBIN = $(shell pwd)/build/bin
+GO ?= $(goVer)
 GO ?= latest
 
 prebuild:
