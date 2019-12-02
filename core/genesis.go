@@ -538,6 +538,14 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		return xfers
 	}
 
+	//---
+	ver := 2
+
+	// Temporary compatibility with existing testnet
+	if config.ChainID.Uint64() == 49797 {
+		ver = 1
+	}
+
 	// Hardcoded Governance V1
 	deployEnergiContract(
 		&xfers,
@@ -605,15 +613,28 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_params.Energi_BackboneReward,
 		config.Energi.BackboneAddress,
 	)
-	deployEnergiContract(
-		&xfers,
-		energi_params.Energi_SporkRegistryV1,
-		nil,
-		energi_abi.SporkRegistryV1ABI,
-		energi_abi.SporkRegistryV1Bin,
-		energi_params.Energi_SporkRegistry,
-		energi_params.Energi_MasternodeRegistry,
-	)
+	if ver > 1 {
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_SporkRegistryV1,
+			nil,
+			energi_abi.SporkRegistryV2ABI,
+			energi_abi.SporkRegistryV2Bin,
+			energi_params.Energi_SporkRegistry,
+			energi_params.Energi_MasternodeRegistry,
+			config.Energi.CPPSigner,
+		)
+	} else {
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_SporkRegistryV1,
+			nil,
+			energi_abi.SporkRegistryV1ABI,
+			energi_abi.SporkRegistryV1Bin,
+			energi_params.Energi_SporkRegistry,
+			energi_params.Energi_MasternodeRegistry,
+		)
+	}
 	deployEnergiContract(
 		&xfers,
 		energi_params.Energi_CheckpointRegistryV1,
