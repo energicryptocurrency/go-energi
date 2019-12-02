@@ -61,6 +61,7 @@ ENERGI_CONTRACTS := \
   MasternodeTokenV1.sol \
   MasternodeRegistryV1.sol \
   SporkRegistryV1.sol \
+  SporkRegistryV2.sol \
   StakerRewardV1.sol \
   TreasuryV1.sol
 
