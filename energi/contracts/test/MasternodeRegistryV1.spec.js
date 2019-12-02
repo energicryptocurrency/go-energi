@@ -40,6 +40,12 @@ contract("MasternodeRegistryV1", async accounts => {
     };
 
     const { toWei } = web3.utils;
+    const vperiod = common.mnregistry_config[1];
+    const isTargetChanges = async (_token, _mn) => {
+        // Proper way is to check pending block validation target against current,
+        // but there are some issues.
+        return (await web3.eth.getBlockNumber() % vperiod === (vperiod - 1))
+    };
     
     before(async () => {
         s.orig = await MasternodeRegistryV1.deployed();
@@ -142,7 +148,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn - 10, b.hash, '0', common.zerofee_callopts);
+                    await s.token_abi.heartbeat(bn - 11, b.hash, '0', common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Too old/);
@@ -154,7 +160,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn - 9, b.hash, '0', common.zerofee_callopts);
+                    await s.token_abi.heartbeat(bn - 10, b.hash, '0', common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Block mismatch/);
@@ -958,11 +964,14 @@ contract("MasternodeRegistryV1", async accounts => {
                     expect(target1).not.equal(target3);
 
                     if (i === 13 || i == 11 || i == 9) {
-                        let invalidator = masternode1;
+                        let t = target1;
 
-                        if ( target2 === masternode3) {
-                            invalidator = masternode2;
+                        if (await isTargetChanges(s.token_abi, masternode1)) {
+                            // still a chance of fail.
+                            t = (t === masternode3) ? masternode2 : masternode3;
                         }
+
+                        const invalidator = (t === masternode3) ? masternode1 : masternode2;
 
                         await s.token_abi.invalidate(masternode3, {from: invalidator});
                     }
@@ -1002,12 +1011,12 @@ contract("MasternodeRegistryV1", async accounts => {
                 } while ( target === tmp );
 
                 for (let k = 0; k < 3; ++k) {
-                    for (let i = common.mnregistry_config[1]; i > 0; --i, --bn) {
+                    for (let i = vperiod; i > 0; --i, --bn) {
                         tmp = await valTarget();
                         expect(tmp).equal(target);
                     }
 
-                    for (let i = common.mnregistry_config[1]; i > 0; --i, --bn) {
+                    for (let i = vperiod; i > 0; --i, --bn) {
                         tmp = await valTarget();
                         expect(tmp).not.equal(target);
                     }
@@ -1018,7 +1027,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 try {
                     let target = await s.token_abi.validationTarget(masternode1);
 
-                    if (target == masternode2) {
+                    if ((target == masternode2) && !await isTargetChanges(s.token_abi, masternode1)) {
                         target = masternode3;
                     } else {
                         target = masternode2;
@@ -1116,7 +1125,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 await s.token_abi.invalidate(masternode3, {from:masternode1, ...common.zerofee_callopts});
 
                 try {
-                    for (let i = 0; i < common.mnregistry_config[1]; ++i) {
+                    for (let i = 0; i < vperiod; ++i) {
                         await s.token_abi.invalidate(masternode3, {from:masternode1, ...common.zerofee_callopts});
                     }
                     assert.fail('It must fail');

@@ -366,8 +366,7 @@ func (g *GovernanceAPI) UpgradeInfo() *UpgradeProposals {
 		return nil
 	}
 
-	res := data.(UpgradeProposals)
-	return &res
+	return data.(*UpgradeProposals)
 }
 
 func (g *GovernanceAPI) upgradeInfo(blockhash common.Hash) (interface{}, error) {
@@ -534,9 +533,7 @@ func (g *GovernanceAPI) BudgetInfo() (*BudgetInfo, error) {
 		return nil, err
 	}
 
-	res := data.(BudgetInfo)
-
-	return &res, nil
+	return data.(*BudgetInfo), nil
 }
 
 func (g *GovernanceAPI) budgetInfo(blockhash common.Hash) (interface{}, error) {
@@ -612,7 +609,7 @@ func (g *GovernanceAPI) budgetInfo(blockhash common.Hash) (interface{}, error) {
 		log.Error("Failed at getBalance", "err", err)
 	}
 
-	budget := BudgetInfo{
+	budget := &BudgetInfo{
 		Balance:   balance,
 		Proposals: ret,
 	}

@@ -97,7 +97,7 @@ type AllCheckpointInfo struct {
 	Active   []CheckpointInfo
 }
 
-func (b *CheckpointAPI) CheckpointInfo() (res AllCheckpointInfo, err error) {
+func (b *CheckpointAPI) CheckpointInfo() (res *AllCheckpointInfo, err error) {
 	var data interface{}
 	data, err = b.cpCache.Get(b.backend, b.checkpointInfo)
 	if err != nil || data == nil {
@@ -105,7 +105,7 @@ func (b *CheckpointAPI) CheckpointInfo() (res AllCheckpointInfo, err error) {
 		return
 	}
 
-	res = data.(AllCheckpointInfo)
+	res = data.(*AllCheckpointInfo)
 
 	return
 }
@@ -127,7 +127,7 @@ func (b *CheckpointAPI) checkpointInfo(blockhash common.Hash) (interface{}, erro
 		return nil, err
 	}
 
-	var res AllCheckpointInfo
+	res := &AllCheckpointInfo{}
 	res.Registry = make([]CheckpointInfo, 0, len(addresses))
 
 	for _, addr := range addresses {

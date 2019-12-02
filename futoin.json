@@ -16,7 +16,7 @@
   "tools": {
     "go": "1.13.4",
     "make": true,
-    "node": "8",
+    "node": "10",
     "release": true,
     "yarn": true
   },

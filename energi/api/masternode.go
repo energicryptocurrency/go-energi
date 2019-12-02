@@ -237,7 +237,7 @@ func (m *MasternodeAPI) MasternodeInfo(owner_or_mn common.Address) (res MNInfo, 
 	return
 }
 
-func (m *MasternodeAPI) Stats() (res MasternodeStats, err error) {
+func (m *MasternodeAPI) Stats() (res *MasternodeStats, err error) {
 	data, err := m.statsCache.Get(m.backend, m.stats)
 
 	if err != nil || data == nil {
@@ -245,7 +245,7 @@ func (m *MasternodeAPI) Stats() (res MasternodeStats, err error) {
 		return
 	}
 
-	res = data.(MasternodeStats)
+	res = data.(*MasternodeStats)
 	return
 }
 
@@ -266,7 +266,7 @@ func (m *MasternodeAPI) stats(blockhash common.Hash) (interface{}, error) {
 		return nil, err
 	}
 
-	var res MasternodeStats
+	res := &MasternodeStats{}
 	res.Active = count.Active.Uint64()
 	res.Total = count.Total.Uint64()
 	res.ActiveCollateral = (*hexutil.Big)(count.ActiveCollateral)
