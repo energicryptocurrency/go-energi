@@ -640,7 +640,7 @@ func (pool *TxPool) validateTx(tx *types.Transaction, local bool) error {
 		return ErrIntrinsicGas
 	}
 	// Energi: protect against zero-fee DoS
-	if is_zerofee && !local {
+	if is_zerofee {
 		err = pool.zfProtector.checkDoS(pool, tx)
 		if err != nil {
 			return err
@@ -822,7 +822,8 @@ func (pool *TxPool) promoteTx(addr common.Address, hash common.Hash, tx *types.T
 // the sender as a local one in the mean time, ensuring it goes around the local
 // pricing constraints.
 func (pool *TxPool) AddLocal(tx *types.Transaction) error {
-	return pool.addTx(tx, !pool.config.NoLocals)
+	// Set as local if the tx is not a zerofee when local tx handling is activated.
+	return pool.addTx(tx, !pool.config.NoLocals && !IsValidZeroFee(tx))
 }
 
 // AddRemote enqueues a single transaction into the pool if it is valid. If the
