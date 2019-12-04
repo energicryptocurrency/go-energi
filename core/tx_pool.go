@@ -81,6 +81,10 @@ var (
 var (
 	evictionInterval    = time.Minute     // Time interval to check for evictable transactions
 	statsReportInterval = 8 * time.Second // Time interval to report transaction pool stats
+
+	// zeroFeesTimeoutInterval defines duration after which a zero-fee tx is considered
+	// to be stale and has to be cleaned up soonest possible.
+	zeroFeesTimeoutInterval = 5 * time.Minute
 )
 
 var (
@@ -342,6 +346,16 @@ func (pool *TxPool) loop() {
 		// Handle inactive account transaction eviction
 		case <-evict.C:
 			pool.mu.Lock()
+			for addr := range pool.pending {
+				// Clean up stale txs.
+				if time.Since(pool.beats[addr]) > zeroFeesTimeoutInterval {
+					txs := pool.pending[addr].Flatten()
+					if len(txs) > 0 && IsValidZeroFee(txs[0]) {
+						pool.removeBySenderLocked(addr)
+					}
+				}
+			}
+
 			for addr := range pool.queue {
 				// Skip local transactions from the eviction mechanism
 				if pool.locals.contains(addr) {
