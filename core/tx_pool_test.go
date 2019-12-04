@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	energi_params "energi.world/core/gen3/energi/params"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -1865,5 +1866,79 @@ func TestZeroFee(t *testing.T) {
 	}
 	if pool.all.Count() != total {
 		t.Errorf("total transaction mismatch: have %d, want %d", pool.all.Count(), total)
+	}
+}
+
+// TestAddLocals tests the new conditions required for a tx to be marked as local.
+// The Locals Config setting must be enabled and the said tx must not be a zero_fee.
+func TestAddLocals(t *testing.T) {
+	t.Parallel()
+
+	// Create a test account and fund it
+	pool, key := setupTxPool()
+	defer pool.Stop()
+
+	account, _ := deriveSender(transaction(0, 0, key))
+	pool.currentState.AddBalance(account, big.NewInt(1000000))
+
+	getTx := func(nonce uint64, address common.Address, gasPrice *big.Int, method types.MethodID) *types.Transaction {
+		var data = make([]byte, 40)
+		copy(data, method[:])
+		copy(data[4:36], address.Hash().Bytes())
+		tx, err := types.SignTx(types.NewTransaction(nonce, address, gasPrice, 50000, common.Big0, data), types.HomesteadSigner{}, key)
+		if err != nil {
+			panic(err)
+		}
+		return tx
+	}
+
+	// Enable the local tx handling by setting pool.config.NoLocals to false.
+	pool.config.NoLocals = false
+	sender := crypto.PubkeyToAddress(key.PublicKey)
+	pool.currentState.SetState(
+		energi_params.Energi_MasternodeList,
+		sender.Hash(),
+		common.BytesToHash([]byte{0x01}),
+	)
+	reqTx := getTx(0, common.Address{234}, big.NewInt(100), energiMNInvalidateID)
+
+	if err := pool.AddLocal(reqTx); err != nil {
+		t.Errorf("AddLocals failed to add a regular tx: %v", err)
+	}
+
+	tx := getTx(1, common.HexToAddress("0x306"), common.Big0, energiCPSignID)
+	if err := pool.AddLocal(tx); err != nil {
+		t.Errorf("AddLocals failed to add a zero fee tx: %v", err)
+	}
+
+	// Disable the local tx handling by setting pool.config.NoLocals to true.
+	pool.config.NoLocals = true
+	pool.currentState.SetState(
+		energi_params.Energi_MasternodeList,
+		sender.Hash(),
+		common.BytesToHash([]byte{0x02}),
+	)
+	tx = getTx(2, common.Address{236}, big.NewInt(100), energiMNHeartbeatID)
+
+	if err := pool.AddLocal(tx); err != nil {
+		t.Errorf("AddLocals failed to add a regular tx: %v", err)
+	}
+
+	tx = getTx(3, common.HexToAddress("0x308"), common.Big0, energiCPSignID)
+	if err := pool.AddLocal(tx); err != nil {
+		t.Errorf("AddLocals failed to add a zero fee tx: %v", err)
+	}
+
+	if pool.all.Count() != 4 {
+		t.Errorf("total count transaction mismatch: have %d, want 4", pool.all.Count())
+	}
+
+	// check and confirm that only one tx was handled as a local tx.
+	if len(pool.locals.accounts) != 1 {
+		t.Errorf("Local count transaction mismatch: have %d, want 1", len(pool.locals.accounts))
+	}
+
+	if !pool.locals.containsTx(reqTx) {
+		t.Errorf("total transaction mismatch: Count not find %v", reqTx.Hash().String())
 	}
 }

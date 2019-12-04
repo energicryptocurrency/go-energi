@@ -245,5 +245,7 @@ func (pool *TxPool) removeBySenderLocked(sender common.Address) bool {
 		res = true
 	}
 
+	pool.zfProtector.cleanupAllBySender(sender)
+
 	return res
 }

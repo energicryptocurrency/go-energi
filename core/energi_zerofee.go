@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 	"strings"
 	"time"
@@ -185,7 +186,22 @@ func (z *zeroFeeProtector) cleanupTimeout(
 	}
 }
 
-func (z *zeroFeeProtector) cleanupRoutine(now time.Time) {
+func (z *zeroFeeProtector) cleanupBySender(
+	sender common.Address,
+	timeMap map[common.Address]time.Time,
+) {
+	if _, ok := timeMap[sender]; ok {
+		delete(timeMap, sender)
+	}
+}
+
+func (z *zeroFeeProtector) cleanupAllBySender(sender common.Address) {
+	z.cleanupBySender(sender, z.mnHeartbeats)
+	z.cleanupBySender(sender, z.mnInvalidations)
+	z.cleanupBySender(sender, z.mnCheckpoints)
+}
+
+func (z *zeroFeeProtector) cleanupAllByTimeout(now time.Time) {
 	if z.nextCleanup.After(now) {
 		return
 	}
@@ -236,6 +252,11 @@ func (z *zeroFeeProtector) checkMigration(
 	tx *types.Transaction,
 ) error {
 	callData := tx.Data()
+	if len(callData) <= 36 {
+		log.Debug("Missing tx data")
+		return fmt.Errorf("invalid tx: missing tx data length")
+	}
+
 	item_id := uint32(new(big.Int).SetBytes(callData[4:36]).Uint64())
 
 	if v, ok := z.coinClaims[item_id]; ok && now.Sub(v) < zfMinCoinClaimPeriod {
@@ -300,7 +321,7 @@ func (z *zeroFeeProtector) checkMigration(
 func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 	now := z.timeNow()
 
-	defer z.cleanupRoutine(now)
+	defer z.cleanupAllByTimeout(now)
 
 	sender, err := types.Sender(pool.signer, tx)
 	if err != nil {
