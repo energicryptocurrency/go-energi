@@ -32,6 +32,7 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/params"
 )
 
@@ -235,6 +236,7 @@ type TxPool struct {
 
 	zfProtector  *zeroFeeProtector
 	preBlacklist *preBlacklist
+	persistPath  string
 
 	homestead bool
 }
@@ -261,7 +263,13 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 		// Ensure to initialize before the tx processing
 		zfProtector:  newZeroFeeProtector(),
 		preBlacklist: newPreBlacklist(),
+		persistPath:  node.DefaultDataDir(),
 	}
+
+	if err := pool.persistenceReader(); err != nil {
+		log.Debug("pool persistenceReader failed", "err", err)
+	}
+
 	pool.locals = newAccountSet(pool.signer)
 	for _, addr := range config.Locals {
 		log.Info("Setting new local account", "address", addr)
@@ -372,13 +380,17 @@ func (pool *TxPool) loop() {
 
 		// Handle local transaction journal rotation
 		case <-journal.C:
+			pool.mu.Lock()
 			if pool.journal != nil {
-				pool.mu.Lock()
 				if err := pool.journal.rotate(pool.local()); err != nil {
 					log.Warn("Failed to rotate local tx journal", "err", err)
 				}
-				pool.mu.Unlock()
 			}
+
+			if err := pool.persistenceWriter(); err != nil {
+				log.Debug("pool persistenceWriter failed", "err", err)
+			}
+			pool.mu.Unlock()
 		}
 	}
 }
@@ -478,6 +490,12 @@ func (pool *TxPool) reset(oldHead, newHead *types.Header) {
 
 // Stop terminates the transaction pool.
 func (pool *TxPool) Stop() {
+	pool.mu.Lock()
+	if err := pool.persistenceWriter(); err != nil {
+		log.Debug("pool persistenceWriter failed", "err", err)
+	}
+	pool.mu.Unlock()
+
 	// Unsubscribe all subscriptions registered from txpool
 	pool.scope.Close()
 
