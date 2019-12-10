@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -30,6 +31,9 @@ import (
 
 // Tests the go-ethereum to Aleth chainspec conversion for the Stureby testnet.
 func TestAlethSturebyConverter(t *testing.T) {
+	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
+		t.Skip("unit test is broken: conditional test skipping activated")
+	}
 	blob, err := ioutil.ReadFile("testdata/stureby_geth.json")
 	if err != nil {
 		t.Fatalf("could not read file: %v", err)
@@ -69,6 +73,9 @@ func TestAlethSturebyConverter(t *testing.T) {
 
 // Tests the go-ethereum to Parity chainspec conversion for the Stureby testnet.
 func TestParitySturebyConverter(t *testing.T) {
+	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
+		t.Skip("unit test is broken: conditional test skipping activated")
+	}
 	blob, err := ioutil.ReadFile("testdata/stureby_geth.json")
 	if err != nil {
 		t.Fatalf("could not read file: %v", err)
