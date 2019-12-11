@@ -61,6 +61,7 @@ var (
 var services = newServices()
 
 func init() {
+	testing.Init()
 	flag.Parse()
 	rand.Seed(time.Now().Unix())
 

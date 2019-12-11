@@ -38,6 +38,7 @@ var (
 )
 
 func init() {
+	testing.Init()
 	flag.Parse()
 	mrand.Seed(time.Now().UnixNano())
 

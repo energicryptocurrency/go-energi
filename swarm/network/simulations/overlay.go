@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"runtime"
 	"sync"
+	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum/log"
@@ -45,6 +46,7 @@ var (
 )
 
 func init() {
+	testing.Init()
 	flag.Parse()
 	//initialize the logger
 	//this is a demonstration on how to use Vmodule for filtering logs
