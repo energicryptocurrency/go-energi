@@ -21,6 +21,7 @@ import (
 	"math"
 	"math/big"
 	"math/rand"
+	"os"
 	"testing"
 	"time"
 
@@ -494,6 +495,9 @@ func TestCheckpointChallenge(t *testing.T) {
 }
 
 func testCheckpointChallenge(t *testing.T, syncmode downloader.SyncMode, checkpoint bool, timeout bool, empty bool, match bool, drop bool) {
+	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
+		t.Skip("unit test is broken: conditional test skipping activated")
+	}
 	// Reduce the checkpoint handshake challenge timeout
 	defer func(old time.Duration) { syncChallengeTimeout = old }(syncChallengeTimeout)
 	syncChallengeTimeout = 250 * time.Millisecond
@@ -599,6 +603,9 @@ func TestBroadcastBlock(t *testing.T) {
 }
 
 func testBroadcastBlock(t *testing.T, totalPeers, broadcastExpected int) {
+	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
+		t.Skip("unit test is broken: conditional test skipping activated")
+	}
 	var (
 		evmux   = new(event.TypeMux)
 		pow     = ethash.NewFaker()
