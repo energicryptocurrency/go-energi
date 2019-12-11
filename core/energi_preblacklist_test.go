@@ -17,6 +17,8 @@
 package core
 
 import (
+	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -24,9 +26,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus/ethash"
+	"github.com/ethereum/go-ethereum/core/state"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 
@@ -219,4 +223,80 @@ func TestPreBlacklist(t *testing.T) {
 	err = prebl.processTx(pool, propose1)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 0, len(prebl.proposed))
+}
+
+func TestPersistence(t *testing.T) {
+	dir, err := ioutil.TempDir(os.TempDir(), "test-*")
+	if err != nil {
+		panic(err)
+	}
+
+	statedb, _ := state.New(common.Hash{}, state.NewDatabase(ethdb.NewMemDatabase()))
+	blockchain := &testBlockChain{statedb, 1000000, new(event.Feed)}
+	pool := NewTxPool(TxPoolConfig{}, params.TestChainConfig, blockchain)
+	pool.persistPath = dir
+
+	preblacklistNewData := map[common.Address]time.Time{
+		common.HexToAddress("12"): time.Unix(123456, 0),
+		common.HexToAddress("13"): time.Unix(56789, 0),
+	}
+
+	mnHeartbeatsNewData := map[common.Address]time.Time{
+		common.HexToAddress("14"): time.Unix(674782, 0),
+		common.HexToAddress("15"): time.Unix(1232142, 0),
+	}
+
+	mnInvalidationsNewData := map[common.Address]time.Time{
+		common.HexToAddress("24"): time.Unix(13132, 0),
+		common.HexToAddress("35"): time.Unix(113231, 0),
+	}
+
+	mnCheckpointsNewData := map[common.Address]time.Time{
+		common.HexToAddress("124"): time.Unix(1231124, 0),
+		common.HexToAddress("152"): time.Unix(123123, 0),
+	}
+
+	coinClaimsNewData := map[uint32]time.Time{
+		3124: time.Unix(12313, 0),
+		3152: time.Unix(123121, 0),
+	}
+
+	// Assign the new data.
+	pool.preBlacklist.proposed = preblacklistNewData
+	pool.zfProtector.mnHeartbeats = mnHeartbeatsNewData
+	pool.zfProtector.mnInvalidations = mnInvalidationsNewData
+	pool.zfProtector.mnCheckpoints = mnCheckpointsNewData
+	pool.zfProtector.coinClaims = coinClaimsNewData
+
+	// Persist in the persist path.
+	err = pool.persistenceWriter()
+	assert.Equal(t, nil, err)
+
+	// Drop the previous set data to simulate a shutdown.
+	pool.preBlacklist.proposed = nil
+	pool.zfProtector.mnHeartbeats = nil
+	pool.zfProtector.mnInvalidations = nil
+	pool.zfProtector.mnCheckpoints = nil
+	pool.zfProtector.coinClaims = nil
+
+	// Assert that the data was actually dropped.
+	assert.NotEqual(t, preblacklistNewData, pool.preBlacklist.proposed)
+	assert.NotEqual(t, mnHeartbeatsNewData, pool.zfProtector.mnHeartbeats)
+	assert.NotEqual(t, mnInvalidationsNewData, pool.zfProtector.mnInvalidations)
+	assert.NotEqual(t, mnCheckpointsNewData, pool.zfProtector.mnCheckpoints)
+	assert.NotEqual(t, coinClaimsNewData, pool.zfProtector.coinClaims)
+
+	// Read the persisted data.
+	err = pool.persistenceReader()
+	assert.Equal(t, nil, err)
+
+	// Assert that the persisted data was successfully read.
+	assert.Equal(t, preblacklistNewData, pool.preBlacklist.proposed)
+	assert.Equal(t, mnHeartbeatsNewData, pool.zfProtector.mnHeartbeats)
+	assert.Equal(t, mnInvalidationsNewData, pool.zfProtector.mnInvalidations)
+	assert.Equal(t, mnCheckpointsNewData, pool.zfProtector.mnCheckpoints)
+	assert.Equal(t, coinClaimsNewData, pool.zfProtector.coinClaims)
+
+	// Cleanup
+	os.Remove(dir)
 }

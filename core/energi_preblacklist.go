@@ -18,6 +18,10 @@ package core
 
 import (
 	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -26,6 +30,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rlp"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_params "energi.world/core/gen3/energi/params"
@@ -248,4 +253,110 @@ func (pool *TxPool) removeBySenderLocked(sender common.Address) bool {
 	pool.zfProtector.cleanupAllBySender(sender)
 
 	return res
+}
+
+const persistenceFilename = "protection.rlp"
+
+type persistContent struct {
+	AddrKeys []common.Address
+	IDKeys   []uint32
+	// RLP encoding and decoding of time.Time object is resulting to
+	// inconsistencies thus the string data usage.
+	Values []string
+}
+
+func encodeAddrMap(data map[common.Address]time.Time) persistContent {
+	key := make([]common.Address, 0, len(data))
+	value := make([]string, 0, len(data))
+	for k, v := range data {
+		key, value = append(key, k), append(value, v.String())
+	}
+	return persistContent{AddrKeys: key, Values: value}
+}
+
+func encodeIDMap(data map[uint32]time.Time) persistContent {
+	key := make([]uint32, 0, len(data))
+	value := make([]string, 0, len(data))
+	for k, v := range data {
+		key, value = append(key, k), append(value, v.String())
+	}
+	return persistContent{IDKeys: key, Values: value}
+}
+
+// persistenceReader fetches the data that was persisted.
+func (pool *TxPool) persistenceReader() error {
+	fullPath := filepath.Join(pool.persistPath, persistenceFilename)
+
+	rawD, err := ioutil.ReadFile(fullPath)
+	if err != nil {
+		return err
+	}
+
+	var data []persistContent
+	if err = rlp.DecodeBytes(rawD, &data); err != nil {
+		return fmt.Errorf("contents reading failed: %v", err)
+	}
+
+	if len(data) != 5 {
+		return fmt.Errorf("missing some persisted data")
+	}
+
+	pool.preBlacklist.proposed = decodeAddrMap(data[0])
+	pool.zfProtector.mnHeartbeats = decodeAddrMap(data[1])
+	pool.zfProtector.mnInvalidations = decodeAddrMap(data[2])
+	pool.zfProtector.mnCheckpoints = decodeAddrMap(data[3])
+	pool.zfProtector.coinClaims = decodeIDMap(data[4])
+
+	return nil
+}
+
+// This is the default time format returned by time.String().
+const timeformat = "2006-01-02 15:04:05.999999999 -0700 MST"
+
+func decodeAddrMap(data persistContent) map[common.Address]time.Time {
+	addrMap := make(map[common.Address]time.Time, len(data.AddrKeys))
+	for i, k := range data.AddrKeys {
+		timestamp, _ := time.Parse(timeformat, data.Values[i])
+		addrMap[k] = timestamp
+	}
+	return addrMap
+}
+
+func decodeIDMap(data persistContent) map[uint32]time.Time {
+	IDMap := make(map[uint32]time.Time, len(data.IDKeys))
+	for i, k := range data.IDKeys {
+		timestamp, _ := time.Parse(timeformat, data.Values[i])
+		IDMap[k] = timestamp
+	}
+	return IDMap
+}
+
+// persistenceWriter persists the data.
+func (pool *TxPool) persistenceWriter() error {
+	val := make([]persistContent, 0, 5)
+	val = append(val, encodeAddrMap(pool.preBlacklist.proposed))
+	val = append(val, encodeAddrMap(pool.zfProtector.mnHeartbeats))
+	val = append(val, encodeAddrMap(pool.zfProtector.mnInvalidations))
+	val = append(val, encodeAddrMap(pool.zfProtector.mnCheckpoints))
+	val = append(val, encodeIDMap(pool.zfProtector.coinClaims))
+
+	data, err := rlp.EncodeToBytes(val)
+	if err != nil {
+		return err
+	}
+
+	fullPath := filepath.Join(pool.persistPath, persistenceFilename)
+	// Create a temporary swap file.
+	if err = ioutil.WriteFile(fullPath+".new", data, 0644); err != nil {
+		return err
+	}
+	// Drop the older file if it exists.
+	if _, err := os.Stat(fullPath); err == nil {
+		err = os.Remove(fullPath)
+		if err != nil {
+			log.Warn("deleting older persistence contents error", "err", err)
+		}
+	}
+	// Rename the .new swap file.
+	return os.Rename(fullPath+".new", fullPath)
 }
