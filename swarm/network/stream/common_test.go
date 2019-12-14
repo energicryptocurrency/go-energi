@@ -62,6 +62,7 @@ var (
 )
 
 func init() {
+	testing.Init()
 	flag.Parse()
 	rand.Seed(time.Now().UnixNano())
 

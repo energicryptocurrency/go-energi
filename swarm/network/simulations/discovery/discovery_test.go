@@ -89,6 +89,7 @@ var (
 )
 
 func init() {
+	testing.Init()
 	flag.Parse()
 	// register the discovery service which will run as a devp2p
 	// protocol when using the exec adapter

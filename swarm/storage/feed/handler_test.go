@@ -43,6 +43,7 @@ var (
 )
 
 func init() {
+	testing.Init()
 	flag.Parse()
 	log.Root().SetHandler(log.CallerFileHandler(log.LvlFilterHandler(log.Lvl(*loglevel), log.StreamHandler(os.Stderr, log.TerminalFormat(true)))))
 }
