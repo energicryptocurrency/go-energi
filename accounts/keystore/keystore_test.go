@@ -69,9 +69,6 @@ func TestKeyStore(t *testing.T) {
 }
 
 func TestSign(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	dir, ks := tmpKeyStore(t, true)
 	defer os.RemoveAll(dir)
 

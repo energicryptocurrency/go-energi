@@ -36,6 +36,8 @@ var bindTests = []struct {
 	abi      string
 	imports  string
 	tester   string
+
+	runtimecodes string
 }{
 	// Test that the binding is available in combined and separate forms too
 	{
@@ -55,6 +57,7 @@ var bindTests = []struct {
 				t.Fatalf("transactor binding (%v) nil or error (%v) not nil", b, nil)
 			}
 		`,
+		``,
 	},
 	// Test that all the official sample contracts bind correctly
 	{
@@ -68,6 +71,7 @@ var bindTests = []struct {
 				t.Fatalf("binding (%v) nil or error (%v) not nil", b, nil)
 			}
 		`,
+		``,
 	},
 	{
 		`Crowdsale`,
@@ -80,6 +84,7 @@ var bindTests = []struct {
 				t.Fatalf("binding (%v) nil or error (%v) not nil", b, nil)
 			}
 		`,
+		``,
 	},
 	// Test that named and anonymous inputs are handled correctly
 	{
@@ -113,6 +118,7 @@ var bindTests = []struct {
 
 			 fmt.Println(err)
 		 }`,
+		``,
 	},
 	// Test that named and anonymous outputs are handled correctly
 	{
@@ -149,6 +155,7 @@ var bindTests = []struct {
 
 			 fmt.Println(str1, str2, res.Str1, res.Str2, err)
 		 }`,
+		``,
 	},
 	// Tests that named, anonymous and indexed events are handled correctly
 	{
@@ -214,6 +221,7 @@ var bindTests = []struct {
 		 if _, ok := reflect.TypeOf(&EventChecker{}).MethodByName("FilterAnonymous"); ok {
 		 	t.Errorf("binding has disallowed method (FilterAnonymous)")
 		 }`,
+		``,
 	},
 	// Test that contract interactions (deploy, transact and call) generate working code
 	{
@@ -246,7 +254,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy an interaction tester contract and call a transaction on it
 			_, _, interactor, err := DeployInteractor(auth, sim, "Deploy string")
@@ -270,6 +278,7 @@ var bindTests = []struct {
 				t.Fatalf("Transact string mismatch: have '%s', want 'Transact string'", str)
 			}
 		`,
+		``,
 	},
 	// Tests that plain values can be properly returned and deserialized
 	{
@@ -295,7 +304,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy a tuple tester contract and execute a structured call on it
 			_, _, getter, err := DeployGetter(auth, sim)
@@ -310,6 +319,7 @@ var bindTests = []struct {
 				t.Fatalf("Retrieved value mismatch: have %v/%v, want %v/%v", str, num, "Hi", 1)
 			}
 		`,
+		``,
 	},
 	// Tests that tuples can be properly returned and deserialized
 	{
@@ -335,7 +345,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy a tuple tester contract and execute a structured call on it
 			_, _, tupler, err := DeployTupler(auth, sim)
@@ -350,6 +360,7 @@ var bindTests = []struct {
 				t.Fatalf("Retrieved value mismatch: have %v/%v, want %v/%v", res.A, res.B, "Hi", 1)
 			}
 		`,
+		``,
 	},
 	// Tests that arrays/slices can be properly returned and deserialized.
 	// Only addresses are tested, remainder just compiled to keep the test small.
@@ -387,7 +398,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy a slice tester contract and execute a n array call on it
 			_, _, slicer, err := DeploySlicer(auth, sim)
@@ -402,6 +413,7 @@ var bindTests = []struct {
 					t.Fatalf("Slice return mismatch: have %v, want %v", out, []common.Address{auth.From, common.Address{}})
 			}
 		`,
+		``,
 	},
 	// Tests that anonymous default methods can be correctly invoked
 	{
@@ -429,7 +441,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy a default method invoker contract and execute its default method
 			_, _, defaulter, err := DeployDefaulter(auth, sim)
@@ -447,6 +459,7 @@ var bindTests = []struct {
 				t.Fatalf("Address mismatch: have %v, want %v", caller, auth.From)
 			}
 		`,
+		``,
 	},
 	// Tests that non-existent contracts are reported as such (though only simulator test)
 	{
@@ -480,6 +493,7 @@ var bindTests = []struct {
 				t.Fatalf("Error mismatch: have %v, want %v", err, bind.ErrNoCode)
 			}
 		`,
+		``,
 	},
 	// Tests that gas estimation works for contracts with weird gas mechanics too.
 	{
@@ -511,7 +525,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy a funky gas pattern contract
 			_, _, limiter, err := DeployFunkyGasPattern(auth, sim)
@@ -530,6 +544,7 @@ var bindTests = []struct {
 				t.Fatalf("Field mismatch: have %v, want %v", field, "automatic")
 			}
 		`,
+		``,
 	},
 	// Test that constant functions can be called from an (optional) specified address
 	{
@@ -555,7 +570,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy a sender tester contract and execute a structured call on it
 			_, _, callfrom, err := DeployCallFrom(auth, sim)
@@ -578,6 +593,7 @@ var bindTests = []struct {
 				}
 			}
 		`,
+		``,
 	},
 	// Tests that methods and returns with underscores inside work correctly.
 	{
@@ -624,7 +640,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy a underscorer tester contract and execute a structured call on it
 			_, _, underscorer, err := DeployUnderscorer(auth, sim)
@@ -652,6 +668,7 @@ var bindTests = []struct {
 
 			fmt.Println(a, b, err)
 		`,
+		``,
 	},
 	// Tests that logs can be successfully filtered and decoded.
 	{
@@ -704,7 +721,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			// Deploy an eventer contract
 			_, _, eventer, err := DeployEventer(auth, sim)
@@ -833,6 +850,7 @@ var bindTests = []struct {
 			case <-time.After(250 * time.Millisecond):
 			}
 		`,
+		``,
 	},
 	{
 		`DeeplyNestedArray`,
@@ -861,7 +879,7 @@ var bindTests = []struct {
 			// Generate a new random account and a funded simulator
 			key, _ := crypto.GenerateKey()
 			auth := bind.NewKeyedTransactor(key)
-			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 10000000)
+			sim := backends.NewSimulatedBackend(core.GenesisAlloc{auth.From: {Balance: big.NewInt(10000000000)}}, 40000000)
 
 			//deploy the test contract
 			_, _, testContract, err := DeployDeeplyNestedArray(auth, sim)
@@ -908,15 +926,13 @@ var bindTests = []struct {
 				t.Fatalf("Retrieved value does not match expected value! got: %d, expected: %d. %v", retrievedArr[4][3][2], testArr[4][3][2], err)
 			}
 		`,
+		``,
 	},
 }
 
 // Tests that packages generated by the binder can be successfully compiled and
 // the requested tester run against it.
 func TestBindings(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	// Skip the test if no Go command can be found
 	gocmd := runtime.GOROOT() + "/bin/go"
 	if !common.FileExist(gocmd) {
@@ -936,7 +952,7 @@ func TestBindings(t *testing.T) {
 	// Generate the test suite for all the contracts
 	for i, tt := range bindTests {
 		// Generate the binding and create a Go source file in the workspace
-		bind, err := Bind([]string{tt.name}, []string{tt.abi}, []string{tt.bytecode}, []string{ /*tt.runtimecodes*/ }, "bindtest", LangGo)
+		bind, err := Bind([]string{tt.name}, []string{tt.abi}, []string{tt.bytecode}, []string{tt.runtimecodes}, "bindtest", LangGo)
 		if err != nil {
 			t.Fatalf("test %d: failed to generate binding: %v", i, err)
 		}
