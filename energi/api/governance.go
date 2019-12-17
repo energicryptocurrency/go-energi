@@ -31,7 +31,7 @@ import (
 )
 
 const (
-	proposalCallGas uint64 = 500000
+	proposalCallGas uint64 = 3000000
 	upgradeCallGas  uint64 = 5000000
 )
 

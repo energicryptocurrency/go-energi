@@ -352,9 +352,9 @@ web3._extend({
 				for (var i = 0; i < raw_proposals.length; ++i) {
 					var raw_item = raw_proposals[i];
 					var item = proposalf(raw_item);
-					item.proposalAmount = toDecimal(status.ProposalAmount);
-					item.paidAmount = toDecimal(status.PaidAmount);
-					item.refUUID = status.RefUUID;
+					item.proposedAmount = toDecimal(raw_item.ProposedAmount);
+					item.paidAmount = toDecimal(raw_item.PaidAmount);
+					item.refUUID = raw_item.RefUUID;
 					proposals.push(item);
 				}
 				return res;
