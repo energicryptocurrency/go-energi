@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
 
-package eth
+package service
 
 import (
 	"context"
@@ -61,9 +61,7 @@ const (
 
 	// cpChanBufferSize defines the number of checkpoint to be pushed into the
 	// checkpoints channel before it can be considered to be full.
-	cpChanBufferSize = 16
-
-	txChanSize        = 4096
+	cpChanBufferSize  = 16
 	chainHeadChanSize = 10
 )
 
@@ -76,7 +74,6 @@ type MasternodeService struct {
 	server *p2p.Server
 	eth    *eth.Ethereum
 
-	quitCh chan struct{}
 	inSync int32
 
 	address  common.Address
@@ -95,7 +92,6 @@ type MasternodeService struct {
 func NewMasternodeService(ethServ *eth.Ethereum) (node.Service, error) {
 	r := &MasternodeService{
 		eth:      ethServ,
-		quitCh:   make(chan struct{}),
 		inSync:   1,
 		features: big.NewInt(0),
 		// NOTE: we need to avoid triggering DoS on restart.
@@ -208,8 +204,6 @@ func (m *MasternodeService) listenDownloader() {
 				log.Debug("Masternode is in sync")
 				return
 			}
-		case <-m.quitCh:
-			return
 		}
 	}
 }
@@ -231,31 +225,20 @@ func (m *MasternodeService) isActive() bool {
 
 func (m *MasternodeService) loop() {
 	bc := m.eth.BlockChain()
-	txpool := m.eth.TxPool()
 
 	chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
 	headSub := bc.SubscribeChainHeadEvent(chainHeadCh)
 	defer headSub.Unsubscribe()
 
-	txEventCh := make(chan core.NewTxsEvent, txChanSize)
-	txSub := txpool.SubscribeNewTxsEvent(txEventCh)
-	defer txSub.Unsubscribe()
-
 	//---
 	for {
 		select {
-		case <-m.quitCh:
-			return
 		case ev := <-chainHeadCh:
 			m.onChainHead(ev.Block)
-			break
-		case <-txEventCh:
 			break
 
 		// Shutdown
 		case <-headSub.Err():
-			return
-		case <-txSub.Err():
 			return
 		}
 	}
@@ -279,7 +262,6 @@ func (m *MasternodeService) getMNCheckpoint() (err error) {
 	// event to be sent.
 	select {
 	case <-time.After(cppSyncDelay):
-	case <-m.quitCh:
 		return nil
 	}
 
@@ -344,9 +326,6 @@ func (m *MasternodeService) getMNCheckpoint() (err error) {
 
 	for {
 		select {
-		case <-m.quitCh:
-			return nil
-
 		case err = <-subscribe.Err():
 			log.Error("checkpoint subscription error", "err", err)
 			return
@@ -399,9 +378,6 @@ func (m *MasternodeService) getMNCheckpoint() (err error) {
 func (m *MasternodeService) voteOnCheckpoints() {
 	for {
 		select {
-		case <-m.quitCh:
-			return
-
 		case cpVote := <-m.cpVoteChan:
 			tx, err := m.cpRegistry.Sign(cpVote.address, cpVote.signature)
 			if tx != nil {
@@ -564,8 +540,6 @@ func (v *peerValidator) validate() {
 
 	for {
 		select {
-		case <-mnsvc.quitCh:
-			return
 		case <-v.cancelCh:
 			return
 		case pe := <-peerCh:

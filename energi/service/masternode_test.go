@@ -1,4 +1,4 @@
-package eth
+package service
 
 import (
 	"crypto/ecdsa"
