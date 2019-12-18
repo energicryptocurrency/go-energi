@@ -96,6 +96,7 @@ var AppHelpFlagGroups = []flagGroup{
 		Flags: []cli.Flag{
 			utils.DeveloperFlag,
 			utils.DeveloperPeriodFlag,
+			utils.EnergiInitDevFlag,
 		},
 	},
 	/*{
