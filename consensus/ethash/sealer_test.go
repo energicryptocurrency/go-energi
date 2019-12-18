@@ -22,7 +22,6 @@ import (
 	"math/big"
 	"net"
 	"net/http"
-	"os"
 	"testing"
 	"time"
 
@@ -146,9 +145,6 @@ func TestRemoteMultiNotify(t *testing.T) {
 
 // Tests whether stale solutions are correctly processed.
 func TestStaleSubmission(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	ethash := NewTester(nil, true)
 	defer ethash.Close()
 	api := &API{ethash}
