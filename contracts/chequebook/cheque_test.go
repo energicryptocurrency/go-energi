@@ -46,7 +46,7 @@ func newTestBackend() *backends.SimulatedBackend {
 		addr0: {Balance: big.NewInt(1000000000)},
 		addr1: {Balance: big.NewInt(1000000000)},
 		addr2: {Balance: big.NewInt(1000000000)},
-	}, 10000000)
+	}, 40000000)
 }
 
 func deploy(prvKey *ecdsa.PrivateKey, amount *big.Int, backend *backends.SimulatedBackend) (common.Address, error) {
@@ -61,9 +61,6 @@ func deploy(prvKey *ecdsa.PrivateKey, amount *big.Int, backend *backends.Simulat
 }
 
 func TestIssueAndReceive(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	path := filepath.Join(os.TempDir(), "chequebook-test.json")
 	backend := newTestBackend()
 	addr0, err := deploy(key0, big.NewInt(0), backend)
@@ -146,9 +143,6 @@ func TestCheckbookFile(t *testing.T) {
 }
 
 func TestVerifyErrors(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	path0 := filepath.Join(os.TempDir(), "chequebook-test-0.json")
 	backend := newTestBackend()
 	contr0, err := deploy(key0, common.Big2, backend)
@@ -226,9 +220,6 @@ func TestVerifyErrors(t *testing.T) {
 }
 
 func TestDeposit(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	path0 := filepath.Join(os.TempDir(), "chequebook-test-0.json")
 	backend := newTestBackend()
 	contr0, _ := deploy(key0, new(big.Int), backend)
@@ -368,9 +359,6 @@ func TestDeposit(t *testing.T) {
 }
 
 func TestCash(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	path := filepath.Join(os.TempDir(), "chequebook-test.json")
 	backend := newTestBackend()
 	contr0, _ := deploy(key0, common.Big2, backend)
