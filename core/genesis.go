@@ -624,6 +624,16 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			energi_params.Energi_MasternodeRegistry,
 			config.Energi.CPPSigner,
 		)
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_CheckpointRegistryV1,
+			nil,
+			energi_abi.CheckpointRegistryV2ABI,
+			energi_abi.CheckpointRegistryV2Bin,
+			energi_params.Energi_CheckpointRegistry,
+			energi_params.Energi_MasternodeRegistry,
+			config.Energi.CPPSigner,
+		)
 	} else {
 		deployEnergiContract(
 			&xfers,
@@ -634,17 +644,17 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			energi_params.Energi_SporkRegistry,
 			energi_params.Energi_MasternodeRegistry,
 		)
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_CheckpointRegistryV1,
+			nil,
+			energi_abi.CheckpointRegistryV1ABI,
+			energi_abi.CheckpointRegistryV1Bin,
+			energi_params.Energi_CheckpointRegistry,
+			energi_params.Energi_MasternodeRegistry,
+			config.Energi.CPPSigner,
+		)
 	}
-	deployEnergiContract(
-		&xfers,
-		energi_params.Energi_CheckpointRegistryV1,
-		nil,
-		energi_abi.CheckpointRegistryV1ABI,
-		energi_abi.CheckpointRegistryV1Bin,
-		energi_params.Energi_CheckpointRegistry,
-		energi_params.Energi_MasternodeRegistry,
-		config.Energi.CPPSigner,
-	)
 	deployEnergiContract(
 		&xfers,
 		energi_params.Energi_BlacklistRegistryV1,
