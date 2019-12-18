@@ -39,6 +39,11 @@ const (
 	cppChanBufferSize = 10
 )
 
+type CheckpointEvent struct {
+	core.Checkpoint
+	cpAddr common.Address
+}
+
 type CheckpointService struct {
 	server *p2p.Server
 	eth    *eth.Ethereum
@@ -131,9 +136,14 @@ func (c *CheckpointService) loop() {
 		log.Error("Failed to get old checkpoints", "err", err)
 	} else {
 		for _, cpAddr := range oldCheckpoints {
-			c.onCheckpoint(cpAddr)
+			c.onCheckpoint(cpAddr, false)
 		}
 	}
+
+	events := c.eth.EventMux().Subscribe(
+		downloader.StartEvent{},
+	)
+	defer events.Unsubscribe()
 
 	for {
 		select {
@@ -142,12 +152,23 @@ func (c *CheckpointService) loop() {
 			return
 
 		case cpData := <-cpChan:
-			c.onCheckpoint(cpData.Checkpoint)
+			c.onCheckpoint(cpData.Checkpoint, true)
+
+		case ev := <-events.Chan():
+			if ev == nil {
+				return
+			}
+			switch ev.Data.(type) {
+			case downloader.StartEvent:
+				// Restart on large re-org
+				go c.loop()
+				return
+			}
 		}
 	}
 }
 
-func (c *CheckpointService) onCheckpoint(cpAddr common.Address) {
+func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 	backend := c.eth.APIBackend
 	cppSigner := backend.ChainConfig().Energi.CPPSigner
 
@@ -180,4 +201,15 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address) {
 
 	log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
 	backend.AddDynamicCheckpoint(info.Since.Uint64(), info.Number.Uint64(), info.Hash, sigs)
+
+	if live {
+		c.eth.EventMux().Post(CheckpointEvent{
+			core.Checkpoint{
+				Since:  info.Since.Uint64(),
+				Number: info.Number.Uint64(),
+				Hash:   info.Hash,
+			},
+			cpAddr,
+		})
+	}
 }
