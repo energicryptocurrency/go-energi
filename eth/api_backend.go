@@ -259,3 +259,7 @@ func (b *EthAPIBackend) AddDynamicCheckpoint(
 func (b *EthAPIBackend) ListCheckpoints() []core.Checkpoint {
 	return b.eth.blockchain.ListCheckpoints()
 }
+
+func (b *EthAPIBackend) CheckpointSignatures(cp core.Checkpoint) []core.CheckpointSignature {
+	return b.eth.blockchain.CheckpointSignatures(cp)
+}
