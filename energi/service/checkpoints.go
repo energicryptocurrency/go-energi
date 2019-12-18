@@ -148,7 +148,7 @@ func (c *CheckpointService) loop() {
 	for {
 		select {
 		case err = <-subscribe.Err():
-			log.Debug("checkpoint subscription error", "err", err)
+			log.Debug("Checkpoint subscription error", "err", err)
 			return
 
 		case cpData := <-cpChan:
@@ -160,7 +160,7 @@ func (c *CheckpointService) loop() {
 			}
 			switch ev.Data.(type) {
 			case downloader.StartEvent:
-				// Restart on large re-org
+				log.Debug("Restarting Checkpoint service loop")
 				go c.loop()
 				return
 			}
@@ -199,10 +199,11 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 		core.CheckpointSignature(cpp_sig),
 	}
 
-	log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
 	backend.AddDynamicCheckpoint(info.Since.Uint64(), info.Number.Uint64(), info.Hash, sigs)
 
 	if live {
+		log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
+
 		c.eth.EventMux().Post(CheckpointEvent{
 			core.Checkpoint{
 				Since:  info.Since.Uint64(),
