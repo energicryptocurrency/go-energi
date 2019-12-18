@@ -49,6 +49,7 @@ ENERGI_CONTRACTS := \
   IBlockReward.sol \
   IBudgetProposal.sol \
   ICheckpoint.sol \
+  ICheckpointV2.sol \
   ICheckpointRegistry.sol \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
