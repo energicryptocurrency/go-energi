@@ -50,22 +50,27 @@ type Checkpoint struct {
 
 type CheckpointSignature []byte
 
-type FutureCheckpoint struct {
+type validCheckpoint struct {
+	Checkpoint
+	signatures []CheckpointSignature
+}
+
+type futureCheckpoint struct {
 	Checkpoint
 	signatures map[common.Address]CheckpointSignature
 }
 
 type checkpointManager struct {
-	validated map[uint64]Checkpoint
+	validated map[uint64]validCheckpoint
 	latest    uint64
-	future    map[uint64]FutureCheckpoint
+	future    map[uint64]futureCheckpoint
 	mtx       sync.RWMutex
 }
 
 func newCheckpointManager() *checkpointManager {
 	return &checkpointManager{
-		validated: make(map[uint64]Checkpoint),
-		future:    make(map[uint64]FutureCheckpoint),
+		validated: make(map[uint64]validCheckpoint),
+		future:    make(map[uint64]futureCheckpoint),
 	}
 }
 
@@ -141,7 +146,7 @@ func (cm *checkpointManager) addCheckpoint(
 	defer cm.mtx.Unlock()
 
 	if curr, ok := cm.validated[cp.Number]; ok {
-		if curr == cp {
+		if curr.Checkpoint == cp {
 			return nil
 		}
 
@@ -175,7 +180,10 @@ func (cm *checkpointManager) addCheckpoint(
 		}
 	}
 
-	cm.validated[cp.Number] = cp
+	cm.validated[cp.Number] = validCheckpoint{
+		Checkpoint: cp,
+		signatures: append([]CheckpointSignature{}, sigs...),
+	}
 	log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
 
 	return chain.EnforceCheckpoint(cp)
@@ -228,7 +236,7 @@ func (bc *BlockChain) ListCheckpoints() []Checkpoint {
 	res := make([]Checkpoint, 0, len(cm.validated))
 
 	for _, v := range cm.validated {
-		res = append(res, v)
+		res = append(res, v.Checkpoint)
 	}
 
 	sort.Slice(res, func(i, j int) bool {
@@ -236,4 +244,17 @@ func (bc *BlockChain) ListCheckpoints() []Checkpoint {
 	})
 
 	return res
+}
+
+func (bc *BlockChain) CheckpointSignatures(cp Checkpoint) []CheckpointSignature {
+	cm := bc.checkpoints
+
+	cm.mtx.Lock()
+	defer cm.mtx.Unlock()
+
+	if vcp, ok := cm.validated[cp.Number]; ok && vcp.Hash == cp.Hash {
+		return append([]CheckpointSignature{}, vcp.signatures...)
+	}
+
+	return nil
 }
