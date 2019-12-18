@@ -17,16 +17,16 @@
 package compiler
 
 import (
-	"os"
 	"os/exec"
 	"testing"
 )
 
 const (
 	testSource = `
+pragma solidity >0.0.0;
 contract test {
    /// @notice Will multiply ` + "`a`" + ` by 7.
-   function multiply(uint a) returns(uint d) {
+   function multiply(uint a) public returns(uint d) {
        return a * 7;
    }
 }
@@ -40,9 +40,6 @@ func skipWithoutSolc(t *testing.T) {
 }
 
 func TestCompiler(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	skipWithoutSolc(t)
 
 	contracts, err := CompileSolidityString("", testSource)
