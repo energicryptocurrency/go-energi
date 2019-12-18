@@ -17,7 +17,6 @@
 package service
 
 import (
-	"context"
 	"errors"
 	"math/big"
 	"sync/atomic"
@@ -43,17 +42,6 @@ import (
 var (
 	heartbeatInterval = time.Duration(35) * time.Minute
 	recheckInterval   = time.Duration(5) * time.Minute
-
-	// errInvalidSubscription is returned if valid subscription cannot be established.
-	errInvalidSubscription = errors.New("Invalid subscription")
-
-	// cppSyncDelay defines the time in which the process retrieving checkpoints
-	// is made to wait for the background sync to complete first.
-	cppSyncDelay = 1 * time.Minute
-
-	// durationValidity refers to the time from the current header where voting
-	// on a checkpoint is permitted.
-	durationValidity = (24 * time.Hour) - (15 * time.Minute) // 23hrs 45min
 )
 
 const (
@@ -169,8 +157,6 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 	m.validator = newPeerValidator(common.Address{}, m)
 	go m.loop()
 
-	go m.getMNCheckpoint()
-
 	log.Info("Started Energi Masternode", "addr", address)
 	return nil
 }
@@ -230,9 +216,24 @@ func (m *MasternodeService) loop() {
 	headSub := bc.SubscribeChainHeadEvent(chainHeadCh)
 	defer headSub.Unsubscribe()
 
+	events := m.eth.EventMux().Subscribe(
+		CheckpointEvent{},
+	)
+	defer events.Unsubscribe()
+
 	//---
 	for {
 		select {
+		case ev := <-events.Chan():
+			if ev == nil {
+				return
+			}
+			switch ev.Data.(type) {
+			case CheckpointEvent:
+				m.onCheckpoint(ev.Data.(CheckpointEvent).cpAddr)
+			}
+			break
+
 		case ev := <-chainHeadCh:
 			m.onChainHead(ev.Block)
 			break
@@ -244,154 +245,72 @@ func (m *MasternodeService) loop() {
 	}
 }
 
-// isActiveCPBlock checks if the blocktime is within the last 23 hrs and 45 min.
-func (m *MasternodeService) isActiveCPBlock(blockNumber uint64) bool {
-	blockHeader := m.eth.BlockChain().GetHeaderByNumber(blockNumber)
-	timestamp := time.Unix(int64(blockHeader.Time), 0)
-
-	// Subtract the durationValidity duration from time.now().
-	validityStart := time.Now().Add(durationValidity * time.Duration(-1))
-	return validityStart.After(timestamp)
-}
-
-// getMNCheckpoint identifies the checkpoint indexed since the lastCPBlock,
-// signs them and pipes them to cpVoteChan for voting after MN heartbeat
-// operation finishes.
-func (m *MasternodeService) getMNCheckpoint() (err error) {
-	// Wait for the possible running background sync to complete or system quit
-	// event to be sent.
-	select {
-	case <-time.After(cppSyncDelay):
-		return nil
-	}
-
-	m.lastCPBlock = 0
-	bestBlockHeight := m.eth.BlockChain().CurrentHeader().Number.Uint64()
-
-	if bestBlockHeight > energi_params.MaxCheckpointVoteBlockAge {
-		m.lastCPBlock = bestBlockHeight - energi_params.MaxCheckpointVoteBlockAge
-	}
-
-	// If sync start block is older than 23hrs 45min, get a start block not older.
-	for !m.isActiveCPBlock(m.lastCPBlock) && m.lastCPBlock < bestBlockHeight {
-		m.lastCPBlock++
-	}
-
-	log.Info("Running checkpoints fetch from", "block", m.lastCPBlock)
-	defer log.Debug("Exiting checkpoint subscription", "block", m.lastCPBlock, "err", err)
-
-	cpChan := make(chan *energi_abi.ICheckpointRegistryCheckpoint, cpChanBufferSize)
-
-	ctx := context.WithValue(
-		context.Background(),
-		energi_params.GeneralProxyCtxKey,
-		energi_common.GeneralProxyHashGen(m.eth.BlockChain()),
-	)
-
-	// Fetch old checkpoints first then subscribe to any future updates later.
-	if m.lastCPBlock < bestBlockHeight {
-		var oldCPs *energi_abi.ICheckpointRegistryCheckpointIterator
-
-		endBlock := bestBlockHeight - 1
-		filterQuery := &bind.FilterOpts{
-			Start:   m.lastCPBlock,
-			End:     &endBlock,
-			Context: ctx,
-		}
-
-		oldCPs, err = m.cpRegistry.Contract.FilterCheckpoint(filterQuery, []*big.Int{})
-		if err != nil {
-			log.Error("Failed old checkpoints filter", "block", m.lastCPBlock, "err", err)
-			return
-		}
-
-		for oldCPs.Next() {
-			cpChan <- oldCPs.Event
-		}
-	}
-
-	// Only subscribe to future checkpoint updates after fetching old checkpoints.
-	watchOpts := &bind.WatchOpts{
-		Context: ctx,
-	}
-
-	subscribe, err := m.cpRegistry.Contract.WatchCheckpoint(watchOpts, cpChan, []*big.Int{})
+func (m *MasternodeService) onCheckpoint(cpAddr common.Address) {
+	cp, err := energi_abi.NewICheckpointV2Caller(cpAddr, m.eth.APIBackend)
 	if err != nil {
-		log.Error("Failed checkpoint subscription", "block", m.lastCPBlock, "err", err)
-
-		return err
+		log.Error("Failed to create the checkpoint iface", "cp", cpAddr, "err", err)
+		return
 	}
 
-	defer subscribe.Unsubscribe()
+	callOpts := &m.cpRegistry.CallOpts
 
-	for {
-		select {
-		case err = <-subscribe.Err():
-			log.Error("checkpoint subscription error", "err", err)
-			return
+	// Check if the current masternode has voted and vote on it if not yet.
+	can_vote, err := cp.CanVote(callOpts, m.address)
+	if err != nil {
+		log.Warn("Failed at Checkpoint.canVote()", "cp", cpAddr, "err", err)
+		return
+	}
 
-		case cpData := <-cpChan:
-			cpAddr := cpData.Checkpoint
-			cp, err := energi_abi.NewICheckpointCaller(cpAddr, m.eth.APIBackend)
-			if err != nil {
-				log.Error("Failed to retrieve the checkpoint", "err", err)
-				continue
-			}
+	if !can_vote {
+		return
+	}
 
-			// Update the current checkpoint height.
-			m.lastCPBlock = cpData.Number.Uint64()
+	log.Debug("MN signature not found, now generating a new one")
 
-			// Check if the current masternode has voted and vote on it if not yet.
-			_, err = cp.Signature(&m.cpRegistry.CallOpts, m.address)
-			if err != nil {
-				log.Debug("MN signature not found, now generating a new one")
+	baseHash, err := cp.SignatureBase(callOpts)
+	if err != nil {
+		log.Error("Failed to get base hash", "cp", cpAddr, "err", err)
+		return
+	}
 
-				baseHash, err := m.cpRegistry.SignatureBase(cpData.Number, cpAddr.Hash())
-				if err != nil {
-					log.Error("Failed to get base hash", "err", err)
-					continue
-				}
+	signature, err := crypto.Sign(baseHash[:], m.server.PrivateKey)
+	if err != nil {
+		log.Error("Failed to sign base hash", "cp", cpAddr, "err", err)
+		return
+	}
 
-				signature, err := crypto.Sign(baseHash[:], m.server.PrivateKey)
-				if err != nil {
-					log.Error("Failed to sign base hash", "err", err)
-					continue
-				}
+	signature[64] += 27
 
-				signature[64] += 27
-
-				// Push the processed signature and the checkpoint address to channel
-				// for later processing.
-				m.cpVoteChan <- &checkpointVote{
-					address:   cpAddr,
-					signature: signature,
-				}
-			}
-
-			log.Debug("MN has already voted", "MN", m.address, "checkpoint", cpAddr)
-		}
+	m.cpVoteChan <- &checkpointVote{
+		address:   cpAddr,
+		signature: signature,
 	}
 }
 
 // voteOnCheckpoints recieves the identified checkpoints vote information and
 // attempts to vote them in.
 func (m *MasternodeService) voteOnCheckpoints() {
+	var cpVote *checkpointVote
+
 	for {
 		select {
-		case cpVote := <-m.cpVoteChan:
-			tx, err := m.cpRegistry.Sign(cpVote.address, cpVote.signature)
-			if tx != nil {
-				txhash := tx.Hash()
-				log.Info("Note: please wait until the vote TX gets into a block!", "tx", txhash.Hex())
-			}
-
-			if err != nil {
-				log.Error("Checkpoint vote failed", "checkpoint", cpVote.address, "err", err)
-			}
+		case cpVote = <-m.cpVoteChan:
+			// Only vote on the latest due to zero fee triggers
+			break
 
 		default:
-			// This triggers loop ending to allow the priority zero-fee txs to be
-			// processed before attempting checkpoint voting again.
+			if cpVote != nil {
+				tx, err := m.cpRegistry.Sign(cpVote.address, cpVote.signature)
+				if tx != nil {
+					txhash := tx.Hash()
+					log.Warn("Voting on checkpoint", "addr", cpVote.address, "tx", txhash.Hex())
+				}
+
+				if err != nil {
+					log.Error("Checkpoint vote failed", "checkpoint", cpVote.address, "err", err)
+				}
+			}
+
 			return
 		}
 	}
@@ -549,11 +468,6 @@ func (v *peerValidator) validate() {
 			// TODO: validate block availability as per MN-14
 			return
 		case <-time.After(deadline.Sub(time.Now())):
-			if mnsvc.eth.TxPool().RemoveBySender(mnsvc.address) {
-				log.Warn("Skipping MN invalidation due to tx queue", "mn", v.target)
-				return
-			}
-
 			log.Info("MN Invalidation", "mn", v.target)
 			_, err := mnsvc.registry.Invalidate(v.target)
 			if err != nil {
