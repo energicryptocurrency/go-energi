@@ -230,7 +230,7 @@ func (m *MasternodeService) loop() {
 			}
 			switch ev.Data.(type) {
 			case CheckpointEvent:
-				m.onCheckpoint(ev.Data.(CheckpointEvent).cpAddr)
+				m.onCheckpoint(ev.Data.(CheckpointEvent))
 			}
 			break
 
@@ -245,7 +245,9 @@ func (m *MasternodeService) loop() {
 	}
 }
 
-func (m *MasternodeService) onCheckpoint(cpAddr common.Address) {
+func (m *MasternodeService) onCheckpoint(cpe CheckpointEvent) {
+	cpAddr := cpe.cpAddr
+
 	cp, err := energi_abi.NewICheckpointV2Caller(cpAddr, m.eth.APIBackend)
 	if err != nil {
 		log.Error("Failed to create the checkpoint iface", "cp", cpAddr, "err", err)
@@ -265,7 +267,17 @@ func (m *MasternodeService) onCheckpoint(cpAddr common.Address) {
 		return
 	}
 
-	log.Debug("MN signature not found, now generating a new one")
+	if h := m.eth.BlockChain().GetHeaderByNumber(cpe.Number); h == nil {
+		log.Warn("Checkpoint Proposal is ahead of this MN blockchain",
+			"number", cpe.Number, "cp", cpe.Hash)
+		return
+	} else if h.Hash() != cpe.Hash {
+		log.Warn("Checkpoint Proposal is not aligned with this MN blockchain",
+			"number", cpe.Number, "header", h.Hash(), "cp", cpe.Hash)
+		return
+	}
+
+	log.Info("MN checkpoint signature not found, now generating a new one", "cp", cpAddr)
 
 	baseHash, err := cp.SignatureBase(callOpts)
 	if err != nil {
