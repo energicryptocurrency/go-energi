@@ -282,8 +282,8 @@ func (z *zeroFeeProtector) checkMigration(
 	// Just in case: safety measure
 	statedb := pool.currentState.Copy()
 
-	bc := pool.chain.(*BlockChain)
-	if bc == nil {
+	bc, ok := pool.chain.(*BlockChain)
+	if bc == nil || !ok {
 		log.Debug("ZeroFee DoS on missing blockchain")
 		return ErrZeroFeeDoS
 	}
