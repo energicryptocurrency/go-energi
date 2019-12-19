@@ -200,7 +200,7 @@ func (bc *BlockChain) EnforceCheckpoint(cp Checkpoint) error {
 	header := bc.GetHeaderByNumber(cp.Number)
 
 	if header != nil && header.Hash() != cp.Hash {
-		log.Error("Side chain is detected as canonical", "number", cp.Number, "hash", cp.Hash)
+		log.Error("Side chain is detected as canonical", "number", cp.Number, "hash", cp.Hash, "old", header.Hash())
 
 		if cp_block := bc.GetBlock(cp.Hash, cp.Number); cp_block != nil {
 			// Known block
@@ -212,6 +212,7 @@ func (bc *BlockChain) EnforceCheckpoint(cp Checkpoint) error {
 				// should terminate
 				return err
 			}
+
 			log.Warn("Chain reorg was successful, resuming normal operation")
 		} else {
 			// Unknown block

@@ -135,8 +135,9 @@ func (c *CheckpointService) loop() {
 	if err != nil {
 		log.Error("Failed to get old checkpoints", "err", err)
 	} else {
-		for _, cpAddr := range oldCheckpoints {
-			c.onCheckpoint(cpAddr, false)
+		// NOTE: we should feed for recent first
+		for i := len(oldCheckpoints) - 1; i >= 0; i-- {
+			c.onCheckpoint(oldCheckpoints[i], false)
 		}
 	}
 
