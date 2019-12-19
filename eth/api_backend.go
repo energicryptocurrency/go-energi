@@ -239,6 +239,27 @@ func (b *EthAPIBackend) AddLocalCheckpoint(num uint64, hash common.Hash) error {
 	)
 }
 
+func (b *EthAPIBackend) AddDynamicCheckpoint(
+	since uint64,
+	num uint64,
+	hash common.Hash,
+	sigs []core.CheckpointSignature,
+) error {
+	return b.eth.blockchain.AddCheckpoint(
+		core.Checkpoint{
+			Since:  since,
+			Number: num,
+			Hash:   hash,
+		},
+		sigs,
+		false,
+	)
+}
+
 func (b *EthAPIBackend) ListCheckpoints() []core.Checkpoint {
 	return b.eth.blockchain.ListCheckpoints()
+}
+
+func (b *EthAPIBackend) CheckpointSignatures(cp core.Checkpoint) []core.CheckpointSignature {
+	return b.eth.blockchain.CheckpointSignatures(cp)
 }

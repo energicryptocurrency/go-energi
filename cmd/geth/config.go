@@ -182,6 +182,8 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 		utils.RegisterEthStatsService(stack, cfg.Ethstats.URL)
 	}
 
+	utils.RegisterDynamicCheckpointService(stack)
+
 	if ctx.GlobalBool(utils.MasternodeFlag.Name) {
 		utils.RegisterMasternodeService(stack)
 	}
