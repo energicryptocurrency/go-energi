@@ -52,6 +52,8 @@ const (
 
 	// minimim number of peers to broadcast new blocks to
 	minBroadcastPeers = 4
+
+	cpChanSize = 8
 )
 
 var (
@@ -90,6 +92,9 @@ type ProtocolManager struct {
 	txsCh         chan core.NewTxsEvent
 	txsSub        event.Subscription
 	minedBlockSub *event.TypeMuxSubscription
+
+	newCheckpointSub event.Subscription
+	newCheckpointCh  chan core.NewCheckpointEvent
 
 	whitelist map[uint64]common.Hash
 
@@ -230,6 +235,11 @@ func (pm *ProtocolManager) Start(maxPeers int) {
 	// start sync handlers
 	go pm.syncer()
 	go pm.txsyncLoop()
+
+	// broadcast new checkpoints
+	pm.newCheckpointCh = make(chan core.NewCheckpointEvent, cpChanSize)
+	pm.newCheckpointSub = pm.blockchain.SubscribeNewCheckpointEvent(pm.newCheckpointCh)
+	go pm.checkpointBroadcastLoop()
 }
 
 func (pm *ProtocolManager) Stop() {
@@ -237,6 +247,8 @@ func (pm *ProtocolManager) Stop() {
 
 	pm.txsSub.Unsubscribe()        // quits txBroadcastLoop
 	pm.minedBlockSub.Unsubscribe() // quits blockBroadcastLoop
+
+	pm.newCheckpointSub.Unsubscribe() // quits checkpointBroadcastLoop
 
 	// Quit the sync loop.
 	// After this send has completed, no new peers will be accepted.
@@ -296,6 +308,12 @@ func (pm *ProtocolManager) handle(p *peer) error {
 	if err := pm.downloader.RegisterPeer(p.id, p.version, p); err != nil {
 		return err
 	}
+
+	if err := p.RequestCheckpoints(); err != nil {
+		p.Log().Error("Energi checkpoint request failed", "err", err)
+		return err
+	}
+
 	// Propagate existing transactions. new transactions appearing
 	// after this will be sent via broadcasts.
 	pm.syncTransactions(p)
@@ -703,6 +721,35 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		}
 		pm.txpool.AddRemotes(txs)
 
+	case p.version >= nrg70 && msg.Code == GetCheckpointsMsg:
+		p.Log().Debug("Sending checkpoints")
+
+		cps := pm.blockchain.ListCheckpoints()
+
+		for i := range cps {
+			p.AsyncSendCheckpoint(&cps[i])
+		}
+
+	case p.version >= nrg70 && msg.Code == CheckpointMsg:
+		var ncp newCheckpointData
+		if err := msg.Decode(&ncp); err != nil {
+			return errResp(ErrDecode, "msg %v: %v", msg, err)
+		}
+
+		p.Log().Debug("Received checkpoint", "number", ncp.Number, "hash", ncp.Hash)
+
+		p.MarkCheckpoint(ncp.Number, ncp.Hash)
+
+		pm.blockchain.AddCheckpoint(
+			core.Checkpoint{
+				Since:  0, // not trusted
+				Number: ncp.Number,
+				Hash:   ncp.Hash,
+			},
+			[]core.CheckpointSignature{ncp.CppSig},
+			false,
+		)
+
 	default:
 		return errResp(ErrInvalidMsgCode, "%v", msg.Code)
 	}
@@ -768,6 +815,14 @@ func (pm *ProtocolManager) BroadcastTxs(txs types.Transactions) {
 	}
 }
 
+func (pm *ProtocolManager) BroadcastCheckpoint(cpi *core.CheckpointInfo) {
+	peers := pm.peers.PeersWithoutCheckpoint(cpi.Number, cpi.Hash)
+
+	for _, peer := range peers {
+		peer.AsyncSendCheckpoint(cpi)
+	}
+}
+
 // Mined broadcast loop
 func (pm *ProtocolManager) minedBroadcastLoop() {
 	// automatically stops if unsubscribe
@@ -787,6 +842,18 @@ func (pm *ProtocolManager) txBroadcastLoop() {
 
 		// Err() channel will be closed when unsubscribing.
 		case <-pm.txsSub.Err():
+			return
+		}
+	}
+}
+
+func (pm *ProtocolManager) checkpointBroadcastLoop() {
+	for {
+		select {
+		case event := <-pm.newCheckpointCh:
+			pm.BroadcastCheckpoint(&event.CheckpointInfo)
+
+		case <-pm.newCheckpointSub.Err():
 			return
 		}
 	}

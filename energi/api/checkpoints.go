@@ -166,7 +166,7 @@ func (b *CheckpointAPI) checkpointInfo(blockhash common.Hash) (interface{}, erro
 			Number:   cp.Number,
 			Hash:     cp.Hash,
 			Since:    cp.Since,
-			SigCount: uint64(len(b.backend.CheckpointSignatures(cp))),
+			SigCount: cp.SigCount,
 		})
 	}
 

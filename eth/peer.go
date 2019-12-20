@@ -25,6 +25,7 @@ import (
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/rlp"
@@ -56,6 +57,9 @@ const (
 	maxQueuedAnns = 4
 
 	handshakeTimeout = 5 * time.Second
+
+	maxKnownCheckpoints = 128
+	maxQueuedCps        = maxKnownCheckpoints
 )
 
 // PeerInfo represents a short summary of the Ethereum sub-protocol metadata known
@@ -91,6 +95,9 @@ type peer struct {
 	queuedProps chan *propEvent           // Queue of blocks to broadcast to the peer
 	queuedAnns  chan *types.Block         // Queue of blocks to announce to the peer
 	term        chan struct{}             // Termination channel to stop the broadcaster
+
+	knownCps  mapset.Set
+	queuedCps chan *core.CheckpointInfo
 }
 
 func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
@@ -105,6 +112,9 @@ func newPeer(version int, p *p2p.Peer, rw p2p.MsgReadWriter) *peer {
 		queuedProps: make(chan *propEvent, maxQueuedProps),
 		queuedAnns:  make(chan *types.Block, maxQueuedAnns),
 		term:        make(chan struct{}),
+
+		knownCps:  mapset.NewSet(),
+		queuedCps: make(chan *core.CheckpointInfo, maxQueuedCps),
 	}
 }
 
@@ -131,6 +141,12 @@ func (p *peer) broadcast() {
 				return
 			}
 			p.Log().Trace("Announced block", "number", block.Number(), "hash", block.Hash())
+
+		case cpi := <-p.queuedCps:
+			if err := p.SendCheckpoint(cpi); err != nil {
+				return
+			}
+			p.Log().Trace("Broadcast checkpoint", "number", cpi.Number, "hash", cpi.Hash)
 
 		case <-p.term:
 			return
@@ -392,7 +408,7 @@ func (p *peer) readStatus(network uint64, status *statusData, genesis common.Has
 // String implements fmt.Stringer.
 func (p *peer) String() string {
 	return fmt.Sprintf("Peer %s [%s]", p.id,
-		fmt.Sprintf("eth/%2d", p.version),
+		fmt.Sprintf("nrg/%2d", p.version),
 	)
 }
 
@@ -519,4 +535,59 @@ func (ps *peerSet) Close() {
 		p.Disconnect(p2p.DiscQuitting)
 	}
 	ps.closed = true
+}
+
+// Energi extensions
+
+func (p *peer) MarkCheckpoint(_ uint64, hash common.Hash) {
+	// If we reached the memory allowance, drop a previously known block hash
+	for p.knownCps.Cardinality() >= maxKnownCheckpoints {
+		p.knownCps.Pop()
+	}
+	p.knownCps.Add(hash)
+}
+
+func (p *peer) SendCheckpoint(cpi *core.CheckpointInfo) error {
+	if p.version < nrg70 || p.knownCps.Contains(cpi.Hash) {
+		return nil
+	}
+
+	p.MarkCheckpoint(cpi.Number, cpi.Hash)
+	return p2p.Send(p.rw, CheckpointMsg, newCheckpointData{
+		cpi.Number,
+		cpi.Hash,
+		cpi.CppSignature,
+		cpi.SigCount,
+	})
+}
+
+func (p *peer) AsyncSendCheckpoint(cpi *core.CheckpointInfo) {
+	select {
+	case p.queuedCps <- cpi:
+		break
+	default:
+		p.Log().Debug("Dropping checkpoint propagation", "hash", cpi.Hash)
+	}
+}
+
+func (p *peer) RequestCheckpoints() error {
+	if p.version < nrg70 {
+		return nil
+	}
+
+	p.Log().Debug("Fetching peer checkpoints")
+	return p2p.Send(p.rw, GetCheckpointsMsg, struct{}{})
+}
+
+func (ps *peerSet) PeersWithoutCheckpoint(_ uint64, hash common.Hash) []*peer {
+	ps.lock.RLock()
+	defer ps.lock.RUnlock()
+
+	list := make([]*peer, 0, len(ps.peers))
+	for _, p := range ps.peers {
+		if !p.knownCps.Contains(hash) {
+			list = append(list, p)
+		}
+	}
+	return list
 }

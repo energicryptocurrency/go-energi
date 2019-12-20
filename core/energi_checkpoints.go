@@ -26,6 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 
@@ -51,6 +52,16 @@ type Checkpoint struct {
 
 type CheckpointSignature []byte
 
+type CheckpointInfo struct {
+	Checkpoint
+	CppSignature CheckpointSignature
+	SigCount     uint64
+}
+
+type NewCheckpointEvent struct {
+	CheckpointInfo
+}
+
 type validCheckpoint struct {
 	Checkpoint
 	signatures []CheckpointSignature
@@ -66,6 +77,7 @@ type checkpointManager struct {
 	latest    uint64
 	future    map[uint64]futureCheckpoint
 	mtx       sync.RWMutex
+	newCpFeed event.Feed
 }
 
 func newCheckpointManager() *checkpointManager {
@@ -187,7 +199,12 @@ func (cm *checkpointManager) addCheckpoint(
 	}
 	log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
 
-	return chain.EnforceCheckpoint(cp)
+	err = chain.EnforceCheckpoint(cp)
+
+	// Send regardless of enforcement success
+	cm.newCpFeed.Send(NewCheckpointEvent{CheckpointInfo{cp, sigs[0], uint64(len(sigs))}})
+
+	return err
 }
 
 func (cm *checkpointManager) hashToSign(cp *Checkpoint) []byte {
@@ -229,20 +246,25 @@ func (bc *BlockChain) EnforceCheckpoint(cp Checkpoint) error {
 	return nil
 }
 
-func (bc *BlockChain) ListCheckpoints() []Checkpoint {
+func (bc *BlockChain) ListCheckpoints() []CheckpointInfo {
 	cm := bc.checkpoints
 
 	cm.mtx.Lock()
 	defer cm.mtx.Unlock()
 
-	res := make([]Checkpoint, 0, len(cm.validated))
+	res := make([]CheckpointInfo, 0, len(cm.validated))
 
 	for _, v := range cm.validated {
-		res = append(res, v.Checkpoint)
+		var sig CheckpointSignature
+		if len(v.signatures) > 0 {
+			sig = v.signatures[0]
+		}
+
+		res = append(res, CheckpointInfo{v.Checkpoint, sig, uint64(len(v.signatures))})
 	}
 
 	sort.Slice(res, func(i, j int) bool {
-		return res[i].Number < res[j].Number
+		return res[i].Since > res[j].Since
 	})
 
 	return res
@@ -259,6 +281,10 @@ func (bc *BlockChain) CheckpointSignatures(cp Checkpoint) []CheckpointSignature 
 	}
 
 	return nil
+}
+
+func (bc *BlockChain) SubscribeNewCheckpointEvent(ch chan<- NewCheckpointEvent) event.Subscription {
+	return bc.scope.Track(bc.checkpoints.newCpFeed.Subscribe(ch))
 }
 
 func (bc *BlockChain) IsRunning() bool {
