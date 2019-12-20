@@ -100,9 +100,11 @@ func (c *CheckpointService) waitDownloader() bool {
 			}
 			switch ev.Data.(type) {
 			case downloader.StartEvent:
-				break
-			case downloader.DoneEvent, downloader.FailedEvent:
+				continue
+			case downloader.DoneEvent:
 				return true
+			case downloader.FailedEvent:
+				return c.eth.BlockChain().IsRunning()
 			}
 		}
 	}

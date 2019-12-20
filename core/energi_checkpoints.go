@@ -21,6 +21,7 @@ import (
 	"math/big"
 	"sort"
 	"sync"
+	"sync/atomic"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -258,4 +259,8 @@ func (bc *BlockChain) CheckpointSignatures(cp Checkpoint) []CheckpointSignature 
 	}
 
 	return nil
+}
+
+func (bc *BlockChain) IsRunning() bool {
+	return atomic.LoadInt32(&bc.running) == 0
 }
