@@ -39,9 +39,9 @@ const (
 	cppChanBufferSize = 10
 )
 
-type CheckpointEvent struct {
+type CheckpointProposalEvent struct {
 	core.Checkpoint
-	cpAddr common.Address
+	Proposal common.Address
 }
 
 type CheckpointService struct {
@@ -100,9 +100,11 @@ func (c *CheckpointService) waitDownloader() bool {
 			}
 			switch ev.Data.(type) {
 			case downloader.StartEvent:
-				break
-			case downloader.DoneEvent, downloader.FailedEvent:
+				continue
+			case downloader.DoneEvent:
 				return true
+			case downloader.FailedEvent:
+				return c.eth.BlockChain().IsRunning()
 			}
 		}
 	}
@@ -141,11 +143,6 @@ func (c *CheckpointService) loop() {
 		}
 	}
 
-	events := c.eth.EventMux().Subscribe(
-		downloader.StartEvent{},
-	)
-	defer events.Unsubscribe()
-
 	for {
 		select {
 		case err = <-subscribe.Err():
@@ -154,17 +151,6 @@ func (c *CheckpointService) loop() {
 
 		case cpData := <-cpChan:
 			c.onCheckpoint(cpData.Checkpoint, true)
-
-		case ev := <-events.Chan():
-			if ev == nil {
-				return
-			}
-			switch ev.Data.(type) {
-			case downloader.StartEvent:
-				log.Debug("Restarting Checkpoint service loop")
-				go c.loop()
-				return
-			}
 		}
 	}
 }
@@ -205,7 +191,7 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 	if live {
 		log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
 
-		c.eth.EventMux().Post(CheckpointEvent{
+		c.eth.EventMux().Post(CheckpointProposalEvent{
 			core.Checkpoint{
 				Since:  info.Since.Uint64(),
 				Number: info.Number.Uint64(),

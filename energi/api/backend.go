@@ -73,7 +73,7 @@ type Backend interface {
 	CurrentBlock() *types.Block
 
 	AddLocalCheckpoint(num uint64, hash common.Hash) error
-	ListCheckpoints() []core.Checkpoint
+	ListCheckpoints() []core.CheckpointInfo
 	CheckpointSignatures(cp core.Checkpoint) []core.CheckpointSignature
 }
 

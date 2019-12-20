@@ -256,7 +256,7 @@ func (b *EthAPIBackend) AddDynamicCheckpoint(
 	)
 }
 
-func (b *EthAPIBackend) ListCheckpoints() []core.Checkpoint {
+func (b *EthAPIBackend) ListCheckpoints() []core.CheckpointInfo {
 	return b.eth.blockchain.ListCheckpoints()
 }
 

@@ -30,18 +30,18 @@ import (
 
 // Constants to match up protocol versions and messages
 const (
-	eth62 = 62
 	eth63 = 63
+	nrg70 = 70
 )
 
 // ProtocolName is the official short name of the protocol used during capability negotiation.
 var ProtocolName = "eth"
 
 // ProtocolVersions are the supported versions of the eth protocol (first is primary).
-var ProtocolVersions = []uint{eth63, eth62}
+var ProtocolVersions = []uint{nrg70, eth63}
 
 // ProtocolLengths are the number of implemented message corresponding to different protocol versions.
-var ProtocolLengths = []uint64{17, 8}
+var ProtocolLengths = []uint64{0x13, 17}
 
 const ProtocolMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
 
@@ -62,6 +62,10 @@ const (
 	NodeDataMsg    = 0x0e
 	GetReceiptsMsg = 0x0f
 	ReceiptsMsg    = 0x10
+
+	// Protocol messages belonging to nrg/70
+	GetCheckpointsMsg = 0x11
+	CheckpointMsg     = 0x12
 )
 
 type errCode int
@@ -183,3 +187,10 @@ type blockBody struct {
 
 // blockBodiesData is the network packet for block content distribution.
 type blockBodiesData []*blockBody
+
+type newCheckpointData struct {
+	Number   uint64
+	Hash     common.Hash
+	CppSig   core.CheckpointSignature
+	SigCount uint64
+}

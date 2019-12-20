@@ -217,7 +217,7 @@ func (m *MasternodeService) loop() {
 	defer headSub.Unsubscribe()
 
 	events := m.eth.EventMux().Subscribe(
-		CheckpointEvent{},
+		CheckpointProposalEvent{},
 	)
 	defer events.Unsubscribe()
 
@@ -229,8 +229,8 @@ func (m *MasternodeService) loop() {
 				return
 			}
 			switch ev.Data.(type) {
-			case CheckpointEvent:
-				m.onCheckpoint(ev.Data.(CheckpointEvent))
+			case CheckpointProposalEvent:
+				m.onCheckpoint(ev.Data.(CheckpointProposalEvent))
 			}
 			break
 
@@ -245,8 +245,8 @@ func (m *MasternodeService) loop() {
 	}
 }
 
-func (m *MasternodeService) onCheckpoint(cpe CheckpointEvent) {
-	cpAddr := cpe.cpAddr
+func (m *MasternodeService) onCheckpoint(cpe CheckpointProposalEvent) {
+	cpAddr := cpe.Proposal
 
 	cp, err := energi_abi.NewICheckpointV2Caller(cpAddr, m.eth.APIBackend)
 	if err != nil {
