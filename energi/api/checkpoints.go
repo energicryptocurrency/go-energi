@@ -14,12 +14,14 @@
 package api
 
 import (
+	"context"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_common "energi.world/core/gen3/energi/common"
@@ -178,6 +180,14 @@ func (b *CheckpointAPI) CheckpointPropose(
 	hash common.Hash,
 	password *string,
 ) (txhash common.Hash, err error) {
+	if h, _ := b.backend.HeaderByNumber(context.Background(), rpc.BlockNumber(number)); h == nil {
+		log.Error("Block not found on local node", "number", number)
+		return
+	} else if h.Hash() != hash {
+		log.Error("Block mismatch on local node", "number", number, "hash", hash, "block", h.Hash())
+		return
+	}
+
 	registry, hashsig, err := b.registry(password, b.backend.ChainConfig().Energi.CPPSigner)
 	if err != nil {
 		return
