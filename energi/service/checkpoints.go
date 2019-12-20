@@ -143,11 +143,6 @@ func (c *CheckpointService) loop() {
 		}
 	}
 
-	events := c.eth.EventMux().Subscribe(
-		downloader.StartEvent{},
-	)
-	defer events.Unsubscribe()
-
 	for {
 		select {
 		case err = <-subscribe.Err():
@@ -156,17 +151,6 @@ func (c *CheckpointService) loop() {
 
 		case cpData := <-cpChan:
 			c.onCheckpoint(cpData.Checkpoint, true)
-
-		case ev := <-events.Chan():
-			if ev == nil {
-				return
-			}
-			switch ev.Data.(type) {
-			case downloader.StartEvent:
-				log.Debug("Restarting Checkpoint service loop")
-				go c.loop()
-				return
-			}
 		}
 	}
 }
