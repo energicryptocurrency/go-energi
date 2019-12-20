@@ -39,9 +39,9 @@ const (
 	cppChanBufferSize = 10
 )
 
-type CheckpointEvent struct {
+type CheckpointProposalEvent struct {
 	core.Checkpoint
-	cpAddr common.Address
+	Proposal common.Address
 }
 
 type CheckpointService struct {
@@ -191,7 +191,7 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 	if live {
 		log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
 
-		c.eth.EventMux().Post(CheckpointEvent{
+		c.eth.EventMux().Post(CheckpointProposalEvent{
 			core.Checkpoint{
 				Since:  info.Since.Uint64(),
 				Number: info.Number.Uint64(),
