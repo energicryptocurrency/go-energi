@@ -43,7 +43,7 @@ const (
 
 	accountPass     = "secret-pass"
 	peerConInterval = 1 * time.Minute
-	miningInterval  = 4 * time.Minute
+	miningInterval  = 4 * time.Minute // Max interval which the test can run before its seen as failed.
 	peerSyncDelay   = 20 * time.Second
 
 	gasLimit          = 40000000
@@ -424,7 +424,8 @@ func SignerCallback(node *node.Node, signerAddrs map[common.Address]*ecdsa.Priva
 }
 
 // cpPropose uses the CPPSigner to propose a checkpoint to the network.
-func cpPropose() error {
+// It creates a checkpoint on the current header.
+func cpPropose() (*core.CheckpointInfo, error) {
 	signer := nodesInfo[cpSignerIndex]
 
 	var ethServ *eth.Ethereum
@@ -435,7 +436,7 @@ func cpPropose() error {
 		energi_params.Energi_CheckpointRegistry, ethServ.APIBackend,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	callOpts := bind.CallOpts{
@@ -446,12 +447,12 @@ func cpPropose() error {
 	block := ethServ.BlockChain().CurrentHeader()
 	hashRaw, err := cpRegistry.SignatureBase(&callOpts, block.Number, block.Hash())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	signature, err := crypto.Sign(hashRaw[:], signers[cpSigner])
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	signature[64] += 27
@@ -468,7 +469,15 @@ func cpPropose() error {
 		addTxDesc(tx, "checkpoint")
 	}
 
-	return err
+	cp := core.CheckpointInfo{
+		Checkpoint: core.Checkpoint{
+			Number: block.Number.Uint64(),
+			Hash:   block.Hash(),
+		},
+		CppSignature: signature,
+	}
+
+	return &cp, err
 }
 
 func depositCollateral(
@@ -677,6 +686,8 @@ func isSignedCheckpointTx(tx *types.Transaction) bool {
 }
 
 func masternodeCPSigningTest(t *testing.T) {
+	miningTimeout := time.After(miningInterval)
+
 	// masternode mn node picked is at index 1.
 	mn := nodesInfo[mnIndex]
 	var mnEthService *eth.Ethereum
@@ -769,7 +780,7 @@ func masternodeCPSigningTest(t *testing.T) {
 
 	// The cpp signer node proposes a checkpoint.
 	fmt.Println(" _______ PROPOSE CHECKPOINT _____")
-	err = cpPropose()
+	_, err = cpPropose()
 	assert.Equal(t, nil, err)
 
 	// Send more txs.
@@ -804,7 +815,7 @@ func masternodeCPSigningTest(t *testing.T) {
 		// Test Passed
 		fmt.Println(" _______ A checkpoint signed by a masternode was found _____")
 
-	case <-time.After(miningInterval):
+	case <-miningTimeout:
 		// Test Failed
 		t.Fatalf(" _______ signed Checkpoint NOT found: mining interval expired _____")
 	}
