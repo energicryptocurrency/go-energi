@@ -44,6 +44,7 @@ const (
 	accountPass     = "secret-pass"
 	peerConInterval = 1 * time.Minute
 	miningInterval  = 4 * time.Minute
+	peerSyncDelay   = 20 * time.Second
 
 	gasLimit          = 40000000
 	mnPrepareGasLimit = 3900000
@@ -60,9 +61,6 @@ var (
 	gasPrice   = big.NewInt(10000000000)
 	collateral = new(big.Int).Mul(big.NewInt(100000), big.NewInt(1e18))
 	balance    = new(big.Int).Mul(big.NewInt(1000000), big.NewInt(1e18))
-
-	blockNo   = big.NewInt(10)
-	blockHash = common.HexToHash("0x9191e3da766eee8472a6a2ef5d7b84426f3dd154638e6abd1f2ded2ce8a4a02f")
 
 	errTimeout = errors.New("time expired")
 
@@ -157,15 +155,8 @@ func getMigration(chainID uint64) ([]byte, error) {
 	return json.Marshal(migrations)
 }
 
-func TestMasternodeService(m *testing.M) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
-
+func TestMasternodeService(t *testing.T) {
 	// log.Root().SetHandler(log.StdoutHandler)
-
-	// Reduce the cppSyncDelay interval to a negligible value.
-	cppSyncDelay = 1 * time.Microsecond
 
 	// initialize tx Description Map
 	txDesc = txDescription{
@@ -242,7 +233,7 @@ func TestMasternodeService(m *testing.M) {
 
 		switch nConfig.isMN {
 		case true:
-			node, err = MasternodeNetwork(key, allocs)
+			node, err = energiServices(key, allocs)
 
 		default: // rest of the account belong to enodes.
 			node, err = newNode(key, allocs)
@@ -320,7 +311,7 @@ func TestMasternodeService(m *testing.M) {
 		}
 	}
 
-	code := m.Run()
+	masternodeCPSigningTest(t)
 
 	// Clean Up
 	os.Remove(tmpFile.Name())
@@ -330,8 +321,6 @@ func TestMasternodeService(m *testing.M) {
 		err = data.stack.Stop()
 		withErr("Failed to stop the protocol stack", err)
 	}
-
-	os.Exit(code)
 }
 
 // serviceConfig generates the ethereum service configuration.
@@ -341,6 +330,7 @@ func serviceConfig(presale core.GenesisAlloc) *eth.Config {
 	ethConfig.MinerRecommit = 3 * time.Second
 	ethConfig.Genesis = core.DefaultEnergiTestnetGenesisBlock()
 	ethConfig.Genesis.GasLimit = gasLimit
+	ethConfig.Genesis.Config.ChainID = big.NewInt(1)
 	ethConfig.Genesis.Config.Energi.CPPSigner = cpSigner
 	ethConfig.Genesis.Config.Energi.MigrationSigner = mgSigner
 	ethConfig.Genesis.Alloc = presale
@@ -383,9 +373,9 @@ func newNode(privKey *ecdsa.PrivateKey, presale core.GenesisAlloc) (*node.Node, 
 	return stack, nil
 }
 
-// MasternodeNetwork creates a new network node to the protocol with the default
-// values and registers the ethreum & masternode services into the network.
-func MasternodeNetwork(privKey *ecdsa.PrivateKey, presale core.GenesisAlloc) (*node.Node, error) {
+// energiServices creates a new network node to the protocol with the default
+// values and registers the ethereum, masternode and checkpoint services into the network.
+func energiServices(privKey *ecdsa.PrivateKey, presale core.GenesisAlloc) (*node.Node, error) {
 	stack, err := newNode(privKey, presale)
 	if err != nil {
 		return nil, err
@@ -402,6 +392,19 @@ func MasternodeNetwork(privKey *ecdsa.PrivateKey, presale core.GenesisAlloc) (*n
 	// Register the masternode service.
 	if err := stack.Register(MNConstructor); err != nil {
 		return nil, fmt.Errorf("Failed to register MN service: %v", err)
+	}
+
+	CPConstructor := func(ctx *node.ServiceContext) (node.Service, error) {
+		var ethServ *eth.Ethereum
+		if err := ctx.Service(&ethServ); err != nil {
+			return nil, err
+		}
+		return NewCheckpointService(ethServ)
+	}
+
+	// Register the checkpoint service.
+	if err := stack.Register(CPConstructor); err != nil {
+		return nil, fmt.Errorf("Failed to register CP service: %v", err)
 	}
 
 	return stack, nil
@@ -421,14 +424,14 @@ func SignerCallback(node *node.Node, signerAddrs map[common.Address]*ecdsa.Priva
 }
 
 // cpPropose uses the CPPSigner to propose a checkpoint to the network.
-func cpPropose(hash common.Hash, blockNo *big.Int) error {
+func cpPropose() error {
 	signer := nodesInfo[cpSignerIndex]
 
 	var ethServ *eth.Ethereum
 	signer.stack.Service(&ethServ)
 
 	// Governed Proxy Contract
-	cpRegistry, err := energi_abi.NewCheckpointRegistryV1(
+	cpRegistry, err := energi_abi.NewCheckpointRegistryV2(
 		energi_params.Energi_CheckpointRegistry, ethServ.APIBackend,
 	)
 	if err != nil {
@@ -440,7 +443,8 @@ func cpPropose(hash common.Hash, blockNo *big.Int) error {
 		GasLimit: mnPrepareGasLimit,
 	}
 
-	hashRaw, err := cpRegistry.SignatureBase(&callOpts, blockNo, hash)
+	block := ethServ.BlockChain().CurrentHeader()
+	hashRaw, err := cpRegistry.SignatureBase(&callOpts, block.Number, block.Hash())
 	if err != nil {
 		return err
 	}
@@ -459,7 +463,7 @@ func cpPropose(hash common.Hash, blockNo *big.Int) error {
 		GasLimit: mnPrepareGasLimit,
 	}
 
-	tx, err := cpRegistry.Propose(&transactOpts, blockNo, hash, signature)
+	tx, err := cpRegistry.Propose(&transactOpts, block.Number, block.Hash(), signature)
 	if tx != nil {
 		addTxDesc(tx, "checkpoint")
 	}
@@ -603,7 +607,7 @@ func networkEventsLoop(
 	headSub := bc.SubscribeChainHeadEvent(chainHeadCh)
 	defer headSub.Unsubscribe()
 
-	txEventCh := make(chan core.NewTxsEvent, txChanSize)
+	txEventCh := make(chan core.NewTxsEvent, 10)
 	txSub := txpool.SubscribeNewTxsEvent(txEventCh)
 	defer txSub.Unsubscribe()
 
@@ -624,12 +628,10 @@ func networkEventsLoop(
 					isSignedCPP <- struct{}{}
 				}
 			}
-			break
 		case txEvent := <-txEventCh:
 			for _, tx := range txEvent.Txs {
 				fmt.Printf("\t\t _____ (%s) Tx Announced  %v _____ \n", checkTxDesc(tx), tx.Hash().String())
 			}
-			break
 
 		// Shutdown
 		case <-headSub.Err():
@@ -673,7 +675,8 @@ func isSignedCheckpointTx(tx *types.Transaction) bool {
 	// fmt.Println("invalid recipient address found: Not Required tx")
 	return false
 }
-func TestMasternodeSigning(t *testing.T) {
+
+func masternodeCPSigningTest(t *testing.T) {
 	// masternode mn node picked is at index 1.
 	mn := nodesInfo[mnIndex]
 	var mnEthService *eth.Ethereum
@@ -711,6 +714,8 @@ func TestMasternodeSigning(t *testing.T) {
 			select {
 			case event := <-peerCh:
 				if event.Type == p2p.PeerEventTypeMsgRecv {
+					// Allow some delay for the peer to sync.
+					time.Sleep(peerSyncDelay)
 					break peerConLoop
 				}
 			case <-time.After(peerConInterval):
@@ -735,7 +740,7 @@ func TestMasternodeSigning(t *testing.T) {
 		}
 	}()
 
-	// Confirm that the peer was added to the network.
+	// Confirm that all the peers were added to the network.
 	assert.Equal(t, peers, mnServer.PeerCount())
 
 	fmt.Println(" _______ START MINING _____")
@@ -764,7 +769,7 @@ func TestMasternodeSigning(t *testing.T) {
 
 	// The cpp signer node proposes a checkpoint.
 	fmt.Println(" _______ PROPOSE CHECKPOINT _____")
-	err = cpPropose(blockHash, blockNo)
+	err = cpPropose()
 	assert.Equal(t, nil, err)
 
 	// Send more txs.
