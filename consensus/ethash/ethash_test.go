@@ -33,9 +33,6 @@ import (
 
 // Tests that ethash works correctly in test mode.
 func TestTestMode(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	header := &types.Header{Number: big.NewInt(1), Difficulty: big.NewInt(100)}
 
 	ethash := NewTester(nil, false)
@@ -96,9 +93,6 @@ func verifyTest(wg *sync.WaitGroup, e *Ethash, workerIndex, epochs int) {
 }
 
 func TestRemoteSealer(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	ethash := NewTester(nil, false)
 	defer ethash.Close()
 
