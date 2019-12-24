@@ -18,7 +18,6 @@ package core
 
 import (
 	"math/big"
-	"os"
 	"reflect"
 	"testing"
 
@@ -31,26 +30,36 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 )
 
+var (
+	DefaultMainnetGenesisHash = common.HexToHash("0x493c7b54d31001e4e9f8c37f96186fc96088f71b050c61351b6dbda90bf59bf0")
+	DefaultTestnetGenesisHash = common.HexToHash("0x8f25a6ec9252577d66f4f1905414cf9c43424b95af1bbc5f97823624cfa3dd51")
+)
+
 func TestDefaultGenesisBlock(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	block := DefaultGenesisBlock().ToBlock(nil)
-	if block.Hash() != params.MainnetGenesisHash {
-		t.Errorf("wrong mainnet genesis hash, got %v, want %v", block.Hash(), params.MainnetGenesisHash)
+	if block.Hash() != DefaultMainnetGenesisHash {
+		t.Errorf("wrong default mainnet genesis hash, got %v, want %v", block.Hash().String(), DefaultMainnetGenesisHash.String())
 	}
 	block = DefaultTestnetGenesisBlock().ToBlock(nil)
+	if block.Hash() != DefaultTestnetGenesisHash {
+		t.Errorf("wrong default testnet genesis hash, got %v, want %v", block.Hash().String(), DefaultTestnetGenesisHash.String())
+	}
+}
+
+func TestEnergiGenesisBlock(t *testing.T) {
+	block := DefaultEnergiMainnetGenesisBlock().ToBlock(nil)
+	if block.Hash() != params.MainnetGenesisHash {
+		t.Errorf("wrong energi mainnet genesis hash, got %v, want %v", block.Hash().String(), params.MainnetGenesisHash.String())
+	}
+	block = DefaultEnergiTestnetGenesisBlock().ToBlock(nil)
 	if block.Hash() != params.TestnetGenesisHash {
-		t.Errorf("wrong testnet genesis hash, got %v, want %v", block.Hash(), params.TestnetGenesisHash)
+		t.Errorf("wrong energi testnet genesis hash, got %v, want %v", block.Hash().String(), params.TestnetGenesisHash.String())
 	}
 }
 
 func TestSetupGenesis(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	var (
-		customghash = common.HexToHash("0x89c99d90b79719238d2645c7642f2c9295246e80775b38cfd162b696817fbd50")
+		customghash = common.HexToHash("0x3355576b6a5756a0040828c9b41d4afa58de21b537034253e57cf4759faf295b")
 		customg     = Genesis{
 			Config: &params.ChainConfig{HomesteadBlock: big.NewInt(3)},
 			Alloc: GenesisAlloc{
@@ -80,17 +89,26 @@ func TestSetupGenesis(t *testing.T) {
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
 				return SetupGenesisBlock(db, nil)
 			},
-			wantHash:   params.MainnetGenesisHash,
+			wantHash:   DefaultMainnetGenesisHash,
 			wantConfig: params.MainnetChainConfig,
 		},
 		{
-			name: "mainnet block in DB, genesis == nil",
+			name: "default mainnet block in DB, genesis == nil",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
 				DefaultGenesisBlock().MustCommit(db)
 				return SetupGenesisBlock(db, nil)
 			},
-			wantHash:   params.MainnetGenesisHash,
+			wantHash:   DefaultMainnetGenesisHash,
 			wantConfig: params.MainnetChainConfig,
+		},
+		{
+			name: "energi mainnet block in DB, genesis == nil",
+			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
+				DefaultEnergiMainnetGenesisBlock().MustCommit(db)
+				return SetupGenesisBlock(db, nil)
+			},
+			wantHash:   params.MainnetGenesisHash,
+			wantConfig: DefaultEnergiMainnetGenesisBlock().Config,
 		},
 		{
 			name: "custom block in DB, genesis == nil",
@@ -102,14 +120,24 @@ func TestSetupGenesis(t *testing.T) {
 			wantConfig: customg.Config,
 		},
 		{
-			name: "custom block in DB, genesis == testnet",
+			name: "custom block in DB, genesis == default testnet",
 			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
 				customg.MustCommit(db)
 				return SetupGenesisBlock(db, DefaultTestnetGenesisBlock())
 			},
+			wantErr:    &GenesisMismatchError{Stored: customghash, New: DefaultTestnetGenesisHash},
+			wantHash:   DefaultTestnetGenesisHash,
+			wantConfig: params.TestnetChainConfig,
+		},
+		{
+			name: "custom block in DB, genesis == energi testnet",
+			fn: func(db ethdb.Database) (*params.ChainConfig, common.Hash, error) {
+				customg.MustCommit(db)
+				return SetupGenesisBlock(db, DefaultEnergiTestnetGenesisBlock())
+			},
 			wantErr:    &GenesisMismatchError{Stored: customghash, New: params.TestnetGenesisHash},
 			wantHash:   params.TestnetGenesisHash,
-			wantConfig: params.TestnetChainConfig,
+			wantConfig: params.EnergiTestnetChainConfig,
 		},
 		{
 			name: "compatible config in DB",
@@ -148,24 +176,26 @@ func TestSetupGenesis(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		db := ethdb.NewMemDatabase()
-		config, hash, err := test.fn(db)
-		// Check the return values.
-		if !reflect.DeepEqual(err, test.wantErr) {
-			spew := spew.ConfigState{DisablePointerAddresses: true, DisableCapacities: true}
-			t.Errorf("%s: returned error %#v, want %#v", test.name, spew.NewFormatter(err), spew.NewFormatter(test.wantErr))
-		}
-		if !reflect.DeepEqual(config, test.wantConfig) {
-			t.Errorf("%s:\nreturned %v\nwant     %v", test.name, config, test.wantConfig)
-		}
-		if hash != test.wantHash {
-			t.Errorf("%s: returned hash %s, want %s", test.name, hash.Hex(), test.wantHash.Hex())
-		} else if err == nil {
-			// Check database content.
-			stored := rawdb.ReadBlock(db, test.wantHash, 0)
-			if stored.Hash() != test.wantHash {
-				t.Errorf("%s: block in DB has hash %s, want %s", test.name, stored.Hash(), test.wantHash)
+		t.Run(test.name, func(t *testing.T) {
+			db := ethdb.NewMemDatabase()
+			config, hash, err := test.fn(db)
+			// Check the return values.
+			if !reflect.DeepEqual(err, test.wantErr) {
+				spew := spew.ConfigState{DisablePointerAddresses: true, DisableCapacities: true}
+				t.Errorf("%s: returned error %#v, want %#v", test.name, spew.NewFormatter(err), spew.NewFormatter(test.wantErr))
 			}
-		}
+			if !reflect.DeepEqual(config, test.wantConfig) {
+				t.Errorf("%s:\nreturned %v\nwant     %v", test.name, config, test.wantConfig)
+			}
+			if hash != test.wantHash {
+				t.Errorf("%s: returned hash %s, want %s", test.name, hash.Hex(), test.wantHash.Hex())
+			} else if err == nil {
+				// Check database content.
+				stored := rawdb.ReadBlock(db, test.wantHash, 0)
+				if stored.Hash() != test.wantHash {
+					t.Errorf("%s: block in DB has hash %s, want %s", test.name, stored.Hash(), test.wantHash)
+				}
+			}
+		})
 	}
 }

@@ -73,19 +73,26 @@ func transaction(nonce uint64, gaslimit uint64, key *ecdsa.PrivateKey) *types.Tr
 	return pricedTransaction(nonce, gaslimit, big.NewInt(1), key)
 }
 
-func pricedTransaction(nonce uint64, gaslimit uint64, gasprice *big.Int, key *ecdsa.PrivateKey) *types.Transaction {
-	tx, _ := types.SignTx(types.NewTransaction(nonce, common.Address{}, big.NewInt(100), gaslimit, gasprice, nil), types.HomesteadSigner{}, key)
+func pricedTransaction(nonce uint64, gaslimit uint64, gasprice *big.Int, key *ecdsa.PrivateKey, address ...common.Address) *types.Transaction {
+	addr := common.Address{}
+	if len(address) > 0 {
+		addr = address[0]
+	}
+	tx, _ := types.SignTx(types.NewTransaction(nonce, addr, big.NewInt(100), gaslimit, gasprice, nil), types.HomesteadSigner{}, key)
 	return tx
 }
 
-func zerofeeTransaction(nonce uint64, dst common.Address, data []byte, key *ecdsa.PrivateKey) *types.Transaction {
-	tx, _ := types.SignTx(types.NewTransaction(nonce, dst, common.Big0, 50000, common.Big0, data), types.HomesteadSigner{}, key)
+func zerofeeTransaction(nonce uint64, dst common.Address, method types.MethodID, key *ecdsa.PrivateKey) *types.Transaction {
+	var data = make([]byte, 40)
+	copy(data, method[:])
+	copy(data[4:36], dst.Hash().Bytes())
+	tx, _ := types.SignTx(types.NewTransaction(nonce, dst, common.Big0, ZeroFeeGasLimit, big.NewInt(1), data), types.HomesteadSigner{}, key)
 	return tx
 }
 
 func setupTxPool() (*TxPool, *ecdsa.PrivateKey) {
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(ethdb.NewMemDatabase()))
-	blockchain := &testBlockChain{statedb, 1000000, new(event.Feed)}
+	blockchain := &testBlockChain{statedb, 40000000, new(event.Feed)}
 
 	key, _ := crypto.GenerateKey()
 	pool := NewTxPool(testTxPoolConfig, params.TestChainConfig, blockchain)
@@ -1842,17 +1849,23 @@ func benchmarkPoolBatchInsert(b *testing.B, size int) {
 /**
  * Test if zero fee xfers get added
  */
-func TestZeroFee(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
+func TestZeroFeeTxs(t *testing.T) {
 	t.Parallel()
 
 	// Create a test account and fund it
 	pool, key := setupTxPool()
 	defer pool.Stop()
 
-	//account, _ := deriveSender(transaction(0, 0, key))
+	account, _ := deriveSender(transaction(0, 0, key))
+	pool.currentState.AddBalance(account, big.NewInt(100000000))
+
+	sender := crypto.PubkeyToAddress(key.PublicKey)
+	pool.currentState.SetState(
+		energi_params.Energi_MasternodeList,
+		sender.Hash(),
+		common.BytesToHash([]byte{0x02}),
+	)
+
 	total := 3
 
 	// Keep queuing up transactions and make sure all above a limit are dropped
@@ -1860,8 +1873,9 @@ func TestZeroFee(t *testing.T) {
 		if err := pool.AddRemote(pricedTransaction(uint64(i), 50000, common.Big0, key)); err == nil {
 			t.Fatalf("tx %d: invalid zerofee got added: %v", i, err)
 		}
-		if err := pool.AddRemote(zerofeeTransaction(uint64(i), common.HexToAddress("0x308"), energiClaimID[:], key)); err != nil {
-			t.Fatalf("tx %d: failed to add transaction: %v", i, err)
+		tx := zerofeeTransaction(uint64(i), common.HexToAddress("0x308"), energiCPSignID, key)
+		if err := pool.AddRemote(tx); err != nil {
+			t.Fatalf("tx %d: failed to add zerofee transaction: %v", i, err)
 		}
 		if len(pool.pending) != 0 {
 			t.Errorf("tx %d: pending pool size mismatch: have %d, want %d", i, len(pool.pending), 0)
@@ -1882,18 +1896,7 @@ func TestAddLocals(t *testing.T) {
 	defer pool.Stop()
 
 	account, _ := deriveSender(transaction(0, 0, key))
-	pool.currentState.AddBalance(account, big.NewInt(1000000))
-
-	getTx := func(nonce uint64, address common.Address, gasPrice *big.Int, method types.MethodID) *types.Transaction {
-		var data = make([]byte, 40)
-		copy(data, method[:])
-		copy(data[4:36], address.Hash().Bytes())
-		tx, err := types.SignTx(types.NewTransaction(nonce, address, gasPrice, 50000, common.Big0, data), types.HomesteadSigner{}, key)
-		if err != nil {
-			panic(err)
-		}
-		return tx
-	}
+	pool.currentState.AddBalance(account, big.NewInt(100000000))
 
 	// Enable the local tx handling by setting pool.config.NoLocals to false.
 	pool.config.NoLocals = false
@@ -1903,13 +1906,13 @@ func TestAddLocals(t *testing.T) {
 		sender.Hash(),
 		common.BytesToHash([]byte{0x01}),
 	)
-	reqTx := getTx(0, common.Address{234}, big.NewInt(100), energiMNInvalidateID)
 
+	reqTx := pricedTransaction(0, 40000000, common.Big0, key, common.Address{234})
 	if err := pool.AddLocal(reqTx); err != nil {
 		t.Errorf("AddLocals failed to add a regular tx: %v", err)
 	}
 
-	tx := getTx(1, common.HexToAddress("0x306"), common.Big0, energiCPSignID)
+	tx := zerofeeTransaction(1, common.HexToAddress("0x306"), energiCPSignID, key)
 	if err := pool.AddLocal(tx); err != nil {
 		t.Errorf("AddLocals failed to add a zero fee tx: %v", err)
 	}
@@ -1921,13 +1924,13 @@ func TestAddLocals(t *testing.T) {
 		sender.Hash(),
 		common.BytesToHash([]byte{0x02}),
 	)
-	tx = getTx(2, common.Address{236}, big.NewInt(100), energiMNHeartbeatID)
 
+	tx = pricedTransaction(2, 40000000, common.Big0, key, common.Address{236})
 	if err := pool.AddLocal(tx); err != nil {
 		t.Errorf("AddLocals failed to add a regular tx: %v", err)
 	}
 
-	tx = getTx(3, common.HexToAddress("0x308"), common.Big0, energiCPSignID)
+	tx = zerofeeTransaction(3, common.HexToAddress("0x308"), energiCPSignID, key)
 	if err := pool.AddLocal(tx); err != nil {
 		t.Errorf("AddLocals failed to add a zero fee tx: %v", err)
 	}
