@@ -661,6 +661,12 @@ var (
 		Name:  "masternode",
 		Usage: "Enable Energi Masternode service",
 	}
+
+	EnergiInitDevFlag = cli.StringFlag{
+		Name:  "init",
+		Usage: "Energi network: use pre-configured custom genesis block",
+		Value: "",
+	}
 )
 
 // MakeDataDir retrieves the currently requested data directory, terminating
@@ -1202,7 +1208,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	checkExclusive(ctx, DeveloperFlag, TestnetFlag)
+	checkExclusive(ctx, DeveloperFlag, TestnetFlag, EnergiInitDevFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	ks := stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
@@ -1330,6 +1336,13 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		cfg.Genesis = core.DeveloperGenesisBlock(uint64(ctx.GlobalInt(DeveloperPeriodFlag.Name)), developer.Address)
 		if !ctx.GlobalIsSet(MinerGasPriceFlag.Name) && !ctx.GlobalIsSet(MinerLegacyGasPriceFlag.Name) {
 			cfg.MinerGasPrice = big.NewInt(1)
+		}
+	case ctx.GlobalString(EnergiInitDevFlag.Name) != "":
+		// Check for the pre-defined custom genesis block configuration.
+		var err error
+		cfg.Genesis, err = core.DeveloperEnergiGenesisBlock(ctx.GlobalString(EnergiInitDevFlag.Name))
+		if err != nil {
+			Fatalf("Valid custom genesis block configuration was not found: %v", err)
 		}
 	default:
 		cfg.Genesis = core.DefaultEnergiMainnetGenesisBlock()

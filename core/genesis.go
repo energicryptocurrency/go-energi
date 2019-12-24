@@ -449,6 +449,23 @@ func DefaultEnergiTestnetGenesisBlock() *Genesis {
 	}
 }
 
+// DeveloperEnergiGenesisBlock scans the custom genesis block from the provided
+// file path.
+func DeveloperEnergiGenesisBlock(customGenesisPath string) (*Genesis, error) {
+	file, err := os.Open(customGenesisPath)
+	defer file.Close()
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read genesis file: %v", err)
+	}
+
+	genesis := new(Genesis)
+	if err := json.NewDecoder(file).Decode(genesis); err != nil {
+		return nil, fmt.Errorf("invalid genesis file: %v", err)
+	}
+	genesis.Xfers = append(genesis.Xfers, DeployEnergiGovernance(genesis.Config)...)
+	return genesis, nil
+}
+
 // DeveloperGenesisBlock returns the 'geth --dev' genesis block. Note, this must
 // be seeded with the
 func DeveloperGenesisBlock(period uint64, faucet common.Address) *Genesis {

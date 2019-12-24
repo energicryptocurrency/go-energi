@@ -139,6 +139,7 @@ var (
 		utils.EWASMInterpreterFlag,
 		utils.EVMInterpreterFlag,
 		utils.MasternodeFlag,
+		utils.EnergiInitDevFlag,
 		configFileFlag,
 	}
 

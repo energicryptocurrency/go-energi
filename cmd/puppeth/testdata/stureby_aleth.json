@@ -9,7 +9,7 @@
     "EIP158ForkBlock":"0x59d8",
     "byzantiumForkBlock":"0x7530",
     "constantinopleForkBlock":"0x9c40",
-    "minGasLimit":"0x1388",
+    "minGasLimit":"0x2625a00",
     "maxGasLimit":"0x7fffffffffffffff",
     "tieBreakingGas":false,
     "gasLimitBoundDivisor":"0x0400",
