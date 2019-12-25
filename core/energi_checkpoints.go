@@ -35,6 +35,7 @@ import (
 
 type CheckpointValidateChain interface {
 	GetHeaderByNumber(number uint64) *types.Header
+	CurrentHeader() *types.Header
 }
 
 type CheckpointChain interface {
@@ -114,6 +115,8 @@ func (cm *checkpointManager) validate(chain CheckpointValidateChain, num uint64,
 		if cp.Hash != hash {
 			return ErrCheckpointMismatch
 		}
+
+		cm.updateLatest(chain, &cp.Checkpoint)
 
 		return nil
 	}
@@ -201,6 +204,8 @@ func (cm *checkpointManager) addCheckpoint(
 
 	err = chain.EnforceCheckpoint(cp)
 
+	cm.updateLatest(chain, &cp)
+
 	if !local {
 		// Send regardless of enforcement success
 		cm.newCpFeed.Send(NewCheckpointEvent{CheckpointInfo{cp, sigs[0], uint64(len(sigs))}})
@@ -214,6 +219,13 @@ func (cm *checkpointManager) hashToSign(cp *Checkpoint) []byte {
 	data = append(data, common.BigToHash(new(big.Int).SetUint64(cp.Number)).Bytes()...)
 	data = append(data, cp.Hash.Bytes()...)
 	return crypto.Keccak256(data)
+}
+
+func (cm *checkpointManager) updateLatest(chain CheckpointValidateChain, cp *Checkpoint) {
+	if cp.Number > cm.latest && cp.Number <= chain.CurrentHeader().Number.Uint64() {
+		cm.latest = cp.Number
+		log.Info("Latest checkpoint", "height", cp.Number, "hash", cp.Hash.Hex())
+	}
 }
 
 func (bc *BlockChain) EnforceCheckpoint(cp Checkpoint) error {

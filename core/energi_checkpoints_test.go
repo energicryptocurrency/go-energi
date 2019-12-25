@@ -51,6 +51,7 @@ func TestCheckpoints(t *testing.T) {
 	assert.Empty(t, err)
 	second_fork := blocks[0].Hash()
 	assert.NotEqual(t, first_fork, second_fork)
+	assert.Equal(t, chain.checkpoints.latest, uint64(0))
 
 	// Orig long chain
 	curr_fork := chain.GetHeaderByNumber(fpn + 1).Hash()
@@ -69,6 +70,7 @@ func TestCheckpoints(t *testing.T) {
 
 	curr_fork = chain.GetHeaderByNumber(fpn + 1).Hash()
 	assert.Equal(t, second_fork, curr_fork)
+	assert.Equal(t, chain.checkpoints.latest, fpn+1)
 
 	log.Trace("Unknown fork")
 	unknown_fork := second_fork
@@ -123,6 +125,7 @@ func TestCheckpoints(t *testing.T) {
 	log.Trace("Failed at checkpoint")
 	blocks = makeBlockChain(fp, 2, engine, db, canonicalSeed+2)
 	third_fork := blocks[0].Hash()
+	third_second := blocks[1].Hash()
 
 	_, err = chain.InsertHeaderChain([]*types.Header{
 		blocks[0].Header(),
@@ -140,18 +143,44 @@ func TestCheckpoints(t *testing.T) {
 	}
 	sig, _ = crypto.Sign(chain.checkpoints.hashToSign(&cp), signer)
 	err = chain.AddCheckpoint(
-		Checkpoint{
-			Number: fpn + 1,
-			Hash:   third_fork,
-		},
+		cp,
 		[]CheckpointSignature{CheckpointSignature(sig)},
 		false,
 	)
 	assert.Empty(t, err)
+	assert.Equal(t, chain.checkpoints.latest, fpn+1)
 
 	_, err = chain.InsertChain(blocks)
 	assert.Empty(t, err)
 
 	curr_fork = chain.GetHeaderByNumber(fpn + 1).Hash()
 	assert.Equal(t, third_fork, curr_fork)
+
+	log.Trace("Valid remote checkpoint (second)")
+	cp = Checkpoint{
+		Number: fpn + 2,
+		Hash:   third_second,
+	}
+	sig, _ = crypto.Sign(chain.checkpoints.hashToSign(&cp), signer)
+	err = chain.AddCheckpoint(
+		cp,
+		[]CheckpointSignature{CheckpointSignature(sig)},
+		false,
+	)
+	assert.Empty(t, err)
+	assert.Equal(t, chain.checkpoints.latest, fpn+2)
+
+	log.Trace("Valid remote checkpoint (future)")
+	cp = Checkpoint{
+		Number: fpn + 10,
+		Hash:   third_second,
+	}
+	sig, _ = crypto.Sign(chain.checkpoints.hashToSign(&cp), signer)
+	err = chain.AddCheckpoint(
+		cp,
+		[]CheckpointSignature{CheckpointSignature(sig)},
+		false,
+	)
+	assert.Empty(t, err)
+	assert.Equal(t, chain.checkpoints.latest, fpn+2)
 }
