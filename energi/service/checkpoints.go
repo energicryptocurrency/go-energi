@@ -76,6 +76,17 @@ func (c *CheckpointService) Start(server *p2p.Server) (err error) {
 	}
 
 	c.server = server
+
+	//---
+	oldCheckpoints, err := c.cpRegistry.Checkpoints(c.callOpts)
+	if err != nil {
+		log.Error("Failed to get old checkpoints (startup)", "err", err)
+	} else if lc := len(oldCheckpoints); lc > 0 {
+		// NOTE: enable the latest checkpoint immediately for safety reasons
+		c.onCheckpoint(oldCheckpoints[lc-1], false)
+	}
+
+	//---
 	go c.loop()
 	return nil
 }
@@ -173,7 +184,7 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 
 	cpp_sig, err := cp.Signature(c.callOpts, cppSigner)
 	if err != nil {
-		log.Warn("Failed to get CPP sig", "addr", cpAddr, "err", err)
+		log.Debug("Skipping checkpoint with no CPP sig", "addr", cpAddr, "err", err)
 		return
 	}
 
