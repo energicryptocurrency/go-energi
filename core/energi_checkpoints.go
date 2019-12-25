@@ -201,8 +201,10 @@ func (cm *checkpointManager) addCheckpoint(
 
 	err = chain.EnforceCheckpoint(cp)
 
-	// Send regardless of enforcement success
-	cm.newCpFeed.Send(NewCheckpointEvent{CheckpointInfo{cp, sigs[0], uint64(len(sigs))}})
+	if !local {
+		// Send regardless of enforcement success
+		cm.newCpFeed.Send(NewCheckpointEvent{CheckpointInfo{cp, sigs[0], uint64(len(sigs))}})
+	}
 
 	return err
 }
