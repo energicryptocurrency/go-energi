@@ -184,7 +184,7 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 
 	cpp_sig, err := cp.Signature(c.callOpts, cppSigner)
 	if err != nil {
-		log.Warn("Failed to get CPP sig", "addr", cpAddr, "err", err)
+		log.Debug("Skipping checkpoint with no CPP sig", "addr", cpAddr, "err", err)
 		return
 	}
 
