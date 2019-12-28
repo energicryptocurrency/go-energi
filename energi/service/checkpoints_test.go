@@ -3,9 +3,7 @@ package service
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"io/ioutil"
 	"net"
-	"os"
 	"reflect"
 	"sync"
 	"testing"
@@ -24,6 +22,7 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/stretchr/testify/assert"
 
+	energi_testutils "energi.world/core/gen3/energi/common/testutils"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -166,17 +165,12 @@ func TestCheckpointsService(t *testing.T) {
 		signers[ownerAddr] = ownerKey
 	}
 
+	migrations := energi_testutils.NewTestGen2Migration()
 	// Create a gen2 migration tempfile
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "node-simulation-")
-	withErr("Cannot create temporary file", err)
-
-	migrations, err := getMigration(params.EnergiTestnetChainConfig.ChainID.Uint64())
+	err := migrations.PrepareTestGen2Migration(params.EnergiTestnetChainConfig.ChainID.Uint64())
 	withErr("Creating the Gen2 snapshot failed", err)
 
-	_, err = tmpFile.Write(migrations)
-	withErr("Failed to write to temporary file", err)
-
-	migrationFile = tmpFile.Name()
+	migrationFile = migrations.TempFileName()
 
 	injectAccount := func(store *keystore.KeyStore, privKey *ecdsa.PrivateKey) {
 		account, err := store.ImportECDSA(privKey, accountPass)
@@ -223,7 +217,7 @@ func TestCheckpointsService(t *testing.T) {
 	listenToCheckpointsTest(t)
 
 	// Clean Up
-	os.Remove(tmpFile.Name())
+	migrations.CleanUp()
 
 	// Stop the entire protocol for all nodesInfo.
 	for _, data := range nodesInfo {

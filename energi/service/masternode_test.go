@@ -2,15 +2,10 @@ package service
 
 import (
 	"crypto/ecdsa"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
 	"net"
-	"os"
 	"sync"
 	"testing"
 	"time"
@@ -28,10 +23,10 @@ import (
 	"github.com/ethereum/go-ethereum/p2p"
 	"github.com/ethereum/go-ethereum/p2p/nat"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/shengdoushi/base58"
 	"github.com/stretchr/testify/assert"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_testutils "energi.world/core/gen3/energi/common/testutils"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -73,18 +68,6 @@ type nodeConfig struct {
 	address common.Address
 }
 
-type snapshotItem struct {
-	Owner  string   `json:"owner"`
-	Amount *big.Int `json:"amount"`
-	Atype  string   `json:"type"`
-}
-
-type snapshot struct {
-	Txouts    []snapshotItem `json:"snapshot_utxos"`
-	Blacklist []string       `json:"snapshot_blacklist"`
-	Hash      string         `json:"snapshot_hash"`
-}
-
 // txDescription helps to identify by description the respective txs mined.
 type txDescription struct {
 	mtx     sync.RWMutex
@@ -116,43 +99,6 @@ func accountGen() (*ecdsa.PrivateKey, common.Address) {
 	privKey, _ := crypto.GenerateKey()
 	walletAddr := crypto.PubkeyToAddress(privKey.PublicKey)
 	return privKey, walletAddr
-}
-
-func getMigration(chainID uint64) ([]byte, error) {
-	prefix := byte(33)
-	if chainID == 49797 {
-		prefix = byte(127)
-	}
-
-	res := make([]byte, 20)
-	_, err := rand.Read(res)
-	if err != nil {
-		return nil, err
-	}
-
-	owner := make([]byte, 25)
-	owner[0] = prefix
-	copy(owner[1:], res[:])
-	ownerhash := sha256.Sum256(owner[:21])
-	copy(owner[21:], ownerhash[:4])
-
-	items := int(params.MinGasLimit / 100000)
-	snapshotItems := make([]snapshotItem, 0, items)
-	for i := 0; i < items; i++ {
-		snapshotItems = append(snapshotItems, snapshotItem{
-			Owner:  base58.Encode(owner, base58.BitcoinAlphabet),
-			Amount: big.NewInt(1000),
-			Atype:  "pubkeyhash",
-		})
-	}
-
-	migrations := snapshot{
-		Txouts:    snapshotItems,
-		Blacklist: []string{"tWFyUdwGxEkcam2aikVsDMPDpvMNKfP2XV"},
-		Hash:      "778d7a438e3b86e0e754c4e46af802f852eb7c051d268c8599aa17c0cb9ce819",
-	}
-
-	return json.Marshal(migrations)
 }
 
 func TestMasternodeService(t *testing.T) {
@@ -257,17 +203,12 @@ func TestMasternodeService(t *testing.T) {
 		signers[ownerAddr] = ownerKey
 	}
 
+	migrations := energi_testutils.NewTestGen2Migration()
 	// Create a gen2 migration tempfile
-	tmpFile, err := ioutil.TempFile(os.TempDir(), "node-simulation-")
-	withErr("Cannot create temporary file", err)
-
-	migrations, err := getMigration(params.EnergiTestnetChainConfig.ChainID.Uint64())
+	err := migrations.PrepareTestGen2Migration(params.EnergiTestnetChainConfig.ChainID.Uint64())
 	withErr("Creating the Gen2 snapshot failed", err)
 
-	_, err = tmpFile.Write(migrations)
-	withErr("Failed to write to temporary file", err)
-
-	migrationFile = tmpFile.Name()
+	migrationFile = migrations.TempFileName()
 
 	injectAccount := func(store *keystore.KeyStore, privKey *ecdsa.PrivateKey) {
 		account, err := store.ImportECDSA(privKey, accountPass)
@@ -314,7 +255,7 @@ func TestMasternodeService(t *testing.T) {
 	masternodeCPSigningTest(t)
 
 	// Clean Up
-	os.Remove(tmpFile.Name())
+	migrations.CleanUp()
 
 	// Stop the entire protocol for all nodesInfo.
 	for _, data := range nodesInfo {
