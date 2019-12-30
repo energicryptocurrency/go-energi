@@ -17,7 +17,6 @@
 package eth
 
 import (
-	"os"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -30,16 +29,16 @@ import (
 // Tests that fast sync gets disabled as soon as a real block is successfully
 // imported into the blockchain.
 func TestFastSyncDisabling(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	// Create a pristine protocol manager, check that fast sync is left enabled
 	pmEmpty, _ := newTestProtocolManagerMust(t, downloader.FastSync, 0, nil, nil)
 	if atomic.LoadUint32(&pmEmpty.fastSync) == 0 {
 		t.Fatalf("fast sync disabled on pristine blockchain")
 	}
+	// Blocks count to sync to must be a multiple of MaxHeaderFetch to avoid the
+	// block fetcher from blocking forever.
+	blocksToSync := 1152 // = MaxHeaderFetch * 6
 	// Create a full protocol manager, check that fast sync gets disabled
-	pmFull, _ := newTestProtocolManagerMust(t, downloader.FastSync, 1024, nil, nil)
+	pmFull, _ := newTestProtocolManagerMust(t, downloader.FastSync, blocksToSync, nil, nil)
 	if atomic.LoadUint32(&pmFull.fastSync) == 1 {
 		t.Fatalf("fast sync not disabled on non-empty blockchain")
 	}
