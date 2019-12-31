@@ -273,3 +273,5 @@ func (cr *fakeChainReader) GetBlock(hash common.Hash, number uint64) *types.Bloc
 func (cr *fakeChainReader) CalculateBlockState(hash common.Hash, number uint64) *state.StateDB {
 	return nil
 }
+
+func (cr *fakeChainReader) Engine() consensus.Engine { return nil }

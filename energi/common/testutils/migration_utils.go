@@ -57,16 +57,25 @@ func NewTestGen2Migration() *TestGen2Migration {
 // CleanUp deletes the temporary file created. This should be called once the
 // test is complete.
 func (tg *TestGen2Migration) CleanUp() error {
+	if tg == nil {
+		return nil
+	}
 	return os.Remove(tg.tempFile.Name())
 }
 
 // TempFileName returns the temp migrations file path.
 func (tg *TestGen2Migration) TempFileName() string {
+	if tg == nil {
+		return ""
+	}
 	return tg.tempFile.Name()
 }
 
 // PrepareTestGen2Migration creates a gen2 migration temp file.
 func (tg *TestGen2Migration) PrepareTestGen2Migration(chainID uint64) error {
+	if tg == nil {
+		return nil
+	}
 	prefix := byte(33)
 	if chainID == 49797 {
 		prefix = byte(127)
