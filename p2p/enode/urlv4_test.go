@@ -21,7 +21,6 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 	"net"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -48,6 +47,10 @@ var parseNodeTests = []struct {
 	},
 	{
 		rawurl:    "enode://1dd9d65c4552b5eb43d5ad55a2ee3f56c6cbc1c64a5c8d659f51fcd51bace24351232b8d7821617d2b29b54b81cdefb9b3e9c37d7fd5f63270bcc9e1a6f6a439@127.0.0.1:foo",
+		wantError: `parse enode://1dd9d65c4552b5eb43d5ad55a2ee3f56c6cbc1c64a5c8d659f51fcd51bace24351232b8d7821617d2b29b54b81cdefb9b3e9c37d7fd5f63270bcc9e1a6f6a439@127.0.0.1:foo: invalid port ":foo" after host`,
+	},
+	{
+		rawurl:    "enode://1dd9d65c4552b5eb43d5ad55a2ee3f56c6cbc1c64a5c8d659f51fcd51bace24351232b8d7821617d2b29b54b81cdefb9b3e9c37d7fd5f63270bcc9e1a6f6a439@127.0.0.1:70000",
 		wantError: `invalid port`,
 	},
 	{
@@ -130,9 +133,6 @@ func hexPubkey(h string) *ecdsa.PublicKey {
 }
 
 func TestParseNode(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	for _, test := range parseNodeTests {
 		n, err := ParseV4(test.rawurl)
 		if test.wantError != "" {
