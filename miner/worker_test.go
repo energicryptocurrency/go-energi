@@ -18,7 +18,7 @@ package miner
 
 import (
 	"math/big"
-	"os"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -33,6 +33,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/params"
+
+	energi_testutils "energi.world/core/gen3/energi/common/testutils"
+	energi "energi.world/core/gen3/energi/consensus"
+	energi_params "energi.world/core/gen3/energi/params"
 )
 
 var (
@@ -40,6 +44,7 @@ var (
 	testTxPoolConfig  core.TxPoolConfig
 	ethashChainConfig *params.ChainConfig
 	cliqueChainConfig *params.ChainConfig
+	energiChainConfig *params.ChainConfig
 
 	// Test accounts
 	testBankKey, _  = crypto.GenerateKey()
@@ -52,6 +57,9 @@ var (
 	// Test transactions
 	pendingTxs []*types.Transaction
 	newTxs     []*types.Transaction
+
+	// Energi signers private keys
+	migrationSigner, _ = crypto.GenerateKey()
 )
 
 func init() {
@@ -63,6 +71,7 @@ func init() {
 		Period: 10,
 		Epoch:  30000,
 	}
+	energiChainConfig = params.EnergiTestnetChainConfig
 	tx1, _ := types.SignTx(types.NewTransaction(0, testUserAddress, big.NewInt(1000), params.TxGas, nil, nil), types.HomesteadSigner{}, testBankKey)
 	pendingTxs = append(pendingTxs, tx1)
 	tx2, _ := types.SignTx(types.NewTransaction(1, testUserAddress, big.NewInt(1000), params.TxGas, nil, nil), types.HomesteadSigner{}, testBankKey)
@@ -76,10 +85,13 @@ type testWorkerBackend struct {
 	chain      *core.BlockChain
 	testTxFeed event.Feed
 	uncleBlock *types.Block
+	migration  *energi_testutils.TestGen2Migration
 }
 
 func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine, n int) *testWorkerBackend {
 	var (
+		migrations *energi_testutils.TestGen2Migration
+
 		db    = ethdb.NewMemDatabase()
 		gspec = core.Genesis{
 			Config: chainConfig,
@@ -92,6 +104,37 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 		gspec.ExtraData = make([]byte, 32+common.AddressLength+65)
 		copy(gspec.ExtraData[32:], testBankAddress[:])
 	case *ethash.Ethash:
+	case *energi.Energi:
+		// Create a gen2 migration tempfile
+		migrations = energi_testutils.NewTestGen2Migration()
+		if err := migrations.PrepareTestGen2Migration(chainConfig.ChainID.Uint64()); err != nil {
+			t.Fatalf("Creating the Gen2 snapshot failed: %v", err)
+		}
+
+		// Set the migrations signer.
+		gspec.Alloc[energi_params.Energi_MigrationContract] = core.GenesisAccount{Balance: testBankFunds}
+		energiEngine := engine.(*energi.Energi)
+		// energiEngine.testing = true
+		energiEngine.SetMinerCB(
+			func() []common.Address {
+				return []common.Address{energi_params.Energi_MigrationContract}
+			},
+			func(addr common.Address, hash []byte) ([]byte, error) {
+				return crypto.Sign(hash, migrationSigner)
+			},
+			func() int { return 1 },
+		)
+		chainConfig.Energi = &params.EnergiConfig{
+			MigrationSigner: crypto.PubkeyToAddress(migrationSigner.PublicKey),
+		}
+
+		// Update genesis block config.
+		gspec.GasLimit = 8000000
+		gspec.Timestamp = 1000
+		gspec.Difficulty = big.NewInt(1)
+		gspec.Coinbase = energi_params.Energi_Treasury
+		gspec.Xfers = core.DeployEnergiGovernance(chainConfig)
+
 	default:
 		t.Fatalf("unexpected consensus engine type: %T", engine)
 	}
@@ -122,6 +165,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 		chain:      chain,
 		txPool:     txpool,
 		uncleBlock: blocks[0],
+		migration:  migrations,
 	}
 }
 
@@ -130,39 +174,55 @@ func (b *testWorkerBackend) TxPool() *core.TxPool         { return b.txPool }
 func (b *testWorkerBackend) PostChainEvents(events []interface{}) {
 	b.chain.PostChainEvents(events, nil)
 }
+func (b *testWorkerBackend) CleanUp() error { return b.migration.CleanUp() }
 
 func newTestWorker(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine, blocks int) (*worker, *testWorkerBackend) {
 	backend := newTestWorkerBackend(t, chainConfig, engine, blocks)
 	backend.txPool.AddLocals(pendingTxs)
 	w := newWorker(chainConfig, engine, backend, new(event.TypeMux), time.Second, params.GenesisGasLimit, params.GenesisGasLimit, nil)
 	w.setEtherbase(testBankAddress)
+	w.setMigration(backend.migration.TempFileName())
 	return w, backend
 }
 
-func TestPendingStateAndBlockEthash(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
-	testPendingStateAndBlock(t, ethashChainConfig, ethash.NewFaker())
-}
-func TestPendingStateAndBlockClique(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
-	testPendingStateAndBlock(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// func TestPendingStateAndBlockEthash(t *testing.T) {
+// 	testPendingStateAndBlock(t, ethashChainConfig, ethash.NewFaker())
+// }
+// func TestPendingStateAndBlockClique(t *testing.T) {
+// 	testPendingStateAndBlock(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// }
+
+func TestPendingStateAndBlockEnergi(t *testing.T) {
+	testPendingStateAndBlock(t, energiChainConfig, energi.New(energiChainConfig.Energi, ethdb.NewMemDatabase()))
 }
 
 func testPendingStateAndBlock(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
 	defer engine.Close()
 
 	w, b := newTestWorker(t, chainConfig, engine, 0)
-	defer w.close()
+	defer func() {
+		w.close()
+		b.CleanUp()
+	}()
+
+	// Trigger processing of the migration tx at block number 1
+	atomic.StoreInt32(&w.running, 1)
 
 	// Ensure snapshot has been updated.
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 	block, state := w.pending()
-	if block.NumberU64() != 1 {
-		t.Errorf("block number mismatch: have %d, want %d", block.NumberU64(), 1)
+
+	var wantBlockheight uint64
+	switch engine.(type) {
+	case *energi.Energi:
+		// Block count increase because of the migration block that is mined too.
+		wantBlockheight = 2
+	default:
+		wantBlockheight = 1
+	}
+
+	if block.NumberU64() != wantBlockheight {
+		t.Errorf("block number mismatch: have %d, want %d", block.NumberU64(), wantBlockheight)
 	}
 	if balance := state.GetBalance(testUserAddress); balance.Cmp(big.NewInt(1000)) != 0 {
 		t.Errorf("account balance mismatch: have %d, want %d", balance, 1000)
@@ -170,28 +230,31 @@ func testPendingStateAndBlock(t *testing.T, chainConfig *params.ChainConfig, eng
 	b.txPool.AddLocals(newTxs)
 
 	// Ensure the new tx events has been processed
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 	block, state = w.pending()
 	if balance := state.GetBalance(testUserAddress); balance.Cmp(big.NewInt(2000)) != 0 {
 		t.Errorf("account balance mismatch: have %d, want %d", balance, 2000)
 	}
 }
 
-func TestEmptyWorkEthash(t *testing.T) {
-	testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
-}
-func TestEmptyWorkClique(t *testing.T) {
-	testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// func TestEmptyWorkEthash(t *testing.T) {
+// 	testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
+// }
+// func TestEmptyWorkClique(t *testing.T) {
+// 	testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// }
+func TestEmptyWorkEnergi(t *testing.T) {
+	testEmptyWork(t, energiChainConfig, energi.New(energiChainConfig.Energi, ethdb.NewMemDatabase()))
 }
 
 func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	defer engine.Close()
 
-	w, _ := newTestWorker(t, chainConfig, engine, 0)
-	defer w.close()
+	w, b := newTestWorker(t, chainConfig, engine, 0)
+	defer func() {
+		w.close()
+		b.CleanUp()
+	}()
 
 	var (
 		taskCh    = make(chan struct{}, 2)
@@ -212,29 +275,32 @@ func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consens
 	}
 
 	w.newTaskHook = func(task *task) {
-		if task.block.NumberU64() == 1 {
+		if task.block.NumberU64() == 2 {
 			checkEqual(t, task, taskIndex)
-			taskIndex += 1
+			taskIndex++
 			taskCh <- struct{}{}
 		}
 	}
 	w.fullTaskHook = func() {
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 	}
+
+	// Trigger processing of the migration tx at block number 1
+	atomic.StoreInt32(&w.running, 1)
 
 	// Ensure worker has finished initialization
 	for {
 		b := w.pendingBlock()
-		if b != nil && b.NumberU64() == 1 {
+		if b != nil && b.NumberU64() >= 1 {
 			break
 		}
 	}
 
 	w.start()
-	for i := 0; i < 2; i += 1 {
+	for i := 0; i < 2; i++ {
 		select {
 		case <-taskCh:
-		case <-time.NewTimer(time.Second).C:
+		case <-time.NewTimer(2 * time.Second).C:
 			t.Error("new task timeout")
 		}
 	}
@@ -245,7 +311,10 @@ func TestStreamUncleBlock(t *testing.T) {
 	defer ethash.Close()
 
 	w, b := newTestWorker(t, ethashChainConfig, ethash, 1)
-	defer w.close()
+	defer func() {
+		w.close()
+		b.CleanUp()
+	}()
 
 	var taskCh = make(chan struct{})
 
@@ -260,7 +329,7 @@ func TestStreamUncleBlock(t *testing.T) {
 				}
 			}
 			taskCh <- struct{}{}
-			taskIndex += 1
+			taskIndex++
 		}
 	}
 	w.skipSealHook = func(task *task) bool {
@@ -280,7 +349,7 @@ func TestStreamUncleBlock(t *testing.T) {
 	w.start()
 
 	// Ignore the first two works
-	for i := 0; i < 2; i += 1 {
+	for i := 0; i < 2; i++ {
 		select {
 		case <-taskCh:
 		case <-time.NewTimer(time.Second).C:
@@ -296,28 +365,32 @@ func TestStreamUncleBlock(t *testing.T) {
 	}
 }
 
-func TestRegenerateMiningBlockEthash(t *testing.T) {
-	testRegenerateMiningBlock(t, ethashChainConfig, ethash.NewFaker())
-}
+// func TestRegenerateMiningBlockEthash(t *testing.T) {
+// 	testRegenerateMiningBlock(t, ethashChainConfig, ethash.NewFaker())
+// }
 
-func TestRegenerateMiningBlockClique(t *testing.T) {
-	testRegenerateMiningBlock(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// func TestRegenerateMiningBlockClique(t *testing.T) {
+// 	testRegenerateMiningBlock(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// }
+
+func TestRegenerateMiningBlockEnergi(t *testing.T) {
+	testRegenerateMiningBlock(t, energiChainConfig, energi.New(energiChainConfig.Energi, ethdb.NewMemDatabase()))
 }
 
 func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	defer engine.Close()
 
 	w, b := newTestWorker(t, chainConfig, engine, 0)
-	defer w.close()
+	defer func() {
+		w.close()
+		b.CleanUp()
+	}()
 
 	var taskCh = make(chan struct{})
 
 	taskIndex := 0
 	w.newTaskHook = func(task *task) {
-		if task.block.NumberU64() == 1 {
+		if task.block.NumberU64() == 2 {
 			if taskIndex == 2 {
 				receiptLen, balance := 2, big.NewInt(2000)
 				if len(task.receipts) != receiptLen {
@@ -328,15 +401,19 @@ func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, en
 				}
 			}
 			taskCh <- struct{}{}
-			taskIndex += 1
+			taskIndex++
 		}
 	}
-	w.skipSealHook = func(task *task) bool {
-		return true
-	}
+	// w.skipSealHook = func(task *task) bool {
+	// 	return true
+	// }
 	w.fullTaskHook = func() {
 		time.Sleep(100 * time.Millisecond)
 	}
+
+	// Trigger processing of the migration tx at block number 1
+	atomic.StoreInt32(&w.running, 1)
+
 	// Ensure worker has finished initialization
 	for {
 		b := w.pendingBlock()
@@ -347,11 +424,11 @@ func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, en
 
 	w.start()
 	// Ignore the first two works
-	for i := 0; i < 2; i += 1 {
+	for i := 0; i < 2; i++ {
 		select {
 		case <-taskCh:
-		case <-time.NewTimer(time.Second).C:
-			t.Error("new task timeout")
+		case <-time.NewTimer(2 * time.Second).C:
+			t.Error("new task timeout ..")
 		}
 	}
 	b.txPool.AddLocals(newTxs)
@@ -359,27 +436,31 @@ func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, en
 
 	select {
 	case <-taskCh:
-	case <-time.NewTimer(time.Second).C:
+	case <-time.NewTimer(2 * time.Second).C:
 		t.Error("new task timeout")
 	}
 }
 
-func TestAdjustIntervalEthash(t *testing.T) {
-	testAdjustInterval(t, ethashChainConfig, ethash.NewFaker())
-}
+// func TestAdjustIntervalEthash(t *testing.T) {
+// 	testAdjustInterval(t, ethashChainConfig, ethash.NewFaker())
+// }
 
-func TestAdjustIntervalClique(t *testing.T) {
-	testAdjustInterval(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// func TestAdjustIntervalClique(t *testing.T) {
+// 	testAdjustInterval(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+// }
+
+func TestAdjustIntervalEnergi(t *testing.T) {
+	testAdjustInterval(t, energiChainConfig, energi.New(energiChainConfig.Energi, ethdb.NewMemDatabase()))
 }
 
 func testAdjustInterval(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	defer engine.Close()
 
-	w, _ := newTestWorker(t, chainConfig, engine, 0)
-	defer w.close()
+	w, b := newTestWorker(t, chainConfig, engine, 0)
+	defer func() {
+		w.close()
+		b.CleanUp()
+	}()
 
 	w.skipSealHook = func(task *task) bool {
 		return true
@@ -424,9 +505,13 @@ func testAdjustInterval(t *testing.T, chainConfig *params.ChainConfig, engine co
 			t.Errorf("resubmit interval mismatch: have %v, want %v", recommitInterval, wantRecommitInterval)
 		}
 		result = append(result, float64(recommitInterval.Nanoseconds()))
-		index += 1
+		index++
 		progress <- struct{}{}
 	}
+
+	// Trigger processing of the migration tx at block number 1
+	atomic.StoreInt32(&w.running, 1)
+
 	// Ensure worker has finished initialization
 	for {
 		b := w.pendingBlock()

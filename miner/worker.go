@@ -897,11 +897,12 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	// Processing a special case of migrations
 	if header.IsGen2Migration() {
 		if !w.isRunning() {
+			log.Error("Refusing to mine migration block: worker not yet started")
 			return
 		}
 
 		if len(w.migration) == 0 {
-			log.Error("Refusing to mine migration block")
+			log.Error("Refusing to mine migration block: file path not set")
 			return
 		}
 
