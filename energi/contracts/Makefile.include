@@ -54,6 +54,7 @@ ENERGI_CONTRACTS := \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
   IMasternodeRegistry.sol \
+  IMasternodeRegistryV2.sol \
   IMasternodeToken.sol \
   IProposal.sol \
   ISporkRegistry.sol \
@@ -61,7 +62,9 @@ ENERGI_CONTRACTS := \
   Gen2Migration.sol \
   GovernedProxy.sol \
   MasternodeTokenV1.sol \
+  MasternodeTokenV2.sol \
   MasternodeRegistryV1.sol \
+  MasternodeRegistryV2.sol \
   SporkRegistryV1.sol \
   SporkRegistryV2.sol \
   StakerRewardV1.sol \
