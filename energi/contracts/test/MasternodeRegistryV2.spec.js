@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2019-2020 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -20,12 +20,16 @@
 
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
+const MockProposal = artifacts.require('MockProposal');
+const GovernedProxy = artifacts.require('GovernedProxy');
+const MockSporkRegistry = artifacts.require('MockSporkRegistry')
 const MasternodeRegistryV2 = artifacts.require('MasternodeRegistryV2');
+const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 const IBlockReward = artifacts.require('IBlockReward');
-const IMasternodeRegistry = artifacts.require('IMasternodeRegistry');
+const IMasternodeRegistryV2 = artifacts.require('IMasternodeRegistryV2');
 const IMasternodeToken = artifacts.require('IMasternodeToken');
 const ITreasury = artifacts.require('ITreasury');
-const StorageMasternodeRegistryV2 = artifacts.require('StorageMasternodeRegistryV2');
+const StorageMasternodeRegistryV1 = artifacts.require('StorageMasternodeRegistryV1');
 
 const common = require('./common');
 
@@ -55,9 +59,9 @@ contract("MasternodeRegistryV2", async accounts => {
         s.fake = await MockContract.new(s.proxy.address);
         s.proxy_abi = await MasternodeRegistryV2.at(s.proxy.address);
 
-        s.token_abi = await IMasternodeRegistry.at(s.proxy.address);
+        s.token_abi = await IMasternodeRegistryV2.at(s.proxy.address);
         s.reward_abi = await IBlockReward.at(s.proxy.address);
-        s.storage = await StorageMasternodeRegistryV2.at(await s.proxy_abi.v1storage());
+        s.storage = await StorageMasternodeRegistryV1.at(await s.proxy_abi.v1storage());
 
         s.mntoken_proxy_addr = await s.orig.token_proxy();
         //s.mntoken_proxy = await MockProxy.at(s.mntoken_proxy_addr);
@@ -87,9 +91,9 @@ contract("MasternodeRegistryV2", async accounts => {
     describe('Primary', () => {
         const { fromAscii, toBN } = web3.utils;
 
-        const collateral1 = toWei('30000', 'ether');
-        const collateral2 = toWei('20000', 'ether');
-        const collateral3 = toWei('10000', 'ether');
+        const collateral1 = toWei('3000', 'ether');
+        const collateral2 = toWei('2000', 'ether');
+        const collateral3 = toWei('1000', 'ether');
         const reward = toBN(toWei('9.14', 'ether'));
 
         const owner1 = accounts[1];
@@ -261,6 +265,15 @@ contract("MasternodeRegistryV2", async accounts => {
 
             it('should handle onCollateralUpdate()', async () => {
                 await s.token_abi.onCollateralUpdate(owner1);
+            });
+
+            it('collateralLimits() should return correct values', async () => {
+                let limits = await s.token_abi.collateralLimits();
+                common.stringifyBN(web3, limits);
+                expect(limits).include({
+                    min: '1000000000000000000000', // 1000 NRG
+                    max: '100000000000000000000000', // 100,000 NRG
+                });
             });
 
             it('should handle enumerate()', async () => {
@@ -546,31 +559,32 @@ contract("MasternodeRegistryV2", async accounts => {
                     'Denounced', common.evt_last_block)).lengthOf(0);
             });
 
-            it('should denounce() on collateral change', async() => {
+            it('should re-announce() or denounce() on collateral change depending the final collateral balance', async() => {
                 await s.token_abi.announce(
                     masternode1, ip1, enode1, { from: owner1 });
 
+                // It triggers auto masternode re-announcing since the minimum collateral is found.
                 await s.mntoken_abi.depositCollateral({
                     from: owner1,
                     value: collateral1,
                 });
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([]);
+                // expect(await s.token_abi.enumerate()).members([]);
 
-                await s.token_abi.announce(
-                    masternode1, ip1, enode1, { from: owner1 });
+                // await s.token_abi.announce(
+                //     masternode1, ip1, enode1, { from: owner1 });
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1]);
 
-                await s.mntoken_abi.withdrawCollateral(collateral1, {
-                    from: owner1,
-                });
+                // It triggers auto masternode denouncing since the minimum collateral is not found.
+                await s.mntoken_abi.withdrawCollateral(collateral1, {from: owner1});
 
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([]);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
+                expect(await s.token_abi.enumerate()).members([masternode1]);
 
-                await s.token_abi.announce(
-                    masternode1, ip1, enode1, { from: owner1 });
+                // await s.token_abi.announce(
+                //     masternode1, ip1, enode1, { from: owner1 });
             });
 
             it('should denounce()', async()=> {
@@ -715,14 +729,14 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(res).eql({
                     '0': '2',
                     '1': '2',
-                    '2': toWei('50000', 'ether'),
-                    '3': toWei('50000', 'ether'),
-                    '4': toWei('60000', 'ether'),
+                    '2': toWei('5000', 'ether'),
+                    '3': toWei('5000', 'ether'),
+                    '4': toWei('10000', 'ether'),
                     'active': '2',
                     'total': '2',
-                    'active_collateral': toWei('50000', 'ether'),
-                    'total_collateral': toWei('50000', 'ether'),
-                    'max_of_all_times': toWei('60000', 'ether'),
+                    'active_collateral': toWei('5000', 'ether'),
+                    'total_collateral': toWei('5000', 'ether'),
+                    'max_of_all_times': toWei('10000', 'ether'),
                 });
             });
 
@@ -779,16 +793,17 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
             });
 
-            it('should denounce() on collateral change', async() => {
+            it('should re-announce() or denounce() on collateral change depending the final collateral balance', async() => {
+                // It triggers auto masternode re-announcing since the minimum collateral is found.
                 await s.mntoken_abi.depositCollateral({
                     from: owner1,
                     value: collateral1,
                 });
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode2]);
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
 
-                await s.token_abi.announce(
-                    masternode1, ip1, enode1, { from: owner1 });
+                // await s.token_abi.announce(
+                //     masternode1, ip1, enode1, { from: owner1 });
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
 
@@ -797,10 +812,10 @@ contract("MasternodeRegistryV2", async accounts => {
                 });
 
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode2]);
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
 
-                await s.token_abi.announce(
-                    masternode1, ip1, enode1, { from: owner1 });
+                // await s.token_abi.announce(
+                //     masternode1, ip1, enode1, { from: owner1 });
             });
 
             it('should denounce()', async()=> {
@@ -907,14 +922,14 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(res).eql({
                     '0': '3',
                     '1': '3',
-                    '2': toWei('60000', 'ether'),
-                    '3': toWei('60000', 'ether'),
-                    '4': toWei('80000', 'ether'),
+                    '2': toWei('6000', 'ether'),
+                    '3': toWei('6000', 'ether'),
+                    '4': toWei('10000', 'ether'),
                     'active': '3',
                     'total': '3',
-                    'active_collateral': toWei('60000', 'ether'),
-                    'total_collateral': toWei('60000', 'ether'),
-                    'max_of_all_times': toWei('80000', 'ether'),
+                    'active_collateral': toWei('6000', 'ether'),
+                    'total_collateral': toWei('6000', 'ether'),
+                    'max_of_all_times': toWei('10000', 'ether'),
                 });
             });
 
@@ -1144,28 +1159,30 @@ contract("MasternodeRegistryV2", async accounts => {
                     masternode1, masternode3]);
             });
 
-            it('should denounce() on collateral change', async() => {
+            it('should re-announce() or denounce() on collateral change depending the final collateral balance', async() => {
+                // It triggers auto masternode re-announcing since the minimum collateral is found.
                 await s.mntoken_abi.depositCollateral({
                     from: owner1,
                     value: collateral1,
                 });
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode2, masternode3]);
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
 
-                await s.token_abi.announce(
-                    masternode1, ip1, enode1, { from: owner1 });
+                // await s.token_abi.announce(
+                //     masternode1, ip1, enode1, { from: owner1 });
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
 
+                // It triggers auto masternode denouncing since the minimum collateral is not found.
                 await s.mntoken_abi.withdrawCollateral(collateral1, {
                     from: owner1,
                 });
 
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode2, masternode3]);
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
 
-                await s.token_abi.announce(
-                    masternode1, ip1, enode1, { from: owner1 });
+                // await s.token_abi.announce(
+                //     masternode1, ip1, enode1, { from: owner1 });
             });
 
             it('should cleanup inactive node', async () => {
@@ -1210,55 +1227,74 @@ contract("MasternodeRegistryV2", async accounts => {
                     '1': '0',
                     '2': toWei('0', 'ether'),
                     '3': toWei('0', 'ether'),
-                    '4': toWei('90000', 'ether'),
+                    '4': toWei('10000', 'ether'),
                     'active': '0',
                     'total': '0',
                     'active_collateral': toWei('0', 'ether'),
                     'total_collateral': toWei('0', 'ether'),
-                    'max_of_all_times': toWei('90000', 'ether'),
+                    'max_of_all_times': toWei('10000', 'ether'),
                 });
             });
-        });
 
-        describe('StorageMasternodeRegistryV2', async () => {
-            it ('should refuse setMasternode() from outside', async () => {
-                try {
-                    await s.storage.setMasternode(
-                        masternode1,
-                        masternode1,
-                        ip1,
-                        enode1,
-                        '0',
-                        '0',
-                        masternode1,
-                        masternode1
-                    );
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Not owner/);
+            it('should migrate all connected the masternodes and extra data', async () => {
+                let new_collateral = toBN(toWei('10000', 'ether'));
+                for (let mn of nodes) {
+                    if (mn.masternode == masternode3) {
+                        new_collateral = mn.collateral;
+                    }
+                    await s.mntoken_abi.depositCollateral({ from: mn.owner, value: new_collateral });
+                    await s.token_abi.announce(mn.masternode, mn.ip, mn.enode, { from: mn.owner });
                 }
-            });
 
-            it ('should refuse setMasternodePos() from outside', async () => {
-                try {
-                    await s.storage.setMasternodePos(
-                        masternode1,
-                        false, masternode1,
-                        false, masternode1
-                    );
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Not owner/);
-                }
-            });
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
 
-            it ('should refuse deleteMasternode() from outside', async () => {
-                try {
-                    await s.storage.deleteMasternode(masternode1);
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Not owner/);
-                }
+                // // Old implementation
+                // let registry_proxy = await MockProxy.new();
+                // let registry = await MockSporkRegistry.new(s.proxy.address);
+                // await registry_proxy.setImpl(registry.address);
+                // let fake_registry = await MockContract.new(registry.address);
+                // let old_impl = await MasternodeRegistryV1.new(
+                //     fake_registry.address,
+                //     s.mntoken_proxy_addr,
+                //     s.treasury_proxy_addr,
+                //     common.mnregistry_config
+                // );
+                // let gov_proxy = await GovernedProxy.new(await old_impl.proxy(), registry_proxy.address);
+
+                // Old implementation
+                let registry_proxy = await MockProxy.new();
+                let registry = await MockSporkRegistry.new(s.proxy.address);
+                await registry_proxy.setImpl(registry.address);
+                let mn_proxy = await MockProxy.new();
+                let old_impl = await MasternodeRegistryV1.new(
+                    mn_proxy.address,
+                    s.mntoken_proxy_addr,
+                    s.treasury_proxy_addr,
+                    common.mnregistry_config
+                );
+                await mn_proxy.setImpl(old_impl);
+                // let gov_proxy = await GovernedProxy.new(await old_impl.proxy(), registry_proxy.address)
+
+                // New Implementation
+                let new_impl = await MasternodeRegistryV2.new(
+                    mn_proxy.address,
+                    s.mntoken_proxy_addr,
+                    s.treasury_proxy_addr,
+                    common.mnregistry_config
+                );
+
+                expect(await new_impl.enumerate()).members([]);
+
+                const { logs } = await old_impl.proposeUpgrade(new_impl.address, 0);
+                s.assert.equal(logs.length, 1);
+            
+                const proposal = await MockProposal.at(logs[0].args['1']);
+
+                await proposal.setAccepted();
+                await old_impl.upgrade(proposal.address);
+            
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
+                expect(await new_impl.enumerate()).members([masternode1, masternode2, masternode3]);
             });
         });
     });

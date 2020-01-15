@@ -9,7 +9,9 @@ const Gen2Migration = artifacts.require('Gen2Migration');
 //const GenericProposalV1 = artifacts.require('GenericProposalV1');
 const GovernedProxy = artifacts.require('GovernedProxy');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
+const MasternodeTokenV2 = artifacts.require('MasternodeTokenV2');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
+const MasternodeRegistryV2 = artifacts.require('MasternodeRegistryV2');
 const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const SporkRegistryV2 = artifacts.require('SporkRegistryV2');
 const StakerRewardV1 = artifacts.require('StakerRewardV1');
@@ -73,6 +75,18 @@ module.exports = async (deployer, _, accounts) => {
             treasury_proxy,
             mn_registry_proxy,
         ]);
+
+        // V2 Instances
+        await deployer.deploy(MockProxy);
+        const mn_token_proxy_v2 = MockProxy.address;
+        await deployer.deploy(MockProxy);
+        const mn_registry_proxy_v2 = MockProxy.address;
+        await deployer.deploy(MockProxy);
+
+        await deploy_common(MasternodeTokenV2, mn_token_proxy_v2, mn_registry_proxy_v2);
+        await deploy_common(MasternodeRegistryV2,
+            mn_registry_proxy_v2, mn_token_proxy_v2, treasury_proxy,
+            common.mnregistry_config);
 
         // For unit test
         await deployer.deploy(GovernedProxy, BackboneRewardV1.address, SporkRegistryV1.address);

@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2019-2020 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -22,110 +22,29 @@ pragma solidity 0.5.11;
 //pragma experimental SMTChecker;
 
 import { GlobalConstants } from "./constants.sol";
+import { GlobalConstantsV2 } from "./constantsV2.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IBlockReward } from "./IBlockReward.sol";
-import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
+import { IMasternodeRegistryV2 } from "./IMasternodeRegistryV2.sol";
 import { IMasternodeToken } from "./IMasternodeToken.sol";
 import { ITreasury } from "./ITreasury.sol";
 import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
-
-
-/**
- * Permanent storage of Masternode Registry V1 data.
- */
-contract StorageMasternodeRegistryV1 is
-    StorageBase
-{
-    struct Info {
-        uint announced_block;
-        uint collateral;
-        bytes32 enode_0;
-        bytes32 enode_1;
-        address payable owner;
-        address prev;
-        address next;
-        uint32 ipv4address;
-    }
-
-    mapping(address => Info) public masternodes;
-    mapping(address => address) public owner_masternodes;
-
-    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
-
-    /**
-     * For initial setup.
-     */
-    function setMasternode(
-        address _masternode,
-        address payable _owner,
-        uint32 _ipv4address,
-        bytes32[2] calldata _enode,
-        uint _collateral,
-        uint _announced_block,
-        address _prev,
-        address _next
-    )
-        external
-        requireOwner
-    {
-        Info storage item = masternodes[_masternode];
-        address old_owner = item.owner;
-
-        if (old_owner != _owner) {
-            assert(old_owner == address(0));
-            owner_masternodes[_owner] = _masternode;
-        }
-
-        item.owner = _owner;
-        item.ipv4address = _ipv4address;
-        item.enode_0 = _enode[0];
-        item.enode_1 = _enode[1];
-        item.collateral = _collateral;
-        item.announced_block = _announced_block;
-        item.prev = _prev;
-        item.next = _next;
-    }
-
-    /**
-     * NOTE: Extra booleans are just more failsafe than bitfield or other approaches.
-     *       Conditional assignment is required to save gas.
-     */
-    function setMasternodePos(
-        address _masternode,
-        bool _set_prev, address _prev,
-        bool _set_next, address _next
-    )
-        external
-        requireOwner
-    {
-        Info storage item = masternodes[_masternode];
-
-        if (_set_prev) item.prev = _prev;
-        if (_set_next) item.next = _next;
-    }
-
-    function deleteMasternode(address _masternode)
-        external
-        requireOwner
-    {
-        delete owner_masternodes[masternodes[_masternode].owner];
-        delete masternodes[_masternode];
-    }
-}
-
+import { StorageMasternodeRegistryV1 } from "./MasternodeRegistryV1.sol";
+import { StorageMasternodeTokenV1 } from "./MasternodeTokenV1.sol";
 
 /**
  * MN-2: Genesis hardcoded version of MasternodeRegistry
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract MasternodeRegistryV1 is
+contract MasternodeRegistryV2 is
     GlobalConstants,
+    GlobalConstantsV2,
     GovernedContract,
     IBlockReward,
-    IMasternodeRegistry,
+    IMasternodeRegistryV2,
     NonReentrant
 {
     // NOTE: maybe this is too much...
@@ -197,7 +116,7 @@ contract MasternodeRegistryV1 is
 
         uint initial_ever_collateral = _config[uint(Config.InitialEverCollateral)];
         mn_ever_collateral = initial_ever_collateral;
-        require(initial_ever_collateral >= MN_COLLATERAL_MIN, "Initial collateral");
+        require(initial_ever_collateral >= MN_COLLATERAL_MIN_V2, "Initial collateral");
     }
 
     // IMasternodeRegistry
@@ -234,6 +153,17 @@ contract MasternodeRegistryV1 is
         _announce_check_free(mn_storage, masternode);
         _announce_check_ipv4(ipv4address);
 
+        _announce_set_data(masternode, owner, balance, ipv4address, enode, mn_storage);
+    }
+
+    function _announce_set_data(
+        address masternode,
+        address owner,
+        uint balance,
+        uint32 ipv4address,
+        bytes32[2] memory enode,
+        StorageMasternodeRegistryV1 mn_storage
+    ) internal {
         // Insert into list
         //---
         (address next, address prev) = _announce_insert(mn_storage, masternode);
@@ -253,7 +183,7 @@ contract MasternodeRegistryV1 is
 
         Status storage mnstatus = mn_status[masternode];
         mnstatus.last_heartbeat = block.timestamp;
-        mnstatus.seq_payouts = balance / MN_COLLATERAL_MIN;
+        mnstatus.seq_payouts = balance / MN_COLLATERAL_MIN_V2;
         ++mn_active;
         ++mn_announced;
 
@@ -278,9 +208,12 @@ contract MasternodeRegistryV1 is
     }
 
     function _announce_checkbalance(address owner) internal view returns(uint balance) {
-        (balance,) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(owner);
-        require(balance >= MN_COLLATERAL_MIN, "Invalid collateral");
+        balance = _getbalance(owner);
+        require(balance >= MN_COLLATERAL_MIN_V2, "Invalid collateral");
+    }
 
+    function _getbalance(address owner) internal view returns(uint balance) {
+        (balance,) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(owner);
     }
 
     function _announce_clear_old(StorageMasternodeRegistryV1 mn_storage, address owner) internal {
@@ -619,6 +552,8 @@ contract MasternodeRegistryV1 is
 
     //===
 
+    // If the new collateral balance is greater or equal to the minimum collateral
+    // amount required. The masternode is auto renounced
     function onCollateralUpdate(address owner)
         external
         noReentry
@@ -633,12 +568,27 @@ contract MasternodeRegistryV1 is
             return;
         }
 
+        Status storage mnstatus = mn_status[masternode];
+
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
-        ValidationStatus check = _checkStatus(mn_status[masternode], mninfo);
+        ValidationStatus check = _checkStatus(mnstatus, mninfo);
 
         if (check == ValidationStatus.MNCollaterIssue) {
-            // Only if collateral issue!
-            _denounce(masternode, owner);
+            // Only if collateral issue exists!
+            uint balance = _getbalance(owner);
+
+            // Re-announce only if the minimum collateral is met otherwise denounce.
+            if (balance >= MN_COLLATERAL_MIN_V2) {
+                uint32 ipv4address = mninfo.ipv4address;
+                bytes32[2] memory enode = [mninfo.enode_0, mninfo.enode_1];
+
+                _denounce(masternode, owner);
+
+                // Update the masternode data.
+                _announce_set_data(masternode, owner, balance, ipv4address, enode, mn_storage);
+            }else {
+                _denounce(masternode, owner);
+            }
         }
     }
 
@@ -678,8 +628,58 @@ contract MasternodeRegistryV1 is
         }
     }
 
+    // V2
+    // --------------------------------
+    function collateralLimits() external pure returns (uint min, uint max) {
+        min = MN_COLLATERAL_MIN_V2; // 1000 NRG
+        max = MN_COLLATERAL_MAX; // 100,000 NRG
+    }
+    // --------------------------------
+
     // IGovernedContract
     //---------------------------------
+    function _migrate(IGovernedContract _oldImpl) internal {
+        v1storage.kill();
+        MasternodeRegistryV2 oldinstance = MasternodeRegistryV2(address(_oldImpl));
+        v1storage = oldinstance.v1storage();
+
+        // Migration data
+        token_proxy = oldinstance.token_proxy();
+        treasury_proxy = oldinstance.treasury_proxy();
+        mn_announced = oldinstance.mn_announced();
+        current_masternode = oldinstance.current_masternode();
+        current_payouts = oldinstance.current_payouts();
+        require_validation = oldinstance.require_validation();
+        validation_period = oldinstance.validation_period();
+        cleanup_period = oldinstance.cleanup_period();
+
+        // Other data
+        mn_ever_collateral = oldinstance.mn_ever_collateral();
+        mn_active_collateral = oldinstance.mn_active_collateral();
+        mn_announced_collateral = oldinstance.mn_announced_collateral();
+        mn_active = oldinstance.mn_active();
+        validator_list = oldinstance.enumerate();
+
+        // Restore the mn status information.
+        for (uint i = 0; i < validator_list.length; i++) {
+            address mn = validator_list[i];
+
+            Status memory status;
+            (
+                status.sw_features,
+                status.last_heartbeat,
+                status.inactive_since,
+                status.validator_index,
+                status.invalidation_since,
+                status.invalidations,
+                status.seq_payouts,
+                status.last_vote_epoch
+            ) = oldinstance.mn_status(mn);
+
+            mn_status[mn] = status;
+        }
+    }
+
     function _destroy(IGovernedContract _newImpl) internal {
         v1storage.setOwner(_newImpl);
     }

@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2019-2020 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -20,13 +20,13 @@
 
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
-const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
+const MasternodeTokenV2 = artifacts.require('MasternodeTokenV2');
 const IMasternodeToken = artifacts.require('IMasternodeToken');
 const StorageMasternodeTokenV1 = artifacts.require('StorageMasternodeTokenV1');
 
 const common = require('./common');
 
-contract("MasternodeTokenV1", async accounts => {
+contract("MasternodeTokenV2", async accounts => {
     const s = {
         artifacts,
         accounts,
@@ -50,11 +50,11 @@ contract("MasternodeTokenV1", async accounts => {
     };
 
     before(async () => {
-        s.orig = await MasternodeTokenV1.deployed();
+        s.orig = await MasternodeTokenV2.deployed();
         s.proxy = await MockProxy.at(await s.orig.proxy());
         s.registry_proxy = await MockProxy.at(await s.orig.registry_proxy());
         s.fake = await MockContract.new(s.proxy.address);
-        s.proxy_abi = await MasternodeTokenV1.at(s.proxy.address);
+        s.proxy_abi = await MasternodeTokenV2.at(s.proxy.address);
         s.token_abi = await IMasternodeToken.at(s.proxy.address);
         await s.proxy.setImpl(s.orig.address);
         s.storage = await StorageMasternodeTokenV1.at(await s.proxy_abi.v1storage());
@@ -62,7 +62,7 @@ contract("MasternodeTokenV1", async accounts => {
     });
 
     after(async () => {
-        const impl = await MasternodeTokenV1.new(s.proxy.address, s.registry_proxy.address);
+        const impl = await MasternodeTokenV2.new(s.proxy.address, s.registry_proxy.address);
         await s.proxy.setImpl(impl.address);
 
         await s.fake.testDrain(COLLATERAL_3, {from: accounts[1]});
@@ -74,7 +74,7 @@ contract("MasternodeTokenV1", async accounts => {
     //---
     describe('ERC20', () => {
         it('should emit Transfer in c-tor', async () => {
-            const tmp = await MasternodeTokenV1.new(s.proxy.address, s.registry_proxy.address);
+            const tmp = await MasternodeTokenV2.new(s.proxy.address, s.registry_proxy.address);
 
             const evt = await tmp.getPastEvents('Transfer', common.evt_last_block);
             expect(evt).lengthOf(1);

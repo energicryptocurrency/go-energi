@@ -590,31 +590,6 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	)
 	deployEnergiContract(
 		&xfers,
-		energi_params.Energi_MasternodeTokenV1,
-		nil,
-		energi_abi.MasternodeTokenV1ABI,
-		energi_abi.MasternodeTokenV1Bin,
-		energi_params.Energi_MasternodeToken,
-		energi_params.Energi_MasternodeRegistry,
-	)
-	deployEnergiContract(
-		&xfers,
-		energi_params.Energi_MasternodeRegistryV1,
-		nil,
-		energi_abi.MasternodeRegistryV1ABI,
-		energi_abi.MasternodeRegistryV1Bin,
-		energi_params.Energi_MasternodeRegistry,
-		energi_params.Energi_MasternodeToken,
-		energi_params.Energi_Treasury,
-		[4]*big.Int{
-			config.MNRequireValidation,
-			config.MNValidationPeriod,
-			config.MNCleanupPeriod,
-			config.MNEverCollateral,
-		},
-	)
-	deployEnergiContract(
-		&xfers,
 		energi_params.Energi_StakerRewardV1,
 		nil,
 		energi_abi.StakerRewardV1ABI,
@@ -651,6 +626,31 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			energi_params.Energi_MasternodeRegistry,
 			config.Energi.CPPSigner,
 		)
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_MasternodeTokenV1,
+			nil,
+			energi_abi.MasternodeTokenV2ABI,
+			energi_abi.MasternodeTokenV2Bin,
+			energi_params.Energi_MasternodeToken,
+			energi_params.Energi_MasternodeRegistry,
+		)
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_MasternodeRegistryV1,
+			nil,
+			energi_abi.MasternodeRegistryV2ABI,
+			energi_abi.MasternodeRegistryV2Bin,
+			energi_params.Energi_MasternodeRegistry,
+			energi_params.Energi_MasternodeToken,
+			energi_params.Energi_Treasury,
+			[4]*big.Int{
+				config.MNRequireValidation,
+				config.MNValidationPeriod,
+				config.MNCleanupPeriod,
+				config.MNEverCollateral,
+			},
+		)
 	} else {
 		deployEnergiContract(
 			&xfers,
@@ -670,6 +670,31 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			energi_params.Energi_CheckpointRegistry,
 			energi_params.Energi_MasternodeRegistry,
 			config.Energi.CPPSigner,
+		)
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_MasternodeTokenV1,
+			nil,
+			energi_abi.MasternodeTokenV1ABI,
+			energi_abi.MasternodeTokenV1Bin,
+			energi_params.Energi_MasternodeToken,
+			energi_params.Energi_MasternodeRegistry,
+		)
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_MasternodeRegistryV1,
+			nil,
+			energi_abi.MasternodeRegistryV1ABI,
+			energi_abi.MasternodeRegistryV1Bin,
+			energi_params.Energi_MasternodeRegistry,
+			energi_params.Energi_MasternodeToken,
+			energi_params.Energi_Treasury,
+			[4]*big.Int{
+				config.MNRequireValidation,
+				config.MNValidationPeriod,
+				config.MNCleanupPeriod,
+				config.MNEverCollateral,
+			},
 		)
 	}
 	deployEnergiContract(

@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2020 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -21,184 +21,47 @@
 pragma solidity 0.5.11;
 //pragma experimental SMTChecker;
 
-import { GlobalConstants } from "./constants.sol";
+import { GlobalConstantsV2 } from "./constantsV2.sol";
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
-import { IMasternodeToken } from "./IMasternodeToken.sol";
-import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
-import { NonReentrant } from "./NonReentrant.sol";
-import { StorageBase }  from "./StorageBase.sol";
-
-/**
- * Permanent storage of Masternode Token V1 data.
- */
-contract StorageMasternodeTokenV1 is
-    StorageBase
-{
-    struct Balance {
-        uint256 amount;
-        uint256 last_block;
-    }
-    mapping(address => Balance) public balances;
-
-    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
-    function balanceOnly(address _account)
-        external view
-        returns(uint256 amount)
-    {
-        return balances[_account].amount;
-    }
-
-    function setBalance(address _account, uint256 _amount, uint256 _last_block)
-        external
-        requireOwner
-    {
-        // NOTE: DO NOT process last_block as part of storage logic!
-        Balance storage item = balances[_account];
-        item.amount = _amount;
-        item.last_block = _last_block;
-    }
-}
+import { MasternodeTokenV1 } from "./MasternodeTokenV1.sol";
 
 /**
  * MN-1: Genesis hardcoded version of MasternodeToken.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract MasternodeTokenV1 is
-    GlobalConstants,
-    GovernedContract,
-    IMasternodeToken,
-    NonReentrant
+contract MasternodeTokenV2 is
+    MasternodeTokenV1,
+    GlobalConstantsV2
 {
-    // Data for migration
-    //---------------------------------
-    StorageMasternodeTokenV1 public v1storage;
-    IGovernedProxy public registry_proxy;
-    //---------------------------------
-
     constructor(address _proxy, IGovernedProxy _registry_proxy)
         public
-        GovernedContract(_proxy)
-    {
-        v1storage = new StorageMasternodeTokenV1();
-        registry_proxy = _registry_proxy;
-
-        // ERC20
-        emit Transfer(address(0), address(0), 0);
-    }
+        MasternodeTokenV1(_proxy, _registry_proxy)
+    {}
 
     // IGovernedContract
     //---------------------------------
+    function _migrate(IGovernedContract _oldImpl) internal {
+        v1storage.kill();
+        v1storage = MasternodeTokenV1(address(_oldImpl)).v1storage();
+    }
+
     function _destroy(IGovernedContract _newImpl) internal {
         v1storage.setOwner(_newImpl);
     }
 
-    // MasternodeTokenV1
-    //---------------------------------
-
-    function totalSupply() external view returns (uint256) {
-        return address(this).balance;
-    }
-
-    function name() external view returns (string memory) {
-        return "Masternode Collateral";
-    }
-
-    function symbol() external view returns (string memory) {
-        return "MNGR";
-    }
-
-    function decimals() external view returns (uint8) {
-        return 18 + 4;
-    }
-
-    function balanceOf(address _owner) external view returns (uint256) {
-        return v1storage.balanceOnly(_owner);
-    }
-
-    function transfer(address, uint256) external returns (bool) {
-        revert("Not allowed");
-    }
-
-    function transferFrom(address, address, uint256) external returns (bool) {
-        revert("Not allowed");
-    }
-
-    function approve(address, uint256) external returns (bool) {
-        revert("Not allowed");
-    }
-
-    function allowance(address, address) external view returns (uint256) {
-        return 0;
-    }
-
-    // Energi
-    //---------------------------------
-
-    // solium-disable security/no-block-members
-
-    function balanceInfo(address _tokenOwner)
-        external view
-        returns (uint256 balance, uint256 last_block)
-    {
-        (balance, last_block) = v1storage.balances(_tokenOwner);
-    }
-
-    function withdrawCollateral(uint256 _amount) external noReentry {
-        // Retrieve
-        address payable tokenOwner = _callerAddress();
-        uint256 balance = v1storage.balanceOnly(tokenOwner);
-
-        // Process
-        if (balance < _amount) {
-            revert("Not enough");
-        }
-
-        balance -= _amount;
-        _validateBalance(balance);
-
-        // Store
-        v1storage.setBalance(tokenOwner, balance, block.number);
-
-        // Events
-        emit Transfer(tokenOwner, address(0), _amount);
-
-        // Notify the registry
-        IMasternodeRegistry(address(registry_proxy.impl())).onCollateralUpdate(tokenOwner);
-
-        // TODO: we may need to allow more gas here for shared masternode contracts!
-        tokenOwner.transfer(_amount);
-    }
-
-    function depositCollateral() external payable noReentry {
-        // Retrieve
-        address payable tokenOwner = _callerAddress();
-        uint256 balance = v1storage.balanceOnly(tokenOwner);
-
-        // Process
-        balance += msg.value;
-        _validateBalance(balance);
-
-        // Store
-        v1storage.setBalance(tokenOwner, balance, block.number);
-
-        // Events
-        emit Transfer(address(0), tokenOwner, msg.value);
-
-        // Notify the registry
-        IMasternodeRegistry(address(registry_proxy.impl())).onCollateralUpdate(tokenOwner);
-    }
-
+    // _validateBalance overrides the same function in MasternodeTokenV1. It
+    // uses the new value on minimum collateral amount defined.
     function _validateBalance(uint256 _amount) internal pure {
         // NOTE: "Too small" check makes no sense as it would be just zero.
 
         if (_amount > MN_COLLATERAL_MAX) {
-            revert("Too much");
+            revert("Too much collateral");
         }
 
-        if ((_amount % MN_COLLATERAL_MIN) != 0) {
-            revert("Not a multiple");
+        if ((_amount % MN_COLLATERAL_MIN_V2) != 0) {
+            revert("Not a multiple of collateral");
         }
     }
 
