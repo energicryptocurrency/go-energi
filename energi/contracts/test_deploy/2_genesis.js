@@ -62,7 +62,11 @@ module.exports = async (deployer, _, accounts) => {
         await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(CheckpointRegistryV2, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
+        await deploy_common(MasternodeTokenV2, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,
+            mn_registry_proxy, mn_token_proxy, treasury_proxy,
+            common.mnregistry_config);
+        await deploy_common(MasternodeRegistryV2,
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
             common.mnregistry_config);
         await deploy_common(SporkRegistryV1, undefined, mn_registry_proxy);
@@ -75,18 +79,6 @@ module.exports = async (deployer, _, accounts) => {
             treasury_proxy,
             mn_registry_proxy,
         ]);
-
-        // V2 Instances
-        await deployer.deploy(MockProxy);
-        const mn_token_proxy_v2 = MockProxy.address;
-        await deployer.deploy(MockProxy);
-        const mn_registry_proxy_v2 = MockProxy.address;
-        await deployer.deploy(MockProxy);
-
-        await deploy_common(MasternodeTokenV2, mn_token_proxy_v2, mn_registry_proxy_v2);
-        await deploy_common(MasternodeRegistryV2,
-            mn_registry_proxy_v2, mn_token_proxy_v2, treasury_proxy,
-            common.mnregistry_config);
 
         // For unit test
         await deployer.deploy(GovernedProxy, BackboneRewardV1.address, SporkRegistryV1.address);
