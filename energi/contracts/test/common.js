@@ -24,6 +24,9 @@ exports.mnregistry_config = [
     24*60*60,
     '10000000000000000000000', // 10,000 NRG
 ];
+exports.mnregistry_config_v2 = [
+    ...exports.mnregistry_config,
+];
 exports.superblock_cycles = 8;
 exports.chain_id = 49797;
 exports.migration_signer = '0x0000000000000000000000000000000012345678';

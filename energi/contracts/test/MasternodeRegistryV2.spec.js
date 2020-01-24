@@ -21,7 +21,6 @@
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
 const MockProposal = artifacts.require('MockProposal');
-const GovernedProxy = artifacts.require('GovernedProxy');
 const MockSporkRegistry = artifacts.require('MockSporkRegistry')
 const MasternodeRegistryV2 = artifacts.require('MasternodeRegistryV2');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
@@ -44,7 +43,7 @@ contract("MasternodeRegistryV2", async accounts => {
     };
 
     const { toWei } = web3.utils;
-    const vperiod = common.mnregistry_config[1];
+    const vperiod = common.mnregistry_config_v2[1];
     const isTargetChanges = async (_token, _mn) => {
         // Proper way is to check pending block validation target against current,
         // but there are some issues.
@@ -80,7 +79,7 @@ contract("MasternodeRegistryV2", async accounts => {
             s.proxy.address,
             s.mntoken_proxy_addr,
             s.treasury_proxy_addr,
-            common.mnregistry_config
+            common.mnregistry_config_v2
         );
         await s.proxy.setImpl(impl.address);
     });
@@ -559,32 +558,42 @@ contract("MasternodeRegistryV2", async accounts => {
                     'Denounced', common.evt_last_block)).lengthOf(0);
             });
 
-            it('should re-announce() or denounce() on collateral change depending the final collateral balance', async() => {
+            it('should denounce() on collateral withdrawal', async() => {
                 await s.token_abi.announce(
                     masternode1, ip1, enode1, { from: owner1 });
 
-                // It triggers auto masternode re-announcing since the minimum collateral is found.
+                await s.mntoken_abi.withdrawCollateral(collateral1, {from: owner1});
+
+                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(0);
+                expect(await s.token_abi.enumerate()).members([]);
+            });
+
+            it('should re-announce() on collateral change', async() => {
+                // Initial
                 await s.mntoken_abi.depositCollateral({
                     from: owner1,
                     value: collateral1,
                 });
-                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                // expect(await s.token_abi.enumerate()).members([]);
+                await s.token_abi.announce(
+                    masternode1, ip1, enode1, { from: owner1 });
 
-                // await s.token_abi.announce(
-                //     masternode1, ip1, enode1, { from: owner1 });
+                // Change +
+                await s.mntoken_abi.depositCollateral({
+                    from: owner1,
+                    value: collateral1,
+                });
+
+                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1]);
 
-                // It triggers auto masternode denouncing since the minimum collateral is not found.
+                // Change -
                 await s.mntoken_abi.withdrawCollateral(collateral1, {from: owner1});
 
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
                 expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1]);
-
-                // await s.token_abi.announce(
-                //     masternode1, ip1, enode1, { from: owner1 });
             });
 
             it('should denounce()', async()=> {
@@ -793,29 +802,42 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
             });
 
-            it('should re-announce() or denounce() on collateral change depending the final collateral balance', async() => {
-                // It triggers auto masternode re-announcing since the minimum collateral is found.
+            it('should denounce() on collateral withdrawal', async() => {
+                await s.token_abi.announce(
+                    masternode1, ip1, enode1, { from: owner1 });
+
+                await s.mntoken_abi.withdrawCollateral(collateral1, {from: owner1});
+
+                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(0);
+                expect(await s.token_abi.enumerate()).members([masternode2]);
+            });
+
+            it('should re-announce() on collateral change', async() => {
+                // Initial
                 await s.mntoken_abi.depositCollateral({
                     from: owner1,
                     value: collateral1,
                 });
-                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
+                await s.token_abi.announce(
+                    masternode1, ip1, enode1, { from: owner1 });
 
-                // await s.token_abi.announce(
-                //     masternode1, ip1, enode1, { from: owner1 });
-                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
-
-                await s.mntoken_abi.withdrawCollateral(collateral1, {
+                // Change +
+                await s.mntoken_abi.depositCollateral({
                     from: owner1,
+                    value: collateral1,
                 });
 
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
 
-                // await s.token_abi.announce(
-                //     masternode1, ip1, enode1, { from: owner1 });
+                // Change -
+                await s.mntoken_abi.withdrawCollateral(collateral1, {from: owner1});
+
+                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2]);
             });
 
             it('should denounce()', async()=> {
@@ -1159,30 +1181,42 @@ contract("MasternodeRegistryV2", async accounts => {
                     masternode1, masternode3]);
             });
 
-            it('should re-announce() or denounce() on collateral change depending the final collateral balance', async() => {
-                // It triggers auto masternode re-announcing since the minimum collateral is found.
+            it('should denounce() on collateral withdrawal', async() => {
+                await s.token_abi.announce(
+                    masternode1, ip1, enode1, { from: owner1 });
+
+                await s.mntoken_abi.withdrawCollateral(collateral1, {from: owner1});
+
+                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(0);
+                expect(await s.token_abi.enumerate()).members([masternode2, masternode3]);
+            });
+
+            it('should re-announce() on collateral change', async() => {
+                // Initial
                 await s.mntoken_abi.depositCollateral({
                     from: owner1,
                     value: collateral1,
                 });
-                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
+                await s.token_abi.announce(
+                    masternode1, ip1, enode1, { from: owner1 });
 
-                // await s.token_abi.announce(
-                //     masternode1, ip1, enode1, { from: owner1 });
-                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
-                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
-
-                // It triggers auto masternode denouncing since the minimum collateral is not found.
-                await s.mntoken_abi.withdrawCollateral(collateral1, {
+                // Change +
+                await s.mntoken_abi.depositCollateral({
                     from: owner1,
+                    value: collateral1,
                 });
 
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
                 expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
 
-                // await s.token_abi.announce(
-                //     masternode1, ip1, enode1, { from: owner1 });
+                // Change -
+                await s.mntoken_abi.withdrawCollateral(collateral1, {from: owner1});
+
+                expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(1);
+                expect(await s.orig.getPastEvents('Announced', common.evt_last_block)).lengthOf(1);
+                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
             });
 
             it('should cleanup inactive node', async () => {
@@ -1236,65 +1270,63 @@ contract("MasternodeRegistryV2", async accounts => {
                 });
             });
 
-            it('should migrate all connected the masternodes and extra data', async () => {
-                let new_collateral = toBN(toWei('10000', 'ether'));
+            it('should migrate from V1', async () => {
+                const collateral = toWei('10000', 'ether');
+
+                // Spork registry
+                const registry_proxy = await MockProxy.new();
+                const registry = await MockSporkRegistry.new(registry_proxy.address);
+                await registry_proxy.setImpl(registry.address);
+
+                // MNReg proxy
+                const mn_proxy = await MockProxy.new();
+                const imn = await IMasternodeRegistryV2.at(mn_proxy.address);
+
+                const impl1 = await MasternodeRegistryV1.new(
+                    mn_proxy.address,
+                    s.mntoken_proxy_addr,
+                    s.treasury_proxy_addr,
+                    common.mnregistry_config
+                );
+                const impl2 = await MasternodeRegistryV2.new(
+                    mn_proxy.address,
+                    s.mntoken_proxy_addr,
+                    s.treasury_proxy_addr,
+                    common.mnregistry_config_v2
+                );
+                await mn_proxy.setImpl(impl1.address);
+
+                // Announce
                 for (let mn of nodes) {
-                    if (mn.masternode == masternode3) {
-                        new_collateral = mn.collateral;
+                    if (mn.masternode === masternode3) {
+                        continue;
                     }
-                    await s.mntoken_abi.depositCollateral({ from: mn.owner, value: new_collateral });
-                    await s.token_abi.announce(mn.masternode, mn.ip, mn.enode, { from: mn.owner });
+
+                    await s.mntoken_abi.depositCollateral({
+                        from: mn.owner,
+                        value: collateral,
+                    });
+
+                    await imn.announce(mn.masternode, mn.ip, mn.enode, { from: mn.owner });
                 }
 
-                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
+                expect(await imn.enumerate()).members([masternode1, masternode2]);
 
-                // // Old implementation
-                // let registry_proxy = await MockProxy.new();
-                // let registry = await MockSporkRegistry.new(s.proxy.address);
-                // await registry_proxy.setImpl(registry.address);
-                // let fake_registry = await MockContract.new(registry.address);
-                // let old_impl = await MasternodeRegistryV1.new(
-                //     fake_registry.address,
-                //     s.mntoken_proxy_addr,
-                //     s.treasury_proxy_addr,
-                //     common.mnregistry_config
-                // );
-                // let gov_proxy = await GovernedProxy.new(await old_impl.proxy(), registry_proxy.address);
+                expect(await impl2.enumerate()).members([]);
 
-                // Old implementation
-                let registry_proxy = await MockProxy.new();
-                let registry = await MockSporkRegistry.new(s.proxy.address);
-                await registry_proxy.setImpl(registry.address);
-                let mn_proxy = await MockProxy.new();
-                let old_impl = await MasternodeRegistryV1.new(
-                    mn_proxy.address,
-                    s.mntoken_proxy_addr,
-                    s.treasury_proxy_addr,
-                    common.mnregistry_config
-                );
-                await mn_proxy.setImpl(old_impl);
-                // let gov_proxy = await GovernedProxy.new(await old_impl.proxy(), registry_proxy.address)
-
-                // New Implementation
-                let new_impl = await MasternodeRegistryV2.new(
-                    mn_proxy.address,
-                    s.mntoken_proxy_addr,
-                    s.treasury_proxy_addr,
-                    common.mnregistry_config
-                );
-
-                expect(await new_impl.enumerate()).members([]);
-
-                const { logs } = await old_impl.proposeUpgrade(new_impl.address, 0);
+                // Upgrade
+                const { logs } = await mn_proxy.proposeUpgrade(impl2.address, 0);
                 s.assert.equal(logs.length, 1);
-            
+
                 const proposal = await MockProposal.at(logs[0].args['1']);
 
                 await proposal.setAccepted();
-                await old_impl.upgrade(proposal.address);
-            
-                expect(await s.token_abi.enumerate()).members([masternode1, masternode2, masternode3]);
-                expect(await new_impl.enumerate()).members([masternode1, masternode2, masternode3]);
+                await mn_proxy.upgrade(proposal.address);
+
+                // Ensure MNs are still there
+                expect(await imn.enumerate()).members([masternode1, masternode2]);
+
+                expect(await impl2.enumerate()).members([masternode1, masternode2]);
             });
         });
     });

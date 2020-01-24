@@ -31,8 +31,10 @@ import { IMasternodeToken } from "./IMasternodeToken.sol";
 import { ITreasury } from "./ITreasury.sol";
 import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
-import { StorageMasternodeRegistryV1 } from "./MasternodeRegistryV1.sol";
-import { StorageMasternodeTokenV1 } from "./MasternodeTokenV1.sol";
+import {
+    MasternodeRegistryV1,
+    StorageMasternodeRegistryV1
+} from "./MasternodeRegistryV1.sol";
 
 /**
  * MN-2: Genesis hardcoded version of MasternodeRegistry
@@ -116,7 +118,7 @@ contract MasternodeRegistryV2 is
 
         uint initial_ever_collateral = _config[uint(Config.InitialEverCollateral)];
         mn_ever_collateral = initial_ever_collateral;
-        require(initial_ever_collateral >= MN_COLLATERAL_MIN_V2, "Initial collateral");
+        require(initial_ever_collateral >= MN_COLLATERAL_V2_MIN, "Initial collateral");
     }
 
     // IMasternodeRegistry
@@ -141,11 +143,22 @@ contract MasternodeRegistryV2 is
         noReentry
     {
         address owner = _callerAddress();
-        StorageMasternodeRegistryV1 mn_storage = v1storage;
 
         // Check collateral
         //---
         uint balance = _announce_checkbalance(owner);
+
+        _announce(masternode, owner, balance, ipv4address, enode);
+    }
+
+    function _announce(
+        address masternode,
+        address owner,
+        uint balance,
+        uint32 ipv4address,
+        bytes32[2] memory enode
+    ) internal {
+        StorageMasternodeRegistryV1 mn_storage = v1storage;
 
         // Cleanup & checks
         //---
@@ -153,17 +166,6 @@ contract MasternodeRegistryV2 is
         _announce_check_free(mn_storage, masternode);
         _announce_check_ipv4(ipv4address);
 
-        _announce_set_data(masternode, owner, balance, ipv4address, enode, mn_storage);
-    }
-
-    function _announce_set_data(
-        address masternode,
-        address owner,
-        uint balance,
-        uint32 ipv4address,
-        bytes32[2] memory enode,
-        StorageMasternodeRegistryV1 mn_storage
-    ) internal {
         // Insert into list
         //---
         (address next, address prev) = _announce_insert(mn_storage, masternode);
@@ -183,7 +185,7 @@ contract MasternodeRegistryV2 is
 
         Status storage mnstatus = mn_status[masternode];
         mnstatus.last_heartbeat = block.timestamp;
-        mnstatus.seq_payouts = balance / MN_COLLATERAL_MIN_V2;
+        mnstatus.seq_payouts = balance / MN_COLLATERAL_V2_MIN;
         ++mn_active;
         ++mn_announced;
 
@@ -208,12 +210,8 @@ contract MasternodeRegistryV2 is
     }
 
     function _announce_checkbalance(address owner) internal view returns(uint balance) {
-        balance = _getbalance(owner);
-        require(balance >= MN_COLLATERAL_MIN_V2, "Invalid collateral");
-    }
-
-    function _getbalance(address owner) internal view returns(uint balance) {
-        (balance,) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(owner);
+        (balance,) = _getCollateralInfo(owner);
+        require(balance >= MN_COLLATERAL_V2_MIN, "Invalid collateral");
     }
 
     function _announce_clear_old(StorageMasternodeRegistryV1 mn_storage, address owner) internal {
@@ -458,6 +456,19 @@ contract MasternodeRegistryV2 is
         internal view
         returns(ValidationStatus)
     {
+        (uint balance, uint last_block) = _getCollateralInfo(mninfo.owner);
+        return _checkStatus(mnstatus, mninfo, balance, last_block);
+    }
+
+    function _checkStatus(
+        Status storage mnstatus,
+        StorageMasternodeRegistryV1.Info memory mninfo,
+        uint balance,
+        uint last_block
+    )
+        internal view
+        returns(ValidationStatus)
+    {
         if (mnstatus.seq_payouts == 0) {
             return ValidationStatus.MNNotActive;
         }
@@ -465,8 +476,6 @@ contract MasternodeRegistryV2 is
         if ((block.timestamp - mnstatus.last_heartbeat) >= MN_HEARTBEAT_INTERVAL_MAX) {
             return ValidationStatus.MNHeartbeat;
         }
-
-        (uint balance, uint last_block) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(mninfo.owner);
 
         if (balance != mninfo.collateral) {
             return ValidationStatus.MNCollaterIssue;
@@ -477,6 +486,16 @@ contract MasternodeRegistryV2 is
         }
 
         return ValidationStatus.MNActive;
+    }
+
+    function _getCollateralInfo(address owner)
+        internal view
+        returns(
+            uint balance,
+            uint last_block
+        )
+    {
+        (balance, last_block) = IMasternodeToken(address(token_proxy.impl())).balanceInfo(owner);
     }
 
     //===
@@ -552,8 +571,6 @@ contract MasternodeRegistryV2 is
 
     //===
 
-    // If the new collateral balance is greater or equal to the minimum collateral
-    // amount required. The masternode is auto renounced
     function onCollateralUpdate(address owner)
         external
         noReentry
@@ -568,25 +585,19 @@ contract MasternodeRegistryV2 is
             return;
         }
 
-        Status storage mnstatus = mn_status[masternode];
+        (uint balance, uint last_block) = _getCollateralInfo(owner);
 
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
-        ValidationStatus check = _checkStatus(mnstatus, mninfo);
+        ValidationStatus check = _checkStatus(mn_status[masternode], mninfo, balance, last_block);
 
         if (check == ValidationStatus.MNCollaterIssue) {
-            // Only if collateral issue exists!
-            uint balance = _getbalance(owner);
-
-            // Re-announce only if the minimum collateral is met otherwise denounce.
-            if (balance >= MN_COLLATERAL_MIN_V2) {
+            // Re-announce, if there is collateral left.
+            if (balance >= MN_COLLATERAL_V2_MIN) {
                 uint32 ipv4address = mninfo.ipv4address;
                 bytes32[2] memory enode = [mninfo.enode_0, mninfo.enode_1];
 
-                _denounce(masternode, owner);
-
-                // Update the masternode data.
-                _announce_set_data(masternode, owner, balance, ipv4address, enode, mn_storage);
-            }else {
+                _announce(masternode, owner, balance, ipv4address, enode);
+            } else {
                 _denounce(masternode, owner);
             }
         }
@@ -628,55 +639,55 @@ contract MasternodeRegistryV2 is
         }
     }
 
-    // V2
-    // --------------------------------
+    // IMasternodeRegistryV2
+    //---------------------------------
     function collateralLimits() external pure returns (uint min, uint max) {
-        min = MN_COLLATERAL_MIN_V2; // 1000 NRG
-        max = MN_COLLATERAL_MAX; // 100,000 NRG
+        min = MN_COLLATERAL_V2_MIN;
+        max = MN_COLLATERAL_MAX;
     }
-    // --------------------------------
+    //---------------------------------
 
     // IGovernedContract
     //---------------------------------
     function _migrate(IGovernedContract _oldImpl) internal {
+        // Dispose
         v1storage.kill();
-        MasternodeRegistryV2 oldinstance = MasternodeRegistryV2(address(_oldImpl));
+
+        MasternodeRegistryV1 oldinstance = MasternodeRegistryV1(address(_oldImpl));
         v1storage = oldinstance.v1storage();
 
         // Migration data
-        token_proxy = oldinstance.token_proxy();
-        treasury_proxy = oldinstance.treasury_proxy();
         mn_announced = oldinstance.mn_announced();
         current_masternode = oldinstance.current_masternode();
         current_payouts = oldinstance.current_payouts();
-        require_validation = oldinstance.require_validation();
-        validation_period = oldinstance.validation_period();
-        cleanup_period = oldinstance.cleanup_period();
 
         // Other data
         mn_ever_collateral = oldinstance.mn_ever_collateral();
         mn_active_collateral = oldinstance.mn_active_collateral();
         mn_announced_collateral = oldinstance.mn_announced_collateral();
         mn_active = oldinstance.mn_active();
-        validator_list = oldinstance.enumerate();
+        address[] memory old_list = oldinstance.enumerate();
+        last_block_number = block.number;
 
         // Restore the mn status information.
-        for (uint i = 0; i < validator_list.length; i++) {
-            address mn = validator_list[i];
+        // NOTE: this may be a serious gas consumption problem due to
+        //       open limit.
+        for (uint i = old_list.length; i-- > 0;) {
+            address mn = old_list[i];
 
             Status memory status;
             (
                 status.sw_features,
                 status.last_heartbeat,
                 status.inactive_since,
-                status.validator_index,
+                validator_list.length,
                 status.invalidation_since,
                 status.invalidations,
                 status.seq_payouts,
                 status.last_vote_epoch
             ) = oldinstance.mn_status(mn);
-
             mn_status[mn] = status;
+            validator_list.push(mn);
         }
     }
 
