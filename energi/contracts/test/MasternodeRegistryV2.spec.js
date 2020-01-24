@@ -458,18 +458,26 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(await s.token_abi.isActive(masternode2)).false;
             });
 
-            it('should heartbeat()', async () => {
+            it('should canHeartbeat()', async () => {
+                expect(await s.token_abi.canHeartbeat(masternode1)).false;
+                expect(await s.token_abi.canHeartbeat(masternode2)).false;
+
                 await common.moveTime(web3, 60*30+1);
 
+                expect(await s.token_abi.canHeartbeat(masternode1)).true;
+                expect(await s.token_abi.canHeartbeat(masternode2)).false;
+            });
+
+            it('should heartbeat()', async () => {
                 const s1 = await s.orig.mn_status(masternode1);
                 const bn = await web3.eth.getBlockNumber();
                 const b = await web3.eth.getBlock(bn);
 
                 await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
-                
+
                 const s2 = await s.orig.mn_status(masternode1);
-                expect(s2.last_heartbeat.gt(s1.last_heartbeat)).true;
-                expect(s2.last_heartbeat.gt(b.timestamp)).true;
+                expect(s2.next_heartbeat.gt(s1.next_heartbeat)).true;
+                expect(s2.next_heartbeat.gt(b.timestamp)).true;
 
                 await checkHeartbeat();
             });
@@ -539,6 +547,8 @@ contract("MasternodeRegistryV2", async accounts => {
                 const bn = await web3.eth.getBlockNumber();
                 const b = await web3.eth.getBlock(bn);
 
+                expect(await s.token_abi.canHeartbeat(masternode1)).false;
+
                 try {
                     await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
@@ -546,8 +556,14 @@ contract("MasternodeRegistryV2", async accounts => {
                     assert.match(e.message, /Too early/);
                 }
 
-                await common.moveTime(web3, 2*60*60);
-                
+                const mn1_status = await s.orig.mn_status(masternode1);
+                let to_move = (mn1_status.next_heartbeat + 2*60*60+1);
+                to_move -= (await web3.eth.getBlock('latest')).timestamp;
+
+                await common.moveTime(web3, to_move);
+
+                expect(await s.token_abi.canHeartbeat(masternode1)).false;
+
                 try {
                     await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
@@ -718,11 +734,11 @@ contract("MasternodeRegistryV2", async accounts => {
                 await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                 
                 const s2 = await s.orig.mn_status(masternode1);
-                expect(s2.last_heartbeat.gt(s1.last_heartbeat)).true;
-                expect(s2.last_heartbeat.gt(b.timestamp)).true;
+                expect(s2.next_heartbeat.gt(s1.next_heartbeat)).true;
+                expect(s2.next_heartbeat.gt(b.timestamp)).true;
 
                 const s2o = await s.orig.mn_status(masternode2);
-                expect(s2o.last_heartbeat.eq(s1o.last_heartbeat)).true;
+                expect(s2o.next_heartbeat.eq(s1o.next_heartbeat)).true;
                 
                 await checkHeartbeat();
             });

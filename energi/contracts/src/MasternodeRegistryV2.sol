@@ -49,6 +49,11 @@ contract MasternodeRegistryV2 is
     IMasternodeRegistryV2,
     NonReentrant
 {
+    // MN-4 approximation logic:
+    // - the target is 1000 hearbeats per hour
+    // - {MN count} / 1000/3600 ~ {MN count} * 4
+    uint constant internal TARGET_HEARTBEATS_COEF = 4;
+
     enum Config {
         RequireValidation,
         ValidationPeriod,
@@ -75,7 +80,7 @@ contract MasternodeRegistryV2 is
     // Not for migration
     struct Status {
         uint256 sw_features;
-        uint last_heartbeat;
+        uint next_heartbeat;
         uint inactive_since;
         uint validator_index;
         uint invalidation_since;
@@ -179,7 +184,7 @@ contract MasternodeRegistryV2 is
         );
 
         Status storage mnstatus = mn_status[masternode];
-        mnstatus.last_heartbeat = block.timestamp;
+        mnstatus.next_heartbeat = block.timestamp + _newHeartbeatInterval();
         mnstatus.seq_payouts = balance / MN_COLLATERAL_V2_MIN;
         ++mn_active;
         ++mn_announced;
@@ -385,11 +390,18 @@ contract MasternodeRegistryV2 is
 
         require(_isActive(masternode, s), "Not active");
 
-        uint hearbeat_delay = block.timestamp - s.last_heartbeat;
-        require(hearbeat_delay > MN_HEARTBEAT_INTERVAL_MIN, "Too early");
+        require(s.next_heartbeat <= block.timestamp, "Too early");
 
-        s.last_heartbeat = block.timestamp;
+        s.next_heartbeat = block.timestamp + _newHeartbeatInterval();
         s.sw_features = sw_features;
+    }
+
+    function _newHeartbeatInterval() internal view returns(uint delay) {
+        delay = mn_active * TARGET_HEARTBEATS_COEF;
+
+        if (delay < MN_HEARTBEAT_INTERVAL_MIN) {
+            delay = MN_HEARTBEAT_INTERVAL_MIN;
+        }
     }
 
     function invalidate(address masternode)
@@ -466,7 +478,7 @@ contract MasternodeRegistryV2 is
             return ValidationStatus.MNNotActive;
         }
 
-        if ((block.timestamp - mnstatus.last_heartbeat) >= MN_HEARTBEAT_INTERVAL_MAX) {
+        if (block.timestamp > (mnstatus.next_heartbeat + MN_HEARTBEAT_INTERVAL_MAX)) {
             return ValidationStatus.MNHeartbeat;
         }
 
@@ -638,6 +650,13 @@ contract MasternodeRegistryV2 is
         min = MN_COLLATERAL_V2_MIN;
         max = MN_COLLATERAL_MAX;
     }
+
+    function canHeartbeat(address masternode) external view returns(bool can_heartbeat) {
+        Status storage s = mn_status[masternode];
+
+        return _isActive(masternode, s) && (s.next_heartbeat <= block.timestamp);
+    }
+
     //---------------------------------
 
     // IGovernedContract
@@ -671,16 +690,20 @@ contract MasternodeRegistryV2 is
             Status memory status;
             (
                 status.sw_features,
-                status.last_heartbeat,
+                ,
                 status.inactive_since,
-                validator_list.length,
+                ,
                 status.invalidation_since,
                 status.invalidations,
                 status.seq_payouts,
                 status.last_vote_epoch
             ) = oldinstance.mn_status(mn);
-            mn_status[mn] = status;
+
+            status.next_heartbeat = block.timestamp + (i * TARGET_HEARTBEATS_COEF);
+            status.validator_index = validator_list.length;
             validator_list.push(mn);
+
+            mn_status[mn] = status;
         }
     }
 
