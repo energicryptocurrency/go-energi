@@ -51,17 +51,16 @@ contract MasternodeTokenV2 is
         v1storage.setOwner(_newImpl);
     }
 
-    // _validateBalance overrides the same function in MasternodeTokenV1. It
-    // uses the new value on minimum collateral amount defined.
+    //---------------------------------
     function _validateBalance(uint256 _amount) internal pure {
         // NOTE: "Too small" check makes no sense as it would be just zero.
 
         if (_amount > MN_COLLATERAL_MAX) {
-            revert("Too much collateral");
+            revert("Too much");
         }
 
-        if ((_amount % MN_COLLATERAL_MIN_V2) != 0) {
-            revert("Not a multiple of collateral");
+        if ((_amount % MN_COLLATERAL_V2_MIN) != 0) {
+            revert("Not a multiple");
         }
     }
 

@@ -27,5 +27,5 @@ pragma solidity 0.5.11;
  */
 
 contract GlobalConstantsV2 {
-    uint constant internal MN_COLLATERAL_MIN_V2 = 1000 ether;
+    uint constant internal MN_COLLATERAL_V2_MIN = 1000 ether;
 }

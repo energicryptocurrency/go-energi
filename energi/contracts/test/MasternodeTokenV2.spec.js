@@ -18,8 +18,11 @@
 
 'use strict';
 
+const MockProposal = artifacts.require('MockProposal');
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
+const MockSporkRegistry = artifacts.require('MockSporkRegistry');
+const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const MasternodeTokenV2 = artifacts.require('MasternodeTokenV2');
 const IMasternodeToken = artifacts.require('IMasternodeToken');
 const StorageMasternodeTokenV1 = artifacts.require('StorageMasternodeTokenV1');
@@ -36,6 +39,7 @@ contract("MasternodeTokenV2", async accounts => {
         storage: null,
     };
 
+    const COLLATERAL_01 = web3.utils.toWei('1000', 'ether');
     const COLLATERAL_1 = web3.utils.toWei('10000', 'ether');
     const COLLATERAL_2 = web3.utils.toWei('20000', 'ether');
     const COLLATERAL_3 = web3.utils.toWei('30000', 'ether');
@@ -318,6 +322,57 @@ contract("MasternodeTokenV2", async accounts => {
             } catch (e) {
                 assert.match(e.message, /Not owner/);
             }
+        });
+
+        it('should allow depositCollateral() - V2 min', async () => {
+            const { logs } = await s.token_abi.depositCollateral({
+                from: accounts[2],
+                value: COLLATERAL_01,
+            });
+            assert.equal(logs.length, 1);
+            const res = await s.token_abi.balanceInfo(accounts[2]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_01);
+            await check_age(res['1']);
+        });
+
+        it('should migrate from V1', async () => {
+            // Spork registry
+            const registry_proxy = await MockProxy.new();
+            const registry = await MockSporkRegistry.new(registry_proxy.address);
+            await registry_proxy.setImpl(registry.address);
+
+            // MNToken proxy
+            const mn_proxy = await MockProxy.new();
+            const imn = await IMasternodeToken.at(mn_proxy.address);
+
+            const impl1 = await MasternodeTokenV1.new(mn_proxy.address, registry_proxy.address);
+            const impl2 = await MasternodeTokenV2.new(mn_proxy.address, registry_proxy.address);
+            await mn_proxy.setImpl(impl1.address);
+
+            // Deposit before migration
+            await imn.depositCollateral({
+                from: accounts[0],
+                value: COLLATERAL_1,
+            });
+
+            // Upgrade
+            const { logs } = await mn_proxy.proposeUpgrade(impl2.address, 0);
+            s.assert.equal(logs.length, 1);
+
+            const proposal = await MockProposal.at(logs[0].args['1']);
+
+            await proposal.setAccepted();
+            await mn_proxy.upgrade(proposal.address);
+
+            const res = await impl2.balanceInfo(accounts[0]);
+            assert.equal(res['0'].valueOf(), COLLATERAL_1);
+
+            await imn.withdrawCollateral(COLLATERAL_1, {
+                from: accounts[0],
+            });
+
+            const res2 = await impl2.balanceInfo(accounts[0]);
+            assert.equal(res2['0'].valueOf(), 0);
         });
     });
 
