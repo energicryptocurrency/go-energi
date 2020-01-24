@@ -140,6 +140,15 @@ contract("MasternodeRegistryV2", async accounts => {
             });
         });
 
+        const checkHeartbeat = async () => {
+            try {
+                const evt = await s.orig.getPastEvents('Heartbeat', common.evt_last_block);
+                expect(evt).lengthOf(0);
+            } catch(e) {
+                expect(e.message).match(/doesn't exist in this contract/);
+            }
+        };
+
         describe('No MN', () => {
             it('should silently denounce()', async () => {
                 await s.token_abi.denounce(masternode1);
@@ -462,14 +471,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(s2.last_heartbeat.gt(s1.last_heartbeat)).true;
                 expect(s2.last_heartbeat.gt(b.timestamp)).true;
 
-                const evt = await s.orig.getPastEvents('Heartbeat', common.evt_last_block);
-                expect(evt).lengthOf(1);
-
-                expect(evt[0].args).deep.include({
-                    '0': masternode1,
-                    '__length__': 1,
-                    'masternode': masternode1,
-                });
+                await checkHeartbeat();
             });
 
             it('should correctly count', async () => {
@@ -722,14 +724,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 const s2o = await s.orig.mn_status(masternode2);
                 expect(s2o.last_heartbeat.eq(s1o.last_heartbeat)).true;
                 
-                const evt = await s.orig.getPastEvents('Heartbeat', common.evt_last_block);
-                expect(evt).lengthOf(1);
-
-                expect(evt[0].args).deep.include({
-                    '0': masternode1,
-                    '__length__': 1,
-                    'masternode': masternode1,
-                });
+                await checkHeartbeat();
             });
 
             it('should correctly count', async () => {

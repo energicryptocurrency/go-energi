@@ -49,11 +49,6 @@ contract MasternodeRegistryV2 is
     IMasternodeRegistryV2,
     NonReentrant
 {
-    // NOTE: maybe this is too much...
-    event Heartbeat(
-        address indexed masternode
-    );
-
     enum Config {
         RequireValidation,
         ValidationPeriod,
@@ -395,8 +390,6 @@ contract MasternodeRegistryV2 is
 
         s.last_heartbeat = block.timestamp;
         s.sw_features = sw_features;
-
-        emit Heartbeat(masternode);
     }
 
     function invalidate(address masternode)
