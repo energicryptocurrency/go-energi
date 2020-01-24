@@ -89,6 +89,7 @@ var AppHelpFlagGroups = []flagGroup{
 		Name: "ENERGI MASTERNODE",
 		Flags: []cli.Flag{
 			utils.MasternodeFlag,
+			utils.MasternodeOwnerFlag,
 		},
 	},
 	{
