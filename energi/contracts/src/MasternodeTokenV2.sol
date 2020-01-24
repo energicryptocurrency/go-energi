@@ -40,6 +40,12 @@ contract MasternodeTokenV2 is
         MasternodeTokenV1(_proxy, _registry_proxy)
     {}
 
+    // ERC20
+    //---------------------------------
+    function decimals() external view returns (uint8) {
+        return 18;
+    }
+
     // IGovernedContract
     //---------------------------------
     function _migrate(IGovernedContract _oldImpl) internal {

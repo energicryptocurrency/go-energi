@@ -107,7 +107,7 @@ contract("MasternodeTokenV2", async accounts => {
 
         it('should support decimals()', async () => {
             const res = await s.token_abi.decimals();
-            assert.equal(res.valueOf(), 22);
+            assert.equal(res.valueOf(), 18);
         });
 
         it('should support balanceOf()', async () => {
