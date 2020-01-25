@@ -22,6 +22,7 @@ const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
 const MockProposal = artifacts.require('MockProposal');
 const MockSporkRegistry = artifacts.require('MockSporkRegistry')
+const MockMasternodeTokenV2 = artifacts.require('MockMasternodeTokenV2')
 const MasternodeRegistryV2 = artifacts.require('MasternodeRegistryV2');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 const IBlockReward = artifacts.require('IBlockReward');
@@ -557,10 +558,10 @@ contract("MasternodeRegistryV2", async accounts => {
                 }
 
                 const mn1_status = await s.orig.mn_status(masternode1);
-                let to_move = (mn1_status.next_heartbeat + 2*60*60+1);
-                to_move -= (await web3.eth.getBlock('latest')).timestamp;
+                let to_move = (mn1_status.next_heartbeat.add(toBN(2*60*60+1)));
+                to_move = to_move.sub(toBN((await web3.eth.getBlock('latest')).timestamp));
 
-                await common.moveTime(web3, to_move);
+                await common.moveTime(web3, to_move.toNumber());
 
                 expect(await s.token_abi.canHeartbeat(masternode1)).false;
 
@@ -1338,6 +1339,123 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(await imn.enumerate()).members([masternode1, masternode2]);
 
                 expect(await impl2.enumerate()).members([masternode1, masternode2]);
+            });
+        });
+
+        const SPI_MN_COUNT = process.env.SPI_MN_COUNT || 10; // set to 10000 at runtime
+        describe(`${SPI_MN_COUNT} MNs`, () => {
+            const nodes = [];
+
+            let mntoken_orig;
+            let mntoken_proxy;
+            let mnreg_orig;
+            let mnreg_proxy;
+            let mnreg_abi;
+
+            before(async () => {
+                mntoken_proxy = await MockProxy.new();
+                mnreg_proxy = await MockProxy.new();
+
+                mntoken_orig = await MockMasternodeTokenV2.new(
+                    mntoken_proxy.address, mnreg_proxy.address);
+                await mntoken_proxy.setImpl(mntoken_orig.address);
+
+                mnreg_orig = await MasternodeRegistryV2.new(
+                    mnreg_proxy.address,
+                    mntoken_proxy.address,
+                    s.treasury_proxy_addr,
+                    common.mnregistry_config_v2
+                );
+                await mnreg_proxy.setImpl(mnreg_orig.address);
+                mnreg_abi = await IMasternodeRegistryV2.at(mnreg_orig.address);
+            });
+
+            it('should generate metadata', async function() {
+                this.timeout(7200e3);
+                const c1k = toBN(toWei('1000', 'ether'));
+                const for_fees = toBN(toWei('1', 'ether'));
+                const e1 = fromAscii('12345678901234567890123456789012');
+
+                for (let i = 1; i <= SPI_MN_COUNT; ++i) {
+                    const e2 = (i.toString() + '000000').repeat(10).substr(0, 32);
+                    const masternode = await web3.eth.personal.newAccount('');
+                    const owner = await web3.eth.personal.newAccount('');
+                    const collateral = c1k.mul(toBN(1 + i%100));
+
+                    await web3.eth.personal.unlockAccount(masternode, '', 0);
+                    await web3.eth.personal.unlockAccount(owner, '', 0);
+
+                    nodes.push({
+                        masternode,
+                        owner,
+                        ip: ip1,
+                        enode: [e1, fromAscii(e2)],
+                        collateral,
+                    });
+
+                    await web3.eth.sendTransaction({
+                        to: owner,
+                        from: owner1,
+                        value: for_fees,
+                    });
+                    await web3.eth.sendTransaction({
+                        to: masternode,
+                        from: owner1,
+                        value: for_fees,
+                    });
+                    await mntoken_orig.setBalance(owner, collateral);
+
+                    if (i%100 === 0) {
+                        // eslint-disable-next-line no-console
+                        console.log(`Done ${i}`);
+                    }
+                }
+            });
+
+            it('should announce all', async function() {
+                this.timeout(7200e3);
+                let i = 0;
+
+                for (let n of nodes) {
+                    await mnreg_abi.announce(n.masternode, n.ip, n.enode, {
+                        from: n.owner
+                    });
+
+                    if (++i%100 === 0) {
+                        // eslint-disable-next-line no-console
+                        console.log(`Done ${i}`);
+                    }
+                }
+            });
+
+            it('should heartbeat all', async function() {
+                this.timeout(7200e3);
+                let i = 0;
+
+                await common.moveTime(web3, 60*30);
+
+                for (let { masternode } of nodes) {
+                    if (!await mnreg_abi.canHeartbeat(masternode)) {
+                        const status = await mnreg_orig.mn_status(masternode);
+                        let to_move = status.next_heartbeat.add(toBN(1));
+                        to_move -= (await web3.eth.getBlock('latest')).timestamp;
+
+                        await common.moveTime(web3, to_move.toNumber());
+                    }
+
+                    const bn = await web3.eth.getBlockNumber();
+                    const b = await web3.eth.getBlock(bn);
+
+                    await mnreg_abi.heartbeat(bn, b.hash, '0', {
+                        from: masternode,
+                        ...common.zerofee_callopts,
+                    });
+
+                    if (++i%100 === 0) {
+                        // eslint-disable-next-line no-console
+                        console.log(`Done ${i}`);
+                    }
+                }
             });
         });
     });
