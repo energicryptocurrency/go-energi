@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -255,8 +254,6 @@ func (pool *TxPool) removeBySenderLocked(sender common.Address) bool {
 	return res
 }
 
-const persistenceFilename = "protection.rlp"
-
 type persistContent struct {
 	AddrKeys []common.Address
 	IDKeys   []uint32
@@ -285,9 +282,7 @@ func encodeIDMap(data map[uint32]time.Time) persistContent {
 
 // persistenceReader fetches the data that was persisted.
 func (pool *TxPool) persistenceReader() error {
-	fullPath := filepath.Join(pool.persistPath, persistenceFilename)
-
-	rawD, err := ioutil.ReadFile(fullPath)
+	rawD, err := ioutil.ReadFile(pool.config.Protection)
 	if err != nil {
 		return err
 	}
@@ -345,7 +340,7 @@ func (pool *TxPool) persistenceWriter() error {
 		return err
 	}
 
-	fullPath := filepath.Join(pool.persistPath, persistenceFilename)
+	fullPath := pool.config.Protection
 	// Create a temporary swap file.
 	if err = ioutil.WriteFile(fullPath+".new", data, 0644); err != nil {
 		return err
