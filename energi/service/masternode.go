@@ -389,6 +389,11 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 		m.validator.cancel()
 		m.validator = newPeerValidator(target, m)
 
+		// Only present in IMasternodeRegistryV2
+		if ok, err := m.registry.CanInvalidate(m.address); err == nil && !ok {
+			return
+		}
+
 		// Skip the first validation cycle to prevent possible DoS trigger on restart
 		if (old_target != common.Address{}) {
 			go m.validator.validate()
