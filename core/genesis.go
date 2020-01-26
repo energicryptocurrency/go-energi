@@ -644,11 +644,12 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			energi_params.Energi_MasternodeRegistry,
 			energi_params.Energi_MasternodeToken,
 			energi_params.Energi_Treasury,
-			[4]*big.Int{
+			[5]*big.Int{
 				config.MNRequireValidation,
 				config.MNValidationPeriod,
 				config.MNCleanupPeriod,
 				config.MNEverCollateral,
+				config.MNRewardsPerBlock,
 			},
 		)
 	} else {
