@@ -1363,6 +1363,7 @@ contract("MasternodeRegistryV2", async accounts => {
             let mnreg_orig;
             let mnreg_proxy;
             let mnreg_abi;
+            let reward_abi;
 
             before(async () => {
                 mntoken_proxy = await MockProxy.new();
@@ -1373,15 +1374,19 @@ contract("MasternodeRegistryV2", async accounts => {
                     common.mnreg_deploy_opts);
                 await mntoken_proxy.setImpl(mntoken_orig.address);
 
+                const params = common.mnregistry_config_v2.slice();
+                params[4] = 10;
+
                 mnreg_orig = await MasternodeRegistryV2.new(
                     mnreg_proxy.address,
                     mntoken_proxy.address,
                     s.treasury_proxy_addr,
-                    common.mnregistry_config_v2,
+                    params,
                     common.mnreg_deploy_opts
                 );
                 await mnreg_proxy.setImpl(mnreg_orig.address);
                 mnreg_abi = await IMasternodeRegistryV2.at(mnreg_orig.address);
+                reward_abi = await IBlockReward.at(mnreg_orig.address);
             });
 
             it('should generate metadata', async function() {
@@ -1442,7 +1447,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 }
             });
 
-            it('should heartbeat all', async function() {
+            it('should simulate operation', async function() {
                 this.timeout(7200e3);
                 let i = 0;
 
@@ -1452,7 +1457,7 @@ contract("MasternodeRegistryV2", async accounts => {
                     if (!await mnreg_abi.canHeartbeat(masternode)) {
                         const status = await mnreg_orig.mn_status(masternode);
                         let to_move = status.next_heartbeat.add(toBN(1));
-                        to_move -= (await web3.eth.getBlock('latest')).timestamp;
+                        to_move = to_move.sub(toBN(await web3.eth.getBlock('latest')).timestamp);
 
                         await common.moveTime(web3, to_move.toNumber());
                     }
@@ -1464,6 +1469,7 @@ contract("MasternodeRegistryV2", async accounts => {
                         from: masternode,
                         ...common.zerofee_callopts,
                     });
+                    await reward_abi.reward({value: reward});
 
                     if (++i%100 === 0) {
                         // eslint-disable-next-line no-console

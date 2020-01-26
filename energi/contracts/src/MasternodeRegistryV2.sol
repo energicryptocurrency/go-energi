@@ -58,7 +58,8 @@ contract MasternodeRegistryV2 is
         RequireValidation,
         ValidationPeriods,
         CleanupPeriod,
-        InitialEverCollateral
+        InitialEverCollateral,
+        PaymentsPerBlock
     }
 
     // Data for migration
@@ -75,6 +76,7 @@ contract MasternodeRegistryV2 is
     uint public require_validation;
     uint public validation_periods;
     uint public cleanup_period;
+    uint public payments_per_block;
     //---------------------------------
 
     // Not for migration
@@ -105,7 +107,7 @@ contract MasternodeRegistryV2 is
         address _proxy,
         IGovernedProxy _token_proxy,
         IGovernedProxy _treasury_proxy,
-        uint[4] memory _config
+        uint[5] memory _config
     )
         public
         GovernedContract(_proxy)
@@ -117,6 +119,7 @@ contract MasternodeRegistryV2 is
         require_validation = _config[uint(Config.RequireValidation)];
         validation_periods = _config[uint(Config.ValidationPeriods)];
         cleanup_period = _config[uint(Config.CleanupPeriod)];
+        payments_per_block = _config[uint(Config.PaymentsPerBlock)];
 
         require(validation_periods <= require_validation, "Validations > Require");
 
@@ -778,15 +781,20 @@ contract MasternodeRegistryV2 is
             _processValidationEpoch();
 
             // Safety checks
-            assert(gasleft() > GAS_RESERVE);
             assert(msg.value == address(this).balance);
+            uint fractions = payments_per_block;
+            uint reward_part = REWARD_MASTERNODE_V1 / fractions;
 
-            // solium-disable-next-line no-empty-blocks
-            while ((gasleft() > GAS_RESERVE) && !_reward()) {}
+            for (uint i = fractions; i > 0; --i) {
+                assert(gasleft() > GAS_RESERVE);
+
+                // solium-disable-next-line no-empty-blocks
+                while ((gasleft() > GAS_RESERVE) && !_reward(reward_part)) {}
+            }
         }
     }
 
-    function _reward() internal returns(bool) {
+    function _reward(uint reward_part) internal returns(bool) {
         //---
         address masternode = current_masternode;
         uint payouts = current_payouts;
@@ -816,7 +824,7 @@ contract MasternodeRegistryV2 is
         if (status == ValidationStatus.MNActive) {
             // solium-disable security/no-send
             if (!_canReward(invalidations) ||
-                mninfo.owner.send(msg.value)
+                mninfo.owner.send(reward_part)
             ) {
                 return true;
             }

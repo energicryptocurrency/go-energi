@@ -28,7 +28,8 @@ exports.mnregistry_config_v2 = [
     3, // RequireValidation
     3, // ValidationPeriods
     24*60*60, // CleanupPeriod
-    '10000000000000000000000', // 10,000 NRG
+    '10000000000000000000000', // 10,000 NRG,
+    1,
 ];
 exports.superblock_cycles = 8;
 exports.chain_id = 49797;
