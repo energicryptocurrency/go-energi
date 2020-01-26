@@ -46,9 +46,7 @@ contract("MasternodeRegistryV2", async accounts => {
     const { toWei } = web3.utils;
     const vperiod = common.mnregistry_config_v2[1];
     const isTargetChanges = async (_token, _mn) => {
-        // Proper way is to check pending block validation target against current,
-        // but there are some issues.
-        return (await web3.eth.getBlockNumber() % vperiod === (vperiod - 1))
+        return await _token.validationTarget(_mn, 'latest') !=  await _token.validationTarget(_mn, 'pending');
     };
     
     before(async () => {
@@ -80,7 +78,8 @@ contract("MasternodeRegistryV2", async accounts => {
             s.proxy.address,
             s.mntoken_proxy_addr,
             s.treasury_proxy_addr,
-            common.mnregistry_config_v2
+            common.mnregistry_config_v2,
+            common.mnreg_deploy_opts
         );
         await s.proxy.setImpl(impl.address);
     });
@@ -1012,7 +1011,7 @@ contract("MasternodeRegistryV2", async accounts => {
                     expect(target1).not.equal(target2);
                     expect(target1).not.equal(target3);
 
-                    if (i === 13 || i == 11 || i == 9) {
+                    if (i > 6 && i < 12 || i == 13) {
                         let t = target1;
 
                         if (await isTargetChanges(s.token_abi, masternode1)) {
@@ -1022,7 +1021,9 @@ contract("MasternodeRegistryV2", async accounts => {
 
                         const invalidator = (t === masternode3) ? masternode1 : masternode2;
 
-                        await s.token_abi.invalidate(masternode3, {from: invalidator});
+                        if (await s.token_abi.canInvalidate(invalidator)) {
+                            await s.token_abi.invalidate(masternode3, {from: invalidator});
+                        }
                     }
                 }
 
@@ -1059,16 +1060,18 @@ contract("MasternodeRegistryV2", async accounts => {
                     target = await valTarget();
                 } while ( target === tmp );
 
-                for (let k = 0; k < 3; ++k) {
-                    for (let i = vperiod; i > 0; --i, --bn) {
-                        tmp = await valTarget();
-                        expect(tmp).equal(target);
-                    }
+                const obn = bn;
 
-                    for (let i = vperiod; i > 0; --i, --bn) {
-                        tmp = await valTarget();
-                        expect(tmp).not.equal(target);
-                    }
+                for (let i = vperiod; i > 0; --i, --bn) {
+                    tmp = await valTarget();
+                    expect(tmp).equal(target);
+                }
+
+                bn = obn + 1;
+
+                for (let i = vperiod; i > 0; --i, ++bn) {
+                    tmp = await valTarget();
+                    expect(tmp).not.equal(target);
                 }
             });
 
@@ -1161,6 +1164,12 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(target3).eql(masternode1);
             });
 
+            it('should canInvalidate()', async () => {
+                expect(await s.token_abi.canInvalidate(masternode1)).true;
+                expect(await s.token_abi.canInvalidate(masternode2)).false;
+                expect(await s.token_abi.canInvalidate(masternode3)).true;
+            });
+
             it('should refuse invalidate() by inactive node', async () => {
                 try {
                     await s.token_abi.invalidate(masternode1, {from:masternode2, ...common.zerofee_callopts});
@@ -1171,7 +1180,9 @@ contract("MasternodeRegistryV2", async accounts => {
             });
 
             it('should refuse double invalidate()', async () => {
+                expect(await s.token_abi.canInvalidate(masternode1)).true;
                 await s.token_abi.invalidate(masternode3, {from:masternode1, ...common.zerofee_callopts});
+                expect(await s.token_abi.canInvalidate(masternode1)).false;
 
                 try {
                     for (let i = 0; i < vperiod; ++i) {
@@ -1304,7 +1315,8 @@ contract("MasternodeRegistryV2", async accounts => {
                     mn_proxy.address,
                     s.mntoken_proxy_addr,
                     s.treasury_proxy_addr,
-                    common.mnregistry_config_v2
+                    common.mnregistry_config_v2,
+                    common.mnreg_deploy_opts
                 );
                 await mn_proxy.setImpl(impl1.address);
 
@@ -1357,14 +1369,16 @@ contract("MasternodeRegistryV2", async accounts => {
                 mnreg_proxy = await MockProxy.new();
 
                 mntoken_orig = await MockMasternodeTokenV2.new(
-                    mntoken_proxy.address, mnreg_proxy.address);
+                    mntoken_proxy.address, mnreg_proxy.address,
+                    common.mnreg_deploy_opts);
                 await mntoken_proxy.setImpl(mntoken_orig.address);
 
                 mnreg_orig = await MasternodeRegistryV2.new(
                     mnreg_proxy.address,
                     mntoken_proxy.address,
                     s.treasury_proxy_addr,
-                    common.mnregistry_config_v2
+                    common.mnregistry_config_v2,
+                    common.mnreg_deploy_opts
                 );
                 await mnreg_proxy.setImpl(mnreg_orig.address);
                 mnreg_abi = await IMasternodeRegistryV2.at(mnreg_orig.address);

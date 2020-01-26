@@ -68,7 +68,7 @@ module.exports = async (deployer, _, accounts) => {
             common.mnregistry_config);
         await deploy_common(MasternodeRegistryV2,
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
-            common.mnregistry_config_v2);
+            common.mnregistry_config_v2, common.mnreg_deploy_opts);
         await deploy_common(SporkRegistryV1, undefined, mn_registry_proxy);
         await deploy_common(SporkRegistryV2, undefined, mn_registry_proxy, common.emergency_signer);
         await deploy_common(StakerRewardV1, staker_proxy);

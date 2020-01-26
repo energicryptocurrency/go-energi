@@ -32,4 +32,5 @@ import { IMasternodeRegistry } from "./IMasternodeRegistry.sol";
 contract IMasternodeRegistryV2 is IMasternodeRegistry {
     function collateralLimits() external pure returns (uint min, uint max);
     function canHeartbeat(address masternode) external view returns(bool can_heartbeat);
+    function canInvalidate(address masternode) external view returns(bool can_invalidate);
 }

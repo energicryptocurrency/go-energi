@@ -56,7 +56,7 @@ contract MasternodeRegistryV2 is
 
     enum Config {
         RequireValidation,
-        ValidationPeriod,
+        ValidationPeriods,
         CleanupPeriod,
         InitialEverCollateral
     }
@@ -73,7 +73,7 @@ contract MasternodeRegistryV2 is
     address public current_masternode;
     uint public current_payouts;
     uint public require_validation;
-    uint public validation_period;
+    uint public validation_periods;
     uint public cleanup_period;
     //---------------------------------
 
@@ -83,7 +83,6 @@ contract MasternodeRegistryV2 is
         uint next_heartbeat;
         uint inactive_since;
         uint validator_index;
-        uint invalidation_since;
         uint invalidations;
         uint seq_payouts;
         uint last_vote_epoch;
@@ -96,7 +95,10 @@ contract MasternodeRegistryV2 is
     uint public mn_active;
     mapping(address => Status) public mn_status;
     address[] public validator_list;
-    uint last_block_number;
+    uint public last_block_number;
+
+    uint public curr_validation_ends;
+    uint public curr_validation_offset;
     //---------------------------------
 
     constructor(
@@ -113,12 +115,16 @@ contract MasternodeRegistryV2 is
         treasury_proxy = _treasury_proxy;
 
         require_validation = _config[uint(Config.RequireValidation)];
-        validation_period = _config[uint(Config.ValidationPeriod)];
+        validation_periods = _config[uint(Config.ValidationPeriods)];
         cleanup_period = _config[uint(Config.CleanupPeriod)];
+
+        require(validation_periods <= require_validation, "Validations > Require");
 
         uint initial_ever_collateral = _config[uint(Config.InitialEverCollateral)];
         mn_ever_collateral = initial_ever_collateral;
         require(initial_ever_collateral >= MN_COLLATERAL_V2_MIN, "Initial collateral");
+
+        _processValidationEpoch();
     }
 
     // IMasternodeRegistry
@@ -200,7 +206,6 @@ contract MasternodeRegistryV2 is
 
         // Validator logic is de-coupled for easier changes
         //---
-        mnstatus.invalidation_since = block.number;
         mnstatus.validator_index = validator_list.length;
         validator_list.push(masternode);
 
@@ -411,7 +416,7 @@ contract MasternodeRegistryV2 is
         address caller = _callerAddress();
         require(caller != masternode, "Invalidation for self");
 
-        uint vote_epoch = block.number / validation_period;
+        uint vote_epoch = curr_validation_ends;
 
         //---
         Status storage cs = mn_status[caller];
@@ -433,14 +438,39 @@ contract MasternodeRegistryV2 is
 
     function validationTarget(address masternode) public view returns(address target) {
         uint total = validator_list.length;
+        uint offset = curr_validation_offset;
 
-        uint vperiod = validation_period;
-        uint offset = (block.number / vperiod % (total - 1)) + 1;
+        // NOTE: a valid case when MN count changes
+        if (offset == total) {
+            offset += 1;
+        }
 
         uint target_index = mn_status[masternode].validator_index;
-        target_index = (target_index + offset) % total;
+        target_index = (target_index + curr_validation_offset) % total;
 
         return validator_list[target_index];
+    }
+
+    function _processValidationEpoch() internal {
+        if (block.number >= curr_validation_ends) {
+            uint total = validator_list.length;
+            uint vperiods = validation_periods;
+
+            // means validation is not enabled
+            if (total < vperiods) {
+                return;
+            }
+
+            uint vperiod = total / vperiods;
+
+            // NOTE: vperiods serves as both validation period count per cycle and as mininal block count.
+            if (vperiod < vperiods ) {
+                vperiod = vperiods;
+            }
+
+            curr_validation_ends = block.number + vperiod;
+            curr_validation_offset = (uint256(blockhash(block.number - 1)) % (total - 1)) + 1;
+        }
     }
 
     function isActive(address masternode) external view returns(bool) {
@@ -657,6 +687,15 @@ contract MasternodeRegistryV2 is
         return _isActive(masternode, s) && (s.next_heartbeat <= block.timestamp);
     }
 
+    function canInvalidate(address masternode) external view returns(bool can_invalidate) {
+        Status storage s = mn_status[masternode];
+        return (
+            _isActive(masternode, s) &&
+            (s.last_vote_epoch < curr_validation_ends) &&
+            (validationTarget(masternode) != masternode)
+        );
+    }
+
     //---------------------------------
 
     // IGovernedContract
@@ -693,7 +732,7 @@ contract MasternodeRegistryV2 is
                 ,
                 status.inactive_since,
                 ,
-                status.invalidation_since,
+                ,
                 status.invalidations,
                 status.seq_payouts,
                 status.last_vote_epoch
@@ -705,6 +744,8 @@ contract MasternodeRegistryV2 is
 
             mn_status[mn] = status;
         }
+
+        _processValidationEpoch();
     }
 
     function _destroy(IGovernedContract _newImpl) internal {
@@ -731,8 +772,12 @@ contract MasternodeRegistryV2 is
         if (msg.value == REWARD_MASTERNODE_V1) {
             // SECURITY: this check is essential against Masternode skip attacks!
             require(last_block_number < block.number, "Call outside of governance!");
-            last_block_number = last_block_number;
+            last_block_number = block.number;
 
+            // Update validation offset if needed
+            _processValidationEpoch();
+
+            // Safety checks
             assert(gasleft() > GAS_RESERVE);
             assert(msg.value == address(this).balance);
 
@@ -754,14 +799,12 @@ contract MasternodeRegistryV2 is
 
         Status storage mnstatus = mn_status[masternode];
         uint invalidations = mnstatus.invalidations;
-        uint invalidation_since = mnstatus.invalidation_since;
         ++payouts;
 
         if (payouts < mnstatus.seq_payouts) {
             current_payouts = payouts;
         } else {
             mnstatus.invalidations = 0;
-            mnstatus.invalidation_since = block.number;
             current_masternode = mninfo.next;
             current_payouts = 0;
         }
@@ -772,7 +815,7 @@ contract MasternodeRegistryV2 is
 
         if (status == ValidationStatus.MNActive) {
             // solium-disable security/no-send
-            if (!_canReward(invalidations, invalidation_since) ||
+            if (!_canReward(invalidations) ||
                 mninfo.owner.send(msg.value)
             ) {
                 return true;
@@ -802,14 +845,12 @@ contract MasternodeRegistryV2 is
         return false;
     }
 
-    function _canReward(uint invalidations, uint invalidation_since) internal view returns(bool) {
+    function _canReward(uint invalidations) internal view returns(bool) {
         if (mn_active < require_validation) {
             return true;
         }
 
-        uint threshold = block.number - invalidation_since;
-        threshold = (threshold / validation_period) + 1;
-        threshold /= 2;
+        uint threshold = (validation_periods + 1) / 2;
 
         return (invalidations < threshold);
     }
