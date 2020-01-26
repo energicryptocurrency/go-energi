@@ -449,7 +449,7 @@ contract MasternodeRegistryV2 is
         }
 
         uint target_index = mn_status[masternode].validator_index;
-        target_index = (target_index + curr_validation_offset) % total;
+        target_index = (target_index + offset) % total;
 
         return validator_list[target_index];
     }
