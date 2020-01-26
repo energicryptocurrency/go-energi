@@ -24,6 +24,13 @@ exports.mnregistry_config = [
     24*60*60,
     '10000000000000000000000', // 10,000 NRG
 ];
+exports.mnregistry_config_v2 = [
+    3, // RequireValidation
+    3, // ValidationPeriods
+    24*60*60, // CleanupPeriod
+    '10000000000000000000000', // 10,000 NRG,
+    1,
+];
 exports.superblock_cycles = 8;
 exports.chain_id = 49797;
 exports.migration_signer = '0x0000000000000000000000000000000012345678';
@@ -31,6 +38,9 @@ exports.cpp_signer = '0x2D0bc327d0843CAF6Fd9ae1eFaB0bF7196Fc2FC8';
 exports.emergency_signer = '0x73E286b244c17F030F72e98C57FC83015a3C53Fd';
 exports.zerofee_callopts = {
     gas: 120000, // real max is 500000
+};
+exports.mnreg_deploy_opts = {
+    gas: 7000000,
 };
 
 exports.evt_last_block = {

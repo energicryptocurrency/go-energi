@@ -9,7 +9,9 @@ const Gen2Migration = artifacts.require('Gen2Migration');
 //const GenericProposalV1 = artifacts.require('GenericProposalV1');
 const GovernedProxy = artifacts.require('GovernedProxy');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
+const MasternodeTokenV2 = artifacts.require('MasternodeTokenV2');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
+const MasternodeRegistryV2 = artifacts.require('MasternodeRegistryV2');
 const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const SporkRegistryV2 = artifacts.require('SporkRegistryV2');
 const StakerRewardV1 = artifacts.require('StakerRewardV1');
@@ -60,9 +62,13 @@ module.exports = async (deployer, _, accounts) => {
         await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(CheckpointRegistryV2, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
+        await deploy_common(MasternodeTokenV2, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
             common.mnregistry_config);
+        await deploy_common(MasternodeRegistryV2,
+            mn_registry_proxy, mn_token_proxy, treasury_proxy,
+            common.mnregistry_config_v2, common.mnreg_deploy_opts);
         await deploy_common(SporkRegistryV1, undefined, mn_registry_proxy);
         await deploy_common(SporkRegistryV2, undefined, mn_registry_proxy, common.emergency_signer);
         await deploy_common(StakerRewardV1, staker_proxy);

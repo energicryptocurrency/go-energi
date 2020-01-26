@@ -40,8 +40,8 @@ import (
 )
 
 var (
-	heartbeatInterval = time.Duration(35) * time.Minute
-	recheckInterval   = time.Duration(5) * time.Minute
+	heartbeatInterval = time.Duration(30) * time.Minute
+	recheckInterval   = time.Minute
 )
 
 const (
@@ -65,7 +65,7 @@ type MasternodeService struct {
 	inSync int32
 
 	address  common.Address
-	registry *energi_abi.IMasternodeRegistrySession
+	registry *energi_abi.IMasternodeRegistryV2Session
 
 	cpRegistry  *energi_abi.ICheckpointRegistrySession
 	lastCPBlock uint64
@@ -108,13 +108,13 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 	m.eth.TxPool().RemoveBySender(address)
 
 	//---
-	contract, err := energi_abi.NewIMasternodeRegistry(
+	contract, err := energi_abi.NewIMasternodeRegistryV2(
 		energi_params.Energi_MasternodeRegistry, m.eth.APIBackend)
 	if err != nil {
 		return err
 	}
 
-	m.registry = &energi_abi.IMasternodeRegistrySession{
+	m.registry = &energi_abi.IMasternodeRegistryV2Session{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
 			From: address,
@@ -347,6 +347,11 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 		// Some chance of race is still left, but at acceptable probability.
 		m.validator.cancel()
 
+		// Only present in IMasternodeRegistryV2
+		if ok, err := m.registry.CanHeartbeat(m.address); err == nil && !ok {
+			return
+		}
+
 		// Ensure heartbeat on clean queue
 		if !m.eth.TxPool().RemoveBySender(m.address) {
 			current := m.eth.BlockChain().CurrentHeader()
@@ -383,6 +388,11 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 	if old_target := m.validator.target; old_target != target {
 		m.validator.cancel()
 		m.validator = newPeerValidator(target, m)
+
+		// Only present in IMasternodeRegistryV2
+		if ok, err := m.registry.CanInvalidate(m.address); err == nil && !ok {
+			return
+		}
 
 		// Skip the first validation cycle to prevent possible DoS trigger on restart
 		if (old_target != common.Address{}) {
