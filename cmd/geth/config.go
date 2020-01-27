@@ -29,6 +29,7 @@ import (
 	cli "gopkg.in/urfave/cli.v1"
 
 	"github.com/ethereum/go-ethereum/cmd/utils"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/dashboard"
 	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/node"
@@ -185,7 +186,14 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	utils.RegisterDynamicCheckpointService(stack)
 
 	if ctx.GlobalBool(utils.MasternodeFlag.Name) {
-		utils.RegisterMasternodeService(stack)
+		var owner common.Address
+		if ownerStr := ctx.GlobalString(utils.MasternodeOwnerFlag.Name); ownerStr != "" {
+			if !common.IsHexAddress(ownerStr) {
+				utils.Fatalf("Invalid owner address was set as an argument")
+			}
+			owner = common.HexToAddress(ownerStr)
+		}
+		utils.RegisterMasternodeService(stack, owner)
 	}
 
 	return stack

@@ -65,6 +65,7 @@ type MasternodeService struct {
 	inSync int32
 
 	address  common.Address
+	owner    common.Address
 	registry *energi_abi.IMasternodeRegistryV2Session
 
 	cpRegistry  *energi_abi.ICheckpointRegistrySession
@@ -77,11 +78,12 @@ type MasternodeService struct {
 	validator *peerValidator
 }
 
-func NewMasternodeService(ethServ *eth.Ethereum) (node.Service, error) {
+func NewMasternodeService(ethServ *eth.Ethereum, owner common.Address) (node.Service, error) {
 	r := &MasternodeService{
 		eth:      ethServ,
 		inSync:   1,
 		features: big.NewInt(0),
+		owner:    owner,
 		// NOTE: we need to avoid triggering DoS on restart.
 		// There is no reliable way to check blockchain and all pools in the network.
 		nextHB: time.Now().Add(recheckInterval),
@@ -197,6 +199,19 @@ func (m *MasternodeService) listenDownloader() {
 func (m *MasternodeService) isActive() bool {
 	if atomic.LoadInt32(&m.inSync) == 0 {
 		return false
+	}
+
+	if m.owner != (common.Address{}) {
+		mninfo, err := m.registry.Info(m.address)
+		if err != nil {
+			log.Error("Masternode info fetch Err: %v", err)
+			return false
+		}
+
+		if mninfo.Owner != m.owner {
+			log.Error("Masternode owner mismatch", " needed=", m.owner, " got=", mninfo.Owner)
+			return false
+		}
 	}
 
 	res, err := m.registry.IsActive(m.address)

@@ -343,7 +343,7 @@ func energiServices(privKey *ecdsa.PrivateKey, presale core.GenesisAlloc) (*node
 		if err := ctx.Service(&ethServ); err != nil {
 			return nil, err
 		}
-		return NewMasternodeService(ethServ)
+		return NewMasternodeService(ethServ, common.Address{})
 	}
 
 	// Register the masternode service.

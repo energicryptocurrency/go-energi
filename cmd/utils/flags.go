@@ -662,6 +662,12 @@ var (
 		Usage: "Enable Energi Masternode service",
 	}
 
+	MasternodeOwnerFlag = cli.StringFlag{
+		Name:  "masternode.owner",
+		Usage: "Sets the current masternode owner address",
+		Value: "",
+	}
+
 	EnergiInitDevFlag = cli.StringFlag{
 		Name:  "init",
 		Usage: "Energi network: use pre-configured custom genesis block",
@@ -1427,13 +1433,14 @@ func RegisterDynamicCheckpointService(stack *node.Node) {
 	}
 }
 
-// RegisterMasternodeService configures Energi Masternode service
-func RegisterMasternodeService(stack *node.Node) {
+// RegisterMasternodeService configures Energi Masternode service. It also accepts
+// the owner parameter which is an optional user set cmd argument.
+func RegisterMasternodeService(stack *node.Node, owner common.Address) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		var ethServ *eth.Ethereum
 		ctx.Service(&ethServ)
 
-		return energi_svc.NewMasternodeService(ethServ)
+		return energi_svc.NewMasternodeService(ethServ, owner)
 	}); err != nil {
 		Fatalf("Failed to register the Energi Masternode service: %v", err)
 	}
