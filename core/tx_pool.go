@@ -33,7 +33,6 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/node"
 	"github.com/ethereum/go-ethereum/params"
 )
 
@@ -143,6 +142,9 @@ type TxPoolConfig struct {
 	GlobalQueue  uint64 // Maximum number of non-executable transaction slots for all accounts
 
 	Lifetime time.Duration // Maximum amount of time non-executable transaction are queued
+
+	// Energi
+	Protection string // Defines the protection data persist path.
 }
 
 // DefaultTxPoolConfig contains the default configurations for the transaction
@@ -159,7 +161,8 @@ var DefaultTxPoolConfig = TxPoolConfig{
 	AccountQueue: 64,
 	GlobalQueue:  1024,
 
-	Lifetime: 3 * time.Hour,
+	Lifetime:   3 * time.Hour,
+	Protection: "protection.rlp",
 }
 
 // sanitize checks the provided user configurations and changes anything that's
@@ -237,7 +240,6 @@ type TxPool struct {
 
 	zfProtector  *zeroFeeProtector
 	preBlacklist *preBlacklist
-	persistPath  string
 
 	homestead bool
 }
@@ -264,7 +266,6 @@ func NewTxPool(config TxPoolConfig, chainconfig *params.ChainConfig, chain block
 		// Ensure to initialize before the tx processing
 		zfProtector:  newZeroFeeProtector(),
 		preBlacklist: newPreBlacklist(),
-		persistPath:  node.DefaultDataDir(),
 	}
 
 	if err := pool.persistenceReader(); err != nil {
