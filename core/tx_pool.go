@@ -356,12 +356,18 @@ func (pool *TxPool) loop() {
 		// Handle inactive account transaction eviction
 		case <-evict.C:
 			pool.mu.Lock()
+			lifetime := pool.config.Lifetime
 			for addr := range pool.pending {
 				// Clean up stale txs.
 				if time.Since(pool.beats[addr]) > zeroFeesTimeoutInterval {
 					txs := pool.pending[addr].Flatten()
 					if len(txs) > 0 && IsValidZeroFee(txs[0]) {
+						// Removes by sender from both queued and pending list.
 						pool.removeBySenderLocked(addr)
+					}
+				} else if time.Since(pool.beats[addr]) > lifetime {
+					for _, tx := range pool.pending[addr].Flatten() {
+						pool.removeTx(tx.Hash(), true)
 					}
 				}
 			}
@@ -372,7 +378,7 @@ func (pool *TxPool) loop() {
 					continue
 				}
 				// Any non-locals old enough should be removed
-				if time.Since(pool.beats[addr]) > pool.config.Lifetime {
+				if time.Since(pool.beats[addr]) > lifetime {
 					for _, tx := range pool.queue[addr].Flatten() {
 						pool.removeTx(tx.Hash(), true)
 					}
