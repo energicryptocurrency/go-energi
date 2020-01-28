@@ -32,8 +32,8 @@ import (
 )
 
 const (
-	mntokenCallGas    uint64 = 300000
-	masternodeCallGas uint64 = 500000
+	mntokenCallGas    uint64 = 1000000
+	masternodeCallGas uint64 = 1000000
 )
 
 type MasternodeAPI struct {

@@ -458,6 +458,13 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(await s.token_abi.isActive(masternode2)).false;
             });
 
+            it('should handle onCollateralUpdate()', async () => {
+                await s.token_abi.onCollateralUpdate(owner1);
+                await s.token_abi.onCollateralUpdate(owner2);
+                expect(await s.token_abi.isActive(masternode1)).true;
+                expect(await s.token_abi.isActive(masternode2)).false;
+            });
+
             it('should canHeartbeat()', async () => {
                 expect(await s.token_abi.canHeartbeat(masternode1)).false;
                 expect(await s.token_abi.canHeartbeat(masternode2)).false;
