@@ -78,7 +78,12 @@ func TestPreBlacklist(t *testing.T) {
 		engine, vm.Config{}, nil)
 	assert.Empty(t, err)
 
-	pool := NewTxPool(TxPoolConfig{}, gspec.Config, chain)
+	dir, err := ioutil.TempDir(os.TempDir(), "test-*")
+	if err != nil {
+		panic(err)
+	}
+
+	pool := NewTxPool(TxPoolConfig{Protection: dir}, gspec.Config, chain)
 	prebl := pool.preBlacklist
 	prebl.timeNow = func() time.Time {
 		return now.Add(adjust_time)
@@ -233,8 +238,7 @@ func TestPersistence(t *testing.T) {
 
 	statedb, _ := state.New(common.Hash{}, state.NewDatabase(ethdb.NewMemDatabase()))
 	blockchain := &testBlockChain{statedb, 1000000, new(event.Feed)}
-	pool := NewTxPool(TxPoolConfig{}, params.TestChainConfig, blockchain)
-	pool.persistPath = dir
+	pool := NewTxPool(TxPoolConfig{Protection: dir}, params.TestChainConfig, blockchain)
 
 	preblacklistNewData := map[common.Address]time.Time{
 		common.HexToAddress("12"): time.Unix(123456, 0),

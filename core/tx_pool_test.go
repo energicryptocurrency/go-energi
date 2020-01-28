@@ -44,6 +44,12 @@ var testTxPoolConfig TxPoolConfig
 func init() {
 	testTxPoolConfig = DefaultTxPoolConfig
 	testTxPoolConfig.Journal = ""
+
+	dir, err := ioutil.TempDir(os.TempDir(), "test-*")
+	if err != nil {
+		panic(err)
+	}
+	testTxPoolConfig.Protection = dir
 }
 
 type testBlockChain struct {

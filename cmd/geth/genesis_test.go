@@ -70,7 +70,8 @@ var customGenesisTests = []struct {
 				"mnRequireValidation": 5,
 				"mnValidationPeriod" : 5,
 				"mnCleanupPeriod"    : 1209600,
-				"mnEverCollateral"   : 30000000000000000000000
+				"mnEverCollateral"   : 30000000000000000000000,
+				"mnRewardsPerBlock"  : 10
 			}
 		}`,
 		query:  "eth.getBlock(0).nonce",
@@ -102,6 +103,7 @@ var customGenesisTests = []struct {
 				"mnValidationPeriod" : 5,
 				"mnCleanupPeriod"    : 1209600,
 				"mnEverCollateral"   : 30000000000000000000000,
+				"mnRewardsPerBlock"  : 10,
 				"homesteadBlock"     : 314,
 				"daoForkBlock"       : 141,
 				"daoForkSupport"     : true
