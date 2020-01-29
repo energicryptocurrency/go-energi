@@ -18,6 +18,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/pborman/uuid"
@@ -89,6 +90,11 @@ func (g *GovernanceAPI) VoteAccept(
 	mn_owner common.Address,
 	password *string,
 ) (txhash common.Hash, err error) {
+	if err = g.requireActiveMN(mn_owner, password); err != nil {
+		log.Error("Failed", "err", err)
+		return
+	}
+
 	contract, err := g.proposal(password, mn_owner, proposal)
 	if err != nil {
 		log.Error("Failed", "err", err)
@@ -110,6 +116,11 @@ func (g *GovernanceAPI) VoteReject(
 	mn_owner common.Address,
 	password *string,
 ) (txhash common.Hash, err error) {
+	if err = g.requireActiveMN(mn_owner, password); err != nil {
+		log.Error("Failed", "err", err)
+		return
+	}
+
 	contract, err := g.proposal(password, mn_owner, proposal)
 	if err != nil {
 		log.Error("Failed", "err", err)
@@ -151,6 +162,26 @@ func (g *GovernanceAPI) WithdrawFee(
 	}
 
 	return
+}
+
+func (g *GovernanceAPI) requireActiveMN(
+	owner common.Address,
+	password *string,
+) (err error) {
+	registry, err := masternodeRegistry(password, owner, g.backend)
+	if err != nil {
+		return
+	}
+
+	mnInfo, err := registry.OwnerInfo(owner)
+	if err != nil {
+		return
+	}
+
+	if isActive, err := registry.IsActive(mnInfo.Masternode); !isActive {
+		return fmt.Errorf("An Active masternode is required: %v", err)
+	}
+	return nil
 }
 
 //=============================================================================

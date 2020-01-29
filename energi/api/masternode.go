@@ -287,12 +287,13 @@ func (m *MasternodeAPI) enode(ipv4address uint32, pubkey [2][32]byte) string {
 	return res.String()
 }
 
-func (m *MasternodeAPI) registry(
+func masternodeRegistry(
 	password *string,
 	dst common.Address,
+	backend Backend,
 ) (session *energi_abi.IMasternodeRegistrySession, err error) {
 	contract, err := energi_abi.NewIMasternodeRegistry(
-		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractBackend))
+		energi_params.Energi_MasternodeRegistry, backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +306,7 @@ func (m *MasternodeAPI) registry(
 		},
 		TransactOpts: bind.TransactOpts{
 			From:     dst,
-			Signer:   createSignerCallback(m.backend, password),
+			Signer:   createSignerCallback(backend, password),
 			Value:    common.Big0,
 			GasLimit: masternodeCallGas,
 		},
@@ -318,7 +319,7 @@ func (m *MasternodeAPI) Announce(
 	enode_url string,
 	password *string,
 ) (txhash common.Hash, err error) {
-	registry, err := m.registry(password, owner)
+	registry, err := masternodeRegistry(password, owner, m.backend)
 	if err != nil {
 		return
 	}
@@ -386,7 +387,7 @@ func (m *MasternodeAPI) Denounce(
 	owner common.Address,
 	password *string,
 ) (txhash common.Hash, err error) {
-	registry, err := m.registry(password, owner)
+	registry, err := masternodeRegistry(password, owner, m.backend)
 	if err != nil {
 		return
 	}
