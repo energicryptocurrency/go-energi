@@ -121,12 +121,7 @@ func (m *MasternodeAPI) DepositCollateral(
 	amount *hexutil.Big,
 	password *string,
 ) (txhash common.Hash, err error) {
-	mnInfo, err := m.MasternodeInfo(dst)
-	if err != nil {
-		err = fmt.Errorf("Error: Fetching masternode information failed")
-	}
-
-	registry, err := m.registry(password, dist)
+	registry, err := masternodeRegistry(password, dst, m.backend)
 	if err != nil {
 		return
 	}
@@ -136,17 +131,21 @@ func (m *MasternodeAPI) DepositCollateral(
 		return
 	}
 
-	newTotalAmount := big.NewInt(0).Add(mnInfo.Collateral.Toint(), amount.ToInt())
+	if err = m.validateAmount("Deposit", amount.ToInt(), limits.Min); err != nil {
+		return
+	}
+
+	mnInfo, err := registry.OwnerInfo(dst)
+	if err != nil {
+		err = fmt.Errorf("Error: Fetching masternode information failed: %v", err)
+		return
+	}
+
+	newTotalAmount := new(big.Int).Add(mnInfo.Collateral, amount.ToInt())
 
 	// Expected total amount should not be more than the maximum collateral value allowed.
 	if newTotalAmount.Cmp(limits.Max) > 0 {
 		err = fmt.Errorf("Error: Total expected deposits should not exceed max allowed deposit")
-		return
-	}
-
-	// Deposit amount should be a multiple of the minimum collateral amount allowed.
-	if amount.ToInt().Int64()%limits.Min.Int64() != 0 {
-		err = fmt.Errorf("Error: Deposit amount should be a multiple of the minimum collateral amount")
 		return
 	}
 
@@ -171,12 +170,7 @@ func (m *MasternodeAPI) WithdrawCollateral(
 	amount *hexutil.Big,
 	password *string,
 ) (txhash common.Hash, err error) {
-	mnInfo, err := m.MasternodeInfo(dst)
-	if err != nil {
-		err = fmt.Errorf("Error: Fetching masternode information failed")
-	}
-
-	registry, err := m.registry(password, dist)
+	registry, err := masternodeRegistry(password, dst, m.backend)
 	if err != nil {
 		return
 	}
@@ -186,15 +180,19 @@ func (m *MasternodeAPI) WithdrawCollateral(
 		return
 	}
 
-	// Amount to withdraw should be less than or equal to the collateral amount.
-	if amount.ToInt().Cmp(mnInfo.Collateral.Toint()) > 0 {
-		err = fmt.Errorf("Error: Withdrawal amount is greater than the collateral balance amount")
+	if err = m.validateAmount("Withdrawal", amount.ToInt(), limits.Min); err != nil {
 		return
 	}
 
-	// Withdrawal amount should be a multiple of the minimum collateral amount allowed.
-	if amount.ToInt().Int64()%limits.Min.Int64() != 0 {
-		err = fmt.Errorf("Error: withdrawal amount should be a multiple of the minimum collateral amount")
+	mnInfo, err := registry.OwnerInfo(dst)
+	if err != nil {
+		err = fmt.Errorf("Error: Fetching masternode information failed: %v", err)
+		return
+	}
+
+	// Amount to withdraw should be less than or equal to the collateral amount.
+	if amount.ToInt().Cmp(mnInfo.Collateral) > 0 {
+		err = fmt.Errorf("Error: Withdrawal amount is greater than the collateral balance amount")
 		return
 	}
 
@@ -211,6 +209,20 @@ func (m *MasternodeAPI) WithdrawCollateral(
 	}
 
 	return
+}
+
+func (m *MasternodeAPI) validateAmount(validateType string, amount, minColl *big.Int) error {
+	// Amount to should be greater than zero.
+	if amount.Cmp(common.Big0) < 1 {
+		return fmt.Errorf("Error: %v amount should be greater than zero", validateType)
+	}
+
+	// Amount should be a multiple of the minimum collateral amount allowed.
+	if new(big.Int).Mod(amount, minColl) != common.Big0 {
+		return fmt.Errorf("Error: %v amount should be a multiple of the minimum collateral amount", validateType)
+	}
+
+	return nil
 }
 
 type MNInfo struct {
@@ -349,14 +361,14 @@ func masternodeRegistry(
 	password *string,
 	dst common.Address,
 	backend Backend,
-) (session *energi_abi.IMasternodeRegistrySession, err error) {
+) (session *energi_abi.IMasternodeRegistryV2Session, err error) {
 	contract, err := energi_abi.NewIMasternodeRegistryV2(
-		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractBackend))
+		energi_params.Energi_MasternodeRegistry, backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, err
 	}
 
-	session = &energi_abi.IMasternodeRegistrySession{
+	session = &energi_abi.IMasternodeRegistryV2Session{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
 			From:     dst,
