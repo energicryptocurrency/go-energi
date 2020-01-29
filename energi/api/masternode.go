@@ -18,6 +18,8 @@ package api
 
 import (
 	"errors"
+	"fmt"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -119,6 +121,35 @@ func (m *MasternodeAPI) DepositCollateral(
 	amount *hexutil.Big,
 	password *string,
 ) (txhash common.Hash, err error) {
+	mnInfo, err := m.MasternodeInfo(dst)
+	if err != nil {
+		err = fmt.Errorf("Error: Fetching masternode information failed")
+	}
+
+	registry, err := m.registry(password, dist)
+	if err != nil {
+		return
+	}
+
+	limits, err := registry.CollateralLimits()
+	if err != nil {
+		return
+	}
+
+	newTotalAmount := big.NewInt(0).Add(mnInfo.Collateral.Toint(), amount.ToInt())
+
+	// Expected total amount should not be more than the maximum collateral value allowed.
+	if newTotalAmount.Cmp(limits.Max) > 0 {
+		err = fmt.Errorf("Error: Total expected deposits should not exceed max allowed deposit")
+		return
+	}
+
+	// Deposit amount should be a multiple of the minimum collateral amount allowed.
+	if amount.ToInt().Int64()%limits.Min.Int64() != 0 {
+		err = fmt.Errorf("Error: Deposit amount should be a multiple of the minimum collateral amount")
+		return
+	}
+
 	token, err := m.token(password, dst)
 	if err != nil {
 		return
@@ -140,6 +171,33 @@ func (m *MasternodeAPI) WithdrawCollateral(
 	amount *hexutil.Big,
 	password *string,
 ) (txhash common.Hash, err error) {
+	mnInfo, err := m.MasternodeInfo(dst)
+	if err != nil {
+		err = fmt.Errorf("Error: Fetching masternode information failed")
+	}
+
+	registry, err := m.registry(password, dist)
+	if err != nil {
+		return
+	}
+
+	limits, err := registry.CollateralLimits()
+	if err != nil {
+		return
+	}
+
+	// Amount to withdraw should be less than or equal to the collateral amount.
+	if amount.ToInt().Cmp(mnInfo.Collateral.Toint()) > 0 {
+		err = fmt.Errorf("Error: Withdrawal amount is greater than the collateral balance amount")
+		return
+	}
+
+	// Withdrawal amount should be a multiple of the minimum collateral amount allowed.
+	if amount.ToInt().Int64()%limits.Min.Int64() != 0 {
+		err = fmt.Errorf("Error: withdrawal amount should be a multiple of the minimum collateral amount")
+		return
+	}
+
 	token, err := m.token(password, dst)
 	if err != nil {
 		return
@@ -292,8 +350,8 @@ func masternodeRegistry(
 	dst common.Address,
 	backend Backend,
 ) (session *energi_abi.IMasternodeRegistrySession, err error) {
-	contract, err := energi_abi.NewIMasternodeRegistry(
-		energi_params.Energi_MasternodeRegistry, backend.(bind.ContractBackend))
+	contract, err := energi_abi.NewIMasternodeRegistryV2(
+		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, err
 	}
