@@ -102,7 +102,7 @@ contract("MasternodeTokenV2", async accounts => {
 
         it('should support symbol()', async () => {
             const res = await s.token_abi.symbol();
-            assert.equal(res, "MNGR");
+            assert.equal(res, "MNRG");
         });
 
         it('should support decimals()', async () => {

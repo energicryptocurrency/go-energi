@@ -42,6 +42,10 @@ contract MasternodeTokenV2 is
 
     // ERC20
     //---------------------------------
+    function symbol() external view returns (string memory) {
+        return "MNRG";
+    }
+
     function decimals() external view returns (uint8) {
         return 18;
     }
