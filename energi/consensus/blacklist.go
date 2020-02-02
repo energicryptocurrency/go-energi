@@ -165,7 +165,8 @@ func (e *Energi) processDrainable(
 	var comp_fund common.Address
 
 	txhash := common.Hash{}
-	statedb.Prepare(txhash, common.Hash{}, 0)
+	bhash := header.Hash()
+	statedb.Prepare(txhash, bhash, len(txs))
 
 	// 1. List drainable addresses address
 	//---
@@ -284,7 +285,7 @@ func (e *Energi) processDrainable(
 			contributeData)
 		tx = tx.WithConsensusSender(addr)
 
-		statedb.Prepare(tx.Hash(), common.Hash{}, len(txs))
+		statedb.Prepare(tx.Hash(), bhash, len(txs))
 
 		msg, err = tx.AsMessage(&ConsensusSigner{})
 		if err != nil {
@@ -329,7 +330,7 @@ func (e *Energi) processDrainable(
 			collectData)
 		tx = tx.WithConsensusSender(blregistry)
 
-		statedb.Prepare(tx.Hash(), common.Hash{}, len(txs))
+		statedb.Prepare(tx.Hash(), bhash, len(txs))
 
 		msg, err = tx.AsMessage(&ConsensusSigner{})
 		if err != nil {

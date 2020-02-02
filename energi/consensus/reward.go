@@ -100,7 +100,7 @@ func (e *Energi) processBlockRewards(
 		rewardData)
 	tx = tx.WithConsensusSender(systemFaucet)
 
-	statedb.Prepare(tx.Hash(), common.Hash{}, len(txs))
+	statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
 
 	msg, err = tx.AsMessage(&ConsensusSigner{})
 	if err != nil {
