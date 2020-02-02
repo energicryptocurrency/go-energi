@@ -4,8 +4,8 @@
   "author": "Andrey Galkin <andrey@futoin.org>",
   "license": "GPL-3.0+",
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "ethereumjs-util": "^6.1.0",
-    "ethlint": "^1.2.4"
+    "eslint": "^6.8.0",
+    "ethereumjs-util": "^6.2.0",
+    "ethlint": "^1.2.5"
   }
 }
