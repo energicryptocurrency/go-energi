@@ -214,12 +214,12 @@ func (m *MasternodeAPI) WithdrawCollateral(
 func (m *MasternodeAPI) validateAmount(validateType string, amount, minColl *big.Int) error {
 	// Amount to should be greater than zero.
 	if amount.Cmp(common.Big0) < 1 {
-		return fmt.Errorf("Error: %v amount should be greater than zero", validateType)
+		return fmt.Errorf("%v amount should be greater than zero", validateType)
 	}
 
 	// Amount should be a multiple of the minimum collateral amount allowed.
-	if new(big.Int).Mod(amount, minColl) != common.Big0 {
-		return fmt.Errorf("Error: %v amount should be a multiple of the minimum collateral amount", validateType)
+	if new(big.Int).Mod(amount, minColl).Cmp(common.Big0) != 0 {
+		return fmt.Errorf("%v amount should be a multiple of the minimum collateral amount", validateType)
 	}
 
 	return nil
