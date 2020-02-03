@@ -756,10 +756,8 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 
 	case config == nil:
 		tracer = vm.NewStructLogger(&vm.LogConfig{
-			DisableMemory:  true,
-			DisableStack:   true,
 			DisableStorage: true,
-			OnlyValueXfers: true,
+			OnlyClosures:   true,
 			Limit:          100000,
 		})
 
