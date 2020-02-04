@@ -135,22 +135,22 @@ func (m *MasternodeAPI) DepositCollateral(
 		return
 	}
 
-	mnInfo, err := registry.OwnerInfo(dst)
+	token, err := m.token(password, dst)
 	if err != nil {
-		err = fmt.Errorf("Error: Fetching masternode information failed: %v", err)
 		return
 	}
 
-	newTotalAmount := new(big.Int).Add(mnInfo.Collateral, amount.ToInt())
+	balance, err := token.BalanceOf(dst)
+	if err != nil {
+		// Possible new masternode detected.
+		log.Warn("Fetching masternode collateral failed: %v", err)
+	}
+
+	newTotalAmount := new(big.Int).Add(balance, amount.ToInt())
 
 	// Expected total amount should not be more than the maximum collateral value allowed.
 	if newTotalAmount.Cmp(limits.Max) > 0 {
-		err = fmt.Errorf("Error: Total expected deposits should not exceed max allowed deposit")
-		return
-	}
-
-	token, err := m.token(password, dst)
-	if err != nil {
+		err = fmt.Errorf("Total expected deposits should not exceed max allowed deposit")
 		return
 	}
 
@@ -184,20 +184,19 @@ func (m *MasternodeAPI) WithdrawCollateral(
 		return
 	}
 
-	mnInfo, err := registry.OwnerInfo(dst)
+	token, err := m.token(password, dst)
 	if err != nil {
-		err = fmt.Errorf("Error: Fetching masternode information failed: %v", err)
 		return
+	}
+
+	balance, err := token.BalanceOf(dst)
+	if err != nil {
+		return fmt.Errorf("Fetching masternode collateral failed: %v", err)
 	}
 
 	// Amount to withdraw should be less than or equal to the collateral amount.
-	if amount.ToInt().Cmp(mnInfo.Collateral) > 0 {
-		err = fmt.Errorf("Error: Withdrawal amount is greater than the collateral balance amount")
-		return
-	}
-
-	token, err := m.token(password, dst)
-	if err != nil {
+	if amount.ToInt().Cmp(balance) > 0 {
+		err = fmt.Errorf("Withdrawal amount is greater than the collateral balance amount")
 		return
 	}
 
