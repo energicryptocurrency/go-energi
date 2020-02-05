@@ -191,7 +191,8 @@ func (m *MasternodeAPI) WithdrawCollateral(
 
 	balance, err := token.BalanceOf(dst)
 	if err != nil {
-		return fmt.Errorf("Fetching masternode collateral failed: %v", err)
+		err = fmt.Errorf("Fetching masternode collateral failed: %v", err)
+		return
 	}
 
 	// Amount to withdraw should be less than or equal to the collateral amount.
