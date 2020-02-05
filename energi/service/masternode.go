@@ -82,7 +82,7 @@ func NewMasternodeService(ethServ *eth.Ethereum, owner common.Address) (node.Ser
 	r := &MasternodeService{
 		eth:      ethServ,
 		inSync:   1,
-		features: big.NewInt(0),
+		features: energi_common.SWVersionToInt(),
 		owner:    owner,
 		// NOTE: we need to avoid triggering DoS on restart.
 		// There is no reliable way to check blockchain and all pools in the network.
