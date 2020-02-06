@@ -105,7 +105,7 @@ contract("GenericProposalV1", async accounts => {
                 );
                 assert.fail('It must fail');
             } catch (e) {
-                assert.match(e.message, /invalid opcode/);
+                assert.match(e.message, /Quorum min/);
             }
 
             await GenericProposalV1.new(
@@ -131,7 +131,7 @@ contract("GenericProposalV1", async accounts => {
                 );
                 assert.fail('It must fail');
             } catch (e) {
-                assert.match(e.message, /invalid opcode/);
+                assert.match(e.message, /Quorum max/);
             }
         });
 
@@ -167,19 +167,25 @@ contract("GenericProposalV1", async accounts => {
                 not_owner
             );
 
+            expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             expect((await proposal.accepted_weight()).toString())
                 .eql(collateral1.toString());
-            
+
+            expect(await proposal.canVote(owner3)).true;
             await proposal.voteAccept({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
             expect(await proposal.isAccepted()).true;
             expect(await proposal.isFinished()).true;
             expect((await proposal.accepted_weight()).toString())
                 .eql(collateral1.add(collateral3).toString());
 
+            expect(await proposal.canVote(owner2)).true;
             await proposal.voteAccept({from: owner2});
+            expect(await proposal.canVote(owner2)).false;
             expect(await proposal.isAccepted()).true;
             expect(await proposal.isFinished()).true;
             expect((await proposal.accepted_weight()).toString())
@@ -229,13 +235,17 @@ contract("GenericProposalV1", async accounts => {
                 not_owner
             );
 
+            expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             expect((await proposal.accepted_weight()).toString())
                 .eql(collateral1.toString());
-            
+
+            expect(await proposal.canVote(owner3)).true;
             await proposal.voteReject({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             expect((await proposal.accepted_weight()).toString())
@@ -265,13 +275,17 @@ contract("GenericProposalV1", async accounts => {
                 not_owner
             );
 
+            expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             expect((await proposal.accepted_weight()).toString())
                 .eql(collateral1.toString());
-            
+
+            expect(await proposal.canVote(owner3)).true;
             await proposal.voteReject({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             expect((await proposal.accepted_weight()).toString())
@@ -279,7 +293,9 @@ contract("GenericProposalV1", async accounts => {
             expect((await proposal.rejected_weight()).toString())
                 .eql(collateral3.toString());
 
+            expect(await proposal.canVote(owner2)).true;
             await common.moveTime(web3, 70);
+            expect(await proposal.canVote(owner2)).false;
 
             try {
                 await proposal.voteAccept({from: owner2});
@@ -309,13 +325,17 @@ contract("GenericProposalV1", async accounts => {
                 not_owner
             );
 
+            expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             expect((await proposal.accepted_weight()).toString())
                 .eql(collateral1.toString());
-            
+
+            expect(await proposal.canVote(owner3)).true;
             await proposal.voteReject({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             expect((await proposal.accepted_weight()).toString())
@@ -323,7 +343,9 @@ contract("GenericProposalV1", async accounts => {
             expect((await proposal.rejected_weight()).toString())
                 .eql(collateral3.toString());
 
+            expect(await proposal.canVote(owner2)).true;
             await proposal.voteAccept({from: owner2});
+            expect(await proposal.canVote(owner2)).false;
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).false;
             await common.moveTime(web3, 70);
@@ -345,6 +367,7 @@ contract("GenericProposalV1", async accounts => {
             );
 
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
+            expect(await proposal.canVote(owner2)).false;
 
             try {
                 await proposal.voteAccept({from: owner2});
@@ -353,7 +376,9 @@ contract("GenericProposalV1", async accounts => {
                 assert.match(e.message, /Not eligible/);
             }
 
+            expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
         });
 
         it('should refuse already voted Masternode', async () => {
@@ -366,7 +391,9 @@ contract("GenericProposalV1", async accounts => {
                 not_owner
             );
 
+            expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
 
             try {
                 await proposal.voteAccept({from: owner1});

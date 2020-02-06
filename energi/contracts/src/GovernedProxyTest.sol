@@ -139,6 +139,9 @@ contract MockProposal is IUpgradeProposal {
         require(msg.sender == parent, "Not Owner");
     }
     function collect() external {}
+    function canVote(address) external view returns(bool) {
+        return true;
+    }
     function voteAccept() external {}
     function voteReject() external {}
     function setFee() external payable {}

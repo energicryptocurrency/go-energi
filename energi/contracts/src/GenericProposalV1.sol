@@ -104,8 +104,8 @@ contract GenericProposalV1 is
 
         require(_ever_weight > 0, "Not ready for proposals");
         require(_total_weight >= (_ever_weight/2), "Active weight < 1/2 ever weight");
-        assert(_quorum >= QUORUM_MIN);
-        assert(_quorum <= QUORUM_MAX);
+        require(_quorum >= QUORUM_MIN, "Quorum min");
+        require(_quorum <= QUORUM_MAX, "Quorum max");
 
         total_weight = _total_weight;
         quorum_weight = _total_weight * _quorum / QUORUM_MAX;
@@ -116,8 +116,8 @@ contract GenericProposalV1 is
             finish_weight = _total_weight * QUORUM_MAJORITY / QUORUM_MAX;
         }
 
-        assert(quorum_weight > 0);
-        assert(finish_weight > 0);
+        require(quorum_weight > 0, "Quorum weight");
+        require(finish_weight > 0, "Finish weight");
     }
 
     /**
@@ -167,6 +167,22 @@ contract GenericProposalV1 is
         require(announced_block < created_block, "Not eligible");
         require(!voted[owner], "Already voted");
         voted[owner] = true;
+    }
+
+    /**
+     * Check if particular MN owner can vote
+     */
+    function canVote(address owner) external view returns(bool) {
+        IMasternodeRegistry registry = IMasternodeRegistry(address(mnregistry_proxy.impl()));
+
+        uint announced_block;
+        (,,,, announced_block,) = registry.ownerInfo(owner);
+
+        return (
+            (deadline > block.timestamp) &&
+            (announced_block < created_block) &&
+            !voted[owner]
+        );
     }
 
     /**
