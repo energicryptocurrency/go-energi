@@ -163,7 +163,7 @@ contract GenericProposalV1 is
         address owner = msg.sender;
 
         uint announced_block;
-        (,,, collateral, announced_block) = registry.ownerInfo(owner);
+        (,,, collateral, announced_block,) = registry.ownerInfo(owner);
         require(announced_block < created_block, "Not eligible");
         require(!voted[owner], "Already voted");
         voted[owner] = true;
