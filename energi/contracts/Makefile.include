@@ -42,7 +42,6 @@ ENERGI_CONTRACTS := \
   BackboneRewardV1.sol \
   BlacklistRegistryV1.sol \
   BlockRewardV1.sol \
-  CheckpointRegistryV1.sol \
   CheckpointRegistryV2.sol \
   DummyAccount.sol \
   IBlacklistRegistry.sol \
@@ -61,11 +60,8 @@ ENERGI_CONTRACTS := \
   ITreasury.sol \
   Gen2Migration.sol \
   GovernedProxy.sol \
-  MasternodeTokenV1.sol \
   MasternodeTokenV2.sol \
-  MasternodeRegistryV1.sol \
   MasternodeRegistryV2.sol \
-  SporkRegistryV1.sol \
   SporkRegistryV2.sol \
   StakerRewardV1.sol \
   TreasuryV1.sol
