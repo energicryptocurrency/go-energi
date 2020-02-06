@@ -31,7 +31,6 @@ import (
 
 // Constants to match up protocol versions and messages
 const (
-	eth63 = 63
 	nrg70 = 70
 )
 
@@ -39,10 +38,10 @@ const (
 var ProtocolName = "eth"
 
 // ProtocolVersions are the supported versions of the eth protocol (first is primary).
-var ProtocolVersions = []uint{nrg70, eth63}
+var ProtocolVersions = []uint{nrg70}
 
 // ProtocolLengths are the number of implemented message corresponding to different protocol versions.
-var ProtocolLengths = []uint64{0x13, 17}
+var ProtocolLengths = []uint64{0x13}
 
 const ProtocolMaxMsgSize = 10 * 1024 * 1024 // Maximum cap on the size of a protocol message
 
