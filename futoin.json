@@ -14,7 +14,7 @@
     }
   },
   "tools": {
-    "go": "1.13.7",
+    "go": "1.13.4",
     "make": true,
     "node": "10",
     "release": true,

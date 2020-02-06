@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.11;
+pragma solidity 0.5.16;
 //pragma experimental SMTChecker;
 
 import { IGovernedProxy } from "./IGovernedProxy.sol";
@@ -67,10 +67,10 @@ interface IMasternodeRegistry {
             uint max_of_all_times);
     function info(address masternode) external view
         returns(address owner, uint32 ipv4address, bytes32[2] memory enode,
-                uint collateral, uint announced_block);
+                uint collateral, uint announced_block, uint sw_features);
     function ownerInfo(address owner) external view
         returns(address masternode, uint32 ipv4address, bytes32[2] memory enode,
-                uint collateral, uint announced_block);
+                uint collateral, uint announced_block, uint sw_features);
     function onCollateralUpdate(address owner) external;
     function enumerate() external view returns(address[] memory masternodes);
     function enumerateActive() external view returns(address[] memory masternodes);

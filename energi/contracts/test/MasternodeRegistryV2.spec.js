@@ -48,7 +48,8 @@ contract("MasternodeRegistryV2", async accounts => {
     const isTargetChanges = async (_token, _mn) => {
         return await _token.validationTarget(_mn, 'latest') !=  await _token.validationTarget(_mn, 'pending');
     };
-    
+    const sw_features = web3.utils.toBN((1 << 24) | (2 << 16) | (3 << 8));
+
     before(async () => {
         s.orig = await MasternodeRegistryV2.deployed();
         s.proxy = await MockProxy.at(await s.orig.proxy());
@@ -160,7 +161,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn - 11, b.hash, '0', common.zerofee_callopts);
+                    await s.token_abi.heartbeat(bn - 11, b.hash, sw_features, common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Too old/);
@@ -172,7 +173,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn - 10, b.hash, '0', common.zerofee_callopts);
+                    await s.token_abi.heartbeat(bn - 10, b.hash, sw_features, common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Block mismatch/);
@@ -184,7 +185,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', common.zerofee_callopts);
+                    await s.token_abi.heartbeat(bn, b.hash, sw_features, common.zerofee_callopts);
                     assert.fail('It should fail');
                 } catch(e) {
                     assert.match(e.message, /Not active/);
@@ -437,7 +438,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
+                    await s.token_abi.heartbeat(bn, b.hash, sw_features, {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Too early/);
@@ -446,7 +447,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 await common.moveTime(web3, 59*30);
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
+                    await s.token_abi.heartbeat(bn, b.hash, sw_features, {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Too early/);
@@ -480,7 +481,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 const bn = await web3.eth.getBlockNumber();
                 const b = await web3.eth.getBlock(bn);
 
-                await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
+                await s.token_abi.heartbeat(bn, b.hash, sw_features, {from: masternode1, ...common.zerofee_callopts});
 
                 const s2 = await s.orig.mn_status(masternode1);
                 expect(s2.next_heartbeat.gt(s1.next_heartbeat)).true;
@@ -504,6 +505,7 @@ contract("MasternodeRegistryV2", async accounts => {
                     ipv4address: toBN(ip1).toString(),
                     enode: enode1,
                     collateral: toBN(collateral1).toString(),
+                    sw_features: sw_features.toString(),
                 });
             });
 
@@ -516,6 +518,7 @@ contract("MasternodeRegistryV2", async accounts => {
                     enode: enode1,
                     collateral: toBN(collateral1).toString(),
                     announced_block: announced_block.toString(),
+                    sw_features: sw_features.toString(),
                 });
             });
 
@@ -557,7 +560,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(await s.token_abi.canHeartbeat(masternode1)).false;
 
                 try {
-                    await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
+                    await s.token_abi.heartbeat(bn, b.hash, sw_features, {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
                 } catch (e) {
                     assert.match(e.message, /Too early/);
@@ -738,7 +741,7 @@ contract("MasternodeRegistryV2", async accounts => {
                 const bn = await web3.eth.getBlockNumber();
                 const b = await web3.eth.getBlock(bn);
 
-                await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
+                await s.token_abi.heartbeat(bn, b.hash, sw_features, {from: masternode1, ...common.zerofee_callopts});
                 
                 const s2 = await s.orig.mn_status(masternode1);
                 expect(s2.next_heartbeat.gt(s1.next_heartbeat)).true;
@@ -775,7 +778,8 @@ contract("MasternodeRegistryV2", async accounts => {
                         owner: mn.owner,
                         ipv4address: toBN(mn.ip).toString(),
                         enode: mn.enode,
-                        collateral: toBN(mn.collateral).toString()
+                        collateral: toBN(mn.collateral).toString(),
+                        sw_features: (mn.masternode === masternode1) ? sw_features.toString() : '0',
                     });
                 }
             });
@@ -981,7 +985,8 @@ contract("MasternodeRegistryV2", async accounts => {
                         owner: mn.owner,
                         ipv4address: toBN(mn.ip).toString(),
                         enode: mn.enode,
-                        collateral: toBN(mn.collateral).toString()
+                        collateral: toBN(mn.collateral).toString(),
+                        sw_features: '0',
                     });
                 }
             });

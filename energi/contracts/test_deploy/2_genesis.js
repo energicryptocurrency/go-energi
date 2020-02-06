@@ -73,7 +73,7 @@ module.exports = async (deployer, _, accounts) => {
             blacklist_registry, mn_registry_proxy,
             Gen2Migration.address, compensation_fund.address,
             accounts[3],
-            { gas: "30000000" });
+            { gas: "10000000" });
         await deploy_common(BackboneRewardV1, backbone_proxy, accounts[5]);
         await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(CheckpointRegistryV2, undefined, mn_registry_proxy, common.cpp_signer);

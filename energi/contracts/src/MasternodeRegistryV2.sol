@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.11;
+pragma solidity 0.5.16;
 //pragma experimental SMTChecker;
 
 import { GlobalConstants } from "./constants.sol";
@@ -556,7 +556,7 @@ contract MasternodeRegistryV2 is
     function info(address masternode) external view
         returns(
             address owner, uint32 ipv4address, bytes32[2] memory enode,
-            uint collateral, uint announced_block
+            uint collateral, uint announced_block, uint sw_features
         )
     {
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, masternode);
@@ -566,12 +566,14 @@ contract MasternodeRegistryV2 is
         enode = [ mninfo.enode_0, mninfo.enode_1 ];
         collateral = mninfo.collateral;
         announced_block = mninfo.announced_block;
+
+        sw_features = mn_status[masternode].sw_features;
     }
 
     function ownerInfo(address owner) external view
         returns(
             address masternode, uint32 ipv4address, bytes32[2] memory enode,
-            uint collateral, uint announced_block
+            uint collateral, uint announced_block, uint sw_features
         )
     {
         StorageMasternodeRegistryV1 mnstorage = v1storage;
@@ -585,6 +587,8 @@ contract MasternodeRegistryV2 is
         enode = [ mninfo.enode_0, mninfo.enode_1 ];
         collateral = mninfo.collateral;
         announced_block = mninfo.announced_block;
+
+        sw_features = mn_status[masternode].sw_features;
     }
 
     function _mnInfo(

@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.11;
+pragma solidity 0.5.16;
 //pragma experimental SMTChecker;
 
 /**
@@ -70,6 +70,6 @@ contract GlobalConstants {
 
     uint constant internal BUDGET_AMOUNT_MIN = FEE_BUDGET_V1;
     uint constant internal BUDGET_AMOUNT_MAX = REWARD_TREASURY_V1;
-    uint constant internal BUDGET_PROPOSAL_MAX = 8;
+    uint constant internal BUDGET_PROPOSAL_MAX = 100;
 }
 

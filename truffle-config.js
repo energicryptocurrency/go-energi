@@ -61,7 +61,7 @@ module.exports = {
     },
     compilers: {
         solc: {
-            version: '0.5.11',
+            version: '0.5.16',
             evmVersion: 'petersburg',
             optimizer: {
                 enabled: true,

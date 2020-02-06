@@ -559,11 +559,6 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 	//---
 	ver := 2
 
-	// Temporary compatibility with existing testnet
-	if config.ChainID.Uint64() == 49797 {
-		ver = 1
-	}
-
 	// Hardcoded Governance V1
 	deployEnergiContract(
 		&xfers,
@@ -654,50 +649,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			},
 		)
 	} else {
-		deployEnergiContract(
-			&xfers,
-			energi_params.Energi_SporkRegistryV1,
-			nil,
-			energi_abi.SporkRegistryV1ABI,
-			energi_abi.SporkRegistryV1Bin,
-			energi_params.Energi_SporkRegistry,
-			energi_params.Energi_MasternodeRegistry,
-		)
-		deployEnergiContract(
-			&xfers,
-			energi_params.Energi_CheckpointRegistryV1,
-			nil,
-			energi_abi.CheckpointRegistryV1ABI,
-			energi_abi.CheckpointRegistryV1Bin,
-			energi_params.Energi_CheckpointRegistry,
-			energi_params.Energi_MasternodeRegistry,
-			config.Energi.CPPSigner,
-		)
-		deployEnergiContract(
-			&xfers,
-			energi_params.Energi_MasternodeTokenV1,
-			nil,
-			energi_abi.MasternodeTokenV1ABI,
-			energi_abi.MasternodeTokenV1Bin,
-			energi_params.Energi_MasternodeToken,
-			energi_params.Energi_MasternodeRegistry,
-		)
-		deployEnergiContract(
-			&xfers,
-			energi_params.Energi_MasternodeRegistryV1,
-			nil,
-			energi_abi.MasternodeRegistryV1ABI,
-			energi_abi.MasternodeRegistryV1Bin,
-			energi_params.Energi_MasternodeRegistry,
-			energi_params.Energi_MasternodeToken,
-			energi_params.Energi_Treasury,
-			[4]*big.Int{
-				config.MNRequireValidation,
-				config.MNValidationPeriod,
-				config.MNCleanupPeriod,
-				config.MNEverCollateral,
-			},
-		)
+		panic("Energi Genesis V1 is not supported anymore")
 	}
 	deployEnergiContract(
 		&xfers,

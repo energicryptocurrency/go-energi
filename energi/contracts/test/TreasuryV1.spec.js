@@ -305,16 +305,16 @@ contract("TreasuryV1", async accounts => {
         });
 
         it ('should refuse propose() over total limit', async () => {
-            for (let i = 3; i <= 8; ++i) {
+            for (let i = 3; i <= 100; ++i) {
                 await s.treasury_abi.propose(
-                    def_amount, String(i).repeat(8), def_period + (i * def_period / 10),
+                    def_amount, String(i).repeat(8), def_period + (i * def_period / 100),
                     { value: fee_amount }
                 );
             }
 
             try {
                 await s.treasury_abi.propose(
-                    def_amount, '9'.repeat(8), def_period,
+                    def_amount, '101'.repeat(8), def_period,
                     { value: fee_amount }
                 );
                 assert.fail('It must fail');
@@ -338,16 +338,16 @@ contract("TreasuryV1", async accounts => {
                 .equal(toBN(toWei('200', 'ether')).toString());
 
             // another 2
-            await common.moveTime(web3, (4*def_period/10)+1);
+            await common.moveTime(web3, (4*def_period/100)+1);
             await s.reward_abi.reward();
             expect(toBN(await s.treasury_abi.balance()).sub(orig_bal).toString())
                 .equal(toBN(toWei('400', 'ether')).toString());
 
-            // remaining 4
-            await common.moveTime(web3, (5*def_period/10)+1);
+            // remaining 95
+            await common.moveTime(web3, (96*def_period/100)+1);
             await s.reward_abi.reward();
             expect(toBN(await s.treasury_abi.balance()).sub(orig_bal).toString())
-                .equal(toBN(toWei('800', 'ether')).toString());
+                .equal(toBN(toWei('10000', 'ether')).toString());
         });
 
         it ('should correctly distribute full payouts', async() => {
@@ -450,14 +450,16 @@ contract("TreasuryV1", async accounts => {
             const evt3 = await s.orig.getPastEvents('Payout', common.evt_last_block);
             expect(evt3.length).equal(0);
 
-            const after_bal1 = orig_bal.mul(mul1).add(start_bal3)
-                .sub(toBN(await web3.eth.getBalance(owner3)))
-                .div(trunc_bal);
-            const after_bal2 = orig_bal.mul(mul2).add(start_bal4)
-                .sub(toBN(await web3.eth.getBalance(owner4)))
-                .div(trunc_bal);
-            expect(after_bal1.toString()).equal(toBN(2).toString());
-            expect(after_bal2.toString()).equal(toBN(2).toString());
+            const diff_bal1 = toBN(await web3.eth.getBalance(owner3))
+                .sub(start_bal3);
+            const diff_bal2 = toBN(await web3.eth.getBalance(owner4))
+                .sub(start_bal4);
+            expect(diff_bal1.add(orig_bal.sub(toBN(1))).div(orig_bal).toString()).equal(toBN(mul1).toString());
+            expect(diff_bal2.add(orig_bal.sub(toBN(1))).div(orig_bal).toString()).equal(toBN(mul2).toString());
+            expect(diff_bal1.lt(orig_bal.mul(mul1))).true;
+            expect(diff_bal2.lt(orig_bal.mul(mul2))).true;
+            expect(diff_bal1.gt(orig_bal)).true;
+            expect(diff_bal2.gt(orig_bal)).true;
         });
 
         it ('should refuse propose() on UUID duplicate of past proposal', async () => {

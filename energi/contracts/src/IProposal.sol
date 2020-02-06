@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.11;
+pragma solidity 0.5.16;
 //pragma experimental SMTChecker;
 
 interface IProposal {
@@ -39,5 +39,6 @@ interface IProposal {
     function voteAccept() external;
     function voteReject() external;
     function setFee() external payable;
+    function canVote(address owner) external view returns(bool);
 }
 

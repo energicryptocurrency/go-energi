@@ -2,8 +2,8 @@
 .PHONY: solc abigen energi-contracts
 
 # ---
-SOLC_VERSION := 0.5.11
-SOLC_SHA256 := 350d5abc5862dca43292426b6d4e592f81f40b02cda833f38406ba0047b6b9d0
+SOLC_VERSION := 0.5.16
+SOLC_SHA256 := a15f01700ec7e02f91bbdfd4b6ff4450b3c2decae173e4f41910a3cfbaf5d3d3
 SOLC ?= build/_workspace/bin/solc-$(SOLC_VERSION)
 SOLC_OPTIONS := \
   --asm \
@@ -42,7 +42,6 @@ ENERGI_CONTRACTS := \
   BackboneRewardV1.sol \
   BlacklistRegistryV1.sol \
   BlockRewardV1.sol \
-  CheckpointRegistryV1.sol \
   CheckpointRegistryV2.sol \
   DummyAccount.sol \
   IBlacklistRegistry.sol \
@@ -61,11 +60,8 @@ ENERGI_CONTRACTS := \
   ITreasury.sol \
   Gen2Migration.sol \
   GovernedProxy.sol \
-  MasternodeTokenV1.sol \
   MasternodeTokenV2.sol \
-  MasternodeRegistryV1.sol \
   MasternodeRegistryV2.sol \
-  SporkRegistryV1.sol \
   SporkRegistryV2.sol \
   StakerRewardV1.sol \
   TreasuryV1.sol
@@ -121,7 +117,7 @@ test-sol:
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef12345678ffffffff,100000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567fffffffff,100000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef123456ffffffffff,100000000000000000000000' \
-	    -l 30000000 \
+	    -l 10000000 \
 	    2>&1 >build/contracts/ganache.log & \
 	  sleep 1; \
 	  truffle test; \

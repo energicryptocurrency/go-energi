@@ -850,6 +850,8 @@ web3._extend.formatters.outputMasternodeFormatter = function(item){
 		collateral:     web3._extend.utils.toDecimal(item.Collateral),
 		announcedBlock: item.AnnouncedBlock,
 		isActive:       item.IsActive,
+		swFeatures:     item.SWFeatures,
+		swVersion:      item.SWVersion,
 	};
 };
 

@@ -28,7 +28,7 @@ var (
 )
 
 // IMasternodeRegistryABI is the input ABI used to generate the binding from.
-const IMasternodeRegistryABI = "[{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"active\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"total\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"active_collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"total_collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"info\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"internalType\":\"uint256\",\"name\":\"collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"invalidate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token_proxy\",\"outputs\":[{\"internalType\":\"contractIGovernedProxy\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury_proxy\",\"outputs\":[{\"internalType\":\"contractIGovernedProxy\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ownerInfo\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"internalType\":\"uint256\",\"name\":\"collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"announced_block\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validationTarget\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"onCollateralUpdate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"collateral\",\"type\":\"uint256\"}],\"name\":\"Announced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Denounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"Invalidation\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"Deactivated\",\"type\":\"event\"}]"
+const IMasternodeRegistryABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"indexed\":false,\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"collateral\",\"type\":\"uint256\"}],\"name\":\"Announced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"Deactivated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Denounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"validator\",\"type\":\"address\"}],\"name\":\"Invalidation\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"}],\"name\":\"announce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"count\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"active\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"total\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"active_collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"total_collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"max_of_all_times\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"denounce\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"masternodes\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"heartbeat\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"info\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"internalType\":\"uint256\",\"name\":\"collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"announced_block\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"invalidate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"onCollateralUpdate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ownerInfo\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"},{\"internalType\":\"uint32\",\"name\":\"ipv4address\",\"type\":\"uint32\"},{\"internalType\":\"bytes32[2]\",\"name\":\"enode\",\"type\":\"bytes32[2]\"},{\"internalType\":\"uint256\",\"name\":\"collateral\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"announced_block\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token_proxy\",\"outputs\":[{\"internalType\":\"contractIGovernedProxy\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury_proxy\",\"outputs\":[{\"internalType\":\"contractIGovernedProxy\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"masternode\",\"type\":\"address\"}],\"name\":\"validationTarget\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // IMasternodeRegistry is an auto generated Go binding around an Ethereum contract.
 type IMasternodeRegistry struct {
@@ -274,13 +274,14 @@ func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) EnumerateActive() 
 
 // Info is a free data retrieval call binding the contract method 0x0aae7a6b.
 //
-// Solidity: function info(address masternode) constant returns(address owner, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block)
+// Solidity: function info(address masternode) constant returns(address owner, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block, uint256 sw_features)
 func (_IMasternodeRegistry *IMasternodeRegistryCaller) Info(opts *bind.CallOpts, masternode common.Address) (struct {
 	Owner          common.Address
 	Ipv4address    uint32
 	Enode          [2][32]byte
 	Collateral     *big.Int
 	AnnouncedBlock *big.Int
+	SwFeatures     *big.Int
 }, error) {
 	ret := new(struct {
 		Owner          common.Address
@@ -288,6 +289,7 @@ func (_IMasternodeRegistry *IMasternodeRegistryCaller) Info(opts *bind.CallOpts,
 		Enode          [2][32]byte
 		Collateral     *big.Int
 		AnnouncedBlock *big.Int
+		SwFeatures     *big.Int
 	})
 	out := ret
 	err := _IMasternodeRegistry.contract.Call(opts, out, "info", masternode)
@@ -296,26 +298,28 @@ func (_IMasternodeRegistry *IMasternodeRegistryCaller) Info(opts *bind.CallOpts,
 
 // Info is a free data retrieval call binding the contract method 0x0aae7a6b.
 //
-// Solidity: function info(address masternode) constant returns(address owner, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block)
+// Solidity: function info(address masternode) constant returns(address owner, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block, uint256 sw_features)
 func (_IMasternodeRegistry *IMasternodeRegistrySession) Info(masternode common.Address) (struct {
 	Owner          common.Address
 	Ipv4address    uint32
 	Enode          [2][32]byte
 	Collateral     *big.Int
 	AnnouncedBlock *big.Int
+	SwFeatures     *big.Int
 }, error) {
 	return _IMasternodeRegistry.Contract.Info(&_IMasternodeRegistry.CallOpts, masternode)
 }
 
 // Info is a free data retrieval call binding the contract method 0x0aae7a6b.
 //
-// Solidity: function info(address masternode) constant returns(address owner, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block)
+// Solidity: function info(address masternode) constant returns(address owner, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block, uint256 sw_features)
 func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) Info(masternode common.Address) (struct {
 	Owner          common.Address
 	Ipv4address    uint32
 	Enode          [2][32]byte
 	Collateral     *big.Int
 	AnnouncedBlock *big.Int
+	SwFeatures     *big.Int
 }, error) {
 	return _IMasternodeRegistry.Contract.Info(&_IMasternodeRegistry.CallOpts, masternode)
 }
@@ -348,13 +352,14 @@ func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) IsActive(masternod
 
 // OwnerInfo is a free data retrieval call binding the contract method 0xb83e1605.
 //
-// Solidity: function ownerInfo(address owner) constant returns(address masternode, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block)
+// Solidity: function ownerInfo(address owner) constant returns(address masternode, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block, uint256 sw_features)
 func (_IMasternodeRegistry *IMasternodeRegistryCaller) OwnerInfo(opts *bind.CallOpts, owner common.Address) (struct {
 	Masternode     common.Address
 	Ipv4address    uint32
 	Enode          [2][32]byte
 	Collateral     *big.Int
 	AnnouncedBlock *big.Int
+	SwFeatures     *big.Int
 }, error) {
 	ret := new(struct {
 		Masternode     common.Address
@@ -362,6 +367,7 @@ func (_IMasternodeRegistry *IMasternodeRegistryCaller) OwnerInfo(opts *bind.Call
 		Enode          [2][32]byte
 		Collateral     *big.Int
 		AnnouncedBlock *big.Int
+		SwFeatures     *big.Int
 	})
 	out := ret
 	err := _IMasternodeRegistry.contract.Call(opts, out, "ownerInfo", owner)
@@ -370,26 +376,28 @@ func (_IMasternodeRegistry *IMasternodeRegistryCaller) OwnerInfo(opts *bind.Call
 
 // OwnerInfo is a free data retrieval call binding the contract method 0xb83e1605.
 //
-// Solidity: function ownerInfo(address owner) constant returns(address masternode, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block)
+// Solidity: function ownerInfo(address owner) constant returns(address masternode, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block, uint256 sw_features)
 func (_IMasternodeRegistry *IMasternodeRegistrySession) OwnerInfo(owner common.Address) (struct {
 	Masternode     common.Address
 	Ipv4address    uint32
 	Enode          [2][32]byte
 	Collateral     *big.Int
 	AnnouncedBlock *big.Int
+	SwFeatures     *big.Int
 }, error) {
 	return _IMasternodeRegistry.Contract.OwnerInfo(&_IMasternodeRegistry.CallOpts, owner)
 }
 
 // OwnerInfo is a free data retrieval call binding the contract method 0xb83e1605.
 //
-// Solidity: function ownerInfo(address owner) constant returns(address masternode, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block)
+// Solidity: function ownerInfo(address owner) constant returns(address masternode, uint32 ipv4address, bytes32[2] enode, uint256 collateral, uint256 announced_block, uint256 sw_features)
 func (_IMasternodeRegistry *IMasternodeRegistryCallerSession) OwnerInfo(owner common.Address) (struct {
 	Masternode     common.Address
 	Ipv4address    uint32
 	Enode          [2][32]byte
 	Collateral     *big.Int
 	AnnouncedBlock *big.Int
+	SwFeatures     *big.Int
 }, error) {
 	return _IMasternodeRegistry.Contract.OwnerInfo(&_IMasternodeRegistry.CallOpts, owner)
 }

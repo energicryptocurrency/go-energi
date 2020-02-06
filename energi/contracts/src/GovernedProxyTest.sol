@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.11;
+pragma solidity 0.5.16;
 //pragma experimental SMTChecker;
 
 // solium-disable no-empty-blocks
@@ -139,6 +139,9 @@ contract MockProposal is IUpgradeProposal {
         require(msg.sender == parent, "Not Owner");
     }
     function collect() external {}
+    function canVote(address) external view returns(bool) {
+        return true;
+    }
     function voteAccept() external {}
     function voteReject() external {}
     function setFee() external payable {}
