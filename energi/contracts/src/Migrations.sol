@@ -1,7 +1,7 @@
 // IGNORE THIS FILE
 // It is part of Truffle.
 
-pragma solidity 0.5.11;
+pragma solidity 0.5.16;
 
 contract Migrations {
     address public owner;

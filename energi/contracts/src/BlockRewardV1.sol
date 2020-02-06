@@ -18,7 +18,7 @@
 
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
-pragma solidity 0.5.11;
+pragma solidity 0.5.16;
 //pragma experimental SMTChecker;
 
 import { GovernedContract } from "./GovernedContract.sol";

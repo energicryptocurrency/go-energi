@@ -2,8 +2,8 @@
 .PHONY: solc abigen energi-contracts
 
 # ---
-SOLC_VERSION := 0.5.11
-SOLC_SHA256 := 350d5abc5862dca43292426b6d4e592f81f40b02cda833f38406ba0047b6b9d0
+SOLC_VERSION := 0.5.16
+SOLC_SHA256 := a15f01700ec7e02f91bbdfd4b6ff4450b3c2decae173e4f41910a3cfbaf5d3d3
 SOLC ?= build/_workspace/bin/solc-$(SOLC_VERSION)
 SOLC_OPTIONS := \
   --asm \
