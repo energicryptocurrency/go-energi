@@ -903,7 +903,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 		}
 
 		if len(w.migration) == 0 {
-			log.Error("Refusing to mine migration block: file path not set")
+			log.Debug("Refusing to mine migration block: file path not set")
 			return
 		}
 
