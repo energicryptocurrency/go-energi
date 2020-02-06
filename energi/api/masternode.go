@@ -232,6 +232,8 @@ type MNInfo struct {
 	Collateral     *hexutil.Big
 	AnnouncedBlock uint64
 	IsActive       bool
+	SWFeatures     *hexutil.Big
+	SWVersion      string
 }
 
 func (m *MasternodeAPI) ListMasternodes() (res []MNInfo, err error) {
@@ -284,6 +286,8 @@ func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, err
 			Collateral:     (*hexutil.Big)(mninfo.Collateral),
 			AnnouncedBlock: mninfo.AnnouncedBlock.Uint64(),
 			IsActive:       isActive,
+			SWFeatures:     (*hexutil.Big)(mninfo.SwFeatures),
+			SWVersion:      energi_common.SWVersionIntToString(mninfo.SwFeatures),
 		})
 	}
 
