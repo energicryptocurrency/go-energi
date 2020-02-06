@@ -66,6 +66,28 @@ contract BlacklistProposalV1 is
 }
 
 /**
+ * A workaround for BlacklistRegistryV1 deploy-time gas consumption
+ */
+contract BlacklistV1ProposalCreator is
+    StorageBase
+{
+    function create(IGovernedProxy mnregistry_proxy, address payable fee_payer)
+        external payable
+        requireOwner
+        returns(IBlacklistProposal)
+    {
+        BlacklistProposalV1 proposal = new BlacklistProposalV1(
+            mnregistry_proxy,
+            fee_payer
+        );
+
+        proposal.setFee.value(msg.value)();
+        return proposal;
+    }
+}
+
+
+/**
  * Permanent storage of Blacklist Registry V1 data.
  */
 contract StorageBlacklistRegistryV1 is
@@ -162,6 +184,7 @@ contract BlacklistRegistryV1 is
 {
     // Data for migration
     //---------------------------------
+    BlacklistV1ProposalCreator public proposal_creator;
     StorageBlacklistRegistryV1 public v1storage;
     IGovernedProxy public mnregistry_proxy;
     Gen2Migration public migration;
@@ -178,6 +201,7 @@ contract BlacklistRegistryV1 is
     )
         public GovernedContract(_proxy)
     {
+        proposal_creator = new BlacklistV1ProposalCreator();
         v1storage = new StorageBlacklistRegistryV1();
         mnregistry_proxy = _mnregistry_proxy;
         migration = _migration;
@@ -189,6 +213,7 @@ contract BlacklistRegistryV1 is
     //---------------------------------
     function _destroy(IGovernedContract _newImpl) internal {
         v1storage.setOwner(_newImpl);
+        proposal_creator.kill();
     }
 
     // IBlacklistRegistry
@@ -201,13 +226,14 @@ contract BlacklistRegistryV1 is
     }
 
     function _createProposal() internal returns(IBlacklistProposal) {
-        BlacklistProposalV1 proposal = new BlacklistProposalV1(
-            mnregistry_proxy,
-            _callerAddress()
+        // solium-disable-next-line security/no-low-level-calls
+        (bool s, bytes memory r) = address(proposal_creator).delegatecall(
+            abi.encodeWithSelector(
+                proposal_creator.create.selector,
+                mnregistry_proxy, _callerAddress())
         );
-
-        proposal.setFee.value(msg.value)();
-        return proposal;
+        require(s, string(r));
+        return abi.decode(r, (IBlacklistProposal));
     }
 
     // solium-disable-next-line security/no-assign-params
