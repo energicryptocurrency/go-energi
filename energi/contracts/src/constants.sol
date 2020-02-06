@@ -70,6 +70,6 @@ contract GlobalConstants {
 
     uint constant internal BUDGET_AMOUNT_MIN = FEE_BUDGET_V1;
     uint constant internal BUDGET_AMOUNT_MAX = REWARD_TREASURY_V1;
-    uint constant internal BUDGET_PROPOSAL_MAX = 8;
+    uint constant internal BUDGET_PROPOSAL_MAX = 100;
 }
 
