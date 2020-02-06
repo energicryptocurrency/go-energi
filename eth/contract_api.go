@@ -115,7 +115,7 @@ func (b *EthAPIBackend) SendTransaction(
 	return b.SendTx(ctx, tx)
 }
 
-// FilterLogs is a less effecient method of fetching the logs in a given block.
+// FilterLogs is a less efficient method of fetching the logs in a given block.
 func (b *EthAPIBackend) FilterLogs(
 	ctx context.Context,
 	query ethereum.FilterQuery,

@@ -196,7 +196,7 @@ contract BlacklistRegistryV1 is
         address _proxy,
         IGovernedProxy _mnregistry_proxy,
         Gen2Migration _migration,
-        ITreasury _compensatin_fund,
+        ITreasury _compensation_fund,
         address _ebi_signer
     )
         public GovernedContract(_proxy)
@@ -205,7 +205,7 @@ contract BlacklistRegistryV1 is
         v1storage = new StorageBlacklistRegistryV1();
         mnregistry_proxy = _mnregistry_proxy;
         migration = _migration;
-        compensation_fund = _compensatin_fund;
+        compensation_fund = _compensation_fund;
         EBI_signer = _ebi_signer;
     }
 

@@ -47,8 +47,8 @@ func TestProtocolCompatibility(t *testing.T) {
 		mode       downloader.SyncMode
 		compatible bool
 	}{
-		{61, downloader.FullSync, true}, {62, downloader.FullSync, true}, {63, downloader.FullSync, true},
-		{61, downloader.FastSync, false}, {62, downloader.FastSync, false}, {63, downloader.FastSync, true},
+		{nrg70, downloader.FullSync, true},
+		{nrg70, downloader.FastSync, true},
 	}
 	// Make sure anything we screw up is restored
 	backup := ProtocolVersions
@@ -69,8 +69,9 @@ func TestProtocolCompatibility(t *testing.T) {
 }
 
 // Tests that block headers can be retrieved from a remote chain based on user queries.
-func TestGetBlockHeaders62(t *testing.T) { testGetBlockHeaders(t, 62) }
-func TestGetBlockHeaders63(t *testing.T) { testGetBlockHeaders(t, 63) }
+//func TestGetBlockHeaders62(t *testing.T) { testGetBlockHeaders(t, 62) }
+//func TestGetBlockHeaders63(t *testing.T) { testGetBlockHeaders(t, 63) }
+func TestGetBlockHeaders70(t *testing.T) { testGetBlockHeaders(t, nrg70) }
 
 func testGetBlockHeaders(t *testing.T, protocol int) {
 	pm, _ := newTestProtocolManagerMust(t, downloader.FullSync, downloader.MaxHashFetch+15, nil, nil)
@@ -228,8 +229,9 @@ func testGetBlockHeaders(t *testing.T, protocol int) {
 }
 
 // Tests that block contents can be retrieved from a remote chain based on their hashes.
-func TestGetBlockBodies62(t *testing.T) { testGetBlockBodies(t, 62) }
-func TestGetBlockBodies63(t *testing.T) { testGetBlockBodies(t, 63) }
+//func TestGetBlockBodies62(t *testing.T) { testGetBlockBodies(t, 62) }
+//func TestGetBlockBodies63(t *testing.T) { testGetBlockBodies(t, 63) }
+func TestGetBlockBodies70(t *testing.T) { testGetBlockBodies(t, nrg70) }
 
 func testGetBlockBodies(t *testing.T, protocol int) {
 	pm, _ := newTestProtocolManagerMust(t, downloader.FullSync, downloader.MaxBlockFetch+15, nil, nil)
@@ -300,7 +302,8 @@ func testGetBlockBodies(t *testing.T, protocol int) {
 }
 
 // Tests that the node state database can be retrieved based on hashes.
-func TestGetNodeData63(t *testing.T) { testGetNodeData(t, 63) }
+//func TestGetNodeData63(t *testing.T) { testGetNodeData(t, 63) }
+func TestGetNodeData70(t *testing.T) { testGetNodeData(t, nrg70) }
 
 func testGetNodeData(t *testing.T, protocol int) {
 	// Define three accounts to simulate transactions with
@@ -392,7 +395,8 @@ func testGetNodeData(t *testing.T, protocol int) {
 }
 
 // Tests that the transaction receipts can be retrieved based on hashes.
-func TestGetReceipt63(t *testing.T) { testGetReceipt(t, 63) }
+//func TestGetReceipt63(t *testing.T) { testGetReceipt(t, 63) }
+func TestGetReceipt70(t *testing.T) { testGetReceipt(t, nrg70) }
 
 func testGetReceipt(t *testing.T, protocol int) {
 	// Define three accounts to simulate transactions with

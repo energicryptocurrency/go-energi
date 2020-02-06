@@ -177,6 +177,11 @@ func newTestPeer(name string, version int, pm *ProtocolManager, shake bool) (*te
 			td      = pm.blockchain.GetTd(head.Hash(), head.Number.Uint64())
 		)
 		tp.handshake(nil, td, head.Hash(), genesis.Hash())
+		if version >= nrg70 {
+			if err := p2p.ExpectMsg(app, GetCheckpointsMsg, nil); err != nil {
+				errc <- err
+			}
+		}
 	}
 	return tp, errc
 }

@@ -404,7 +404,6 @@ contract("TreasuryV1", async accounts => {
             const tot = mul1.add(mul2);
             const addbal = orig_bal.mul(tot.sub(toBN(1)));
             const trunc = toBN(10);
-            const trunc_bal = toBN('10000000000000000');
             const extra = toBN(12345678);
             
             await s.treasury_abi.propose(
