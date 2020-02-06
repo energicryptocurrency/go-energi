@@ -25,7 +25,7 @@ import (
 
 // SWVersionToInt converts the current semantic software version to an integer.
 func SWVersionToInt() *big.Int {
-	semver := int64(params.VersionMajor<<24 | params.VersionMinor<<16 | params.VersionMinor<<8)
+	semver := int64(params.VersionMajor<<24 | params.VersionMinor<<16 | params.VersionPatch<<8)
 	return new(big.Int).SetInt64(semver)
 }
 
