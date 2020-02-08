@@ -433,9 +433,12 @@ contract("MasternodeRegistryV2", async accounts => {
                 expect(await s.orig.getPastEvents('Denounced', common.evt_last_block)).lengthOf(0);
             });
 
-            it('should forbid heartbeat() too early', async () => {
+            it('should forbid heartbeat() at wrong time', async () => {
                 const bn = await web3.eth.getBlockNumber();
                 const b = await web3.eth.getBlock(bn);
+
+                // The first must succeed
+                await s.token_abi.heartbeat(bn, b.hash, sw_features, {from: masternode1, ...common.zerofee_callopts});
 
                 try {
                     await s.token_abi.heartbeat(bn, b.hash, sw_features, {from: masternode1, ...common.zerofee_callopts});

@@ -193,7 +193,7 @@ contract MasternodeRegistryV2 is
         );
 
         Status storage mnstatus = mn_status[masternode];
-        mnstatus.next_heartbeat = block.timestamp + _newHeartbeatInterval();
+        mnstatus.next_heartbeat = block.timestamp;
         mnstatus.seq_payouts = balance / MN_COLLATERAL_V2_MIN;
         ++mn_active;
         ++mn_announced;
