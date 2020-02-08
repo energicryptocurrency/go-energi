@@ -13,7 +13,8 @@ SOLC_OPTIONS := \
   --abi \
   --optimize \
   --optimize-runs=999999999 \
-  --overwrite
+  --overwrite \
+  --evm-version petersburg
 SOLC_BIN_EXT := bin
 SOLC_ABI_EXT := abi
 
