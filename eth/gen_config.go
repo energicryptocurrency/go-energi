@@ -23,10 +23,11 @@ func (c Config) MarshalTOML() (interface{}, error) {
 		NetworkId               uint64
 		SyncMode                downloader.SyncMode
 		NoPruning               bool
-		LightServ               int  `toml:",omitempty"`
-		LightPeers              int  `toml:",omitempty"`
-		SkipBcVersionCheck      bool `toml:"-"`
-		DatabaseHandles         int  `toml:"-"`
+		Whitelist               map[uint64]common.Hash `toml:"-"`
+		LightServ               int                    `toml:",omitempty"`
+		LightPeers              int                    `toml:",omitempty"`
+		SkipBcVersionCheck      bool                   `toml:"-"`
+		DatabaseHandles         int                    `toml:"-"`
 		DatabaseCache           int
 		TrieCleanCache          int
 		TrieDirtyCache          int
@@ -42,6 +43,7 @@ func (c Config) MarshalTOML() (interface{}, error) {
 		MinerNoverify           bool
 		MinerDPoS               DPoSMap `toml:",omitempty"`
 		MinerMigration          string  `toml:",omitempty"`
+		MinerNonceCap           uint64  `toml:"-"`
 		Ethash                  ethash.Config
 		TxPool                  core.TxPoolConfig
 		GPO                     gasprice.Config
@@ -49,12 +51,15 @@ func (c Config) MarshalTOML() (interface{}, error) {
 		DocRoot                 string `toml:"-"`
 		EWASMInterpreter        string
 		EVMInterpreter          string
+		ConstantinopleOverride  *big.Int
+		RPCGasCap               *big.Int `toml:",omitempty"`
 	}
 	var enc Config
 	enc.Genesis = c.Genesis
 	enc.NetworkId = c.NetworkId
 	enc.SyncMode = c.SyncMode
 	enc.NoPruning = c.NoPruning
+	enc.Whitelist = c.Whitelist
 	enc.LightServ = c.LightServ
 	enc.LightPeers = c.LightPeers
 	enc.SkipBcVersionCheck = c.SkipBcVersionCheck
@@ -74,6 +79,7 @@ func (c Config) MarshalTOML() (interface{}, error) {
 	enc.MinerNoverify = c.MinerNoverify
 	enc.MinerDPoS = c.MinerDPoS
 	enc.MinerMigration = c.MinerMigration
+	enc.MinerNonceCap = c.MinerNonceCap
 	enc.Ethash = c.Ethash
 	enc.TxPool = c.TxPool
 	enc.GPO = c.GPO
@@ -81,6 +87,8 @@ func (c Config) MarshalTOML() (interface{}, error) {
 	enc.DocRoot = c.DocRoot
 	enc.EWASMInterpreter = c.EWASMInterpreter
 	enc.EVMInterpreter = c.EVMInterpreter
+	enc.ConstantinopleOverride = c.ConstantinopleOverride
+	enc.RPCGasCap = c.RPCGasCap
 	return &enc, nil
 }
 
@@ -91,10 +99,11 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		NetworkId               *uint64
 		SyncMode                *downloader.SyncMode
 		NoPruning               *bool
-		LightServ               *int  `toml:",omitempty"`
-		LightPeers              *int  `toml:",omitempty"`
-		SkipBcVersionCheck      *bool `toml:"-"`
-		DatabaseHandles         *int  `toml:"-"`
+		Whitelist               map[uint64]common.Hash `toml:"-"`
+		LightServ               *int                   `toml:",omitempty"`
+		LightPeers              *int                   `toml:",omitempty"`
+		SkipBcVersionCheck      *bool                  `toml:"-"`
+		DatabaseHandles         *int                   `toml:"-"`
 		DatabaseCache           *int
 		TrieCleanCache          *int
 		TrieDirtyCache          *int
@@ -110,6 +119,7 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		MinerNoverify           *bool
 		MinerDPoS               *DPoSMap `toml:",omitempty"`
 		MinerMigration          *string  `toml:",omitempty"`
+		MinerNonceCap           *uint64  `toml:"-"`
 		Ethash                  *ethash.Config
 		TxPool                  *core.TxPoolConfig
 		GPO                     *gasprice.Config
@@ -117,6 +127,8 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		DocRoot                 *string `toml:"-"`
 		EWASMInterpreter        *string
 		EVMInterpreter          *string
+		ConstantinopleOverride  *big.Int
+		RPCGasCap               *big.Int `toml:",omitempty"`
 	}
 	var dec Config
 	if err := unmarshal(&dec); err != nil {
@@ -133,6 +145,9 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 	}
 	if dec.NoPruning != nil {
 		c.NoPruning = *dec.NoPruning
+	}
+	if dec.Whitelist != nil {
+		c.Whitelist = dec.Whitelist
 	}
 	if dec.LightServ != nil {
 		c.LightServ = *dec.LightServ
@@ -191,6 +206,9 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 	if dec.MinerMigration != nil {
 		c.MinerMigration = *dec.MinerMigration
 	}
+	if dec.MinerNonceCap != nil {
+		c.MinerNonceCap = *dec.MinerNonceCap
+	}
 	if dec.Ethash != nil {
 		c.Ethash = *dec.Ethash
 	}
@@ -211,6 +229,12 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 	}
 	if dec.EVMInterpreter != nil {
 		c.EVMInterpreter = *dec.EVMInterpreter
+	}
+	if dec.ConstantinopleOverride != nil {
+		c.ConstantinopleOverride = dec.ConstantinopleOverride
+	}
+	if dec.RPCGasCap != nil {
+		c.RPCGasCap = dec.RPCGasCap
 	}
 	return nil
 }

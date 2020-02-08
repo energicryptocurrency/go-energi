@@ -46,7 +46,7 @@ import (
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
 //go:generate gencodec -type GenesisAccount -field-override genesisAccountMarshaling -out gen_genesis_account.go
-//go:generate gencodec -type GenesisXfer -field-override genesisXferMarshaling -out gen_genesis_xfer
+//go:generate gencodec -type GenesisXfer -field-override genesisXferMarshaling -out gen_genesis_xfer.go
 var errGenesisNoConfig = errors.New("genesis has no chain configuration")
 
 // Genesis specifies the header fields, state of a genesis block. It also defines hard

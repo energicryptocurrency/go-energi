@@ -31,8 +31,8 @@ func (h Header) MarshalJSON() ([]byte, error) {
 		Extra       hexutil.Bytes  `json:"extraData"        gencodec:"required"`
 		MixDigest   common.Hash    `json:"mixHash"`
 		Nonce       BlockNonce     `json:"nonce"`
-		Hash        common.Hash    `json:"hash"`
 		Signature   hexutil.Bytes  `json:"signature"`
+		Hash        common.Hash    `json:"hash"`
 	}
 	var enc Header
 	enc.ParentHash = h.ParentHash
@@ -50,8 +50,8 @@ func (h Header) MarshalJSON() ([]byte, error) {
 	enc.Extra = h.Extra
 	enc.MixDigest = h.MixDigest
 	enc.Nonce = h.Nonce
-	enc.Hash = h.Hash()
 	enc.Signature = h.Signature
+	enc.Hash = h.Hash()
 	return json.Marshal(&enc)
 }
 
@@ -138,8 +138,7 @@ func (h *Header) UnmarshalJSON(input []byte) error {
 		h.Nonce = *dec.Nonce
 	}
 	if dec.Signature != nil {
-		h.Signature = make([]byte, len(*dec.Signature))
-		copy(h.Signature, *dec.Signature)
+		h.Signature = *dec.Signature
 	}
 	return nil
 }
