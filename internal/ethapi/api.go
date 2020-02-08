@@ -48,7 +48,8 @@ import (
 )
 
 const (
-	defaultGasPrice = params.GWei
+	defaultGasPrice     = params.GWei
+	capTraceInputLength = 64 * 1024
 )
 
 // PublicEthereumAPI provides an API to access Ethereum related information.
@@ -982,12 +983,17 @@ func newRPCTransaction(tx *types.Transaction, blockHash common.Hash, blockNumber
 		from = tx.ConsensusSender()
 	}
 
+	tx_data := tx.Data()
+	if len(tx_data) > capTraceInputLength {
+		tx_data = tx_data[:capTraceInputLength]
+	}
+
 	result := &RPCTransaction{
 		From:     from,
 		Gas:      hexutil.Uint64(tx.Gas()),
 		GasPrice: (*hexutil.Big)(tx.GasPrice()),
 		Hash:     tx.Hash(),
-		Input:    hexutil.Bytes(tx.Data()),
+		Input:    hexutil.Bytes(tx_data),
 		Nonce:    hexutil.Uint64(tx.Nonce()),
 		To:       tx.To(),
 		Value:    (*hexutil.Big)(tx.Value()),
