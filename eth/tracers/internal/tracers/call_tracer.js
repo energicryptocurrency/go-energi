@@ -24,6 +24,9 @@
 	// an inner call.
 	descended: false,
 
+	// inform tracer to optimize stepping
+	onlyCalls: true,
+
 	// step is invoked for every opcode that the VM executes.
 	step: function(log, db) {
 		// Capture any errors immediately
