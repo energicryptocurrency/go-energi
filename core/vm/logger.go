@@ -147,40 +147,34 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 
 	if l.cfg.OnlyClosures {
 		arg_count := 0
-		mem1_off_pos := -1
-		mem1_len_pos := -1
-		mem2_off_pos := -1
-		mem2_len_pos := -1
+		mem_off_pos := -1
+		mem_len_pos := -1
 
 		switch op {
 		case CREATE:
 			arg_count = 3
-			mem1_len_pos = 0
-			mem1_off_pos = 1
+			mem_len_pos = 0
+			mem_off_pos = 1
 			break
 		case CALL, CALLCODE:
 			arg_count = 7
-			mem1_len_pos = 0
-			mem1_off_pos = 1
-			mem2_len_pos = 2
-			mem2_off_pos = 3
+			mem_len_pos = 2
+			mem_off_pos = 3
 			break
 		case RETURN, REVERT:
 			arg_count = 2
-			mem1_len_pos = 0
-			mem1_off_pos = 1
+			mem_len_pos = 0
+			mem_off_pos = 1
 			break
 		case DELEGATECALL, STATICCALL:
 			arg_count = 6
-			mem1_len_pos = 0
-			mem1_off_pos = 1
-			mem2_len_pos = 2
-			mem2_off_pos = 3
+			mem_len_pos = 2
+			mem_off_pos = 3
 			break
 		case CREATE2:
 			arg_count = 4
-			mem1_len_pos = 0
-			mem1_off_pos = 1
+			mem_len_pos = 0
+			mem_off_pos = 1
 			break
 		case SELFDESTRUCT:
 			arg_count = 1
@@ -198,43 +192,25 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 				stck[i] = new(big.Int).Set(item)
 			}
 
-			if mem1_off_pos >= 0 {
-				mem_start := stck[mem1_off_pos].Int64()
-				mem_end := stck[mem1_off_pos].Int64() + stck[mem1_len_pos].Int64()
-
-				if mem2_off_pos >= 0 {
-					ms2 := stck[mem2_off_pos].Int64()
-
-					if ms2 < mem_start {
-						mem_start = ms2
-					}
-
-					if me2 := ms2 + stck[mem2_len_pos].Int64(); me2 > mem_end {
-						mem_end = me2
-					}
-				}
+			if mem_off_pos >= 0 {
+				mem_start := stck[mem_off_pos].Int64()
+				mem_end := stck[mem_off_pos].Int64() + stck[mem_len_pos].Int64()
 
 				if mem_len := mem_end - mem_start; mem_len > 0 {
 					if ml := int64(len(memory.Data())); mem_len > ml {
 						mem_len = ml
 						mem_end = mem_start + mem_len
 					}
-					mem = make([]byte, mem_len)
-					copy(mem, memory.Data()[mem_start:mem_end])
+					mem = memory.Data()[mem_start:mem_end]
 				}
 
 				// Adjust stack
-				stck[mem1_off_pos].SetInt64(stck[mem1_off_pos].Int64() - mem_start)
-				if mem2_off_pos >= 0 {
-					stck[mem2_off_pos].SetInt64(stck[mem2_off_pos].Int64() - mem_start)
-				}
+				stck[mem_off_pos].SetInt64(stck[mem_off_pos].Int64() - mem_start)
 			}
 		}
 
-		log := StructLog{pc, op, gas, cost, mem, len(mem), stck, nil, depth, env.StateDB.GetRefund(), err}
-		l.logs = append(l.logs, log)
-
-		return nil
+		memory = &Memory{mem, memory.lastGasCost}
+		stack = &Stack{stck}
 	}
 
 	// initialise new changed values storage container for this contract
