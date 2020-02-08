@@ -31,6 +31,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/internal/jsre"
 	"github.com/ethereum/go-ethereum/internal/web3ext"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/mattn/go-colorable"
 	"github.com/peterh/liner"
@@ -72,6 +73,8 @@ type Console struct {
 	histPath string       // Absolute path to the console scrollback history
 	history  []string     // Scroll history maintained by the console
 	printer  io.Writer    // Output writer to serialize any display strings to
+
+	passMasking *maskingJSRE
 }
 
 // New initializes a JavaScript interpreted runtime environment and sets defaults
@@ -115,6 +118,12 @@ func (c *Console) init(preload []string) error {
 	jethObj, _ := c.jsre.Get("jeth")
 	jethObj.Object().Set("send", bridge.Send)
 	jethObj.Object().Set("sendAsync", bridge.Send)
+
+	var err error
+	c.passMasking, err = newMaskingJSRE(bridge.Send)
+	if err != nil {
+		return err
+	}
 
 	consoleObj, _ := c.jsre.Get("console")
 	consoleObj.Object().Set("log", c.consoleOutput)
@@ -217,6 +226,15 @@ func (c *Console) init(preload []string) error {
 			c.prompter.SetHistory(nil)
 		} else {
 			c.history = strings.Split(string(content), "\n")
+			// Mask all passwords in the previous history.
+			for i, cmd := range c.history {
+				if !c.passMasking.IsPasswordMasked(cmd) {
+					c.history[i], err = c.passMasking.MaskPassword(cmd)
+					if err != nil {
+						log.Warn("Password masking failed", "err", err)
+					}
+				}
+			}
 			c.prompter.SetHistory(c.history)
 		}
 		c.prompter.SetWordCompleter(c.AutoCompleteInput)
@@ -367,14 +385,37 @@ func (c *Console) Interactive() {
 			}
 			// If all the needed lines are present, save the command and run
 			if indents <= 0 {
+				var err error
 				if len(input) > 0 && input[0] != ' ' && !passwordRegexp.MatchString(input) {
 					if command := strings.TrimSpace(input); len(c.history) == 0 || command != c.history[len(c.history)-1] {
+						// if password not masked, mask it then.
+						if !c.passMasking.IsPasswordMasked(command) {
+							command, err = c.passMasking.MaskPassword(command)
+							if err != nil {
+								log.Warn("Password masking failed", "err", err)
+							}
+						}
+
 						c.history = append(c.history, command)
 						if c.prompter != nil {
 							c.prompter.AppendHistory(command)
 						}
 					}
 				}
+
+				// if masked password is found, prompt new password input.
+				if c.passMasking.IsPasswordMasked(input) {
+					pass, err := c.prompter.PromptInput("Re-enter the Password again: ")
+					if err != nil {
+						fmt.Fprintf(c.printer, "[native] error: %v\n", err)
+						continue
+					}
+					input, err = c.passMasking.UnMaskPassword(input, pass)
+					if err != nil {
+						log.Warn("Password unmasking failed", "err", err)
+					}
+				}
+
 				c.Evaluate(input)
 				input = ""
 			}
