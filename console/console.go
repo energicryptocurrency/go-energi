@@ -231,7 +231,7 @@ func (c *Console) init(preload []string) error {
 				if !c.passMasking.IsPasswordMasked(cmd) {
 					c.history[i], err = c.passMasking.MaskPassword(cmd)
 					if err != nil {
-						log.Warn("Password masking failed", "err", err)
+						log.Debug("Password masking failed", "err", err)
 					}
 				}
 			}
@@ -392,7 +392,7 @@ func (c *Console) Interactive() {
 						if !c.passMasking.IsPasswordMasked(command) {
 							command, err = c.passMasking.MaskPassword(command)
 							if err != nil {
-								log.Warn("Password masking failed", "err", err)
+								log.Debug("Password masking failed", "err", err)
 							}
 						}
 
@@ -412,7 +412,7 @@ func (c *Console) Interactive() {
 					}
 					input, err = c.passMasking.UnMaskPassword(input, pass)
 					if err != nil {
-						log.Warn("Password unmasking failed", "err", err)
+						log.Debug("Password unmasking failed", "err", err)
 					}
 				}
 

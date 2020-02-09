@@ -898,7 +898,7 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	// Processing a special case of migrations
 	if header.IsGen2Migration() {
 		if !w.isRunning() {
-			log.Error("Refusing to mine migration block: worker not yet started")
+			log.Debug("Refusing to mine migration block: worker not yet started")
 			return
 		}
 

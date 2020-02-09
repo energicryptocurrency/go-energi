@@ -186,7 +186,7 @@ func (m *maskingJSRE) vmRun(command string) (otto.Value, error) {
 	go func() {
 		time.Sleep(runtimeTimeout) // Stop after runtimeTimeout
 		m.vmInstance.Interrupt <- func() {
-			log.Warn("masking JSRE timeout on command: " + command)
+			log.Debug("masking JSRE timeout on command: " + command)
 		}
 	}()
 	return m.vmInstance.Run(command)
