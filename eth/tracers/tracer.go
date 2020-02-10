@@ -558,8 +558,10 @@ func (jst *Tracer) CaptureState(env *vm.EVM, pc uint64, op vm.OpCode, gas, cost 
 		case vm.CREATE2:
 		case vm.SELFDESTRUCT:
 			break
+		case vm.RETURN, vm.STOP:
+			break
 		default:
-			if depth == jst.lastDepth {
+			if depth == jst.lastDepth && err == nil {
 				return nil
 			}
 		}
