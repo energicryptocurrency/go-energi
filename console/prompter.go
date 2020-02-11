@@ -127,7 +127,7 @@ func (p *terminalPrompter) PromptPassword(prompt string) (passwd string, err err
 		p.rawMode.ApplyMode()
 		defer p.normalMode.ApplyMode()
 		passwd, err = p.State.PasswordPrompt(prompt)
-		fmt.Println(prompt + "" + passwordMask)
+		fmt.Println("Passphrase entered: " + passwordMask)
 		return
 	}
 	if !p.warned {

@@ -225,22 +225,21 @@ func (c *Console) init(preload []string) error {
 		if content, err := ioutil.ReadFile(c.histPath); err != nil {
 			c.prompter.SetHistory(nil)
 		} else {
-			c.history = strings.Split(string(content), "\n")
+			history := strings.Split(string(content), "\n")
 			// Mask all passwords in the previous history.
-			i := 0
-			for _, cmd := range c.history {
+			for _, cmd := range history {
 				if !c.passMasking.IsPasswordMasked(cmd) {
 					cmd, err = c.passMasking.MaskPassword(cmd)
 					if err != nil {
-						log.Debug("Password masking failed", "err", err)
-					} else {
-						// Only append commands with correct format to the history file.
-						c.history[i] = cmd
-						i++
+						log.Debug("Passphrase masking failed", "err", err)
 					}
 				}
+				if err == nil {
+					// Only append commands with correct format to the history file.
+					c.history = append(c.history, cmd)
+				}
 			}
-			c.prompter.SetHistory(c.history[:i])
+			c.prompter.SetHistory(c.history)
 		}
 		c.prompter.SetWordCompleter(c.AutoCompleteInput)
 	}
