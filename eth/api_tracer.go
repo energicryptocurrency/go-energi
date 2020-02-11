@@ -769,6 +769,12 @@ func (api *PrivateDebugAPI) traceTx(ctx context.Context, message core.Message, v
 
 	ret, gas, failed, err := core.ApplyMessage(vmenv, message, new(core.GasPool).AddGas(message.Gas()))
 	if err != nil {
+		// Prevent memory leak in C code
+		switch tracer := tracer.(type) {
+		case *tracers.Tracer:
+			tracer.GetResult()
+		}
+
 		return nil, fmt.Errorf("tracing failed: %v", err)
 	}
 	// Depending on the tracer type, format and return the output
