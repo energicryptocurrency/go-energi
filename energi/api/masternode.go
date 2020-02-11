@@ -232,6 +232,7 @@ type MNInfo struct {
 	Collateral     *hexutil.Big
 	AnnouncedBlock uint64
 	IsActive       bool
+	IsAlive        bool
 	SWFeatures     *hexutil.Big
 	SWVersion      string
 }
@@ -249,7 +250,7 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNInfo, err error) {
 }
 
 func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, error) {
-	registry, err := energi_abi.NewIMasternodeRegistryCaller(
+	registry, err := energi_abi.NewIMasternodeRegistryV2Caller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed", "err", err)
@@ -279,6 +280,12 @@ func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, err
 			continue
 		}
 
+		canHeartbeat, err := registry.CanHeartbeat(call_opts, mn)
+		if err != nil {
+			log.Warn("CanHeartbeat error", "mn", mn, "err", err)
+			continue
+		}
+
 		res = append(res, MNInfo{
 			Masternode:     mn,
 			Owner:          mninfo.Owner,
@@ -286,6 +293,7 @@ func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, err
 			Collateral:     (*hexutil.Big)(mninfo.Collateral),
 			AnnouncedBlock: mninfo.AnnouncedBlock.Uint64(),
 			IsActive:       isActive,
+			IsAlive:        isActive && !canHeartbeat,
 			SWFeatures:     (*hexutil.Big)(mninfo.SwFeatures),
 			SWVersion:      energi_common.SWVersionIntToString(mninfo.SwFeatures),
 		})
@@ -324,7 +332,7 @@ func (m *MasternodeAPI) Stats() (res *MasternodeStats, err error) {
 }
 
 func (m *MasternodeAPI) stats(blockhash common.Hash) (interface{}, error) {
-	registry, err := energi_abi.NewIMasternodeRegistryCaller(
+	registry, err := energi_abi.NewIMasternodeRegistryV2Caller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed", "err", err)
