@@ -843,8 +843,10 @@ func (api *PrivateDebugAPI) handleConsensusTx(
 	signer types.Signer,
 ) types.Signer {
 	if tx.IsConsensus() {
-		if tx.ConsensusSender() == energi_params.Energi_SystemFaucet {
+		if addr := tx.ConsensusSender(); addr == energi_params.Energi_SystemFaucet {
 			statedb.SetBalance(energi_params.Energi_SystemFaucet, tx.Value())
+		} else if (statedb.GetState(energi_params.Energi_Blacklist, addr.Hash()) != common.Hash{}) {
+			statedb.SetState(energi_params.Energi_Blacklist, addr.Hash(), common.Hash{})
 		}
 		return gConsensusSigner
 	}
