@@ -29,6 +29,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 
@@ -62,7 +63,7 @@ type Gen2Coin struct {
 	ItemID   uint64
 	RawOwner common.Address
 	Owner    string
-	Amount   *big.Int
+	Amount   *hexutil.Big
 }
 
 type Gen2Key struct {
@@ -127,7 +128,7 @@ func (m *MigrationAPI) listGen2Coins(blockhash common.Hash) (interface{}, error)
 			ItemID:   uint64(i),
 			RawOwner: common.BytesToAddress(res.Owner[:]),
 			Owner:    base58.Encode(owner, base58.BitcoinAlphabet),
-			Amount:   res.Amount,
+			Amount:   (*hexutil.Big)(res.Amount),
 		})
 	}
 
@@ -179,7 +180,7 @@ func (m *MigrationAPI) searchGen2Coins(
 
 	for _, c := range list {
 		if _, ok := owners_map[c.RawOwner]; ok {
-			if include_empty || c.Amount.Cmp(common.Big0) > 0 {
+			if include_empty || c.Amount.ToInt().Cmp(common.Big0) > 0 {
 				coins = append(coins, c)
 			}
 		}

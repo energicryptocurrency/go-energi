@@ -132,6 +132,15 @@ web3._extend.formatters.outputProposalFormatter = function(item){
 	};
 };
 
+web3._extend.formatters.coinSearchFormatter = function(list){
+	var toDecimal = web3._extend.utils.toDecimal;
+	for (var i = 0; i < list.length; ++i) {
+		var item = list[i];
+		item.Amount = toDecimal(item.Amount);
+	}
+	return list;
+};
+
 web3._extend({
 	property: 'energi',
 	methods: [
@@ -139,17 +148,20 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'listGen2Coins',
 			call: 'energi_listGen2Coins',
-			params: 0
+			params: 0,
+			outputFormatter: web3._extend.formatters.coinSearchFormatter,
 		}),
 		new web3._extend.Method({
 			name: 'searchGen2Coins',
 			call: 'energi_searchGen2Coins',
-			params: 2
+			params: 2,
+			outputFormatter: web3._extend.formatters.coinSearchFormatter,
 		}),
 		new web3._extend.Method({
 			name: 'searchRawGen2Coins',
 			call: 'energi_searchRawGen2Coins',
-			params: 2
+			params: 2,
+			outputFormatter: web3._extend.formatters.coinSearchFormatter,
 		}),
 		new web3._extend.Method({
 			name: 'claimGen2CoinsDirect',
