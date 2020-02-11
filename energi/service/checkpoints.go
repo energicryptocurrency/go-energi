@@ -170,7 +170,7 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 	backend := c.eth.APIBackend
 	cppSigner := backend.ChainConfig().Energi.CPPSigner
 
-	cp, err := energi_abi.NewICheckpointCaller(cpAddr, backend)
+	cp, err := energi_abi.NewICheckpointV2Caller(cpAddr, backend)
 	if err != nil {
 		log.Warn("Failed to create CP contract caller", "addr", cpAddr, "err", err)
 		return

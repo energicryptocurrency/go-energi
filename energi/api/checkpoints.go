@@ -136,7 +136,7 @@ func (b *CheckpointAPI) checkpointInfo(blockhash common.Hash) (interface{}, erro
 	res.Registry = make([]CheckpointInfo, 0, len(addresses))
 
 	for _, addr := range addresses {
-		cp, err := energi_abi.NewICheckpointCaller(
+		cp, err := energi_abi.NewICheckpointV2Caller(
 			addr, b.backend.(bind.ContractCaller))
 		if err != nil {
 			log.Error("Failed", "err", err)

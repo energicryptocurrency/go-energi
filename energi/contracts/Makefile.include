@@ -48,12 +48,10 @@ ENERGI_CONTRACTS := \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
   IBudgetProposal.sol \
-  ICheckpoint.sol \
   ICheckpointV2.sol \
   ICheckpointRegistry.sol \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
-  IMasternodeRegistry.sol \
   IMasternodeRegistryV2.sol \
   IMasternodeToken.sol \
   IProposal.sol \

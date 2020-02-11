@@ -111,7 +111,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
-	mngreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	mngreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	if err != nil {
 		panic(err)
 		return nil

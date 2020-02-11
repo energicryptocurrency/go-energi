@@ -468,7 +468,7 @@ func announceMN(
 	mnAddr common.Address,
 	ip net.IP,
 ) error {
-	registry, err := energi_abi.NewIMasternodeRegistryTransactor(
+	registry, err := energi_abi.NewIMasternodeRegistryV2Transactor(
 		energi_params.Energi_MasternodeRegistry, ethService.APIBackend)
 	if err != nil {
 		return err

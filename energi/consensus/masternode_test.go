@@ -125,7 +125,7 @@ func TestMasternodeList(t *testing.T) {
 	log.Trace("depositCollateral")
 	core.ApplyMessage(evm, msg, gp)
 	//---
-	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	callData, err = mnreg_abi.Pack("announce", mn_addr1, uint32(130<<24), [2][32]byte{})
 	assert.Empty(t, err)
 	msg = types.NewMessage(

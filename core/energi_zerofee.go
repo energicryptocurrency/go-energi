@@ -54,7 +54,7 @@ func init() {
 	copy(energiClaimID[:], migration_abi.Methods["claim"].Id())
 	copy(energiVerifyClaimID[:], migration_abi.Methods["verifyClaim"].Id())
 
-	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	if err != nil {
 		panic(err)
 	}

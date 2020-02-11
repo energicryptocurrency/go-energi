@@ -48,7 +48,7 @@ func TestIsValidZeroFee(t *testing.T) {
 		"claim", common.Big0, common.Address{}, uint8(0), common.Hash{}, common.Hash{})
 	assert.Empty(t, err)
 
-	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	assert.Empty(t, err)
 	heartbeatCall, err := mnreg_abi.Pack("heartbeat", common.Big1, common.Hash{}, common.Big0)
 	assert.Empty(t, err)
@@ -273,7 +273,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 		mn_inactive.Hash(),
 	)
 
-	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryABI))
+	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	assert.Empty(t, err)
 	heartbeatCall, err := mnreg_abi.Pack("heartbeat", common.Big1, common.Hash{}, common.Big0)
 	assert.Empty(t, err)
