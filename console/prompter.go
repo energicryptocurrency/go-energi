@@ -126,7 +126,9 @@ func (p *terminalPrompter) PromptPassword(prompt string) (passwd string, err err
 	if p.supported {
 		p.rawMode.ApplyMode()
 		defer p.normalMode.ApplyMode()
-		return p.State.PasswordPrompt(prompt)
+		passwd, err = p.State.PasswordPrompt(prompt)
+		fmt.Println(prompt + "" + passwordMask)
+		return
 	}
 	if !p.warned {
 		fmt.Println("!! Unsupported terminal, password will be echoed.")

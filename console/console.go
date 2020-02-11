@@ -397,7 +397,7 @@ func (c *Console) Interactive() {
 						if !c.passMasking.IsPasswordMasked(command) {
 							command, err = c.passMasking.MaskPassword(command)
 							if err != nil {
-								log.Debug("Password masking failed", "err", err)
+								log.Debug("Passphrase masking failed", "err", err)
 							}
 						}
 
@@ -413,14 +413,14 @@ func (c *Console) Interactive() {
 
 				// if masked password is found, prompt new password input.
 				if c.passMasking.IsPasswordMasked(input) {
-					pass, err := c.prompter.PromptInput("Re-enter the Password again: ")
+					pass, err := c.prompter.PromptPassword("Re-enter passphrase again: ")
 					if err != nil {
 						fmt.Fprintf(c.printer, "[native] error: %v\n", err)
 						continue
 					}
 					input, err = c.passMasking.UnMaskPassword(input, pass)
 					if err != nil {
-						log.Debug("Password unmasking failed", "err", err)
+						log.Debug("Passphrase unmasking failed", "err", err)
 					}
 				}
 

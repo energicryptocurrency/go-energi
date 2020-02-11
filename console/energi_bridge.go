@@ -202,7 +202,7 @@ func (m *maskingJSRE) replacePassword(command, placeholder string) (string, erro
 			// Use the JSRE to evaluate the actual password in the command.
 			realPass, err := m.vmRun(command)
 			if err != nil || !realPass.IsDefined() {
-				return command, fmt.Errorf("Unable to locate password in %s: %v", command, err)
+				return command, fmt.Errorf("Unable to locate passphrase in %s: %v", command, err)
 			}
 
 			// escape any special characters.
