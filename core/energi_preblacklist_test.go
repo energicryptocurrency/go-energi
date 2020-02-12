@@ -94,6 +94,10 @@ func TestPreBlacklist(t *testing.T) {
 	sender := common.HexToAddress("0x3333")
 	wladdr1 := common.HexToAddress("0x4444")
 
+	gspec.Config.Energi = &params.EnergiConfig{
+		EBISigner: sender,
+	}
+
 	signer := &fakeSigner{}
 	pool.signer = signer
 	signer.sender = sender

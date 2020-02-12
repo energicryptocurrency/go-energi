@@ -133,8 +133,8 @@ func (pb *preBlacklist) processProposal(
 	if method := tx.MethodID(); method != energiBLProposeID {
 		return
 	}
-	// DBL-10 - only enable for EBI proposals which have zero cost by design
-	if tx.GasPrice().Cmp(common.Big0) != 0 {
+	// DBL-10 - only enable for EBI proposals
+	if sender != pool.chainconfig.Energi.EBISigner {
 		return
 	}
 
