@@ -225,14 +225,18 @@ func (c *Console) init(preload []string) error {
 		if content, err := ioutil.ReadFile(c.histPath); err != nil {
 			c.prompter.SetHistory(nil)
 		} else {
-			c.history = strings.Split(string(content), "\n")
+			history := strings.Split(string(content), "\n")
 			// Mask all passwords in the previous history.
-			for i, cmd := range c.history {
+			for _, cmd := range history {
 				if !c.passMasking.IsPasswordMasked(cmd) {
-					c.history[i], err = c.passMasking.MaskPassword(cmd)
+					cmd, err = c.passMasking.MaskPassword(cmd)
 					if err != nil {
-						log.Debug("Password masking failed", "err", err)
+						log.Debug("Passphrase masking failed", "err", err)
 					}
+				}
+				if err == nil {
+					// Only append commands with correct format to the history file.
+					c.history = append(c.history, cmd)
 				}
 			}
 			c.prompter.SetHistory(c.history)
@@ -392,27 +396,30 @@ func (c *Console) Interactive() {
 						if !c.passMasking.IsPasswordMasked(command) {
 							command, err = c.passMasking.MaskPassword(command)
 							if err != nil {
-								log.Debug("Password masking failed", "err", err)
+								log.Debug("Passphrase masking failed", "err", err)
 							}
 						}
 
-						c.history = append(c.history, command)
-						if c.prompter != nil {
-							c.prompter.AppendHistory(command)
+						if err == nil {
+							// Only append commands with correct format to the history file.
+							c.history = append(c.history, command)
+							if c.prompter != nil {
+								c.prompter.AppendHistory(command)
+							}
 						}
 					}
 				}
 
 				// if masked password is found, prompt new password input.
 				if c.passMasking.IsPasswordMasked(input) {
-					pass, err := c.prompter.PromptInput("Re-enter the Password again: ")
+					pass, err := c.prompter.PromptPassword("Re-enter passphrase again: ")
 					if err != nil {
 						fmt.Fprintf(c.printer, "[native] error: %v\n", err)
 						continue
 					}
 					input, err = c.passMasking.UnMaskPassword(input, pass)
 					if err != nil {
-						log.Debug("Password unmasking failed", "err", err)
+						log.Debug("Passphrase unmasking failed", "err", err)
 					}
 				}
 

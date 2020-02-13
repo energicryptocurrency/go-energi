@@ -46,6 +46,7 @@ const (
 // arguments before obtaining the actual password in the specified cmd command.
 type maskingJSRE struct {
 	vmInstance *otto.Otto
+	vmQuit     chan struct{}
 }
 
 type info struct {
@@ -146,7 +147,10 @@ func newMaskingJSRE(
 		return
 	}
 
-	runtime = &maskingJSRE{vm}
+	runtime = &maskingJSRE{
+		vmInstance: vm,
+		vmQuit:     make(chan struct{}),
+	}
 
 	// Set handler functions
 	for key, info := range passwordIndexMap {
@@ -184,10 +188,14 @@ func (m *maskingJSRE) UnMaskPassword(maskedCommand, pass string) (string, error)
 
 func (m *maskingJSRE) vmRun(command string) (otto.Value, error) {
 	go func() {
-		time.Sleep(runtimeTimeout) // Stop after runtimeTimeout
-		m.vmInstance.Interrupt <- func() {
-			log.Debug("masking JSRE timeout on command: " + command)
+		select {
+		case <-time.After(runtimeTimeout): // Stop after runtimeTimeout
+			m.vmInstance.Interrupt <- func() {
+				log.Debug("masking JSRE timeout on command: " + command)
+			}
+		case <-m.vmQuit: // Successfully completed command evaluation.
 		}
+		return
 	}()
 	return m.vmInstance.Run(command)
 }
@@ -202,8 +210,10 @@ func (m *maskingJSRE) replacePassword(command, placeholder string) (string, erro
 			// Use the JSRE to evaluate the actual password in the command.
 			realPass, err := m.vmRun(command)
 			if err != nil || !realPass.IsDefined() {
-				return command, fmt.Errorf("Unable to locate password in %s: %v", command, err)
+				return command, fmt.Errorf("Unable to locate passphrase in %s: %v", command, err)
 			}
+
+			m.vmQuit <- struct{}{}
 
 			// escape any special characters.
 			escapedPass := regexp.QuoteMeta(realPass.String())
