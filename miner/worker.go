@@ -160,6 +160,8 @@ type worker struct {
 
 	migration string
 
+	autocollateral bool
+
 	pendingMu    sync.RWMutex
 	pendingTasks map[common.Hash]*task
 
@@ -240,6 +242,12 @@ func (w *worker) setMigration(migration string) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.migration = migration
+}
+
+func (w *worker) setAutocollateral(autocollateral bool) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.autocollateral = autocollateral
 }
 
 // setExtra sets the content used to initialize the block extra field.
@@ -359,6 +367,9 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			clearPending(head.Block.NumberU64())
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
+			if w.autocollateral {
+				go w.tryAutocollateral()
+			}
 
 		case <-timer.C:
 			// If mining is running resubmit a new work cycle periodically to pull in

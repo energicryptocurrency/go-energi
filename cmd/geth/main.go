@@ -116,6 +116,7 @@ var (
 		utils.MinerDPoSFlag,
 		utils.MinerMigrationFlag,
 		utils.MinerNonceCapFlag,
+		utils.MinerAutocollateralFlag,
 		utils.NATFlag,
 		utils.NoDiscoverFlag,
 		utils.DiscoveryV5Flag,

@@ -58,6 +58,8 @@ var DefaultConfig = Config{
 	MinerRecommit:  3 * time.Second,
 	MinerNonceCap:  0,
 
+	MinerAutocollateral: true,
+
 	TxPool: core.DefaultTxPoolConfig,
 	GPO: gasprice.Config{
 		Blocks:     20,
@@ -122,6 +124,8 @@ type Config struct {
 	MinerDPoS      DPoSMap `toml:",omitempty"`
 	MinerMigration string  `toml:",omitempty"`
 	MinerNonceCap  uint64  `toml:"-"`
+
+	MinerAutocollateral bool `toml:",omitempty"`
 
 	// Ethash options
 	Ethash ethash.Config

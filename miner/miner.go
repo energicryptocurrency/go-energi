@@ -192,3 +192,7 @@ func (self *Miner) SetMinerNonceCap(nonce *uint64) (oldNonce uint64) {
 	consensus.SetMinerNonceCap(*nonce)
 	return
 }
+
+func (self *Miner) SetMinerAutocollateral(autocollateral bool) {
+	self.worker.setAutocollateral(autocollateral)
+}
