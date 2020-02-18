@@ -204,6 +204,9 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	}
 	eth.APIBackend.gpo = gasprice.NewOracle(eth.APIBackend, gpoParams)
 
+	eth.miner.SetEthAPIBackend(eth.APIBackend)
+	eth.miner.SetMinerAutocollateral(config.MinerAutocollateral)
+
 	return eth, nil
 }
 

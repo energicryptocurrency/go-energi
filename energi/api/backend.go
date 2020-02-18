@@ -119,8 +119,8 @@ func CreateStakeTxSignerCallback(backend Backend) bind.SignerFn {
 			return nil, err
 		}
 
-		if wallet.IsUnlockedForStaking(account) {
-			return nil, fmt.Errorf("requires an unlocked account")
+		if !wallet.IsUnlockedForStaking(account) {
+			return nil, fmt.Errorf("Requires an unlocked account")
 		}
 
 		chainID := backend.ChainConfig().ChainID

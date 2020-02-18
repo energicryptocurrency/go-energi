@@ -34,6 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 
+	energi_api "energi.world/core/gen3/energi/api"
 	energi_consensus "energi.world/core/gen3/energi/consensus"
 )
 
@@ -160,8 +161,6 @@ type worker struct {
 
 	migration string
 
-	autocollateral bool
-
 	pendingMu    sync.RWMutex
 	pendingTasks map[common.Hash]*task
 
@@ -181,6 +180,10 @@ type worker struct {
 	skipSealHook func(*task) bool                   // Method to decide whether skipping the sealing.
 	fullTaskHook func()                             // Method to call before pushing the full sealing task.
 	resubmitHook func(time.Duration, time.Duration) // Method to call upon updating resubmitting interval.
+
+	// Energi params
+	autocollateral bool
+	APIBackend     energi_api.Backend
 }
 
 func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend, mux *event.TypeMux, recommit time.Duration, gasFloor, gasCeil uint64, isLocalBlock func(*types.Block) bool) *worker {
@@ -255,6 +258,12 @@ func (w *worker) setExtra(extra []byte) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.extra = extra
+}
+
+func (w *worker) setEthAPIBackend(api energi_api.Backend) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.APIBackend = api
 }
 
 // setRecommitInterval updates the interval for miner sealing work recommitting.

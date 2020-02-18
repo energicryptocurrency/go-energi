@@ -35,7 +35,7 @@ import (
 
 const (
 	mntokenCallGas    uint64 = 1000000
-	masternodeCallGas uint64 = 1000000
+	MasternodeCallGas uint64 = 1000000
 )
 
 type MasternodeAPI struct {
@@ -390,7 +390,7 @@ func masternodeRegistry(
 			From:     dst,
 			Signer:   createSignerCallback(backend, password),
 			Value:    common.Big0,
-			GasLimit: masternodeCallGas,
+			GasLimit: MasternodeCallGas,
 		},
 	}
 	return

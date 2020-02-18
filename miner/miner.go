@@ -34,6 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 
 	energi "energi.world/core/gen3/energi/consensus"
+	energi_api "energi.world/core/gen3/energi/api"
 )
 
 // Backend wraps all methods required for mining.
@@ -195,4 +196,8 @@ func (self *Miner) SetMinerNonceCap(nonce *uint64) (oldNonce uint64) {
 
 func (self *Miner) SetMinerAutocollateral(autocollateral bool) {
 	self.worker.setAutocollateral(autocollateral)
+}
+
+func (self *Miner) SetEthAPIBackend(api energi_api.Backend) {
+	self.worker.setEthAPIBackend(api)
 }
