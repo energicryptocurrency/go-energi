@@ -19,6 +19,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -101,5 +102,28 @@ func createSignerCallback(
 
 		return wallet.SignTxWithPassphrase(
 			account, *password, tx, chain_id)
+	}
+}
+
+// CreateStakeTxSignerCallback uses unlocked accounts to sign transactions without
+// a password.
+func CreateStakeTxSignerCallback(backend Backend) bind.SignerFn {
+	return func(
+		signer types.Signer,
+		addr common.Address,
+		tx *types.Transaction,
+	) (*types.Transaction, error) {
+		account := accounts.Account{Address: addr}
+		wallet, err := backend.AccountManager().Find(account)
+		if err != nil {
+			return nil, err
+		}
+
+		if wallet.IsUnlockedForStaking(account) {
+			return nil, fmt.Errorf("requires an unlocked account")
+		}
+
+		chainID := backend.ChainConfig().ChainID
+		return wallet.SignTx(account, tx, chainID)
 	}
 }
