@@ -168,6 +168,11 @@ func (api *PrivateMinerAPI) RemoveDPoS(contract common.Address) bool {
 	return true
 }
 
+// SetMinerNonceCap updates the POS nonce cap.
+func (api *PrivateMinerAPI) SetMinerNonceCap(nonce *uint64) uint64 {
+	return api.e.Miner().SetMinerNonceCap(nonce)
+}
+
 // PrivateAdminAPI is the collection of Ethereum full node-related APIs
 // exposed over the private admin endpoint.
 type PrivateAdminAPI struct {

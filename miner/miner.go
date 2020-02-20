@@ -32,6 +32,8 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
+
+	energi "energi.world/core/gen3/energi/consensus"
 )
 
 // Backend wraps all methods required for mining.
@@ -174,4 +176,19 @@ func (self *Miner) SetEtherbase(addr common.Address) {
 
 func (self *Miner) SetMigration(migration string) {
 	self.worker.setMigration(migration)
+}
+
+func (self *Miner) SetMinerNonceCap(nonce *uint64) (oldNonce uint64) {
+	consensus, ok := self.engine.(*energi.Energi)
+	if !ok {
+		return 0
+	}
+
+	oldNonce = consensus.GetMinerNonceCap()
+	if nonce == nil {
+		return
+	}
+
+	consensus.SetMinerNonceCap(*nonce)
+	return
 }
