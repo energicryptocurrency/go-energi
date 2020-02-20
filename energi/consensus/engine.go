@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -724,7 +725,10 @@ func (e *Energi) SignatureHash(header *types.Header) (hash common.Hash) {
 }
 
 func (e *Energi) SetMinerNonceCap(nonceCap uint64) {
-	e.nonceCap = nonceCap
+	atomic.StoreUint64(&e.nonceCap, nonceCap)
+}
+func (e *Energi) GetMinerNonceCap() uint64 {
+	return atomic.LoadUint64(&e.nonceCap)
 }
 func (e *Energi) SetMinerCB(
 	accountsFn AccountsFn,

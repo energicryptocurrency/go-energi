@@ -1012,6 +1012,13 @@ web3._extend({
 			params: 1,
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
+		new web3._extend.Method({
+			name: 'setMinerNonceCap',
+			call: 'miner_setMinerNonceCap',
+			params: 1,
+			inputFormatter: [null],
+			outputFormatter: console.log,
+		}),
 	],
 	properties: []
 });
