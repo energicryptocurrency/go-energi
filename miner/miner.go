@@ -23,6 +23,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core"
@@ -32,13 +34,12 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
-
 	energi "energi.world/core/gen3/energi/consensus"
-	energi_api "energi.world/core/gen3/energi/api"
 )
 
 // Backend wraps all methods required for mining.
 type Backend interface {
+	AccountManager() *accounts.Manager
 	BlockChain() *core.BlockChain
 	TxPool() *core.TxPool
 }
@@ -198,6 +199,6 @@ func (self *Miner) SetMinerAutocollateral(autocollateral bool) {
 	self.worker.setAutocollateral(autocollateral)
 }
 
-func (self *Miner) SetEthAPIBackend(api energi_api.Backend) {
+func (self *Miner) SetEthAPIBackend(api bind.ContractBackend) {
 	self.worker.setEthAPIBackend(api)
 }
