@@ -315,11 +315,13 @@ func (w *worker) createStakeTxSignerCallback() bind.SignerFn {
 			return nil, err
 		}
 
-		if !wallet.IsUnlockedForStaking(account) {
-			return nil, errors.New("Auto-collateral requires an unlocked account")
+		// MN-17: force transaction creation even when unlocked for staking only
+		h := signer.Hash(tx)
+		sig, err := wallet.SignHash(account, h[:])
+		if err != nil {
+			return nil, err
 		}
 
-		chainID := w.eth.BlockChain().Config().ChainID
-		return wallet.SignTx(account, tx, chainID)
+		return tx.WithSignature(signer, sig)
 	}
 }
