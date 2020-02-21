@@ -63,10 +63,23 @@ func (w *worker) tryAutocollateral() {
 		return
 	}
 
-	// Skip superblocks
-	blockReward, err := w.superBlockCheck(block.Number())
+	// Get rewards
+	stakeReward, err := w.getBlockReward(energi_params.Energi_StakerReward, block.Number())
 	if err != nil {
-		log.Debug(err.Error())
+		log.Error(err.Error())
+		return
+	}
+
+	mnReward, err := w.getBlockReward(energi_params.Energi_MasternodeRegistry, block.Number())
+	if err != nil {
+		log.Error(err.Error())
+		return
+	}
+
+	// Skip superblocks
+	// MN-17 - 4
+	if mnReward.Cmp(common.Big0) == 0 {
+		log.Debug("Skipping super block for auto-collateral")
 		return
 	}
 
@@ -77,7 +90,7 @@ func (w *worker) tryAutocollateral() {
 			if wallet.IsUnlockedForStaking(account) {
 				log.Debug("Auto-Collateralize checking", "account", account)
 
-				amount, err := w.hasJustReceivedRewards(account.Address, block, blockReward)
+				amount, err := w.hasJustReceivedRewards(account.Address, block, stakeReward, mnReward)
 				if err != nil {
 					log.Debug(err.Error())
 					if w.autocollateral != acRapid {
@@ -95,20 +108,6 @@ func (w *worker) tryAutocollateral() {
 			}
 		}
 	}
-}
-
-func (w *worker) superBlockCheck(blockNo *big.Int) (*big.Int, error) {
-	reward, err := w.getBlockReward(blockNo)
-	if err != nil {
-		return nil, err
-	}
-
-	// MN-17 - 4
-	if reward.Cmp(common.Big0) == 0 {
-		return nil, errors.New("Skipping super block for auto-collateral")
-	}
-
-	return reward, nil
 }
 
 func (w *worker) getBalanceAtBlock(block *types.Block, address common.Address) (*big.Int, error) {
@@ -145,10 +144,10 @@ func (w *worker) isMNPayouts(currentblock *types.Block, mnOwner common.Address, 
 	return status, balanceNow, nil
 }
 
-func (w *worker) hasJustReceivedRewards(account common.Address, block *types.Block, blockReward *big.Int) (*big.Int, error) {
+func (w *worker) hasJustReceivedRewards(account common.Address, block *types.Block, stakeReward, mnReward *big.Int) (*big.Int, error) {
 	// MN-17 - 5
-	// (a) Confirm no MN payouts in the current block.
-	isCurrentMNPayout, balanceNow, err := w.isMNPayouts(block, account, blockReward)
+	// (a).i Confirm no MN payouts in the current block.
+	isCurrentMNPayout, balanceNow, err := w.isMNPayouts(block, account, mnReward)
 	if err != nil {
 		return nil, err
 	}
@@ -158,11 +157,17 @@ func (w *worker) hasJustReceivedRewards(account common.Address, block *types.Blo
 	}
 
 	// MN-17 - 5
-	// (b) Confirm atleast 1 masternode payout in the previous block.
+	// (a).ii Confirm atleast 1 masternode payout in the previous block.
 	prevBlock := w.eth.BlockChain().GetBlockByNumber(block.Number().Uint64() - 1)
-	isPrevPayout, _, err := w.isMNPayouts(prevBlock, account, blockReward)
+	isPrevPayout, balancePrev, err := w.isMNPayouts(prevBlock, account, mnReward)
 	if err != nil {
 		return balanceNow, err
+	}
+
+	// MN-17 - 5
+	// (a).ii Ensure the changes was not due to stake reward
+	if new(big.Int).Add(balancePrev, stakeReward).Cmp(balanceNow) == 0 {
+		return balanceNow, errors.New("Balance difference got triggered by stake")
 	}
 
 	if !isPrevPayout {
@@ -185,7 +190,7 @@ func (w *worker) canAutocollateralize(
 	}
 
 	// MN-17 - 5
-	// (c) Ensures that available balance is at least one minimal collateral.
+	// (b) Ensures that available balance is at least one minimal collateral.
 	if amount.Cmp(minLimit) < 0 {
 		return nil, errors.New("Amount found is less than the minimum required")
 	}
@@ -196,7 +201,7 @@ func (w *worker) canAutocollateralize(
 	}
 
 	// MN-17 - 5
-	// (d) Ensure that the current collateral is below the maximum allowed.
+	// (c) Ensure that the current collateral is below the maximum allowed.
 	if tokenBalance.Cmp(maxLimit) >= 0 {
 		return nil, errors.New("Maximum collateral supported already achieved")
 	}
@@ -227,8 +232,8 @@ func (w *worker) doAutocollateral(account common.Address, amount *big.Int) (comm
 		return common.Hash{}, nil, err
 	}
 
-	// MN-17 - 4
-	// (e) Perform MNReg.depositCollataral
+	// MN-17 - 5
+	// (d) Perform MNReg.depositCollataral
 	tokenAPI.TransactOpts.Value = newAmount
 	tx, err := tokenAPI.DepositCollateral()
 	if tx == nil || err != nil {
@@ -240,18 +245,14 @@ func (w *worker) doAutocollateral(account common.Address, amount *big.Int) (comm
 	return tx.Hash(), coinsDeposited, nil
 }
 
-func (w *worker) getBlockReward(blockNumber *big.Int) (*big.Int, error) {
+func (w *worker) getBlockReward(proxy common.Address, blockNumber *big.Int) (*big.Int, error) {
 	contract, err := energi_abi.NewIBlockReward(
-		energi_params.Energi_MasternodeRegistry, w.apiBackend.(bind.ContractBackend))
+		proxy, w.apiBackend.(bind.ContractBackend))
 	if err != nil {
 		return nil, err
 	}
 
-	callOpts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
-	}
-
-	resp, err := contract.GetReward(callOpts, blockNumber)
+	resp, err := contract.GetReward(&bind.CallOpts{}, blockNumber)
 	if err != nil {
 		return nil, err
 	}
