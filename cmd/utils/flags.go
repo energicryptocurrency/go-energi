@@ -404,9 +404,10 @@ var (
 		Name:  "miner.noncecap",
 		Usage: "Cap the maximum PoS Nonce value",
 	}
-	MinerAutocollateralFlag = cli.BoolFlag{
+	MinerAutocollateralFlag = cli.Uint64Flag{
 		Name:  "miner.autocollateralize",
-		Usage: "Autocollateralize for MN owner addresses (default)",
+		Usage: "Autocollateralize for MN owner addresses (0 - disable, 1 - after MN rewards, 2 - rapid)",
+		Value: 1,
 	}
 	// Account settings
 	UnlockedAccountFlag = cli.StringFlag{
@@ -1299,10 +1300,7 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 		cfg.MinerNonceCap = ctx.GlobalUint64(MinerNonceCapFlag.Name)
 	}
 	if ctx.GlobalIsSet(MinerAutocollateralFlag.Name) {
-		cfg.MinerAutocollateral = ctx.Bool(MinerAutocollateralFlag.Name)
-	} else {
-		// Enable by-default
-		cfg.MinerAutocollateral = true
+		cfg.MinerAutocollateral = ctx.GlobalUint64(MinerAutocollateralFlag.Name)
 	}
 	if ctx.GlobalIsSet(VMEnableDebugFlag.Name) {
 		// TODO(fjl): force-enable this in --dev mode

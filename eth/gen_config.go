@@ -44,7 +44,7 @@ func (c Config) MarshalTOML() (interface{}, error) {
 		MinerDPoS               DPoSMap `toml:",omitempty"`
 		MinerMigration          string  `toml:",omitempty"`
 		MinerNonceCap           uint64  `toml:"-"`
-		MinerAutocollateral     bool    `toml:",omitempty"`
+		MinerAutocollateral     uint64  `toml:",omitempty"`
 		Ethash                  ethash.Config
 		TxPool                  core.TxPoolConfig
 		GPO                     gasprice.Config
@@ -122,7 +122,7 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		MinerDPoS               *DPoSMap `toml:",omitempty"`
 		MinerMigration          *string  `toml:",omitempty"`
 		MinerNonceCap           *uint64  `toml:"-"`
-		MinerAutocollateral     *bool    `toml:",omitempty"`
+		MinerAutocollateral     *uint64  `toml:",omitempty"`
 		Ethash                  *ethash.Config
 		TxPool                  *core.TxPoolConfig
 		GPO                     *gasprice.Config

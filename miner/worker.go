@@ -161,7 +161,7 @@ type worker struct {
 
 	// Energi params
 	migration      string
-	autocollateral bool
+	autocollateral uint64
 	apiBackend     bind.ContractBackend
 
 	pendingMu    sync.RWMutex
@@ -246,7 +246,7 @@ func (w *worker) setMigration(migration string) {
 	w.migration = migration
 }
 
-func (w *worker) setAutocollateral(autocollateral bool) {
+func (w *worker) setAutocollateral(autocollateral uint64) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.autocollateral = autocollateral
@@ -375,7 +375,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			clearPending(head.Block.NumberU64())
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
-			if w.autocollateral {
+			if w.autocollateral != acDisabled {
 				go w.tryAutocollateral()
 			}
 

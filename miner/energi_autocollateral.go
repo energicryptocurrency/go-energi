@@ -35,6 +35,12 @@ import (
 
 const maxAutoCollateralBlockAge = time.Duration(time.Minute)
 
+const (
+	acDisabled   uint64 = 0
+	acPostReward uint64 = 1
+	acRapid      uint64 = 2
+)
+
 func (w *worker) tryAutocollateral() {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
@@ -74,8 +80,9 @@ func (w *worker) tryAutocollateral() {
 				amount, err := w.hasJustReceivedRewards(account.Address, block, blockReward)
 				if err != nil {
 					log.Debug(err.Error())
-					// TODO: conditional disable for rapid live testing
-					continue
+					if w.autocollateral != acRapid {
+						continue
+					}
 				}
 
 				if _, coins, err := w.doAutocollateral(account.Address, amount); err != nil {
