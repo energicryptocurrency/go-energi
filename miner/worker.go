@@ -25,6 +25,7 @@ import (
 	"time"
 
 	mapset "github.com/deckarep/golang-set"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core"
@@ -158,7 +159,10 @@ type worker struct {
 	coinbase common.Address
 	extra    []byte
 
-	migration string
+	// Energi params
+	migration      string
+	autocollateral uint64
+	apiBackend     bind.ContractBackend
 
 	pendingMu    sync.RWMutex
 	pendingTasks map[common.Hash]*task
@@ -242,11 +246,23 @@ func (w *worker) setMigration(migration string) {
 	w.migration = migration
 }
 
+func (w *worker) setAutocollateral(autocollateral uint64) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.autocollateral = autocollateral
+}
+
 // setExtra sets the content used to initialize the block extra field.
 func (w *worker) setExtra(extra []byte) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.extra = extra
+}
+
+func (w *worker) setEthAPIBackend(api bind.ContractBackend) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.apiBackend = api
 }
 
 // setRecommitInterval updates the interval for miner sealing work recommitting.
@@ -359,6 +375,9 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			clearPending(head.Block.NumberU64())
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
+			if w.autocollateral != acDisabled {
+				go w.tryAutocollateral()
+			}
 
 		case <-timer.C:
 			// If mining is running resubmit a new work cycle periodically to pull in

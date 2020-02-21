@@ -23,6 +23,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/ethereum/go-ethereum/accounts"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus"
 	"github.com/ethereum/go-ethereum/core"
@@ -38,6 +40,7 @@ import (
 
 // Backend wraps all methods required for mining.
 type Backend interface {
+	AccountManager() *accounts.Manager
 	BlockChain() *core.BlockChain
 	TxPool() *core.TxPool
 }
@@ -191,4 +194,12 @@ func (self *Miner) SetMinerNonceCap(nonce *uint64) (oldNonce uint64) {
 
 	consensus.SetMinerNonceCap(*nonce)
 	return
+}
+
+func (self *Miner) SetMinerAutocollateral(autocollateral uint64) {
+	self.worker.setAutocollateral(autocollateral)
+}
+
+func (self *Miner) SetEthAPIBackend(api bind.ContractBackend) {
+	self.worker.setEthAPIBackend(api)
 }

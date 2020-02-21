@@ -32,6 +32,8 @@ const (
 
 	UnlimitedGas uint64 = (1 << 40)
 
+	MasternodeCallGas uint64 = 1000000
+
 	// MaxCheckpointVoteBlockAge defines the period in blocks count from the time
 	// the checkpoint signer account proposes a checkpoint in which its voting
 	// is permitted.

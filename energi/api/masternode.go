@@ -34,8 +34,8 @@ import (
 )
 
 const (
-	mntokenCallGas    uint64 = 1000000
-	masternodeCallGas uint64 = 1000000
+	mntokenCallGas    uint64 = energi_params.MasternodeCallGas
+	masternodeCallGas uint64 = energi_params.MasternodeCallGas
 )
 
 type MasternodeAPI struct {

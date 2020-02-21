@@ -44,6 +44,7 @@ func (c Config) MarshalTOML() (interface{}, error) {
 		MinerDPoS               DPoSMap `toml:",omitempty"`
 		MinerMigration          string  `toml:",omitempty"`
 		MinerNonceCap           uint64  `toml:"-"`
+		MinerAutocollateral     uint64  `toml:",omitempty"`
 		Ethash                  ethash.Config
 		TxPool                  core.TxPoolConfig
 		GPO                     gasprice.Config
@@ -80,6 +81,7 @@ func (c Config) MarshalTOML() (interface{}, error) {
 	enc.MinerDPoS = c.MinerDPoS
 	enc.MinerMigration = c.MinerMigration
 	enc.MinerNonceCap = c.MinerNonceCap
+	enc.MinerAutocollateral = c.MinerAutocollateral
 	enc.Ethash = c.Ethash
 	enc.TxPool = c.TxPool
 	enc.GPO = c.GPO
@@ -120,6 +122,7 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		MinerDPoS               *DPoSMap `toml:",omitempty"`
 		MinerMigration          *string  `toml:",omitempty"`
 		MinerNonceCap           *uint64  `toml:"-"`
+		MinerAutocollateral     *uint64  `toml:",omitempty"`
 		Ethash                  *ethash.Config
 		TxPool                  *core.TxPoolConfig
 		GPO                     *gasprice.Config
@@ -208,6 +211,9 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 	}
 	if dec.MinerNonceCap != nil {
 		c.MinerNonceCap = *dec.MinerNonceCap
+	}
+	if dec.MinerAutocollateral != nil {
+		c.MinerAutocollateral = *dec.MinerAutocollateral
 	}
 	if dec.Ethash != nil {
 		c.Ethash = *dec.Ethash
