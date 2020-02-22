@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"errors"
@@ -32,6 +33,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/shengdoushi/base58"
 	"golang.org/x/crypto/ripemd160"
@@ -51,13 +53,20 @@ const (
 type MigrationAPI struct {
 	backend    Backend
 	coinsCache *energi_common.CacheStorage
+
+	lastCoins   interface{}
+	lastBalance *big.Int
 }
 
 func NewMigrationAPI(b Backend) *MigrationAPI {
-	return &MigrationAPI{
+	r := &MigrationAPI{
 		backend:    b,
 		coinsCache: energi_common.NewCacheStorage(),
 	}
+	b.OnSyncedHeadUpdates(func() {
+		r.listGen2Coins()
+	})
+	return r
 }
 
 type Gen2Coin struct {
@@ -73,7 +82,11 @@ type Gen2Key struct {
 }
 
 func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin, err error) {
-	return nil, errors.New("This API is disabled for security reasons")
+	if m.backend.IsPublicService() {
+		return nil, errors.New("This API is disabled for security reasons")
+	}
+
+	return m.listGen2Coins()
 }
 
 func (m *MigrationAPI) listGen2Coins() (coins []Gen2Coin, err error) {
@@ -89,7 +102,22 @@ func (m *MigrationAPI) listGen2Coins() (coins []Gen2Coin, err error) {
 }
 
 func (m *MigrationAPI) listGen2CoinsUncached(num *big.Int) (interface{}, error) {
-	log.Info("Preparing a coin list")
+	// Check if it makes sense to re-create the list at all
+	//---
+	state, _, err := m.backend.StateAndHeaderByNumber(context.Background(), rpc.BlockNumber(num.Int64()))
+	if err != nil {
+		log.Error("Failed to get migration state", "err", err)
+		return nil, err
+	}
+
+	currBalance := state.GetBalance(energi_params.Energi_MigrationContract)
+
+	if m.lastCoins != nil && m.lastBalance.Cmp(currBalance) == 0 {
+		return m.lastCoins, nil
+	}
+
+	//---
+	log.Info("Preparing a new migration coin list")
 
 	mgrt_contract, err := energi_abi.NewGen2MigrationCaller(
 		energi_params.Energi_MigrationContract, m.backend.(bind.ContractCaller))
@@ -138,6 +166,9 @@ func (m *MigrationAPI) listGen2CoinsUncached(num *big.Int) (interface{}, error) 
 		})
 	}
 
+	m.lastBalance = currBalance
+	m.lastCoins = coins
+
 	return coins, nil
 }
 
@@ -145,7 +176,7 @@ func (m *MigrationAPI) SearchGen2Coins(
 	owners []string,
 	include_empty bool,
 ) (coins []Gen2Coin, err error) {
-	if len(owners) > ownerSafetyLimit {
+	if m.backend.IsPublicService() && len(owners) > ownerSafetyLimit {
 		return nil, errors.New("Too many owners requests.")
 	}
 
@@ -165,7 +196,7 @@ func (m *MigrationAPI) SearchRawGen2Coins(
 	rawOwners []common.Address,
 	include_empty bool,
 ) (coins []Gen2Coin, err error) {
-	if len(rawOwners) > ownerSafetyLimit {
+	if m.backend.IsPublicService() && len(rawOwners) > ownerSafetyLimit {
 		return nil, errors.New("Too many owners requests.")
 	}
 

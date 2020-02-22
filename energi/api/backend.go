@@ -75,6 +75,9 @@ type Backend interface {
 	AddLocalCheckpoint(num uint64, hash common.Hash) error
 	ListCheckpoints() []core.CheckpointInfo
 	CheckpointSignatures(cp core.Checkpoint) []core.CheckpointSignature
+
+	IsPublicService() bool
+	OnSyncedHeadUpdates(cb func())
 }
 
 func createSignerCallback(

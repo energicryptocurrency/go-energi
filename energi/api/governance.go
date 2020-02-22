@@ -45,11 +45,16 @@ type GovernanceAPI struct {
 }
 
 func NewGovernanceAPI(b Backend) *GovernanceAPI {
-	return &GovernanceAPI{
+	r := &GovernanceAPI{
 		backend:    b,
 		uInfoCache: energi_common.NewCacheStorage(),
 		bInfoCache: energi_common.NewCacheStorage(),
 	}
+	b.OnSyncedHeadUpdates(func() {
+		r.UpgradeInfo()
+		r.BudgetInfo()
+	})
+	return r
 }
 
 //=============================================================================

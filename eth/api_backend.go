@@ -20,6 +20,7 @@ package eth
 import (
 	"context"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
@@ -33,6 +34,7 @@ import (
 	"github.com/ethereum/go-ethereum/eth/gasprice"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -263,4 +265,44 @@ func (b *EthAPIBackend) ListCheckpoints() []core.CheckpointInfo {
 
 func (b *EthAPIBackend) CheckpointSignatures(cp core.Checkpoint) []core.CheckpointSignature {
 	return b.eth.blockchain.CheckpointSignatures(cp)
+}
+
+func (b *EthAPIBackend) IsPublicService() bool {
+	return b.eth.config.PublicService
+}
+
+const (
+	syncedHeadToleranceDuration = time.Second * 60
+	syncedHeadChanSize          = 16
+)
+
+func (b *EthAPIBackend) OnSyncedHeadUpdates(cb func()) {
+	if !b.IsPublicService() {
+		return
+	}
+
+	go func() {
+		chainHeadCh := make(chan core.ChainHeadEvent, syncedHeadChanSize)
+		headSub := b.SubscribeChainHeadEvent(chainHeadCh)
+		defer headSub.Unsubscribe()
+
+		for {
+			select {
+			case ev := <-chainHeadCh:
+				blockTime := time.Unix(int64(ev.Block.Time()), 0)
+				timeNow := time.Now().UTC()
+
+				if blockTime.After(timeNow.Add(-syncedHeadToleranceDuration)) {
+					log.Debug("Firing OnSyncedHead")
+					go cb()
+				}
+
+				break
+
+			// Shutdown
+			case <-headSub.Err():
+				return
+			}
+		}
+	}()
 }

@@ -37,10 +37,14 @@ type CheckpointAPI struct {
 }
 
 func NewCheckpointAPI(b Backend) *CheckpointAPI {
-	return &CheckpointAPI{
+	r := &CheckpointAPI{
 		backend: b,
 		cpCache: energi_common.NewCacheStorage(),
 	}
+	b.OnSyncedHeadUpdates(func() {
+		r.CheckpointInfo()
+	})
+	return r
 }
 
 const (

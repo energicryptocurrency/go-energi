@@ -73,6 +73,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.DataDirFlag,
 			utils.KeyStoreDirFlag,
 			utils.NoUSBFlag,
+			utils.NoEphemeralFlag,
 			utils.NetworkIdFlag,
 			utils.TestnetFlag,
 			utils.SyncModeFlag,
@@ -176,6 +177,7 @@ var AppHelpFlagGroups = []flagGroup{
 			utils.JSpathFlag,
 			utils.ExecFlag,
 			utils.PreloadJSFlag,
+			utils.PublicServiceFlag,
 		},
 	},
 	{

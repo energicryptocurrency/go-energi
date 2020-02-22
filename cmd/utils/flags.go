@@ -131,6 +131,10 @@ var (
 		Name:  "nousb",
 		Usage: "Disables monitoring for and managing USB hardware wallets",
 	}
+	NoEphemeralFlag = cli.BoolFlag{
+		Name:  "noephemeral",
+		Usage: "Disables Ephemeral transaction signing account support",
+	}
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
 		Usage: "Network identifier (integer, 39797=EnergiMain, 49797=EnergiTest)",
@@ -678,6 +682,10 @@ var (
 		Usage: "Energi network: use pre-configured custom genesis block",
 		Value: "",
 	}
+	PublicServiceFlag = cli.BoolFlag{
+		Name:  "publicservice",
+		Usage: "Enable security restrictions and tweaks to operate as a public service",
+	}
 )
 
 // MakeDataDir retrieves the currently requested data directory, terminating
@@ -1053,6 +1061,14 @@ func SetNodeConfig(ctx *cli.Context, cfg *node.Config) {
 	if ctx.GlobalIsSet(NoUSBFlag.Name) {
 		cfg.NoUSB = ctx.GlobalBool(NoUSBFlag.Name)
 	}
+	if ctx.GlobalIsSet(NoEphemeralFlag.Name) {
+		cfg.NoEphemeral = ctx.GlobalBool(NoEphemeralFlag.Name)
+	}
+	if ctx.GlobalIsSet(PublicServiceFlag.Name) && ctx.GlobalBool(PublicServiceFlag.Name) {
+		log.Info("Enforcing NoUSB and enabled Ephemeral account")
+		cfg.NoEphemeral = false
+		cfg.NoUSB = true
+	}
 }
 
 func setDataDir(ctx *cli.Context, cfg *node.Config) {
@@ -1115,6 +1131,10 @@ func setTxPool(ctx *cli.Context, cfg *core.TxPoolConfig) {
 	}
 	if ctx.GlobalIsSet(TxPoolLifetimeFlag.Name) {
 		cfg.Lifetime = ctx.GlobalDuration(TxPoolLifetimeFlag.Name)
+	}
+	if ctx.GlobalIsSet(PublicServiceFlag.Name) && ctx.GlobalBool(PublicServiceFlag.Name) {
+		log.Info("Enforcing NoLocals")
+		cfg.NoLocals = true
 	}
 }
 
@@ -1316,6 +1336,10 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	}
 	if ctx.GlobalIsSet(RPCGlobalGasCap.Name) {
 		cfg.RPCGasCap = new(big.Int).SetUint64(ctx.GlobalUint64(RPCGlobalGasCap.Name))
+	}
+
+	if ctx.GlobalIsSet(PublicServiceFlag.Name) {
+		cfg.PublicService = ctx.GlobalBool(PublicServiceFlag.Name)
 	}
 
 	// Override any default configs for hard coded networks.

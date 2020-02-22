@@ -36,10 +36,14 @@ type BlacklistAPI struct {
 }
 
 func NewBlacklistAPI(b Backend) *BlacklistAPI {
-	return &BlacklistAPI{
+	r := &BlacklistAPI{
 		backend:   b,
 		infoCache: energi_common.NewCacheStorage(),
 	}
+	b.OnSyncedHeadUpdates(func() {
+		r.BlacklistInfo()
+	})
+	return r
 }
 
 const (

@@ -45,11 +45,16 @@ type MasternodeAPI struct {
 }
 
 func NewMasternodeAPI(b Backend) *MasternodeAPI {
-	return &MasternodeAPI{
+	r := &MasternodeAPI{
 		backend:    b,
 		nodesCache: energi_common.NewCacheStorage(),
 		statsCache: energi_common.NewCacheStorage(),
 	}
+	b.OnSyncedHeadUpdates(func() {
+		r.ListMasternodes()
+		r.Stats()
+	})
+	return r
 }
 
 type MasternodeStats struct {

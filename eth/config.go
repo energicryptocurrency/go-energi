@@ -127,6 +127,8 @@ type Config struct {
 
 	MinerAutocollateral uint64 `toml:",omitempty"`
 
+	PublicService bool `toml:",omitempty"`
+
 	// Ethash options
 	Ethash ethash.Config
 
