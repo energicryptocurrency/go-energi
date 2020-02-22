@@ -45,6 +45,8 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
+
+	energi_api "energi.world/core/gen3/energi/api"
 )
 
 const (
@@ -194,6 +196,9 @@ func NewPublicAccountAPI(am *accounts.Manager) *PublicAccountAPI {
 func (s *PublicAccountAPI) Accounts() []common.Address {
 	addresses := make([]common.Address, 0) // return [] instead of nil if empty
 	for _, wallet := range s.am.Wallets() {
+		if _, ok := wallet.(*energi_api.EphemeralWallet); ok {
+			continue
+		}
 		for _, account := range wallet.Accounts() {
 			addresses = append(addresses, account.Address)
 		}
@@ -223,6 +228,9 @@ func NewPrivateAccountAPI(b Backend, nonceLock *AddrLocker) *PrivateAccountAPI {
 func (s *PrivateAccountAPI) ListAccounts() []common.Address {
 	addresses := make([]common.Address, 0) // return [] instead of nil if empty
 	for _, wallet := range s.am.Wallets() {
+		if _, ok := wallet.(*energi_api.EphemeralWallet); ok {
+			continue
+		}
 		for _, account := range wallet.Accounts() {
 			addresses = append(addresses, account.Address)
 		}
@@ -243,6 +251,10 @@ type rawWallet struct {
 func (s *PrivateAccountAPI) ListWallets() []rawWallet {
 	wallets := make([]rawWallet, 0) // return [] instead of nil if empty
 	for _, wallet := range s.am.Wallets() {
+		if _, ok := wallet.(*energi_api.EphemeralWallet); ok {
+			continue
+		}
+
 		status, failure := wallet.Status()
 
 		raw := rawWallet{

@@ -49,6 +49,7 @@ var (
 	Energi_MasternodeTokenV1    = common.BigToAddress(big.NewInt(0x319))
 
 	Energi_SystemFaucet = common.BigToAddress(big.NewInt(0x320))
+	Energi_Ephemeral    = common.HexToAddress("0x457068656d6572616c")
 
 	// NOTE: this is NOT very safe, but it optimizes significantly
 	Storage_ProxyImpl = common.BigToHash(big.NewInt(0x01))
