@@ -18,6 +18,7 @@ package api
 
 import (
 	"errors"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -91,7 +92,7 @@ func (b *BlacklistAPI) BlacklistInfo() (res []BLInfo, err error) {
 	return
 }
 
-func (b *BlacklistAPI) blacklistInfo(blockhash common.Hash) (interface{}, error) {
+func (b *BlacklistAPI) blacklistInfo(num *big.Int) (interface{}, error) {
 	registry, err := energi_abi.NewIBlacklistRegistryCaller(
 		energi_params.Energi_BlacklistRegistry, b.backend.(bind.ContractCaller))
 	if err != nil {
@@ -100,7 +101,8 @@ func (b *BlacklistAPI) blacklistInfo(blockhash common.Hash) (interface{}, error)
 	}
 
 	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
+		BlockNumber: num,
+		GasLimit:    energi_params.UnlimitedGas,
 	}
 	addresses, err := registry.EnumerateAll(call_opts)
 	if err != nil {

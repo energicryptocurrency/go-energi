@@ -18,7 +18,10 @@ package common
 
 import (
 	"errors"
+	"math/big"
 	"sync"
+	"sync/atomic"
+	"unsafe"
 
 	eth_common "github.com/ethereum/go-ethereum/common"
 	eth_types "github.com/ethereum/go-ethereum/core/types"
@@ -29,14 +32,19 @@ var ErrInvalidData = errors.New("Invalid data returned by the CacheQuery func")
 
 // CacheQuery is the function that allow a fresh data query if the previous data
 // held is considered to have expired or the cache was empty in the first place.
-type CacheQuery func(blockhash eth_common.Hash) (interface{}, error)
+type CacheQuery func(block_num *big.Int) (interface{}, error)
+
+type cacheState struct {
+	blockHash eth_common.Hash
+	entry     interface{}
+}
 
 // CacheStorage is a storage that is held by the client that wants to cache specific
 // data.
 type CacheStorage struct {
-	mtx       sync.RWMutex
-	blockHash eth_common.Hash
-	entry     interface{}
+	mtx      sync.RWMutex
+	state    unsafe.Pointer
+	updating int32
 }
 
 // CacheChain defines the method(s) needed by the cache implementation to access
@@ -47,29 +55,70 @@ type CacheChain interface {
 
 // NewCacheStorage creates a new CacheStorage instance.
 func NewCacheStorage() *CacheStorage {
-	return new(CacheStorage)
+	c := new(CacheStorage)
+	state := &cacheState{}
+	atomic.StorePointer(&c.state, unsafe.Pointer(state))
+	return c
 }
 
 // Get returns the cached data entry if it hasn't expired(new blockhash generated).
 // An error is returned if a nil cache instance is used or the cache query function
 // returns nil data.
 func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, error) {
-	c.mtx.Lock()
-	defer c.mtx.Unlock()
+	block := chain.CurrentBlock()
+	blockhash := block.Hash()
 
-	blockhash := chain.CurrentBlock().Hash()
-	if c.entry == nil || blockhash != c.blockHash {
+	state := (*cacheState)(atomic.LoadPointer(&c.state))
+
+	do_update := func() (*cacheState, error) {
+		state := (*cacheState)(atomic.LoadPointer(&c.state))
+
+		// Concurrent update could happened
+		if state.entry == nil || state.blockHash != blockhash {
+			entry, err := source(block.Number())
+
+			if err != nil {
+				return nil, err
+			}
+
+			state = &cacheState{blockhash, entry}
+			atomic.StorePointer(&c.state, unsafe.Pointer(state))
+		}
+
+		return state, nil
+	}
+
+	// First run or error recovery
+	if state.entry == nil {
+		c.mtx.Lock()
+		defer c.mtx.Unlock()
 		var err error
-		if c.entry, err = source(blockhash); err != nil {
+		state, err = do_update()
+		if err != nil {
 			return nil, err
 		}
 
-		if c.entry == nil {
-			return nil, ErrInvalidData
+		// Update needed
+	} else if state.blockHash != blockhash {
+		if atomic.CompareAndSwapInt32(&c.updating, 0, 1) {
+			go func() {
+				defer atomic.StoreInt32(&c.updating, 0)
+				defer func() {
+					// Workaround for shutdown
+					// and force to go blocking on any other error.
+					if recover() != nil {
+						state := &cacheState{}
+						atomic.StorePointer(&c.state, unsafe.Pointer(state))
+					}
+				}()
+				do_update()
+			}()
 		}
-
-		c.blockHash = blockhash
 	}
 
-	return c.entry, nil
+	if state.entry == nil {
+		return nil, ErrInvalidData
+	}
+
+	return state.entry, nil
 }

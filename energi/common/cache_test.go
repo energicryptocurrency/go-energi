@@ -17,8 +17,10 @@
 package common
 
 import (
+	"math/big"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -37,11 +39,15 @@ func (f *fakeChain) CurrentBlock() *types.Block {
 // TestDataCache tests the cache's setter and getter methods.
 func TestDataCache(t *testing.T) {
 	chain := new(fakeChain)
-	cacheInstance := new(CacheStorage)
+	cacheInstance := NewCacheStorage()
 
 	var newData interface{}
-	cacheQueryfunc := func(blockhash common.Hash) (interface{}, error) {
+	cacheQueryfunc := func(num *big.Int) (interface{}, error) {
 		return newData, nil
+	}
+	delayedQueryfunc := func(num *big.Int) (interface{}, error) {
+		time.Sleep(time.Second)
+		return cacheQueryfunc(num)
 	}
 
 	t.Run("Test_adding_new_data_nil_data", func(t *testing.T) {
@@ -93,8 +99,53 @@ func TestDataCache(t *testing.T) {
 			t.Fatalf("expected no error but found %v", err)
 		}
 
+		if reflect.DeepEqual(data, newData) {
+			t.Fatalf("expected the returned data to be old on the first call")
+		}
+
+		time.Sleep(100 * time.Millisecond)
+
+		data, err = cacheInstance.Get(chain, cacheQueryfunc)
+		if err != nil {
+			t.Fatalf("expected no error but found %v", err)
+		}
+
 		if !reflect.DeepEqual(data, newData) {
 			t.Fatalf("expected the returned data to match it didn't")
 		}
 	})
+
+	t.Run("Test_stress", func(t *testing.T) {
+		dummyBlockHash = common.BytesToHash([]byte{120, 23, 90, 7})
+		newData = map[string]int{
+			"rsc": 3711,
+		}
+
+		tf := func() {
+			data, err := cacheInstance.Get(chain, delayedQueryfunc)
+			if err != nil {
+				t.Fatalf("expected no error but found %v", err)
+			}
+
+			if reflect.DeepEqual(data, newData) {
+				t.Fatalf("expected the returned data to be old on the first call")
+			}
+		}
+
+		for i := 100; i > 0; i-- {
+			tf()
+		}
+
+		time.Sleep(1100 * time.Millisecond)
+
+		data, err := cacheInstance.Get(chain, cacheQueryfunc)
+		if err != nil {
+			t.Fatalf("expected no error but found %v", err)
+		}
+
+		if !reflect.DeepEqual(data, newData) {
+			t.Fatalf("expected the returned data to match it didn't")
+		}
+	})
+
 }

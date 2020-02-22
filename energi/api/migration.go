@@ -83,7 +83,7 @@ func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin, err error) {
 	return
 }
 
-func (m *MigrationAPI) listGen2Coins(blockhash common.Hash) (interface{}, error) {
+func (m *MigrationAPI) listGen2Coins(num *big.Int) (interface{}, error) {
 	log.Info("Preparing a coin list")
 
 	mgrt_contract, err := energi_abi.NewGen2MigrationCaller(
@@ -94,7 +94,8 @@ func (m *MigrationAPI) listGen2Coins(blockhash common.Hash) (interface{}, error)
 	}
 
 	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
+		BlockNumber: num,
+		GasLimit:    energi_params.UnlimitedGas,
 	}
 	bigItems, err := mgrt_contract.ItemCount(call_opts)
 	if err != nil {

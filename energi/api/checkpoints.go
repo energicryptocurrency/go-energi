@@ -115,7 +115,7 @@ func (b *CheckpointAPI) CheckpointInfo() (res *AllCheckpointInfo, err error) {
 	return
 }
 
-func (b *CheckpointAPI) checkpointInfo(blockhash common.Hash) (interface{}, error) {
+func (b *CheckpointAPI) checkpointInfo(num *big.Int) (interface{}, error) {
 	registry, err := energi_abi.NewICheckpointRegistryCaller(
 		energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractCaller))
 	if err != nil {
@@ -124,7 +124,8 @@ func (b *CheckpointAPI) checkpointInfo(blockhash common.Hash) (interface{}, erro
 	}
 
 	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
+		BlockNumber: num,
+		GasLimit:    energi_params.UnlimitedGas,
 	}
 	addresses, err := registry.Checkpoints(call_opts)
 	if err != nil {

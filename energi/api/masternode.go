@@ -249,7 +249,7 @@ func (m *MasternodeAPI) ListMasternodes() (res []MNInfo, err error) {
 	return
 }
 
-func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, error) {
+func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 	registry, err := energi_abi.NewIMasternodeRegistryV2Caller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {
@@ -258,7 +258,8 @@ func (m *MasternodeAPI) listMasternodes(blockhash common.Hash) (interface{}, err
 	}
 
 	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
+		BlockNumber: num,
+		GasLimit:    energi_params.UnlimitedGas,
 	}
 	masternodes, err := registry.Enumerate(call_opts)
 	if err != nil {
@@ -331,7 +332,7 @@ func (m *MasternodeAPI) Stats() (res *MasternodeStats, err error) {
 	return
 }
 
-func (m *MasternodeAPI) stats(blockhash common.Hash) (interface{}, error) {
+func (m *MasternodeAPI) stats(num *big.Int) (interface{}, error) {
 	registry, err := energi_abi.NewIMasternodeRegistryV2Caller(
 		energi_params.Energi_MasternodeRegistry, m.backend.(bind.ContractCaller))
 	if err != nil {
@@ -340,7 +341,8 @@ func (m *MasternodeAPI) stats(blockhash common.Hash) (interface{}, error) {
 	}
 
 	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
+		BlockNumber: num,
+		GasLimit:    energi_params.UnlimitedGas,
 	}
 	count, err := registry.Count(call_opts)
 	if err != nil {

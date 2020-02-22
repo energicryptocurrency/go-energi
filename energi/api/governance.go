@@ -309,7 +309,7 @@ type UpgradeProposalInfo struct {
 	Proxy common.Address
 }
 
-func (g *GovernanceAPI) upgradeProposalInfo(proxy common.Address) ([]UpgradeProposalInfo, error) {
+func (g *GovernanceAPI) upgradeProposalInfo(num *big.Int, proxy common.Address) ([]UpgradeProposalInfo, error) {
 	proxy_obj, err := energi_abi.NewIGovernedProxyCaller(
 		proxy, g.backend.(bind.ContractCaller))
 	if err != nil {
@@ -318,7 +318,8 @@ func (g *GovernanceAPI) upgradeProposalInfo(proxy common.Address) ([]UpgradeProp
 	}
 
 	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
+		BlockNumber: num,
+		GasLimit:    energi_params.UnlimitedGas,
 	}
 	proposals, err := proxy_obj.ListUpgradeProposals(call_opts)
 	if err != nil {
@@ -395,45 +396,45 @@ func (g *GovernanceAPI) UpgradeInfo() *UpgradeProposals {
 	return data.(*UpgradeProposals)
 }
 
-func (g *GovernanceAPI) upgradeInfo(blockhash common.Hash) (interface{}, error) {
+func (g *GovernanceAPI) upgradeInfo(num *big.Int) (interface{}, error) {
 	var err error
 	ret := new(UpgradeProposals)
-	ret.Treasury, err = g.upgradeProposalInfo(energi_params.Energi_Treasury)
+	ret.Treasury, err = g.upgradeProposalInfo(num, energi_params.Energi_Treasury)
 	if err != nil {
 		log.Error("Treasury info fetch failed", "err", err)
 	}
 
-	ret.MasternodeRegistry, err = g.upgradeProposalInfo(energi_params.Energi_MasternodeRegistry)
+	ret.MasternodeRegistry, err = g.upgradeProposalInfo(num, energi_params.Energi_MasternodeRegistry)
 	if err != nil {
 		log.Error("MasternodeRegistry info fetch failed", "err", err)
 	}
 
-	ret.StakerReward, err = g.upgradeProposalInfo(energi_params.Energi_StakerReward)
+	ret.StakerReward, err = g.upgradeProposalInfo(num, energi_params.Energi_StakerReward)
 	if err != nil {
 		log.Error("StakerReward info fetch failed", "err", err)
 	}
 
-	ret.BackboneReward, err = g.upgradeProposalInfo(energi_params.Energi_BackboneReward)
+	ret.BackboneReward, err = g.upgradeProposalInfo(num, energi_params.Energi_BackboneReward)
 	if err != nil {
 		log.Error("BackboneReward info fetch failed", "err", err)
 	}
 
-	ret.SporkRegistry, err = g.upgradeProposalInfo(energi_params.Energi_SporkRegistry)
+	ret.SporkRegistry, err = g.upgradeProposalInfo(num, energi_params.Energi_SporkRegistry)
 	if err != nil {
 		log.Error("SporkRegistry info fetch failed", "err", err)
 	}
 
-	ret.CheckpointRegistry, err = g.upgradeProposalInfo(energi_params.Energi_CheckpointRegistry)
+	ret.CheckpointRegistry, err = g.upgradeProposalInfo(num, energi_params.Energi_CheckpointRegistry)
 	if err != nil {
 		log.Error("CheckpointRegistry info fetch failed", "err", err)
 	}
 
-	ret.BlacklistRegistry, err = g.upgradeProposalInfo(energi_params.Energi_BlacklistRegistry)
+	ret.BlacklistRegistry, err = g.upgradeProposalInfo(num, energi_params.Energi_BlacklistRegistry)
 	if err != nil {
 		log.Error("BlacklistRegistry info fetch failed", "err", err)
 	}
 
-	ret.MasternodeToken, err = g.upgradeProposalInfo(energi_params.Energi_MasternodeToken)
+	ret.MasternodeToken, err = g.upgradeProposalInfo(num, energi_params.Energi_MasternodeToken)
 	if err != nil {
 		log.Error("MasternodeToken info fetch failed", "err", err)
 	}
@@ -562,7 +563,7 @@ func (g *GovernanceAPI) BudgetInfo() (*BudgetInfo, error) {
 	return data.(*BudgetInfo), nil
 }
 
-func (g *GovernanceAPI) budgetInfo(blockhash common.Hash) (interface{}, error) {
+func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
 	treasury, err := energi_abi.NewITreasuryCaller(
 		energi_params.Energi_Treasury, g.backend.(bind.ContractCaller))
 	if err != nil {
@@ -578,7 +579,8 @@ func (g *GovernanceAPI) budgetInfo(blockhash common.Hash) (interface{}, error) {
 	}
 
 	call_opts := &bind.CallOpts{
-		GasLimit: energi_params.UnlimitedGas,
+		BlockNumber: num,
+		GasLimit:    energi_params.UnlimitedGas,
 	}
 
 	proposals, err := treasury.ListProposals(call_opts)
