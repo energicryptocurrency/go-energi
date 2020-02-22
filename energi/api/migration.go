@@ -45,6 +45,7 @@ const (
 	base54PrivateKeyLen int    = 52
 	privateKeyLen       int    = 32
 	migrationGas        uint64 = 100000
+	ownerSafetyLimit    int    = 10000
 )
 
 type MigrationAPI struct {
@@ -72,9 +73,13 @@ type Gen2Key struct {
 }
 
 func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin, err error) {
-	data, err := m.coinsCache.Get(m.backend, m.listGen2Coins)
+	return nil, errors.New("This API is disabled for security reasons")
+}
+
+func (m *MigrationAPI) listGen2Coins() (coins []Gen2Coin, err error) {
+	data, err := m.coinsCache.Get(m.backend, m.listGen2CoinsUncached)
 	if err != nil || data == nil {
-		log.Error("ListGen2Coins failed", "err", err)
+		log.Error("listGen2Coins failed", "err", err)
 		return
 	}
 
@@ -83,7 +88,7 @@ func (m *MigrationAPI) ListGen2Coins() (coins []Gen2Coin, err error) {
 	return
 }
 
-func (m *MigrationAPI) listGen2Coins(num *big.Int) (interface{}, error) {
+func (m *MigrationAPI) listGen2CoinsUncached(num *big.Int) (interface{}, error) {
 	log.Info("Preparing a coin list")
 
 	mgrt_contract, err := energi_abi.NewGen2MigrationCaller(
@@ -140,6 +145,10 @@ func (m *MigrationAPI) SearchGen2Coins(
 	owners []string,
 	include_empty bool,
 ) (coins []Gen2Coin, err error) {
+	if len(owners) > ownerSafetyLimit {
+		return nil, errors.New("Too many owners requests.")
+	}
+
 	rawOwners := make([]common.Address, len(owners))
 	for i, o := range owners {
 		ro, err := base58.Decode(o, base58.BitcoinAlphabet)
@@ -149,14 +158,18 @@ func (m *MigrationAPI) SearchGen2Coins(
 		}
 		rawOwners[i] = common.BytesToAddress(ro[1 : len(ro)-4])
 	}
-	return m.searchGen2Coins(rawOwners, m.ListGen2Coins, include_empty)
+	return m.searchGen2Coins(rawOwners, m.listGen2Coins, include_empty)
 }
 
 func (m *MigrationAPI) SearchRawGen2Coins(
 	rawOwners []common.Address,
 	include_empty bool,
 ) (coins []Gen2Coin, err error) {
-	return m.searchGen2Coins(rawOwners, m.ListGen2Coins, include_empty)
+	if len(rawOwners) > ownerSafetyLimit {
+		return nil, errors.New("Too many owners requests.")
+	}
+
+	return m.searchGen2Coins(rawOwners, m.listGen2Coins, include_empty)
 }
 
 type listCoins func() (coins []Gen2Coin, err error)

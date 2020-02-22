@@ -369,15 +369,6 @@ func (s *Ethereum) APIs() []rpc.API {
 		},
 	}...)
 
-	// NOTE: this requires web3.js extensions as well
-	for _, a := range apis {
-		if a.Namespace == "eth" {
-			// "a" should be a copy
-			a.Namespace = "energi"
-			apis = append(apis, a)
-		}
-	}
-
 	return apis
 }
 
