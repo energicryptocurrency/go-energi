@@ -31,9 +31,7 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
-type EphemeralWallet struct {
-	privateKey *ecdsa.PrivateKey
-}
+type EphemeralWallet struct{}
 
 func (ew *EphemeralWallet) URL() accounts.URL {
 	return accounts.URL{"ephemeral", ""}
@@ -44,7 +42,6 @@ func (ew *EphemeralWallet) Status() (string, error) {
 }
 
 func (ew *EphemeralWallet) Open(passphrase string) (err error) {
-	ew.privateKey, err = ecdsa.GenerateKey(crypto.S256(), crand.Reader)
 	return
 }
 
@@ -73,7 +70,12 @@ func (ew *EphemeralWallet) SignHash(account accounts.Account, hash []byte) ([]by
 		return nil, accounts.ErrUnknownAccount
 	}
 
-	return crypto.Sign(hash, ew.privateKey)
+	privateKey, err := ecdsa.GenerateKey(crypto.S256(), crand.Reader)
+	if err != nil {
+		return nil, err
+	}
+
+	return crypto.Sign(hash, privateKey)
 }
 
 func (ew *EphemeralWallet) SignTx(account accounts.Account, tx *types.Transaction, chainID *big.Int) (*types.Transaction, error) {
@@ -81,10 +83,15 @@ func (ew *EphemeralWallet) SignTx(account accounts.Account, tx *types.Transactio
 		return nil, accounts.ErrUnknownAccount
 	}
 
-	if chainID != nil {
-		return types.SignTx(tx, types.NewEIP155Signer(chainID), ew.privateKey)
+	privateKey, err := ecdsa.GenerateKey(crypto.S256(), crand.Reader)
+	if err != nil {
+		return nil, err
 	}
-	return types.SignTx(tx, types.HomesteadSigner{}, ew.privateKey)
+
+	if chainID != nil {
+		return types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+	}
+	return types.SignTx(tx, types.HomesteadSigner{}, privateKey)
 }
 
 func (ew *EphemeralWallet) SignHashWithPassphrase(account accounts.Account, passphrase string, hash []byte) ([]byte, error) {
