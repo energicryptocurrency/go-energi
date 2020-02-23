@@ -64,12 +64,6 @@ func (w *worker) tryAutocollateral() {
 	}
 
 	// Get rewards
-	stakeReward, err := w.getBlockReward(energi_params.Energi_StakerReward, block.Number())
-	if err != nil {
-		log.Error(err.Error())
-		return
-	}
-
 	mnReward, err := w.getBlockReward(energi_params.Energi_MasternodeRegistry, block.Number())
 	if err != nil {
 		log.Error(err.Error())
@@ -90,7 +84,7 @@ func (w *worker) tryAutocollateral() {
 			if wallet.IsUnlockedForStaking(account) {
 				log.Debug("Auto-Collateralize checking", "account", account)
 
-				amount, err := w.hasJustReceivedRewards(account.Address, block, stakeReward, mnReward)
+				amount, err := w.hasJustReceivedRewards(account.Address, block, mnReward)
 				if err != nil {
 					log.Debug(err.Error())
 					if w.autocollateral != acRapid {
@@ -131,10 +125,16 @@ func (w *worker) isMNPayouts(currentblock *types.Block, mnOwner common.Address, 
 		return false, nil, err
 	}
 
+	// MN-17 - 5
+	// (a).ii Ensure the change was not due to stake reward
+	if currentblock.Coinbase() == mnOwner {
+		return false, balanceNow, errors.New("Stake reward")
+	}
+
 	prevBlock := w.eth.BlockChain().GetBlockByNumber(blockNo - 1)
 	balancePrev, err := w.getBalanceAtBlock(prevBlock, mnOwner)
 	if err != nil {
-		return false, nil, err
+		return false, balanceNow, err
 	}
 
 	diff := new(big.Int).Sub(balanceNow, balancePrev)
@@ -144,7 +144,7 @@ func (w *worker) isMNPayouts(currentblock *types.Block, mnOwner common.Address, 
 	return status, balanceNow, nil
 }
 
-func (w *worker) hasJustReceivedRewards(account common.Address, block *types.Block, stakeReward, mnReward *big.Int) (*big.Int, error) {
+func (w *worker) hasJustReceivedRewards(account common.Address, block *types.Block, mnReward *big.Int) (*big.Int, error) {
 	// MN-17 - 5
 	// (a).i Confirm no MN payouts in the current block.
 	isCurrentMNPayout, balanceNow, err := w.isMNPayouts(block, account, mnReward)
@@ -159,15 +159,9 @@ func (w *worker) hasJustReceivedRewards(account common.Address, block *types.Blo
 	// MN-17 - 5
 	// (a).ii Confirm atleast 1 masternode payout in the previous block.
 	prevBlock := w.eth.BlockChain().GetBlockByNumber(block.Number().Uint64() - 1)
-	isPrevPayout, balancePrev, err := w.isMNPayouts(prevBlock, account, mnReward)
+	isPrevPayout, _, err := w.isMNPayouts(prevBlock, account, mnReward)
 	if err != nil {
 		return balanceNow, err
-	}
-
-	// MN-17 - 5
-	// (a).ii Ensure the changes was not due to stake reward
-	if new(big.Int).Add(balancePrev, stakeReward).Cmp(balanceNow) == 0 {
-		return balanceNow, errors.New("Balance difference got triggered by stake")
 	}
 
 	if !isPrevPayout {
