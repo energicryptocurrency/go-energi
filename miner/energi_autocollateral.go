@@ -87,7 +87,7 @@ func (w *worker) tryAutocollateral() {
 				amount, err := w.hasJustReceivedRewards(account.Address, block, mnReward)
 				if err != nil {
 					log.Debug(err.Error())
-					if w.autocollateral != acRapid {
+					if amount == nil || w.autocollateral != acRapid {
 						continue
 					}
 				}
@@ -195,8 +195,10 @@ func (w *worker) canAutocollateralize(
 	}
 
 	// MN-17 - 5
-	// (c) Ensure that the current collateral is below the maximum allowed.
-	if tokenBalance.Cmp(maxLimit) >= 0 {
+	// (c) Ensure that the current collateral is below the maximum allowed and more than zero.
+	if tokenBalance.Cmp(common.Big0) <= 0 {
+		return nil, errors.New("No collateral exists")
+	} else if tokenBalance.Cmp(maxLimit) >= 0 {
 		return nil, errors.New("Maximum collateral supported already achieved")
 	}
 
