@@ -78,6 +78,7 @@ func (m *MasternodeAPI) token(
 	session = &energi_abi.IMasternodeTokenSession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     dst,
 			GasLimit: energi_params.UnlimitedGas,
 		},

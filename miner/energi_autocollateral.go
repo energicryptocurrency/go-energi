@@ -265,6 +265,7 @@ func (w *worker) tokenRegistry(dst common.Address) (*energi_abi.IMasternodeToken
 	session := &energi_abi.IMasternodeTokenSession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     dst,
 			GasLimit: energi_params.UnlimitedGas,
 		},

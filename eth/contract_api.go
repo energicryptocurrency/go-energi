@@ -87,7 +87,7 @@ func (b *EthAPIBackend) PendingCodeAt(
 	ctx context.Context,
 	account common.Address,
 ) ([]byte, error) {
-	return nil, errors.New("Not implemented")
+	return b.CodeAt(ctx, account, new(big.Int).SetInt64(int64(rpc.PendingBlockNumber)))
 }
 
 func (b *EthAPIBackend) PendingNonceAt(
@@ -95,6 +95,13 @@ func (b *EthAPIBackend) PendingNonceAt(
 	account common.Address,
 ) (uint64, error) {
 	return b.GetPoolNonce(ctx, account)
+}
+
+func (b *EthAPIBackend) PendingCallContract(
+	ctx context.Context,
+	call ethereum.CallMsg,
+) ([]byte, error) {
+	return b.CallContract(ctx, call, new(big.Int).SetInt64(int64(rpc.PendingBlockNumber)))
 }
 
 func (b *EthAPIBackend) SuggestGasPrice(ctx context.Context) (*big.Int, error) {

@@ -72,6 +72,7 @@ func (g *GovernanceAPI) proposal(
 	session = &energi_abi.IProposalSession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     owner,
 			GasLimit: energi_params.UnlimitedGas,
 		},
