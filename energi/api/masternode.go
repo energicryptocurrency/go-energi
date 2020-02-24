@@ -267,6 +267,11 @@ func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 		BlockNumber: num,
 		GasLimit:    energi_params.UnlimitedGas,
 	}
+	prev_call_opts := &bind.CallOpts{
+		BlockNumber: new(big.Int).Sub(num, common.Big3),
+		GasLimit:    energi_params.UnlimitedGas,
+	}
+
 	masternodes, err := registry.Enumerate(call_opts)
 	if err != nil {
 		log.Error("Failed", "err", err)
@@ -293,6 +298,14 @@ func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 			continue
 		}
 
+		prevCanHeartbeat, err := registry.CanHeartbeat(prev_call_opts, mn)
+		if err != nil {
+			// missing trie node may appear on non-full node
+			log.Debug("Prev CanHeartbeat error", "mn", mn, "err", err)
+			// assume the same as atm
+			prevCanHeartbeat = canHeartbeat
+		}
+
 		res = append(res, MNInfo{
 			Masternode:     mn,
 			Owner:          mninfo.Owner,
@@ -300,7 +313,7 @@ func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 			Collateral:     (*hexutil.Big)(mninfo.Collateral),
 			AnnouncedBlock: mninfo.AnnouncedBlock.Uint64(),
 			IsActive:       isActive,
-			IsAlive:        isActive && !canHeartbeat,
+			IsAlive:        isActive && !canHeartbeat && !prevCanHeartbeat,
 			SWFeatures:     (*hexutil.Big)(mninfo.SwFeatures),
 			SWVersion:      energi_common.SWVersionIntToString(mninfo.SwFeatures),
 		})
