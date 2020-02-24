@@ -27,7 +27,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/log"
 )
 
 // makeWizard creates and returns a new puppeth wizard.

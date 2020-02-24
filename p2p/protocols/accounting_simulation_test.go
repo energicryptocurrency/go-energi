@@ -32,14 +32,14 @@ import (
 
 	"github.com/mattn/go-colorable"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rpc"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/rpc"
 
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/simulations"
+	"energi.world/core/gen3/p2p/simulations/adapters"
 )
 
 const (

@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/log"
 )
 
 // ensureVirtualHost checks whether a reverse-proxy is running on the specified

@@ -20,7 +20,7 @@ package feed
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"energi.world/core/gen3/common/hexutil"
 )
 
 func TestTopic(t *testing.T) {

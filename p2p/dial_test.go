@@ -24,9 +24,9 @@ import (
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/enr"
+	"energi.world/core/gen3/p2p/netutil"
 )
 
 func init() {

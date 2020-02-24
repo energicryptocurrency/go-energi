@@ -22,11 +22,11 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/event"
+	"energi.world/core/gen3/rlp"
 )
 
 // Constants to match up protocol versions and messages

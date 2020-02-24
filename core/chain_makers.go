@@ -21,13 +21,13 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/consensus"
+	"energi.world/core/gen3/core/state"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/core/vm"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/params"
 )
 
 // BlockGen creates blocks for testing.

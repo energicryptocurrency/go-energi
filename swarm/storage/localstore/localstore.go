@@ -23,10 +23,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/swarm/shed"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/mock"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/swarm/shed"
+	"energi.world/core/gen3/swarm/storage"
+	"energi.world/core/gen3/swarm/storage/mock"
 )
 
 var (

@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p/simulations/pipes"
+	"energi.world/core/gen3/p2p/simulations/pipes"
 )
 
 func TestTCPPipe(t *testing.T) {

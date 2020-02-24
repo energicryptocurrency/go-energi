@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common/math"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/params"
 )
 
 type diffTest struct {

@@ -21,7 +21,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/vm"
+	"energi.world/core/gen3/core/vm"
 )
 
 func TestVM(t *testing.T) {

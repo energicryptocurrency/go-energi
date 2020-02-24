@@ -22,10 +22,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/cmd/utils"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 

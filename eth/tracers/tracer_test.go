@@ -24,10 +24,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/state"
+	"energi.world/core/gen3/core/vm"
+	"energi.world/core/gen3/params"
 )
 
 type account struct{}

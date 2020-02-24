@@ -22,10 +22,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/eth/downloader"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"energi.world/core/gen3/eth/downloader"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/enode"
 )
 
 // Tests that fast sync gets disabled as soon as a real block is successfully

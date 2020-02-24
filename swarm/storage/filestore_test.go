@@ -25,7 +25,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/testutil"
+	"energi.world/core/gen3/swarm/testutil"
 )
 
 const testDataSize = 0x0001000

@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/hexutil"
+	"energi.world/core/gen3/crypto"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	swarm "github.com/ethereum/go-ethereum/swarm/api/client"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"energi.world/core/gen3/cmd/utils"
+	swarm "energi.world/core/gen3/swarm/api/client"
+	"energi.world/core/gen3/swarm/storage/feed"
 	"gopkg.in/urfave/cli.v1"
 )
 

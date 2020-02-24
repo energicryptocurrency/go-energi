@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/params"
 )
 
 // SWVersionToInt converts the current semantic software version to an integer.

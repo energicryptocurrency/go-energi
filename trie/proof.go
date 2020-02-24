@@ -20,11 +20,11 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/rlp"
 )
 
 // Prove constructs a merkle proof for key. The result contains all encoded nodes

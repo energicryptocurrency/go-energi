@@ -23,10 +23,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
-	"github.com/ethereum/go-ethereum/p2p/enode"
+	"energi.world/core/gen3/common/math"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/crypto/secp256k1"
+	"energi.world/core/gen3/p2p/enode"
 )
 
 // node represents a host on the network.

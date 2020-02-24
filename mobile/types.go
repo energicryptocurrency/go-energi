@@ -24,10 +24,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/rlp"
+	whisper "energi.world/core/gen3/whisper/whisperv6"
 )
 
 // A Nonce is a 64-bit hash which proves (combined with the mix-hash) that

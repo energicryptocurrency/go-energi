@@ -23,9 +23,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	"github.com/ethereum/go-ethereum/swarm/log"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/protocols"
+	"energi.world/core/gen3/swarm/log"
 )
 
 // Generic ping protocol implementation for

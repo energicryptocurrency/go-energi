@@ -35,12 +35,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/swarm/api"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/storage"
+	"energi.world/core/gen3/swarm/storage/feed"
 	"github.com/rs/cors"
 )
 

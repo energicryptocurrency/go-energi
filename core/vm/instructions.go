@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/math"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/params"
 	"golang.org/x/crypto/sha3"
 )
 

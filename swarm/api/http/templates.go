@@ -22,7 +22,7 @@ import (
 	"html/template"
 	"path"
 
-	"github.com/ethereum/go-ethereum/swarm/api"
+	"energi.world/core/gen3/swarm/api"
 )
 
 type htmlListData struct {

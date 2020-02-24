@@ -19,7 +19,7 @@
 package ethdb_test
 
 import (
-	"github.com/ethereum/go-ethereum/ethdb"
+	"energi.world/core/gen3/ethdb"
 )
 
 var _ ethdb.Database = &ethdb.LDBDatabase{}

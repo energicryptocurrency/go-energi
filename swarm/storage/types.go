@@ -25,9 +25,9 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/swarm/bmt"
-	ch "github.com/ethereum/go-ethereum/swarm/chunk"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/swarm/bmt"
+	ch "energi.world/core/gen3/swarm/chunk"
 	"golang.org/x/crypto/sha3"
 )
 

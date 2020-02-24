@@ -19,12 +19,12 @@ package consensus
 import (
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/math"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/core/state"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/log"
 
 	energi_params "energi.world/core/gen3/energi/params"
 )

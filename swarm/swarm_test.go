@@ -29,10 +29,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm/api"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/rpc"
+	"energi.world/core/gen3/swarm/api"
 )
 
 // TestNewSwarm validates Swarm fields in repsect to the provided configuration.

@@ -23,9 +23,9 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/console"
-	"github.com/ethereum/go-ethereum/crypto"
+	"energi.world/core/gen3/cmd/utils"
+	"energi.world/core/gen3/console"
+	"energi.world/core/gen3/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 

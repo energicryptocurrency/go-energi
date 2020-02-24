@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/hexutil"
+	"energi.world/core/gen3/common/math"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/params"
+	"energi.world/core/gen3/rlp"
 )
 
 // TransactionTest checks RLP decoding and sender derivation of transactions.

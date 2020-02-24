@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/ethdb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

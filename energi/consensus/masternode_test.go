@@ -21,14 +21,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/accounts/abi"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/core/vm"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
 

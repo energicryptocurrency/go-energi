@@ -20,10 +20,10 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/rlp"
 )
 
 // NodeSet stores a set of trie nodes. It implements trie.Database and can also

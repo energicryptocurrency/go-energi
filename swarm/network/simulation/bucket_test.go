@@ -20,8 +20,8 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p/simulations/adapters"
 )
 
 // TestServiceBucket tests all bucket functionality using subtests.

@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/consensus"
+	"energi.world/core/gen3/core/types"
 )
 
 // Tests whether remote HTTP servers are correctly notified of new work.

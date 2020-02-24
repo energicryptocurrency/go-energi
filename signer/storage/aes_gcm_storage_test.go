@@ -24,8 +24,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/log"
 	"github.com/mattn/go-colorable"
 )
 

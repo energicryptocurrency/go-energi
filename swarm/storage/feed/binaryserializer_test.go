@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"energi.world/core/gen3/common/hexutil"
 )
 
 // KV mocks a key value store

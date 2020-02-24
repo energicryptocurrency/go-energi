@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/accounts"
+	"energi.world/core/gen3/accounts/abi/bind"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/params"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi "energi.world/core/gen3/energi/consensus"

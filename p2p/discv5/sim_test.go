@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"energi.world/core/gen3/common"
 )
 
 // In this test, nodes try to randomly resolve each other.

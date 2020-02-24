@@ -23,8 +23,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
+	"energi.world/core/gen3/accounts/abi"
+	"energi.world/core/gen3/common"
 
 	"bytes"
 	"os"

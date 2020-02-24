@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"energi.world/core/gen3/accounts/keystore"
+	"energi.world/core/gen3/cmd/utils"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 

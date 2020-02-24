@@ -21,7 +21,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"energi.world/core/gen3/common"
 )
 
 // precompiledTest defines the input/output pairs for precompiled contract tests.

@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	bv "github.com/ethereum/go-ethereum/swarm/network/bitvector"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/swarm/log"
+	bv "energi.world/core/gen3/swarm/network/bitvector"
+	"energi.world/core/gen3/swarm/spancontext"
+	"energi.world/core/gen3/swarm/storage"
 	"github.com/opentracing/opentracing-go"
 )
 

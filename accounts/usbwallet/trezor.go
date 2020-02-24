@@ -27,12 +27,12 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/usbwallet/internal/trezor"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/accounts"
+	"energi.world/core/gen3/accounts/usbwallet/internal/trezor"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/hexutil"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/log"
 	"github.com/golang/protobuf/proto"
 )
 

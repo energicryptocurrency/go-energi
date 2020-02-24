@@ -24,11 +24,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	p2ptest "github.com/ethereum/go-ethereum/p2p/testing"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/protocols"
+	p2ptest "energi.world/core/gen3/p2p/testing"
 )
 
 const (

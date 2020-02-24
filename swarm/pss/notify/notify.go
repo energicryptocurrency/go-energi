@@ -22,12 +22,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/pss"
+	"energi.world/core/gen3/common/hexutil"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/rlp"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/pss"
 )
 
 const (

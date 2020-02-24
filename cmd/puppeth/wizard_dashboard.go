@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/log"
 )
 
 // deployDashboard queries the user for various input on deploying a web-service

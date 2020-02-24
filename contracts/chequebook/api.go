@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
+	"energi.world/core/gen3/common"
 )
 
 const Version = "1.0"

@@ -19,7 +19,7 @@ package state
 import (
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
+	"energi.world/core/gen3/common"
 )
 
 type account struct {

@@ -28,13 +28,13 @@ import (
 	"time"
 
 	energi_params "energi.world/core/gen3/energi/params"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/state"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/event"
+	"energi.world/core/gen3/params"
 )
 
 // testTxPoolConfig is a transaction pool configuration without stateful disk

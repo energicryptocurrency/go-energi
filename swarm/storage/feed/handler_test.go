@@ -27,11 +27,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/swarm/chunk"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed/lookup"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/swarm/chunk"
+	"energi.world/core/gen3/swarm/storage"
+	"energi.world/core/gen3/swarm/storage/feed/lookup"
 )
 
 var (

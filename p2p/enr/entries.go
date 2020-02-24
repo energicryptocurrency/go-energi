@@ -21,7 +21,7 @@ import (
 	"io"
 	"net"
 
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/rlp"
 )
 
 // Entry is implemented by known node record entry types.

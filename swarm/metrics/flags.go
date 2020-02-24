@@ -19,10 +19,10 @@ package metrics
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	gethmetrics "github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/metrics/influxdb"
-	"github.com/ethereum/go-ethereum/swarm/log"
+	"energi.world/core/gen3/cmd/utils"
+	gethmetrics "energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/metrics/influxdb"
+	"energi.world/core/gen3/swarm/log"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

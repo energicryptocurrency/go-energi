@@ -25,8 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"energi.world/core/gen3/common/mclock"
+	"energi.world/core/gen3/ethdb"
 )
 
 func TestFreeClientPoolL10C100(t *testing.T) {

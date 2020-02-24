@@ -24,11 +24,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/sctx"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/swarm/api"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/sctx"
+	"energi.world/core/gen3/swarm/spancontext"
 	"github.com/pborman/uuid"
 )
 

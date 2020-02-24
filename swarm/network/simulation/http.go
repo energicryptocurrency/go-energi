@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/p2p/simulations"
 )
 
 // Package defaults.

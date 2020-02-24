@@ -19,8 +19,8 @@ package main
 import (
 	"os"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/cmd/utils"
+	"energi.world/core/gen3/log"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

@@ -25,14 +25,14 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed/lookup"
+	"energi.world/core/gen3/swarm/storage"
+	"energi.world/core/gen3/swarm/storage/feed/lookup"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	swarmhttp "github.com/ethereum/go-ethereum/swarm/api/http"
-	"github.com/ethereum/go-ethereum/swarm/storage/feed"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/swarm/api"
+	swarmhttp "energi.world/core/gen3/swarm/api/http"
+	"energi.world/core/gen3/swarm/storage/feed"
 )
 
 func serverFunc(api *api.API) swarmhttp.TestServer {

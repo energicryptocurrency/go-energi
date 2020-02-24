@@ -34,7 +34,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/log"
 )
 
 // Handler is the global debugging handler.

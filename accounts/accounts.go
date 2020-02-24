@@ -21,10 +21,10 @@ package accounts
 import (
 	"math/big"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
+	ethereum "energi.world/core/gen3"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/event"
 )
 
 // Account represents an Ethereum account located at a specific location defined

@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/internal/jsre"
-	"github.com/ethereum/go-ethereum/internal/web3ext"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/internal/jsre"
+	"energi.world/core/gen3/internal/web3ext"
+	"energi.world/core/gen3/log"
 	"github.com/robertkrimen/otto"
 )
 

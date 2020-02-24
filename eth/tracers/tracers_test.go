@@ -27,17 +27,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/common/math"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/tests"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/hexutil"
+	"energi.world/core/gen3/common/math"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/core/vm"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/params"
+	"energi.world/core/gen3/rlp"
+	"energi.world/core/gen3/tests"
 )
 
 // To generate a new callTracer test, copy paste the makeTest method below into

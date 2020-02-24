@@ -25,14 +25,14 @@ import (
 	"net"
 	"os"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/discover"
-	"github.com/ethereum/go-ethereum/p2p/discv5"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/nat"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
+	"energi.world/core/gen3/cmd/utils"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/p2p/discover"
+	"energi.world/core/gen3/p2p/discv5"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/nat"
+	"energi.world/core/gen3/p2p/netutil"
 )
 
 func main() {

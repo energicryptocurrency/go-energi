@@ -7,12 +7,12 @@ import (
 	"math/big"
 	"strings"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
+	ethereum "energi.world/core/gen3"
+	"energi.world/core/gen3/accounts/abi"
+	"energi.world/core/gen3/accounts/abi/bind"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/event"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

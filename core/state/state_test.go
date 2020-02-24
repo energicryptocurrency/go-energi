@@ -21,9 +21,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/ethdb"
 	checker "gopkg.in/check.v1"
 )
 

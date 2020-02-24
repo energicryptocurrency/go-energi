@@ -20,8 +20,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
 )
 
 func TestConfig(t *testing.T) {

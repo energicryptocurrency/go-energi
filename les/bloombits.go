@@ -19,8 +19,8 @@ package les
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/bitutil"
-	"github.com/ethereum/go-ethereum/light"
+	"energi.world/core/gen3/common/bitutil"
+	"energi.world/core/gen3/light"
 )
 
 const (

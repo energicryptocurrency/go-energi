@@ -19,9 +19,9 @@ package protocols
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/simulations/adapters"
+	"energi.world/core/gen3/rlp"
 )
 
 //dummy Balance implementation

@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common/math"
+	"energi.world/core/gen3/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {

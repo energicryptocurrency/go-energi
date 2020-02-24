@@ -21,12 +21,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/network"
+	"energi.world/core/gen3/swarm/spancontext"
+	"energi.world/core/gen3/swarm/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

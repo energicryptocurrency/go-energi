@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/types"
 )
 
 var dummyBlockHash = common.BytesToHash([]byte{1, 3, 4, 5})

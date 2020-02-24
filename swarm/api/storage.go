@@ -20,7 +20,7 @@ import (
 	"context"
 	"path"
 
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/swarm/storage"
 )
 
 type Response struct {

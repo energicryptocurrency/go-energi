@@ -19,11 +19,11 @@ package node
 import (
 	"reflect"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rpc"
+	"energi.world/core/gen3/accounts"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/event"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/rpc"
 )
 
 // ServiceContext is a collection of service independent options inherited from

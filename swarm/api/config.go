@@ -23,16 +23,16 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/contracts/ens"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/pss"
-	"github.com/ethereum/go-ethereum/swarm/services/swap"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/contracts/ens"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/network"
+	"energi.world/core/gen3/swarm/pss"
+	"energi.world/core/gen3/swarm/services/swap"
+	"energi.world/core/gen3/swarm/storage"
 )
 
 const (

@@ -26,7 +26,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/p2p/enr"
+	"energi.world/core/gen3/p2p/enr"
 )
 
 // Node represents a host on the network.

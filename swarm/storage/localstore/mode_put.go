@@ -17,8 +17,8 @@
 package localstore
 
 import (
-	"github.com/ethereum/go-ethereum/swarm/shed"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/swarm/shed"
+	"energi.world/core/gen3/swarm/storage"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

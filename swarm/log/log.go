@@ -18,8 +18,8 @@
 package log
 
 import (
-	l "github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
+	l "energi.world/core/gen3/log"
+	"energi.world/core/gen3/metrics"
 )
 
 const (

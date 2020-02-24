@@ -25,14 +25,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/swarm/network/simulation"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
-	"github.com/ethereum/go-ethereum/swarm/testutil"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/simulations/adapters"
+	"energi.world/core/gen3/swarm/network/simulation"
+	"energi.world/core/gen3/swarm/state"
+	"energi.world/core/gen3/swarm/storage"
+	"energi.world/core/gen3/swarm/testutil"
 )
 
 func TestIntervalsLive(t *testing.T) {

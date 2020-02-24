@@ -30,9 +30,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/event"
+	"energi.world/core/gen3/log"
 )
 
 const (

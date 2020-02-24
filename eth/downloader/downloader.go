@@ -26,15 +26,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/params"
+	ethereum "energi.world/core/gen3"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/rawdb"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/event"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/params"
 )
 
 var (

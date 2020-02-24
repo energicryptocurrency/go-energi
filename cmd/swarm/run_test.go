@@ -33,15 +33,15 @@ import (
 	"time"
 
 	"github.com/docker/docker/pkg/reexec"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/ethereum/go-ethereum/internal/cmdtest"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm"
-	"github.com/ethereum/go-ethereum/swarm/api"
-	swarmhttp "github.com/ethereum/go-ethereum/swarm/api/http"
+	"energi.world/core/gen3/accounts"
+	"energi.world/core/gen3/accounts/keystore"
+	"energi.world/core/gen3/internal/cmdtest"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/rpc"
+	"energi.world/core/gen3/swarm"
+	"energi.world/core/gen3/swarm/api"
+	swarmhttp "energi.world/core/gen3/swarm/api/http"
 )
 
 var loglevel = flag.Int("loglevel", 3, "verbosity of logs")

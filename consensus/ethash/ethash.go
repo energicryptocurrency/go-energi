@@ -35,12 +35,12 @@ import (
 	"unsafe"
 
 	mmap "github.com/edsrzf/mmap-go"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/rpc"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/consensus"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/rpc"
 	"github.com/hashicorp/golang-lru/simplelru"
 )
 

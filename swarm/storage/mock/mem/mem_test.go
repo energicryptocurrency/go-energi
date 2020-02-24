@@ -19,7 +19,7 @@ package mem
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/storage/mock/test"
+	"energi.world/core/gen3/swarm/storage/mock/test"
 )
 
 // TestGlobalStore is running test for a GlobalStore
