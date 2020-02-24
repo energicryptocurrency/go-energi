@@ -159,3 +159,36 @@ release-windows-amd64:
 release-windows-i686:
 	@RELEASE_TARGET=$(RELEASE_VER)-windows-i686 \
 	  GOOS=windows GOARCH=386 HOST=i686-w64-mingw32 $(RELEASE_WINDOWS_COMMON)
+
+
+
+.PHONY: release-macos-common
+.PHONY: release-macos-amd64
+
+release-macos: release-macos-amd64
+
+RELEASE_MACOS_COMMON := make -f Makefile.release release-macos-common --no-print-directory
+release-macos-common:
+	@echo Building $(RELEASE_TARGET)
+	@rm -rf build/release/$(RELEASE_TARGET)
+	@mkdir -p build/release/$(RELEASE_TARGET)
+	@for t in $(TARGET_TOOLS); do \
+	    export GOCACHE=$(CURDIR)/build/release/$(RELEASE_TARGET)/cache; \
+	    export CC=clang; \
+	    export CXX=clang++; \
+	    export CGO_CFLAGS="-mmacosx-version-min=10.11"; \
+	    export CGO_CXXFLAGS="$$CGO_CXXFLAGS"; \
+	    export CGO_ENABLED=1; \
+	    go build -o build/release/$(RELEASE_TARGET)/bin/$$t $(RELEASE_GOFLAGS) --ldflags="-s" ./cmd/$$t; \
+	done
+	@mv build/release/$(RELEASE_TARGET)/bin/geth build/release/$(RELEASE_TARGET)/bin/$(RELEASE_MAIN)
+	@cp COPYING build/release/$(RELEASE_TARGET)/
+	@tar czf build/release/$(RELEASE_TARGET)/$(RELEASE_TARGET).tgz \
+	  -C build/release $(RELEASE_TARGET)/bin/$(RELEASE_MAIN) $(RELEASE_TARGET)/COPYING
+	@tar czf build/release/$(RELEASE_TARGET)/$(RELEASE_TARGET)-alltools.tgz \
+	  -C build/release $(RELEASE_TARGET)/bin/ $(RELEASE_TARGET)/COPYING
+	@ls build/release/$(RELEASE_TARGET)/$(RELEASE_TARGET)*.tgz
+
+release-macos-amd64:
+	@RELEASE_TARGET=$(RELEASE_VER)-macos-amd64 \
+	  GOOS=darwin GOARCH=amd64 HOST=x86_64-apple-darwin $(RELEASE_MACOS_COMMON)
