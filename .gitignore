@@ -20,6 +20,7 @@ build/_vendor/pkg
 /bin
 /node_modules/
 /build/contracts/
+/build/release/
 .vagrant
 
 #*
@@ -53,5 +54,3 @@ profile.cov
 
 **/yarn-error.log
 
-go.mod
-go.sum

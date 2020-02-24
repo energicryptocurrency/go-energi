@@ -25,12 +25,12 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/core/rawdb"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/rlp"
 )
 
 // Constants to match up protocol versions and messages

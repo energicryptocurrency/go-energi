@@ -26,14 +26,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/prque"
+	"energi.world/core/gen3/core/state"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/event"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/params"
 )
 
 const (

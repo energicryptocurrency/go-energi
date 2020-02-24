@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

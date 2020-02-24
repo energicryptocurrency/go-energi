@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
+	"energi.world/core/gen3/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

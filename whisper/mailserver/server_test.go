@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
+	whisper "energi.world/core/gen3/whisper/whisperv6"
 )
 
 const powRequirement = 0.00001

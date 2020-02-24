@@ -22,11 +22,11 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/consensus/ethash"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
 )

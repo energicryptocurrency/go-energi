@@ -25,7 +25,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/swarm/storage"
 )
 
 // TestDB_SubscribePull uploads some chunks before and after

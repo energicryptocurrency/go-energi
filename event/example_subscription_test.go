@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/event"
+	"energi.world/core/gen3/event"
 )
 
 func ExampleNewSubscription() {

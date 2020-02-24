@@ -19,7 +19,7 @@ package vm
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/crypto"
+	"energi.world/core/gen3/crypto"
 )
 
 func TestJumpDestAnalysis(t *testing.T) {

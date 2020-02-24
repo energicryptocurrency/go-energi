@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/internal/jsre"
-	"github.com/ethereum/go-ethereum/node"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/consensus/ethash"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/eth"
+	"energi.world/core/gen3/internal/jsre"
+	"energi.world/core/gen3/node"
 )
 
 const (

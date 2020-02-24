@@ -28,8 +28,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/params"
 )
 
 const (

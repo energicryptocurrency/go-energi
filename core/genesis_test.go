@@ -23,12 +23,12 @@ import (
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/consensus/ethash"
+	"energi.world/core/gen3/core/rawdb"
+	"energi.world/core/gen3/core/vm"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/params"
 )
 
 var (

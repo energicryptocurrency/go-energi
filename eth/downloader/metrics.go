@@ -19,7 +19,7 @@
 package downloader
 
 import (
-	"github.com/ethereum/go-ethereum/metrics"
+	"energi.world/core/gen3/metrics"
 )
 
 var (

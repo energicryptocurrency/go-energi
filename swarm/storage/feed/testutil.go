@@ -22,8 +22,8 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/swarm/storage"
 )
 
 const (

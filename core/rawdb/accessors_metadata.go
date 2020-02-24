@@ -19,10 +19,10 @@ package rawdb
 import (
 	"encoding/json"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/params"
+	"energi.world/core/gen3/rlp"
 )
 
 // ReadDatabaseVersion retrieves the version number of the database.

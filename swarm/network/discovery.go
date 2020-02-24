@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/swarm/pot"
+	"energi.world/core/gen3/swarm/pot"
 )
 
 // discovery bzz extension for requesting and relaying node address records

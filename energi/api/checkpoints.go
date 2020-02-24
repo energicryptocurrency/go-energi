@@ -20,11 +20,11 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rpc"
+	"energi.world/core/gen3/accounts"
+	"energi.world/core/gen3/accounts/abi/bind"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_common "energi.world/core/gen3/energi/common"

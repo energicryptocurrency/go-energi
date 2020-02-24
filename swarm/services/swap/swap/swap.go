@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/swarm/log"
+	"energi.world/core/gen3/swarm/log"
 )
 
 // SwAP Swarm Accounting Protocol with

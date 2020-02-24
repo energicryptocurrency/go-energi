@@ -13,16 +13,22 @@ Section "Uninstall"
   # Delete start menu launcher
   Delete "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Attach.lnk"
+  Delete "$SMPROGRAMS\${APPNAME}\Testnet\${APPNAME}.lnk"
+  Delete "$SMPROGRAMS\${APPNAME}\Testnet\Attach.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Uninstall.lnk"
+  rmDir "$SMPROGRAMS\${APPNAME}\Testnet"
   rmDir "$SMPROGRAMS\${APPNAME}"
 
   # Firewall - remove rules if exists
-  SimpleFC::AdvRemoveRule "Energi Core incoming peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "Energi Core outgoing peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "Energi Core UDP discovery (UDP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 incoming peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 outgoing peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 UDP discovery (UDP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet incoming peers (TCP:49797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)"
 
   # Remove IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
-  ${un.EnvVarUpdate} $0 "ETHEREUM_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
+  ${un.EnvVarUpdate} $0 "ENERGI3_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
 
   # Remove install directory from PATH
   Push "$INSTDIR"

@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/core/vm"
+	"energi.world/core/gen3/cmd/utils"
+	"energi.world/core/gen3/core/vm"
 )
 
 func TestState(t *testing.T) {

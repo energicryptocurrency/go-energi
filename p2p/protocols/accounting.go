@@ -19,7 +19,7 @@ package protocols
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
+	"energi.world/core/gen3/metrics"
 )
 
 // define some metrics

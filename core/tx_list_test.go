@@ -20,8 +20,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/crypto"
 )
 
 // Tests that transactions can be added to strict lists and list contents and

@@ -24,12 +24,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/core/vm"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rlp"
+	"energi.world/core/gen3/accounts/abi"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/core/vm"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/rlp"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_params "energi.world/core/gen3/energi/params"

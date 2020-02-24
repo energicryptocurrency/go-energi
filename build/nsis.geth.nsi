@@ -12,7 +12,7 @@
 # 4. configures the Windows firewall for energi3
 # 5. create energi3, attach and uninstall start menu entries
 # 6. configures the registry that allows Windows to manage the package through its platform tools
-# 7. adds the environment system wide variable ETHEREUM_SOCKET
+# 7. adds the environment system wide variable ENERGI3_SOCKET
 # 8. adds the install directory to %PATH%
 #
 # Requirements:
@@ -30,8 +30,8 @@
 CRCCheck on
 
 !define GROUPNAME "Energi"
-!define APPNAME "Energi Core"
-!define DESCRIPTION "Official Go implementation of the Energi protocol"
+!define APPNAME "Gen 3 Core Node"
+!define DESCRIPTION "Official Go implementation of the Energi Gen 3 protocol"
 !addplugindir .\
 
 # Require admin rights on NT6+ (When UAC is turned on)

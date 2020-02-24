@@ -23,11 +23,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	eth_consensus "github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/common"
+	eth_consensus "energi.world/core/gen3/consensus"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/log"
 
 	energi_params "energi.world/core/gen3/energi/params"
 )

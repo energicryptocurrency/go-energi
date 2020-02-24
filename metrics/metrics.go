@@ -28,7 +28,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/log"
 )
 
 // Enabled is checked by the constructor functions for all of the

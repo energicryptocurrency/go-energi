@@ -24,7 +24,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/testutil"
+	"energi.world/core/gen3/swarm/testutil"
 	"golang.org/x/crypto/sha3"
 )
 

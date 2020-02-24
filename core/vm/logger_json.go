@@ -23,8 +23,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/math"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/math"
 )
 
 type JSONLogger struct {

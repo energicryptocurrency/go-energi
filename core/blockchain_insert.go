@@ -20,10 +20,10 @@ package core
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/mclock"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/log"
 )
 
 // insertStats tracks and reports on block insertion.

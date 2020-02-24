@@ -28,9 +28,9 @@ import (
 	"testing"
 	"time"
 
-	ch "github.com/ethereum/go-ethereum/swarm/chunk"
-	"github.com/ethereum/go-ethereum/swarm/shed"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	ch "energi.world/core/gen3/swarm/chunk"
+	"energi.world/core/gen3/swarm/shed"
+	"energi.world/core/gen3/swarm/storage"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -130,10 +130,10 @@ func TestDB_updateGCSem(t *testing.T) {
 // Measurements on MacBook Pro (Retina, 15-inch, Mid 2014) show
 // that New function executes around 1s for database with 1M chunks.
 //
-// # go test -benchmem -run=none github.com/ethereum/go-ethereum/swarm/storage/localstore -bench BenchmarkNew -v -timeout 20m
+// # go test -benchmem -run=none energi.world/core/gen3/swarm/storage/localstore -bench BenchmarkNew -v -timeout 20m
 // goos: darwin
 // goarch: amd64
-// pkg: github.com/ethereum/go-ethereum/swarm/storage/localstore
+// pkg: energi.world/core/gen3/swarm/storage/localstore
 // BenchmarkNew/1000-8         	     200	  11672414 ns/op	 9570960 B/op	   10008 allocs/op
 // BenchmarkNew/10000-8        	     100	  14890609 ns/op	10490118 B/op	    7759 allocs/op
 // BenchmarkNew/100000-8       	      20	  58334080 ns/op	17763157 B/op	   22978 allocs/op

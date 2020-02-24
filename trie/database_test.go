@@ -20,8 +20,8 @@ package trie
 import (
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/ethdb"
 )
 
 // Tests that the trie database returns a missing trie node error if attempting

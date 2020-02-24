@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"energi.world/core/gen3/common"
 	"golang.org/x/crypto/pbkdf2"
 )
 

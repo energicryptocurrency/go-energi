@@ -26,9 +26,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/p2p/enr"
-	"github.com/ethereum/go-ethereum/p2p/netutil"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/p2p/enr"
+	"energi.world/core/gen3/p2p/netutil"
 )
 
 const (

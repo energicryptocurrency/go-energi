@@ -25,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/pot"
-	sv "github.com/ethereum/go-ethereum/swarm/version"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/pot"
+	sv "energi.world/core/gen3/swarm/version"
 )
 
 /*

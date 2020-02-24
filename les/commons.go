@@ -20,14 +20,14 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/light"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/eth"
+	"energi.world/core/gen3/ethdb"
+	"energi.world/core/gen3/light"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/params"
 )
 
 // lesCommons contains fields needed by both server and client.

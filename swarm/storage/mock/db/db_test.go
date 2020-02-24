@@ -40,7 +40,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/storage/mock/test"
+	"energi.world/core/gen3/swarm/storage/mock/test"
 )
 
 // TestDBStore is running a test.MockStore tests

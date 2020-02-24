@@ -26,10 +26,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	ch "github.com/ethereum/go-ethereum/swarm/chunk"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
+	"energi.world/core/gen3/metrics"
+	ch "energi.world/core/gen3/swarm/chunk"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/spancontext"
 	opentracing "github.com/opentracing/opentracing-go"
 	olog "github.com/opentracing/opentracing-go/log"
 )

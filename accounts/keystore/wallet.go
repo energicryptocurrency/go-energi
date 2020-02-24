@@ -20,9 +20,9 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "github.com/ethereum/go-ethereum"
-	"github.com/ethereum/go-ethereum/accounts"
-	"github.com/ethereum/go-ethereum/core/types"
+	ethereum "energi.world/core/gen3"
+	"energi.world/core/gen3/accounts"
+	"energi.world/core/gen3/core/types"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original

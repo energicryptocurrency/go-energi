@@ -20,9 +20,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	eth_consensus "github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/types"
+	"energi.world/core/gen3/common"
+	eth_consensus "energi.world/core/gen3/consensus"
+	"energi.world/core/gen3/core/types"
 
 	energi_params "energi.world/core/gen3/energi/params"
 )

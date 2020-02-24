@@ -23,11 +23,11 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/rpc"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/internal/ethapi"
+	"energi.world/core/gen3/params"
+	"energi.world/core/gen3/rpc"
 )
 
 var maxPrice = big.NewInt(500 * params.GWei)

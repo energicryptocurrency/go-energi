@@ -29,10 +29,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	ch "github.com/ethereum/go-ethereum/swarm/chunk"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/storage/mock/mem"
+	"energi.world/core/gen3/common"
+	ch "energi.world/core/gen3/swarm/chunk"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/storage/mock/mem"
 	ldberrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 

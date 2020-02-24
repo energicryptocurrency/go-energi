@@ -17,8 +17,8 @@
 package params
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	eth_params "github.com/ethereum/go-ethereum/params"
+	"energi.world/core/gen3/common"
+	eth_params "energi.world/core/gen3/params"
 )
 
 // map Genesis to map of checkpoints

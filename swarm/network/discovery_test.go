@@ -20,7 +20,7 @@ package network
 import (
 	"testing"
 
-	p2ptest "github.com/ethereum/go-ethereum/p2p/testing"
+	p2ptest "energi.world/core/gen3/p2p/testing"
 )
 
 /***

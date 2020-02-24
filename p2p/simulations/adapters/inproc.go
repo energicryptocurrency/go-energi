@@ -23,13 +23,13 @@ import (
 	"net"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations/pipes"
-	"github.com/ethereum/go-ethereum/rpc"
+	"energi.world/core/gen3/event"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/simulations/pipes"
+	"energi.world/core/gen3/rpc"
 )
 
 // SimAdapter is a NodeAdapter which creates in-memory simulation nodes and

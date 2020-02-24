@@ -23,12 +23,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/signer/core"
-	"github.com/ethereum/go-ethereum/signer/rules/deps"
-	"github.com/ethereum/go-ethereum/signer/storage"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/internal/ethapi"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/signer/core"
+	"energi.world/core/gen3/signer/rules/deps"
+	"energi.world/core/gen3/signer/storage"
 	"github.com/robertkrimen/otto"
 )
 

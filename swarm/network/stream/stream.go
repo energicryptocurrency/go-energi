@@ -25,16 +25,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	"github.com/ethereum/go-ethereum/rpc"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/network/stream/intervals"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/p2p"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/protocols"
+	"energi.world/core/gen3/rpc"
+	"energi.world/core/gen3/swarm/log"
+	"energi.world/core/gen3/swarm/network"
+	"energi.world/core/gen3/swarm/network/stream/intervals"
+	"energi.world/core/gen3/swarm/state"
+	"energi.world/core/gen3/swarm/storage"
 )
 
 const (

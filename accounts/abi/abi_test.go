@@ -26,8 +26,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/crypto"
 )
 
 const jsondata = `

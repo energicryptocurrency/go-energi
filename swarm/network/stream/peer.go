@@ -23,14 +23,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/metrics"
-	"github.com/ethereum/go-ethereum/p2p/protocols"
-	"github.com/ethereum/go-ethereum/swarm/log"
-	pq "github.com/ethereum/go-ethereum/swarm/network/priorityqueue"
-	"github.com/ethereum/go-ethereum/swarm/network/stream/intervals"
-	"github.com/ethereum/go-ethereum/swarm/spancontext"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	"github.com/ethereum/go-ethereum/swarm/storage"
+	"energi.world/core/gen3/metrics"
+	"energi.world/core/gen3/p2p/protocols"
+	"energi.world/core/gen3/swarm/log"
+	pq "energi.world/core/gen3/swarm/network/priorityqueue"
+	"energi.world/core/gen3/swarm/network/stream/intervals"
+	"energi.world/core/gen3/swarm/spancontext"
+	"energi.world/core/gen3/swarm/state"
+	"energi.world/core/gen3/swarm/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

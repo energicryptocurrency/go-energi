@@ -25,8 +25,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common/compiler"
+	"energi.world/core/gen3/accounts/abi/bind"
+	"energi.world/core/gen3/common/compiler"
 )
 
 var (

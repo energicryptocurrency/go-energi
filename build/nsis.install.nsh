@@ -19,23 +19,33 @@ Section "Energi Core" GETH_IDX
 
   # Create start menu launcher
   createDirectory "$SMPROGRAMS\${APPNAME}"
-  createShortCut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\energi3.exe" "--fast" "--cache=512"
+  createDirectory "$SMPROGRAMS\${APPNAME}\Testnet"
+  createShortCut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\energi3.exe" "--cache=512"
   createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\energi3.exe" "attach" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet\${APPNAME}.lnk" "$INSTDIR\energi3.exe" "--testnet --cache=512"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet\Attach.lnk" "$INSTDIR\energi3.exe" "--testnet attach" "" ""
   createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "" ""
 
   # Firewall - remove rules (if exists)
-  SimpleFC::AdvRemoveRule "Energi Core incoming peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "Energi Core outgoing peers (TCP:39797)"
-  SimpleFC::AdvRemoveRule "Energi Core UDP discovery (UDP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 incoming peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 outgoing peers (TCP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 UDP discovery (UDP:39797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet incoming peers (TCP:49797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)"
+
 
   # Firewall - add rules
-  SimpleFC::AdvAddRule "Energi Core incoming peers (TCP:39797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 39797 "" "" ""
-  SimpleFC::AdvAddRule "Energi Core outgoing peers (TCP:39797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
-  SimpleFC::AdvAddRule "Energi Core UDP discovery (UDP:39797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 incoming peers (TCP:39797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 39797 "" "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 outgoing peers (TCP:39797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 UDP discovery (UDP:39797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Testnet incoming peers (TCP:49797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 49797 "" "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 49797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 49797 "" ""
 
   # Set default IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
-  ${EnvVarUpdate} $0 "ETHEREUM_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
-  ${EnvVarUpdate} $0 "ETHEREUM_SOCKET" "A" "HKLM" "\\.\pipe\energi3.ipc"
+  ${EnvVarUpdate} $0 "ENERGI3_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
+  ${EnvVarUpdate} $0 "ENERGI3_SOCKET" "A" "HKLM" "\\.\pipe\energi3.ipc"
 
   # Add instdir to PATH
   Push "$INSTDIR"

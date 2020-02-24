@@ -21,7 +21,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/swarm/state"
+	"energi.world/core/gen3/swarm/state"
 )
 
 // TestDBStore tests basic functionality of DBStore.

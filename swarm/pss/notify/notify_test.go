@@ -26,17 +26,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/swarm/network"
-	"github.com/ethereum/go-ethereum/swarm/pss"
-	"github.com/ethereum/go-ethereum/swarm/state"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
+	"energi.world/core/gen3/common/hexutil"
+	"energi.world/core/gen3/crypto"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/simulations"
+	"energi.world/core/gen3/p2p/simulations/adapters"
+	"energi.world/core/gen3/swarm/network"
+	"energi.world/core/gen3/swarm/pss"
+	"energi.world/core/gen3/swarm/state"
+	whisper "energi.world/core/gen3/whisper/whisperv6"
 )
 
 var (

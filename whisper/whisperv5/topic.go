@@ -19,8 +19,8 @@
 package whisperv5
 
 import (
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/common/hexutil"
 )
 
 // TopicType represents a cryptographically secure, probabilistic partial

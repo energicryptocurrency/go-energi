@@ -23,12 +23,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations"
-	"github.com/ethereum/go-ethereum/p2p/simulations/adapters"
-	"github.com/ethereum/go-ethereum/swarm/network"
+	"energi.world/core/gen3/log"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/p2p/enode"
+	"energi.world/core/gen3/p2p/simulations"
+	"energi.world/core/gen3/p2p/simulations/adapters"
+	"energi.world/core/gen3/swarm/network"
 )
 
 // Common errors that are returned by functions in this package.

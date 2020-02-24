@@ -28,13 +28,13 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/dashboard"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/params"
-	whisper "github.com/ethereum/go-ethereum/whisper/whisperv6"
+	"energi.world/core/gen3/cmd/utils"
+	"energi.world/core/gen3/common"
+	"energi.world/core/gen3/dashboard"
+	"energi.world/core/gen3/eth"
+	"energi.world/core/gen3/node"
+	"energi.world/core/gen3/params"
+	whisper "energi.world/core/gen3/whisper/whisperv6"
 	"github.com/naoina/toml"
 )
 
