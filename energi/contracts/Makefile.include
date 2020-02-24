@@ -4,7 +4,7 @@
 # ---
 SOLC_VERSION := 0.5.16
 SOLC_SHA256 := a15f01700ec7e02f91bbdfd4b6ff4450b3c2decae173e4f41910a3cfbaf5d3d3
-SOLC ?= build/_workspace/bin/solc-$(SOLC_VERSION)
+SOLC ?= build/bin/solc-$(SOLC_VERSION)
 SOLC_OPTIONS := \
   --asm \
   --asm-json \
