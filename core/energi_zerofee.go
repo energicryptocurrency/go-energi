@@ -146,8 +146,8 @@ func IsWhitelisted(db vm.StateDB, addr common.Address) bool {
 
 var (
 	zfCleanupTimeout        = time.Minute
-	zfMinHeartbeatPeriod    = time.Duration(30) * time.Minute
-	zfMinInvalidationPeriod = time.Duration(2) * time.Minute
+	zfMinHeartbeatPeriod    = time.Duration(1) * time.Minute
+	zfMinInvalidationPeriod = time.Duration(1) * time.Minute
 	zfMinCoinClaimPeriod    = time.Duration(3) * time.Minute
 	zfMinCheckpointPeriod   = time.Duration(10) * time.Minute
 

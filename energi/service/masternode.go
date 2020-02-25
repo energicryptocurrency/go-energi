@@ -40,7 +40,7 @@ import (
 )
 
 var (
-	heartbeatInterval = time.Duration(30) * time.Minute
+	heartbeatInterval = time.Duration(1) * time.Minute
 	recheckInterval   = time.Minute
 )
 
