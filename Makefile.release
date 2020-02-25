@@ -205,3 +205,14 @@ release-macos-common:
 release-macos-amd64:
 	@RELEASE_TARGET=$(RELEASE_VER)-macos-amd64 \
 	  GOOS=darwin GOARCH=amd64 HOST=x86_64-apple-darwin $(RELEASE_MACOS_COMMON)
+
+
+RELEASE_REPO := s3://download.energi.software/releases/energi3
+
+.PHONY: release-upload
+release-upload:
+	@find build/release/ -name '*.tgz' -or -name '*.zip' -or -name '*-setup.exe' | while read fn; do \
+	  dst=$(RELEASE_REPO)/$(RELEASE_RAW_VER)/$$(basename $$fn); \
+	  aws s3 ls "$$dst" >/dev/null || aws s3 cp "$$fn" "$$dst" || exit $$?; \
+	done
+	@find build/release/ -name '*.tgz' -or -name '*.zip' -or -name '*-setup.exe' | xargs sha256sum
