@@ -127,8 +127,8 @@ func (m *MigrationAPI) listGen2CoinsUncached(num *big.Int) (interface{}, error) 
 	}
 
 	call_opts := &bind.CallOpts{
-		BlockNumber: num,
-		GasLimit:    energi_params.UnlimitedGas,
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
 	}
 	bigItems, err := mgrt_contract.ItemCount(call_opts)
 	if err != nil {
@@ -446,6 +446,7 @@ func (m *MigrationAPI) claimGen2Coins(
 	mgrt_contract := energi_abi.Gen2MigrationSession{
 		Contract: mgrt_contract_obj,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     dst,
 			GasLimit: energi_params.UnlimitedGas,
 		},

@@ -226,6 +226,7 @@ func proposalInfo(backend Backend, address common.Address) (*ProposalInfo, error
 	}
 
 	call_opts := &bind.CallOpts{
+		Pending:  true,
 		GasLimit: energi_params.UnlimitedGas,
 	}
 
@@ -324,8 +325,8 @@ func (g *GovernanceAPI) upgradeProposalInfo(num *big.Int, proxy common.Address) 
 	}
 
 	call_opts := &bind.CallOpts{
-		BlockNumber: num,
-		GasLimit:    energi_params.UnlimitedGas,
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
 	}
 	proposals, err := proxy_obj.ListUpgradeProposals(call_opts)
 	if err != nil {
@@ -368,6 +369,7 @@ func (g *GovernanceAPI) governedProxy(
 	session = &energi_abi.IGovernedProxySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     owner,
 			GasLimit: energi_params.UnlimitedGas,
 		},
@@ -534,6 +536,7 @@ func (g *GovernanceAPI) treasury(
 	session = &energi_abi.ITreasurySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     payer,
 			GasLimit: energi_params.UnlimitedGas,
 		},
@@ -585,8 +588,8 @@ func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
 	}
 
 	call_opts := &bind.CallOpts{
-		BlockNumber: num,
-		GasLimit:    energi_params.UnlimitedGas,
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
 	}
 
 	proposals, err := treasury.ListProposals(call_opts)
@@ -605,7 +608,7 @@ func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
 	for i, p := range proposals {
 		pInfo, err := proposalInfo(g.backend, p)
 		if err != nil {
-			log.Error("Failed at proposalInfo", "err", err)
+			log.Debug("Failed at proposalInfo", "err", err)
 			continue
 		}
 
@@ -614,23 +617,23 @@ func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
 		budger_proposal, err := energi_abi.NewIBudgetProposalCaller(
 			p, g.backend.(bind.ContractCaller))
 		if err != nil {
-			log.Error("Failed at NewIBudgetProposalCaller", "err", err)
+			log.Debug("Failed at NewIBudgetProposalCaller", "err", err)
 			return nil, err
 		}
 
 		proposed_amount, err := budger_proposal.ProposedAmount(call_opts)
 		if err != nil {
-			log.Error("Failed ProposedAmount", "err", err)
+			log.Debug("Failed ProposedAmount", "err", err)
 			continue
 		}
 		paid_amount, err := budger_proposal.PaidAmount(call_opts)
 		if err != nil {
-			log.Error("Failed ProposedAmount", "err", err)
+			log.Debug("Failed ProposedAmount", "err", err)
 			continue
 		}
 		ref_uuid, err := budger_proposal.RefUuid(call_opts)
 		if err != nil {
-			log.Error("Failed ProposedAmount", "err", err)
+			log.Debug("Failed ProposedAmount", "err", err)
 			continue
 		}
 		ret[i].ProposedAmount = (*hexutil.Big)(proposed_amount)

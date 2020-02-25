@@ -107,6 +107,7 @@ func (m *MasternodeAPI) CollateralBalance(
 
 	res, err := token.BalanceInfo(
 		&bind.CallOpts{
+			Pending:  true,
 			From:     dst,
 			GasLimit: energi_params.UnlimitedGas,
 		},
@@ -264,8 +265,8 @@ func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 	}
 
 	call_opts := &bind.CallOpts{
-		BlockNumber: num,
-		GasLimit:    energi_params.UnlimitedGas,
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
 	}
 	prev_call_opts := &bind.CallOpts{
 		BlockNumber: new(big.Int).Sub(num, common.Big3),
@@ -282,19 +283,19 @@ func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 	for _, mn := range masternodes {
 		mninfo, err := registry.Info(call_opts, mn)
 		if err != nil {
-			log.Warn("Info error", "mn", mn, "err", err)
+			log.Debug("Info error", "mn", mn, "err", err)
 			continue
 		}
 
 		isActive, err := registry.IsActive(call_opts, mn)
 		if err != nil {
-			log.Warn("IsActive error", "mn", mn, "err", err)
+			log.Debug("IsActive error", "mn", mn, "err", err)
 			continue
 		}
 
 		canHeartbeat, err := registry.CanHeartbeat(call_opts, mn)
 		if err != nil {
-			log.Warn("CanHeartbeat error", "mn", mn, "err", err)
+			log.Debug("CanHeartbeat error", "mn", mn, "err", err)
 			continue
 		}
 
@@ -313,7 +314,7 @@ func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 			Collateral:     (*hexutil.Big)(mninfo.Collateral),
 			AnnouncedBlock: mninfo.AnnouncedBlock.Uint64(),
 			IsActive:       isActive,
-			IsAlive:        isActive && !canHeartbeat && !prevCanHeartbeat,
+			IsAlive:        isActive && (!canHeartbeat || !prevCanHeartbeat),
 			SWFeatures:     (*hexutil.Big)(mninfo.SwFeatures),
 			SWVersion:      energi_common.SWVersionIntToString(mninfo.SwFeatures),
 		})
@@ -360,8 +361,8 @@ func (m *MasternodeAPI) stats(num *big.Int) (interface{}, error) {
 	}
 
 	call_opts := &bind.CallOpts{
-		BlockNumber: num,
-		GasLimit:    energi_params.UnlimitedGas,
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
 	}
 	count, err := registry.Count(call_opts)
 	if err != nil {
@@ -404,6 +405,7 @@ func masternodeRegistry(
 	session = &energi_abi.IMasternodeRegistryV2Session{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     dst,
 			GasLimit: energi_params.UnlimitedGas,
 		},

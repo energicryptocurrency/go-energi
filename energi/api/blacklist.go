@@ -63,6 +63,7 @@ func (b *BlacklistAPI) registry(
 	session = &energi_abi.IBlacklistRegistrySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     dst,
 			GasLimit: energi_params.UnlimitedGas,
 		},
@@ -105,8 +106,8 @@ func (b *BlacklistAPI) blacklistInfo(num *big.Int) (interface{}, error) {
 	}
 
 	call_opts := &bind.CallOpts{
-		BlockNumber: num,
-		GasLimit:    energi_params.UnlimitedGas,
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
 	}
 	addresses, err := registry.EnumerateAll(call_opts)
 	if err != nil {
@@ -119,29 +120,29 @@ func (b *BlacklistAPI) blacklistInfo(num *big.Int) (interface{}, error) {
 	for _, addr := range addresses {
 		blocked, err := registry.IsBlacklisted(call_opts, addr)
 		if err != nil {
-			log.Warn("IsBlacklisted error", "addr", addr, "err", err)
+			log.Debug("IsBlacklisted error", "addr", addr, "err", err)
 			continue
 		}
 
 		proposals, err := registry.Proposals(call_opts, addr)
 		if err != nil {
-			log.Warn("Proposals error", "addr", addr, "err", err)
+			log.Debug("Proposals error", "addr", addr, "err", err)
 			continue
 		}
 
 		enforceInfo, err := proposalInfo(b.backend, proposals.Enforce)
 		if err != nil {
-			log.Warn("Enforce info error", "addr", addr, "err", err)
+			log.Debug("Enforce info error", "addr", addr, "err", err)
 		}
 
 		revokeInfo, err := proposalInfo(b.backend, proposals.Revoke)
 		if err != nil {
-			log.Warn("Revoke info error", "addr", addr, "err", err)
+			log.Debug("Revoke info error", "addr", addr, "err", err)
 		}
 
 		drainInfo, err := proposalInfo(b.backend, proposals.Drain)
 		if err != nil {
-			log.Warn("Drain info error", "addr", addr, "err", err)
+			log.Debug("Drain info error", "addr", addr, "err", err)
 		}
 
 		res = append(res, BLInfo{

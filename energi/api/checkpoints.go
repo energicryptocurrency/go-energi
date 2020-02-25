@@ -82,6 +82,7 @@ func (b *CheckpointAPI) registry(
 	session = &energi_abi.ICheckpointRegistrySession{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
+			Pending:  true,
 			From:     from,
 			GasLimit: energi_params.UnlimitedGas,
 		},
@@ -128,8 +129,8 @@ func (b *CheckpointAPI) checkpointInfo(num *big.Int) (interface{}, error) {
 	}
 
 	call_opts := &bind.CallOpts{
-		BlockNumber: num,
-		GasLimit:    energi_params.UnlimitedGas,
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
 	}
 	addresses, err := registry.Checkpoints(call_opts)
 	if err != nil {
