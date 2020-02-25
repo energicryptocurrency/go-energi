@@ -11,12 +11,11 @@ Section "Uninstall"
   rmDir $INSTDIR
 
   # Delete start menu launcher
-  Delete "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk"
+  Delete "$SMPROGRAMS\${APPNAME}\Core Node.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Attach.lnk"
-  Delete "$SMPROGRAMS\${APPNAME}\Testnet\${APPNAME}.lnk"
-  Delete "$SMPROGRAMS\${APPNAME}\Testnet\Attach.lnk"
+  Delete "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk"
+  Delete "$SMPROGRAMS\${APPNAME}\Testnet Attach.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Uninstall.lnk"
-  rmDir "$SMPROGRAMS\${APPNAME}\Testnet"
   rmDir "$SMPROGRAMS\${APPNAME}"
 
   # Firewall - remove rules if exists

@@ -30,7 +30,7 @@
 CRCCheck on
 
 !define GROUPNAME "Energi"
-!define APPNAME "Gen 3 Core Node"
+!define APPNAME "Energi Gen 3"
 !define DESCRIPTION "Official Go implementation of the Energi Gen 3 protocol"
 !addplugindir .\
 

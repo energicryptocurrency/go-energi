@@ -19,11 +19,10 @@ Section "Energi Core" GETH_IDX
 
   # Create start menu launcher
   createDirectory "$SMPROGRAMS\${APPNAME}"
-  createDirectory "$SMPROGRAMS\${APPNAME}\Testnet"
-  createShortCut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\energi3.exe" "--cache=512"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\energi3.exe" "attach" "" ""
-  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet\${APPNAME}.lnk" "$INSTDIR\energi3.exe" "--testnet --cache=512"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet\Attach.lnk" "$INSTDIR\energi3.exe" "--testnet attach" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Core Node.lnk" "$INSTDIR\energi3.exe" "--cache=512"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\energi3.exe" "attach \\.\pipe\energi3.ipc" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk" "$INSTDIR\energi3.exe" "--testnet --cache=512 -ipcpath test-energi3.ipc"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Attach.lnk" "$INSTDIR\energi3.exe" "--testnet attach \\.\pipe\test-energi3.ipc" "" ""
   createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "" ""
 
   # Firewall - remove rules (if exists)
