@@ -51,6 +51,7 @@ type CacheStorage struct {
 // the chain data.
 type CacheChain interface {
 	CurrentBlock() *eth_types.Block
+	IsPublicService() bool
 }
 
 // NewCacheStorage creates a new CacheStorage instance.
@@ -70,11 +71,14 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 
 	state := (*cacheState)(atomic.LoadPointer(&c.state))
 
-	do_update := func() (*cacheState, error) {
+	do_update := func(force bool) (interface{}, error) {
+		c.mtx.Lock()
+		defer c.mtx.Unlock()
+
 		state := (*cacheState)(atomic.LoadPointer(&c.state))
 
 		// Concurrent update could happened
-		if state.entry == nil || state.blockHash != blockhash {
+		if force || state.entry == nil || state.blockHash != blockhash {
 			entry, err := source(block.Number())
 
 			if err != nil {
@@ -85,21 +89,18 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 			atomic.StorePointer(&c.state, unsafe.Pointer(state))
 		}
 
-		return state, nil
+		if state.entry == nil {
+			return nil, ErrInvalidData
+		}
+
+		return state.entry, nil
 	}
 
 	// First run or error recovery
 	if state.entry == nil {
-		c.mtx.Lock()
-		defer c.mtx.Unlock()
-		var err error
-		state, err = do_update()
-		if err != nil {
-			return nil, err
-		}
-
-		// Update needed
-	} else if state.blockHash != blockhash {
+		return do_update(false)
+	} else if chain.IsPublicService() || (state.blockHash == blockhash) {
+		// Never block for public service and continusouly refresh in general
 		if atomic.CompareAndSwapInt32(&c.updating, 0, 1) {
 			go func() {
 				defer atomic.StoreInt32(&c.updating, 0)
@@ -111,13 +112,12 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 						atomic.StorePointer(&c.state, unsafe.Pointer(state))
 					}
 				}()
-				do_update()
+				do_update(true)
 			}()
 		}
-	}
-
-	if state.entry == nil {
-		return nil, ErrInvalidData
+	} else if state.blockHash != blockhash {
+		// Ensure not to provide the stale data for non-public services
+		return do_update(false)
 	}
 
 	return state.entry, nil
