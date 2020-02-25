@@ -54,7 +54,7 @@ var DefaultConfig = Config{
 	TrieRapidTime:  10 * time.Second,
 	MinerGasFloor:  40000000,
 	MinerGasCeil:   80000000,
-	MinerGasPrice:  big.NewInt(10 * params.GWei),
+	MinerGasPrice:  big.NewInt(1 * params.GWei),
 	MinerRecommit:  3 * time.Second,
 	MinerNonceCap:  0,
 
