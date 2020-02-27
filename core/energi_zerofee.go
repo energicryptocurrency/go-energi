@@ -224,6 +224,7 @@ func (z *zeroFeeProtector) checkMasternode(
 	pool *TxPool,
 	sender common.Address,
 	now time.Time,
+	tx *types.Transaction,
 	timeMap map[common.Address]time.Time,
 	timeout time.Duration,
 ) error {
@@ -240,6 +241,40 @@ func (z *zeroFeeProtector) checkMasternode(
 		return ErrZeroFeeDoS
 	}
 
+	// Check if call is valid
+	//---
+	msg := types.NewMessage(
+		sender,
+		tx.To(),
+		tx.Nonce(),
+		tx.Value(),
+		tx.Gas(),
+		tx.GasPrice(),
+		tx.Data(),
+		false,
+	)
+
+	statedb := pool.currentState.Copy()
+
+	bc, ok := pool.chain.(*BlockChain)
+	if bc == nil || !ok {
+		log.Warn("ZeroFee DoS on missing blockchain")
+		return ErrZeroFeeDoS
+	}
+	vmc := bc.GetVMConfig()
+	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
+	ctx.GasLimit = ZeroFeeGasLimit
+	evm := vm.NewEVM(ctx, statedb, bc.Config(), *vmc)
+
+	gp := new(GasPool).AddGas(tx.Gas())
+	output, _, failed, err := ApplyMessage(evm, msg, gp)
+	if failed || err != nil {
+		log.Debug("ZeroFee DoS MN by execution",
+			"sender", sender, "err", err, "output", output)
+		return ErrZeroFeeDoS
+	}
+
+	//---
 	timeMap[sender] = now
 	log.Debug("ZeroFee masternode", "sender", sender, "now", now)
 	return nil
@@ -284,7 +319,7 @@ func (z *zeroFeeProtector) checkMigration(
 
 	bc, ok := pool.chain.(*BlockChain)
 	if bc == nil || !ok {
-		log.Debug("ZeroFee DoS on missing blockchain")
+		log.Warn("ZeroFee DoS on missing blockchain")
 		return ErrZeroFeeDoS
 	}
 	vmc := bc.GetVMConfig()
@@ -331,13 +366,13 @@ func (z *zeroFeeProtector) checkDoS(pool *TxPool, tx *types.Transaction) error {
 
 	// NOTE: assumed to be called only on zero fee
 	if method := tx.MethodID(); method == energiMNHeartbeatID {
-		return z.checkMasternode(pool, sender, now, z.mnHeartbeats, zfMinHeartbeatPeriod)
+		return z.checkMasternode(pool, sender, now, tx, z.mnHeartbeats, zfMinHeartbeatPeriod)
 	} else if method == energiMNInvalidateID {
-		return z.checkMasternode(pool, sender, now, z.mnInvalidations, zfMinInvalidationPeriod)
+		return z.checkMasternode(pool, sender, now, tx, z.mnInvalidations, zfMinInvalidationPeriod)
 	} else if method == energiClaimID {
 		return z.checkMigration(pool, sender, now, tx)
 	} else if method == energiCPSignID {
-		return z.checkMasternode(pool, sender, now, z.mnCheckpoints, zfMinCheckpointPeriod)
+		return z.checkMasternode(pool, sender, now, tx, z.mnCheckpoints, zfMinCheckpointPeriod)
 	}
 	return nil
 }

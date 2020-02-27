@@ -25,7 +25,6 @@ import (
 	"energi.world/core/gen3/accounts/abi"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core/state"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/ethdb"
@@ -255,22 +254,38 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	pool.signer = signer
 
 	testdb := ethdb.NewMemDatabase()
-	statedb, _ := state.New(common.Hash{}, state.NewDatabase(testdb))
-	pool.currentState = statedb
+	gspec := &Genesis{
+		Config: params.TestnetChainConfig,
+	}
+	gspec.MustCommit(testdb)
+	engine := ethash.NewFaker()
+
+	chain, err := NewBlockChain(
+		testdb, nil, gspec.Config,
+		engine, vm.Config{}, nil)
+	assert.Empty(t, err)
+	defer chain.Stop()
+	pool.chain = chain
+	pool.currentState, _ = chain.State()
 
 	mn_active1 := common.HexToAddress("0x0000000000000000000000000000000022345678")
 	mn_active2 := common.HexToAddress("0x0000000000000000000000000000000022345679")
 	mn_inactive := common.HexToAddress("0x0000000000000000000000000000000022345680")
 
-	statedb.SetState(
+	pool.currentState.SetState(
 		energi_params.Energi_MasternodeList,
 		mn_active1.Hash(),
 		mn_inactive.Hash(),
 	)
-	statedb.SetState(
+	pool.currentState.SetState(
 		energi_params.Energi_MasternodeList,
 		mn_active2.Hash(),
 		mn_inactive.Hash(),
+	)
+	pool.currentState.SetCode(
+		energi_params.Energi_MasternodeRegistry,
+		// PUSH1 0 PUSH1 0 RETURN
+		[]byte{0x60, 0x00, 0x60, 0x00, 0xF3},
 	)
 
 	mnreg_abi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
@@ -284,23 +299,23 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Empty(t, err)
 
 	hbtx0 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, heartbeatCall)
 	invtx0 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, invalidateCall)
 	sigtx0 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, cpsignCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, cpsignCall)
 	hbtx1 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, heartbeatCall)
 	invtx1 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, invalidateCall)
 	sigtx1 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, cpsignCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, cpsignCall)
 	hbtx2 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, heartbeatCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, heartbeatCall)
 	invtx2 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, invalidateCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, invalidateCall)
 	sigtx2 := types.NewTransaction(
-		1, common.Address{}, common.Big0, 100000, common.Big0, cpsignCall)
+		1, energi_params.Energi_MasternodeRegistry, common.Big0, 100000, common.Big0, cpsignCall)
 
 	// Inactive MN
 	signer.sender = mn_inactive
@@ -343,7 +358,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 
 	signer.sender = mn_active1
 	err = protector.checkDoS(pool, hbtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx1)
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, sigtx1)
@@ -351,7 +366,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 
 	signer.sender = mn_active2
 	err = protector.checkDoS(pool, hbtx2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx2)
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, sigtx2)
@@ -362,7 +377,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 
 	signer.sender = mn_active1
 	err = protector.checkDoS(pool, hbtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx1)
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, sigtx1)
@@ -370,14 +385,43 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 
 	signer.sender = mn_active2
 	err = protector.checkDoS(pool, hbtx2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, invtx2)
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, sigtx2)
 	assert.Equal(t, nil, err)
 
 	// Active MN after heartbeat period is over
-	adjust_time = time.Duration(30) * time.Minute
+	adjust_time = time.Duration(20) * time.Minute
+
+	pool.currentState.SetCode(
+		energi_params.Energi_MasternodeRegistry,
+		// PUSH1 0 PUSH1 0 REVERT
+		[]byte{0x60, 0x00, 0x60, 0x00, 0xFD},
+	)
+
+	signer.sender = mn_active1
+	err = protector.checkDoS(pool, hbtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, sigtx1)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+
+	signer.sender = mn_active2
+	err = protector.checkDoS(pool, hbtx2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, invtx2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+	err = protector.checkDoS(pool, sigtx2)
+	assert.Equal(t, ErrZeroFeeDoS, err)
+
+	// Restore correct
+	pool.currentState.SetCode(
+		energi_params.Energi_MasternodeRegistry,
+		// PUSH1 0 PUSH1 0 RETURN
+		[]byte{0x60, 0x00, 0x60, 0x00, 0xF3},
+	)
 
 	signer.sender = mn_active1
 	err = protector.checkDoS(pool, hbtx1)
@@ -403,19 +447,20 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Equal(t, 2, len(protector.mnInvalidations))
 	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
-	adjust_time = time.Duration(35) * time.Minute
+	adjust_time = time.Duration(21)*time.Minute + time.Second
 	err = protector.checkDoS(pool, hbtx0)
-	assert.Equal(t, 2, len(protector.mnHeartbeats))
+	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
 	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
-	adjust_time = time.Duration(59) * time.Minute
+	adjust_time = time.Duration(30) * time.Minute
 	err = protector.checkDoS(pool, hbtx0)
-	assert.Equal(t, 2, len(protector.mnHeartbeats))
+	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
-	assert.Equal(t, 0, len(protector.mnCheckpoints))
+	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
-	adjust_time = time.Duration(61) * time.Minute
+	adjust_time = time.Duration(30)*time.Minute + time.Second
+	protector.nextCleanup = now
 	err = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
