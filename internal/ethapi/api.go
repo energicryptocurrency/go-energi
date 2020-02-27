@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"energi.world/core/gen3/accounts"
 	"energi.world/core/gen3/accounts/keystore"
 	"energi.world/core/gen3/common"
@@ -43,6 +42,7 @@ import (
 	"energi.world/core/gen3/params"
 	"energi.world/core/gen3/rlp"
 	"energi.world/core/gen3/rpc"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 

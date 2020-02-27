@@ -23,12 +23,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/allegro/bigcache"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/ethdb"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/metrics"
 	"energi.world/core/gen3/rlp"
+	"github.com/allegro/bigcache"
 )
 
 var (

@@ -32,7 +32,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/pkg/reexec"
 	"energi.world/core/gen3/accounts"
 	"energi.world/core/gen3/accounts/keystore"
 	"energi.world/core/gen3/internal/cmdtest"
@@ -42,6 +41,7 @@ import (
 	"energi.world/core/gen3/swarm"
 	"energi.world/core/gen3/swarm/api"
 	swarmhttp "energi.world/core/gen3/swarm/api/http"
+	"github.com/docker/docker/pkg/reexec"
 )
 
 var loglevel = flag.Int("loglevel", 3, "verbosity of logs")

@@ -25,10 +25,10 @@ import (
 
 	"sync"
 
-	"github.com/davecgh/go-spew/spew"
 	"energi.world/core/gen3/common/hexutil"
 	"energi.world/core/gen3/internal/ethapi"
 	"energi.world/core/gen3/log"
+	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

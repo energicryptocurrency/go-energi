@@ -26,12 +26,12 @@ import (
 	"sync"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/p2p"
 	"energi.world/core/gen3/rpc"
+	mapset "github.com/deckarep/golang-set"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/sync/syncmap"

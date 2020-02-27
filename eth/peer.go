@@ -24,12 +24,12 @@ import (
 	"sync"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/p2p"
 	"energi.world/core/gen3/rlp"
+	mapset "github.com/deckarep/golang-set"
 )
 
 var (

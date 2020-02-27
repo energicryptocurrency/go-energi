@@ -34,11 +34,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/p2p/enode"
 	"energi.world/core/gen3/rlp"
+	"github.com/davecgh/go-spew/spew"
 )
 
 func init() {

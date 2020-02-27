@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/docker/pkg/reexec"
 	"energi.world/core/gen3/cmd/utils"
 	"energi.world/core/gen3/rpc"
 	"energi.world/core/gen3/swarm"
 	"energi.world/core/gen3/swarm/api"
+	"github.com/docker/docker/pkg/reexec"
 )
 
 func TestConfigDump(t *testing.T) {

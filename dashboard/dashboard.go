@@ -34,12 +34,12 @@ import (
 
 	"io"
 
-	"github.com/elastic/gosigar"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/metrics"
 	"energi.world/core/gen3/p2p"
 	"energi.world/core/gen3/params"
 	"energi.world/core/gen3/rpc"
+	"github.com/elastic/gosigar"
 	"github.com/mohae/deepcopy"
 	"golang.org/x/net/websocket"
 )

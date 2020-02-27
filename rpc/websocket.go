@@ -30,8 +30,8 @@ import (
 	"strings"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"energi.world/core/gen3/log"
+	mapset "github.com/deckarep/golang-set"
 	"golang.org/x/net/websocket"
 )
 

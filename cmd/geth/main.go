@@ -28,7 +28,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/elastic/gosigar"
 	"energi.world/core/gen3/accounts"
 	"energi.world/core/gen3/accounts/keystore"
 	"energi.world/core/gen3/cmd/utils"
@@ -39,6 +38,7 @@ import (
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/metrics"
 	"energi.world/core/gen3/node"
+	"github.com/elastic/gosigar"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

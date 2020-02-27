@@ -34,13 +34,13 @@ import (
 	"time"
 	"unsafe"
 
-	mmap "github.com/edsrzf/mmap-go"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/metrics"
 	"energi.world/core/gen3/rpc"
+	mmap "github.com/edsrzf/mmap-go"
 	"github.com/hashicorp/golang-lru/simplelru"
 )
 

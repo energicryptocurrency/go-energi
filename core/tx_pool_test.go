@@ -27,11 +27,11 @@ import (
 	"testing"
 	"time"
 
-	energi_params "energi.world/core/gen3/energi/params"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core/state"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/crypto"
+	energi_params "energi.world/core/gen3/energi/params"
 	"energi.world/core/gen3/ethdb"
 	"energi.world/core/gen3/event"
 	"energi.world/core/gen3/params"

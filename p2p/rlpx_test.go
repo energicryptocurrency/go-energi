@@ -31,11 +31,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/crypto/ecies"
 	"energi.world/core/gen3/p2p/simulations/pipes"
 	"energi.world/core/gen3/rlp"
+	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/sha3"
 )
 

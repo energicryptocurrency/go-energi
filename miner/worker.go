@@ -24,7 +24,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	mapset "github.com/deckarep/golang-set"
 	"energi.world/core/gen3/accounts/abi/bind"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/consensus"
@@ -34,6 +33,7 @@ import (
 	"energi.world/core/gen3/event"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
+	mapset "github.com/deckarep/golang-set"
 
 	energi_consensus "energi.world/core/gen3/energi/consensus"
 )
