@@ -222,6 +222,22 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 		recommit = minRecommitInterval
 	}
 
+	// Make sure pending state can be returned for API usage
+	parent := worker.chain.CurrentBlock()
+	num := parent.Number()
+	header := &types.Header{
+		ParentHash: parent.Hash(),
+		Number:     num.Add(num, common.Big1),
+		GasLimit:   core.CalcGasLimit(parent, worker.gasFloor, worker.gasCeil),
+		Extra:      worker.extra,
+		Time:       uint64(parent.Time() + energi_consensus.MinBlockGap),
+	}
+	if err := worker.makeCurrent(parent, header); err != nil {
+		panic(err)
+	}
+	worker.updateSnapshot()
+	//
+
 	go worker.mainLoop()
 	go worker.newWorkLoop(recommit)
 	go worker.resultLoop()

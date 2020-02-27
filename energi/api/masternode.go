@@ -272,6 +272,9 @@ func (m *MasternodeAPI) listMasternodes(num *big.Int) (interface{}, error) {
 		BlockNumber: new(big.Int).Sub(num, common.Big3),
 		GasLimit:    energi_params.UnlimitedGas,
 	}
+	if prev_call_opts.BlockNumber.Cmp(common.Big0) < 0 {
+		prev_call_opts.BlockNumber = new(big.Int).Set(common.Big0)
+	}
 
 	masternodes, err := registry.Enumerate(call_opts)
 	if err != nil {
