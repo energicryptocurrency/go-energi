@@ -85,7 +85,8 @@ var (
 
 	// zeroFeesTimeoutInterval defines duration after which a zero-fee tx is considered
 	// to be stale and has to be cleaned up soonest possible.
-	zeroFeesTimeoutInterval = 5 * time.Minute
+	zeroFeesTimeoutInterval   = 5 * time.Minute
+	zeroFeesMNTimeoutInterval = 3 * time.Minute
 )
 
 var (
@@ -358,15 +359,32 @@ func (pool *TxPool) loop() {
 			pool.mu.Lock()
 			lifetime := pool.config.Lifetime
 			for addr := range pool.pending {
-				// Clean up stale txs.
-				if time.Since(pool.beats[addr]) > zeroFeesTimeoutInterval {
-					txs := pool.pending[addr].Flatten()
-					if len(txs) > 0 && IsValidZeroFee(txs[0]) {
-						// Removes by sender from both queued and pending list.
-						pool.removeBySenderLocked(addr)
-					}
-				} else if time.Since(pool.beats[addr]) > lifetime {
-					for _, tx := range pool.pending[addr].Flatten() {
+				age := time.Since(pool.beats[addr])
+				txs := pool.pending[addr].Flatten()
+
+				// Just in case
+				if len(txs) == 0 {
+					continue
+				}
+
+				// Stalled MN zero-fees
+				if age > zeroFeesMNTimeoutInterval && IsMasternodeCall(txs[0]) {
+					log.Debug("Cleaning up stalled MN xfers", "addr", addr)
+					pool.removeBySenderLocked(addr)
+					continue
+				}
+
+				// Stalled zero-fees
+				if age > zeroFeesTimeoutInterval && IsValidZeroFee(txs[0]) {
+					log.Debug("Cleaning up stalled Zero-Fee xfers", "addr", addr)
+					pool.removeBySenderLocked(addr)
+					continue
+				}
+
+				// Stalled general
+				if age > lifetime {
+					log.Warn("Cleaning up stalled general xfers", "addr", addr)
+					for _, tx := range txs {
 						pool.removeTx(tx.Hash(), true)
 					}
 				}
@@ -379,6 +397,7 @@ func (pool *TxPool) loop() {
 				}
 				// Any non-locals old enough should be removed
 				if time.Since(pool.beats[addr]) > lifetime {
+					log.Debug("Cleaning up stalled general queue", "addr", addr)
 					for _, tx := range pool.queue[addr].Flatten() {
 						pool.removeTx(tx.Hash(), true)
 					}
