@@ -52,11 +52,11 @@ Section "Energi Core" GETH_IDX
 SectionEnd
 
 # Install optional develop tools.
-Section /o "Development tools" DEV_TOOLS_IDX
-  SetOutPath $INSTDIR
-  {{range .DevTools}}file {{.}}
-  {{end}}
-SectionEnd
+#Section /o "Development tools" DEV_TOOLS_IDX
+#  SetOutPath $INSTDIR
+#  {{range .DevTools}}file {{.}}
+#  {{end}}
+#SectionEnd
 
 # Return on top of stack the total size (as DWORD) of the selected/installed sections.
 Var GetInstalledSize.total

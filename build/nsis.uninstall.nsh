@@ -3,8 +3,8 @@ Section "Uninstall"
   setShellVarContext all
 
   # Delete (optionally) installed files
-  {{range $}}Delete $INSTDIR\{{.}}
-  {{end}}
+  #{{range $}}Delete $INSTDIR\{{.}}
+  #{{end}}
   Delete $INSTDIR\uninstall.exe
 
   # Delete install directory

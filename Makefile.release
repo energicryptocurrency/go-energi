@@ -123,10 +123,10 @@ release-windows: release-windows-amd64 release-windows-i686
 RELEASE_WINDOWS_COMMON := make -f Makefile.release release-windows-common --no-print-directory
 RELEASE_RENDER_NSIS := sed \
   -e 's,{{.License}},COPYING.txt,g' \
-  -e 's,{{.EnergiCore}},bin/energi3.exe,g' \
-  -e 's,{{range .DevTools}}file {{.}},file bin/abigen.exe\n  file bin/bootnode.exe\n  file bin/clef.exe\n  file bin/evm.exe\n  file bin/rlpdump.exe,g' \
-  -e 's,{{range $$}}Delete $$INSTDIR\\{{.}},Delete \$$INSTDIR\abigen.exe\n  Delete \$$INSTDIR\bootnode.exe\n  Delete \$$INSTDIR\clef.exe\n  Delete \$$INSTDIR\evm.exe\n  Delete $$INSTDIR\rlpdump.exe,g' \
-  -e 's,{{end}},,g'
+  -e 's,{{.EnergiCore}},bin/energi3.exe,g'
+#  -e 's,{{range .DevTools}}file {{.}},file bin/abigen.exe\n  file bin/bootnode.exe\n  file bin/clef.exe\n  file bin/evm.exe\n  file bin/rlpdump.exe,g' \
+#  -e 's,{{range $$}}Delete $$INSTDIR\\{{.}},Delete \$$INSTDIR\abigen.exe\n  Delete \$$INSTDIR\bootnode.exe\n  Delete \$$INSTDIR\clef.exe\n  Delete \$$INSTDIR\evm.exe\n  Delete $$INSTDIR\rlpdump.exe,g' \
+#  -e 's,{{end}},,g'
 # The above could be done better...
 
 release-windows-common:
