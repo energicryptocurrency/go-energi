@@ -41,7 +41,7 @@ import (
 
 var (
 	heartbeatInterval = time.Duration(5) * time.Minute
-	recheckInterval   = time.Minute
+	recheckInterval   = time.Duration(2) * time.Minute
 )
 
 const (
