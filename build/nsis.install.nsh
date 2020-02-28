@@ -1,11 +1,11 @@
-Name "energi3 ${MAJORVERSION}.${MINORVERSION}.${BUILDVERSION}" # VERSION variables set through command line arguments
+Name "Energi ${MAJORVERSION}.${MINORVERSION}.${BUILDVERSION}" # VERSION variables set through command line arguments
 InstallDir "$InstDir"
 OutFile "${OUTPUTFILE}" # set through command line arguments
 
 # Links for "Add/Remove Programs"
-!define HELPURL "https://github.com/ethereum/go-ethereum/issues"
-!define UPDATEURL "https://github.com/ethereum/go-ethereum/releases"
-!define ABOUTURL "https://github.com/ethereum/go-ethereum#ethereum-go"
+!define HELPURL "https://www.energi.world/contact-us/"
+!define UPDATEURL "https://docs.energi.software/en/downloads/core-node"
+!define ABOUTURL "https://docs.energi.software"
 !define /date NOW "%Y%m%d"
 
 PageEx license
@@ -13,7 +13,7 @@ PageEx license
 PageExEnd
 
 # Install energi3 binary
-Section "Energi Core" GETH_IDX
+Section "Gen 3 Core Node" GETH_IDX
   SetOutPath $INSTDIR
   file {{.EnergiCore}}
 
@@ -45,6 +45,8 @@ Section "Energi Core" GETH_IDX
   # Set default IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
   ${EnvVarUpdate} $0 "ENERGI3_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
   ${EnvVarUpdate} $0 "ENERGI3_SOCKET" "A" "HKLM" "\\.\pipe\energi3.ipc"
+  ${EnvVarUpdate} $0 "ENERGI3_TESTNET_SOCKET" "R" "HKLM" "\\.\pipe\test-energi3.ipc"
+  ${EnvVarUpdate} $0 "ENERGI3_TESTNET_SOCKET" "A" "HKLM" "\\.\pipe\test-energi3.ipc"
 
   # Add instdir to PATH
   Push "$INSTDIR"
