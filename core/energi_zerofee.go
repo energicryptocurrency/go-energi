@@ -262,7 +262,10 @@ func (z *zeroFeeProtector) checkMasternode(
 		return ErrZeroFeeDoS
 	}
 	vmc := bc.GetVMConfig()
-	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
+	hdr := types.CopyHeader(bc.CurrentHeader())
+	hdr.ParentHash = hdr.Hash()
+	hdr.Number = new(big.Int).Add(hdr.Number, common.Big1)
+	ctx := NewEVMContext(msg, hdr, bc, &sender)
 	ctx.GasLimit = ZeroFeeGasLimit
 	evm := vm.NewEVM(ctx, statedb, bc.Config(), *vmc)
 
