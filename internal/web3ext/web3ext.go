@@ -534,6 +534,12 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
+		new web3._extend.Method({
+			name: 'validateMigration',
+			call: 'admin_validateMigration',
+			params: 1,
+			outputFormatter: console.log,
+		}),
 	],
 	properties: [
 		new web3._extend.Property({

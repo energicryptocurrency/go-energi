@@ -40,6 +40,7 @@ import (
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_common "energi.world/core/gen3/energi/common"
+	energi_consensus "energi.world/core/gen3/energi/consensus"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -498,4 +499,24 @@ func (m *MigrationAPI) claimGen2Coins(
 	}
 
 	return
+}
+
+type MigrationAdminAPI struct {
+	backend Backend
+}
+
+func NewMigrationAdminAPI(b Backend) *MigrationAdminAPI {
+	return &MigrationAdminAPI{b}
+}
+
+func (b *MigrationAdminAPI) ValidateMigration(
+	migration_file string,
+) bool {
+	block, err := b.backend.BlockByNumber(context.Background(), 1)
+	if block == nil || err != nil {
+		log.Error("Migration block is missing")
+		return false
+	}
+
+	return energi_consensus.ValidateMigration(block, migration_file)
 }

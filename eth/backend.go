@@ -362,6 +362,11 @@ func (s *Ethereum) APIs() []rpc.API {
 			Public:    true,
 		},
 		{
+			Namespace: "admin",
+			Version:   "1.0",
+			Service:   energi_api.NewMigrationAdminAPI(s.APIBackend),
+		},
+		{
 			Namespace: "masternode",
 			Version:   "1.0",
 			Service:   energi_api.NewMasternodeAPI(s.APIBackend),

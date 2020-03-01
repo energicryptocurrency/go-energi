@@ -17,6 +17,7 @@
 package consensus
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -260,4 +261,51 @@ type snapshot struct {
 	Txouts    []snapshotItem `json:"snapshot_utxos"`
 	Blacklist []string       `json:"snapshot_blacklist"`
 	Hash      string         `json:"snapshot_hash"`
+}
+
+func ValidateMigration(
+	block *types.Block,
+	migration_file string,
+) bool {
+	file, err := os.Open(migration_file)
+	if err != nil {
+		log.Error("Failed to open snapshot", "err", err)
+		return false
+	}
+	defer file.Close()
+
+	snapshot, err := parseSnapshot(file)
+	if err != nil {
+		log.Error("Failed to parse snapshot", "err", err)
+		return false
+	}
+
+	owners, amounts, blacklist := createSnapshotParams(snapshot)
+	if owners == nil || amounts == nil || blacklist == nil {
+		log.Error("Failed to create arguments")
+		return false
+	}
+
+	migration_abi, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
+	if err != nil {
+		panic(err)
+	}
+
+	callData, err := migration_abi.Pack("setSnapshot", owners, amounts, blacklist)
+	if err != nil {
+		panic(err)
+	}
+
+	txs := block.Transactions()
+	if len(txs) != 2 {
+		log.Error("Invalid transaction count")
+		return false
+	}
+
+	if !bytes.Equal(txs[0].Data(), callData) {
+		log.Error("Migration transaction data mismatch")
+		return false
+	}
+
+	return true
 }
