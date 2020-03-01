@@ -1,8 +1,13 @@
-export GOPATH=$(pwd)/build/_workspace
+
+export GO111MODULE=off
+export GOFLAGS=
 
 go get -u github.com/fjl/gencodec
 go get -u golang.org/x/tools/cmd/stringer
 go get -u github.com/go-bindata/go-bindata/...
+
+export GO111MODULE=on
+export GOFLAGS=-mod=vendor
 
 go generate energi.world/core/gen3/core/types
 go generate energi.world/core/gen3/core/vm
