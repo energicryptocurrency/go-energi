@@ -1890,27 +1890,47 @@ var unitMap = {
     'Kwei':         '1000',
     'babbage':      '1000',
     'femtoether':   '1000',
+    'femtoenergi':  '1000',
+    'femtonrg':     '1000',
     'mwei':         '1000000',
     'Mwei':         '1000000',
     'lovelace':     '1000000',
     'picoether':    '1000000',
+    'picoenergi':   '1000000',
+    'piconrg':      '1000000',
     'gwei':         '1000000000',
     'Gwei':         '1000000000',
     'shannon':      '1000000000',
     'nanoether':    '1000000000',
     'nano':         '1000000000',
+    'nanoenergi':   '1000000000',
+    'nanonrg':      '1000000000',
     'szabo':        '1000000000000',
     'microether':   '1000000000000',
     'micro':        '1000000000000',
+    'microenergi':  '1000000000000',
+    'micronrg':     '1000000000000',
     'finney':       '1000000000000000',
     'milliether':    '1000000000000000',
     'milli':         '1000000000000000',
+    'millienergi':  '1000000000000000',
+    'millinrg':     '1000000000000000',
     'ether':        '1000000000000000000',
+    'energi':       '1000000000000000000',
+    'nrg':          '1000000000000000000',
     'kether':       '1000000000000000000000',
     'grand':        '1000000000000000000000',
+    'kenergi':      '1000000000000000000000',
+    'knrg':         '1000000000000000000000',
     'mether':       '1000000000000000000000000',
+    'menergi':      '1000000000000000000000000',
+    'mnrg':         '1000000000000000000000000',
     'gether':       '1000000000000000000000000000',
-    'tether':       '1000000000000000000000000000000'
+    'genergi':      '1000000000000000000000000000',
+    'gnrg':         '1000000000000000000000000000',
+    'tether':       '1000000000000000000000000000000',
+    'tenergi':      '1000000000000000000000000000000',
+    'tnrg':         '1000000000000000000000000000000',
 };
 
 /**
@@ -2531,6 +2551,7 @@ function Web3 (provider) {
     this._requestManager = new RequestManager(provider);
     this.currentProvider = provider;
     this.eth = new Eth(this);
+    this.nrg = this.eth;
     this.db = new DB(this);
     this.shh = new Shh(this);
     this.net = new Net(this);

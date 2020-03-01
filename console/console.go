@@ -148,6 +148,7 @@ func (c *Console) init(preload []string) error {
 		return fmt.Errorf("api modules: %v", err)
 	}
 	flatten := "var eth = web3.eth; var personal = web3.personal; "
+	flatten += "var nrg = web3.eth; "
 	for api := range apis {
 		if api == "web3" {
 			continue // manually mapped or ignore
