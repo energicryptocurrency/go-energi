@@ -523,12 +523,14 @@ func (g *GovernanceAPI) UpgradeCollect(
 // GOV-9: Treasury API
 //=============================================================================
 
-func (g *GovernanceAPI) treasury(
+func treasury(
+	backend Backend,
+	addr common.Address,
 	password *string,
 	payer common.Address,
 ) (session *energi_abi.ITreasurySession, err error) {
 	contract, err := energi_abi.NewITreasury(
-		energi_params.Energi_Treasury, g.backend.(bind.ContractBackend))
+		addr, backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, err
 	}
@@ -542,7 +544,7 @@ func (g *GovernanceAPI) treasury(
 		},
 		TransactOpts: bind.TransactOpts{
 			From:     payer,
-			Signer:   createSignerCallback(g.backend, password),
+			Signer:   createSignerCallback(backend, password),
 			Value:    common.Big0,
 			GasLimit: proposalCallGas,
 		},
@@ -573,15 +575,19 @@ func (g *GovernanceAPI) BudgetInfo() (*BudgetInfo, error) {
 }
 
 func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
+	return treasuryInfo(energi_params.Energi_Treasury, g.backend)
+}
+
+func treasuryInfo(addr common.Address, backend Backend) (interface{}, error) {
 	treasury, err := energi_abi.NewITreasuryCaller(
-		energi_params.Energi_Treasury, g.backend.(bind.ContractCaller))
+		addr, backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed NewITreasuryCaller", "err", err)
 		return nil, err
 	}
 
 	proxy, err := energi_abi.NewIGovernedProxyCaller(
-		energi_params.Energi_Treasury, g.backend.(bind.ContractCaller))
+		addr, backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Failed NewITreasuryCaller", "err", err)
 		return nil, err
@@ -600,13 +606,14 @@ func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
 
 	impl, err := proxy.Impl(call_opts)
 	if err != nil {
-		log.Error("Failed Impl", "err", err)
-		return nil, err
+		//log.Error("Failed Impl", "err", err)
+		//return nil, err
+		impl = addr
 	}
 
 	ret := make([]BudgetProposalInfo, 0, len(proposals))
 	for i, p := range proposals {
-		pInfo, err := proposalInfo(g.backend, p)
+		pInfo, err := proposalInfo(backend, p)
 		if err != nil {
 			log.Debug("Failed at proposalInfo", "err", err)
 			continue
@@ -615,7 +622,7 @@ func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
 		ret = append(ret, BudgetProposalInfo{ProposalInfo: *pInfo})
 
 		budger_proposal, err := energi_abi.NewIBudgetProposalCaller(
-			p, g.backend.(bind.ContractCaller))
+			p, backend.(bind.ContractCaller))
 		if err != nil {
 			log.Debug("Failed at NewIBudgetProposalCaller", "err", err)
 			return nil, err
@@ -641,7 +648,7 @@ func (g *GovernanceAPI) budgetInfo(num *big.Int) (interface{}, error) {
 		ret[i].RefUUID = uuid.UUID(common.LeftPadBytes(ref_uuid.Bytes(), 16)).String()
 	}
 
-	balance, err := getBalance(g.backend, impl)
+	balance, err := getBalance(backend, impl)
 	if err != nil {
 		log.Error("Failed at getBalance", "err", err)
 	}
@@ -662,7 +669,25 @@ func (g *GovernanceAPI) BudgetPropose(
 	payer common.Address,
 	password *string,
 ) (txhash common.Hash, err error) {
-	session, err := g.treasury(password, payer)
+	return treasuryPropose(
+		g.backend, energi_params.Energi_Treasury,
+		amount, ref_uuid,
+		period, fee,
+		payer, password,
+	)
+}
+
+func treasuryPropose(
+	backend Backend,
+	addr common.Address,
+	amount *hexutil.Big,
+	ref_uuid string,
+	period uint64,
+	fee *hexutil.Big,
+	payer common.Address,
+	password *string,
+) (txhash common.Hash, err error) {
+	session, err := treasury(backend, addr, password, payer)
 	if err != nil {
 		log.Error("Failed", "err", err)
 		return
