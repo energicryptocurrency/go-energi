@@ -70,10 +70,10 @@ Function GetInstalledSize
     IntOp $GetInstalledSize.total $GetInstalledSize.total + $0
   ${endif}
 
-  ${if} ${SectionIsSelected} ${DEV_TOOLS_IDX}
-    SectionGetSize ${DEV_TOOLS_IDX} $0
-    IntOp $GetInstalledSize.total $GetInstalledSize.total + $0
-  ${endif}
+  #${if} ${SectionIsSelected} ${DEV_TOOLS_IDX}
+  #  SectionGetSize ${DEV_TOOLS_IDX} $0
+  #  IntOp $GetInstalledSize.total $GetInstalledSize.total + $0
+  #${endif}
 
   IntFmt $GetInstalledSize.total "0x%08X" $GetInstalledSize.total
   Push $GetInstalledSize.total
