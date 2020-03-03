@@ -495,7 +495,7 @@ func (m *MigrationAPI) claimGen2Coins(
 	tx, err := mgrt_contract.Claim(item, dst, v, r, s)
 	if tx != nil {
 		txhash = tx.Hash()
-		log.Info("Sent migration transaction", "tx", tx.Hash(), "coins", coin.Owner)
+		log.Info("Sent migration transaction", "tx", tx.Hash().Hex(), "coins", coin.Owner)
 	}
 
 	return

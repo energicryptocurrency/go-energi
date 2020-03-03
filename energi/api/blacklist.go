@@ -356,7 +356,7 @@ func (m *MigrationAPI) CompensationProcess(
 			log.Error("Failed DrainMigration", "err", err)
 			return err
 		} else {
-			log.Info("Sent drain transaction", "tx", tx.Hash(), "coins", fa.Owner)
+			log.Info("Sent drain transaction", "tx", tx.Hash().Hex(), "coins", fa.Owner)
 		}
 
 		reward = true
@@ -402,7 +402,7 @@ func (m *MigrationAPI) CompensationProcess(
 	}
 
 	tx, err := reward_comp_fund.Reward(&comp_fund.TransactOpts)
-	log.Info("Sent distribute transaction", "tx", tx.Hash())
+	log.Info("Sent distribute transaction", "tx", tx.Hash().Hex())
 
 	return err
 }
