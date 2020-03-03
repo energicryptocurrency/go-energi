@@ -63,6 +63,7 @@
       "@cte make prebuild",
       "lint-sol",
       "test-sol"
-    ]
+    ],
+    "make_release": "@cte make -f Makefile.release -j1"
   }
 }
