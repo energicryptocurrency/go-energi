@@ -32,13 +32,13 @@ var (
 	MainnetMigrationSigner = common.HexToAddress("0xac34a2555de08384cd7960f35d3ab048fcf9f83a")
 	TestnetMigrationSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
 
-	MainnetEBISigner = common.HexToAddress("0xf7ec1411b51eebd813f71545ec6b5dc8a7ab71bc")
+	MainnetEBISigner = common.HexToAddress("0x01C3bB0b90C07b89CA38F56Bd9f3E8C160fec4dC")
 	TestnetEBISigner = common.HexToAddress("0x25bbaaaf27ab1966c3ab9faf31277a1db7601f3f")
 
-	MainnetCPPSigner = common.HexToAddress("0xa7acab32c9b29c116825b85d61e1e5587d7db7e4")
+	MainnetCPPSigner = common.HexToAddress("0xBD1C57eACcfD1519E342F870C1c551983F839479")
 	TestnetCPPSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
 
-	MainnetBackbone = common.HexToAddress("0x4d11f979cc5813f85436bdd4ab530a3768d34ae3")
+	MainnetBackbone = common.HexToAddress("0x79C7CF016E53e5C47906c2daF6De2aA00AAcdB1e")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 )
 
