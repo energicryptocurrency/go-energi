@@ -1207,7 +1207,11 @@ func (s *PublicTransactionPoolAPI) GetTransactionReceipt(ctx context.Context, ha
 	}
 
 	// Assign receipt status or post state.
-	if len(receipt.PostState) > 0 {
+	if consensus {
+		// NOTE: the late issue has been discovered - non-Byzantium finalization of consensus txs
+		// consensus transactions should never fail, or at least it is safe to assume so
+		fields["status"] = hexutil.Uint(0x01)
+	} else if len(receipt.PostState) > 0 {
 		fields["root"] = hexutil.Bytes(receipt.PostState)
 	} else {
 		fields["status"] = hexutil.Uint(receipt.Status)

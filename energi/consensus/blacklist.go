@@ -304,6 +304,7 @@ func (e *Energi) processDrainable(
 			return nil, nil, err
 		}
 
+		// NOTE: it should be Byzantium finalization here...
 		root := statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 		receipt := types.NewReceipt(root.Bytes(), failed, header.GasUsed)
 		receipt.TxHash = tx.Hash()
@@ -346,6 +347,7 @@ func (e *Energi) processDrainable(
 			return nil, nil, err
 		}
 
+		// NOTE: it should be Byzantium finalization here...
 		root = statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 		receipt = types.NewReceipt(root.Bytes(), failed, header.GasUsed)
 		receipt.TxHash = tx.Hash()
