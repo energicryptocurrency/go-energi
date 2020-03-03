@@ -1076,6 +1076,31 @@ web3._extend({
 			inputFormatter: [null],
 			outputFormatter: console.log,
 		}),
+		new web3._extend.Method({
+			name: 'stakingStatus',
+			call: 'miner_stakingStatus',
+			params: 0
+			outputFormatter: function(status) {
+				var res = {
+					hash: status.Hash,
+					height: status.Height,
+					miner: status.Miner,
+					nonceCap: status.NonceCap,
+					staking: status.Staking,
+					totalWeight: status.TotalWeight,
+					accounts: [],
+				};
+				var raw_accounts = status.Accounts;
+				for (var i = 0; i < raw_accounts.length; ++i) {
+					var raw_acct = raw_accounts[i];
+					res.accounts.push({
+						account: raw_accounts[i].Account,
+						weight: raw_accounts[i].Weight,
+					});
+				}
+				return res;
+			},
+		}),
 	],
 	properties: []
 });

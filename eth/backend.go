@@ -207,6 +207,52 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	eth.miner.SetEthAPIBackend(eth.APIBackend)
 	eth.miner.SetMinerAutocollateral(config.MinerAutocollateral)
 
+	if energi, ok := eth.engine.(*energi.Energi); ok {
+		energi.SetMinerCB(
+			func() []common.Address {
+				res := make([]common.Address, 0, 32)
+				for _, w := range eth.accountManager.Wallets() {
+					for _, a := range w.Accounts() {
+						if w.IsUnlockedForStaking(a) {
+							res = append(res, a.Address)
+						}
+					}
+				}
+
+				// TODO: revise how locking affects performance
+				eth.lock.RLock()
+				for k := range eth.dpos {
+					res = append(res, k)
+				}
+				eth.lock.RUnlock()
+
+				return res
+			},
+			func(addr common.Address, hash []byte) ([]byte, error) {
+				// TODO: revise how locking affects performance
+				eth.lock.RLock()
+				if signer, ok := eth.dpos[addr]; ok {
+					addr = signer
+				}
+				eth.lock.RUnlock()
+
+				account := accounts.Account{Address: addr}
+				wallet, err := eth.accountManager.Find(account)
+				if wallet == nil || err != nil {
+					log.Error("Account unavailable locally", "err", err)
+					return nil, fmt.Errorf("signer missing: %v", err)
+				}
+				return wallet.SignHash(account, hash)
+			},
+			func() int {
+				return eth.protocolManager.peers.Len()
+			},
+			func() bool {
+				return eth.IsMining()
+			},
+		)
+	}
+
 	return eth, nil
 }
 
@@ -525,48 +571,6 @@ func (s *Ethereum) StartMining(threads int) error {
 				return fmt.Errorf("signer missing: %v", err)
 			}
 			clique.Authorize(eb, wallet.SignHash)
-		}
-		if energi, ok := s.engine.(*energi.Energi); ok {
-			energi.SetMinerCB(
-				func() []common.Address {
-					res := make([]common.Address, 0, 32)
-					for _, w := range s.accountManager.Wallets() {
-						for _, a := range w.Accounts() {
-							if w.IsUnlockedForStaking(a) {
-								res = append(res, a.Address)
-							}
-						}
-					}
-
-					// TODO: revise how locking affects performance
-					s.lock.RLock()
-					for k := range s.dpos {
-						res = append(res, k)
-					}
-					s.lock.RUnlock()
-
-					return res
-				},
-				func(addr common.Address, hash []byte) ([]byte, error) {
-					// TODO: revise how locking affects performance
-					s.lock.RLock()
-					if signer, ok := s.dpos[addr]; ok {
-						addr = signer
-					}
-					s.lock.RUnlock()
-
-					account := accounts.Account{Address: addr}
-					wallet, err := s.accountManager.Find(account)
-					if wallet == nil || err != nil {
-						log.Error("Account unavailable locally", "err", err)
-						return nil, fmt.Errorf("signer missing: %v", err)
-					}
-					return wallet.SignHash(account, hash)
-				},
-				func() int {
-					return s.protocolManager.peers.Len()
-				},
-			)
 		}
 		// If mining is started, we can disable the transaction rejection mechanism
 		// introduced to speed sync times.

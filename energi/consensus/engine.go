@@ -60,6 +60,7 @@ type ChainReader = eth_consensus.ChainReader
 type AccountsFn func() []common.Address
 type SignerFn func(common.Address, []byte) ([]byte, error)
 type PeerCountFn func() int
+type IsMiningFn func() bool
 type DiffFn func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int
 
 type Energi struct {
@@ -78,6 +79,7 @@ type Energi struct {
 	signerFn     SignerFn
 	accountsFn   AccountsFn
 	peerCountFn  PeerCountFn
+	isMiningFn   IsMiningFn
 	diffFn       DiffFn
 	testing      bool
 	now          func() uint64
@@ -147,6 +149,10 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		now:          func() uint64 { return uint64(time.Now().Unix()) },
 		nextKSPurge:  0,
 		txhashMap:    txhashMap,
+
+		accountsFn:  func() []common.Address { return nil },
+		peerCountFn: func() int { return 0 },
+		isMiningFn:  func() bool { return false },
 	}
 }
 
@@ -734,6 +740,7 @@ func (e *Energi) SetMinerCB(
 	accountsFn AccountsFn,
 	signerFn SignerFn,
 	peerCountFn PeerCountFn,
+	isMiningFn IsMiningFn,
 ) {
 	if e.signerFn != nil {
 		panic("Callbacks must be set only once!")
@@ -742,6 +749,7 @@ func (e *Energi) SetMinerCB(
 	e.signerFn = signerFn
 	e.accountsFn = accountsFn
 	e.peerCountFn = peerCountFn
+	e.isMiningFn = isMiningFn
 }
 
 // CalcDifficulty is the difficulty adjustment algorithm. It returns the difficulty
@@ -753,7 +761,14 @@ func (e *Energi) CalcDifficulty(chain ChainReader, time uint64, parent *types.He
 
 // APIs returns the RPC APIs this consensus engine provides.
 func (e *Energi) APIs(chain ChainReader) []rpc.API {
-	return make([]rpc.API, 0)
+	return []rpc.API{
+		{
+			Namespace: "miner",
+			Version:   "1.0",
+			Service:   NewEngineAPI(chain, e),
+			Public:    true,
+		},
+	}
 }
 
 // Close terminates any background threads maintained by the consensus engine.
