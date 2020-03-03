@@ -64,6 +64,10 @@ type IsMiningFn func() bool
 type DiffFn func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int
 
 type Energi struct {
+	// Atomic alignment to 64-bit
+	nonceCap uint64
+
+	// The rest
 	config       *params.EnergiConfig
 	db           ethdb.Database
 	rewardAbi    abi.ABI
@@ -85,7 +89,6 @@ type Energi struct {
 	now          func() uint64
 	knownStakes  KnownStakes
 	nextKSPurge  uint64
-	nonceCap     uint64
 	txhashMap    *lru.Cache
 }
 
