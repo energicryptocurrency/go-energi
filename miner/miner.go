@@ -34,8 +34,6 @@ import (
 	"energi.world/core/gen3/event"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
-
-	energi "energi.world/core/gen3/energi/consensus"
 )
 
 // Backend wraps all methods required for mining.
@@ -181,23 +179,12 @@ func (self *Miner) SetMigration(migration string) {
 	self.worker.setMigration(migration)
 }
 
-func (self *Miner) SetMinerNonceCap(nonce *uint64) (oldNonce uint64) {
-	consensus, ok := self.engine.(*energi.Energi)
-	if !ok {
-		return 0
-	}
-
-	oldNonce = consensus.GetMinerNonceCap()
-	if nonce == nil {
-		return
-	}
-
-	consensus.SetMinerNonceCap(*nonce)
-	return
-}
-
 func (self *Miner) SetMinerAutocollateral(autocollateral uint64) {
 	self.worker.setAutocollateral(autocollateral)
+}
+
+func (self *Miner) GetMinerAutocollateral() uint64 {
+	return self.worker.getAutocollateral()
 }
 
 func (self *Miner) SetEthAPIBackend(api bind.ContractBackend) {

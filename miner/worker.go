@@ -268,6 +268,12 @@ func (w *worker) setAutocollateral(autocollateral uint64) {
 	w.autocollateral = autocollateral
 }
 
+func (w *worker) getAutocollateral() uint64 {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.autocollateral
+}
+
 // setExtra sets the content used to initialize the block extra field.
 func (w *worker) setExtra(extra []byte) {
 	w.mu.Lock()

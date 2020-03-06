@@ -168,9 +168,19 @@ func (api *PrivateMinerAPI) RemoveDPoS(contract common.Address) bool {
 	return true
 }
 
-// SetMinerNonceCap updates the POS nonce cap.
-func (api *PrivateMinerAPI) SetMinerNonceCap(nonce *uint64) uint64 {
-	return api.e.Miner().SetMinerNonceCap(nonce)
+// Updated auto-collateralize mode
+func (api *PrivateMinerAPI) SetAutocollateralize(mode *uint64) (old uint64, err error) {
+	old = api.e.Miner().GetMinerAutocollateral()
+
+	if mode != nil {
+		if *mode <= 2 {
+			api.e.Miner().SetMinerAutocollateral(*mode)
+		} else {
+			err = fmt.Errorf("Invalid mode %d", *mode)
+		}
+	}
+
+	return
 }
 
 // PrivateAdminAPI is the collection of Ethereum full node-related APIs

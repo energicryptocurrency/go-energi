@@ -1070,8 +1070,15 @@ web3._extend({
 			inputFormatter: [web3._extend.formatters.inputAddressFormatter]
 		}),
 		new web3._extend.Method({
-			name: 'setMinerNonceCap',
-			call: 'miner_setMinerNonceCap',
+			name: 'setNonceCap',
+			call: 'miner_setNonceCap',
+			params: 1,
+			inputFormatter: [null],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'setAutocollateralize',
+			call: 'miner_setAutocollateralize',
 			params: 1,
 			inputFormatter: [null],
 			outputFormatter: console.log,

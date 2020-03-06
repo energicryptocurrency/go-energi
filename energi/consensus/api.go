@@ -92,3 +92,13 @@ func (a *EngineAPI) StakingStatus() *StakingStatusInfo {
 
 	return res
 }
+
+func (a *EngineAPI) SetNonceCap(nonce *uint64) (oldNonce uint64) {
+	oldNonce = a.engine.GetMinerNonceCap()
+	if nonce == nil {
+		return
+	}
+
+	a.engine.SetMinerNonceCap(*nonce)
+	return
+}
