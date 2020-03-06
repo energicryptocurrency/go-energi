@@ -360,7 +360,8 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 	if err != nil {
 		return err
 	}
-	if msg.Size > ProtocolMaxMsgSize {
+	// NOTE: maximize payload in migration based on low-level frame limits
+	if msg.Size > ProtocolMaxMsgSize && (pm.blockchain.CurrentHeader().Number.Cmp(common.Big0) != 0) {
 		return errResp(ErrMsgTooLarge, "%v > %v", msg.Size, ProtocolMaxMsgSize)
 	}
 	defer msg.Discard()
