@@ -334,6 +334,10 @@ func (e *Energi) verifyPoSHash(
 	header *types.Header,
 ) error {
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return eth_consensus.ErrUnknownAncestor
+	}
+
 	weight, err := e.lookupStakeWeight(chain, header.Time, parent, header.Coinbase)
 	if err != nil {
 		return err

@@ -25,29 +25,52 @@ import (
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core"
+	"energi.world/core/gen3/core/state"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/ethdb"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
-
 	"github.com/stretchr/testify/assert"
 
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
-func TestPoSChain(t *testing.T) {
-	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+type mockChainReader struct {
+	current *types.Header
+	stateDB *state.StateDB
+	headers map[common.Hash]*types.Header
+}
 
-	results := make(chan *eth_consensus.SealResult, 1)
-	stop := make(chan struct{})
+func (cr *mockChainReader) Config() *params.ChainConfig {
+	panic("Not impl")
+}
+func (cr *mockChainReader) CurrentHeader() *types.Header {
+	return cr.current
+}
+func (cr *mockChainReader) GetHeader(hash common.Hash, number uint64) *types.Header {
+	return cr.headers[hash]
+}
+func (cr *mockChainReader) GetHeaderByNumber(number uint64) *types.Header {
+	panic("Not impl")
+}
+func (cr *mockChainReader) GetHeaderByHash(hash common.Hash) *types.Header {
+	panic("Not impl")
+}
+func (cr *mockChainReader) GetBlock(hash common.Hash, number uint64) *types.Block {
+	panic("Not impl")
+}
+func (cr *mockChainReader) CalculateBlockState(hash common.Hash, number uint64) *state.StateDB {
+	return cr.stateDB
+}
 
-	signers := make(map[common.Address]*ecdsa.PrivateKey, 61)
-	addresses := make([]common.Address, 0, 60)
+func generateAddresses(len int) ([]common.Address, map[common.Address]*ecdsa.PrivateKey, core.GenesisAlloc, common.Address) {
+	signers := make(map[common.Address]*ecdsa.PrivateKey, len+1)
+	addresses := make([]common.Address, 0, len)
 	alloc := make(core.GenesisAlloc, 61)
-	for i := 0; i < 60; i++ {
+
+	for i := 0; i < len; i++ {
 		k, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
 		a := crypto.PubkeyToAddress(k.PublicKey)
 
@@ -57,11 +80,25 @@ func TestPoSChain(t *testing.T) {
 			Balance: minStake,
 		}
 	}
+
 	alloc[energi_params.Energi_MigrationContract] = core.GenesisAccount{
 		Balance: minStake,
 	}
-	migrationSigner := addresses[59]
+
+	migrationSigner := addresses[len-1]
 	signers[energi_params.Energi_MigrationContract] = signers[migrationSigner]
+
+	return addresses, signers, alloc, migrationSigner
+}
+
+func TestPoSChain(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	results := make(chan *eth_consensus.SealResult, 1)
+	stop := make(chan struct{})
+
+	addresses, signers, alloc, migrationSigner := generateAddresses(60)
 
 	testdb := ethdb.NewMemDatabase()
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
@@ -116,7 +153,6 @@ func TestPoSChain(t *testing.T) {
 	assert.NotEmpty(t, parent)
 
 	iterCount := 150
-	//iterMid := iterCount * 2 / 3
 
 	engine.diffFn = func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int {
 		return common.Big1
@@ -235,14 +271,11 @@ func TestPoSChain(t *testing.T) {
 
 		assert.True(t, parent.Time < tt.min_time, "Header %v", i)
 
+		assert.Empty(t, engine.enforceTime(header, tt))
+		assert.Empty(t, engine.checkTime(header, tt))
+
 		_, err = chain.WriteBlockWithState(block, receipts, blstate)
 		assert.Empty(t, err)
-
-		// Stake amount tests
-		//---
-		// TODO:
-
-		//---
 
 		parent = header
 	}
@@ -348,5 +381,303 @@ func TestPoSDiffV1(t *testing.T) {
 
 		res := calcPoSDifficultyV1(nil, tc.time, parent, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
+	}
+}
+
+func TestStakeWeightLookup(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	addresses, _, _, _ := generateAddresses(5)
+	engine := New(nil, nil)
+
+	genesis := types.NewBlock(&types.Header{
+		Number:     big.NewInt(0),
+		Time:       1000,
+		GasLimit:   8000000,
+		GasUsed:    0,
+		Difficulty: big.NewInt(1),
+		Coinbase:   energi_params.Energi_Treasury,
+	}, nil, nil, nil)
+
+	stateCache := state.NewDatabaseWithCache(ethdb.NewMemDatabase(), 256)
+	stateDB, err := state.New(genesis.Root(), stateCache)
+	assert.Empty(t, err)
+
+	fakeChain := new(mockChainReader)
+	fakeChain.stateDB = stateDB
+	fakeChain.headers = make(map[common.Hash]*types.Header)
+	fakeChain.headers[genesis.Hash()] = genesis.Header()
+
+	balance, _ := new(big.Int).SetString("3280000000000000000", 10)
+	expectedWeights := []uint64{3, 6, 19, 78, 393}
+	parent := genesis.Header()
+	for i, address := range addresses {
+		number := new(big.Int).Add(parent.Number, common.Big1)
+		header := &types.Header{
+			ParentHash: parent.Hash(),
+			Coinbase:   address,
+			GasLimit:   parent.GasLimit,
+			Number:     number,
+			Time:       parent.Time,
+		}
+		fakeChain.current = header
+		fakeChain.headers[header.Hash()] = header
+		fakeChain.headers[parent.Hash()] = parent
+
+		multiplier := big.NewInt(int64(i))
+		multiplier = multiplier.Add(multiplier, big.NewInt(1))
+		stateDB.SetBalance(header.Coinbase, balance.Mul(balance, multiplier))
+
+		// Test CalculateBlockState returns nil handled correctly
+		fakeChain.stateDB = nil
+		weight, err := engine.lookupStakeWeight(fakeChain, header.Time, parent, header.Coinbase)
+		assert.Equal(t, err, eth_consensus.ErrMissingState)
+		assert.Equal(t, weight, uint64(0))
+
+		// Test when Coinbase addresses are the same
+		fakeChain.stateDB = stateDB
+		parentCoinbase := parent.Coinbase
+		parent.Coinbase = header.Coinbase
+		weight, err = engine.lookupStakeWeight(fakeChain, header.Time, parent, header.Coinbase)
+		assert.Empty(t, err)
+		assert.Equal(t, weight, expectedWeights[i])
+
+		// Test total_steaked > weight returns 0
+		parentNonce := parent.Nonce
+		parent.Nonce = types.BlockNonce{255, 255, 255, 255, 255, 255, 255, 255}
+		weight, err = engine.lookupStakeWeight(fakeChain, header.Time, parent, header.Coinbase)
+		assert.Empty(t, err)
+		assert.Equal(t, weight, 0)
+
+		parent.Coinbase = parentCoinbase
+		parent.Nonce = parentNonce
+
+		// Test weights match expected
+		weight, err = engine.lookupStakeWeight(fakeChain, header.Time, parent, header.Coinbase)
+		assert.Empty(t, err)
+		assert.Equal(t, weight, expectedWeights[i])
+
+		parent = header
+	}
+}
+
+func TestPoSMine(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	addresses, signers, alloc, migrationSigner := generateAddresses(5)
+	testdb := ethdb.NewMemDatabase()
+	var header *types.Header
+
+	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
+	engine.testing = true
+	engine.diffFn = func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int {
+		return common.Big1
+	}
+	engine.SetMinerCB(
+		func() []common.Address {
+			if header.Number.Uint64() == 1 {
+				return []common.Address{
+					energi_params.Energi_MigrationContract,
+				}
+			}
+
+			return addresses
+		},
+		func(addr common.Address, hash []byte) ([]byte, error) {
+			return crypto.Sign(hash, signers[addr])
+		},
+		func() int { return 1 },
+	)
+
+	chainConfig := *params.EnergiTestnetChainConfig
+	chainConfig.Energi = &params.EnergiConfig{
+		MigrationSigner: migrationSigner,
+	}
+	gspec := &core.Genesis{
+		Config:     &chainConfig,
+		GasLimit:   8000000,
+		Timestamp:  1000,
+		Difficulty: big.NewInt(1),
+		Coinbase:   energi_params.Energi_Treasury,
+		Alloc:      alloc,
+		Xfers:      core.DeployEnergiGovernance(&chainConfig),
+	}
+	genesis := gspec.MustCommit(testdb)
+
+	stateCache := state.NewDatabaseWithCache(testdb, 256)
+	stateDB, err := state.New(genesis.Root(), stateCache)
+	assert.Empty(t, err)
+
+	fakeChain := new(mockChainReader)
+	fakeChain.stateDB = stateDB
+	fakeChain.headers = make(map[common.Hash]*types.Header)
+	fakeChain.headers[genesis.Hash()] = genesis.Header()
+
+	parent := genesis.Header()
+	balance, _ := new(big.Int).SetString("3280000000000000000", 10)
+
+	for i, address := range addresses {
+		multiplier := big.NewInt(int64(i))
+		multiplier = multiplier.Add(multiplier, big.NewInt(1))
+		stateDB.SetBalance(address, balance.Mul(balance, multiplier))
+	}
+
+	for i := 1; i < len(addresses)-1; i++ {
+		number := new(big.Int).Add(parent.Number, common.Big1)
+
+		header = &types.Header{
+			ParentHash: parent.Hash(),
+			Coinbase:   addresses[i],
+			Difficulty: big.NewInt(1),
+			GasLimit:   parent.GasLimit,
+			Number:     number,
+			Time:       parent.Time,
+		}
+
+		fakeChain.current = header
+		fakeChain.headers[header.Hash()] = header
+		fakeChain.headers[parent.Hash()] = parent
+
+		// Test if accounts function returns no addresses
+		engineAccountsFn := engine.accountsFn
+		engine.accountsFn = func() []common.Address {
+			return []common.Address{}
+		}
+		stop := make(chan struct{})
+		go func() {
+			stop <- struct{}{}
+		}()
+		success, err := engine.mine(fakeChain, header, stop)
+		assert.Empty(t, err)
+		assert.False(t, success)
+		close(stop)
+
+		engine.accountsFn = engineAccountsFn
+
+		// Test if chain header returns nil
+		parentHeader := fakeChain.headers[header.ParentHash]
+		fakeChain.headers[header.ParentHash] = nil
+		success, err = engine.mine(fakeChain, header, make(chan struct{}))
+		assert.Equal(t, err, eth_consensus.ErrUnknownAncestor)
+		assert.False(t, success)
+
+		fakeChain.headers[header.ParentHash] = parentHeader
+
+		// Test stop works when PoS miner is sleeping
+		engineNow := engine.now
+		timeNow := uint64(1000)
+		engine.now = func() uint64 { timeNow -= 50; return timeNow }
+		stop = make(chan struct{})
+		go func() {
+			stop <- struct{}{}
+		}()
+		success, err = engine.mine(fakeChain, header, stop)
+		assert.Empty(t, err)
+		assert.False(t, success)
+		close(stop)
+
+		engine.now = engineNow
+
+		// Test missing state
+		fakeChain.stateDB = nil
+		success, err = engine.mine(fakeChain, header, make(chan struct{}))
+		assert.Equal(t, err, eth_consensus.ErrMissingState)
+		assert.False(t, success)
+
+		fakeChain.stateDB = stateDB
+
+		// Test PoS mining
+		success, err = engine.mine(fakeChain, header, make(chan struct{}))
+		assert.Empty(t, err)
+		assert.True(t, success)
+
+		parent = header
+	}
+}
+
+func TestVerifyPoSHash(t *testing.T) {
+	t.Parallel()
+	log.Root().SetHandler(log.StdoutHandler)
+
+	addresses, _, alloc, migrationSigner := generateAddresses(5)
+	testdb := ethdb.NewMemDatabase()
+	var header *types.Header
+
+	engine := New(nil, nil)
+	engine.testing = true
+
+	chainConfig := *params.EnergiTestnetChainConfig
+	chainConfig.Energi = &params.EnergiConfig{
+		MigrationSigner: migrationSigner,
+	}
+	gspec := &core.Genesis{
+		Config:     &chainConfig,
+		GasLimit:   8000000,
+		Timestamp:  1000,
+		Difficulty: big.NewInt(1),
+		Coinbase:   energi_params.Energi_Treasury,
+		Alloc:      alloc,
+		Xfers:      core.DeployEnergiGovernance(&chainConfig),
+	}
+	genesis := gspec.MustCommit(testdb)
+
+	stateCache := state.NewDatabaseWithCache(testdb, 256)
+	stateDB, err := state.New(genesis.Root(), stateCache)
+	assert.Empty(t, err)
+
+	fakeChain := new(mockChainReader)
+	fakeChain.stateDB = stateDB
+	fakeChain.headers = make(map[common.Hash]*types.Header)
+	fakeChain.headers[genesis.Hash()] = genesis.Header()
+
+	parent := genesis.Header()
+
+	for i := 1; i < len(addresses)-1; i++ {
+		number := new(big.Int).Add(parent.Number, common.Big1)
+
+		header = &types.Header{
+			ParentHash: parent.Hash(),
+			Coinbase:   addresses[i],
+			Difficulty: big.NewInt(1),
+			GasLimit:   parent.GasLimit,
+			Number:     number,
+			Time:       parent.Time,
+			Nonce:      types.BlockNonce{0, 0, 0, 0, 0, 0, 0, 1},
+		}
+
+		fakeChain.current = header
+		fakeChain.headers[header.Hash()] = header
+		fakeChain.headers[parent.Hash()] = parent
+
+		// Test if chain get header fails
+		headerParent := fakeChain.headers[header.ParentHash]
+		fakeChain.headers[header.ParentHash] = nil
+		err := engine.verifyPoSHash(fakeChain, header)
+		assert.Equal(t, err, eth_consensus.ErrUnknownAncestor)
+
+		fakeChain.headers[header.ParentHash] = headerParent
+
+		// Test if state is empty
+		fakeChain.stateDB = nil
+		err = engine.verifyPoSHash(fakeChain, header)
+		assert.Equal(t, err, eth_consensus.ErrMissingState)
+
+		fakeChain.stateDB = stateDB
+
+		// Test invalid PoS hash
+		headerDifficulty := header.Difficulty
+		header.Difficulty = big.NewInt(1000000)
+		err = engine.verifyPoSHash(fakeChain, header)
+		assert.Equal(t, err, errInvalidPoSHash)
+
+		header.Difficulty = headerDifficulty
+
+		// Test valid arguments
+		err = engine.verifyPoSHash(fakeChain, header)
+		assert.Empty(t, err)
+
+		parent = header
 	}
 }
