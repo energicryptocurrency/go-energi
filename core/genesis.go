@@ -424,7 +424,7 @@ func DefaultEnergiMainnetGenesisBlock() *Genesis {
 		Config:     params.EnergiMainnetChainConfig,
 		Coinbase:   energi_params.Energi_Treasury,
 		Nonce:      0,
-		Timestamp:  1569888000000,
+		Timestamp:  1583852648,
 		ExtraData:  []byte{},
 		GasLimit:   8000000,
 		Difficulty: big.NewInt(0xFFFF),
