@@ -193,7 +193,7 @@ func (pb *preBlacklist) processProposal(
 
 	// New pre-blacklist item
 	//---
-	log.Warn("New preliminary blacklist", "target", target.Hex(), "sender", sender.Hex())
+	log.Debug("New preliminary blacklist", "target", target.Hex(), "sender", sender.Hex())
 	pb.proposed[target] = now
 	pool.removeBySenderLocked(target)
 }
