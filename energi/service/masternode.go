@@ -506,6 +506,11 @@ func (v *peerValidator) validate() {
 			return
 		case <-time.After(deadline.Sub(time.Now())):
 			log.Info("MN Invalidation", "mn", v.target)
+
+			// TODO: an excepted, but not seen before problem on scale got identified.
+			log.Warn("Invalidations are temporary disabled.")
+			return
+
 			_, err := mnsvc.registry.Invalidate(v.target)
 			if err != nil {
 				log.Warn("MN Invalidate error", "mn", v.target, "err", err)
