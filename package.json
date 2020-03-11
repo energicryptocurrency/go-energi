@@ -1,6 +1,6 @@
 {
   "name": "energi3",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "author": "Andrey Galkin <andrey@futoin.org>",
   "license": "GPL-3.0+",
   "devDependencies": {
