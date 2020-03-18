@@ -5674,8 +5674,8 @@ var methods = function () {
     var unlockAccount = new Method({
         name: 'unlockAccount',
         call: 'personal_unlockAccount',
-        params: 3,
-        inputFormatter: [formatters.inputAddressFormatter, null, null]
+        params: 4,
+        inputFormatter: [formatters.inputAddressFormatter, null, null, null]
     });
 
     var sendTransaction = new Method({

@@ -162,8 +162,16 @@ func (b *bridge) UnlockAccount(call otto.FunctionCall) (response otto.Value) {
 		}
 		duration = call.Argument(2)
 	}
+	// The fourth argument is the stake only
+	stakingOnly := otto.NullValue()
+	if call.Argument(3).IsDefined() && !call.Argument(3).IsNull() {
+		if !call.Argument(3).IsBoolean() {
+			throwJSException("unlock stakingOnly must be a boolean")
+		}
+		stakingOnly = call.Argument(3)
+	}
 	// Send the request to the backend and return
-	val, err := call.Otto.Call("jeth.unlockAccount", nil, account, passwd, duration)
+	val, err := call.Otto.Call("jeth.unlockAccount", nil, account, passwd, duration, stakingOnly)
 	if err != nil {
 		throwJSException(err.Error())
 	}
