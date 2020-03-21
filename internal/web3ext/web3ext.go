@@ -158,6 +158,12 @@ web3._extend({
 			outputFormatter: web3._extend.formatters.coinSearchFormatter,
 		}),
 		new web3._extend.Method({
+			name: 'searchGen3DestinationByGen2Address',
+			call: 'energi_searchGen3DestinationByGen2Address',
+			params: 2,
+			outputFormatter: web3._extend.formatters.coinSearchFormatter,
+		}),
+		new web3._extend.Method({
 			name: 'searchRawGen2Coins',
 			call: 'energi_searchRawGen2Coins',
 			params: 2,

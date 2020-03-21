@@ -21,7 +21,7 @@ import (
 	"errors"
 	"math/big"
 
-	"energi.world/core/gen3"
+	ethereum "energi.world/core/gen3"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core"
 	"energi.world/core/gen3/core/types"
@@ -226,6 +226,17 @@ func (b *EthAPIBackend) isFilteredLog(
 
 		if addr == log.Address {
 			return true
+		}
+	}
+
+	for _, queryTopics := range q.Topics {
+		if len(queryTopics) > 0 {
+			for _, foundTopic := range log.Topics {
+				// Check if missed event name topic was returned.
+				if len(foundTopic) > 0 && queryTopics[0] == foundTopic {
+					return true
+				}
+			}
 		}
 	}
 
