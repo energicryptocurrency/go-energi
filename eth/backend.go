@@ -420,7 +420,17 @@ func (s *Ethereum) APIs() []rpc.API {
 		},
 	}...)
 
-	return apis
+	// Rename a copy of eth to nrg
+	nrgAPIs := make([]rpc.API, 0, 4)
+	for i := range apis {
+		apiSrv := apis[i]
+		if apiSrv.Namespace == "eth" {
+			apiSrv.Namespace = "nrg"
+			nrgAPIs = append(nrgAPIs, apiSrv)
+		}
+	}
+
+	return append(apis, nrgAPIs...)
 }
 
 func (s *Ethereum) ResetWithGenesisBlock(gb *types.Block) {
