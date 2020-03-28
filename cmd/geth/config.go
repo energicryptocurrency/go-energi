@@ -103,7 +103,7 @@ func defaultNodeConfig() node.Config {
 	cfg := node.DefaultConfig
 	cfg.Name = clientIdentifier
 	cfg.Version = params.VersionWithCommit(gitCommit)
-	cfg.HTTPModules = append(cfg.HTTPModules, "eth", "shh")
+	cfg.HTTPModules = append(cfg.HTTPModules, "eth", "shh", "nrg", "masternode", "energi")
 	cfg.WSModules = append(cfg.WSModules, "eth", "shh")
 	cfg.IPCPath = "energi3.ipc"
 	return cfg
