@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"energi.world/core/gen3"
+	ethereum "energi.world/core/gen3"
 	"energi.world/core/gen3/accounts/abi"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core/types"
