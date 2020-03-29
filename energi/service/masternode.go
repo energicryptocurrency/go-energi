@@ -363,8 +363,28 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 		m.validator.cancel()
 
 		// Only present in IMasternodeRegistryV2
-		if ok, err := m.registry.CanHeartbeat(m.address); err == nil && !ok {
-			return
+		// In IMasternodeRegistryV2.sol a bug exists in the function below:
+		// function canHeartbeat(address masternode) external view returns(bool can_heartbeat) {
+		// 	Status storage s = mn_status[masternode];
+
+		// 	return _isActive(masternode, s) && (s.next_heartbeat <= block.timestamp);
+		// }
+		// canHeartbeat returns true if:
+		//       Masternode is Active && its not yet time make a heartbeat
+		// instead of:
+		//       Masternode is Active && its time make a heartbeat.
+
+		// Solution:
+		{
+			isActive, err := m.registry.IsActive(m.address)
+			if err != nil || !isActive {
+				return
+			}
+
+			isActiveButNotYetTime, err := m.registry.CanHeartbeat(m.address)
+			if err != nil || isActiveButNotYetTime {
+				return
+			}
 		}
 
 		// Ensure heartbeat on clean queue
