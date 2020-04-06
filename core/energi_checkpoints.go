@@ -18,6 +18,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"math/big"
 	"sort"
 	"sync"
@@ -49,6 +50,19 @@ type Checkpoint struct {
 	Since  uint64
 	Number uint64
 	Hash   common.Hash
+}
+
+// Format implements fmt.Formatter, forcing the Checkpoint to be formatted as is,
+// without going through the stringer interface used for logging.
+func (cp Checkpoint) Format(s fmt.State, c rune) {
+	cpStr := struct {
+		Number uint64
+		Hash   string
+	}{
+		cp.Number,
+		cp.Hash.String(),
+	}
+	fmt.Fprintf(s, "%+"+string(c), cpStr)
 }
 
 type CheckpointSignature []byte
@@ -181,7 +195,7 @@ func (cm *checkpointManager) addCheckpoint(
 			}
 		}
 
-		if (cp.Number <= maxHardcodedCheckpoint) {
+		if cp.Number <= maxHardcodedCheckpoint {
 			//log.Info("Ignoring checkpoint which occurs before latest checkpoint at", "block", maxHardcodedCheckpoint)
 			return nil
 		}
