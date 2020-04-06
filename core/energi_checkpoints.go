@@ -89,9 +89,7 @@ func newCheckpointManager() *checkpointManager {
 }
 
 func (cm *checkpointManager) setup(chain CheckpointChain) {
-	genesis_hash := chain.GetHeaderByNumber(0).Hash()
-
-	if checkpoints, ok := energi_params.EnergiCheckpoints[genesis_hash]; ok {
+	if checkpoints, ok := energi_params.EnergiCheckpoints[params.MainnetGenesisHash]; ok {
 		for k, v := range checkpoints {
 			cm.addCheckpoint(
 				chain,
@@ -172,6 +170,22 @@ func (cm *checkpointManager) addCheckpoint(
 	}
 
 	if !local {
+		// ignore checkpoints which occur before the latest local checkpoint
+		var maxHardcodedCheckpoint uint64
+		for maxHardcodedCheckpoint = range energi_params.EnergiCheckpoints[params.MainnetGenesisHash] {
+			break
+		}
+		for n := range energi_params.EnergiCheckpoints[params.MainnetGenesisHash] {
+			if n > maxHardcodedCheckpoint {
+				maxHardcodedCheckpoint = n
+			}
+		}
+
+		if (cp.Number <= maxHardcodedCheckpoint) {
+			//log.Info("Ignoring checkpoint which occurs before latest checkpoint at", "block", maxHardcodedCheckpoint)
+			return nil
+		}
+
 		// TODO: proper validation and use of future checkpoints
 		if len(sigs) == 0 {
 			log.Warn("Checkpoint: missing signatures",
