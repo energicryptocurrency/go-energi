@@ -64,42 +64,43 @@ func (e *Energi) checkDoS(
 //		}
 //	}
 
+	// POS-9 is disabled due to issues with chain splits
 	// POS-9: stake throttling
 	//---
-
-	now := e.now()
-
-	ksk := KnownStakeKey{
-		coinbase: header.Coinbase,
-		parent:   header.ParentHash,
-	}
-	ksv := &KnownStakeValue{
-		block: header.Hash(),
-		ts:    now,
-	}
-
-	if prev_ksvi, ok := e.knownStakes.LoadOrStore(ksk, ksv); ok {
-		prev_ksv := prev_ksvi.(*KnownStakeValue)
-		if prev_ksv.isActive(now) && prev_ksv.block != ksv.block {
-			return eth_consensus.ErrDoSThrottle
-		}
-
-		e.knownStakes.Store(ksk, ksv)
-	}
-
-	//---
-	if e.nextKSPurge < now {
-		e.nextKSPurge = now + energi_params.StakeThrottle
-
-		e.knownStakes.Range(func(k, v interface{}) bool {
-			if !v.(*KnownStakeValue).isActive(now) {
-				e.knownStakes.Delete(k)
-			}
-
-			return true
-		})
-	}
-	//---
-
+//
+//	now := e.now()
+//
+//	ksk := KnownStakeKey{
+//		coinbase: header.Coinbase,
+//		parent:   header.ParentHash,
+//	}
+//	ksv := &KnownStakeValue{
+//		block: header.Hash(),
+//		ts:    now,
+//	}
+//
+//	if prev_ksvi, ok := e.knownStakes.LoadOrStore(ksk, ksv); ok {
+//		prev_ksv := prev_ksvi.(*KnownStakeValue)
+//		if prev_ksv.isActive(now) && prev_ksv.block != ksv.block {
+//			return eth_consensus.ErrDoSThrottle
+//		}
+//
+//		e.knownStakes.Store(ksk, ksv)
+//	}
+//
+//	//---
+//	if e.nextKSPurge < now {
+//		e.nextKSPurge = now + energi_params.StakeThrottle
+//
+//		e.knownStakes.Range(func(k, v interface{}) bool {
+//			if !v.(*KnownStakeValue).isActive(now) {
+//				e.knownStakes.Delete(k)
+//			}
+//
+//			return true
+//		})
+//	}
+//	//---
+//
 	return nil
 }
