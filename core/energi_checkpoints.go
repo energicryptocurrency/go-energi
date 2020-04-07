@@ -103,7 +103,8 @@ func newCheckpointManager() *checkpointManager {
 }
 
 func (cm *checkpointManager) setup(chain CheckpointChain) {
-	if checkpoints, ok := energi_params.EnergiCheckpoints[params.MainnetGenesisHash]; ok {
+	genesis_hash := chain.GetHeaderByNumber(0).Hash();
+	if checkpoints, ok := energi_params.EnergiCheckpoints[genesis_hash]; ok {
 		for k, v := range checkpoints {
 			cm.addCheckpoint(
 				chain,
@@ -186,10 +187,11 @@ func (cm *checkpointManager) addCheckpoint(
 	if !local {
 		// ignore checkpoints which occur before the latest local checkpoint
 		var maxHardcodedCheckpoint uint64
-		for maxHardcodedCheckpoint = range energi_params.EnergiCheckpoints[params.MainnetGenesisHash] {
+		genesis_hash := chain.GetHeaderByNumber(0).Hash();
+		for maxHardcodedCheckpoint = range energi_params.EnergiCheckpoints[genesis_hash] {
 			break
 		}
-		for n := range energi_params.EnergiCheckpoints[params.MainnetGenesisHash] {
+		for n := range energi_params.EnergiCheckpoints[genesis_hash] {
 			if n > maxHardcodedCheckpoint {
 				maxHardcodedCheckpoint = n
 			}
