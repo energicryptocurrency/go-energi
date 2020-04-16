@@ -141,8 +141,11 @@ func (m *MigrationAPI) listGen2CoinsUncached(num *big.Int) (interface{}, error) 
 	coins := make([]Gen2Coin, 0, items)
 
 	prefix := byte(33)
-	if m.backend.ChainConfig().ChainID.Int64() == 49797 {
+	switch m.backend.ChainConfig().ChainID.Int64() {
+	case 49797:
 		prefix = byte(127)
+	case 59797:
+		prefix = byte(129)
 	}
 
 	for i := int64(0); i < items; i++ {
