@@ -79,6 +79,8 @@ func (tg *TestGen2Migration) PrepareTestGen2Migration(chainID uint64) error {
 	prefix := byte(33)
 	if chainID == 49797 {
 		prefix = byte(127)
+	} else if chainID == 59797 {
+		prefix = byte(129)
 	}
 
 	res := make([]byte, 20)

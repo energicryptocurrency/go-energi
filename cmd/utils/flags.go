@@ -110,6 +110,8 @@ func NewApp(gitCommit, usage string) *cli.App {
 	return app
 }
 
+const simnetGenesisBlock = "simnet-genesis.json"
+
 // These are all the command line flags we support.
 // If you add to this list, please remember to include the
 // flag in the appropriate command definition.
@@ -756,6 +758,7 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 	case ctx.GlobalBool(TestnetFlag.Name):
 		urls = params.TestnetBootnodes
 	case cfg.BootstrapNodes != nil || ctx.GlobalBool(SimnetFlag.Name):
+		// Simnet has no default boot nodes.
 		return // already set, don't apply defaults.
 	}
 
@@ -1369,10 +1372,15 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 59797
 		}
 
-		// Load simnet's custom genesis block configuration.
+		if cfg.MinerMigration == "" {
+			// Create a special migration tx if no migration file is set.
+			cfg.MinerMigration = energi_common.SimnetMigrationTx
+		}
+
+		// Load simnet's custom configuration.
 		var err error
-		genesisBlockPath := common.AbsolutePath(stack.DataDir(), "simnet-genesis.json")
-		// Create the file if it doesn't exist.
+		genesisBlockPath := common.AbsolutePath(stack.DataDir(), simnetGenesisBlock)
+		// Create the genesis block file if it doesn't exist.
 		if err = energi_common.CreateEnergiSimnetGenesisBlock(genesisBlockPath); err != nil {
 			Fatalf("Failed to create a new simnet genesis block config: %v", err)
 		}
@@ -1574,7 +1582,7 @@ func MakeGenesis(ctx *cli.Context, stack *node.Node) *core.Genesis {
 		Fatalf("Developer chains are ephemeral")
 	case ctx.GlobalBool(SimnetFlag.Name):
 		var err error
-		genesisBlockPath := common.AbsolutePath(stack.DataDir(), "simnet-genesis.json")
+		genesisBlockPath := common.AbsolutePath(stack.DataDir(), simnetGenesisBlock)
 		genesis, err = core.DeveloperEnergiGenesisBlock(genesisBlockPath)
 		if err != nil {
 			Fatalf("Valid custom genesis block configuration was not found: %v", err)

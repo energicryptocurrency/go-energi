@@ -38,6 +38,7 @@ import (
 	"github.com/shengdoushi/base58"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -114,6 +115,11 @@ func MigrationTx(
 	migration_file string,
 	engine consensus.Engine,
 ) (res *types.Transaction) {
+	// Create a special migrations block transaction if on simnet.
+	if tx, ok := createEnergiSimnetMigrationTx(signer, header, migration_file, engine); ok {
+		return tx
+	}
+
 	file, err := os.Open(migration_file)
 	if err != nil {
 		log.Error("Failed to open snapshot", "err", err)
@@ -308,4 +314,82 @@ func ValidateMigration(
 	}
 
 	return true
+}
+
+// createEnergiSimnetMigrationTx creates a special simnet migration tx.
+func createEnergiSimnetMigrationTx(
+	signer types.Signer,
+	header *types.Header,
+	migrationFile string,
+	engine consensus.Engine,
+) (tx *types.Transaction, isOK bool) {
+	if migrationFile != energi_common.SimnetMigrationTx {
+		return
+	}
+
+	isOK = true
+
+	e, ok := engine.(*Energi)
+	if !ok {
+		log.Error("Not Energi consensus engine in simnet tx")
+		return
+	}
+
+	extra, err := rlp.EncodeToBytes([]interface{}{
+		uint(params.VersionMajor<<16 | params.VersionMinor<<8 | params.VersionPatch),
+		"energi3",
+		common.Hash{},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	migrationABI, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
+	if err != nil {
+		panic(err)
+	}
+
+	owners := []common.Address{header.Coinbase}
+	amounts := []*big.Int{new(big.Int).Mul(big.NewInt(9000000000000000000), big.NewInt(100000))}
+	blacklist := make([]common.Address, 0)
+	callData, err := migrationABI.Pack("setSnapshot", owners, amounts, blacklist)
+	if err != nil {
+		panic(err)
+	}
+
+	header.GasLimit = params.GenesisGasLimit
+	header.Extra = extra
+	tx = types.NewTransaction(
+		uint64(0), // it should be the first transaction
+		energi_params.Energi_MigrationContract,
+		common.Big0,
+		header.GasLimit,
+		common.Big0,
+		callData,
+	)
+
+	if e.signerFn == nil {
+		log.Error("Signer is not set in simnet tx")
+		return
+	}
+
+	if e.config == nil {
+		log.Error("Engine config is not set in simnet tx")
+		return
+	}
+
+	txHash := signer.Hash(tx)
+	txSig, err := e.signerFn(e.config.MigrationSigner, txHash.Bytes())
+	if err != nil {
+		log.Error("Failed to sign migration tx in simnet tx", "err", err)
+		return
+	}
+
+	tx, err = tx.WithSignature(signer, txSig)
+	if err != nil {
+		log.Error("Failed to pack migration tx in simnet tx")
+		return
+	}
+
+	return
 }
