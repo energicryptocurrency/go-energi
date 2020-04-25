@@ -131,43 +131,43 @@ func TestPoSDoS(t *testing.T) {
 
 	// POS-9: stake throttling
 	//============================
-//
-//	log.Trace("Another variation")
-//	curr_time += energi_params.StakeThrottle
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//	p.Time = base
-//	c.Time = base
-//	h.Time = base + energi_params.MinBlockGap + 1
-//	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-//	assert.Equal(t, 1, KnownStakesTestCount(&engine.knownStakes))
-//
-//	log.Trace("Another coinbase")
-//	h.Coinbase = common.HexToAddress("0x1234")
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//	assert.Equal(t, 2, KnownStakesTestCount(&engine.knownStakes))
-//
-//	log.Trace("Another variation")
-//	h.Root = common.HexToHash("0x1234")
-//	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-//
-//	log.Trace("Should reset")
-//	curr_time += energi_params.StakeThrottle
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//
-//	log.Trace("Check correct cleanup")
-//	h.Coinbase = common.HexToAddress("0x2345")
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//	h.Coinbase = common.HexToAddress("0x3456")
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
-//
-//	curr_time += energi_params.StakeThrottle / 2
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//	h.Time += 1
-//	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-//	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
-//
-//	curr_time += energi_params.StakeThrottle
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//	assert.Equal(t, 1, KnownStakesTestCount(&engine.knownStakes))
+
+	log.Trace("Another variation")
+	curr_time += energi_params.StakeThrottle
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	p.Time = base
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap + 1
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 1, KnownStakesTestCount(&engine.knownStakes))
+
+	log.Trace("Another coinbase")
+	h.Coinbase = common.HexToAddress("0x1234")
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 2, KnownStakesTestCount(&engine.knownStakes))
+
+	log.Trace("Another variation")
+	h.Root = common.HexToHash("0x1234")
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+
+	log.Trace("Should reset")
+	curr_time += energi_params.StakeThrottle
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+
+	log.Trace("Check correct cleanup")
+	h.Coinbase = common.HexToAddress("0x2345")
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	h.Coinbase = common.HexToAddress("0x3456")
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
+
+	curr_time += energi_params.StakeThrottle / 2
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	h.Time += 1
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
+
+	curr_time += energi_params.StakeThrottle
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+	assert.Equal(t, 1, KnownStakesTestCount(&engine.knownStakes))
 }
