@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"energi.world/core/gen3/common"
-//	eth_consensus "energi.world/core/gen3/consensus"
+	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core/types"
 
 	energi_params "energi.world/core/gen3/energi/params"
