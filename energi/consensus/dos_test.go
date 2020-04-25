@@ -83,51 +83,50 @@ func TestPoSDoS(t *testing.T) {
 	engine := New(nil, nil)
 	engine.now = func() uint64 { return curr_time }
 
-	// POS-8 is disabled due to issues with chain splits
 	// POS-8: old fork protection
 	//============================
-//
-//	log.Trace("Regular grow")
-//	curr_time = base
-//	p.Time = base
-//	c.Time = base
-//	h.Time = base + energi_params.MinBlockGap
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//
-//	log.Trace("Side chain as new fork")
-//	curr_time = base
-//	p.Time = base - energi_params.OldForkPeriod
-//	c.Time = base
-//	h.Time = base + energi_params.MinBlockGap
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-//
-//	log.Trace("Side chain as old fork")
-//	curr_time = base + 1
-//	p.Time = base - energi_params.OldForkPeriod
-//	c.Time = base
-//	h.Time = base + energi_params.MinBlockGap
-//	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-//
-//	log.Trace("Side chain as old fork")
-//	curr_time = base
-//	p.Time = base - energi_params.OldForkPeriod - 1
-//	c.Time = base
-//	h.Time = base + energi_params.MinBlockGap
-//	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-//
-//	log.Trace("Side chain as old fork an near old current")
-//	curr_time = base + energi_params.OldForkPeriod - 1
-//	p.Time = base - energi_params.OldForkPeriod - 1
-//	c.Time = base
-//	h.Time = base + energi_params.MinBlockGap
-//	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
-//
-//	log.Trace("Side chain as old fork an old current - allow old forks")
-//	curr_time = base + energi_params.OldForkPeriod
-//	p.Time = base - energi_params.OldForkPeriod - 1
-//	c.Time = base
-//	h.Time = base + energi_params.MinBlockGap
-//	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+
+	log.Trace("Regular grow")
+	curr_time = base
+	p.Time = base
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+
+	log.Trace("Side chain as new fork")
+	curr_time = base
+	p.Time = base - energi_params.OldForkPeriod
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+
+	log.Trace("Side chain as old fork")
+	curr_time = base + 1
+	p.Time = base - energi_params.OldForkPeriod
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+
+	log.Trace("Side chain as old fork")
+	curr_time = base
+	p.Time = base - energi_params.OldForkPeriod - 1
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+
+	log.Trace("Side chain as old fork an near old current")
+	curr_time = base + energi_params.OldForkPeriod - 1
+	p.Time = base - energi_params.OldForkPeriod - 1
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+
+	log.Trace("Side chain as old fork an old current - allow old forks")
+	curr_time = base + energi_params.OldForkPeriod
+	p.Time = base - energi_params.OldForkPeriod - 1
+	c.Time = base
+	h.Time = base + energi_params.MinBlockGap
+	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 
 	// POS-9: stake throttling
 	//============================
