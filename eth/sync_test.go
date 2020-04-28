@@ -52,6 +52,13 @@ func TestFastSyncDisabling(t *testing.T) {
 	go pmEmpty.handle(pmEmpty.newPeer(nrg70, p2p.NewPeer(enode.ID{}, "full", nil), io1))
 
 	time.Sleep(250 * time.Millisecond)
+
+	// This discards the checkpoint request from the writer clearing way for others
+	// to use the writer freely.
+	if err := p2p.ExpectMsg(io1, GetCheckpointsMsg, nil); err != nil {
+		t.Fatalf(" GetCheckpointsMsg returned an error")
+	}
+
 	pmEmpty.synchronise(pmEmpty.peers.BestPeer())
 
 	// Check that fast sync was disabled

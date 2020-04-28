@@ -944,7 +944,7 @@ func TestBindings(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create temporary workspace: %v", err)
 	}
-	// defer os.RemoveAll(ws)
+	defer os.RemoveAll(ws)
 
 	pkg := filepath.Join(ws, "bindtest")
 	if err = os.MkdirAll(pkg, 0700); err != nil {
@@ -978,7 +978,7 @@ func TestBindings(t *testing.T) {
 		}
 	}
 
-	// Convert the package to go modules and use the current source for go-ethereum
+	// Convert the package to go modules and use the current source for energi.world
 	cmd := exec.Command(gocmd, "mod", "init", "bindtest")
 	cmd.Dir = pkg
 	if out, err := cmd.CombinedOutput(); err != nil {
