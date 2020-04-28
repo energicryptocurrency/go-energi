@@ -22,7 +22,7 @@ import (
 
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
+	// "energi.world/core/gen3/log"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -40,7 +40,7 @@ cQ8ChCLsNbvWZwGDrTXQVqPtM1srL5GgmGYxJkDYZuFp2n3E54nH 2019-06-13T17:26:00Z reserv
 
 func TestGen2Parse(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	m := NewMigrationAPI(nil)
 	res := m.parseGen2Dump(testWalletDump)
@@ -61,7 +61,7 @@ func TestGen2Parse(t *testing.T) {
 
 func TestSearchCoins(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	m := NewMigrationAPI(nil)
 

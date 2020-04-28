@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/log"
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/p2p"
 	"energi.world/core/gen3/p2p/enode"
 )
@@ -31,7 +31,7 @@ import (
 // Tests that fast sync gets disabled as soon as a real block is successfully
 // imported into the blockchain.
 func TestFastSyncDisabling(t *testing.T) {
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 	// Create a pristine protocol manager, check that fast sync is left enabled
 	pmEmpty, _ := newTestProtocolManagerMust(t, downloader.FastSync, 0, nil, nil)
 	if atomic.LoadUint32(&pmEmpty.fastSync) == 0 {

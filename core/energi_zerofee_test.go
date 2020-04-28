@@ -28,7 +28,8 @@ import (
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
@@ -39,7 +40,7 @@ import (
 
 func TestIsValidZeroFee(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	migration_abi, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
 	assert.Empty(t, err)
@@ -238,7 +239,7 @@ func (s *fakeSigner) Equal(types.Signer) bool {
 
 func TestZeroFeeProtectorMasternode(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	now := time.Now() // It can be fixed
 	adjust_time := time.Duration(0)
@@ -469,7 +470,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 
 func TestZeroFeeProtectorMigration(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	now := time.Now() // It can be fixed
 	adjust_time := time.Duration(0)

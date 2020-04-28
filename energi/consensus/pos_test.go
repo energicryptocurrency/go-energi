@@ -30,7 +30,8 @@ import (
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
 
@@ -93,7 +94,7 @@ func generateAddresses(len int) ([]common.Address, map[common.Address]*ecdsa.Pri
 
 func TestPoSChain(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	results := make(chan *eth_consensus.SealResult, 1)
 	stop := make(chan struct{})
@@ -283,7 +284,7 @@ func TestPoSChain(t *testing.T) {
 
 func TestPoSDiffV1(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	type TC struct {
 		parent  int64
@@ -386,7 +387,7 @@ func TestPoSDiffV1(t *testing.T) {
 
 func TestStakeWeightLookup(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, _, _, _ := generateAddresses(5)
 	engine := New(nil, nil)
@@ -464,7 +465,7 @@ func TestStakeWeightLookup(t *testing.T) {
 
 func TestPoSMine(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, signers, alloc, migrationSigner := generateAddresses(5)
 	testdb := ethdb.NewMemDatabase()
@@ -599,7 +600,7 @@ func TestPoSMine(t *testing.T) {
 
 func TestVerifyPoSHash(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, _, alloc, migrationSigner := generateAddresses(5)
 	testdb := ethdb.NewMemDatabase()
