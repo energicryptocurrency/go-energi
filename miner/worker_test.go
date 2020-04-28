@@ -313,6 +313,8 @@ func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consens
 }
 
 func TestStreamUncleBlock(t *testing.T) {
+	t.Skip("Uncle block implementation is not supported on Energi")
+
 	ethash := ethash.NewFaker()
 	defer ethash.Close()
 
