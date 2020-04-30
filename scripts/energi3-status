@@ -1,0 +1,38 @@
+#!/usr/bin/env sh
+
+
+while true
+do
+
+	echo ""
+
+	if [[ -z "${ENERGI_WALLET_ADDR}" ]] ; then
+
+		echo "No wallet address is set! You may edit this script or enter it below."
+
+		read -p "Enter wallet address: " ENERGI_WALLET_ADDR
+
+		if [ -n "$ENERGI_WALLET_ADDR" ]; then
+
+			export ENERGI_WALLET_ADDRESS=${ENERGI_WALLET_ADDR}
+
+		fi
+
+	else
+
+		break
+
+	fi
+
+done
+
+
+# Define unlock command
+UNLOCK_CMD="miner.stakingStatus()"
+
+# Unlock the account (asks user for password)
+energi3 attach --exec "${UNLOCK_CMD}"
+
+echo ""
+
+exit 0
