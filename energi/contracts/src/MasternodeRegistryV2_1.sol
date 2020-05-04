@@ -738,17 +738,14 @@ contract MasternodeRegistryV2_1 is
             Status memory status;
             (
                 status.sw_features,
-                ,
+                status.next_heartbeat,
                 status.inactive_since,
-                ,
-                ,
+                status.validator_index,
                 status.invalidations,
                 status.seq_payouts,
                 status.last_vote_epoch
             ) = oldinstance.mn_status(mn);
 
-            status.next_heartbeat = block.timestamp + (i * TARGET_HEARTBEATS_COEF);
-            status.validator_index = validator_list.length;
             validator_list.push(mn);
 
             mn_status[mn] = status;
