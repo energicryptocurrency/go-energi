@@ -1023,7 +1023,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
-            it('should refuse invalidate() wrong target', async () => {
+            it.skip('should refuse invalidate() wrong target', async () => {
                 try {
                     let target = await s.token_abi.validationTarget(masternode1);
 
