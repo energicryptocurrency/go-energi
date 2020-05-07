@@ -28,6 +28,7 @@ const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const MasternodeTokenV2 = artifacts.require('MasternodeTokenV2');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 const MasternodeRegistryV2 = artifacts.require('MasternodeRegistryV2');
+const MasternodeRegistryV2_1 = artifacts.require('MasternodeRegistryV2_1');
 const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const SporkRegistryV2 = artifacts.require('SporkRegistryV2');
 const StakerRewardV1 = artifacts.require('StakerRewardV1');
@@ -83,6 +84,9 @@ module.exports = async (deployer, _, accounts) => {
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
             common.mnregistry_config);
         await deploy_common(MasternodeRegistryV2,
+            mn_registry_proxy, mn_token_proxy, treasury_proxy,
+            common.mnregistry_config_v2, common.mnreg_deploy_opts);
+        await deploy_common(MasternodeRegistryV2_1,
             mn_registry_proxy, mn_token_proxy, treasury_proxy,
             common.mnregistry_config_v2, common.mnreg_deploy_opts);
         await deploy_common(SporkRegistryV1, undefined, mn_registry_proxy);
