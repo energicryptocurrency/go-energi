@@ -85,48 +85,28 @@ contract MasternodeStatusCopyTest is destructible, NonReentrant {
 
     function copyStatus() public noReentry {
         uint mn_active = mn_registry.mn_active();
+        uint currentlength = validator_list.length;
+
+        require(currentlength < mn_active, "migration already complete");
 
         // Restore the mn status information.
         // NOTE: Only active masternodes (validator_list()) are considered for migration
-        // NOTE: this may be a serious gas consumption problem due to open limit.
-        for (uint i = 0; i < mn_active; ++i) {
-            if (i > max_mns) break;
+        // We only copy max_mns at a time in order to avoid running into block gas limit problems
+        // This will take multiple transactions to complete the migration on mainnet
+        uint stopAt = currentlength + max_mns;
+        for (uint i = currentlength; i < mn_active; ++i) {
+            if (i >= stopAt) break;
 
             address mn = mn_registry.validator_list(i);
             Status memory status;
             (
-                status.sw_features,
+                , // status.sw_features not copied (will be updated on next heartbeat)
                 status.next_heartbeat,
                 status.inactive_since,
                 status.validator_index,
-                status.invalidations,
+                , // status.invalidations not copied (not relevant to mn registry v2.1)
                 status.seq_payouts,
-                status.last_vote_epoch
-            ) = mn_registry.mn_status(mn);
-
-            validator_list.push(mn);
-            mn_status[mn] = status;
-        }
-    }
-
-    function copyStatusWithoutInvalidations() public noReentry {
-        uint mn_active = mn_registry.mn_active();
-
-        // Restore the mn status information.
-        // NOTE: Only active masternodes (validator_list()) are considered for migration
-        // NOTE: this may be a serious gas consumption problem due to open limit.
-        for (uint i = 0; i < mn_active; ++i) {
-            if (i > max_mns) break;
-
-            address mn = mn_registry.validator_list(i);
-            Status memory status;
-            (
-                ,
-                status.next_heartbeat,
-                status.inactive_since,
-                status.validator_index,
-                ,
-                status.seq_payouts,
+                // status.last_vote_epoch not copied (not relevant to mn registry v2.1)
             ) = mn_registry.mn_status(mn);
 
             validator_list.push(mn);
