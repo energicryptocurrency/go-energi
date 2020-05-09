@@ -83,15 +83,13 @@ contract MasternodeRegistryV2_1 is
         mn_active_collateral = oldinstance.mn_active_collateral();
         mn_announced_collateral = oldinstance.mn_announced_collateral();
         mn_active = oldinstance.mn_active();
-        address[] memory old_list = oldinstance.enumerate();
         last_block_number = block.number;
 
         // Restore the mn status information.
-        // NOTE: this may be a serious gas consumption problem due to
-        //       open limit.
-        for (uint i = old_list.length; i-- > 0;) {
-            address mn = old_list[i];
-
+        // NOTE: Only active masternodes (validator_list()) are considered for migration
+        // NOTE: this may be a serious gas consumption problem due to open limit.
+        for (uint i = 0; i < mn_active; ++i) {
+            address mn = oldinstance.validator_list(i);
             Status memory status;
             (
                 status.sw_features,
@@ -104,7 +102,6 @@ contract MasternodeRegistryV2_1 is
             ) = oldinstance.mn_status(mn);
 
             validator_list.push(mn);
-
             mn_status[mn] = status;
         }
 
