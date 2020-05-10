@@ -70,7 +70,6 @@ contract MasternodeRegistryV2_1 is
         mn_ever_collateral = oldinstance.mn_ever_collateral();
         mn_active_collateral = oldinstance.mn_active_collateral();
         mn_announced_collateral = oldinstance.mn_announced_collateral();
-        mn_active = oldinstance.mn_active();
         last_block_number = block.number;
     }
 
@@ -79,9 +78,10 @@ contract MasternodeRegistryV2_1 is
     /// @dev so this function will use the gas limit to determine how many masternodes
     /// @dev that will be migrated at a ago.
     function migrateStatusPartial() external noReentry {
+        // address(uint160()) cast converts from non-payable address to allow cast to IGovernedProxy()
         IGovernedContract current_mnreg_impl = IGovernedProxy(address(uint160(proxy))).impl();
         MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(current_mnreg_impl));
-        uint mn_active = old_registry.mn_active();
+        mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length;
 
         require(currentlength < mn_active, "migration already complete");
