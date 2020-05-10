@@ -435,6 +435,25 @@ contract("MasternodeRegistryV2_1", async accounts => {
                 });
             });
 
+            it('should migrateStatusPartial() reject self migration', async () => {
+                const mn_proxy = await MockProxy.new();
+                const impl = await MasternodeRegistryV2_1.new(
+                    mn_proxy.address,
+                    s.mntoken_proxy_addr,
+                    s.treasury_proxy_addr,
+                    common.mnregistry_config_v2,
+                    common.mnreg_deploy_opts,
+                );
+                await mn_proxy.setImpl(impl.address)
+
+                try {
+                    await impl.migrateStatusPartial({ from: owner4 });
+                    assert.fail('It should fail');
+                } catch(e) {
+                    assert.match(e.message, /cannot migrate from self/);
+                }
+            });
+
             it('should migrate from V2 to V2_1', async () => {
                 const collateral = toWei('10000', 'ether');
 
@@ -507,7 +526,7 @@ contract("MasternodeRegistryV2_1", async accounts => {
                     await impl2.migrateStatusPartial({ from: owner4 });
                     assert.fail('It should fail');
                 } catch(e) {
-                    assert.match(e.message, /migration already complete/);
+                    assert.match(e.message, /migration already done/);
                 }
             });
         });
