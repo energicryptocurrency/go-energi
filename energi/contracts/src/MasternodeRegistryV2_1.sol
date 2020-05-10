@@ -79,12 +79,13 @@ contract MasternodeRegistryV2_1 is
     /// @dev so this function will use the gas limit to determine how many masternodes
     /// @dev that will be migrated at a ago.
     function migrateStatusPartial() external noReentry {
-        MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(IGovernedProxy(proxy).impl()));
+        IGovernedContract current_mnreg_impl = IGovernedProxy(address(uint160(proxy))).impl();
+        MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(current_mnreg_impl));
         uint mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length;
 
         require(currentlength < mn_active, "migration already complete");
-        require(address(IGovernedProxy(proxy).impl()) != address(this), "cannot migrate from self");
+        require(address(current_mnreg_impl) != address(this), "cannot migrate from self");
 
         for (uint i = currentlength; i < mn_active; ++i) {
             // limit chunk of MN migrated using gas left, each iteration takes approx. 10000 units.
