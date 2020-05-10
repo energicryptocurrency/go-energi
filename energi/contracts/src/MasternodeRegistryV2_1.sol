@@ -14,12 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Energi Core. If not, see <http://www.gnu.org/licenses/>.
 
-// Energi Governance system is the fundamental part of Energi Core.
-
-// NOTE: It's not allowed to change the compiler due to byte-to-byte
-//       match requirement.
-pragma solidity 0.5.16;
-//pragma experimental SMTChecker;
+pragma solidity ^0.5.16;
 
 import { GlobalConstants } from "./constants.sol";
 import { GlobalConstantsV2 } from "./constantsV2.sol";
@@ -37,14 +32,17 @@ import {
 } from "./MasternodeRegistryV1.sol";
 import { MasternodeRegistryV2 } from "./MasternodeRegistryV2.sol";
 
-/**
- * MN-2: Genesis hardcoded version of MasternodeRegistry
- *
- * NOTE: it MUST NOT change after blockchain launch!
- */
+
+/// @notice MasternodeRegistryV2_1 is a mostly trivial update to MasternodeRegistryV2
+/// @dev MasternodeRegistryV2_1 disables the proof of service invalidations due to a chain-split vulnerability
 contract MasternodeRegistryV2_1 is
     MasternodeRegistryV2
 {
+    /// @notice construct a new MasternodeRegistryV2_1
+    /// @param _proxy The MasternodeRegistry proxy address
+    /// @param _token_proxy The Masternode Token (MNRG) proxy address
+    /// @param _treasury_proxy The Treasury proxy address
+    /// @param _config MasternodeRegistry configuration ( MNRequireValidation, MNValidationPeriod, MNCleanupPeriod, MNEverCollateral, MNRewardsPerBlock )
     constructor(
         address _proxy,
         IGovernedProxy _token_proxy,
@@ -57,15 +55,16 @@ contract MasternodeRegistryV2_1 is
 
     }
 
-    function invalidate(address /*masternode*/)
-        external
-        noReentry
-    {
+    /// @notice proof of service invalidation
+    /// @dev this is disabled due to chain split vulnerability in previous versions
+    /// @param masternode the masternode to invalidate
+    function invalidate(address /*masternode*/) external noReentry {
         require(false, "invalidations disabled");
     }
 
-    // IGovernedContract
-    //---------------------------------
+    /// @notice this migration function triggered by governance upgrade when replacing another version
+    /// @dev see migrateStatusPartial() - masternode status must be migrated before governance upgrade!
+    /// @param _oldImpl the previous masternode registry being migrated
     function _migrate(IGovernedContract _oldImpl) internal {
         // Dispose
         v1storage.kill();
@@ -84,36 +83,50 @@ contract MasternodeRegistryV2_1 is
         mn_announced_collateral = oldinstance.mn_announced_collateral();
         mn_active = oldinstance.mn_active();
         last_block_number = block.number;
+    }
 
-        // Restore the mn status information.
-        // NOTE: Only active masternodes (validator_list()) are considered for migration
-        // NOTE: this may be a serious gas consumption problem due to open limit.
-        for (uint i = 0; i < mn_active; ++i) {
-            address mn = oldinstance.validator_list(i);
+    /// @notice migrate masternode statuses from the current masternode registry
+    /// @dev We cannot migrate more than 300 masternodes at a time without hitting the gas block limit
+    /// @dev so this function will take multiple transactions to complete on the main net
+    /// @dev this needs to be completed before running the governance upgrade
+    /// @dev only active masternodes will be migrated
+    function migrateStatusPartial() public noReentry {
+        MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(proxy.impl()));
+        uint mn_active = old_registry.mn_active();
+        uint currentlength = validator_list.length;
+
+        require(currentlength < mn_active, "migration already complete");
+        require(proxy.impl() != address(this), "cannot migrate from self");
+
+        uint stopAt = currentlength + 300;
+        for (uint i = currentlength; i < mn_active; ++i) {
+            if (i >= stopAt) break;
+
+            address mn = old_registry.validator_list(i);
             Status memory status;
             (
                 status.sw_features,
                 status.next_heartbeat,
                 status.inactive_since,
                 status.validator_index,
-                status.invalidations,
+                , // status.invalidations not copied (not relevant to mn registry v2.1)
                 status.seq_payouts,
-                status.last_vote_epoch
-            ) = oldinstance.mn_status(mn);
+                // status.last_vote_epoch not copied (not relevant to mn registry v2.1)
+            ) = old_registry.mn_status(mn);
 
             validator_list.push(mn);
             mn_status[mn] = status;
         }
-
-        _processValidationEpoch();
     }
 
+    /// @notice this function triggered by governance upgrade when this contract is replaced by a newer version
+    /// @dev see migrateStatusPartial() - masternode status must be migrated before governance upgrade!
+    /// @param _newImpl the new masternode registry that is replacing this one
     function _destroy(IGovernedContract _newImpl) internal {
         v1storage.setOwner(_newImpl);
     }
 
-    // Safety
-    //---------------------------------
+    /// @notice fallback function not allowed
     function () external payable {
         revert("Not supported");
     }
