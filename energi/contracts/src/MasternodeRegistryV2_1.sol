@@ -14,24 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Energi Core. If not, see <http://www.gnu.org/licenses/>.
 
-pragma solidity ^0.5.16;
+pragma solidity 0.5.16;
 
-import { GlobalConstants } from "./constants.sol";
-import { GlobalConstantsV2 } from "./constantsV2.sol";
-import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
-import { IGovernedProxy } from "./IGovernedProxy.sol";
-import { IBlockReward } from "./IBlockReward.sol";
-import { IMasternodeRegistryV2 } from "./IMasternodeRegistryV2.sol";
-import { IMasternodeToken } from "./IMasternodeToken.sol";
-import { ITreasury } from "./ITreasury.sol";
-import { NonReentrant } from "./NonReentrant.sol";
-import { StorageBase }  from "./StorageBase.sol";
 import {
-    MasternodeRegistryV1,
-    StorageMasternodeRegistryV1
-} from "./MasternodeRegistryV1.sol";
-import { MasternodeRegistryV2 } from "./MasternodeRegistryV2.sol";
-
+    IGovernedProxy,
+    IGovernedContract,
+    MasternodeRegistryV2
+} from "./MasternodeRegistryV2.sol";
 
 /// @notice MasternodeRegistryV2_1 is a mostly trivial update to MasternodeRegistryV2
 /// @dev MasternodeRegistryV2_1 disables the proof of service invalidations due to a chain-split vulnerability
