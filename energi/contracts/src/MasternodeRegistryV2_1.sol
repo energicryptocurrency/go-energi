@@ -57,7 +57,7 @@ contract MasternodeRegistryV2_1 is
 
     /// @notice proof of service invalidation
     /// @dev this is disabled due to chain split vulnerability in previous versions
-    /// @param masternode the masternode to invalidate
+    /// @dev masternode address is the masternode to invalidate.
     function invalidate(address /*masternode*/) external noReentry {
         require(false, "invalidations disabled");
     }
@@ -82,25 +82,24 @@ contract MasternodeRegistryV2_1 is
         mn_active_collateral = oldinstance.mn_active_collateral();
         mn_announced_collateral = oldinstance.mn_announced_collateral();
         mn_active = oldinstance.mn_active();
+        address[] memory old_list = oldinstance.enumerate();
         last_block_number = block.number;
-    }
 
     /// @notice migrate masternode statuses from the current masternode registry
-    /// @dev We cannot migrate more than 300 masternodes at a time without hitting the gas block limit
-    /// @dev so this function will take multiple transactions to complete on the main net
-    /// @dev this needs to be completed before running the governance upgrade
-    /// @dev only active masternodes will be migrated
-    function migrateStatusPartial() public noReentry {
-        MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(proxy.impl()));
+    /// @dev We migrate the available masternodes till gas left is less than or equal to 10000,
+    /// @dev so this function will use the gas limit to determine how many masternodes
+    /// @dev that will be migrated at a ago.
+    function migrateStatusPartial() external noReentry {
+        MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(IGovernedProxy(proxy).impl()));
         uint mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length;
 
         require(currentlength < mn_active, "migration already complete");
-        require(proxy.impl() != address(this), "cannot migrate from self");
+        require(address(IGovernedProxy(proxy).impl()) != address(this), "cannot migrate from self");
 
-        uint stopAt = currentlength + 300;
         for (uint i = currentlength; i < mn_active; ++i) {
-            if (i >= stopAt) break;
+            // limit chunk of MN migrated using gas left, each iteration takes approx. 10000 units.
+            if (gasleft() <= 10000) break;
 
             address mn = old_registry.validator_list(i);
             Status memory status;

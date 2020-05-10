@@ -44,10 +44,10 @@ contract("MasternodeRegistryV2_1", async accounts => {
     };
 
     const { toWei } = web3.utils;
-    const vperiod = common.mnregistry_config_v2[1];
-    const isTargetChanges = async (_token, _mn) => {
-        return await _token.validationTarget(_mn, 'latest') !=  await _token.validationTarget(_mn, 'pending');
-    };
+    // const vperiod = common.mnregistry_config_v2[1];
+    // const isTargetChanges = async (_token, _mn) => {
+    //     return await _token.validationTarget(_mn, 'latest') !=  await _token.validationTarget(_mn, 'pending');
+    // };
     // const sw_features = web3.utils.toBN((1 << 24) | (2 << 16) | (3 << 8));
 
     before(async () => {
@@ -99,20 +99,24 @@ contract("MasternodeRegistryV2_1", async accounts => {
         const owner1 = accounts[1];
         const owner2 = accounts[2];
         const owner3 = accounts[3];
+        const owner4 = accounts[10];
         const not_owner = accounts[0];
 
         const masternode1 = accounts[9];
         const masternode2 = accounts[8];
         const masternode3 = accounts[7];
+        const masternode4 = accounts[6];
 
         const ip1 = toBN(0x12345678);
         const ip2 = toBN(0x87654321);
         const ip3 = toBN(0x43218765);
+        const ip4 = toBN(0x41218785);
 
         const enode_common = '123456789012345678901234567890'
         const enode1 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '11')];
         const enode2 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '22')];
         const enode3 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '33')];
+        const enode4 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '33')];
 
         before(async () => {
             await s.mntoken_abi.depositCollateral({
@@ -163,7 +167,7 @@ contract("MasternodeRegistryV2_1", async accounts => {
                     enode: enode3,
                     owner: owner3,
                     collateral: collateral3,
-                },
+                }
             ];
 
             it('should announce()', async () => {
@@ -477,6 +481,13 @@ contract("MasternodeRegistryV2_1", async accounts => {
 
                 expect(await impl2.enumerate()).members([]);
 
+                // Expects no failure the first time its run.
+                try {
+                    await impl2.migrateStatusPartial({ from: owner4 });
+                } catch(e) {
+                    assert.fail('It should fail');
+                }
+
                 // Upgrade
                 const { logs } = await mn_proxy.proposeUpgrade(impl2.address, 0);
                 s.assert.equal(logs.length, 1);
@@ -490,6 +501,14 @@ contract("MasternodeRegistryV2_1", async accounts => {
                 expect(await imn.enumerate()).members([masternode1, masternode2]);
 
                 expect(await impl2.enumerate()).members([masternode1, masternode2]);
+
+                // Second migration should fail since it has already completed.
+                try {
+                    await impl2.migrateStatusPartial({ from: owner4 });
+                    assert.fail('It should fail');
+                } catch(e) {
+                    assert.match(e.message, /migration already complete/);
+                }
             });
         });
     });

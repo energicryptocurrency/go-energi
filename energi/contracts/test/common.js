@@ -28,10 +28,9 @@ exports.mnregistry_config_v2 = [
     3, // RequireValidation
     3, // ValidationPeriods
     24*60*60, // CleanupPeriod
-    '1000000000000000000000', // 1000 NRG
-    10,
+    '10000000000000000000000', // 10,000 NRG,
+    1, // RewardsPerBlock: Default is 10 but changing this is resulting to lots of tests failures.
 ];
-
 exports.superblock_cycles = 8;
 exports.chain_id = 49797;
 exports.migration_signer = '0x0000000000000000000000000000000012345678';
