@@ -100,7 +100,7 @@ contract MasternodeStatusCopyTest is destructible, NonReentrant {
             address mn = mn_registry.validator_list(i);
             Status memory status;
             (
-                , // status.sw_features not copied (will be updated on next heartbeat)
+                status.sw_features,
                 status.next_heartbeat,
                 status.inactive_since,
                 status.validator_index,
