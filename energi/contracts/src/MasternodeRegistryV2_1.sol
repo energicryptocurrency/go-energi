@@ -27,6 +27,8 @@ import {
 contract MasternodeRegistryV2_1 is
     MasternodeRegistryV2
 {
+    bool migration_complete;
+
     /// @notice construct a new MasternodeRegistryV2_1
     /// @param _proxy The MasternodeRegistry proxy address
     /// @param _token_proxy The Masternode Token (MNRG) proxy address
@@ -41,7 +43,7 @@ contract MasternodeRegistryV2_1 is
         public
         MasternodeRegistryV2(_proxy, _token_proxy, _treasury_proxy, _config)
     {
-
+        migration_complete = false;
     }
 
     /// @notice proof of service invalidation
@@ -78,14 +80,16 @@ contract MasternodeRegistryV2_1 is
     /// @dev so this function will use the gas limit to determine how many masternodes
     /// @dev that will be migrated at a ago.
     function migrateStatusPartial() external noReentry {
+        require(!migration_complete, "migration already done");
+
         // address(uint160()) cast converts from non-payable address to allow cast to IGovernedProxy()
         IGovernedContract current_mnreg_impl = IGovernedProxy(address(uint160(proxy))).impl();
+        require(address(current_mnreg_impl) != address(this), "cannot migrate from self");
+
         MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(current_mnreg_impl));
         mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length;
-
         require(currentlength < mn_active, "migration already complete");
-        require(address(current_mnreg_impl) != address(this), "cannot migrate from self");
 
         for (uint i = currentlength; i < mn_active; ++i) {
             // limit chunk of MN migrated using gas left, each iteration takes approx. 10000 units.
@@ -105,6 +109,10 @@ contract MasternodeRegistryV2_1 is
 
             validator_list.push(mn);
             mn_status[mn] = status;
+        }
+
+        if (validator_list.length >= mn_active) {
+            migration_complete = true;
         }
     }
 
