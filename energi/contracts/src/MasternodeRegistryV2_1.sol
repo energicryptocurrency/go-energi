@@ -71,8 +71,8 @@ contract MasternodeRegistryV2_1 is
         mn_active_collateral = oldinstance.mn_active_collateral();
         mn_announced_collateral = oldinstance.mn_announced_collateral();
         mn_active = oldinstance.mn_active();
-        address[] memory old_list = oldinstance.enumerate();
         last_block_number = block.number;
+    }
 
     /// @notice migrate masternode statuses from the current masternode registry
     /// @dev We migrate the available masternodes till gas left is less than or equal to 10000,
