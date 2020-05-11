@@ -92,8 +92,8 @@ contract MasternodeRegistryV2_1 is
         require(currentlength < mn_active, "migration already complete");
 
         for (uint i = currentlength; i < mn_active; ++i) {
-            // limit chunk of MN migrated using gas left, each iteration takes approx. 10000 units.
-            if (gasleft() <= 10000) break;
+            // limit chunk of MN migrated using gas left
+            if (gasleft() <= 500000) break;
 
             address mn = old_registry.validator_list(i);
             Status memory status;
