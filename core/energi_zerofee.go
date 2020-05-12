@@ -230,7 +230,7 @@ func (z *zeroFeeProtector) checkMasternode(
 ) error {
 	if v, ok := timeMap[sender]; ok && now.Sub(v) < timeout {
 		log.Debug("ZeroFee DoS by time", "sender", sender, "interval", now.Sub(v))
-		return ErrZeroFeeDoS
+		return fmt.Errorf("err: %v desc: time interval is less than the required", ErrZeroFeeDoS)
 	}
 
 	// NOTE: potential issue with nonce gap
@@ -238,7 +238,7 @@ func (z *zeroFeeProtector) checkMasternode(
 		energi_params.Energi_MasternodeList, sender.Hash())
 	if (mn_indicator == common.Hash{}) {
 		log.Debug("ZeroFee DoS by inactive MN", "sender", sender)
-		return ErrZeroFeeDoS
+		return fmt.Errorf("err: %v desc: inactive MN found", ErrZeroFeeDoS)
 	}
 
 	// Check if call is valid
@@ -259,7 +259,7 @@ func (z *zeroFeeProtector) checkMasternode(
 	bc, ok := pool.chain.(*BlockChain)
 	if bc == nil || !ok {
 		log.Warn("ZeroFee DoS on missing blockchain")
-		return ErrZeroFeeDoS
+		return fmt.Errorf("err: %v desc: missing blockchain", ErrZeroFeeDoS)
 	}
 	vmc := bc.GetVMConfig()
 	hdr := types.CopyHeader(bc.CurrentHeader())
@@ -272,9 +272,9 @@ func (z *zeroFeeProtector) checkMasternode(
 	gp := new(GasPool).AddGas(tx.Gas())
 	output, _, failed, err := ApplyMessage(evm, msg, gp)
 	if failed || err != nil {
-		log.Debug("ZeroFee DoS MN by execution",
+		log.Warn("ZeroFee DoS MN by execution",
 			"sender", sender, "err", err, "output", output)
-		return ErrZeroFeeDoS
+		return fmt.Errorf("err: %v desc: %v", ErrZeroFeeDoS, err)
 	}
 
 	//---
@@ -299,7 +299,7 @@ func (z *zeroFeeProtector) checkMigration(
 
 	if v, ok := z.coinClaims[item_id]; ok && now.Sub(v) < zfMinCoinClaimPeriod {
 		log.Debug("ZeroFee DoS by time", "item_id", item_id, "interval", now.Sub(v))
-		return ErrZeroFeeDoS
+		return fmt.Errorf("migrationErr: %v desc: time interval is less than the required", ErrZeroFeeDoS)
 	}
 
 	// Check if call is valid
@@ -323,7 +323,7 @@ func (z *zeroFeeProtector) checkMigration(
 	bc, ok := pool.chain.(*BlockChain)
 	if bc == nil || !ok {
 		log.Warn("ZeroFee DoS on missing blockchain")
-		return ErrZeroFeeDoS
+		return fmt.Errorf("migrationErr: %v desc: missing blockchain", ErrZeroFeeDoS)
 	}
 	vmc := bc.GetVMConfig()
 	ctx := NewEVMContext(msg, bc.CurrentHeader(), bc, &sender)
@@ -333,21 +333,21 @@ func (z *zeroFeeProtector) checkMigration(
 	gp := new(GasPool).AddGas(tx.Gas())
 	output, _, failed, err := ApplyMessage(evm, msg, gp)
 	if failed || err != nil {
-		log.Debug("ZeroFee DoS by execution",
+		log.Warn("ZeroFee DoS by execution",
 			"item", item_id, "err", err, "output", output)
-		return ErrZeroFeeDoS
+		return fmt.Errorf("migrationErr: %v desc: %v", ErrZeroFeeDoS, err)
 	}
 
 	if len(output) != len(common.Hash{}) {
 		log.Debug("ZeroFee DoS by unpack", "item", item_id, "output", output)
-		return ErrZeroFeeDoS
+		return fmt.Errorf("migrationErr: %v desc: %v", ErrZeroFeeDoS, err)
 	}
 
 	amount := new(big.Int).SetBytes(output)
 
 	if amount.Cmp(common.Big0) <= 0 {
 		log.Debug("ZeroFee DoS by already claimed", "item", item_id)
-		return ErrZeroFeeDoS
+		return fmt.Errorf("migrationErr: %v desc: already claimed", ErrZeroFeeDoS)
 	}
 
 	//---
