@@ -272,8 +272,12 @@ func (z *zeroFeeProtector) checkMasternode(
 	gp := new(GasPool).AddGas(tx.Gas())
 	output, _, failed, err := ApplyMessage(evm, msg, gp)
 	if failed || err != nil {
+		strOutput := ""
+		if len(output) > 4 {
+			strOutput = string(output[4:])
+		}
 		log.Warn("ZeroFee DoS MN by execution",
-			"sender", sender, "err", err, "output", output)
+			"sender", sender, "err", err, "output", strOutput)
 		return fmt.Errorf("err: %v desc: %v", ErrZeroFeeDoS, err)
 	}
 
@@ -332,14 +336,18 @@ func (z *zeroFeeProtector) checkMigration(
 
 	gp := new(GasPool).AddGas(tx.Gas())
 	output, _, failed, err := ApplyMessage(evm, msg, gp)
+	strOutput := ""
+	if len(output) > 4 {
+		strOutput = string(output[4:])
+	}
 	if failed || err != nil {
 		log.Warn("ZeroFee DoS by execution",
-			"item", item_id, "err", err, "output", output)
+			"item", item_id, "err", err, "output", strOutput)
 		return fmt.Errorf("migrationErr: %v desc: %v", ErrZeroFeeDoS, err)
 	}
 
 	if len(output) != len(common.Hash{}) {
-		log.Debug("ZeroFee DoS by unpack", "item", item_id, "output", output)
+		log.Debug("ZeroFee DoS by unpack", "item", item_id, "output", strOutput)
 		return fmt.Errorf("migrationErr: %v desc: %v", ErrZeroFeeDoS, err)
 	}
 
