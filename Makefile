@@ -2,11 +2,11 @@
 # with Go source code. If you know what GOPATH is then you probably
 # don't need to bother with make.
 
-.PHONY: geth android ios geth-cross swarm evm all test clean
-.PHONY: geth-linux geth-linux-386 geth-linux-amd64 geth-linux-mips64 geth-linux-mips64le
-.PHONY: geth-linux-arm geth-linux-arm-5 geth-linux-arm-6 geth-linux-arm-7 geth-linux-arm64
-.PHONY: geth-darwin geth-darwin-386 geth-darwin-amd64
-.PHONY: geth-windows geth-windows-386 geth-windows-amd64
+.PHONY: energi3 android ios energi3-cross swarm evm all test clean
+.PHONY: energi3-linux energi3-linux-386 energi3-linux-amd64 energi3-linux-mips64 energi3-linux-mips64le
+.PHONY: energi3-linux-arm energi3-linux-arm-5 energi3-linux-arm-6 energi3-linux-arm-7 energi3-linux-arm64
+.PHONY: energi3-darwin energi3-darwin-386 energi3-darwin-amd64
+.PHONY: energi3-windows energi3-windows-386 energi3-windows-amd64
 .PHONY: prebuild
 
 include energi/contracts/Makefile.include
@@ -17,10 +17,10 @@ GO ?= latest
 
 prebuild:
 
-geth:
-	build/env.sh go run build/ci.go install ./cmd/geth
+energi:
+	build/env.sh go run build/ci.go install ./cmd/energi
 	@echo "Done building."
-	@echo "Run \"$(GOBIN)/energi3\" to launch geth."
+	@echo "Run \"$(GOBIN)/energi3\" to launch energi."
 
 swarm:
 	build/env.sh go run build/ci.go install ./cmd/swarm
@@ -72,92 +72,92 @@ swarm-devtools:
 
 # Cross Compilation Targets (xgo)
 
-geth-cross: geth-linux geth-darwin geth-windows geth-android geth-ios
+energi3-cross: energi3-linux energi3-darwin energi3-windows energi3-android energi3-ios
 	@echo "Full cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-*
 
-geth-linux: geth-linux-386 geth-linux-amd64 geth-linux-arm geth-linux-mips64 geth-linux-mips64le
+energi3-linux: energi3-linux-386 energi3-linux-amd64 energi3-linux-arm energi3-linux-mips64 energi3-linux-mips64le
 	@echo "Linux cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-*
 
-geth-linux-386:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/386 -v ./cmd/geth
+energi3-linux-386:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/386 -v ./cmd/energi
 	@echo "Linux 386 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep 386
 
-geth-linux-amd64:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/amd64 -v ./cmd/geth
+energi3-linux-amd64:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/amd64 -v ./cmd/energi
 	@echo "Linux amd64 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep amd64
 
-geth-linux-arm: geth-linux-arm-5 geth-linux-arm-6 geth-linux-arm-7 geth-linux-arm64
+energi3-linux-arm: energi3-linux-arm-5 energi3-linux-arm-6 energi3-linux-arm-7 energi3-linux-arm64
 	@echo "Linux ARM cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep arm
 
-geth-linux-arm-5:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm-5 -v ./cmd/geth
+energi3-linux-arm-5:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm-5 -v ./cmd/energi
 	@echo "Linux ARMv5 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep arm-5
 
-geth-linux-arm-6:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm-6 -v ./cmd/geth
+energi3-linux-arm-6:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm-6 -v ./cmd/energi
 	@echo "Linux ARMv6 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep arm-6
 
-geth-linux-arm-7:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm-7 -v ./cmd/geth
+energi3-linux-arm-7:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm-7 -v ./cmd/energi
 	@echo "Linux ARMv7 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep arm-7
 
-geth-linux-arm64:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm64 -v ./cmd/geth
+energi3-linux-arm64:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/arm64 -v ./cmd/energi
 	@echo "Linux ARM64 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep arm64
 
-geth-linux-mips:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mips --ldflags '-extldflags "-static"' -v ./cmd/geth
+energi3-linux-mips:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mips --ldflags '-extldflags "-static"' -v ./cmd/energi
 	@echo "Linux MIPS cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep mips
 
-geth-linux-mipsle:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mipsle --ldflags '-extldflags "-static"' -v ./cmd/geth
+energi3-linux-mipsle:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mipsle --ldflags '-extldflags "-static"' -v ./cmd/energi
 	@echo "Linux MIPSle cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep mipsle
 
-geth-linux-mips64:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mips64 --ldflags '-extldflags "-static"' -v ./cmd/geth
+energi3-linux-mips64:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mips64 --ldflags '-extldflags "-static"' -v ./cmd/energi
 	@echo "Linux MIPS64 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep mips64
 
-geth-linux-mips64le:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mips64le --ldflags '-extldflags "-static"' -v ./cmd/geth
+energi3-linux-mips64le:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=linux/mips64le --ldflags '-extldflags "-static"' -v ./cmd/energi
 	@echo "Linux MIPS64le cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-linux-* | grep mips64le
 
-geth-darwin: geth-darwin-386 geth-darwin-amd64
+energi3-darwin: energi3-darwin-386 energi3-darwin-amd64
 	@echo "Darwin cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-darwin-*
 
-geth-darwin-386:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=darwin/386 -v ./cmd/geth
+energi3-darwin-386:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=darwin/386 -v ./cmd/energi
 	@echo "Darwin 386 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-darwin-* | grep 386
 
-geth-darwin-amd64:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=darwin/amd64 -v ./cmd/geth
+energi3-darwin-amd64:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=darwin/amd64 -v ./cmd/energi
 	@echo "Darwin amd64 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-darwin-* | grep amd64
 
-geth-windows: geth-windows-386 geth-windows-amd64
+energi3-windows: energi3-windows-386 energi3-windows-amd64
 	@echo "Windows cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-windows-*
 
-geth-windows-386:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=windows/386 -v ./cmd/geth
+energi3-windows-386:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=windows/386 -v ./cmd/energi
 	@echo "Windows 386 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-windows-* | grep 386
 
-geth-windows-amd64:
-	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=windows/amd64 -v ./cmd/geth
+energi3-windows-amd64:
+	build/env.sh go run build/ci.go xgo -- --go=$(GO) --targets=windows/amd64 -v ./cmd/energi
 	@echo "Windows amd64 cross compilation done:"
 	@ls -ld $(GOBIN)/energi3-windows-* | grep amd64
