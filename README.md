@@ -4,13 +4,9 @@ Official golang implementation of the Energi Core based on Ethereum protocol.
 
 ## Building the source
 
-### Build with FutoIn CID
+### Build with Makefile
 
-Local build from the source is supported via [FutoIn CID](https://futoin.org/docs/cid/).
-
-    cid prepare
-    cid build
-    cid package
+    make all
 
 ### (Optional) Build with Vagrant
 

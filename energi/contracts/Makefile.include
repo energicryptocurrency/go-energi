@@ -31,7 +31,7 @@ ABIGEN ?= build/bin/abigen
 
 abigen: $(ABIGEN)
 $(ABIGEN):
-	cid run cigo -- install ./cmd/abigen
+	./build/env.sh go run ./build/ci.go install ./cmd/abigen
 
 # ---
 ENERGI_CONTRACT_ROOT_DIR := energi/contracts
