@@ -2,7 +2,7 @@
 # with Go source code. If you know what GOPATH is then you probably
 # don't need to bother with make.
 
-.PHONY: energi3 android ios energi3-cross swarm evm all test clean
+.PHONY: energi android ios energi3-cross swarm evm all test clean
 .PHONY: energi3-linux energi3-linux-386 energi3-linux-amd64 energi3-linux-mips64 energi3-linux-mips64le
 .PHONY: energi3-linux-arm energi3-linux-arm-5 energi3-linux-arm-6 energi3-linux-arm-7 energi3-linux-arm64
 .PHONY: energi3-darwin energi3-darwin-386 energi3-darwin-amd64
@@ -20,7 +20,7 @@ prebuild:
 energi:
 	build/env.sh go run build/ci.go install ./cmd/energi
 	@echo "Done building."
-	@echo "Run \"$(GOBIN)/energi3\" to launch energi."
+	@echo "Run \"$(GOBIN)/energi\" to launch energi."
 
 swarm:
 	build/env.sh go run build/ci.go install ./cmd/swarm
