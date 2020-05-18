@@ -26,7 +26,11 @@ From within the Vagrant environment, follow the steps to build with FutoIn CID.
 
 A consistent build environment can be provided with Docker. Release builds are produced through this process.
 
-    docker build -t energi3 .
+    docker build -t energi .
+
+To run the image.
+
+    docker run -it energi
 
 ## Executables
 
