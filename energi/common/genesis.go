@@ -33,7 +33,8 @@ const (
 	{
 		"alloc": {
 			"0x0000000000000000000000000000000000000308": { "balance": "10000000000000000000" },
-			"0x844621b803a2a4f2b4a0d5b1cd43ffa7c2f20f94": { "balance": "1000000000000000000000000000000000000000000000000000000000000000000" }
+			"0x0000000000000000000000000000000000000310": { "balance": "120000000000000000000" },
+			"0x844621b803a2a4f2b4a0d5b1cd43ffa7c2f20f94": { "balance": "150000000000000000000000000000"}
 		},
 		"difficulty": "0x2c",
 		"gasLimit"  : "0x2fefd8",
@@ -61,11 +62,11 @@ const (
 				"ebiSigner"      : "0x128eaec174d59a7a77be8a77899efe8ff8469e76",
 				"cppSigner"      : "0x21902f8414b0b4810d75ba40c651191bcf311552"
 			},
-			"superblockCycle"    	: 600,
-			"mnRequireValidation"	: 5,
-			"mnValidationPeriod" 	: 5,
+			"superblockCycle"    	: 100,
+			"mnRequireValidation"	: 2,
+			"mnValidationPeriod" 	: 2,
 			"mnCleanupPeriod"    	: 86400,
-			"mnEverCollateral"   	: 30000000000000000000000,
+			"mnEverCollateral"   	: 3000000000000000000000,
 			"mnRewardsPerBlock"  	: 10
 		}
 	}`
