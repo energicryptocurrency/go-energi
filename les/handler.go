@@ -151,19 +151,19 @@ func NewProtocolManager(chainConfig *params.ChainConfig, indexerConfig *light.In
 		manager.reqDist = odr.retriever.dist
 	}
 
-	removePeer := manager.removePeer
-	if disableClientRemovePeer {
-		removePeer = func(id string) {}
-	}
-	if lightSync {
-		var checkpoint uint64
-		if cht, ok := params.TrustedCheckpoints[blockchain.Genesis().Hash()]; ok {
-			checkpoint = (cht.SectionIndex+1)*params.CHTFrequencyClient - 1
-		}
-		manager.downloader = downloader.New(downloader.LightSync, checkpoint, chainDb, manager.eventMux, nil, blockchain, txpool, removePeer)
-		manager.peers.notify((*downloaderPeerNotify)(manager))
-		manager.fetcher = newLightFetcher(manager)
-	}
+	//removePeer := manager.removePeer
+	//if disableClientRemovePeer {
+	//	removePeer = func(id string) {}
+	//}
+	//if lightSync {
+	//	var checkpoint uint64
+	//	if cht, ok := params.TrustedCheckpoints[blockchain.Genesis().Hash()]; ok {
+	//		checkpoint = (cht.SectionIndex+1)*params.CHTFrequencyClient - 1
+	//	}
+	//	manager.downloader = downloader.New(downloader.LightSync, checkpoint, chainDb, manager.eventMux, nil, blockchain, txpool, removePeer)
+	//	manager.peers.notify((*downloaderPeerNotify)(manager))
+	//	manager.fetcher = newLightFetcher(manager)
+	//}
 
 	return manager, nil
 }

@@ -24,11 +24,12 @@ type SyncMode int
 const (
 	FullSync  SyncMode = iota // Synchronise the entire blockchain history from full blocks
 	FastSync                  // Quickly download the headers, full sync only at the chain head
-	LightSync                 // Download only the headers and terminate afterwards
+	//LightSync                 // Download only the headers and terminate afterwards
 )
 
 func (mode SyncMode) IsValid() bool {
-	return mode >= FullSync && mode <= LightSync
+	//return mode >= FullSync && mode <= LightSync
+	return mode >= FullSync && mode <= FastSync
 }
 
 // String implements the stringer interface.
@@ -38,8 +39,8 @@ func (mode SyncMode) String() string {
 		return "full"
 	case FastSync:
 		return "fast"
-	case LightSync:
-		return "light"
+	//case LightSync:
+	//	return "light"
 	default:
 		return "unknown"
 	}
@@ -51,8 +52,8 @@ func (mode SyncMode) MarshalText() ([]byte, error) {
 		return []byte("full"), nil
 	case FastSync:
 		return []byte("fast"), nil
-	case LightSync:
-		return []byte("light"), nil
+	//case LightSync:
+	//	return []byte("light"), nil
 	default:
 		return nil, fmt.Errorf("unknown sync mode %d", mode)
 	}
@@ -64,8 +65,8 @@ func (mode *SyncMode) UnmarshalText(text []byte) error {
 		*mode = FullSync
 	case "fast":
 		*mode = FastSync
-	case "light":
-		*mode = LightSync
+	//case "light":
+	//	*mode = LightSync
 	default:
 		return fmt.Errorf(`unknown sync mode %q, want "full", "fast" or "light"`, text)
 	}

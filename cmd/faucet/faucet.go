@@ -48,7 +48,6 @@ import (
 	"energi.world/core/gen3/core"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/eth/downloader"
 	"energi.world/core/gen3/ethclient"
 	"energi.world/core/gen3/ethstats"
 	"energi.world/core/gen3/les"
@@ -234,7 +233,7 @@ func newFaucet(genesis *core.Genesis, port int, enodes []*discv5.Node, network u
 	// Assemble the Ethereum light client protocol
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		cfg := eth.DefaultConfig
-		cfg.SyncMode = downloader.LightSync
+		//cfg.SyncMode = downloader.LightSync
 		cfg.NetworkId = network
 		cfg.Genesis = genesis
 		return les.New(ctx, &cfg)
