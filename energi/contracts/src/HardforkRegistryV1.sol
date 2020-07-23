@@ -24,7 +24,7 @@ import { GovernedContract } from "./GovernedContract.sol";
 import { IHardforkRegistry } from "./IHardforkRegistry.sol"
 
 /**
- * @notice StorageHardforkRegistryv1 manages the hardforks.
+ * @notice StorageHardforkRegistryv1 stores the hardforks.
  * @dev StorageHardforkRegistryV1 inserts and deletes the respective hardforks if
  * @dev if finalization has not yet been achieved.
  */
@@ -84,31 +84,57 @@ contract StorageHardforkRegistryV1 is
         requireOwner,
         contentEditable
     {
-        delete hardforks[_block_no]
+        delete hardforks[_block_no];
 
         for (uint i = hardfork_blocks.length-1; i >= 0; i--) {
             if (hardfork_blocks[i] == _block_no) {
-                delete hardfork_blocks[i]
+                delete hardfork_blocks[i];
             }
         }
     }
 } 
 
+/**
+ * @notice HardforkRegistryV1 manages the various hardforks created.
+ * @dev It allows creation, update and deletion of a hardfork before finalization
+ * @dev is achieved. Respective hardforks can be queried by block number or its
+ * @dev its name. Its possible to list the hardfork blocks from the oldest to the
+ * @dev to the newest.
+ */
 contract HardforkRegistryV1 is 
     GovernedContract,
     IHardforkRegistry
 {
+    HF_Signer public address;
     StorageHardforkRegistryV1 public v1storage;
-    HF_Signer address;
 
+    /**
+     * @notice Constructor accepts the proxy contract and creates a Governed
+     * @notice contract instance.
+     */
     constructor (address _proxy, _HF_Signer) 
-        public GovernedContract(_proxy) {
+        public GovernedContract(_proxy)
+    {
         HF_Signer = _HF_Signer;
     }
 
+    /**
+     * @notice Allows the hardfork signer account to create and update a hardfork.
+     * @param block_no block number when the hardfork should happen.
+     * @param block_hash block hash after the hardfork has happened.
+     * @param name hardfork name derived from the naming scheme.
+     * @param sw_features software version after hardfork finalization.
+     */
     function propose(uint256 block_no, hash block_hash, bytes32 name, uint256 sw_features) external {
         require(_callerAddress() == HF_signer, "Invalid hardfork signer caller");
         require(block_no >= block.number, "Hardfork cannot be created in the past");
+
+        uint256 _block_no;
+        hash _block_hash;
+        _block_no, _block_hash, = getByName(name);
+        if (_block_no != block_no && _block_hash == hash(0)) {
+            revert("Duplicate hardfork names are not allowed");
+        }
 
         v1storage.setHardfork(block_no, block_hash, name, sw_features);
 
@@ -120,7 +146,11 @@ contract HardforkRegistryV1 is
             };
         }
     }
-
+    
+    /**
+     * @notice Returns the hardfork info indexed at provided block number.
+     * @param block_no block number when the hardfork should happen.
+     */
     function getByBlockNo(uint256 block_no) returns external view (hash block_hash,
         bytes32 name, uint256 sw_features) {
         StorageHardforkRegistryV1.Hardfork hfs = memory v1storage.hardforks[block_no];
@@ -130,6 +160,10 @@ contract HardforkRegistryV1 is
         sw_features = hfs.sw_features;
     }
 
+    /**
+     * @notice Returns the hardfork info associated with the provided name
+     * @param name hardfork name derived from the naming scheme.
+     */
     function getByName (bytes32 name) returns external view (uint256 block_no, 
         hash block_hash, uint256 sw_features) {
         StorageHardforkRegistryV1.Hardfork hfs;
@@ -147,11 +181,30 @@ contract HardforkRegistryV1 is
         }
     }
 
+    /**
+     * @notice Removes the hardfork info indexed by the provided block number.
+     * @param block_no block number when the hardfork should happen.
+     */
     function remove(uint256 block_no) external {
         v1storage.deleteHardfork(block_no);
     }
 
+    /**
+     * @notice Lists the hardfork blocks in ascending order.
+     * @dev Lists the hardblock from the oldest to the most recent.
+     */
     function enumerate() returns (uint256[] memory hf_blocks){
         hf_blocks = v1storage.hardfork_blocks
+    }
+
+    //---------------------------------
+    // IGovernedContract
+    //---------------------------------
+
+    /**
+     * @notice sets the owner of the new implementation.
+     */ 
+    function _destroy(IGovernedContract _newImpl) internal {
+        v1storage.setOwner(_newImpl);
     }
 }
