@@ -20,8 +20,11 @@
 //       match requirement.
 pragma solidity 0.5.16;
 
+import { IGovernedContract } from "./IGovernedContract.sol";
 import { GovernedContract } from "./GovernedContract.sol";
-import { IHardforkRegistry } from "./IHardforkRegistry.sol"
+import { IHardforkRegistry } from "./IHardforkRegistry.sol";
+import { NonReentrant } from "./NonReentrant.sol";
+import { StorageBase }  from "./StorageBase.sol";
 
 /**
  * @notice StorageHardforkRegistryv1 stores the hardforks.
@@ -30,21 +33,21 @@ import { IHardforkRegistry } from "./IHardforkRegistry.sol"
  */
 contract StorageHardforkRegistryV1 is
     StorageBase
-{ 
+{
     /**
      * @notice Prevents unnecessary hardforks modification.
      * @dev Before the finalization is achieved, changes on the stored hardforks
      * @dev can be implemented, otherwise they are rejected. Finalization is
      * @dev achieved once the hardfork block hash is updated.
      */
-    modifier contentEditable() {
-        require(hardforks[_block_no].block_hash == hash(0), "hardfork changes not editable")
+    modifier contentEditable(uint256 _block_no) {
+        require(hardforks[_block_no].block_hash == bytes32(0), "hardfork changes not editable");
         _;
     }
 
     struct Hardfork {
         bytes32 name;
-        hash block_hash;
+        bytes32 block_hash;
         uint256 sw_features;
     }
 
@@ -58,22 +61,23 @@ contract StorageHardforkRegistryV1 is
      */
     function setHardfork(
         uint256 _block_no,
-        hash _block_hash,
+        bytes32 _block_hash,
         bytes32 _hardfork_name,
         uint256 _sw_features
     )
         external
-        requireOwner,
-        contentEditable
+        requireOwner
+        contentEditable(_block_no)
     {
-        info storage item = hardforks[_block_no];
+        Hardfork storage item = hardforks[_block_no];
+        // Update the hardfork blocks once the first hardfork name is set
         if (item.name == bytes32(0) && _hardfork_name != bytes32(0)) {
-            hardfork_blocks.push(_block_no)
+            hardfork_blocks.push(_block_no);
         }
 
-        if (_block_hash) item.block_hash = _block_hash;
-        if (_hardfork_name) item.name = _hardfork_name;
-        if (_sw_features) item.sw_features = _sw_features;
+        if (_block_hash != bytes32(0)) item.block_hash = _block_hash;
+        if (_hardfork_name != bytes32(0)) item.name = _hardfork_name;
+        if (_sw_features != 0) item.sw_features = _sw_features;
     }
 
     /**
@@ -81,8 +85,9 @@ contract StorageHardforkRegistryV1 is
      * @dev If content is editable delete the hardfork record completely.
      */
     function deleteHardfork(uint256 _block_no)
-        requireOwner,
-        contentEditable
+        external
+        requireOwner
+        contentEditable(_block_no)
     {
         delete hardforks[_block_no];
 
@@ -92,7 +97,14 @@ contract StorageHardforkRegistryV1 is
             }
         }
     }
-} 
+
+    /**
+     * @notice Return the hardfork blocks.
+     */
+    function getHardForkBlocks() external view returns(uint256[] memory) {
+        return hardfork_blocks;
+    }
+}
 
 /**
  * @notice HardforkRegistryV1 manages the various hardforks created.
@@ -101,59 +113,67 @@ contract StorageHardforkRegistryV1 is
  * @dev its name. Its possible to list the hardfork blocks from the oldest to the
  * @dev to the newest.
  */
-contract HardforkRegistryV1 is 
+contract HardforkRegistryV1 is
     GovernedContract,
-    IHardforkRegistry
+    IHardforkRegistry,
+    NonReentrant
 {
-    HF_Signer public address;
+    address public HF_signer;
     StorageHardforkRegistryV1 public v1storage;
 
     /**
      * @notice Constructor accepts the proxy contract and creates a Governed
      * @notice contract instance.
      */
-    constructor (address _proxy, _HF_Signer) 
+    constructor (address _proxy, address _HF_signer)
         public GovernedContract(_proxy)
     {
-        HF_Signer = _HF_Signer;
+        v1storage = new StorageHardforkRegistryV1();
+        HF_signer = _HF_signer;
     }
 
     /**
      * @notice Allows the hardfork signer account to create and update a hardfork.
      * @param block_no block number when the hardfork should happen.
-     * @param block_hash block hash after the hardfork has happened.
      * @param name hardfork name derived from the naming scheme.
+     * @param block_hash block hash after the hardfork has happened.
      * @param sw_features software version after hardfork finalization.
      */
-    function propose(uint256 block_no, hash block_hash, bytes32 name, uint256 sw_features) external {
+    function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features)
+        external
+        noReentry
+    {
         require(_callerAddress() == HF_signer, "Invalid hardfork signer caller");
         require(block_no >= block.number, "Hardfork cannot be created in the past");
 
         uint256 _block_no;
-        hash _block_hash;
-        _block_no, _block_hash, = getByName(name);
-        if (_block_no != block_no && _block_hash == hash(0)) {
+        bytes32 _block_hash;
+        (_block_no, _block_hash,) = getByName(name);
+        if (_block_no != block_no && _block_hash == bytes32(0)) {
             revert("Duplicate hardfork names are not allowed");
         }
 
         v1storage.setHardfork(block_no, block_hash, name, sw_features);
 
-        if (name != bytes32(0) && block_hash != address(0)) {
-            emit hardfork {
+        if (name != bytes32(0) && block_hash != bytes32(0)) {
+            emit Hardfork (
                 block_no,
                 block_hash,
-                name,
-            };
+                name
+            );
         }
     }
-    
+
     /**
      * @notice Returns the hardfork info indexed at provided block number.
      * @param block_no block number when the hardfork should happen.
      */
-    function getByBlockNo(uint256 block_no) returns external view (hash block_hash,
-        bytes32 name, uint256 sw_features) {
-        StorageHardforkRegistryV1.Hardfork hfs = memory v1storage.hardforks[block_no];
+    function getByBlockNo(uint256 block_no)
+        external
+        view
+        returns(bytes32 name, bytes32 block_hash, uint256 sw_features)
+    {
+        StorageHardforkRegistryV1.Hardfork memory hfs = _hardforkInfo(v1storage, block_no);
 
         name = hfs.name;
         block_hash = hfs.block_hash;
@@ -164,19 +184,22 @@ contract HardforkRegistryV1 is
      * @notice Returns the hardfork info associated with the provided name
      * @param name hardfork name derived from the naming scheme.
      */
-    function getByName (bytes32 name) returns external view (uint256 block_no, 
-        hash block_hash, uint256 sw_features) {
-        StorageHardforkRegistryV1.Hardfork hfs;
-        uint i = v1storage.hardfork_blocks.length-1;
+    function getByName (bytes32 name)
+        public
+        view
+        returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
+    {
+        StorageHardforkRegistryV1.Hardfork memory hfs;
+        uint i = v1storage.getHardForkBlocks().length - 1;
 
         for (; i >= 0; i--) {
-            block_no = v1storage.hardfork_blocks[i];
-            hfs = memory v1storage.hardforks[block_no];
+            block_no = v1storage.hardfork_blocks(i);
+            hfs = _hardforkInfo(v1storage, block_no);
 
-            if (hfs.name = name) {
+            if (hfs.name == name) {
                 block_hash = hfs.block_hash;
                 sw_features = hfs.sw_features;
-                return;
+                return (block_no, block_hash, sw_features);
             }
         }
     }
@@ -185,7 +208,10 @@ contract HardforkRegistryV1 is
      * @notice Removes the hardfork info indexed by the provided block number.
      * @param block_no block number when the hardfork should happen.
      */
-    function remove(uint256 block_no) external {
+    function remove(uint256 block_no) external noReentry {
+        StorageHardforkRegistryV1.Hardfork memory hfs = _hardforkInfo(v1storage, block_no);
+        require(hfs.block_hash == bytes32(0), "Finalized hardfork cannot be deleted");
+
         v1storage.deleteHardfork(block_no);
     }
 
@@ -193,8 +219,24 @@ contract HardforkRegistryV1 is
      * @notice Lists the hardfork blocks in ascending order.
      * @dev Lists the hardblock from the oldest to the most recent.
      */
-    function enumerate() returns (uint256[] memory hf_blocks){
-        hf_blocks = v1storage.hardfork_blocks
+    function enumerate() external returns(uint256[] memory hf_blocks){
+        hf_blocks = v1storage.getHardForkBlocks();
+    }
+
+    /**
+     * @notice Extracts the hardfork information identified by the block number.
+     * @dev privately accessed the function returning a memory instance of the hardfork.
+     */
+    function _hardforkInfo(StorageHardforkRegistryV1 store, uint256 _block_no)
+        internal
+        view
+        returns (StorageHardforkRegistryV1.Hardfork memory hfs)
+    {
+        (
+            hfs.name,
+            hfs.block_hash,
+            hfs.sw_features
+        ) = store.hardforks(_block_no);
     }
 
     //---------------------------------
@@ -203,8 +245,14 @@ contract HardforkRegistryV1 is
 
     /**
      * @notice sets the owner of the new implementation.
-     */ 
+     */
     function _destroy(IGovernedContract _newImpl) internal {
         v1storage.setOwner(_newImpl);
+    }
+
+    // Safety
+    //---------------------------------
+    function () external payable {
+        revert("Not supported");
     }
 }

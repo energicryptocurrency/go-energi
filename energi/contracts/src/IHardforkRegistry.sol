@@ -21,20 +21,20 @@
 pragma solidity 0.5.16;
 
 /**
- * IHardforkRegistry defines the public HardforkRegistry public interface.
+ * IHardforkRegistry defines the HardforkRegistry public interface.
  */
 interface IHardforkRegistry {
-    event hardfork {
-        uint256 block_no;
-        hash block_hash;
-        bytes32 name;
-    }
+    event Hardfork (
+        uint256 block_no,
+        bytes32 block_hash,
+        bytes32 name
+    );
 
-    function propose(uint256 block_no, hash block_hash, bytes32 name, uint256 sw_features) external;
-    function getByBlockNo(uint256 block_no) returns external view (hash block_hash,
-        bytes32 name, uint256 sw_features);
-    function getByName (bytes32 name) returns external view (uint256 block_no, 
-        hash block_hash, uint256 sw_features);
+    function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features) external;
+    function getByBlockNo(uint256 block_no) external view returns(bytes32 name,
+        bytes32 block_hash, uint256 sw_features);
+    function getByName (bytes32 name) external view returns(uint256 block_no,
+        bytes32 block_hash, uint256 sw_features);
     function remove(uint256 block_no) external;
-    function enumerate() returns (uint256[] memory hf_blocks);
+    function enumerate() external returns(uint256[] memory hf_blocks);
 }
