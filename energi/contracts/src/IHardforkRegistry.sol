@@ -36,5 +36,5 @@ interface IHardforkRegistry {
     function getByName (bytes32 name) external view returns(uint256 block_no,
         bytes32 block_hash, uint256 sw_features);
     function remove(uint256 block_no) external;
-    function enumerate() external returns(uint256[] memory hf_blocks);
+    function enumerate() external view returns(uint256[] memory hf_blocks);
 }

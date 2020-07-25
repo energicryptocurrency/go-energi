@@ -25,6 +25,7 @@ const IHardforkRegistry = artifacts.require('IHardforkRegistry');
 const StorageHardforkRegistryV1 = artifacts.require('StorageHardforkRegistryV1');
 
 const common = require('./common');
+const ethers = require('ethers');
 
 contract("HardforkRegistryV1", async accounts => {
     const s = {
@@ -37,54 +38,76 @@ contract("HardforkRegistryV1", async accounts => {
 
     before(async () => {
         s.orig = await HardforkRegistryV1.deployed();
-        s.proxy = await MockProxy.at(s.orig.proxy());
+        s.proxy = await MockProxy.at(await s.orig.proxy());
+        s.fake = await MockContract.new(s.proxy.address);
+
+        s.proxy_abi = await HardforkRegistryV1.at(s.proxy.address);
+        s.proxy_hf = await IHardforkRegistry.at(s.proxy.address);
+        s.token_abi = s.proxy_hf;
         await s.proxy.setImpl(s.orig.address);
 
-        s.fake = await MockContract.new(s.proxy.address);
-        s.proxy_hf = await IHardforkRegistry.at(s.proxy.address);
-        s.storage = await StorageHardforkRegistryV1.at(s.proxy.address);
+        s.storage = await StorageHardforkRegistryV1.at(await s.proxy_abi.v1storage());
         Object.freeze(s);
     });
 
     describe('common pre', () => common.govPreTests(s));
 
-    describe("Primary", () => {
-        const hf_blocks = [10, 20]
-        const hf_names = ["Ba Sing Se", "Hogwarts"]
-        const hf_sw_features = [3000600, 3000600]
+    describe("Primary", async () => {
+        const b32 = (name) => ethers.utils.formatBytes32String(name);
+        const emptyB32 = b32(""); // "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-        let pos = 0;
-        for(i = 0; i <= Math.max(...hf_blocks)+1; i++) {
-            common.moveTime(web3, 1);
+        const hf_sw_feature = 3000600;
+        const owner1 = "0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb";
+        let hf_names = [b32("Ba Sing Se"), b32("Hogwarts"), b32("Mars"), b32("Random")];
 
-            if (pos < hf_blocks.length && i == hf_blocks[pos]) {
-                let hash = "";
+        let hf_blocks = [];
+        let hf_hashes = [];
 
-                if (pos == 0) {
-                    // Finalize only one of the hardforks.
-                    const bn = await web3.eth.getBlockNumber();
-                    const b = await web3.eth.getBlock(bn);
+        before(async () => {
+            let i = 0;
+            for(; i < hf_names.length; i++) {
+                common.moveTime(web3, 1);
 
-                    hash = b.hash
+                const b = await web3.eth.getBlock('latest');
+                // Hardfork needs to be created way ahead of time.
+                hf_blocks.push(b.number+2)
+                if (i > 1) {
+                    hf_hashes.push(emptyB32);
+                } else {
+                    hf_hashes.push(b.hash);
                 }
 
-                await s.proxy_hf.propose(hf_blocks[pos], hash, hf_names[pos], hf_sw_features[pos]);
-                pos++;
+                await s.proxy_hf.propose(hf_blocks[i], hf_names[i], hf_hashes[i], hf_sw_feature, {from: owner1});
             }
-        }
+        })
 
         it("should fail to propose on invalid HF signer", async () => {
+            common.moveTime(web3, 1);
+            const b = await web3.eth.getBlock('latest');
+
             try {
-                await s.fake.propose(50, "", "Invalid Signer", 3000600);
+                await s.proxy_hf.propose(b.number, b32("Invalid Signer"), emptyB32, hf_sw_feature, {from: s.fake.address});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Invalid hardfork signer caller/);
             }
         });
 
-        it("should fail to propose on past HF", async () => {
+        it("should fail to propose when empty hardfork name is used", async () => {
+            common.moveTime(web3, 1);
+            const b = await web3.eth.getBlock('latest');
+
             try {
-                await s.proxy_hf.propose(5, "", "Adromeda", 3000600);
+                await s.proxy_hf.propose(b.number, emptyB32, emptyB32, hf_sw_feature);
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Hardfork name cannot be empty/);
+            }
+        });
+
+        it("should fail to propose on a past HF block", async () => {
+            try {
+                await s.proxy_hf.propose(5, b32("Adromeda"), emptyB32, hf_sw_feature);
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Hardfork cannot be created in the past/);
@@ -92,9 +115,11 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should fail to propose if duplicate name is used", async () => {
-            let blockHash = "0x56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421";
+            common.moveTime(web3, 1);
+            const b = await web3.eth.getBlock('latest');
+
             try {
-                await s.proxy_hf.propose(25, blockHash, "Ba Sing Se", 3000600);
+                await s.proxy_hf.propose(b.number+5, b32("Ba Sing Se"), b.hash, hf_sw_feature);
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Duplicate hardfork names are not allowed/);
@@ -103,123 +128,236 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should propose on correct inputs", async ()=> {
             common.moveTime(web3, 1);
-
-            const bn = web3.eth.getBlockNumber();
-            const b = web3.eth.getBlock(bn);
+            const b = await web3.eth.getBlock('latest');
+            let bn = b.number+3
         
             try {
-                await s.proxy_hf.propose(bn, b.hash, "Krypton", 3000600);
+                hf_blocks.push(bn);
+                hf_names.push(b32("Krypton"));
+                await s.proxy_hf.propose(bn, b32("Krypton"), b.hash, hf_sw_feature);
             } catch (e) {
                 assert.match(e.message, /It must fail/);
             }
 
-            const evt = await s.orig.getPastEvents('hardfork', common.evt_last_block);
+            const evt = await s.orig.getPastEvents('Hardfork', common.evt_last_block);
             expect(evt).lengthOf(1);
+            common.stringifyBN(web3, evt[0].args);
+            expect(evt[0].args).deep.include({
+                block_no: bn.toString(10),
+                block_hash: b.hash,
+                name: b32("Krypton"),
+            });
+        });
+
+
+        it("should fail to propose if the hardfork has already been finalized", async () => {
+            const block_no = hf_blocks[hf_blocks.length -1];
+            const b = await web3.eth.getBlock('latest');
+            try {
+                await s.proxy_hf.propose(block_no, b32("Ba Sing Se - Updated"), b.hash, hf_sw_feature);
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /hardfork changes not editable/);
+            }
+        });
+
+        it("should fail to propose during the hardfork finalization if block hash is empty", async () => {
+            const b = await web3.eth.getBlock('latest');
+            const bn = b.number+3;
+            const hfn = b32("Barbage");
+
+            try {
+                await s.proxy_hf.propose(bn, hfn, emptyB32, hf_sw_feature);
+                hf_blocks.push(bn);
+            } catch (e) {
+                assert.match(e.message, /It must fail/);
+            }
+
+            // Move time till the block finalization period.
+            let i = 0;
+            for(; i < 11; i++) {
+                common.moveTime(web3, 1);
+            }
+
+            try {
+                await s.proxy_hf.propose(bn, hfn, emptyB32, hf_sw_feature);
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /HF finalization block hash cannot be empty/);
+            }
+        });
+
+        it("should propose during the hardfork finalization if block hash is not empty", async () => {
+            const b = await web3.eth.getBlock('latest');
+            const bn = b.number+5;
+            const hfn = b32("Karl Max");
+
+            try {
+                await s.proxy_hf.propose(bn, hfn, emptyB32, hf_sw_feature);
+                hf_blocks.push(bn);
+            } catch (e) {
+                assert.match(e.message, /It must fail/);
+            }
+
+            // Move time till PAST the block finalization period.
+            let i = 0;
+            for(; i < 13; i++) {
+                common.moveTime(web3, 1);
+            }
+
+            try {
+                await s.proxy_hf.propose(bn, hfn, b.hash, hf_sw_feature);
+            } catch (e) {
+                assert.match(e.message, /It must fail/);
+            }
+
+            const evt = await s.orig.getPastEvents('Hardfork', common.evt_last_block);
+            expect(evt).lengthOf(1);
+            common.stringifyBN(web3, evt[0].args);
+            expect(evt[0].args).deep.include({
+                block_no: bn.toString(),
+                block_hash: b.hash,
+                name: hfn,
+            });
+        });
+
+        it("should fail to propose when the hardfork finalization interval is exceeded", async () => {
+            const b = await web3.eth.getBlock('latest');
+
+            try {
+                await s.proxy_hf.propose(hf_blocks[2], hf_names[2], b.hash, hf_sw_feature);
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Hardfork finalization interval exceeded/);
+            }
         });
 
         it("getByBlockNo with none existent block number should return empty values", async () => {
-            let info = await s.proxy_hf.getByBlockNo(100);
+            common.moveTime(web3, 1);
+            const b = await web3.eth.getBlock('latest');
+
+            let info = await s.proxy_hf.getByBlockNo(b.number + 100);
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
-                block_hash: "0x000000000000000000000000000000000000",
-                name: "0x00000000",
-                sw_fetaures: 0
+                block_hash: emptyB32,
+                name: emptyB32,
+                sw_features: "0",
             });
         });
 
         it("getByBlockNo with existent block number should return correct values", async () => {
-            let info = await s.proxy_hf.getByBlockNo(10);
+            let info = await s.proxy_hf.getByBlockNo(hf_blocks[2]);
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
-                block_hash: "0x000000000000000000000000000000000000",
-                name: "0x00000000",
-                sw_fetaures: 0
+                block_hash: hf_hashes[2],
+                name: hf_names[2],
+                sw_features: hf_sw_feature.toString(),
             });
         });
 
         it("getByName with none existent name should return empty values", async () => {
-            let info = await s.proxy_hf.getByName("knight");
+            let info = await s.proxy_hf.getByName(b32("knight"));
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
-                block_hash: "0x000000000000000000000000000000000000",
-                name: "0x00000000",
-                sw_fetaures: 0
+                block_no: "0",
+                block_hash: emptyB32,
+                sw_features: "0",
             });
         });
 
         it("getByName with existent name should return correct values", async () => {
-            let info = await s.proxy_hf.getByName("Ba Sing Se");
+            let info = await s.proxy_hf.getByName(hf_names[2]);
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
-                block_hash: "0x000000000000000000000000000000000000",
-                name: "0x00000000",
-                sw_fetaures: 0
+                block_no: hf_blocks[2].toString(),
+                block_hash: hf_hashes[2],
+                sw_features: hf_sw_feature.toString()
             });
         });
 
         it("should list all the hardforks blocks", async () => {
             let array  = await s.proxy_hf.enumerate();
-            expect(array).to.eql([10, 20, 50]);
+            let i = 0;
+            let returnArray = [];
+            for(; i < array.length; i++) {
+                returnArray.push(array[i].words[0]);
+            }
+            expect(returnArray).members(hf_blocks);
         });
 
         it("should fail to remove a finalized hardfork information", async () => {
             try {
-                await s.proxy_hf.remove(10);
+                await s.proxy_hf.remove(hf_blocks[1]);
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Finalized hardfork cannot be deleted/);
             }
 
             // Confirm that the hardfork wasn't removed at all.
-            let b_hash, name, sw_features = await s.proxy_hf.getByBlockNo(10);
+            let b = await s.proxy_hf.getByBlockNo(hf_blocks[1]);
+            common.stringifyBN(web3, b);
 
-            expect(b_hash).to.equal("0x000000000000000000000000000000000000");
-            expect(name).to.equal("0x00000000");
-            expect(sw_features).to.equal(0);
+            expect(b).deep.include({
+                name: hf_names[1].toString(),
+                block_hash: hf_hashes[1],
+                sw_features: hf_sw_feature.toString()
+            });
 
             let array  = await s.proxy_hf.enumerate();
-            expect(array).to.contain(10);
+            expect(array.length).to.equal(hf_blocks.length);
+
+            let i = 0;
+            let returnArray = [];
+            for(; i < array.length; i++) {
+                returnArray.push(array[i].words[0]);
+            }
+            expect(returnArray).to.contain(hf_blocks[1]);
         });
 
         it("should remove the unfinalized hardfork information completely", async () => {
-            try {
-                await s.proxy_hf.remove(20);
-            } catch (e) {
-                assert.match(e.message, /It must fail/);
-            }
+            await s.proxy_hf.remove(hf_blocks[3]);
 
             // Confirm that the hardfork wasn't removed at all.
-            let b_hash, name, sw_features = await s.proxy_hf.getByBlockNo(20);
+            let b = await s.proxy_hf.getByBlockNo(hf_blocks[3]);
+            common.stringifyBN(web3, b);
 
-            expect(b_hash).to.equal("0x000000000000000000000000000000000000");
-            expect(name).to.equal("0x00000000");
-            expect(sw_features).to.equal(0);
+            expect(b).deep.include({
+                name: emptyB32,
+                block_hash: emptyB32,
+                sw_features: "0"
+            });
 
             let array  = await s.proxy_hf.enumerate();
-            expect(array).to.contain(20);
+            expect(array.length).to.equal(hf_blocks.length - 1);
+
+            let i = 0;
+            let returnArray = [];
+            for(; i < array.length; i++) {
+                returnArray.push(array[i].words[0]);
+            }
+            expect(returnArray).not.contain(hf_blocks[3]);
         });
 
         describe("StorageHardforkRegistryV1", async () => {
-            it("should refuse to update a finalised hardfork", async () => {
-                const b = web3.eth.getBlock(11);
+            it("should refuse to update a hardfork directly", async () => {
                 try {
-                    await s.storage.setHardfork(10, b.hash, "Ba Sing Se- Updated", 3000600);
+                    await s.storage.setHardfork(hf_blocks[0], b32("Ba Sing Se- Updated"), hf_hashes[0], hf_sw_feature);
                     assert.fail('It must fail');
                 } catch (e) {
-                    assert.match(e.message, /hardfork changes not editable/);
+                    assert.match(e.message, /Not owner/);
                 }
             });
 
-            it("should refuse to delete a finalized hardfork", async () => {
+            it("should refuse to delete a hardfork directly", async () => {
                 try {
-                    await s.storage.deleteHardfork(10);
+                    await s.storage.deleteHardfork(hf_blocks[0]);
                     assert.fail('It must fail');
                 } catch (e) {
-                    assert.match(e.message, /hardfork changes not editable/);
+                    assert.match(e.message, /Not owner/);
                 }
             });
         });

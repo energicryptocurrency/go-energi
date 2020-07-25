@@ -52,6 +52,7 @@ ENERGI_CONTRACTS := \
   ICheckpointRegistry.sol \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
+  IHardforkRegistry.sol \
   IMasternodeRegistryV2.sol \
   IMasternodeToken.sol \
   IProposal.sol \

@@ -53,6 +53,7 @@ contract StorageHardforkRegistryV1 is
 
     uint256[] public hardfork_blocks;
     mapping(uint256 => Hardfork) public hardforks;
+    mapping(bytes32 => uint256) public hardfork_names;
 
     /**
      * @notice setHardfork updates the hardfork changes.
@@ -76,8 +77,11 @@ contract StorageHardforkRegistryV1 is
         }
 
         if (_block_hash != bytes32(0)) item.block_hash = _block_hash;
-        if (_hardfork_name != bytes32(0)) item.name = _hardfork_name;
         if (_sw_features != 0) item.sw_features = _sw_features;
+        if (_hardfork_name != bytes32(0)) {
+            item.name = _hardfork_name;
+            hardfork_names[_hardfork_name] = _block_no;
+        }
     }
 
     /**
@@ -89,11 +93,20 @@ contract StorageHardforkRegistryV1 is
         requireOwner
         contentEditable(_block_no)
     {
+        Hardfork memory hf = hardforks[_block_no];
+        delete hardfork_names[hf.name];
+
         delete hardforks[_block_no];
 
-        for (uint i = hardfork_blocks.length-1; i >= 0; i--) {
+        for (uint i = 0; i < hardfork_blocks.length; i++) {
             if (hardfork_blocks[i] == _block_no) {
-                delete hardfork_blocks[i];
+                uint k = i;
+                for (; k < hardfork_blocks.length-1; k++) {
+                    hardfork_blocks[k] = hardfork_blocks[k+1];
+                }
+
+                hardfork_blocks.pop();
+                break;
             }
         }
     }
@@ -122,6 +135,13 @@ contract HardforkRegistryV1 is
     StorageHardforkRegistryV1 public v1storage;
 
     /**
+     * @dev Finalization interval is a period from 10 blocks behind the current
+     * @dev block number. Its the period after which a hardfork will be considered
+     * @dev immutable if set with a block hash or invalid if not.
+     */
+    uint256 internal HF_FINALIZATION_INTERVAL = 10;
+
+    /**
      * @notice Constructor accepts the proxy contract and creates a Governed
      * @notice contract instance.
      */
@@ -144,13 +164,21 @@ contract HardforkRegistryV1 is
         noReentry
     {
         require(_callerAddress() == HF_signer, "Invalid hardfork signer caller");
-        require(block_no >= block.number, "Hardfork cannot be created in the past");
+        require(name != bytes32(0), "Hardfork name cannot be empty");
 
-        uint256 _block_no;
-        bytes32 _block_hash;
-        (_block_no, _block_hash,) = getByName(name);
-        if (_block_no != block_no && _block_hash == bytes32(0)) {
-            revert("Duplicate hardfork names are not allowed");
+        uint256 _block_no = v1storage.hardfork_names(name);
+        if (_block_no > 0) {
+            // Hardfork already exist: Update is currently happening.
+            require(_block_no == block_no, "Duplicate hardfork names are not allowed");
+            require((block_no + HF_FINALIZATION_INTERVAL) >= block.number, "Hardfork finalization interval exceeded");
+
+            if (block_no < block.number) {
+                // During hardfork finalization period, block hash cannot be empty.
+                require(block_hash != bytes32(0), "HF finalization block hash cannot be empty");
+            }
+        } else {
+            // Hardfork doesn't exist: new instance will be created.
+            require(block_no >= block.number, "Hardfork cannot be created in the past");
         }
 
         v1storage.setHardfork(block_no, block_hash, name, sw_features);
@@ -173,11 +201,7 @@ contract HardforkRegistryV1 is
         view
         returns(bytes32 name, bytes32 block_hash, uint256 sw_features)
     {
-        StorageHardforkRegistryV1.Hardfork memory hfs = _hardforkInfo(v1storage, block_no);
-
-        name = hfs.name;
-        block_hash = hfs.block_hash;
-        sw_features = hfs.sw_features;
+        (name, block_hash, sw_features) = _hardforkInfo(v1storage, block_no);
     }
 
     /**
@@ -189,19 +213,8 @@ contract HardforkRegistryV1 is
         view
         returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
     {
-        StorageHardforkRegistryV1.Hardfork memory hfs;
-        uint i = v1storage.getHardForkBlocks().length - 1;
-
-        for (; i >= 0; i--) {
-            block_no = v1storage.hardfork_blocks(i);
-            hfs = _hardforkInfo(v1storage, block_no);
-
-            if (hfs.name == name) {
-                block_hash = hfs.block_hash;
-                sw_features = hfs.sw_features;
-                return (block_no, block_hash, sw_features);
-            }
-        }
+        block_no = v1storage.hardfork_names(name);
+        (, block_hash, sw_features) = _hardforkInfo(v1storage, block_no);
     }
 
     /**
@@ -209,8 +222,9 @@ contract HardforkRegistryV1 is
      * @param block_no block number when the hardfork should happen.
      */
     function remove(uint256 block_no) external noReentry {
-        StorageHardforkRegistryV1.Hardfork memory hfs = _hardforkInfo(v1storage, block_no);
-        require(hfs.block_hash == bytes32(0), "Finalized hardfork cannot be deleted");
+        bytes32 block_hash;
+        (,block_hash,) = _hardforkInfo(v1storage, block_no);
+        require(block_hash == bytes32(0), "Finalized hardfork cannot be deleted");
 
         v1storage.deleteHardfork(block_no);
     }
@@ -219,8 +233,8 @@ contract HardforkRegistryV1 is
      * @notice Lists the hardfork blocks in ascending order.
      * @dev Lists the hardblock from the oldest to the most recent.
      */
-    function enumerate() external returns(uint256[] memory hf_blocks){
-        hf_blocks = v1storage.getHardForkBlocks();
+    function enumerate() external view returns(uint256[] memory){
+        return v1storage.getHardForkBlocks();
     }
 
     /**
@@ -230,12 +244,12 @@ contract HardforkRegistryV1 is
     function _hardforkInfo(StorageHardforkRegistryV1 store, uint256 _block_no)
         internal
         view
-        returns (StorageHardforkRegistryV1.Hardfork memory hfs)
+        returns (bytes32 name, bytes32 block_hash, uint256 sw_features)
     {
         (
-            hfs.name,
-            hfs.block_hash,
-            hfs.sw_features
+           name,
+           block_hash,
+           sw_features
         ) = store.hardforks(_block_no);
     }
 
