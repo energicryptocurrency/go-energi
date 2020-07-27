@@ -38,6 +38,9 @@ var (
 	MainnetCPPSigner = common.HexToAddress("0xBD1C57eACcfD1519E342F870C1c551983F839479")
 	TestnetCPPSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
 
+	MainnetHFSigner = common.HexToAddress("0xBD1C57eACcfD1519E342F870C1c551983F839479")
+	TestnetHFSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
+
 	MainnetBackbone = common.HexToAddress("0x79C7CF016E53e5C47906c2daF6De2aA00AAcdB1e")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 )
@@ -77,6 +80,7 @@ var (
 			MigrationSigner: MainnetMigrationSigner,
 			EBISigner:       MainnetEBISigner,
 			CPPSigner:       MainnetCPPSigner,
+			HFSigner:        MainnetHFSigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24 * 14), // A super block happens at the end of every 20160 block (Approx. 14 days)
 		MNRequireValidation: big.NewInt(10),
@@ -101,6 +105,7 @@ var (
 			MigrationSigner: TestnetMigrationSigner,
 			EBISigner:       TestnetEBISigner,
 			CPPSigner:       TestnetCPPSigner,
+			HFSigner:        TestnetHFSigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24),
 		MNRequireValidation: big.NewInt(5),
@@ -261,6 +266,7 @@ type EnergiConfig struct {
 	MigrationSigner common.Address `json:"migrationSigner"`
 	EBISigner       common.Address `json:"ebiSigner"`
 	CPPSigner       common.Address `json:"cppSigner"`
+	HFSigner        common.Address `json:"hfSigner"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
