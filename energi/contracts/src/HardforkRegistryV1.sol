@@ -135,21 +135,22 @@ contract HardforkRegistryV1 is
     StorageHardforkRegistryV1 public v1storage;
 
     /**
-     * @dev Finalization interval is a period from 10 blocks behind the current
+     * @dev Finalization interval is a period from x blocks behind the current
      * @dev block number. Its the period after which a hardfork will be considered
      * @dev immutable if set with a block hash or invalid if not.
      */
-    uint256 internal HF_FINALIZATION_INTERVAL = 10;
+    uint256 internal HF_FINALIZATION_INTERVAL;
 
     /**
      * @notice Constructor accepts the proxy contract and creates a Governed
      * @notice contract instance.
      */
-    constructor (address _proxy, address _HF_signer)
+    constructor (address _proxy, address _HF_signer, uint256 _HF_finalization_period)
         public GovernedContract(_proxy)
     {
         v1storage = new StorageHardforkRegistryV1();
         HF_signer = _HF_signer;
+        HF_FINALIZATION_INTERVAL = _HF_finalization_period;
     }
 
     /**

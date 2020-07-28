@@ -705,6 +705,16 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_abi.DummyAccountBin,
 	)
 
+	deployEnergiContract(
+		&xfers,
+		energi_params.Energi_HardforkRegistry,
+		nil,
+		energi_abi.HardforkRegistryV1ABI,
+		energi_abi.HardforkRegistryV1Bin,
+		config.Energi.HFSigner,
+		config.HFFinalizationPeriod,
+	)
+
 	// Proxy List
 	proxies := map[common.Address]common.Address{
 		energi_params.Energi_BlockReward:        energi_params.Energi_BlockRewardV1,

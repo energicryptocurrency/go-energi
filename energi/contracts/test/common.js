@@ -35,6 +35,7 @@ exports.superblock_cycles = 8;
 exports.chain_id = 49797;
 exports.migration_signer = '0x0000000000000000000000000000000012345678';
 exports.cpp_signer = '0x2D0bc327d0843CAF6Fd9ae1eFaB0bF7196Fc2FC8';
+exports.hf_finalization_period = 30;
 exports.hf_signer = '0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb';
 exports.emergency_signer = '0x73E286b244c17F030F72e98C57FC83015a3C53Fd';
 exports.zerofee_callopts = {
