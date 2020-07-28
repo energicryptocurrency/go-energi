@@ -157,7 +157,6 @@ func (hf *HardforkRegistryAPI) listHardforks(num *big.Int) (interface{}, error) 
 func (hf *HardforkRegistryAPI) GenerateHardfork(
 	blockNo *hexutil.Big,
 	name string,
-	isFinalizing bool,
 	dst common.Address,
 	password *string,
 ) error {

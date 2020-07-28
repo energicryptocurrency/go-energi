@@ -522,6 +522,16 @@ web3._extend({
 `
 
 const Admin_JS = `
+web3._extend.formatters.hardforkFormatter = function(item){
+	return {
+		blockNo:    item.Masternode,
+		hfName:  	item.Name,
+		blockHash:  item.BlockHash,
+		swFeatures: item.SWFeatures,
+		swVersion:  item.SWVersion,
+	};
+};
+
 web3._extend({
 	property: 'admin',
 	methods: [
@@ -595,6 +605,62 @@ web3._extend({
 			name: 'validateMigration',
 			call: 'admin_validateMigration',
 			params: 1,
+			outputFormatter: console.log,
+		}),
+		// Hardforks
+		new web3._extend.Method({
+			name: 'listHardforks',
+			call: 'admin_listHardforks',
+			params: 0,
+			outputFormatter: function(list) {
+				var res = [];
+				for (var i = 0; i < list.length; ++i)
+					res.push(web3._extend.formatters.hardforkFormatter(list[i]));
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'generateHardfork',
+			call: 'admin_generateHardfork',
+			params: 4,
+			inputFormatter: [
+				web3._extend.utils.fromDecimal,
+				null,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+		new web3._extend.Method({
+			name: 'getHardforkByName',
+			call: 'admin_getHardforkByName',
+			params: 1,
+			inputFormatter: [ null ],
+			outputFormatter: function(status) {
+				return web3._extend.formatters.hardforkFormatter(status);
+			},
+		}),
+		new web3._extend.Method({
+			name: 'getHardforkByBlockNo',
+			call: 'admin_getHardforkByBlockNo',
+			params: 1,
+			inputFormatter: [
+				web3._extend.utils.fromDecimal,
+			],
+			outputFormatter: outputFormatter: function(status) {
+				return web3._extend.formatters.hardforkFormatter(status);
+			},
+		}),
+		new web3._extend.Method({
+			name: 'dropHardfork',
+			call: 'admin_dropHardfork',
+			params: 3,
+			inputFormatter: [
+				web3._extend.utils.fromDecimal,
+				web3._extend.formatters.inputAddressFormatter,
+				null,
+			],
 			outputFormatter: console.log,
 		}),
 	],
