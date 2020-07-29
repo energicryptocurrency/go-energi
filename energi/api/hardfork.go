@@ -142,7 +142,7 @@ func (hf *HardforkRegistryAPI) listHardforks(num *big.Int) (interface{}, error) 
 
 		resp = append(resp, &HardforkInfo{
 			BlockNo:    (*hexutil.Big)(blockNo),
-			Name:       decodeToString(data.Name),
+			Name:       energi_common.DecodeToString(data.Name),
 			BlockHash:  common.BytesToHash(data.BlockHash[:]),
 			SWFeatures: (*hexutil.Big)(data.SwFeatures),
 			SWVersion:  energi_common.SWVersionIntToString(data.SwFeatures),
@@ -199,7 +199,7 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 		blockHash = block.Hash()
 	}
 
-	tx, err := registry.Propose(blockNo.ToInt(), encodeToString(name),
+	tx, err := registry.Propose(blockNo.ToInt(), energi_common.EncodeToString(name),
 		blockHash, swFeatures.ToInt())
 	if err != nil {
 		return err
@@ -227,7 +227,7 @@ func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, er
 		GasLimit: energi_params.UnlimitedGas,
 	}
 
-	data, err := registry.GetByName(callOpts, encodeToString(name))
+	data, err := registry.GetByName(callOpts, energi_common.EncodeToString(name))
 	if err != nil {
 		log.Error("Running GetName Failed", "err", err)
 		return nil, err
@@ -266,25 +266,13 @@ func (hf *HardforkRegistryAPI) GetHardforkByBlockNo(blockNo *big.Int) (*Hardfork
 
 	resp := &HardforkInfo{
 		BlockNo:    (*hexutil.Big)(blockNo),
-		Name:       decodeToString(data.Name),
+		Name:       energi_common.DecodeToString(data.Name),
 		BlockHash:  common.BytesToHash(data.BlockHash[:]),
 		SWFeatures: (*hexutil.Big)(data.SwFeatures),
 		SWVersion:  energi_common.SWVersionIntToString(data.SwFeatures),
 	}
 
 	return resp, nil
-}
-
-// encodeToString converts the string provided to a bytes32 bytes array.
-func encodeToString(data string) [32]byte {
-	value := [32]byte{}
-	copy(value[:], []byte(data))
-	return value
-}
-
-// decodeToString converts the bytes32 bytes array back to the original string.
-func decodeToString(data [32]byte) string {
-	return string(data[:])
 }
 
 // DropHardfork drops any hardfork that is yet to be finalized.

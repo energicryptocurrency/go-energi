@@ -243,8 +243,9 @@ type ChainConfig struct {
 	// MNRewardsPerBlock defines the fraction of the total MN reward per block share
 	// payable to the MN holding the minimum amount of collateral.
 	MNRewardsPerBlock *big.Int `json:"mnRewardsPerBlock"`
-	// HFFinalizationPeriod the number of blocks after the hardfork block, within
-	// which a given hardfork must be finalized made immutable or rendered invalid.
+	// HFFinalizationPeriod is the number of blocks after the hardfork block,
+	// within which a given hardfork must be finalized and made immutable or
+	// rendered invalid and editable.
 	HFFinalizationPeriod *big.Int `json:"hfFinalizationPeriod"`
 }
 
