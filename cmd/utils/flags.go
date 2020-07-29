@@ -145,11 +145,11 @@ var (
 	}
 	TestnetFlag = cli.BoolFlag{
 		Name:  "testnet",
-		Usage: "EnergiTest network: pre-configured proof-of-work test network",
+		Usage: "EnergiTest network: pre-configured proof-of-stake test network",
 	}
 	SimnetFlag = cli.BoolFlag{
 		Name:  "simnet",
-		Usage: "EnergiSim network: pre-configured proof-of-work dev network",
+		Usage: "EnergiSim network: pre-configured proof-of-stake dev network",
 	}
 	ConstantinopleOverrideFlag = cli.Uint64Flag{
 		Name:  "override.constantinople",

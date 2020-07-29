@@ -115,7 +115,7 @@ func MigrationTx(
 	migration_file string,
 	engine consensus.Engine,
 ) (res *types.Transaction) {
-	// Create a special migrations block transaction if on simnet.
+	// Create a special migrations block transaction on simnet.
 	if tx, ok := createEnergiSimnetMigrationTx(signer, header, migration_file, engine); ok {
 		return tx
 	}

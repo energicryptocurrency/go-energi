@@ -242,8 +242,8 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	case ghash == params.TestnetGenesisHash:
 		return params.EnergiTestnetChainConfig
 	default:
-		// This case should work for simnet or other ephemeral test cases.
-		return g.Config
+		// Returned when genesis is nil and matching ghash is not found.
+		return params.TestChainConfig
 	}
 }
 

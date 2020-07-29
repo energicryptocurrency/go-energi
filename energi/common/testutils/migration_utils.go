@@ -25,6 +25,7 @@ import (
 	"math/big"
 	"os"
 
+	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/shengdoushi/base58"
 )
@@ -81,6 +82,8 @@ func (tg *TestGen2Migration) PrepareTestGen2Migration(chainID uint64) error {
 		prefix = byte(127)
 	} else if chainID == 59797 {
 		prefix = byte(129)
+	} else if chainID != 39797 {
+		log.Warn("unknown chain ID found: %d", chainID)
 	}
 
 	res := make([]byte, 20)
