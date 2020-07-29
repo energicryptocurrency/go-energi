@@ -49,6 +49,18 @@ var TrustedCheckpoints = map[common.Hash]*TrustedCheckpoint{
 	//TestnetGenesisHash: TestnetTrustedCheckpoint,
 }
 
+// Seeing as there are 526,000 blocks per year, and there is a 12M NRG annual emission
+// masternodes get 40% of all coins or 4.8M / 526,000 ~ 9.14 (per block except the super block)
+// miners get 10% of all coins or 1.2M / 526,000 ~ 2.28 (per block including the super block)
+// backbone gets 10% of all coins or 1.2M / 526,000 ~ 2.28 (per block including the super block)
+// which adds up to 13.7 as block subsidy (block reward)
+// Therefore with the total annual emission of ~12M per year:
+// => 10% goes to energi backbone.
+// => 10% goes to miners.
+// => 40% goes to masternodes.
+// => Remaining 40% goes to the Treasury. (~184000 NRG, super block cycle must be 20160 blocks)
+// The above coins supply remain true even in the superblock interval of 20160 blocks.
+
 var (
 	EnergiMainnetChainConfig = &ChainConfig{
 		ChainID:             big.NewInt(39797),
@@ -66,12 +78,12 @@ var (
 			EBISigner:       MainnetEBISigner,
 			CPPSigner:       MainnetCPPSigner,
 		},
-		SuperblockCycle:     big.NewInt(60 * 24 * 14),
+		SuperblockCycle:     big.NewInt(60 * 24 * 14), // A super block happens at the end of every 20160 block (Approx. 14 days)
 		MNRequireValidation: big.NewInt(10),
 		MNValidationPeriod:  big.NewInt(5),
-		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14),
+		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14), // Inactive MN denounced after 1209600 sec (14 days/ 2 weeks)
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(3000000), big.NewInt(Ether)),
-		MNRewardsPerBlock:   big.NewInt(10),
+		MNRewardsPerBlock:   big.NewInt(10), // MN with the minimum collateral amount gets a block reward of (9.14/10) 0.914 NRG.
 	}
 
 	EnergiTestnetChainConfig = &ChainConfig{
@@ -202,12 +214,26 @@ type ChainConfig struct {
 	Energi *EnergiConfig `json:"energi,omitempty"`
 
 	// This parameters are not part of hardcoded consensus!
-	SuperblockCycle     *big.Int `json:"superblockCycle"`
+
+	// SuperBlockCycle defines a period whose end results into a super block.
+	// A superblock sends a lump sum reward to the treasury. During a superblock
+	// no masternode reward that is sent out.
+	SuperblockCycle *big.Int `json:"superblockCycle"`
+	// MNRequireValidation defines the minimum number of active announced MN that
+	// disable the invalidations check when checking if one of the active announced
+	// MN should be rewarded.
 	MNRequireValidation *big.Int `json:"mnRequireValidation"`
-	MNValidationPeriod  *big.Int `json:"mnValidationPeriod"`
-	MNCleanupPeriod     *big.Int `json:"mnCleanupPeriod"`
-	MNEverCollateral    *big.Int `json:"mnEverCollateral"`
-	MNRewardsPerBlock   *big.Int `json:"mnRewardsPerBlock"`
+	// MNValidationPeriod maximum amount of time in seconds after which a MN can
+	// possibly be invalidated.
+	MNValidationPeriod *big.Int `json:"mnValidationPeriod"`
+	// MNCleanupPeriod defines the waiting time after which inactive MN are
+	// automatically denounced & dropped from the list of MNs expecting a reward.
+	MNCleanupPeriod *big.Int `json:"mnCleanupPeriod"`
+	// MNEverCollateral minimum MN collateral shown to the users on stats endpoint.
+	MNEverCollateral *big.Int `json:"mnEverCollateral"`
+	// MNRewardsPerBlock defines the fraction of the total MN reward per block share
+	// payable to the MN holding the minimum amount of collateral.
+	MNRewardsPerBlock *big.Int `json:"mnRewardsPerBlock"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
