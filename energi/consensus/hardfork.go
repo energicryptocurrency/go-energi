@@ -83,7 +83,7 @@ func (e *Energi) checkLatestHardforks(
 		}
 	}
 
-	// Fetchs the hardfork information identif
+	// Fetchs the hardfork information identified by the provided block numbers.
 	for _, hfblock := range hardforks {
 		queryData, err := e.hardforkAbi.Pack("getByBlockNo", hfblock)
 		if err != nil {
@@ -141,7 +141,17 @@ func (e *Energi) checkLatestHardforks(
 			// BlockHash already. Hardfork already finalised.
 			log.Info("Hardfork already finalized", "block", hfblock,
 				"hardforkName", energi_common.DecodeToString(hfInfo.Name),
-				"blockHash", common.BytesToHash(hfInfo.BlockHash[:]),
+				"blockHash", common.BytesToHash(hfInfo.BlockHash[:]).String(),
+			)
+		}
+
+		// Update the Hardforks supported.
+		if energi_common.LastSetHfBlock().Cmp(hfblock) >= 0 {
+			energi_common.UpdateHf(
+				energi_common.DecodeToString(hfInfo.Name),
+				hfblock,
+				common.BytesToHash(hfInfo.BlockHash[:]),
+				hfInfo.SwFeatures,
 			)
 		}
 	}
