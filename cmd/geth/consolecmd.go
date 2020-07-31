@@ -125,6 +125,8 @@ func remoteConsole(ctx *cli.Context) error {
 		if path != "" {
 			if ctx.GlobalBool(utils.TestnetFlag.Name) {
 				path = filepath.Join(path, "testnet")
+			} else if ctx.GlobalBool(utils.SimnetFlag.Name) {
+				path = filepath.Join(path, "simnet")
 			}
 		}
 		endpoint = fmt.Sprintf("%s/energi3.ipc", path)
