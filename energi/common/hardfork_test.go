@@ -30,28 +30,23 @@ func TestHardforkManagement(t *testing.T) {
 	var hfSwFeatures = big.NewInt(3000600)
 
 	// Update with accurate data
-	if err := UpdateHf(hfName, hfBlockNo, hfBlockHash, hfSwFeatures); err != nil {
+	if err := UpdateHfActive(hfName, hfBlockNo, hfBlockHash, hfSwFeatures); err != nil {
 		t.Fatalf("expected no error but got: (%v)", err)
 	}
 
 	// Update with empty Hardfork name.
-	if err := UpdateHf("", hfBlockNo, hfBlockHash, hfSwFeatures); err != errInvalidHfName {
+	if err := UpdateHfActive("", hfBlockNo, hfBlockHash, hfSwFeatures); err != errInvalidHfName {
 		t.Fatalf("expected (%v) but got: (%v)", errInvalidHfName, err)
 	}
 
-	// Update with very old hardfork info
-	if err := UpdateHf(hfName, big.NewInt(100), hfBlockHash, hfSwFeatures); err != errTooOldHfInfo {
-		t.Fatalf("expected (%v) but got: (%v)", errTooOldHfInfo, err)
-	}
-
 	// Update with empty empty block hash
-	if err := UpdateHf(hfName, hfBlockNo, common.Hash{}, hfSwFeatures); err != errEmptyHash {
+	if err := UpdateHfActive(hfName, hfBlockNo, common.Hash{}, hfSwFeatures); err != errEmptyHash {
 		t.Fatalf("expected (%v) but got: (%v)", errEmptyHash, err)
 	}
 
 	var newHfName = "Omaha"
 	// Updating a pre-existing instance should still work.
-	if err := UpdateHf(newHfName, hfBlockNo, hfBlockHash, hfSwFeatures); err != nil {
+	if err := UpdateHfActive(newHfName, hfBlockNo, hfBlockHash, hfSwFeatures); err != nil {
 		t.Fatalf("expected no error but got: (%v)", err)
 	}
 

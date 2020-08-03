@@ -362,6 +362,10 @@ func (m *MasternodeService) voteOnCheckpoints() {
 }
 
 func (m *MasternodeService) onChainHead(block *types.Block) {
+	if m.isValidMnVersion() {
+		return
+	}
+
 	if !m.isActive() {
 		do_cleanup := m.validator.target != common.Address{}
 		m.validator.cancel()
@@ -432,10 +436,12 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 			go m.validator.validate()
 		}
 	}
+}
 
-	// Minimum Masternode software version enforcement.
-	// If the minimum masternode version is not found, the masternode service
-	// gracefully shutsdown.
+func (m *MasternodeService) isValidMnVersion() bool {
+	// Minimum Masternode software version enforcement. If the minimum
+	// masternode version is not found, the masternode service gracefully
+	// shutsdown.
 	hardforks, err := m.hfAPI.ListHardforks()
 	if err != nil {
 		log.Warn("ListHardforks error", "err", err)
@@ -444,15 +450,21 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 	emptyHash := [32]byte{}
 	swFeatures := energi_common.SWVersionToInt()
 	for _, fork := range hardforks {
+		// Enforce the minimum masternode version supported.
 		if bytes.Compare(fork.BlockHash[:], emptyHash[:]) != 0 &&
 			swFeatures.Cmp(fork.SWFeatures.ToInt()) < 0 {
+			versionFunc := energi_common.SWVersionIntToString
 			log.Error("Current masternode version is outdated",
-				"current", energi_common.SWVersionIntToString(swFeatures),
-				"minRequired", energi_common.SWVersionIntToString(fork.SWFeatures.ToInt()))
+				"current", versionFunc(swFeatures),
+				"required", versionFunc(fork.SWFeatures.ToInt()),
+			)
+			log.Warn("Update to continue using the masternode service")
 
 			m.Stop()
+			return false
 		}
 	}
+	return true
 }
 
 type peerValidator struct {

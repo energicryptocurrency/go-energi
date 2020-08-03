@@ -17,6 +17,7 @@
 package common
 
 import (
+	"bytes"
 	"net"
 
 	"energi.world/core/gen3/crypto"
@@ -53,6 +54,7 @@ func EncodeToString(data string) [32]byte {
 }
 
 // DecodeToString converts the bytes32 bytes array back to the original string.
+// It trims all the null characters from the string.
 func DecodeToString(data [32]byte) string {
-	return string(data[:])
+	return string(bytes.Trim(data[:], "\x00"))
 }

@@ -711,10 +711,11 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 
 	deployEnergiContract(
 		&xfers,
-		energi_params.Energi_HardforkRegistry,
+		energi_params.Energi_HardforkRegistryV1,
 		nil,
 		energi_abi.HardforkRegistryV1ABI,
 		energi_abi.HardforkRegistryV1Bin,
+		energi_params.Energi_HardforkRegistry,
 		config.Energi.HFSigner,
 		config.HFFinalizationPeriod,
 	)
@@ -730,6 +731,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_params.Energi_CheckpointRegistry: energi_params.Energi_CheckpointRegistryV1,
 		energi_params.Energi_BlacklistRegistry:  energi_params.Energi_BlacklistRegistryV1,
 		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
+		energi_params.Energi_HardforkRegistry:   energi_params.Energi_HardforkRegistryV1,
 	}
 	for k, v := range proxies {
 		deployEnergiContract(

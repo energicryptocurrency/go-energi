@@ -38,7 +38,7 @@ const (
 	// maxHardforkNameSize defines the max length in bytes a hf name can have.
 	maxHardforkNameSize = 32
 	// minHardforkNameSize defines the max length in bytes a hf name can have.
-	minHardforkNameSize = 5
+	minHardforkNameSize = 1
 )
 
 // HardforkRegistryAPI is holds the data required to access the API. It has a
@@ -68,8 +68,9 @@ func registry(
 	password *string,
 ) (session *energi_abi.IHardforkRegistrySession, err error) {
 	contract, err := energi_abi.NewIHardforkRegistry(
-		energi_params.Energi_HardforkRegistryV1, backend.(bind.ContractBackend))
+		energi_params.Energi_HardforkRegistry, backend.(bind.ContractBackend))
 	if err != nil {
+		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
 		return nil, err
 	}
 
@@ -157,22 +158,21 @@ func (hf *HardforkRegistryAPI) listHardforks(num *big.Int) (interface{}, error) 
 func (hf *HardforkRegistryAPI) GenerateHardfork(
 	blockNo *hexutil.Big,
 	name string,
-	dst common.Address,
 	password *string,
-) error {
+) (common.Hash, error) {
 	switch {
 	case blockNo.ToInt().Cmp(common.Big0) < 1:
-		return fmt.Errorf("Hardfork on the genesis block is not supportted")
+		return (common.Hash{}), fmt.Errorf("Hardfork on the genesis block is not supportted")
 
 	case len([]byte(name)) > maxHardforkNameSize:
-		return fmt.Errorf("Hardfork name is too long")
+		return (common.Hash{}), fmt.Errorf("Hardfork name is too long")
 
 	case len([]byte(name)) < minHardforkNameSize:
-		return fmt.Errorf("Hardfork name is too long")
+		return (common.Hash{}), fmt.Errorf("Hardfork name is too short")
 
 	default:
 		swFeatures := (*hexutil.Big)(energi_common.SWVersionToInt())
-		return hf.generateHardfork(blockNo, name, swFeatures, dst, password)
+		return hf.generateHardfork(blockNo, name, swFeatures, password)
 	}
 }
 
@@ -183,12 +183,13 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 	blockNo *hexutil.Big,
 	name string,
 	swFeatures *hexutil.Big,
-	dst common.Address,
 	password *string,
-) error {
+) (common.Hash, error) {
+	txHash := common.Hash{}
+	dst := hf.backend.ChainConfig().Energi.HFSigner
 	registry, err := registry(hf.backend, dst, password)
 	if err != nil {
-		return err
+		return txHash, err
 	}
 
 	blockHash := common.Hash{}
@@ -202,16 +203,15 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 	tx, err := registry.Propose(blockNo.ToInt(), energi_common.EncodeToString(name),
 		blockHash, swFeatures.ToInt())
 	if err != nil {
-		return err
+		return txHash, err
 	}
 
 	if tx != nil {
-		if tx != nil {
-			log.Info("hardfork creation tx: %v will be processed in the next block",
-				tx.Hash().String())
-		}
+		txHash = tx.Hash()
+		log.Info("Note: please wait till HF create TX gets into a block!", "tx", txHash.Hex())
 	}
-	return nil
+
+	return txHash, nil
 }
 
 // GetHardforkByName returns the hardfork info associated with the provided name.
@@ -245,7 +245,7 @@ func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, er
 }
 
 // GetHardforkByBlockNo returns the hardfork info identified by the provided blockno.
-func (hf *HardforkRegistryAPI) GetHardforkByBlockNo(blockNo *big.Int) (*HardforkInfo, error) {
+func (hf *HardforkRegistryAPI) GetHardforkByBlockNo(blockNo *hexutil.Big) (*HardforkInfo, error) {
 	registry, err := energi_abi.NewIHardforkRegistryCaller(
 		energi_params.Energi_HardforkRegistry, hf.backend.(bind.ContractCaller))
 	if err != nil {
@@ -258,14 +258,14 @@ func (hf *HardforkRegistryAPI) GetHardforkByBlockNo(blockNo *big.Int) (*Hardfork
 		GasLimit: energi_params.UnlimitedGas,
 	}
 
-	data, err := registry.GetByBlockNo(callOpts, blockNo)
+	data, err := registry.GetByBlockNo(callOpts, blockNo.ToInt())
 	if err != nil {
 		log.Error("Running GetName Failed", "err", err)
 		return nil, err
 	}
 
 	resp := &HardforkInfo{
-		BlockNo:    (*hexutil.Big)(blockNo),
+		BlockNo:    blockNo,
 		Name:       energi_common.DecodeToString(data.Name),
 		BlockHash:  common.BytesToHash(data.BlockHash[:]),
 		SWFeatures: (*hexutil.Big)(data.SwFeatures),
@@ -278,23 +278,25 @@ func (hf *HardforkRegistryAPI) GetHardforkByBlockNo(blockNo *big.Int) (*Hardfork
 // DropHardfork drops any hardfork that is yet to be finalized.
 func (hf *HardforkRegistryAPI) DropHardfork(
 	blockNo *hexutil.Big,
-	dst common.Address,
 	password *string,
-) error {
+) (common.Hash, error) {
+	txHash := common.Hash{}
+	dst := hf.backend.ChainConfig().Energi.HFSigner
 	registry, err := registry(hf.backend, dst, password)
 	if err != nil {
-		return err
+		return txHash, err
 	}
 
 	tx, err := registry.Remove(blockNo.ToInt())
 	if err != nil {
-		return fmt.Errorf("Dropping the hardfork at block %v failed. Error: %v",
+		return txHash, fmt.Errorf("Dropping the hardfork at block %v failed. Error: %v",
 			blockNo.String(), err)
 	}
 
 	if tx != nil {
-		log.Info("hardfork removal tx: %v will be processed in the next block",
-			tx.Hash().String())
+		txHash = tx.Hash()
+		log.Info("Note: please wait till HF drop TX gets into a block!", "tx", txHash.Hex())
 	}
-	return nil
+
+	return txHash, nil
 }

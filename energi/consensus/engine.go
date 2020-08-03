@@ -76,7 +76,6 @@ type Energi struct {
 	sporkAbi     abi.ABI
 	mnregAbi     abi.ABI
 	treasuryAbi  abi.ABI
-	hardforkAbi  abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -130,12 +129,6 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
-	hardfork_abi, err := abi.JSON(strings.NewReader(energi_abi.IHardforkRegistryABI))
-	if err != nil {
-		panic(err)
-		return nil
-	}
-
 	txhashMap, err := lru.New(8)
 	if err != nil {
 		panic(err)
@@ -151,7 +144,6 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		sporkAbi:     spork_abi,
 		mnregAbi:     mngreg_abi,
 		treasuryAbi:  treasury_abi,
-		hardforkAbi:  hardfork_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      0,
 		callGas:      30000,
@@ -567,9 +559,6 @@ func (e *Energi) govFinalize(
 	}
 	if err == nil {
 		err = e.finalizeMigration(chain, header, state, txs)
-	}
-	if err == nil {
-		err = e.checkLatestHardforks(chain, header, state)
 	}
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	return txs, receipts, err

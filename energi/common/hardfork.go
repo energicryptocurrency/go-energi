@@ -26,7 +26,6 @@ import (
 
 var (
 	errInvalidHfName = errors.New("empty hardfork name not supported")
-	errTooOldHfInfo  = errors.New("Hardfork cannot be created in the past")
 	errEmptyHash     = errors.New("empty hardfork block hash not supported")
 
 	hfInfo = latestHardfork{
@@ -47,34 +46,22 @@ type latestHardfork struct {
 	hfs []hardforkInfo
 }
 
-// UpdateHf sets the latest supported hardfork. A hardfork with an empty
-// blockhash, lesser block number in relation to the previoulsy set and software
-// version lesser than the previously set is rejected. A hardwork with an empty
-// name is also rejected.
-func UpdateHf(name string, blockNo *big.Int, blockHash common.Hash, swFeatures *big.Int) error {
+// UpdateHfActive sets the list of finalized hardforks i.e. a hardfork with an empty
+// blockhash is rejected. A hardfork with an empty name is also rejected.
+func UpdateHfActive(name string, blockNo *big.Int, blockHash common.Hash, swFeatures *big.Int) error {
 	hfInfo.mtx.Lock()
 	defer hfInfo.mtx.Unlock()
-
-	latestHF := hardforkInfo{}
-	if len(hfInfo.hfs) > 0 {
-		// pick the last hardfork added
-		latestHF = hfInfo.hfs[len(hfInfo.hfs)-1]
-	}
 
 	switch {
 	case name == "":
 		return errInvalidHfName
-
-	case latestHF.blockNo.Cmp(blockNo) < 0, latestHF.swFeatures.Cmp(swFeatures) < 0:
-		return errTooOldHfInfo
 
 	case blockHash == (common.Hash{}):
 		return errEmptyHash
 
 	default:
 		for i, info := range hfInfo.hfs {
-			// This case should never happen but if it happens just update the
-			// pre-existing instance.
+			// Update the pre-existing instances.
 			if info.blockNo.Cmp(blockNo) == 0 {
 				hfInfo.hfs[i].blockHash = blockHash
 				hfInfo.hfs[i].name = name
@@ -92,17 +79,6 @@ func UpdateHf(name string, blockNo *big.Int, blockHash common.Hash, swFeatures *
 		})
 		return nil
 	}
-}
-
-// LastSetHfBlock returns the last supported hardfork.
-func LastSetHfBlock() *big.Int {
-	hfInfo.mtx.RLock()
-	defer hfInfo.mtx.RUnlock()
-
-	if len(hfInfo.hfs) == 0 {
-		return big.NewInt(0)
-	}
-	return hfInfo.hfs[len(hfInfo.hfs)-1].blockNo
 }
 
 // IsHfActive returns true if and only if the provided hardfork name exists and
