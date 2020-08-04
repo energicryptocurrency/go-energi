@@ -17,6 +17,7 @@
 package core
 
 import (
+	"errors"
 	"math/big"
 	"strings"
 	"testing"
@@ -320,12 +321,13 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 
 	// Inactive MN
 	signer.sender = mn_inactive
+	errMsg := errors.New("err: zero-fee DoS desc: inactive MN found")
 	err = protector.checkDoS(pool, hbtx0)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, invtx0)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, sigtx0)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	// Active MN
 	signer.sender = mn_active1
@@ -338,12 +340,13 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 
 	// Active MN repeat interval
 	signer.sender = mn_active1
+	errMsg = errors.New("err: zero-fee DoS desc: time interval is less than the required")
 	err = protector.checkDoS(pool, hbtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, invtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, sigtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	// Active another MV
 	signer.sender = mn_active2
@@ -363,7 +366,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	err = protector.checkDoS(pool, invtx1)
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, sigtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	signer.sender = mn_active2
 	err = protector.checkDoS(pool, hbtx2)
@@ -371,7 +374,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	err = protector.checkDoS(pool, invtx2)
 	assert.Equal(t, nil, err)
 	err = protector.checkDoS(pool, sigtx2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	// Active MN after checkpoint period is over
 	adjust_time = time.Duration(10) * time.Minute
@@ -401,21 +404,22 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 		[]byte{0x60, 0x00, 0x60, 0x00, 0xFD},
 	)
 
+	errMsg = errors.New("err: zero-fee DoS desc: <nil>")
 	signer.sender = mn_active1
 	err = protector.checkDoS(pool, hbtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, invtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, sigtx1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	signer.sender = mn_active2
 	err = protector.checkDoS(pool, hbtx2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, invtx2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, sigtx2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	// Restore correct
 	pool.currentState.SetCode(
@@ -531,9 +535,10 @@ func TestZeroFeeProtectorMigration(t *testing.T) {
 	adjust_time = time.Duration(2) * time.Minute
 
 	err = protector.checkDoS(pool, claim1)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	errMsg := errors.New("migrationErr: zero-fee DoS desc: time interval is less than the required")
+	assert.Equal(t, errMsg, err)
 	err = protector.checkDoS(pool, claim2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	// After reset + return 0
 	adjust_time = time.Duration(3) * time.Minute
@@ -547,8 +552,9 @@ func TestZeroFeeProtectorMigration(t *testing.T) {
 		[]byte{0x60, 0x00, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xF3},
 	)
 
+	errMsg = errors.New("migrationErr: zero-fee DoS desc: already claimed")
 	err = protector.checkDoS(pool, claim2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 
 	// After reset + revert 1
 	adjust_time = time.Duration(6) * time.Minute
@@ -568,6 +574,7 @@ func TestZeroFeeProtectorMigration(t *testing.T) {
 		[]byte{0x60, 0x01, 0x60, 0x00, 0x52, 0x60, 0x20, 0x60, 0x00, 0xFD},
 	)
 
+	errMsg = errors.New("migrationErr: zero-fee DoS desc: <nil>")
 	err = protector.checkDoS(pool, claim2)
-	assert.Equal(t, ErrZeroFeeDoS, err)
+	assert.Equal(t, errMsg, err)
 }
