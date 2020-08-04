@@ -242,7 +242,8 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	case ghash == params.TestnetGenesisHash:
 		return params.EnergiTestnetChainConfig
 	default:
-		return params.AllEthashProtocolChanges
+		// Returned when genesis is nil and matching ghash is not found.
+		return params.TestChainConfig
 	}
 }
 
@@ -464,6 +465,9 @@ func DeveloperEnergiGenesisBlock(customGenesisPath string) (*Genesis, error) {
 		return nil, fmt.Errorf("invalid genesis file: %v", err)
 	}
 	genesis.Xfers = append(genesis.Xfers, DeployEnergiGovernance(genesis.Config)...)
+	for addr, account := range DefaultPrealloc() {
+		genesis.Alloc[addr] = account
+	}
 	return genesis, nil
 }
 
