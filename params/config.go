@@ -29,8 +29,11 @@ var (
 	MainnetGenesisHash = common.HexToHash("0xd8e2a3b0ad08f8eaabaf653d25b7d9beee2911101010a2cd4f6692a9a1dc228a")
 	TestnetGenesisHash = common.HexToHash("0x4d5513e2cd959af850591de3e38f6cc7a2f9775f8159da0159788a95ef4e85ac")
 
-	MainnetMigrationSigner = common.HexToAddress("0x441b27F941b6fda16dd81cC7EE0527bb78DA9130")
-	TestnetMigrationSigner = common.HexToAddress("0xe7c22f6b3716a880623204fb178a03d4002c7c59")
+	MainnetMigrationSigner = common.HexToAddress("0xac34a2555de08384cd7960f35d3ab048fcf9f83a")
+	TestnetMigrationSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
+
+	MainnetMigrationSignerV2 = common.HexToAddress("0x441b27F941b6fda16dd81cC7EE0527bb78DA9130")
+	TestnetMigrationSignerV2 = common.HexToAddress("0xe7c22f6b3716a880623204fb178a03d4002c7c59")
 
 	MainnetEBISigner = common.HexToAddress("0x01C3bB0b90C07b89CA38F56Bd9f3E8C160fec4dC")
 	TestnetEBISigner = common.HexToAddress("0x25bbaaaf27ab1966c3ab9faf31277a1db7601f3f")
