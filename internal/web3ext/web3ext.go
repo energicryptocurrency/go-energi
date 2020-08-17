@@ -655,6 +655,23 @@ web3._extend({
 				null,
 			],
 		}),
+		new web3._extend.Method({
+			name: 'contractAddress',
+			call: 'admin_contractAddress',
+			params: 2,
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+				web3._extend.utils.fromDecimal,
+			],
+		}),
+		new web3._extend.Method({
+			name: 'nonceAt',
+			call: 'admin_nonceAt',
+			params: 1,
+			inputFormatter: [
+				web3._extend.formatters.inputAddressFormatter,
+			],
+		}),
 	],
 	properties: [
 		new web3._extend.Property({

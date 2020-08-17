@@ -44,8 +44,9 @@ const (
 // HardforkRegistryAPI is holds the data required to access the API. It has a
 // cache that temporarily holds regularly accessed data.
 type HardforkRegistryAPI struct {
-	backend Backend
-	hfCache *energi_common.CacheStorage
+	backend   Backend
+	hfCache   *energi_common.CacheStorage
+	proxyAddr common.Address
 }
 
 // NewHardforkRegistryAPI returns a new HardforkRegistryAPI instance. It also
@@ -54,6 +55,8 @@ func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	r := &HardforkRegistryAPI{
 		backend: b,
 		hfCache: energi_common.NewCacheStorage(),
+		proxyAddr: energi_params.GetProxyContractAddress(
+			energi_params.EnergiHardforkRegistry, b.BlockChain().GetBlockByNumber(0).Hash()),
 	}
 
 	b.OnSyncedHeadUpdates(func() {
@@ -62,13 +65,13 @@ func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	return r
 }
 
-func registry(
+func registrySession(
 	backend Backend,
-	dst common.Address,
+	dst, proxyAddr common.Address,
 	password *string,
 ) (session *energi_abi.IHardforkRegistrySession, err error) {
-	contract, err := energi_abi.NewIHardforkRegistry(
-		energi_params.Energi_HardforkRegistry, backend.(bind.ContractBackend))
+	contract, err := energi_abi.NewIHardforkRegistry(proxyAddr,
+		backend.(bind.ContractBackend))
 	if err != nil {
 		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
 		return nil, err
@@ -106,7 +109,7 @@ func (hf *HardforkRegistryAPI) ListHardforks() (res []*HardforkInfo, err error) 
 	data, err := hf.hfCache.Get(hf.backend, hf.listHardforks)
 	if err != nil || data == nil {
 		log.Error("ListHardforks failed", "err", err)
-		return
+		return nil, err
 	}
 
 	res = data.([]*HardforkInfo)
@@ -115,8 +118,8 @@ func (hf *HardforkRegistryAPI) ListHardforks() (res []*HardforkInfo, err error) 
 
 // listHardforks queries the actual hardforks information from the contracts.
 func (hf *HardforkRegistryAPI) listHardforks(num *big.Int) (interface{}, error) {
-	registry, err := energi_abi.NewIHardforkRegistryCaller(
-		energi_params.Energi_HardforkRegistry, hf.backend.(bind.ContractCaller))
+	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
+		hf.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
 		return nil, err
@@ -187,7 +190,7 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 ) (common.Hash, error) {
 	txHash := common.Hash{}
 	dst := hf.backend.ChainConfig().Energi.HFSigner
-	registry, err := registry(hf.backend, dst, password)
+	registry, err := registrySession(hf.backend, dst, hf.proxyAddr, password)
 	if err != nil {
 		return txHash, err
 	}
@@ -216,8 +219,8 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 
 // GetHardforkByName returns the hardfork info associated with the provided name.
 func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, error) {
-	registry, err := energi_abi.NewIHardforkRegistryCaller(
-		energi_params.Energi_HardforkRegistry, hf.backend.(bind.ContractCaller))
+	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
+		hf.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
 		return nil, err
@@ -246,8 +249,8 @@ func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, er
 
 // GetHardforkByBlockNo returns the hardfork info identified by the provided blockno.
 func (hf *HardforkRegistryAPI) GetHardforkByBlockNo(blockNo *hexutil.Big) (*HardforkInfo, error) {
-	registry, err := energi_abi.NewIHardforkRegistryCaller(
-		energi_params.Energi_HardforkRegistry, hf.backend.(bind.ContractCaller))
+	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
+		hf.backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
 		return nil, err
@@ -282,7 +285,7 @@ func (hf *HardforkRegistryAPI) DropHardfork(
 ) (common.Hash, error) {
 	txHash := common.Hash{}
 	dst := hf.backend.ChainConfig().Energi.HFSigner
-	registry, err := registry(hf.backend, dst, password)
+	registry, err := registrySession(hf.backend, dst, hf.proxyAddr, password)
 	if err != nil {
 		return txHash, err
 	}
