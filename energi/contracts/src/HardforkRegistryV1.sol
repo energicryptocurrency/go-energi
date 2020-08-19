@@ -223,6 +223,8 @@ contract HardforkRegistryV1 is
      * @param block_no block number when the hardfork should happen.
      */
     function remove(uint256 block_no) external noReentry {
+        require(_callerAddress() == HF_signer, "Invalid hardfork signer caller");
+
         bytes32 block_hash;
         (,block_hash,) = _hardforkInfo(v1storage, block_no);
         require(block_hash == bytes32(0), "Finalized hardfork cannot be deleted");

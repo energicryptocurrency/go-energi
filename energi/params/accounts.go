@@ -76,11 +76,11 @@ var newProxyContracts = map[common.Hash]map[newProxyContract]common.Address{
 	},
 }
 
-// defaultAddresses holds the default proxy address if the required network
-// network configuration doest exist.
+// defaultAddresses holds the default proxy addresses if the required network
+// network configuration doesn't exist.
 var defaultAddresses = map[newProxyContract]common.Address{
-	// EnergiHardforkRegistry: Energi_HardforkRegistry,
-	EnergiHardforkRegistry: common.HexToAddress("0xf280007b154e48adb309c278f6515f358025e484"),
+	EnergiHardforkRegistry: Energi_HardforkRegistry,
+	// EnergiHardforkRegistry: common.HexToAddress("0xf280007b154e48adb309c278f6515f358025e484"),
 }
 
 // GetProxyContractAddress returns the required proxy address if it exists.

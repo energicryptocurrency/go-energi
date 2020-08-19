@@ -289,6 +289,15 @@ contract("HardforkRegistryV1", async accounts => {
             expect(returnArray).members(hf_blocks);
         });
 
+        it("should fail to remove on invalid HF signer", async () => {
+            try {
+                await s.proxy_hf.remove(hf_blocks[2], {from: s.fake.address});
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Invalid hardfork signer caller/);
+            }
+        });
+
         it("should fail to remove a finalized hardfork information", async () => {
             try {
                 await s.proxy_hf.remove(hf_blocks[1]);
