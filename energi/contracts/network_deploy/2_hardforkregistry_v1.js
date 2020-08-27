@@ -19,7 +19,7 @@
 const HardforkRegistryV1 = artifacts.require('HardforkRegistryV1');
 const common = require('../test/common');
 
-module.exports = function(deployer, network) {
+module.exports = async function(deployer, network) {
   try {
     var hf_signer = common.hf_signer;
     var hf_finalization_period = common.hf_finalization_period;
@@ -34,7 +34,11 @@ module.exports = function(deployer, network) {
       hf_finalization_period = 10;
     }
 
-    deployer.deploy(HardforkRegistryV1, hf_signer, hf_finalization_period);
+    // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
+    await deployer.deploy(HardforkRegistryV1, hf_signer, hf_finalization_period);
+    var instance = await HardforkRegistryV1.deployed();
+    var proxyAddress = await instance.proxy();
+    console.log("   > proxy address:       " + proxyAddress);
   } catch (e) {
     console.dir(e);
     throw e;
