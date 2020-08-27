@@ -24,15 +24,16 @@ pragma solidity 0.5.16;
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { GovernedProxy } from "./GovernedProxy.sol";
 import { IGovernedContract } from "./IGovernedContract.sol";
-import { GovernedContract } from "./GovernedContract.sol";
 import { GlobalConstants } from "./constants.sol";
 
 /**
  * GovernedContractV2 is a version of GovernedContract which deploys its own proxy.
  * This is useful to avoid a circular dependency between GovernedContract and GovernedProxy
  * wherein they need each other's address in the constructor.
+ * This should only be used when deploying a contract which needs a new proxy, not a contract
+ * for which a proxy already exists. If a proxy already exists, use GovernedContract
  */
-contract GovernedContractV2 is IGovernedContract, GlobalConstants {
+contract GovernedContractAutoProxy is IGovernedContract, GlobalConstants {
     IGovernedProxy public proxy;
 
     constructor() public {

@@ -21,7 +21,7 @@
 pragma solidity 0.5.16;
 
 import { IGovernedContract } from "./IGovernedContract.sol";
-import { GovernedContractV2 } from "./GovernedContractV2.sol";
+import { GovernedContractAutoProxy } from "./GovernedContractAutoProxy.sol";
 import { IHardforkRegistry } from "./IHardforkRegistry.sol";
 import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
@@ -127,7 +127,7 @@ contract StorageHardforkRegistryV1 is
  * @dev to the newest.
  */
 contract HardforkRegistryV1 is
-    GovernedContractV2,
+    GovernedContractAutoProxy,
     IHardforkRegistry,
     NonReentrant
 {
@@ -146,7 +146,7 @@ contract HardforkRegistryV1 is
      * @notice contract instance.
      */
     constructor (address _HF_signer, uint256 _HF_finalization_period)
-        public GovernedContractV2()
+        public GovernedContractAutoProxy()
     {
         v1storage = new StorageHardforkRegistryV1();
         HF_signer = _HF_signer;
