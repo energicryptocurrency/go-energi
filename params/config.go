@@ -89,6 +89,7 @@ var (
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(3000000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10), // MN with the minimum collateral amount gets a block reward of (9.14/10) 0.914 NRG.
 
+		HardforkRegistryProxyAddress: common.Address{},
 		HFFinalizationPeriod: big.NewInt(30), // The hardfork should be finalized in 30 blocks.
 	}
 
@@ -116,7 +117,8 @@ var (
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10),
 
-		HFFinalizationPeriod: big.NewInt(30), // The hardfork should be finalized in 30 blocks.
+		HardforkRegistryProxyAddress: common.HexToAddress("0x9bBD68DDa3359dee5bE2566904469Ff5a379d7f2"),
+		HFFinalizationPeriod: big.NewInt(10), // The hardfork should be finalized in 10 blocks.
 	}
 
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
@@ -170,16 +172,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}, big.NewInt(0)}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}, big.NewInt(0)}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}, big.NewInt(0)}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -243,6 +245,10 @@ type ChainConfig struct {
 	// MNRewardsPerBlock defines the fraction of the total MN reward per block share
 	// payable to the MN holding the minimum amount of collateral.
 	MNRewardsPerBlock *big.Int `json:"mnRewardsPerBlock"`
+	// HardforkRegistryProxyAddress is the address of the proxy contract for
+	// the HardforkRegistry. This contract was not deployed via genesis so it can change
+	// between networks.
+	HardforkRegistryProxyAddress common.Address `json:"hfRegistryProxyAddress"`
 	// HFFinalizationPeriod is the number of blocks after the hardfork block,
 	// within which a given hardfork must be finalized and made immutable or
 	// rendered invalid and editable.
