@@ -27,7 +27,7 @@ import { IGovernedContract } from "./IGovernedContract.sol";
 import { GlobalConstants } from "./constants.sol";
 
 /**
- * GovernedContractV2 is a version of GovernedContract which deploys its own proxy.
+ * GovernedContractAutoProxy is a version of GovernedContract which deploys its own proxy.
  * This is useful to avoid a circular dependency between GovernedContract and GovernedProxy
  * wherein they need each other's address in the constructor.
  * This should only be used when deploying a contract which needs a new proxy, not a contract
