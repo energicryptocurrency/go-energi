@@ -20,14 +20,6 @@ import (
 	"math/big"
 
 	"energi.world/core/gen3/common"
-	eth_params "energi.world/core/gen3/params"
-)
-
-type newProxyContract int
-
-const (
-	// EnergiHardforkRegistry proxy contract address identifier.
-	EnergiHardforkRegistry newProxyContract = iota
 )
 
 var (
@@ -44,7 +36,7 @@ var (
 	Energi_Blacklist          = common.BigToAddress(big.NewInt(0x30A))
 	Energi_Whitelist          = common.BigToAddress(big.NewInt(0x30B))
 	Energi_MasternodeList     = common.BigToAddress(big.NewInt(0x30C))
-	Energi_HardforkRegistry   = common.BigToAddress(big.NewInt(0x30D)) // Only used in simnet and devnet
+	Energi_HardforkRegistry   = common.BigToAddress(big.NewInt(0x30D)) // Only used in simnet and devnet, check ChainConfig
 
 	Energi_BlockRewardV1        = common.BigToAddress(big.NewInt(0x310))
 	Energi_TreasuryV1           = common.BigToAddress(big.NewInt(0x311))
@@ -56,7 +48,7 @@ var (
 	Energi_BlacklistRegistryV1  = common.BigToAddress(big.NewInt(0x317))
 	Energi_CompensationFundV1   = common.BigToAddress(big.NewInt(0x318))
 	Energi_MasternodeTokenV1    = common.BigToAddress(big.NewInt(0x319))
-	Energi_HardforkRegistryV1   = common.BigToAddress(big.NewInt(0x321)) // Only used in simnet and devnet
+	Energi_HardforkRegistryV1   = common.BigToAddress(big.NewInt(0x321)) // Only used in simnet and devnet, check ChainConfig
 
 	Energi_SystemFaucet = common.BigToAddress(big.NewInt(0x320))
 	Energi_Ephemeral    = common.HexToAddress("0x457068656d6572616c")
@@ -64,38 +56,3 @@ var (
 	// NOTE: this is NOT very safe, but it optimizes significantly
 	Storage_ProxyImpl = common.BigToHash(big.NewInt(0x01))
 )
-
-// newProxyContracts defines network specific proxy contract addresses that are
-// set after the new proxy contracts are deployed
-var newProxyContracts = map[common.Hash]map[newProxyContract]common.Address{
-	eth_params.MainnetGenesisHash: {
-		EnergiHardforkRegistry: common.Address{},
-	},
-	eth_params.TestnetGenesisHash: {
-		EnergiHardforkRegistry: common.Address{},
-	},
-}
-
-// defaultAddresses holds the default proxy addresses if the required network
-// network configuration doesn't exist.
-var defaultAddresses = map[newProxyContract]common.Address{
-	EnergiHardforkRegistry: Energi_HardforkRegistry,
-	// EnergiHardforkRegistry: common.HexToAddress("0xf280007b154e48adb309c278f6515f358025e484"),
-}
-
-// GetProxyContractAddress returns the required proxy address if it exists.
-func GetProxyContractAddress(name newProxyContract, net common.Hash) common.Address {
-	info, ok := newProxyContracts[net]
-	if ok {
-		addr, ok := info[name]
-		if !ok {
-			return common.Address{}
-		}
-
-		if addr != (common.Address{}) {
-			return addr
-		}
-	}
-
-	return defaultAddresses[name]
-}

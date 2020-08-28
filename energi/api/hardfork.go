@@ -55,8 +55,13 @@ func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	r := &HardforkRegistryAPI{
 		backend: b,
 		hfCache: energi_common.NewCacheStorage(),
-		proxyAddr: energi_params.GetProxyContractAddress(
-			energi_params.EnergiHardforkRegistry, b.BlockChain().GetBlockByNumber(0).Hash()),
+		proxyAddr: b.ChainConfig().HardforkRegistryProxyAddress,
+	}
+
+	// use the default proxy address if we don't have it from ChainConfig
+	emptyAddr := common.Address{}
+	if r.proxyAddr == emptyAddr {
+		r.proxyAddr = energi_params.Energi_HardforkRegistry
 	}
 
 	b.OnSyncedHeadUpdates(func() {
