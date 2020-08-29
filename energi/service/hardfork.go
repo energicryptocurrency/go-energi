@@ -22,9 +22,6 @@ import (
 	"math/big"
 	"sync/atomic"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
-
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core"
 	"energi.world/core/gen3/core/types"
@@ -72,14 +69,7 @@ func (hf *HardforkService) Protocols() []p2p.Protocol {
 
 // APIs retrieves the list of RPC descriptors the service provides
 func (hf *HardforkService) APIs() []rpc.API {
-	return []rpc.API{
-		{
-			Namespace: "admin",
-			Version:   "1.0",
-			Service:   &PrivateAdminAPI{hf.eth},
-			Public:    false,
-		},
-	}
+	return nil
 }
 
 // Start is called after all services have been constructed and the networking
@@ -221,21 +211,4 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String(),
 		)
 	}
-}
-
-// PrivateAdminAPI holds the private admin implementations for the hardfork.
-type PrivateAdminAPI struct {
-	eth *eth.Ethereum
-}
-
-// ContractAddress creates a contract address from the sender and nonce fields
-// provided.
-func (p *PrivateAdminAPI) ContractAddress(sender common.Address, nonce *hexutil.Big) common.Address {
-	return crypto.CreateAddress(sender, nonce.ToInt().Uint64())
-}
-
-// NonceAt returns the pending nonce at the provided address.
-func (p *PrivateAdminAPI) NonceAt(addr common.Address) uint64 {
-	nonce, _ := p.eth.APIBackend.GetPoolNonce(context.Background(), addr)
-	return nonce
 }
