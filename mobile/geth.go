@@ -27,7 +27,7 @@ import (
 
 	"energi.world/core/gen3/core"
 	"energi.world/core/gen3/eth"
-	//"energi.world/core/gen3/eth/downloader"
+	"energi.world/core/gen3/eth/downloader"
 	"energi.world/core/gen3/ethclient"
 	"energi.world/core/gen3/ethstats"
 	"energi.world/core/gen3/internal/debug"
@@ -158,7 +158,7 @@ func NewNode(datadir string, config *NodeConfig) (stack *Node, _ error) {
 	if config.EthereumEnabled {
 		ethConf := eth.DefaultConfig
 		ethConf.Genesis = genesis
-		//ethConf.SyncMode = downloader.LightSync
+		ethConf.SyncMode = downloader.LightSync
 		ethConf.NetworkId = uint64(config.EthereumNetworkID)
 		ethConf.DatabaseCache = config.EthereumDatabaseCache
 		if err := rawStack.Register(func(ctx *node.ServiceContext) (node.Service, error) {

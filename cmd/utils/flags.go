@@ -168,8 +168,7 @@ var (
 	defaultSyncMode = eth.DefaultConfig.SyncMode
 	SyncModeFlag    = TextMarshalerFlag{
 		Name:  "syncmode",
-		//Usage: `Blockchain sync mode ("fast", "full", or "light")`,
-		Usage: `Blockchain sync mode ("fast", or "full")`,
+		Usage: `Blockchain sync mode ("fast" or "full")`,
 		Value: &defaultSyncMode,
 	}
 	GCModeFlag = cli.StringFlag{
@@ -984,7 +983,7 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 	setBootstrapNodes(ctx, cfg)
 	setBootstrapNodesV5(ctx, cfg)
 
-	//lightClient := ctx.GlobalString(SyncModeFlag.Name) == "light"
+	lightClient := ctx.GlobalString(SyncModeFlag.Name) == "light"
 	lightServer := ctx.GlobalInt(LightServFlag.Name) != 0
 	lightPeers := ctx.GlobalInt(LightPeersFlag.Name)
 
@@ -993,38 +992,34 @@ func SetP2PConfig(ctx *cli.Context, cfg *p2p.Config) {
 		if lightServer && !ctx.GlobalIsSet(LightPeersFlag.Name) {
 			cfg.MaxPeers += lightPeers
 		}
+	} else {
+		if lightServer {
+			cfg.MaxPeers += lightPeers
+		}
+		if lightClient && ctx.GlobalIsSet(LightPeersFlag.Name) && cfg.MaxPeers < lightPeers {
+			cfg.MaxPeers = lightPeers
+		}
 	}
-	//else {
-	//	if lightServer {
-	//		cfg.MaxPeers += lightPeers
-	//	}
-	//	if lightClient && ctx.GlobalIsSet(LightPeersFlag.Name) && cfg.MaxPeers < lightPeers {
-	//		cfg.MaxPeers = lightPeers
-	//	}
-	//}
-	//if !(lightClient || lightServer) {
-	//	lightPeers = 0
-	//}
-	//ethPeers := cfg.MaxPeers - lightPeers
-	//if lightClient {
-	//	ethPeers = 0
-	//}
-	ethPeers := cfg.MaxPeers
+	if !(lightClient || lightServer) {
+		lightPeers = 0
+	}
+	ethPeers := cfg.MaxPeers - lightPeers
+	if lightClient {
+		ethPeers = 0
+	}
 	log.Info("Maximum peer count", "ETH", ethPeers, "LES", lightPeers, "total", cfg.MaxPeers)
 
 	if ctx.GlobalIsSet(MaxPendingPeersFlag.Name) {
 		cfg.MaxPendingPeers = ctx.GlobalInt(MaxPendingPeersFlag.Name)
 	}
-	//if ctx.GlobalIsSet(NoDiscoverFlag.Name) || lightClient {
-	if ctx.GlobalIsSet(NoDiscoverFlag.Name) {
+	if ctx.GlobalIsSet(NoDiscoverFlag.Name) || lightClient {
 		cfg.NoDiscovery = true
 	}
 
 	// if we're running a light client or server, force enable the v5 peer discovery
 	// unless it is explicitly disabled with --nodiscover note that explicitly specifying
 	// --v5disc overrides --nodiscover, in which case the later only disables v4 discovery
-	//forceV5Discovery := (lightClient || lightServer) && !ctx.GlobalBool(NoDiscoverFlag.Name)
-	forceV5Discovery := lightServer && !ctx.GlobalBool(NoDiscoverFlag.Name)
+	forceV5Discovery := (lightClient || lightServer) && !ctx.GlobalBool(NoDiscoverFlag.Name)
 	if ctx.GlobalIsSet(DiscoveryV5Flag.Name) {
 		cfg.DiscoveryV5 = ctx.GlobalBool(DiscoveryV5Flag.Name)
 	} else if forceV5Discovery {
@@ -1406,30 +1401,20 @@ func SetDashboardConfig(ctx *cli.Context, cfg *dashboard.Config) {
 // RegisterEthService adds an Ethereum client to the stack.
 func RegisterEthService(stack *node.Node, cfg *eth.Config) {
 	var err error
-	//if cfg.SyncMode == downloader.LightSync {
-	//	err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-	//		return les.New(ctx, cfg)
-	//	})
-	//} else {
-	//	err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-	//		fullNode, err := eth.New(ctx, cfg)
-	//		if fullNode != nil && cfg.LightServ > 0 {
-	//			ls, _ := les.NewLesServer(fullNode, cfg)
-	//			fullNode.AddLesServer(ls)
-	//		}
-	//		return fullNode, err
-	//	})
-	//}
-
-	err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-		fullNode, err := eth.New(ctx, cfg)
-		if fullNode != nil && cfg.LightServ > 0 {
-			ls, _ := les.NewLesServer(fullNode, cfg)
-			fullNode.AddLesServer(ls)
-		}
-		return fullNode, err
-	})
-
+	if cfg.SyncMode == downloader.LightSync {
+		err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+			return les.New(ctx, cfg)
+		})
+	} else {
+		err = stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+			fullNode, err := eth.New(ctx, cfg)
+			if fullNode != nil && cfg.LightServ > 0 {
+				ls, _ := les.NewLesServer(fullNode, cfg)
+				fullNode.AddLesServer(ls)
+			}
+			return fullNode, err
+		})
+	}
 	if err != nil {
 		Fatalf("Failed to register the Energi service: %v", err)
 	}

@@ -353,10 +353,10 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 		(ctx.GlobalString(utils.MiningEnabledFlag.Name) != "" &&
 			len(wallets) > 0 &&
 			len(wallets[0].Accounts()) > 0) {
-		//// Mining only makes sense if a full Ethereum node is running
-		//if ctx.GlobalString(utils.SyncModeFlag.Name) == "light" {
-		//	utils.Fatalf("Light clients do not support mining")
-		//}
+		// Mining only makes sense if a full Ethereum node is running
+		if ctx.GlobalString(utils.SyncModeFlag.Name) == "light" {
+			utils.Fatalf("Light clients do not support mining")
+		}
 		var ethereum *eth.Ethereum
 		if err := stack.Service(&ethereum); err != nil {
 			utils.Fatalf("Energi service not running: %v", err)
