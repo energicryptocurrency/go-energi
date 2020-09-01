@@ -241,6 +241,16 @@ contract HardforkRegistryV1 is
     }
 
     /**
+     * @notice Checks if the hardfork block has been achieved.
+     * @param name hardfork name to be searched.
+     */
+    function isActive(bytes32 name) public view returns (bool) {
+        uint256 block_no;
+        (block_no,,) = getByName(name);
+        return (block.number >= block_no);
+    }
+
+    /**
      * @notice Extracts the hardfork information identified by the block number.
      * @dev privately accessed the function returning a memory instance of the hardfork.
      */

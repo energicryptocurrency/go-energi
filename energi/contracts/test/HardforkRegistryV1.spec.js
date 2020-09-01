@@ -18,8 +18,8 @@
 
 'use strict';
 
-const MockProxy = artifacts.require('MockProxy');
-const MockContract = artifacts.require('MockContract');
+const MockAutoProxy = artifacts.require('MockAutoProxy');
+const MockAutoContract = artifacts.require('MockAutoContract');
 const HardforkRegistryV1 = artifacts.require('HardforkRegistryV1');
 const IHardforkRegistry = artifacts.require('IHardforkRegistry');
 const StorageHardforkRegistryV1 = artifacts.require('StorageHardforkRegistryV1');
@@ -38,13 +38,13 @@ contract("HardforkRegistryV1", async accounts => {
 
     before(async () => {
         s.orig = await HardforkRegistryV1.deployed();
-        s.proxy = await MockProxy.at(await s.orig.proxy());
-        s.fake = await MockContract.new(s.proxy.address);
+        s.proxy = await MockAutoProxy.at(await s.orig.proxy());
+        s.fake = await MockAutoContract.new();
 
         s.proxy_abi = await HardforkRegistryV1.at(s.proxy.address);
         s.proxy_hf = await IHardforkRegistry.at(s.proxy.address);
         s.token_abi = s.proxy_hf;
-        await s.proxy.setImpl(s.orig.address);
+        // await s.proxy.setImpl(s.orig.address);
 
         s.storage = await StorageHardforkRegistryV1.at(await s.proxy_abi.v1storage());
         Object.freeze(s);
@@ -351,6 +351,33 @@ contract("HardforkRegistryV1", async accounts => {
             expect(returnArray).not.contain(hf_blocks[3]);
         });
 
+        it("should find hardfork with block that has passed as active", async() => {
+            expect(await s.proxy_hf.isActive(b32("Krypton"))).to.be.true;
+        });
+
+        it("should find hardfork with block not yet passed inactive active", async() => {
+            const b = await web3.eth.getBlock('latest');
+            const bn = b.number+5
+            const name = b32("Atlanta-")
+            try {
+                await s.proxy_hf.propose(bn, name, emptyB32, hf_sw_feature);
+            } catch (e) {
+                assert.match(e.message, /It must fail/);
+            }
+
+            // The hardfork should be found in the system.
+            let info = await s.proxy_hf.getByName(name);
+            common.stringifyBN(web3, info);
+            expect(info).deep.include({
+                block_no: bn.toString(),
+                block_hash: emptyB32,
+                sw_features: hf_sw_feature.toString(),
+            });
+
+            // The hardfork should be inactive because the block no is not yet mined.
+            expect(await s.proxy_hf.isActive(name)).to.be.false;
+        });
+
         describe("StorageHardforkRegistryV1", async () => {
             it("should refuse to update a hardfork directly", async () => {
                 try {
@@ -372,5 +399,5 @@ contract("HardforkRegistryV1", async accounts => {
         });
     });
 
-    describe('common post', () => common.govPostTests(s));
+    // describe('common post', () => common.govPostTests(s));
 });

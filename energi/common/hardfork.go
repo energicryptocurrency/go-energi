@@ -29,7 +29,7 @@ var (
 	errEmptyHash     = errors.New("empty hardfork block hash not supported")
 
 	hfInfo = latestHardfork{
-		hfs: make([]hardforkInfo, 0, 10),
+		hfs: make(map[string]hardforkInfo),
 	}
 )
 
@@ -43,7 +43,7 @@ type hardforkInfo struct {
 // latestHardfork holds information about the latest hardfork
 type latestHardfork struct {
 	mtx sync.RWMutex
-	hfs []hardforkInfo
+	hfs map[string]hardforkInfo
 }
 
 // UpdateHfActive sets the list of finalized hardforks i.e. a hardfork with an empty
@@ -56,27 +56,13 @@ func UpdateHfActive(name string, blockNo *big.Int, blockHash common.Hash, swFeat
 	case name == "":
 		return errInvalidHfName
 
-	case blockHash == (common.Hash{}):
-		return errEmptyHash
-
 	default:
-		for i, info := range hfInfo.hfs {
-			// Update the pre-existing instances.
-			if info.blockNo.Cmp(blockNo) == 0 {
-				hfInfo.hfs[i].blockHash = blockHash
-				hfInfo.hfs[i].name = name
-				hfInfo.hfs[i].swFeatures = swFeatures
-				return nil
-			}
-		}
-
-		// Append this as new HF instance.
-		hfInfo.hfs = append(hfInfo.hfs, hardforkInfo{
+		hfInfo.hfs[name] = hardforkInfo{
 			name:       name,
 			blockNo:    blockNo,
 			blockHash:  blockHash,
 			swFeatures: swFeatures,
-		})
+		}
 		return nil
 	}
 }

@@ -537,6 +537,12 @@ web3._extend({
 				null,
 			],
 		}),
+		new web3._extend.Method({
+			name: 'isHardforkActive',
+			call: 'energi_isHardforkActive',
+			params: 1,
+			inputFormatter: [null],
+		}),
 	],
 	properties: [
 	]

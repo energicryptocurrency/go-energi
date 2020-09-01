@@ -53,8 +53,8 @@ type HardforkRegistryAPI struct {
 // pre-fetches the latest list of the hardforks available in the system.
 func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	r := &HardforkRegistryAPI{
-		backend: b,
-		hfCache: energi_common.NewCacheStorage(),
+		backend:   b,
+		hfCache:   energi_common.NewCacheStorage(),
 		proxyAddr: b.ChainConfig().HardforkRegistryProxyAddress,
 	}
 
@@ -307,4 +307,26 @@ func (hf *HardforkRegistryAPI) DropHardfork(
 	}
 
 	return txHash, nil
+}
+
+// IsHardforkActive returns true if the hardfork block has been processed otherwise
+// it returns false.
+func (hf *HardforkRegistryAPI) IsHardforkActive(name string) bool {
+	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
+		hf.backend.(bind.ContractCaller))
+	if err != nil {
+		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
+		return false
+	}
+
+	callOpts := &bind.CallOpts{
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
+	}
+
+	isActive, err := registry.IsActive(callOpts, energi_common.EncodeToString(name))
+	if err != nil {
+		log.Error("Running IsActive Failed", "err", err)
+	}
+	return isActive
 }

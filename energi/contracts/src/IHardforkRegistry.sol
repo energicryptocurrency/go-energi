@@ -37,4 +37,5 @@ interface IHardforkRegistry {
         bytes32 block_hash, uint256 sw_features);
     function remove(uint256 block_no) external;
     function enumerate() external view returns(uint256[] memory hf_blocks);
+    function isActive(bytes32 name) external view returns (bool);
 }

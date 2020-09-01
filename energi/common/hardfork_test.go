@@ -50,7 +50,15 @@ func TestHardforkManagement(t *testing.T) {
 		t.Fatalf("expected no error but got: (%v)", err)
 	}
 
-	blockNo := LastSetHfBlock()
+	var blockNo *big.Int
+	hfInfo.mtx.RLock()
+	for _, info := range hfInfo.hfs {
+		if info.blockNo.Cmp(blockNo) == 1 {
+			blockNo = info.blockNo
+		}
+	}
+	hfInfo.mtx.RUnlock()
+
 	if blockNo.Cmp(hfBlockNo) != 0 {
 		t.Fatalf("expected  block number to (%v) but got: (%v)", hfBlockNo, blockNo)
 	}
