@@ -66,16 +66,10 @@ module.exports = async (deployer, _, accounts) => {
             }
 
             const instance = await deployer.deploy(type, proxy, ...args);
-            await (await MockProxy.at(proxy)).setImpl(instance.address);
+            if (proxy !== common.default_address) {
+                await (await MockProxy.at(proxy)).setImpl(instance.address);
+            }
         };
-
-        const deploy_no_proxy = async (type, ...args) => {
-            await deployer.deploy(MockAutoProxy);
-            const auto_proxy = MockAutoProxy.address;
-
-            const instance = await deployer.deploy(type,...args);
-            await (await MockAutoProxy.at(auto_proxy)).setImpl(instance.address);
-        }
 
         await deployer.deploy(Gen2Migration, blacklist_registry, common.chain_id, common.migration_signer);
 
@@ -88,7 +82,7 @@ module.exports = async (deployer, _, accounts) => {
         await deploy_common(BackboneRewardV1, backbone_proxy, accounts[5]);
         await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(CheckpointRegistryV2, undefined, mn_registry_proxy, common.cpp_signer);
-        await deploy_no_proxy(HardforkRegistryV1, common.hf_signer, common.hf_finalization_period);
+        await deploy_common(HardforkRegistryV1, common.default_address, common.hf_signer, common.hf_finalization_period);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeTokenV2, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,

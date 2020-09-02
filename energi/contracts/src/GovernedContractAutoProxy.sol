@@ -23,8 +23,8 @@ pragma solidity 0.5.16;
 
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { GovernedProxy } from "./GovernedProxy.sol";
-import { IGovernedContract } from "./IGovernedContract.sol";
 import { GlobalConstants } from "./constants.sol";
+import { GovernedContract } from "./GovernedContract.sol";
 
 /**
  * GovernedContractAutoProxy is a version of GovernedContract which deploys its own proxy.
@@ -33,43 +33,11 @@ import { GlobalConstants } from "./constants.sol";
  * This should only be used when deploying a contract which needs a new proxy, not a contract
  * for which a proxy already exists. If a proxy already exists, use GovernedContract
  */
-contract GovernedContractAutoProxy is IGovernedContract, GlobalConstants {
-    IGovernedProxy public proxy;
+contract GovernedContractAutoProxy is GovernedContract, GlobalConstants {
 
-    constructor() public {
-        proxy = new GovernedProxy(this, IGovernedProxy(SPORK_REGISTRY));
-    }
-
-    modifier requireProxy {
-        require(msg.sender == address(proxy), "Not proxy");
-        _;
-    }
-
-    function migrate(IGovernedContract _oldImpl) external requireProxy {
-        _migrate(_oldImpl);
-    }
-
-    function destroy(IGovernedContract _newImpl) external requireProxy {
-        _destroy(_newImpl);
-        selfdestruct(address(_newImpl));
-    }
-
-    // solium-disable-next-line no-empty-blocks
-    function _migrate(IGovernedContract) internal {}
-
-    // solium-disable-next-line no-empty-blocks
-    function _destroy(IGovernedContract) internal {}
-
-    function _callerAddress()
-        internal view
-        returns (address payable)
-    {
-        if (msg.sender == address(proxy)) {
-            // This is guarantee of the GovernedProxy
-            // solium-disable-next-line security/no-tx-origin
-            return tx.origin;
-        } else {
-            return msg.sender;
+    constructor(address _proxy) public GovernedContract(_proxy) {
+        if (_proxy == address(0)) {
+            proxy = address(new GovernedProxy(this, IGovernedProxy(SPORK_REGISTRY)));
         }
     }
 }

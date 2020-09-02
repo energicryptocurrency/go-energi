@@ -145,8 +145,8 @@ contract HardforkRegistryV1 is
      * @notice Constructor accepts the proxy contract and creates a Governed
      * @notice contract instance.
      */
-    constructor (address _HF_signer, uint256 _HF_finalization_period)
-        public GovernedContractAutoProxy()
+    constructor (address _proxy, address _HF_signer, uint256 _HF_finalization_period)
+        public GovernedContractAutoProxy(_proxy)
     {
         v1storage = new StorageHardforkRegistryV1();
         HF_signer = _HF_signer;

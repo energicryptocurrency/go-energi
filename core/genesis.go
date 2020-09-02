@@ -732,6 +732,7 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 			nil,
 			energi_abi.HardforkRegistryV1ABI,
 			energi_abi.HardforkRegistryV1Bin,
+			energi_params.Energi_HardforkRegistry,
 			config.Energi.HFSigner,
 			config.HFFinalizationPeriod,
 		)

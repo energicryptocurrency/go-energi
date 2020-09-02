@@ -152,7 +152,7 @@ contract MockProposal is IUpgradeProposal {
 
 contract MockAutoContract is GovernedContractAutoProxy
 {
-    constructor() public GovernedContractAutoProxy() {}
+    constructor() public GovernedContractAutoProxy(address(0)) {}
     function migrate(IGovernedContract) external {}
     function destroy(IGovernedContract new_impl) external {
         selfdestruct(address(new_impl));
@@ -169,10 +169,10 @@ contract MockAutoContract is GovernedContractAutoProxy
     function testDrain(uint amount) external {
         msg.sender.transfer(amount);
     }
-    // function callProxy() external payable {
-    //     address payable p = address(uint160(proxy));
-    //     p.transfer(msg.value);
-    // }
+    function callProxy() external payable {
+        address payable p = address(uint160(proxy));
+        p.transfer(msg.value);
+    }
     function () external payable {}
 }
 
