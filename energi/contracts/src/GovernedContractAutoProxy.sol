@@ -30,8 +30,8 @@ import { GovernedContract } from "./GovernedContract.sol";
  * GovernedContractAutoProxy is a version of GovernedContract which deploys its own proxy.
  * This is useful to avoid a circular dependency between GovernedContract and GovernedProxy
  * wherein they need each other's address in the constructor.
- * This should only be used when deploying a contract which needs a new proxy, not a contract
- * for which a proxy already exists. If a proxy already exists, use GovernedContract
+ * If you want a new governed contract to create a proxy, pass address(0) when deploying
+ * otherwise, you can pass a proxy address like in normal GovernedContract
  */
 contract GovernedContractAutoProxy is GovernedContract, GlobalConstants {
 
