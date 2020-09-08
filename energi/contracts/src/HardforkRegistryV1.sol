@@ -183,7 +183,7 @@ contract HardforkRegistryV1 is
             }
         } else {
             // Hardfork doesn't exist: new instance will be created.
-            require(block_no >= block.number, "Hardfork cannot be created in the past");
+            require(block_no > (block.number + HF_FINALIZATION_INTERVAL), "Hardfork cannot be scheduled immediately.");
         }
 
         v1storage.setHardfork(block_no, block_hash, name, sw_features);

@@ -35,7 +35,7 @@ module.exports = async function(deployer, network) {
     }
 
     // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
-    await deployer.deploy(HardforkRegistryV1, hf_signer, hf_finalization_period);
+    await deployer.deploy(HardforkRegistryV1, common.default_address, hf_signer, hf_finalization_period);
     var instance = await HardforkRegistryV1.deployed();
     var proxyAddress = await instance.proxy();
     console.log("   > proxy address:       " + proxyAddress);
