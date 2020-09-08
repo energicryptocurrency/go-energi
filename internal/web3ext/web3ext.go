@@ -548,11 +548,9 @@ web3._extend({
 		}),
 		new web3._extend.Method({
 			name: 'getHardfork',
-			call: energi_getHardfork,
+			call: 'energi_getHardfork',
 			params: 1,
-			inputFormatter: [
-				web3._extend.utils.fromDecimal,
-			],
+			inputFormatter: [null],
 			outputFormatter:  web3._extend.formatters.hardforkFormatter
 		}),
 		new web3._extend.Method({

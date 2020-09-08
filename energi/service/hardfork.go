@@ -37,6 +37,9 @@ import (
 
 var logAllHfs = int32(1)
 
+// logIntervals defines the block interval in which pending blocks will be logged.
+var logIntervals = big.NewInt(20)
+
 // HardforkService defines the hardfork service type.
 type HardforkService struct {
 	eth *eth.Ethereum
@@ -167,8 +170,24 @@ func (hf *HardforkService) onChainHead(block *types.Block) {
 		log.Info("Initial hardforks listing on startup", "logged", loggedCount,
 			"remaining", offset)
 	} else {
-		// Otherwise only log information about the latest hardfork.
-		logHardforkInfo(block.Number(), period, hardforks[len(hardforks)-1])
+		pendingHardforks, er := hf.hfAPI.ListPendingHardforks()
+		if er != nil {
+			log.Warn("ListPendingHardforks", "err", err)
+		}
+
+		if len(pendingHardforks) < 1 && er == nil {
+			log.Debug("No pending hardforks currently available in the system")
+		}
+
+		// Otherwise only log information about the pending hardforks.
+		for _, hfInfo := range pendingHardforks {
+			// log this data at intervals of logIntervals.
+			mod := new(big.Int).Mod(block.Number(), logIntervals)
+			if mod.Cmp(common.Big0) == 0 {
+				logHardforkInfo(block.Number(), period, hfInfo)
+			}
+		}
+
 	}
 
 	for _, fork := range hardforks {
@@ -180,7 +199,7 @@ func (hf *HardforkService) onChainHead(block *types.Block) {
 
 // logHardfork logs information about the information about the provided hardfork.
 func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
-	logFunc := log.Trace
+	logFunc := log.Debug
 	emptyHash := [32]byte{}
 	hfBlockNo := hfInfo.BlockNo.ToInt()
 	diff := new(big.Int).Sub(currentBlockNo, hfBlockNo)

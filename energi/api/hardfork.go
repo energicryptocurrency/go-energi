@@ -301,8 +301,8 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 	return txHash, nil
 }
 
-// GetHardforkByName returns the hardfork info associated with the provided name.
-func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, error) {
+// GetHardfork returns the hardfork info associated with the provided name.
+func (hf *HardforkRegistryAPI) GetHardfork(name string) (*HardforkInfo, error) {
 	if name == "" {
 		return nil, errors.New("Empty hardfork name is not allowed")
 	}
