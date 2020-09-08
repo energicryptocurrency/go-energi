@@ -20,6 +20,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 
@@ -302,6 +303,10 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 
 // GetHardforkByName returns the hardfork info associated with the provided name.
 func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, error) {
+	if name == "" {
+		return nil, errors.New("Empty hardfork name is not allowed")
+	}
+
 	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 	if err != nil {
 		return nil, err
@@ -311,6 +316,11 @@ func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, er
 	if err != nil {
 		log.Error("Running GetName Failed", "err", err)
 		return nil, err
+	}
+
+	// If hardfork data was not found, return an error.
+	if data.BlockNo.Cmp(common.Big0) == 0 {
+		return nil, fmt.Errorf("hardfork with name: (%v) was not found", name)
 	}
 
 	resp := &HardforkInfo{

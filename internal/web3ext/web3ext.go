@@ -115,13 +115,6 @@ web3._extend({
 `
 
 const Energi_JS = `
-web3._extend.formatters.getHardfork = function(args) {
-	return (typeof args === 'number') ? web3._extend.utils.fromDecimal(args): args;
-};
-
-web3._extend.formatters.callHardfork = function(args) {
-	return (typeof args[0] === 'number') ? 'energi_getHardforkByBlockNo': 'energi_getHardforkByName';
-};
 
 web3._extend.formatters.outputProposalFormatter = function(item){
 	var toDecimal = web3._extend.utils.toDecimal;
@@ -147,6 +140,16 @@ web3._extend.formatters.coinSearchFormatter = function(list){
 		item.Amount = toDecimal(item.Amount);
 	}
 	return list;
+};
+
+web3._extend.formatters.hardforkFormatter = function(item) {
+	return {
+		blockNo:	web3._extend.utils.toDecimal(item.BlockNo),
+		hfName:  	item.Name,
+		blockHash:	item.BlockHash,
+		swFeatures:	item.SWFeatures,
+		swVersion:	item.SWVersion,
+	};
 };
 
 web3._extend({
@@ -510,6 +513,30 @@ web3._extend({
 			},
 		}),
 		new web3._extend.Method({
+			name: 'listPendingHardforks',
+			call: 'energi_listPendingHardforks',
+			params: 0,
+			outputFormatter: function(list) {
+				var res = [];
+				for (var i = 0; i < list.length; ++i) {
+					res.push(web3._extend.formatters.hardforkFormatter(list[i]));
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
+			name: 'listActiveHardforks',
+			call: 'energi_listActiveHardforks',
+			params: 0,
+			outputFormatter: function(list) {
+				var res = [];
+				for (var i = 0; i < list.length; ++i) {
+					res.push(web3._extend.formatters.hardforkFormatter(list[i]));
+				}
+				return res;
+			},
+		}),
+		new web3._extend.Method({
 			name: 'generateHardfork',
 			call: 'energi_generateHardfork',
 			params: 3,
@@ -521,10 +548,10 @@ web3._extend({
 		}),
 		new web3._extend.Method({
 			name: 'getHardfork',
-			call: web3._extend.formatters.callHardfork,
+			call: energi_getHardfork,
 			params: 1,
 			inputFormatter: [
-				web3._extend.formatters.getHardfork,
+				web3._extend.utils.fromDecimal,
 			],
 			outputFormatter:  web3._extend.formatters.hardforkFormatter
 		}),
@@ -578,15 +605,6 @@ web3._extend({
 `
 
 const Admin_JS = `
-web3._extend.formatters.hardforkFormatter = function(item) {
-	return {
-		blockNo:	web3._extend.utils.toDecimal(item.BlockNo),
-		hfName:  	item.Name,
-		blockHash:	item.BlockHash,
-		swFeatures:	item.SWFeatures,
-		swVersion:	item.SWVersion,
-	};
-};
 
 web3._extend({
 	property: 'admin',
