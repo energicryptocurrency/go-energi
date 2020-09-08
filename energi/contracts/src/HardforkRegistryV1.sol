@@ -201,12 +201,12 @@ contract HardforkRegistryV1 is
      * @notice Returns the hardfork info indexed at provided block number.
      * @param block_no block number when the hardfork should happen.
      */
-    function getHardfork(uint256 block_no)
+    function getHardfork(bytes32 _hardfork_name)
         external
         view
-        returns(bytes32 name, bytes32 block_hash, uint256 sw_features)
+        returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
     {
-        (name,, block_hash, sw_features) = _hardforkInfo(v1storage, block_no);
+        (,block_no, block_hash, sw_features) = v1storage.hardforks(_hardfork_name);
     }
 
     /**

@@ -72,7 +72,7 @@ contract("HardforkRegistryV1", async accounts => {
 
                 const b = await web3.eth.getBlock('latest');
                 // Hardfork needs to be created way ahead of time.
-                hf_blocks.push(b.number+2)
+                hf_blocks.push(b.number+40)
                 if (i > 1) {
                     hf_hashes.push(emptyB32);
                 } else {
@@ -88,7 +88,7 @@ contract("HardforkRegistryV1", async accounts => {
             const b = await web3.eth.getBlock('latest');
 
             try {
-                await s.proxy_hf.propose(b.number, b32("Invalid Signer"), emptyB32, hf_sw_feature, {from: s.fake.address});
+                await s.proxy_hf.propose(b.number+40, b32("Invalid Signer"), emptyB32, hf_sw_feature, {from: s.fake.address});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Invalid hardfork signer caller/);
@@ -107,12 +107,12 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-        it("should fail to propose on a past HF block", async () => {
+        it("should fail to propose on a HF block within the block finalization count", async () => {
             try {
                 await s.proxy_hf.propose(5, b32("Adromeda"), emptyB32, hf_sw_feature);
                 assert.fail('It must fail');
             } catch (e) {
-                assert.match(e.message, /Hardfork cannot be created in the past/);
+                assert.match(e.message, /Hardfork cannot be scheduled immediately/);
             }
         });
 
@@ -121,7 +121,7 @@ contract("HardforkRegistryV1", async accounts => {
             const b = await web3.eth.getBlock('latest');
 
             try {
-                await s.proxy_hf.propose(b.number+5, b32("Ba Sing Se"), b.hash, hf_sw_feature);
+                await s.proxy_hf.propose(b.number+40, b32("Ba Sing Se"), b.hash, hf_sw_feature);
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Duplicate hardfork names are not allowed/);
@@ -131,7 +131,7 @@ contract("HardforkRegistryV1", async accounts => {
         it("should propose on correct inputs", async ()=> {
             common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
-            let bn = b.number+3
+            let bn = b.number+42
             let hfn = b32("Krypton");
         
             try {
@@ -153,8 +153,23 @@ contract("HardforkRegistryV1", async accounts => {
             });
         });
 
+        it("should propose a hardfork on future on invalid HF signer", async () => {
+            common.moveTime(web3, 1);
+            const b = await web3.eth.getBlock('latest');
+            const hfn = b32("lieze");
+
+            try {
+                await s.proxy_hf.propose(b.number+40000, hfn, emptyB32, hf_sw_feature);
+                hf_names.push(hfn);
+                hf_pending.push(hfn);
+            } catch (e) {
+                assert.fail('It must fail');
+            }
+        });
 
         it("should fail to propose if the hardfork has already been finalized", async () => {
+            common.moveTime(web3, 1);
+
             const block_no = hf_blocks[hf_blocks.length -1];
             const b = await web3.eth.getBlock('latest');
             try {
@@ -166,8 +181,10 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should fail to propose during the hardfork finalization if block hash is empty", async () => {
+            common.moveTime(web3, 1);
+
             const b = await web3.eth.getBlock('latest');
-            const bn = b.number+3;
+            const bn = b.number+43;
             const hfn = b32("Barbage");
 
             try {
@@ -181,7 +198,7 @@ contract("HardforkRegistryV1", async accounts => {
 
             // Move time till the block finalization period.
             let i = 0;
-            for(; i < 11; i++) {
+            for(; i < 43; i++) {
                 common.moveTime(web3, 1);
             }
 
@@ -195,21 +212,21 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should propose during the hardfork finalization if block hash is not empty", async () => {
             const b = await web3.eth.getBlock('latest');
-            const bn = b.number+5000;
+            const bn = b.number+50;
             const hfn = b32("Karl Max");
 
             try {
                 await s.proxy_hf.propose(bn, hfn, emptyB32, hf_sw_feature);
                 hf_blocks.push(bn);
                 hf_names.push(hfn);
-                hf_pending.push(hfn);
+                hf_active.push(hfn);
             } catch (e) {
                 assert.match(e.message, /It must fail/);
             }
 
             // Move time till PAST the block finalization period.
             let i = 0;
-            for(; i < 13; i++) {
+            for(; i < 43; i++) {
                 common.moveTime(web3, 1);
             }
 
@@ -230,6 +247,10 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should fail to propose when the hardfork finalization interval is exceeded", async () => {
+            let i = 0;
+            for(; i < 50; i++) {
+                common.moveTime(web3, 1);
+            }
             const b = await web3.eth.getBlock('latest');
 
             try {
@@ -244,23 +265,23 @@ contract("HardforkRegistryV1", async accounts => {
             common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
 
-            let info = await s.proxy_hf.getHardfork(b.number + 100);
+            let info = await s.proxy_hf.getHardfork(b32("none-existent"));
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
                 block_hash: emptyB32,
-                name: emptyB32,
+                block_no: "0",
                 sw_features: "0",
             });
         });
 
         it("getHardfork with existent block number should return correct values", async () => {
-            let info = await s.proxy_hf.getHardfork(hf_blocks[2]);
+            let info = await s.proxy_hf.getHardfork(hf_names[2]);
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
                 block_hash: hf_hashes[2],
-                name: hf_names[2],
+                block_no: hf_blocks[2].toString(),
                 sw_features: hf_sw_feature.toString(),
             });
         });
@@ -298,11 +319,11 @@ contract("HardforkRegistryV1", async accounts => {
             }
 
             // Confirm that the hardfork wasn't removed at all.
-            let b = await s.proxy_hf.getHardfork(hf_blocks[1]);
+            let b = await s.proxy_hf.getHardfork(hf_names[1]);
             common.stringifyBN(web3, b);
 
             expect(b).deep.include({
-                name: hf_names[1].toString(),
+                block_no: hf_blocks[1].toString(),
                 block_hash: hf_hashes[1],
                 sw_features: hf_sw_feature.toString()
             });
@@ -316,11 +337,11 @@ contract("HardforkRegistryV1", async accounts => {
             await s.proxy_hf.remove(hf_blocks[3]);
 
             // Confirm that the hardfork wasn't removed at all.
-            let b = await s.proxy_hf.getHardfork(hf_blocks[3]);
+            let b = await s.proxy_hf.getHardfork(hf_names[3]);
             common.stringifyBN(web3, b);
 
             expect(b).deep.include({
-                name: emptyB32,
+                block_no: "0",
                 block_hash: emptyB32,
                 sw_features: "0"
             });
@@ -340,7 +361,7 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should find hardfork with block not yet passed inactive active", async() => {
             const b = await web3.eth.getBlock('latest');
-            const bn = b.number+5
+            const bn = b.number+45
             const name = b32("Atlanta-")
             try {
                 await s.proxy_hf.propose(bn, name, emptyB32, hf_sw_feature);
@@ -349,10 +370,10 @@ contract("HardforkRegistryV1", async accounts => {
             }
 
             // The hardfork should be found in the system.
-            let info = await s.proxy_hf.getHardfork(bn);
+            let info = await s.proxy_hf.getHardfork(name);
             common.stringifyBN(web3, info);
             expect(info).deep.include({
-                name: name,
+                block_no: bn.toString(),
                 block_hash: emptyB32,
                 sw_features: hf_sw_feature.toString(),
             });
