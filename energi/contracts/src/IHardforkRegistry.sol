@@ -31,11 +31,11 @@ interface IHardforkRegistry {
     );
 
     function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features) external;
-    function getByBlockNo(uint256 block_no) external view returns(bytes32 name,
-        bytes32 block_hash, uint256 sw_features);
-    function getByName (bytes32 name) external view returns(uint256 block_no,
+    function getHardfork(uint256 block_no) external view returns(bytes32 name,
         bytes32 block_hash, uint256 sw_features);
     function remove(uint256 block_no) external;
-    function enumerate() external view returns(uint256[] memory hf_blocks);
+    function enumerateAll() external view returns(bytes32[] memory all_hf_names);
+    function enumeratePending() external view returns(bytes32[] memory pending_hf_names);
+    function enumerateActive() external view returns(bytes32[] memory active_hf_names);
     function isActive(bytes32 name) external view returns (bool);
 }

@@ -41,23 +41,30 @@ contract StorageHardforkRegistryV1 is
      * @dev achieved once the hardfork block hash is updated.
      */
     modifier contentEditable(uint256 _block_no) {
-        require(hardforks[_block_no].block_hash == bytes32(0), "hardfork changes not editable");
+        bytes32 block_hash;
+        for (uint i = 0; i <hardfork_names.length; i++) {
+            Hardfork memory hf = hardforks[hardfork_names[i]];
+            if (hf.block_number == _block_no) {
+                block_hash = hf.block_hash;
+            }
+        }
+        require(block_hash == bytes32(0), "hardfork changes not editable");
         _;
     }
 
     struct Hardfork {
         bytes32 name;
+        uint256 block_number;
         bytes32 block_hash;
         uint256 sw_features;
     }
 
-    uint256[] public hardfork_blocks;
-    mapping(uint256 => Hardfork) public hardforks;
-    mapping(bytes32 => uint256) public hardfork_names;
+    bytes32[] public hardfork_names;
+    mapping(bytes32 => Hardfork) public hardforks;
 
     /**
      * @notice setHardfork updates the hardfork changes.
-     * @dev Updates the hardfork_blocks array and hardforks mapping if content
+     * @dev Updates the hardfork_names array and hardforks mapping if content
      * @dev is editable.
      */
     function setHardfork(
@@ -70,52 +77,47 @@ contract StorageHardforkRegistryV1 is
         requireOwner
         contentEditable(_block_no)
     {
-        Hardfork storage item = hardforks[_block_no];
-        // Update the hardfork blocks once the first hardfork name is set
+        Hardfork storage item = hardforks[_hardfork_name];
+        // Update the hardfork names array once the first hardfork name is set.
         if (item.name == bytes32(0) && _hardfork_name != bytes32(0)) {
-            hardfork_blocks.push(_block_no);
+            hardfork_names.push(_hardfork_name);
         }
 
-        if (_block_hash != bytes32(0)) item.block_hash = _block_hash;
+        item.block_number = _block_no;
         if (_sw_features != 0) item.sw_features = _sw_features;
-        if (_hardfork_name != bytes32(0)) {
-            item.name = _hardfork_name;
-            hardfork_names[_hardfork_name] = _block_no;
-        }
+        if (_block_hash != bytes32(0)) item.block_hash = _block_hash;
+        if (_hardfork_name != bytes32(0)) item.name = _hardfork_name;
     }
 
     /**
-     * @notice deletes the hardfork identified by the provided block number.
+     * @notice deletes the hardfork identified by the provided hardfork name.
      * @dev If content is editable delete the hardfork record completely.
      */
-    function deleteHardfork(uint256 _block_no)
+    function deleteHardfork(bytes32 _hardfork_name, uint256 _block_no)
         external
         requireOwner
         contentEditable(_block_no)
     {
-        Hardfork memory hf = hardforks[_block_no];
-        delete hardfork_names[hf.name];
+        delete hardforks[_hardfork_name];
 
-        delete hardforks[_block_no];
-
-        for (uint i = 0; i < hardfork_blocks.length; i++) {
-            if (hardfork_blocks[i] == _block_no) {
+        for (uint i = 0; i <hardfork_names.length; i++) {
+            if (hardfork_names[i] == _hardfork_name) {
                 uint k = i;
-                for (; k < hardfork_blocks.length-1; k++) {
-                    hardfork_blocks[k] = hardfork_blocks[k+1];
+                for (; k <hardfork_names.length-1; k++) {
+                   hardfork_names[k] = hardfork_names[k+1];
                 }
 
-                hardfork_blocks.pop();
+               hardfork_names.pop();
                 break;
             }
         }
     }
 
     /**
-     * @notice Return the hardfork blocks.
+     * @notice Returns all the hardfork names available.
      */
-    function getHardForkBlocks() external view returns(uint256[] memory) {
-        return hardfork_blocks;
+    function getHardForkNames() external view returns(bytes32[] memory) {
+        return hardfork_names;
     }
 }
 
@@ -167,7 +169,9 @@ contract HardforkRegistryV1 is
         require(_callerAddress() == HF_signer, "Invalid hardfork signer caller");
         require(name != bytes32(0), "Hardfork name cannot be empty");
 
-        uint256 _block_no = v1storage.hardfork_names(name);
+        bytes32 _name;
+        uint256 _block_no;
+        (_name,_block_no,,) = v1storage.hardforks(name);
         if (_block_no > 0) {
             // Hardfork already exist: Update is currently happening.
             require(_block_no == block_no, "Duplicate hardfork names are not allowed");
@@ -197,25 +201,12 @@ contract HardforkRegistryV1 is
      * @notice Returns the hardfork info indexed at provided block number.
      * @param block_no block number when the hardfork should happen.
      */
-    function getByBlockNo(uint256 block_no)
+    function getHardfork(uint256 block_no)
         external
         view
         returns(bytes32 name, bytes32 block_hash, uint256 sw_features)
     {
-        (name, block_hash, sw_features) = _hardforkInfo(v1storage, block_no);
-    }
-
-    /**
-     * @notice Returns the hardfork info associated with the provided name
-     * @param name hardfork name derived from the naming scheme.
-     */
-    function getByName (bytes32 name)
-        public
-        view
-        returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-    {
-        block_no = v1storage.hardfork_names(name);
-        (, block_hash, sw_features) = _hardforkInfo(v1storage, block_no);
+        (name,, block_hash, sw_features) = _hardforkInfo(v1storage, block_no);
     }
 
     /**
@@ -225,19 +216,73 @@ contract HardforkRegistryV1 is
     function remove(uint256 block_no) external noReentry {
         require(_callerAddress() == HF_signer, "Invalid hardfork signer caller");
 
-        bytes32 block_hash;
-        (,block_hash,) = _hardforkInfo(v1storage, block_no);
-        require(block_hash == bytes32(0), "Finalized hardfork cannot be deleted");
+        bytes32 _name;
+        uint256 _block_no;
+        bytes32 _block_hash;
+        (_name, _block_no, _block_hash,) = _hardforkInfo(v1storage, block_no);
+        require(_name != bytes32(0), "Hardfork name cannot be empty");
+        require(_block_hash == bytes32(0), "Finalized hardfork cannot be deleted");
 
-        v1storage.deleteHardfork(block_no);
+        v1storage.deleteHardfork(_name, _block_no);
     }
 
     /**
-     * @notice Lists the hardfork blocks in ascending order.
-     * @dev Lists the hardblock from the oldest to the most recent.
+     * @notice Lists the all the hardfork names in the order they were created.
      */
-    function enumerate() external view returns(uint256[] memory){
-        return v1storage.getHardForkBlocks();
+    function enumerateAll() public view returns(bytes32[] memory){
+        return v1storage.getHardForkNames();
+    }
+
+    /**
+     * @notice Lists all the pending hardfork names in the order they were created.
+     * @dev Two for-loops used guarantee the final array is not permanently stored.
+     */
+    function enumeratePending() public view returns(bytes32[] memory){
+        uint index;
+        uint pending_HFs;
+        bytes32[] memory all_names = enumerateAll();
+        for (uint i = 0; i < all_names.length; i++) {
+            bytes32 name = all_names[i];
+            if (!isActive(name)) {
+                pending_HFs++;
+            }
+        }
+
+        bytes32[] memory pending_names = new bytes32[](pending_HFs);
+        for (uint i = 0; i < all_names.length; i++) {
+            bytes32 name = all_names[i];
+            if (!isActive(name)) {
+                pending_names[index] = name;
+                index++;
+            }
+        }
+        return pending_names;
+    }
+
+    /**
+     * @notice Lists all the active hardfork names in the order they were created.
+     * @dev Two for-loops used guarantee the final array is not permanently stored.
+     */
+    function enumerateActive() public view returns(bytes32[] memory){
+        uint index;
+        uint active_HFs;
+        bytes32[] memory all_names = enumerateAll();
+        for (uint i = 0; i < all_names.length; i++) {
+            bytes32 name = all_names[i];
+            if (isActive(name)) {
+                active_HFs++;
+            }
+        }
+
+        bytes32[] memory active_names = new bytes32[](active_HFs);
+        for (uint i = 0; i < all_names.length; i++) {
+            bytes32 name = all_names[i];
+            if (isActive(name)) {
+                active_names[index] = name;
+                index++;
+            }
+        }
+        return active_names;
     }
 
     /**
@@ -245,9 +290,12 @@ contract HardforkRegistryV1 is
      * @param name hardfork name to be searched.
      */
     function isActive(bytes32 name) public view returns (bool) {
+        // if name is empty return false
+        if (name == bytes32(0)) return false;
+
         uint256 block_no;
-        (block_no,,) = getByName(name);
-        return (block.number >= block_no);
+        (,block_no,,) = v1storage.hardforks(name);
+        return (block.number >= block_no && block_no != 0);
     }
 
     /**
@@ -257,13 +305,23 @@ contract HardforkRegistryV1 is
     function _hardforkInfo(StorageHardforkRegistryV1 store, uint256 _block_no)
         internal
         view
-        returns (bytes32 name, bytes32 block_hash, uint256 sw_features)
+        returns (bytes32 name, uint256 block_no, bytes32 block_hash, uint256 sw_features)
     {
-        (
-           name,
-           block_hash,
-           sw_features
-        ) = store.hardforks(_block_no);
+        bytes32[] memory hf_names_array = store.getHardForkNames();
+        for (uint i = 0; i < hf_names_array.length; i++) {
+            bytes32 _name;
+            uint256 _blockNo;
+            bytes32 _block_hash;
+            uint256 _sw_features;
+            (_name, _blockNo, _block_hash, _sw_features) = store.hardforks(hf_names_array[i]);
+            if (_blockNo == _block_no) {
+                name = _name;
+                block_no = _blockNo;
+                block_hash = _block_hash;
+                sw_features = _sw_features;
+                break;
+            }
+        }
     }
 
     //---------------------------------

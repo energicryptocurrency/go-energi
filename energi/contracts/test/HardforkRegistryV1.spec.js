@@ -59,6 +59,8 @@ contract("HardforkRegistryV1", async accounts => {
         const hf_sw_feature = 3000600;
         const owner1 = "0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb";
         let hf_names = [b32("Ba Sing Se"), b32("Hogwarts"), b32("Mars"), b32("Random")];
+        let hf_active = [b32("Ba Sing Se"), b32("Hogwarts"), b32("Mars"), b32("Random")];
+        let hf_pending = [];
 
         let hf_blocks = [];
         let hf_hashes = [];
@@ -130,11 +132,13 @@ contract("HardforkRegistryV1", async accounts => {
             common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
             let bn = b.number+3
+            let hfn = b32("Krypton");
         
             try {
                 hf_blocks.push(bn);
-                hf_names.push(b32("Krypton"));
-                await s.proxy_hf.propose(bn, b32("Krypton"), b.hash, hf_sw_feature);
+                hf_names.push(hfn);
+                hf_active.push(hfn);
+                await s.proxy_hf.propose(bn, hfn, b.hash, hf_sw_feature);
             } catch (e) {
                 assert.match(e.message, /It must fail/);
             }
@@ -145,7 +149,7 @@ contract("HardforkRegistryV1", async accounts => {
             expect(evt[0].args).deep.include({
                 block_no: bn.toString(10),
                 block_hash: b.hash,
-                name: b32("Krypton"),
+                name: hfn,
             });
         });
 
@@ -169,6 +173,8 @@ contract("HardforkRegistryV1", async accounts => {
             try {
                 await s.proxy_hf.propose(bn, hfn, emptyB32, hf_sw_feature);
                 hf_blocks.push(bn);
+                hf_names.push(hfn);
+                hf_active.push(hfn);
             } catch (e) {
                 assert.match(e.message, /It must fail/);
             }
@@ -189,12 +195,14 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should propose during the hardfork finalization if block hash is not empty", async () => {
             const b = await web3.eth.getBlock('latest');
-            const bn = b.number+5;
+            const bn = b.number+5000;
             const hfn = b32("Karl Max");
 
             try {
                 await s.proxy_hf.propose(bn, hfn, emptyB32, hf_sw_feature);
                 hf_blocks.push(bn);
+                hf_names.push(hfn);
+                hf_pending.push(hfn);
             } catch (e) {
                 assert.match(e.message, /It must fail/);
             }
@@ -232,11 +240,11 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-        it("getByBlockNo with none existent block number should return empty values", async () => {
+        it("getHardfork with none existent block number should return empty values", async () => {
             common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
 
-            let info = await s.proxy_hf.getByBlockNo(b.number + 100);
+            let info = await s.proxy_hf.getHardfork(b.number + 100);
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
@@ -246,8 +254,8 @@ contract("HardforkRegistryV1", async accounts => {
             });
         });
 
-        it("getByBlockNo with existent block number should return correct values", async () => {
-            let info = await s.proxy_hf.getByBlockNo(hf_blocks[2]);
+        it("getHardfork with existent block number should return correct values", async () => {
+            let info = await s.proxy_hf.getHardfork(hf_blocks[2]);
             common.stringifyBN(web3, info);
 
             expect(info).deep.include({
@@ -257,36 +265,19 @@ contract("HardforkRegistryV1", async accounts => {
             });
         });
 
-        it("getByName with none existent name should return empty values", async () => {
-            let info = await s.proxy_hf.getByName(b32("knight"));
-            common.stringifyBN(web3, info);
-
-            expect(info).deep.include({
-                block_no: "0",
-                block_hash: emptyB32,
-                sw_features: "0",
-            });
+        it("should list all the hardforks names", async () => {
+            let returnArray  = await s.proxy_hf.enumerateAll();
+            expect(returnArray).members(hf_names);
         });
 
-        it("getByName with existent name should return correct values", async () => {
-            let info = await s.proxy_hf.getByName(hf_names[2]);
-            common.stringifyBN(web3, info);
-
-            expect(info).deep.include({
-                block_no: hf_blocks[2].toString(),
-                block_hash: hf_hashes[2],
-                sw_features: hf_sw_feature.toString()
-            });
+        it("should list all the pending hardforks names", async () => {
+            let returnArray  = await s.proxy_hf.enumeratePending();
+            expect(returnArray).members(hf_pending);
         });
 
-        it("should list all the hardforks blocks", async () => {
-            let array  = await s.proxy_hf.enumerate();
-            let i = 0;
-            let returnArray = [];
-            for(; i < array.length; i++) {
-                returnArray.push(array[i].words[0]);
-            }
-            expect(returnArray).members(hf_blocks);
+        it("should list all the active hardforks names", async () => {
+            let returnArray  = await s.proxy_hf.enumerateActive();
+            expect(returnArray).members(hf_active);
         });
 
         it("should fail to remove on invalid HF signer", async () => {
@@ -307,7 +298,7 @@ contract("HardforkRegistryV1", async accounts => {
             }
 
             // Confirm that the hardfork wasn't removed at all.
-            let b = await s.proxy_hf.getByBlockNo(hf_blocks[1]);
+            let b = await s.proxy_hf.getHardfork(hf_blocks[1]);
             common.stringifyBN(web3, b);
 
             expect(b).deep.include({
@@ -316,22 +307,16 @@ contract("HardforkRegistryV1", async accounts => {
                 sw_features: hf_sw_feature.toString()
             });
 
-            let array  = await s.proxy_hf.enumerate();
-            expect(array.length).to.equal(hf_blocks.length);
-
-            let i = 0;
-            let returnArray = [];
-            for(; i < array.length; i++) {
-                returnArray.push(array[i].words[0]);
-            }
-            expect(returnArray).to.contain(hf_blocks[1]);
+            let array  = await s.proxy_hf.enumerateAll();
+            expect(array.length).to.equal(hf_names.length);
+            expect(array).to.contain(hf_names[1]);
         });
 
         it("should remove the unfinalized hardfork information completely", async () => {
             await s.proxy_hf.remove(hf_blocks[3]);
 
             // Confirm that the hardfork wasn't removed at all.
-            let b = await s.proxy_hf.getByBlockNo(hf_blocks[3]);
+            let b = await s.proxy_hf.getHardfork(hf_blocks[3]);
             common.stringifyBN(web3, b);
 
             expect(b).deep.include({
@@ -340,19 +325,17 @@ contract("HardforkRegistryV1", async accounts => {
                 sw_features: "0"
             });
 
-            let array  = await s.proxy_hf.enumerate();
-            expect(array.length).to.equal(hf_blocks.length - 1);
-
-            let i = 0;
-            let returnArray = [];
-            for(; i < array.length; i++) {
-                returnArray.push(array[i].words[0]);
-            }
-            expect(returnArray).not.contain(hf_blocks[3]);
+            let array  = await s.proxy_hf.enumerateAll();
+            expect(array.length).to.equal(hf_names.length - 1);
+            expect(array).not.contain(hf_names[3]);
         });
 
         it("should find hardfork with block that has passed as active", async() => {
             expect(await s.proxy_hf.isActive(b32("Krypton"))).to.be.true;
+        });
+
+        it("should return false if an empty hardfork name is used", async() => {
+            expect(await s.proxy_hf.isActive(emptyB32)).to.be.false;
         });
 
         it("should find hardfork with block not yet passed inactive active", async() => {
@@ -366,10 +349,10 @@ contract("HardforkRegistryV1", async accounts => {
             }
 
             // The hardfork should be found in the system.
-            let info = await s.proxy_hf.getByName(name);
+            let info = await s.proxy_hf.getHardfork(bn);
             common.stringifyBN(web3, info);
             expect(info).deep.include({
-                block_no: bn.toString(),
+                name: name,
                 block_hash: emptyB32,
                 sw_features: hf_sw_feature.toString(),
             });
@@ -390,7 +373,7 @@ contract("HardforkRegistryV1", async accounts => {
 
             it("should refuse to delete a hardfork directly", async () => {
                 try {
-                    await s.storage.deleteHardfork(hf_blocks[0]);
+                    await s.storage.deleteHardfork(hf_names[0], hf_blocks[0]);
                     assert.fail('It must fail');
                 } catch (e) {
                     assert.match(e.message, /Not owner/);
