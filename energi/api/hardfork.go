@@ -99,6 +99,25 @@ func registrySession(
 	return
 }
 
+func registryCaller(
+	backend Backend,
+	proxyAddr common.Address,
+) (*energi_abi.IHardforkRegistryCaller, *bind.CallOpts, error) {
+	registry, err := energi_abi.NewIHardforkRegistryCaller(proxyAddr,
+		backend.(bind.ContractCaller))
+	if err != nil {
+		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
+		return nil, nil, err
+	}
+
+	callOpts := &bind.CallOpts{
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
+	}
+
+	return registry, callOpts, nil
+}
+
 // HardforkInfo defines the hardfork payload information returned.
 type HardforkInfo struct {
 	BlockNo    *hexutil.Big
@@ -123,35 +142,94 @@ func (hf *HardforkRegistryAPI) ListHardforks() (res []*HardforkInfo, err error) 
 
 // listHardforks queries the actual hardforks information from the contracts.
 func (hf *HardforkRegistryAPI) listHardforks(num *big.Int) (interface{}, error) {
-	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
-		hf.backend.(bind.ContractCaller))
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 	if err != nil {
-		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
 		return nil, err
 	}
 
-	callOpts := &bind.CallOpts{
-		Pending:  true,
-		GasLimit: energi_params.UnlimitedGas,
-	}
-
-	blockNos, err := registry.Enumerate(callOpts)
+	HfNames, err := registry.EnumerateAll(callOpts)
 	if err != nil {
-		log.Error("Running Enumerate Failed", "err", err)
+		log.Error("Running EnumerateAll failed", "err", err)
 		return nil, err
 	}
 
-	resp := make([]*HardforkInfo, 0, len(blockNos))
-	for _, blockNo := range blockNos {
-		data, err := registry.GetByBlockNo(callOpts, blockNo)
+	return processHfListings(HfNames, registry, callOpts)
+}
+
+// ListPendingHardforks returns a list of the latest pending hardfork payload.
+// It caches the last fetched data till a new block is mined.
+func (hf *HardforkRegistryAPI) ListPendingHardforks() (res []*HardforkInfo, err error) {
+	data, err := hf.hfCache.Get(hf.backend, hf.listPendingHardforks)
+	if err != nil || data == nil {
+		log.Error("Running ListPendingHardforks failed", "err", err)
+		return nil, err
+	}
+
+	res = data.([]*HardforkInfo)
+	return
+}
+
+// listPendingHardforks returns a list of the current pending hardforks.
+func (hf *HardforkRegistryAPI) listPendingHardforks(num *big.Int) (interface{}, error) {
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	HfNames, err := registry.EnumeratePending(callOpts)
+	if err != nil {
+		log.Error("Running EnumeratePending failed", "err", err)
+		return nil, err
+	}
+
+	return processHfListings(HfNames, registry, callOpts)
+}
+
+// ListActiveHardforks returns a list of the latest active hardfork payload.
+// It caches the last fetched data till a new block is mined.
+func (hf *HardforkRegistryAPI) ListActiveHardforks() (res []*HardforkInfo, err error) {
+	data, err := hf.hfCache.Get(hf.backend, hf.listActiveHardforks)
+	if err != nil || data == nil {
+		log.Error("ListActiveHardforks failed", "err", err)
+		return nil, err
+	}
+
+	res = data.([]*HardforkInfo)
+	return
+}
+
+// listActiveHardforks returns a list of the current Active hardforks.
+func (hf *HardforkRegistryAPI) listActiveHardforks(num *big.Int) (interface{}, error) {
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	HfNames, err := registry.EnumerateActive(callOpts)
+	if err != nil {
+		log.Error("Running EnumerateActive failed", "err", err)
+		return nil, err
+	}
+
+	return processHfListings(HfNames, registry, callOpts)
+}
+
+func processHfListings(
+	HfNames [][32]byte,
+	registry *energi_abi.IHardforkRegistryCaller,
+	callOpts *bind.CallOpts,
+) ([]*HardforkInfo, error) {
+	resp := make([]*HardforkInfo, 0, len(HfNames))
+	for _, name := range HfNames {
+		data, err := registry.GetHardfork(callOpts, name)
 		if err != nil {
-			log.Error("Running GetByBlockNo Failed", "err", err)
+			log.Error("Running GetHardfork failed", "err", err)
 			return nil, err
 		}
 
 		resp = append(resp, &HardforkInfo{
-			BlockNo:    (*hexutil.Big)(blockNo),
-			Name:       energi_common.DecodeToString(data.Name),
+			BlockNo:    (*hexutil.Big)(data.BlockNo),
+			Name:       energi_common.DecodeToString(name),
 			BlockHash:  common.BytesToHash(data.BlockHash[:]),
 			SWFeatures: (*hexutil.Big)(data.SwFeatures),
 			SWVersion:  energi_common.SWVersionIntToString(data.SwFeatures),
@@ -224,18 +302,12 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 
 // GetHardforkByName returns the hardfork info associated with the provided name.
 func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, error) {
-	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
-		hf.backend.(bind.ContractCaller))
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 	if err != nil {
-		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
 		return nil, err
 	}
-	callOpts := &bind.CallOpts{
-		Pending:  true,
-		GasLimit: energi_params.UnlimitedGas,
-	}
 
-	data, err := registry.GetByName(callOpts, energi_common.EncodeToString(name))
+	data, err := registry.GetHardfork(callOpts, energi_common.EncodeToString(name))
 	if err != nil {
 		log.Error("Running GetName Failed", "err", err)
 		return nil, err
@@ -244,37 +316,6 @@ func (hf *HardforkRegistryAPI) GetHardforkByName(name string) (*HardforkInfo, er
 	resp := &HardforkInfo{
 		BlockNo:    (*hexutil.Big)(data.BlockNo),
 		Name:       name,
-		BlockHash:  common.BytesToHash(data.BlockHash[:]),
-		SWFeatures: (*hexutil.Big)(data.SwFeatures),
-		SWVersion:  energi_common.SWVersionIntToString(data.SwFeatures),
-	}
-
-	return resp, nil
-}
-
-// GetHardforkByBlockNo returns the hardfork info identified by the provided blockno.
-func (hf *HardforkRegistryAPI) GetHardforkByBlockNo(blockNo *hexutil.Big) (*HardforkInfo, error) {
-	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
-		hf.backend.(bind.ContractCaller))
-	if err != nil {
-		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
-		return nil, err
-	}
-
-	callOpts := &bind.CallOpts{
-		Pending:  true,
-		GasLimit: energi_params.UnlimitedGas,
-	}
-
-	data, err := registry.GetByBlockNo(callOpts, blockNo.ToInt())
-	if err != nil {
-		log.Error("Running GetName Failed", "err", err)
-		return nil, err
-	}
-
-	resp := &HardforkInfo{
-		BlockNo:    blockNo,
-		Name:       energi_common.DecodeToString(data.Name),
 		BlockHash:  common.BytesToHash(data.BlockHash[:]),
 		SWFeatures: (*hexutil.Big)(data.SwFeatures),
 		SWVersion:  energi_common.SWVersionIntToString(data.SwFeatures),
@@ -312,16 +353,13 @@ func (hf *HardforkRegistryAPI) DropHardfork(
 // IsHardforkActive returns true if the hardfork block has been processed otherwise
 // it returns false.
 func (hf *HardforkRegistryAPI) IsHardforkActive(name string) bool {
-	registry, err := energi_abi.NewIHardforkRegistryCaller(hf.proxyAddr,
-		hf.backend.(bind.ContractCaller))
-	if err != nil {
-		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
+	if name == "" {
 		return false
 	}
 
-	callOpts := &bind.CallOpts{
-		Pending:  true,
-		GasLimit: energi_params.UnlimitedGas,
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
+	if err != nil {
+		return false
 	}
 
 	isActive, err := registry.IsActive(callOpts, energi_common.EncodeToString(name))

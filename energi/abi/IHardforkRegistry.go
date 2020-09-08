@@ -28,7 +28,7 @@ var (
 )
 
 // IHardforkRegistryABI is the input ABI used to generate the binding from.
-const IHardforkRegistryABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"Hardfork\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"hf_blocks\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"}],\"name\":\"getByBlockNo\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"getByName\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"propose\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"}],\"name\":\"remove\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const IHardforkRegistryABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"Hardfork\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"active_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateAll\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"all_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumeratePending\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"pending_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_hardfork_name\",\"type\":\"bytes32\"}],\"name\":\"getHardfork\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"propose\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"}],\"name\":\"remove\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // IHardforkRegistry is an auto generated Go binding around an Ethereum contract.
 type IHardforkRegistry struct {
@@ -172,76 +172,88 @@ func (_IHardforkRegistry *IHardforkRegistryTransactorRaw) Transact(opts *bind.Tr
 	return _IHardforkRegistry.Contract.contract.Transact(opts, method, params...)
 }
 
-// Enumerate is a free data retrieval call binding the contract method 0xff9f78b3.
+// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
 //
-// Solidity: function enumerate() constant returns(uint256[] hf_blocks)
-func (_IHardforkRegistry *IHardforkRegistryCaller) Enumerate(opts *bind.CallOpts) ([]*big.Int, error) {
+// Solidity: function enumerateActive() constant returns(bytes32[] active_hf_names)
+func (_IHardforkRegistry *IHardforkRegistryCaller) EnumerateActive(opts *bind.CallOpts) ([][32]byte, error) {
 	var (
-		ret0 = new([]*big.Int)
+		ret0 = new([][32]byte)
 	)
 	out := ret0
-	err := _IHardforkRegistry.contract.Call(opts, out, "enumerate")
+	err := _IHardforkRegistry.contract.Call(opts, out, "enumerateActive")
 	return *ret0, err
 }
 
-// Enumerate is a free data retrieval call binding the contract method 0xff9f78b3.
+// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
 //
-// Solidity: function enumerate() constant returns(uint256[] hf_blocks)
-func (_IHardforkRegistry *IHardforkRegistrySession) Enumerate() ([]*big.Int, error) {
-	return _IHardforkRegistry.Contract.Enumerate(&_IHardforkRegistry.CallOpts)
+// Solidity: function enumerateActive() constant returns(bytes32[] active_hf_names)
+func (_IHardforkRegistry *IHardforkRegistrySession) EnumerateActive() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.EnumerateActive(&_IHardforkRegistry.CallOpts)
 }
 
-// Enumerate is a free data retrieval call binding the contract method 0xff9f78b3.
+// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
 //
-// Solidity: function enumerate() constant returns(uint256[] hf_blocks)
-func (_IHardforkRegistry *IHardforkRegistryCallerSession) Enumerate() ([]*big.Int, error) {
-	return _IHardforkRegistry.Contract.Enumerate(&_IHardforkRegistry.CallOpts)
+// Solidity: function enumerateActive() constant returns(bytes32[] active_hf_names)
+func (_IHardforkRegistry *IHardforkRegistryCallerSession) EnumerateActive() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.EnumerateActive(&_IHardforkRegistry.CallOpts)
 }
 
-// GetByBlockNo is a free data retrieval call binding the contract method 0x1658312e.
+// EnumerateAll is a free data retrieval call binding the contract method 0xbc393afb.
 //
-// Solidity: function getByBlockNo(uint256 block_no) constant returns(bytes32 name, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryCaller) GetByBlockNo(opts *bind.CallOpts, block_no *big.Int) (struct {
-	Name       [32]byte
-	BlockHash  [32]byte
-	SwFeatures *big.Int
-}, error) {
-	ret := new(struct {
-		Name       [32]byte
-		BlockHash  [32]byte
-		SwFeatures *big.Int
-	})
-	out := ret
-	err := _IHardforkRegistry.contract.Call(opts, out, "getByBlockNo", block_no)
-	return *ret, err
+// Solidity: function enumerateAll() constant returns(bytes32[] all_hf_names)
+func (_IHardforkRegistry *IHardforkRegistryCaller) EnumerateAll(opts *bind.CallOpts) ([][32]byte, error) {
+	var (
+		ret0 = new([][32]byte)
+	)
+	out := ret0
+	err := _IHardforkRegistry.contract.Call(opts, out, "enumerateAll")
+	return *ret0, err
 }
 
-// GetByBlockNo is a free data retrieval call binding the contract method 0x1658312e.
+// EnumerateAll is a free data retrieval call binding the contract method 0xbc393afb.
 //
-// Solidity: function getByBlockNo(uint256 block_no) constant returns(bytes32 name, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistrySession) GetByBlockNo(block_no *big.Int) (struct {
-	Name       [32]byte
-	BlockHash  [32]byte
-	SwFeatures *big.Int
-}, error) {
-	return _IHardforkRegistry.Contract.GetByBlockNo(&_IHardforkRegistry.CallOpts, block_no)
+// Solidity: function enumerateAll() constant returns(bytes32[] all_hf_names)
+func (_IHardforkRegistry *IHardforkRegistrySession) EnumerateAll() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.EnumerateAll(&_IHardforkRegistry.CallOpts)
 }
 
-// GetByBlockNo is a free data retrieval call binding the contract method 0x1658312e.
+// EnumerateAll is a free data retrieval call binding the contract method 0xbc393afb.
 //
-// Solidity: function getByBlockNo(uint256 block_no) constant returns(bytes32 name, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryCallerSession) GetByBlockNo(block_no *big.Int) (struct {
-	Name       [32]byte
-	BlockHash  [32]byte
-	SwFeatures *big.Int
-}, error) {
-	return _IHardforkRegistry.Contract.GetByBlockNo(&_IHardforkRegistry.CallOpts, block_no)
+// Solidity: function enumerateAll() constant returns(bytes32[] all_hf_names)
+func (_IHardforkRegistry *IHardforkRegistryCallerSession) EnumerateAll() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.EnumerateAll(&_IHardforkRegistry.CallOpts)
 }
 
-// GetByName is a free data retrieval call binding the contract method 0x8bc237f1.
+// EnumeratePending is a free data retrieval call binding the contract method 0xca89ad5f.
 //
-// Solidity: function getByName(bytes32 name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryCaller) GetByName(opts *bind.CallOpts, name [32]byte) (struct {
+// Solidity: function enumeratePending() constant returns(bytes32[] pending_hf_names)
+func (_IHardforkRegistry *IHardforkRegistryCaller) EnumeratePending(opts *bind.CallOpts) ([][32]byte, error) {
+	var (
+		ret0 = new([][32]byte)
+	)
+	out := ret0
+	err := _IHardforkRegistry.contract.Call(opts, out, "enumeratePending")
+	return *ret0, err
+}
+
+// EnumeratePending is a free data retrieval call binding the contract method 0xca89ad5f.
+//
+// Solidity: function enumeratePending() constant returns(bytes32[] pending_hf_names)
+func (_IHardforkRegistry *IHardforkRegistrySession) EnumeratePending() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.EnumeratePending(&_IHardforkRegistry.CallOpts)
+}
+
+// EnumeratePending is a free data retrieval call binding the contract method 0xca89ad5f.
+//
+// Solidity: function enumeratePending() constant returns(bytes32[] pending_hf_names)
+func (_IHardforkRegistry *IHardforkRegistryCallerSession) EnumeratePending() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.EnumeratePending(&_IHardforkRegistry.CallOpts)
+}
+
+// GetHardfork is a free data retrieval call binding the contract method 0x44d396ff.
+//
+// Solidity: function getHardfork(bytes32 _hardfork_name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryCaller) GetHardfork(opts *bind.CallOpts, _hardfork_name [32]byte) (struct {
 	BlockNo    *big.Int
 	BlockHash  [32]byte
 	SwFeatures *big.Int
@@ -252,30 +264,30 @@ func (_IHardforkRegistry *IHardforkRegistryCaller) GetByName(opts *bind.CallOpts
 		SwFeatures *big.Int
 	})
 	out := ret
-	err := _IHardforkRegistry.contract.Call(opts, out, "getByName", name)
+	err := _IHardforkRegistry.contract.Call(opts, out, "getHardfork", _hardfork_name)
 	return *ret, err
 }
 
-// GetByName is a free data retrieval call binding the contract method 0x8bc237f1.
+// GetHardfork is a free data retrieval call binding the contract method 0x44d396ff.
 //
-// Solidity: function getByName(bytes32 name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistrySession) GetByName(name [32]byte) (struct {
+// Solidity: function getHardfork(bytes32 _hardfork_name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistrySession) GetHardfork(_hardfork_name [32]byte) (struct {
 	BlockNo    *big.Int
 	BlockHash  [32]byte
 	SwFeatures *big.Int
 }, error) {
-	return _IHardforkRegistry.Contract.GetByName(&_IHardforkRegistry.CallOpts, name)
+	return _IHardforkRegistry.Contract.GetHardfork(&_IHardforkRegistry.CallOpts, _hardfork_name)
 }
 
-// GetByName is a free data retrieval call binding the contract method 0x8bc237f1.
+// GetHardfork is a free data retrieval call binding the contract method 0x44d396ff.
 //
-// Solidity: function getByName(bytes32 name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryCallerSession) GetByName(name [32]byte) (struct {
+// Solidity: function getHardfork(bytes32 _hardfork_name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryCallerSession) GetHardfork(_hardfork_name [32]byte) (struct {
 	BlockNo    *big.Int
 	BlockHash  [32]byte
 	SwFeatures *big.Int
 }, error) {
-	return _IHardforkRegistry.Contract.GetByName(&_IHardforkRegistry.CallOpts, name)
+	return _IHardforkRegistry.Contract.GetHardfork(&_IHardforkRegistry.CallOpts, _hardfork_name)
 }
 
 // IsActive is a free data retrieval call binding the contract method 0x5c36901c.
