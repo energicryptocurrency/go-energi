@@ -28,7 +28,7 @@ var (
 )
 
 // IHardforkRegistryABI is the input ABI used to generate the binding from.
-const IHardforkRegistryABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"Hardfork\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"active_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateAll\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"all_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumeratePending\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"pending_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_hardfork_name\",\"type\":\"bytes32\"}],\"name\":\"getHardfork\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"propose\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"}],\"name\":\"remove\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const IHardforkRegistryABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"Hardfork\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"active_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateAll\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"all_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumeratePending\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"pending_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_hardfork_name\",\"type\":\"bytes32\"}],\"name\":\"getHardfork\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"propose\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_hardfork_name\",\"type\":\"bytes32\"}],\"name\":\"remove\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
 
 // IHardforkRegistry is an auto generated Go binding around an Ethereum contract.
 type IHardforkRegistry struct {
@@ -337,25 +337,25 @@ func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Propose(block_no *
 	return _IHardforkRegistry.Contract.Propose(&_IHardforkRegistry.TransactOpts, block_no, name, block_hash, sw_features)
 }
 
-// Remove is a paid mutator transaction binding the contract method 0x4cc82215.
+// Remove is a paid mutator transaction binding the contract method 0x95bc2673.
 //
-// Solidity: function remove(uint256 block_no) returns()
-func (_IHardforkRegistry *IHardforkRegistryTransactor) Remove(opts *bind.TransactOpts, block_no *big.Int) (*types.Transaction, error) {
-	return _IHardforkRegistry.contract.Transact(opts, "remove", block_no)
+// Solidity: function remove(bytes32 _hardfork_name) returns()
+func (_IHardforkRegistry *IHardforkRegistryTransactor) Remove(opts *bind.TransactOpts, _hardfork_name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.contract.Transact(opts, "remove", _hardfork_name)
 }
 
-// Remove is a paid mutator transaction binding the contract method 0x4cc82215.
+// Remove is a paid mutator transaction binding the contract method 0x95bc2673.
 //
-// Solidity: function remove(uint256 block_no) returns()
-func (_IHardforkRegistry *IHardforkRegistrySession) Remove(block_no *big.Int) (*types.Transaction, error) {
-	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, block_no)
+// Solidity: function remove(bytes32 _hardfork_name) returns()
+func (_IHardforkRegistry *IHardforkRegistrySession) Remove(_hardfork_name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, _hardfork_name)
 }
 
-// Remove is a paid mutator transaction binding the contract method 0x4cc82215.
+// Remove is a paid mutator transaction binding the contract method 0x95bc2673.
 //
-// Solidity: function remove(uint256 block_no) returns()
-func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Remove(block_no *big.Int) (*types.Transaction, error) {
-	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, block_no)
+// Solidity: function remove(bytes32 _hardfork_name) returns()
+func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Remove(_hardfork_name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, _hardfork_name)
 }
 
 // IHardforkRegistryHardforkIterator is returned from FilterHardfork and is used to iterate over the raw logs and unpacked data for Hardfork events raised by the IHardforkRegistry contract.
@@ -427,15 +427,16 @@ func (it *IHardforkRegistryHardforkIterator) Close() error {
 
 // IHardforkRegistryHardfork represents a Hardfork event raised by the IHardforkRegistry contract.
 type IHardforkRegistryHardfork struct {
-	BlockNo   *big.Int
-	BlockHash [32]byte
-	Name      [32]byte
-	Raw       types.Log // Blockchain specific contextual infos
+	BlockNo    *big.Int
+	BlockHash  [32]byte
+	Name       [32]byte
+	SwFeatures *big.Int
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterHardfork is a free log retrieval operation binding the contract event 0x9e3eb3a1090f7e2eb48f596218f9322ec1584fad2673784a5cbd5f9e452f18b3.
+// FilterHardfork is a free log retrieval operation binding the contract event 0xb22930fde3f4a5bddcb906dc3248ab30f4549101ef99a59fbfbf6121d74c17c5.
 //
-// Solidity: event Hardfork(uint256 block_no, bytes32 block_hash, bytes32 name)
+// Solidity: event Hardfork(uint256 block_no, bytes32 block_hash, bytes32 name, uint256 sw_features)
 func (_IHardforkRegistry *IHardforkRegistryFilterer) FilterHardfork(opts *bind.FilterOpts) (*IHardforkRegistryHardforkIterator, error) {
 
 	logs, sub, err := _IHardforkRegistry.contract.FilterLogs(opts, "Hardfork")
@@ -445,9 +446,9 @@ func (_IHardforkRegistry *IHardforkRegistryFilterer) FilterHardfork(opts *bind.F
 	return &IHardforkRegistryHardforkIterator{contract: _IHardforkRegistry.contract, event: "Hardfork", logs: logs, sub: sub}, nil
 }
 
-// WatchHardfork is a free log subscription operation binding the contract event 0x9e3eb3a1090f7e2eb48f596218f9322ec1584fad2673784a5cbd5f9e452f18b3.
+// WatchHardfork is a free log subscription operation binding the contract event 0xb22930fde3f4a5bddcb906dc3248ab30f4549101ef99a59fbfbf6121d74c17c5.
 //
-// Solidity: event Hardfork(uint256 block_no, bytes32 block_hash, bytes32 name)
+// Solidity: event Hardfork(uint256 block_no, bytes32 block_hash, bytes32 name, uint256 sw_features)
 func (_IHardforkRegistry *IHardforkRegistryFilterer) WatchHardfork(opts *bind.WatchOpts, sink chan<- *IHardforkRegistryHardfork) (event.Subscription, error) {
 
 	logs, sub, err := _IHardforkRegistry.contract.WatchLogs(opts, "Hardfork")

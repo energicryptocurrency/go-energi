@@ -336,7 +336,7 @@ func (hf *HardforkRegistryAPI) GetHardfork(name string) (*HardforkInfo, error) {
 
 // DropHardfork drops any hardfork that is yet to be finalized.
 func (hf *HardforkRegistryAPI) DropHardfork(
-	blockNo *hexutil.Big,
+	name string,
 	password *string,
 ) (common.Hash, error) {
 	txHash := common.Hash{}
@@ -346,10 +346,10 @@ func (hf *HardforkRegistryAPI) DropHardfork(
 		return txHash, err
 	}
 
-	tx, err := registry.Remove(blockNo.ToInt())
+	tx, err := registry.Remove(energi_common.EncodeToString(name))
 	if err != nil {
-		return txHash, fmt.Errorf("Dropping the hardfork at block %v failed. Error: %v",
-			blockNo.String(), err)
+		return txHash, fmt.Errorf("Dropping the hardfork (%v) failed. Error: %v",
+			name, err)
 	}
 
 	if tx != nil {

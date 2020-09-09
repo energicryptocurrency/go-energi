@@ -557,10 +557,7 @@ web3._extend({
 			name: 'dropHardfork',
 			call: 'energi_dropHardfork',
 			params: 2,
-			inputFormatter: [
-				web3._extend.utils.fromDecimal,
-				null,
-			],
+			inputFormatter: [null, null],
 		}),
 		new web3._extend.Method({
 			name: 'isHardforkActive',
