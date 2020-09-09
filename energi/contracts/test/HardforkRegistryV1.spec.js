@@ -150,6 +150,7 @@ contract("HardforkRegistryV1", async accounts => {
                 block_no: bn.toString(10),
                 block_hash: b.hash,
                 name: hfn,
+                sw_features: hf_sw_feature.toString(),
             });
         });
 
@@ -170,13 +171,27 @@ contract("HardforkRegistryV1", async accounts => {
         it("should fail to propose if the hardfork has already been finalized", async () => {
             common.moveTime(web3, 1);
 
-            const block_no = hf_blocks[hf_blocks.length -1];
+            const block_no = hf_blocks[4];
+            const hfns = hf_names[4];
             const b = await web3.eth.getBlock('latest');
             try {
-                await s.proxy_hf.propose(block_no, b32("Ba Sing Se - Updated"), b.hash, hf_sw_feature);
+                await s.proxy_hf.propose(block_no, hfns, b.hash, hf_sw_feature);
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /hardfork changes not editable/);
+            }
+        });
+
+        it("should fail to propose if duplicate block number is used", async () => {
+            common.moveTime(web3, 1);
+
+            const block_no = hf_blocks[hf_blocks.length -1];
+            const b = await web3.eth.getBlock('latest');
+            try {
+                await s.proxy_hf.propose(block_no, b32("Ba Sing Se - updated"), b.hash, hf_sw_feature);
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Duplicate block numbers for unique hardforks are not allowed/);
             }
         });
 
@@ -243,6 +258,7 @@ contract("HardforkRegistryV1", async accounts => {
                 block_no: bn.toString(),
                 block_hash: b.hash,
                 name: hfn,
+                sw_features: hf_sw_feature.toString(),
             });
         });
 
@@ -303,16 +319,25 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should fail to remove on invalid HF signer", async () => {
             try {
-                await s.proxy_hf.remove(hf_blocks[2], {from: s.fake.address});
+                await s.proxy_hf.remove(hf_names[2], {from: s.fake.address});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Invalid hardfork signer caller/);
             }
         });
 
+        it("should fail to remove on an invalid HF names", async () => {
+            try {
+                await s.proxy_hf.remove(b32("invalid-names"));
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Hardfork name is unknown/);
+            }
+        });
+
         it("should fail to remove a finalized hardfork information", async () => {
             try {
-                await s.proxy_hf.remove(hf_blocks[1]);
+                await s.proxy_hf.remove(hf_names[1]);
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Finalized hardfork cannot be deleted/);
@@ -334,7 +359,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should remove the unfinalized hardfork information completely", async () => {
-            await s.proxy_hf.remove(hf_blocks[3]);
+            await s.proxy_hf.remove(hf_names[3]);
 
             // Confirm that the hardfork wasn't removed at all.
             let b = await s.proxy_hf.getHardfork(hf_names[3]);
@@ -394,7 +419,7 @@ contract("HardforkRegistryV1", async accounts => {
 
             it("should refuse to delete a hardfork directly", async () => {
                 try {
-                    await s.storage.deleteHardfork(hf_names[0], hf_blocks[0]);
+                    await s.storage.deleteHardfork(hf_names[0]);
                     assert.fail('It must fail');
                 } catch (e) {
                     assert.match(e.message, /Not owner/);

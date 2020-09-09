@@ -27,13 +27,14 @@ interface IHardforkRegistry {
     event Hardfork (
         uint256 block_no,
         bytes32 block_hash,
-        bytes32 name
+        bytes32 name,
+        uint256 sw_features
     );
 
     function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features) external;
     function getHardfork(bytes32 _hardfork_name) external view returns(uint256 block_no,
         bytes32 block_hash, uint256 sw_features);
-    function remove(uint256 block_no) external;
+    function remove(bytes32 _hardfork_name) external;
     function enumerateAll() external view returns(bytes32[] memory all_hf_names);
     function enumeratePending() external view returns(bytes32[] memory pending_hf_names);
     function enumerateActive() external view returns(bytes32[] memory active_hf_names);
