@@ -46,6 +46,8 @@ contract MasternodeRegistryV2_2 is
     {
         migration_complete = false;
         inactive_count = 0;
+        current_masternode = address(0);
+        current_payouts = 0;
     }
 
     /// @notice proof of service invalidation
@@ -67,8 +69,9 @@ contract MasternodeRegistryV2_2 is
 
         // Migration data
         mn_announced = oldinstance.mn_announced();
-        //current_masternode = oldinstance.current_masternode();
-        current_payouts = 0; //oldinstance.current_payouts();
+        if (current_masternode == oldinstance.current_masternode()) {
+            current_payouts = oldinstance.current_payouts();
+        }
 
         // Other data
         mn_ever_collateral = oldinstance.mn_ever_collateral();
@@ -91,7 +94,6 @@ contract MasternodeRegistryV2_2 is
         MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(current_mnreg_impl));
         mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length;
-        bool set_current = false;
         require(currentlength < mn_active, "migration already complete");
 
         for (uint i = currentlength; i < mn_active; ++i) {
@@ -104,9 +106,8 @@ contract MasternodeRegistryV2_2 is
             if (!old_registry.isActive(mn)) {
                 inactive_count++;
                 continue;
-            } else if (!set_current) {
+            } else if (current_masternode == address(0)) {
                 current_masternode = mn;
-                set_current = true;
             }
 
             Status memory status;
