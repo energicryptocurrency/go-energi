@@ -22,15 +22,15 @@ import {
     MasternodeRegistryV2
 } from "./MasternodeRegistryV2.sol";
 
-/// @notice MasternodeRegistryV2_1 is a mostly trivial update to MasternodeRegistryV2
-/// @dev MasternodeRegistryV2_1 disables the proof of service invalidations due to a chain-split vulnerability
-contract MasternodeRegistryV2_1 is
+/// @notice MasternodeRegistryV2_2 is a mostly trivial update to MasternodeRegistryV2
+/// @dev MasternodeRegistryV2_2 disables the proof of service invalidations due to a chain-split vulnerability
+contract MasternodeRegistryV2_2 is
     MasternodeRegistryV2
 {
     bool migration_complete;
     uint inactive_count;
 
-    /// @notice construct a new MasternodeRegistryV2_1
+    /// @notice construct a new MasternodeRegistryV2_2
     /// @param _proxy The MasternodeRegistry proxy address
     /// @param _token_proxy The Masternode Token (MNRG) proxy address
     /// @param _treasury_proxy The Treasury proxy address
