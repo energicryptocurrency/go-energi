@@ -67,8 +67,8 @@ contract MasternodeRegistryV2_2 is
 
         // Migration data
         mn_announced = oldinstance.mn_announced();
-        current_masternode = oldinstance.current_masternode();
-        current_payouts = oldinstance.current_payouts();
+        //current_masternode = oldinstance.current_masternode();
+        current_payouts = 0; //oldinstance.current_payouts();
 
         // Other data
         mn_ever_collateral = oldinstance.mn_ever_collateral();
@@ -91,6 +91,7 @@ contract MasternodeRegistryV2_2 is
         MasternodeRegistryV2 old_registry = MasternodeRegistryV2(address(current_mnreg_impl));
         mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length;
+        bool set_current = false;
         require(currentlength < mn_active, "migration already complete");
 
         for (uint i = currentlength; i < mn_active; ++i) {
@@ -103,6 +104,9 @@ contract MasternodeRegistryV2_2 is
             if (!old_registry.isActive(mn)) {
                 inactive_count++;
                 continue;
+            } else if (!set_current) {
+                current_masternode = mn;
+                set_current = true;
             }
 
             Status memory status;
@@ -111,9 +115,9 @@ contract MasternodeRegistryV2_2 is
                 status.next_heartbeat,
                 status.inactive_since,
                 status.validator_index,
-                , // status.invalidations not copied (not relevant to mn registry v2.1)
+                , // status.invalidations not copied (not relevant to mn registry v2.2)
                 status.seq_payouts,
-                // status.last_vote_epoch not copied (not relevant to mn registry v2.1)
+                // status.last_vote_epoch not copied (not relevant to mn registry v2.2)
             ) = old_registry.mn_status(mn);
 
             validator_list.push(mn);
