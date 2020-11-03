@@ -103,7 +103,7 @@ contract MasternodeRegistryV2_2 is
             address mn = old_registry.validator_list(i);
 
             // skip inactive masternodes
-            if (!old_registry.isActive(mn)) {
+            if (!old_registry.isActive(mn) || old_registry.canHeartbeat(mn)) {
                 inactive_count++;
                 continue;
             } else if (current_masternode == address(0)) {
