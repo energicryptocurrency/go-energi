@@ -126,7 +126,7 @@ contract MasternodeRegistryV2_2 is
         }
 
         if (validator_list.length >= (mn_active - inactive_count)) {
-            mn_active = validator_list.length();
+            mn_active = validator_list.length;
             migration_complete = true;
         }
     }
