@@ -49,8 +49,6 @@ contract MasternodeRegistryV2_2 is
     {
         migration_complete = false;
         migration_inactive_count = 0;
-        migration_progress = 0;
-        migration_mn_active = 0;
         current_masternode = address(0);
         current_payouts = 0;
     }
