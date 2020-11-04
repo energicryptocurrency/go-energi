@@ -115,12 +115,13 @@ contract MasternodeRegistryV2_2 is
                 status.sw_features,
                 status.next_heartbeat,
                 status.inactive_since,
-                status.validator_index,
+                , // status.validator_index is reset when adding to the list
                 , // status.invalidations not copied (not relevant to mn registry v2.2)
                 status.seq_payouts,
                 // status.last_vote_epoch not copied (not relevant to mn registry v2.2)
             ) = old_registry.mn_status(mn);
 
+            status.validator_index = validator_list.length;
             validator_list.push(mn);
             mn_status[mn] = status;
         }
