@@ -61,6 +61,7 @@ contract MasternodeRegistryV2_2 is
     /// @dev see migrateStatusPartial() - masternode status must be migrated before governance upgrade!
     /// @param _oldImpl the previous masternode registry being migrated
     function _migrate(IGovernedContract _oldImpl) internal {
+        require(migration_complete, "cannot upgrade before migration");
         // Dispose
         v1storage.kill();
 
