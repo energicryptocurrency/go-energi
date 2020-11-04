@@ -19,6 +19,8 @@ pragma solidity 0.5.16;
 import {
     IGovernedProxy,
     IGovernedContract,
+    IBlockReward,
+    StorageMasternodeRegistryV1,
     MasternodeRegistryV2
 } from "./MasternodeRegistryV2.sol";
 
@@ -138,6 +140,78 @@ contract MasternodeRegistryV2_2 is
     /// @param _newImpl the new masternode registry that is replacing this one
     function _destroy(IGovernedContract _newImpl) internal {
         v1storage.setOwner(_newImpl);
+    }
+
+    /// @notice the reward() function from IBlockReward is called as part of the block reward loop to pay the masternode
+    function reward() external payable noReentry {
+        // NOTE: ensure to move of remaining from the previous times to Treasury
+        //---
+        uint diff = address(this).balance - msg.value;
+
+        if (int(diff) > 0) {
+            IBlockReward treasury = IBlockReward(address(treasury_proxy.impl()));
+            treasury.reward.value(diff)();
+        }
+
+        //---
+        // SECURITY: do processing only when reward is exactly as expected
+        if (msg.value == REWARD_MASTERNODE_V1) {
+            // SECURITY: this check is essential against Masternode skip attacks!
+            require(last_block_number < block.number, "Call outside of governance!");
+            last_block_number = block.number;
+
+            // Safety checks
+            assert(msg.value == address(this).balance);
+            uint fractions = payments_per_block;
+
+            for (uint i = fractions; i > 0; --i) {
+                assert(gasleft() > GAS_RESERVE);
+
+                // solium-disable-next-line no-empty-blocks
+                while ((gasleft() > GAS_RESERVE) && !_reward()) {}
+            }
+        }
+    }
+
+    /// @notice For each payment in a block (payments_per_block) this function is called to pay the next eligible masternode
+    function _reward() internal returns(bool) {
+        // skip when there's no masternodes
+        if (current_masternode == address(0)) {
+            return true;
+        }
+
+        // get the status of the current masternode
+        StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, current_masternode);
+
+        // move on to the next masternode if we are done paying
+        if (current_payouts >= mn_status[current_masternode].seq_payouts) {
+            current_masternode = mninfo.next;
+            current_payouts = 0;
+            mninfo = _mnInfo(v1storage, current_masternode);
+        }
+
+        bool success = false;
+
+        // pay valid masternodes
+        ValidationStatus validation = _checkStatus(mn_status[current_masternode], mninfo);
+        if (validation == ValidationStatus.MNActive) {
+            uint reward_payment = REWARD_MASTERNODE_V1 / payments_per_block;
+            success = mninfo.owner.send(reward_payment);
+            current_payouts++;
+        // denounce invalid masternodes if they have a collateral issue or have been around too long
+        } else if ((validation == ValidationStatus.MNCollaterIssue) || ((block.timestamp - mn_status[current_masternode].inactive_since) > cleanup_period)) {
+            _denounce(current_masternode, mninfo.owner);
+        // deactivate invalid masternodes
+        } else if (mn_status[current_masternode].seq_payouts > 0) {
+            mn_status[current_masternode].seq_payouts = 0;
+            mn_status[current_masternode].inactive_since = block.timestamp;
+            _deactive_common(current_masternode, mninfo.collateral);
+            current_masternode = mninfo.next;
+            current_payouts = 0;
+            emit Deactivated(current_masternode);
+        }
+
+        return success;
     }
 
     /// @notice fallback function not allowed
