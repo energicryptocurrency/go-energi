@@ -130,11 +130,6 @@ contract MasternodeRegistryV2_3 is
         uint initial_ever_collateral = _config[uint(Config.InitialEverCollateral)];
         mn_ever_collateral = initial_ever_collateral;
         require(initial_ever_collateral >= MN_COLLATERAL_V2_MIN, "Initial collateral");
-
-        migration_complete = false;
-        inactive_count = 0;
-        current_masternode = address(0);
-        current_payouts = 0;
     }
 
     // IMasternodeRegistry
@@ -734,7 +729,6 @@ contract MasternodeRegistryV2_3 is
     function _destroy(IGovernedContract _newImpl) internal {
         v1storage.setOwner(_newImpl);
     }
-
 
     /// @notice the reward() function from IBlockReward is called as part of the block reward loop to pay the masternode
     function reward() external payable noReentry {
