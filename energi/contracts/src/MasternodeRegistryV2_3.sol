@@ -31,11 +31,7 @@ import { IMasternodeToken } from "./IMasternodeToken.sol";
 import { ITreasury } from "./ITreasury.sol";
 import { NonReentrant } from "./NonReentrant.sol";
 import { StorageBase }  from "./StorageBase.sol";
-import {
-    MasternodeRegistryV1,
-    StorageMasternodeRegistryV1
-} from "./MasternodeRegistryV1.sol";
-import { MasternodeRegistryV2_2 } from "./MasternodeRegistryV2_2.sol";
+import { StorageMasternodeRegistryV1 } from "./MasternodeRegistryV1.sol";
 
 /**
  * MN-2: Genesis hardcoded version of MasternodeRegistry
@@ -655,7 +651,7 @@ contract MasternodeRegistryV2_3 is
         // Dispose
         v1storage.kill();
 
-        MasternodeRegistryV2_2 oldinstance = MasternodeRegistryV2_2(address(_oldImpl));
+        MasternodeRegistryV2_3 oldinstance = MasternodeRegistryV2_3(address(_oldImpl));
         v1storage = oldinstance.v1storage();
 
         // Migration data
@@ -683,7 +679,7 @@ contract MasternodeRegistryV2_3 is
         IGovernedContract current_mnreg_impl = IGovernedProxy(address(uint160(proxy))).impl();
         require(address(current_mnreg_impl) != address(this), "cannot migrate from self");
 
-        MasternodeRegistryV2_2 old_registry = MasternodeRegistryV2_2(address(current_mnreg_impl));
+        MasternodeRegistryV2_3 old_registry = MasternodeRegistryV2_3(address(current_mnreg_impl));
         mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length + inactive_count;
         require(currentlength < mn_active, "migration already complete");
