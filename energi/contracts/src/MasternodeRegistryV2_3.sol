@@ -774,11 +774,11 @@ contract MasternodeRegistryV2_3 is
             current_masternode = mninfo.next;
             current_payouts = 0;
             mninfo = _mnInfo(v1storage, current_masternode);
+            mns = mn_status[current_masternode];
         }
 
-        bool success = false;
-
         // pay valid masternodes
+        bool success = false;
         ValidationStatus validation = _checkStatus(mns, mninfo);
         if (validation == ValidationStatus.MNActive) {
             uint reward_payment = REWARD_MASTERNODE_V1 / payments_per_block;
