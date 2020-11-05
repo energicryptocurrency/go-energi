@@ -655,7 +655,6 @@ contract MasternodeRegistryV2_3 is
         v1storage = oldinstance.v1storage();
 
         // Migration data
-        current_masternode = oldinstance.current_masternode();
         mn_announced = oldinstance.mn_announced();
         if (current_masternode == oldinstance.current_masternode()) {
             current_payouts = oldinstance.current_payouts();
@@ -680,6 +679,8 @@ contract MasternodeRegistryV2_3 is
         require(address(current_mnreg_impl) != address(this), "cannot migrate from self");
 
         MasternodeRegistryV2_3 old_registry = MasternodeRegistryV2_3(address(current_mnreg_impl));
+
+        current_masternode = oldinstance.current_masternode();
         mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length + inactive_count;
         require(currentlength < mn_active, "migration already complete");
@@ -694,8 +695,6 @@ contract MasternodeRegistryV2_3 is
             if (!old_registry.isActive(mn) || old_registry.canHeartbeat(mn)) {
                 inactive_count++;
                 continue;
-            } else if (current_masternode == address(0)) {
-                current_masternode = mn;
             }
 
             Status memory status;
