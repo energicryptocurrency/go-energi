@@ -681,7 +681,7 @@ contract MasternodeRegistryV2_3 is
 
         MasternodeRegistryV2_3 old_registry = MasternodeRegistryV2_3(address(current_mnreg_impl));
 
-        current_masternode = oldinstance.current_masternode();
+        current_masternode = old_registry.current_masternode();
         mn_active = old_registry.mn_active();
         uint currentlength = validator_list.length + inactive_count;
         require(currentlength < mn_active, "migration already complete");
