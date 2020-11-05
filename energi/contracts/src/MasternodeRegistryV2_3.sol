@@ -767,9 +767,10 @@ contract MasternodeRegistryV2_3 is
 
         // get the status of the current masternode
         StorageMasternodeRegistryV1.Info memory mninfo = _mnInfo(v1storage, current_masternode);
+        Status storage mns = mn_status[current_masternode];
 
         // move on to the next masternode if we are done paying
-        if (current_payouts >= mn_status[current_masternode].seq_payouts) {
+        if (current_payouts >= mns.seq_payouts) {
             current_masternode = mninfo.next;
             current_payouts = 0;
             mninfo = _mnInfo(v1storage, current_masternode);
@@ -778,18 +779,18 @@ contract MasternodeRegistryV2_3 is
         bool success = false;
 
         // pay valid masternodes
-        ValidationStatus validation = _checkStatus(mn_status[current_masternode], mninfo);
+        ValidationStatus validation = _checkStatus(mns, mninfo);
         if (validation == ValidationStatus.MNActive) {
             uint reward_payment = REWARD_MASTERNODE_V1 / payments_per_block;
             success = mninfo.owner.send(reward_payment);
             current_payouts++;
         // denounce invalid masternodes if they have a collateral issue or have been around too long
-        } else if ((validation == ValidationStatus.MNCollaterIssue) || ((block.timestamp - mn_status[current_masternode].inactive_since) > cleanup_period)) {
+        } else if ((validation == ValidationStatus.MNCollaterIssue) || ((block.timestamp - mns.inactive_since) > cleanup_period)) {
             _denounce(current_masternode, mninfo.owner);
         // deactivate invalid masternodes
-        } else if (mn_status[current_masternode].seq_payouts > 0) {
-            mn_status[current_masternode].seq_payouts = 0;
-            mn_status[current_masternode].inactive_since = block.timestamp;
+        } else if (mns.seq_payouts > 0) {
+            mns.seq_payouts = 0;
+            mns.inactive_since = block.timestamp;
             _deactive_common(current_masternode, mninfo.collateral);
             current_masternode = mninfo.next;
             current_payouts = 0;
