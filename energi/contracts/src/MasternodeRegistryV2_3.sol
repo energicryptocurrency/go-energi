@@ -659,6 +659,7 @@ contract MasternodeRegistryV2_3 is
         v1storage = oldinstance.v1storage();
 
         // Migration data
+        current_masternode = oldinstance.current_masternode();
         mn_announced = oldinstance.mn_announced();
         if (current_masternode == oldinstance.current_masternode()) {
             current_payouts = oldinstance.current_payouts();
@@ -797,6 +798,9 @@ contract MasternodeRegistryV2_3 is
             current_masternode = mninfo.next;
             current_payouts = 0;
             emit Deactivated(current_masternode);
+        } else {
+            current_masternode = mninfo.next;
+            current_payouts = 0;
         }
 
         return success;
