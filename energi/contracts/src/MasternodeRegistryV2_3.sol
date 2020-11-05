@@ -648,6 +648,7 @@ contract MasternodeRegistryV2_3 is
     /// @param _oldImpl the previous masternode registry being migrated
     function _migrate(IGovernedContract _oldImpl) internal {
         require(migration_complete, "cannot upgrade before migration");
+        require(validator_list.length > 0, "validator list empty");
         // Dispose
         v1storage.kill();
 
