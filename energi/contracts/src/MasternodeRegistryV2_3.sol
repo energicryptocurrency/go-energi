@@ -791,9 +791,9 @@ contract MasternodeRegistryV2_3 is
             mns.seq_payouts = 0;
             mns.inactive_since = block.timestamp;
             _deactive_common(current_masternode, mninfo.collateral);
+            emit Deactivated(current_masternode);
             current_masternode = mninfo.next;
             current_payouts = 0;
-            emit Deactivated(current_masternode);
         } else {
             current_masternode = mninfo.next;
             current_payouts = 0;
