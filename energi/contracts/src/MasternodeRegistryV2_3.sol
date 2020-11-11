@@ -751,9 +751,10 @@ contract MasternodeRegistryV2_3 is
 
             for (uint i = fractions; i > 0; --i) {
                 assert(gasleft() > GAS_RESERVE);
+                uint attempts = 0;
 
                 // solium-disable-next-line no-empty-blocks
-                while ((gasleft() > GAS_RESERVE) && !_reward()) {}
+                while ((gasleft() > GAS_RESERVE) && (attempts++ < 10) && !_reward()) {}
             }
         }
     }
