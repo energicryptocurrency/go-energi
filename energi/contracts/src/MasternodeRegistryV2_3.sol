@@ -748,13 +748,14 @@ contract MasternodeRegistryV2_3 is
             // Safety checks
             assert(msg.value == address(this).balance);
             uint fractions = payments_per_block;
+            uint total_attempts = 0;
 
             for (uint i = fractions; i > 0; --i) {
                 assert(gasleft() > GAS_RESERVE);
                 uint attempts = 0;
 
                 // solium-disable-next-line no-empty-blocks
-                while ((gasleft() > GAS_RESERVE) && (attempts++ < 10) && !_reward()) {}
+                while ((gasleft() > GAS_RESERVE) && (total_attempts++ < 80) && (attempts++ < 10) && !_reward()) {}
             }
         }
     }
