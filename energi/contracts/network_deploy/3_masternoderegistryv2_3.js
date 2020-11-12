@@ -81,6 +81,7 @@ module.exports = async function(deployer, network, accounts) {
                 // expected revert
                 if ((e.name === 'StatusError') && (e.reason === 'migration already done')) {
                     console.log("   > migrateStatusPartial(): complete");
+                    console.log();
                     break;
                 } else {
                     console.dir(e);
