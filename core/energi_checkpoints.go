@@ -224,16 +224,15 @@ func (cm *checkpointManager) addCheckpoint(
 			log.Warn("Checkpoint: invalid CPP signature", "num", cp.Number, "hash", cp.Hash)
 			return errors.New("invalid CPP signature")
 		}
-		//only received(non-hardcoded) checkpoints will be stored in validated map
-		cm.validated[cp.Number] = validCheckpoint{
-			Checkpoint: cp,
-			signatures: append([]CheckpointSignature{}, sigs...),
-		}
 
-		log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
-	} else {
-		log.Info("New Local checkpoint processed ", "checkpoint", cp, "local", local)
 	}
+	//only received(non-hardcoded) checkpoints will be stored in validated map
+	cm.validated[cp.Number] = validCheckpoint{
+		Checkpoint: cp,
+		signatures: append([]CheckpointSignature{}, sigs...),
+	}
+
+	log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
 
 	err = chain.EnforceCheckpoint(cp)
 
