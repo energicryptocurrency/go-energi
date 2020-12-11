@@ -55,13 +55,13 @@ func (e *Energi) checkDoS(
 
 	// POS-8: allow old fork only if current head is not fresh enough
 	//---
-	if parent.Time < old_fork_threshold {
-		current := chain.CurrentHeader()
-
-		if current.Time > old_fork_threshold {
-			return eth_consensus.ErrDoSThrottle
-		}
-	}
+	// if parent.Time < old_fork_threshold {
+	// 	current := chain.CurrentHeader()
+	//
+	// 	if current.Time > old_fork_threshold {
+	// 		return eth_consensus.ErrDoSThrottle
+	// 	}
+	// }
 
 	// POS-9: stake throttling
 	//---
