@@ -27,35 +27,74 @@ import { ICheckpoint } from "./ICheckpoint.sol";
 import { StorageBase }  from "./StorageBase.sol";
 
 /**
- * Permanent storage of Checkpoint Registry V1 data.
+ * Permanent storage of Checkpoint Registry V3 data.
  */
-// solium-disable-next-line no-empty-blocks
-contract StorageCheckpointRegistryV2 is
-    StorageBase
-{
-    // NOTE: ABIEncoderV2 is not acceptable at the moment of development!
+contract StorageCheckpointRegistryV2 is StorageBase {
 
-    ICheckpoint[] public checkpoints;
+    //main storage data structure for queue implementation
+    mapping(uint => ICheckpoint) public checkpoints;
+    //starting index(key) for checkpoints
+    uint startingKeyIndex;
+    //number of checkpoints currently stored
+    uint size;
+    //max number of stored checkpoints
+    uint constant maxSize = 10;
 
-    function add(ICheckpoint cp)
-        external
-        requireOwner
-    {
-        checkpoints.push(cp);
-    }
 
-    function listCheckpoints()
-        external view
-        returns(ICheckpoint[] memory res)
-    {
-        uint len = checkpoints.length;
-        res = new ICheckpoint[](len);
-        for (uint i = len; i-- > 0;) {
-            res[i] = checkpoints[i];
+
+    //push new checkpoint
+    function add(ICheckpoint cp) external requireOwner {
+        //insert into empty map
+        if (size == 0) {
+          checkpoints[startingKeyIndex] = cp;
+          size = 1;
+          return;
+        }
+
+        //if queue is full and needs first element to be deleted
+        if (size == maxSize)  {
+          delete checkpoints[startingKeyIndex];
+          checkpoints[startingKeyIndex + size] = cp;
+          startingKeyIndex++;
+        } else {
+          checkpoints[startingKeyIndex + size] = cp;
+          size++;
         }
     }
 
-    function remove(ICheckpoint cp) external  requireOwner {
 
+    //for removal we find the checkpoint and move the right part of the queue to the left
+    function remove(ICheckpoint cp) external  requireOwner returns(bool found) {
+      uint foundCpIndex;
+      found = false;
+      //find the cp in map
+      for (foundCpIndex = startingKeyIndex; foundCpIndex < startingKeyIndex + size; foundCpIndex++) {
+          if (checkpoints[foundCpIndex] == cp) {
+            found = true;
+            break;
+          }
+      }
+
+      //if we found the checkpoint
+      if (found == true) {
+        //shift every element after index to the left by one
+        for (uint i = foundCpIndex; i < startingKeyIndex + size - 1; i++) {
+            checkpoints[i] = checkpoints[i + 1];
+        }
+        //remove last element
+        delete checkpoints[startingKeyIndex + size - 1];
+        size--;
+      }
+      return found;
     }
+
+
+    //return checkpoinst  [startingKeyIndex, startingKeyIndex+size) from map
+    function listCheckpoints() external view returns(ICheckpoint[] memory res) {
+        res = new ICheckpoint[](size);
+        for (uint i = startingKeyIndex; i < startingKeyIndex + size; i++) {
+            res[i - startingKeyIndex] = checkpoints[i];
+        }
+    }
+
 }
