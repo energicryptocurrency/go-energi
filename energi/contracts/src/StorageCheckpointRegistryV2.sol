@@ -34,10 +34,10 @@ contract StorageCheckpointRegistryV2 is StorageBase {
     //main storage data structure for queue implementation
     mapping(uint => ICheckpoint) public checkpoints;
     //starting index(key) for checkpoints
-    uint startingKeyIndex;
+    uint128 startingKeyIndex;
     //number of checkpoints currently stored
-    uint size;
-    //max number of stored checkpoints
+    uint128 size;
+    //number of stored checkpoints' limit
     uint constant maxSize = 10;
 
 
