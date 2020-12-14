@@ -24,8 +24,8 @@ pragma experimental ABIEncoderV2;
 
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
 import { IGovernedProxy } from "./IGovernedProxy.sol";
-import { ICheckpointRegistryV2 } from "./ICheckpointRegistryV2.sol";
 import { ICheckpoint } from "./ICheckpoint.sol";
+import { ICheckpointRegistryV2 } from "./ICheckpointRegistryV2.sol";
 import { StorageCheckpointRegistryV2 } from "./StorageCheckpointRegistryV2.sol";
 
 import {
