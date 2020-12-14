@@ -69,10 +69,14 @@ contract StorageCheckpointRegistryV2 is StorageBase {
       found = false;
       //find the cp in map
       for (foundCpIndex = startingKeyIndex; foundCpIndex < startingKeyIndex + size; foundCpIndex++) {
-          if (checkpoints[foundCpIndex] == cp) {
+          (uint number_1, bytes32 hash_1,  ) = checkpoints[foundCpIndex].info();
+          (uint number_2, bytes32 hash_2,  ) = cp.info();
+
+          if (number_1 == number_2 && hash_1 == hash_2) {
             found = true;
             break;
           }
+
       }
 
       //if we found the checkpoint

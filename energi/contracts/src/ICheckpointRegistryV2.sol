@@ -23,24 +23,12 @@ pragma solidity 0.5.16;
 pragma experimental ABIEncoderV2;
 
 import { ICheckpoint } from "./ICheckpoint.sol";
-
+import { ICheckpointRegistry } from "./ICheckpointRegistry.sol";
 /**
  * Genesis version of CheckpointRegistry interface.
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-interface ICheckpointRegistryV2 {
-    event Checkpoint(
-        uint indexed number,
-        bytes32 hash,
-        ICheckpoint checkpoint
-    );
-
-    function CPP_signer() external view returns(address);
-
-    function propose(uint number, bytes32 hash, bytes calldata signature) external returns(ICheckpoint);
+contract ICheckpointRegistryV2 is ICheckpointRegistry {
     function remove(uint number, bytes32 hash, bytes calldata signature) external returns(bool deleted);
-    function checkpoints() external view returns(ICheckpoint[] memory);
-    function signatureBase(uint number, bytes32 hash) external view returns(bytes32 sigbase);
-    function sign(ICheckpoint checkpoint, bytes calldata signature) external;
 }

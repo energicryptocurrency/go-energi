@@ -96,16 +96,8 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
           );
       }
 
-      function checkpoints() external view returns(ICheckpoint[] memory) {
-          return v2storage.listCheckpoints();
-      }
-
-      function sign(ICheckpoint checkpoint, bytes calldata signature) external {
-          checkpoint.sign(signature);
-      }
-
       // Remove checkpoint from storage (always succeeds)
-      function remove(uint number, bytes32 hash, bytes calldata signature) external {
+      function remove(uint number, bytes32 hash, bytes calldata signature) external returns(bool deleted) {
           // Allow to remove checkpoint by any caller as far as signature is correct.
           //require(_callerAddress() == CPP_signer, "Invalid caller");
 
@@ -116,8 +108,18 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
           require(ecrecover(sigbase, uint8(signature[64]), r, s) == CPP_signer, "Invalid signer");
 
           //remove checkpoint from storage
-          v2storage.remove(new CheckpointV2(mnregistry_proxy, number, hash, sigbase, signature));
+          deleted = v2storage.remove(new CheckpointV2(mnregistry_proxy, number, hash, sigbase, signature));
       }
+
+      function checkpoints() external view returns(ICheckpoint[] memory) {
+          return v2storage.listCheckpoints();
+      }
+
+      function sign(ICheckpoint checkpoint, bytes calldata signature) external {
+          checkpoint.sign(signature);
+      }
+
+
 
 
       // Safety
