@@ -21,6 +21,9 @@ const BlacklistRegistryV1 = artifacts.require('BlacklistRegistryV1');
 const BlockRewardV1 = artifacts.require('BlockRewardV1');
 const CheckpointRegistryV1 = artifacts.require('CheckpointRegistryV1');
 const CheckpointRegistryV2 = artifacts.require('CheckpointRegistryV2');
+const CheckpointRegistryV3 = artifacts.require('CheckpointRegistryV3');
+const StorageCheckpointRegistryV2 = artifacts.require('StorageCheckpointRegistryV2');
+
 const Gen2Migration = artifacts.require('Gen2Migration');
 //const GenericProposalV1 = artifacts.require('GenericProposalV1');
 const GovernedProxy = artifacts.require('GovernedProxy');
@@ -78,6 +81,10 @@ module.exports = async (deployer, _, accounts) => {
         await deploy_common(BackboneRewardV1, backbone_proxy, accounts[5]);
         await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(CheckpointRegistryV2, undefined, mn_registry_proxy, common.cpp_signer);
+        await deploy_common(CheckpointRegistryV3, undefined, mn_registry_proxy, common.cpp_signer);
+        await deploy_common(StorageCheckpointRegistryV2, undefined, mn_registry_proxy, common.cpp_signer);
+
+
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeTokenV2, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,

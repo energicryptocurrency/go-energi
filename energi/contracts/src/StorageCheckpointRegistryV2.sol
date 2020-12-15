@@ -44,13 +44,6 @@ contract StorageCheckpointRegistryV2 is StorageBase {
 
     //push new checkpoint
     function add(ICheckpoint cp) external requireOwner {
-        //insert into empty map
-        if (size == 0) {
-          checkpoints[startingKeyIndex] = cp;
-          size = 1;
-          return;
-        }
-
         //if queue is full and needs first element to be deleted
         if (size == maxSize)  {
           delete checkpoints[startingKeyIndex];
@@ -68,10 +61,9 @@ contract StorageCheckpointRegistryV2 is StorageBase {
       uint foundCpIndex;
       found = false;
       //find the cp in map
+      (uint number_1, bytes32 hash_1,  ) = cp.info();
       for (foundCpIndex = startingKeyIndex; foundCpIndex < startingKeyIndex + size; foundCpIndex++) {
-          (uint number_1, bytes32 hash_1,  ) = checkpoints[foundCpIndex].info();
-          (uint number_2, bytes32 hash_2,  ) = cp.info();
-
+          (uint number_2, bytes32 hash_2,  ) = checkpoints[foundCpIndex].info();
           if (number_1 == number_2 && hash_1 == hash_2) {
             found = true;
             break;

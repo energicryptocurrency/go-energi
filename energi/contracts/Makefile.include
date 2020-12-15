@@ -44,6 +44,7 @@ ENERGI_CONTRACTS := \
   BlacklistRegistryV1.sol \
   BlockRewardV1.sol \
   CheckpointRegistryV2.sol \
+  CheckpointRegistryV3.sol
   DummyAccount.sol \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
@@ -63,7 +64,8 @@ ENERGI_CONTRACTS := \
   MasternodeRegistryV2.sol \
   SporkRegistryV2.sol \
   StakerRewardV1.sol \
-  TreasuryV1.sol
+  TreasuryV1.sol \
+  StorageCheckpointRegistryV2.sol
 
 ENERGI_CONTRACTS_SRC := $(addprefix $(ENERGI_CONTRACT_SRC_DIR)/,$(ENERGI_CONTRACTS))
 

@@ -27,6 +27,8 @@ const contracts = [
     'SporkRegistryV1',
     'StakerRewardV1',
     'TreasuryV1',
+    'CheckpointRegistryV3',
+    'StorageCheckpointRegistryV2',
 ];
 const targets = [];
 
@@ -56,7 +58,7 @@ module.exports = {
         development: {
             host: "127.0.0.1",
             port: 7545,
-            network_id: "*" // Match any network id
+            network_id: "5777" // Match any network id
         }
     },
     compilers: {
