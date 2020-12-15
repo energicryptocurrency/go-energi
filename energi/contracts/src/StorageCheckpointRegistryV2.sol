@@ -55,6 +55,17 @@ contract StorageCheckpointRegistryV2 is StorageBase {
         }
     }
 
+    //pop first element
+    function pop() external requireOwner {
+      //nothing to pop
+      if (size == 0) return;
+
+      //remove last element
+      delete checkpoints[startingKeyIndex];
+      startingKeyIndex++;
+      size--;
+    }
+
 
     //for removal we find the checkpoint and move the right part of the queue to the left
     function remove(ICheckpoint cp) external  requireOwner returns(bool found) {
