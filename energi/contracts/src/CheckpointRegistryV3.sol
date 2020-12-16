@@ -27,10 +27,7 @@ import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { ICheckpoint } from "./ICheckpoint.sol";
 import { ICheckpointRegistryV2 } from "./ICheckpointRegistryV2.sol";
 import { StorageCheckpointRegistryV2 } from "./StorageCheckpointRegistryV2.sol";
-
-import {
-    CheckpointV2
-} from "./CheckpointRegistryV2.sol";
+import { CheckpointV2 } from "./CheckpointRegistryV2.sol";
 
 // solium-disable-next-line no-empty-blocks
 
@@ -44,14 +41,15 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
 
       // Data for migration
       //---------------------------------
+      //main storage contract (for current version queue style) that stores checkpoints
       StorageCheckpointRegistryV2 public v2storage;
+      //Igoverned proxy registry that is checked to be active when creating new checkpoints
       IGovernedProxy public mnregistry_proxy;
+      //address that is expected to be making signatures for propose or removal of signatures
       address public CPP_signer;
-      //---------------------------------
 
-      constructor(address _proxy, IGovernedProxy _mnregistry_proxy, address _cpp_signer)
-          public GovernedContract(_proxy)
-      {
+
+      constructor(address _proxy, IGovernedProxy _mnregistry_proxy, address _cpp_signer) public GovernedContract(_proxy) {
           v2storage = new StorageCheckpointRegistryV2();
           mnregistry_proxy = _mnregistry_proxy;
           CPP_signer = _cpp_signer;
@@ -65,10 +63,7 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
 
       // ICheckpointRegistry
       //---------------------------------
-      function signatureBase(uint number, bytes32 hash)
-          public view
-          returns(bytes32 sigbase)
-      {
+      function signatureBase(uint number, bytes32 hash) public view returns(bytes32 sigbase) {
           sigbase = keccak256(
               abi.encodePacked(
                   "||Energi Blockchain Checkpoint||",
