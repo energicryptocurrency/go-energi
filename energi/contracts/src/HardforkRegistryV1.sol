@@ -71,16 +71,19 @@ contract StorageHardforkRegistryV1 is
         requireOwner
         contentEditable(_hardfork_name)
     {
+        //don't allow illogical empty _hardfork_name
+        require(_hardfork_name != bytes32(0), "Hardfork name cannot be empty");
+
         Hardfork storage item = hardforks[_hardfork_name];
         // Update the hardfork names array once the first hardfork name is set.
-        if (item.name == bytes32(0) && _hardfork_name != bytes32(0)) {
+        if (item.name == bytes32(0)) {
             hardfork_names.push(_hardfork_name);
         }
 
         item.block_number = _block_no;
         if (_sw_features != 0) item.sw_features = _sw_features;
         if (_block_hash != bytes32(0)) item.block_hash = _block_hash;
-        if (_hardfork_name != bytes32(0)) item.name = _hardfork_name;
+        item.name = _hardfork_name;
     }
 
     /**
