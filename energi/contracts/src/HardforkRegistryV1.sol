@@ -176,7 +176,7 @@ contract HardforkRegistryV1 is
 
             if (block_no < block.number) {
                 // During hardfork finalization period, block hash cannot be empty.
-                require(block_hash != bytes32(0), "HF finalization block hash cannot be empty");
+                require(block_hash == blockhash(block_no), "HF finalization block must be corresponding to block with number block_no");
             }
         } else {
             // Hardfork doesn't exist: new instance will be created.
@@ -192,15 +192,17 @@ contract HardforkRegistryV1 is
             }
         }
 
+        //store new/updated hardfork info
         v1storage.setHardfork(block_no, block_hash, name, sw_features);
 
-        if (name != bytes32(0) && block_hash != bytes32(0)) {
-            emit Hardfork (
-                block_no,
-                block_hash,
-                name,
-                sw_features
-            );
+        if (block_hash != bytes32(0)) {
+          //notifie change via even
+          emit Hardfork (
+              block_no,
+              block_hash,
+              name,
+              sw_features
+          );
         }
     }
 

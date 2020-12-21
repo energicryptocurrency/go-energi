@@ -57,7 +57,7 @@ contract("HardforkRegistryV1", async accounts => {
         const emptyB32 = b32(""); // "0x0000000000000000000000000000000000000000000000000000000000000000"
 
         const hf_sw_feature = 3000600;
-        const owner1 = "0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb";
+        const owner1 = "0xf32e860d8510b1cFA3f7B04E0D1e157f8B7B8473";
         let hf_names = [b32("Ba Sing Se"), b32("Hogwarts"), b32("Mars"), b32("Random")];
         let hf_active = [b32("Ba Sing Se"), b32("Hogwarts"), b32("Mars"), b32("Random")];
         let hf_pending = [];
@@ -133,7 +133,7 @@ contract("HardforkRegistryV1", async accounts => {
             const b = await web3.eth.getBlock('latest');
             let bn = b.number+42
             let hfn = b32("Krypton");
-        
+
             try {
                 hf_blocks.push(bn);
                 hf_names.push(hfn);
