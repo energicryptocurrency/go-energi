@@ -179,12 +179,15 @@ func (hf *HardforkService) onChainHead(block *types.Block) {
 			log.Debug("No pending hardforks currently available in the system")
 		}
 
-		// Otherwise only log information about the pending hardforks.
-		for _, hfInfo := range pendingHardforks {
-			// log this data at intervals of logIntervals.
-			mod := new(big.Int).Mod(block.Number(), logIntervals)
-			if mod.Cmp(common.Big0) == 0 {
-				logHardforkInfo(block.Number(), period, hfInfo)
+
+		if er != nil { //check pendingHardforks not to be nil
+			// Otherwise only log information about the pending hardforks.
+			for _, hfInfo := range pendingHardforks {
+				// log this data at intervals of logIntervals.
+				mod := new(big.Int).Mod(block.Number(), logIntervals)
+				if mod.Cmp(common.Big0) == 0 {
+					logHardforkInfo(block.Number(), period, hfInfo)
+				}
 			}
 		}
 
