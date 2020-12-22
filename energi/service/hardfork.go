@@ -180,7 +180,7 @@ func (hf *HardforkService) onChainHead(block *types.Block) {
 		}
 
 
-		if er != nil { //check pendingHardforks not to be nil
+		if er == nil { //check pendingHardforks not to be nil
 			// Otherwise only log information about the pending hardforks.
 			for _, hfInfo := range pendingHardforks {
 				// log this data at intervals of logIntervals.
