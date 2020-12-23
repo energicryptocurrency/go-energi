@@ -196,7 +196,6 @@ contract HardforkRegistryV1 is
         v1storage.setHardfork(block_no, block_hash, name, sw_features);
 
         if (block_hash != bytes32(0)) {
-          //notifie change via even
           emit Hardfork (
               block_no,
               block_hash,
