@@ -40,6 +40,9 @@ var logAllHfs = int32(1)
 // logIntervals defines the block interval in which pending blocks will be logged.
 var logIntervals = big.NewInt(20)
 
+// limiting logged hardforks allows proper real estate usage.
+const loggedCount = 10
+
 // HardforkService defines the hardfork service type.
 type HardforkService struct {
 	eth *eth.Ethereum
@@ -155,9 +158,8 @@ func (hf *HardforkService) onChainHead(block *types.Block) {
 
 	period := hf.eth.BlockChain().Config().HFFinalizationPeriod
 
-	// The first time log the last 10 hardforks otherwise log only the last one.
+	// The first time log the last loggedCount hardforks otherwise log only the last one.
 	if atomic.CompareAndSwapInt32(&logAllHfs, 1, 0) {
-		loggedCount := 10 // limiting logged hardforks allows proper real estate usage.
 		offset := len(hardforks) - loggedCount
 		if offset < 0 {
 			offset = 0

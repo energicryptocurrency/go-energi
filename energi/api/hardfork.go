@@ -342,7 +342,7 @@ func (hf *HardforkRegistryAPI) DropHardfork(
 
 	//hardfork name cannot be empty
 	if name == "" {
-		return nil, errors.New("Empty hardfork name is not allowed")
+		return common.Hash{}, errors.New("Empty hardfork name is not allowed")
 	}
 
 	txHash := common.Hash{}
