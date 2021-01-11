@@ -51,7 +51,7 @@ func (e *Energi) checkDoS(
 	header *types.Header,
 	parent *types.Header,
 ) error {
-	old_fork_threshold := e.now() - energi_params.OldForkPeriod
+	//old_fork_threshold := e.now() - energi_params.OldForkPeriod
 
 	// POS-8: allow old fork only if current head is not fresh enough
 	//---
