@@ -26,7 +26,6 @@ interface IHardforkRegistry {
     event HardforkCreated (
         bytes32 indexed name,
         uint256 block_number,
-        bytes32 block_hash,
         uint256 sw_features
     );
 
@@ -60,7 +59,7 @@ interface IHardforkRegistry {
     /// @dev emits HardforkRemoved if a hard fork was removed from the registry
     /// @param name The name of the hard fork to remove
     /// @return true when the hard fork was removed, false otherwise
-    function remove(bytes32 name) returns(bool) external;
+    function remove(bytes32 name) external returns(bool);
 
     /// @notice get the information for a hard fork
     /// @param name The name of the hard fork to look up
