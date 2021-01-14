@@ -66,14 +66,17 @@ contract StorageHardforkRegistryV1 is StorageBase
         external
         requireOwner
         requirePending(name)
+        returns(bool new_hardfork)
     {
         require(block_number < block.number, "Hardfork is too soon");
 
+        new_hardfork = false;
         Hardfork storage hf = hardforks[name];
 
         // save new mapping key
         if (hf.name == bytes32(0)) {
             hardfork_names.push(name);
+            new_hardfork = true;
         }
 
         hf.name = name;
@@ -171,7 +174,9 @@ contract HardforkRegistryV1 is
     /// @param sw_features A version integer describing the minimum software required for the hard fork
     function add(bytes32 name, uint256 block_number, uint256 sw_features) external requireHardforkSigner
     {
-        v1storage.set(name, block_number, sw_features);
+        if (v1storage.set(name, block_number, sw_features)) {
+            emit HardforkCreated(name, block_number, sw_features);
+        }
     }
 
     /// @notice finalize a hard fork
@@ -181,7 +186,12 @@ contract HardforkRegistryV1 is
     /// @param name The name of the hard fork to finalize
     function finalize(bytes32 name) external requireHardforkSigner
     {
-        v1storage.finalize(name);
+        v1storage.finalize(name, finalization_confirmations);
+        uint256 block_number;
+        bytes32 block_hash;
+        uint256 sw_features;
+        (, block_number, block_hash, sw_features) = v1storage.hardforks(name);
+        emit HardforkFinalized(name, block_number, block_hash, sw_features);
     }
 
     /// @notice remove a hard fork from the registry
@@ -189,9 +199,13 @@ contract HardforkRegistryV1 is
     /// @dev emits HardforkRemoved if a hard fork was removed from the registry
     /// @param name The name of the hard fork to remove
     /// @return true when the hard fork was removed, false otherwise
-    function remove(bytes32 name) returns(bool) external requireHardforkSigner
+    function remove(bytes32 name) external requireHardforkSigner returns(bool)
     {
-        return v1storage.remove(name);
+        if (v1storage.remove(name)) {
+            emit HardforkRemoved(name);
+            return true;
+        }
+        return false;
     }
 
     /// @notice get the information for a hard fork
