@@ -95,7 +95,7 @@ contract StorageHardforkRegistryV1 is StorageBase
         requireOwner
         requirePending(name)
     {
-        Hardfork storage hf = hardforks(name);
+        Hardfork storage hf = hardforks[name];
         require(hf.name != bytes32(0), "Hardfork doesn't exist");
         require(block.number > (hf.block_number + finalization_confirmations), "Hardfork not eligible for finalizing");
         bytes32 hardfork_block = block.blockhash(hf.block_number);
@@ -132,6 +132,13 @@ contract StorageHardforkRegistryV1 is StorageBase
 
         return found;
     }
+
+    /// @notice get the hardfork names array
+    /// @return an array of hardfork names
+    function get_names() external view requireOwner returns(bytes32[] memory)
+    {
+        return hardfork_names;
+    }
 }
 
 /// @title Hardfork Registry
@@ -157,7 +164,7 @@ contract HardforkRegistryV1 is
     /// @param _proxy The proxy address of the HardforkRegistry. If address(0) is used, a new proxy will be created.
     /// @param _hf_signer The address of the key responsible for managing hardforks.
     /// @param _finalization_confirmations The number of block confirmations before a hardfork is eligible to finalize.
-    constructor(address _proxy, address _HardforkSigner, uint256 _finalization_confirmations)
+    constructor(address _proxy, address _hf_signer, uint256 _finalization_confirmations)
         public GovernedContractAutoProxy(_proxy)
     {
         v1storage = new StorageHardforkRegistryV1();
@@ -241,18 +248,19 @@ contract HardforkRegistryV1 is
     /// @return A list of hard fork names
     function enumerate() external view returns(bytes32[] memory)
     {
-        return v1storage.hardfork_names();
+        return v1storage.get_names();
     }
 
     /// @notice Get the names of pending hard forks
     /// @return A list of pending hard fork names
     function enumeratePending() external view returns (bytes32[] memory)
     {
-        bytes32[] storage hf_names = v1storage.hardfork_names();
+        bytes32[] memory hf_names = v1storage.get_names();
         uint names_count = hf_names.length;
 
         bytes32[] memory pending;
         for (uint i = 0; i < names_count; i++) {
+            uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number < block_number) {
                 pending.push(hf_names[i]);
@@ -266,11 +274,12 @@ contract HardforkRegistryV1 is
     /// @return A list of active hard fork names
     function enumerateActive() external view returns (bytes32[] memory)
     {
-        bytes32[] storage hf_names = v1storage.hardfork_names();
+        bytes32[] memory hf_names = v1storage.get_names();
         uint names_count = hf_names.length;
 
         bytes32[] memory active;
         for (uint i = 0; i < names_count; i++) {
+            uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number >= block_number) {
                 active.push(hf_names[i]);
@@ -288,8 +297,8 @@ contract HardforkRegistryV1 is
     {
         bytes32 _name;
         uint256 block_number;
-        (_name, block_number, ,) = v1storage.hardforks(names);
-        return ((block.number >= block_number) && (_name != bytes32(0));
+        (_name, block_number, ,) = v1storage.hardforks(name);
+        return ((block.number >= block_number) && (_name != bytes32(0)));
     }
 
     /// @notice move data to new hardfork registry during upgrade
