@@ -43,7 +43,8 @@ contract StorageHardforkRegistryV1 is StorageBase
 
     /// @notice A hard fork which is in effect or finalized may not be modified.
     /// @param name The name of the hardfork to check if it is still pending
-    modifier requirePending(bytes32 name) {
+    modifier requirePending(bytes32 name)
+    {
         require(name != bytes32(0), "Hardfork name cannot be empty");
         Hardfork storage hf = hardforks[name];
         // once a hard fork block number happens, any change to the hard fork would be dangerous
@@ -143,7 +144,8 @@ contract HardforkRegistryV1 is
     uint256 finalization_confirmations;
 
     /// @notice Only hf_signer is allowed to update the HardforkRegistry
-    modifier requireHardforkSigner() {
+    modifier requireHardforkSigner()
+    {
         require(_callerAddress() == hf_signer, "only hf_signer is allowed to call this function");
         _;
     }
@@ -276,175 +278,21 @@ contract HardforkRegistryV1 is
         return ((block.number >= block_number) && (_name != bytes32(0));
     }
 
-    ///**
-    // * @notice Allows the hardfork signer account to create and update a hardfork.
-    // * @param block_no block number when the hardfork should happen.
-    // * @param name hardfork name derived from the naming scheme.
-    // * @param block_hash block hash after the hardfork has happened.
-    // * @param sw_features software version after hardfork finalization.
-    // */
-    //function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features)
-    //    external
-    //    noReentry
-    //{
-    //    require(name != bytes32(0), "Hardfork name cannot be empty");
-//
-    //    bytes32 _name;
-    //    uint256 _block_no;
-    //    (_name,_block_no,,) = v1storage.hardforks(name);
-    //    if (_block_no > 0) {
-    //        // Hardfork already exist: Update is currently happening.
-    //        require(_block_no == block_no, "Duplicate hardfork names are not allowed");
-    //        require((block_no + HF_FINALIZATION_INTERVAL) >= block.number, "Hardfork finalization interval exceeded");
-//
-    //        if (block_no < block.number) {
-    //            // During hardfork finalization period, block hash cannot be empty.
-    //            require(block_hash == blockhash(block_no), "HF finalization block must be corresponding to block with number block_no");
-    //        }
-    //    } else {
-    //        // Hardfork doesn't exist: new instance will be created.
-    //        require(block_no > (block.number + HF_FINALIZATION_INTERVAL), "Hardfork cannot be scheduled immediately.");
-//
-    //        // Assert unique block number per hardfork.
-    //        bytes32[] memory hfs = v1storage.getHardForkNames();
-    //        for (uint i=0; i < hfs.length; i++) {
-    //            (,_block_no,,) = v1storage.hardforks(hfs[i]);
-    //            if (_block_no == block_no) {
-    //                revert("Duplicate block numbers for unique hardforks are not allowed");
-    //            }
-    //        }
-    //    }
-//
-    //    //store new/updated hardfork info
-    //    v1storage.setHardfork(block_no, block_hash, name, sw_features);
-//
-    //    if (block_hash != bytes32(0)) {
-    //      emit Hardfork (
-    //          block_no,
-    //          block_hash,
-    //          name,
-    //          sw_features
-    //      );
-    //    }
-    //}
-//
-    ///**
-    // * @notice Returns the hardfork info indexed at provided hardfork name.
-    // * @param _hardfork_name hardfork name top search for.
-    // */
-    //function getHardfork(bytes32 _hardfork_name)
-    //    external
-    //    view
-    //    returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-    //{
-    //    (,block_no, block_hash, sw_features) = v1storage.hardforks(_hardfork_name);
-    //}
-//
-    ///**
-    // * @notice Removes the hardfork info indexed by the provided hardfork name.
-    // * @param _hardfork_name name of the hardfork to drop.
-    // */
-    //function remove(bytes32 _hardfork_name) external noReentry {
-    //    require(_callerAddress() == HF_signer, "Invalid hardfork signer caller");
-    //    require(_hardfork_name != bytes32(0), "Hardfork name cannot be empty");
-//
-    //    bytes32 _name;
-    //    uint256 _block_no;
-    //    bytes32 _block_hash;
-    //    (_name, _block_no, _block_hash,) = v1storage.hardforks(_hardfork_name);
-    //    require(_name != bytes32(0), "Hardfork name is unknown");
-    //    require(_block_hash == bytes32(0), "Finalized hardfork cannot be deleted");
-//
-    //    v1storage.deleteHardfork(_name);
-    //}
-//
-    ///**
-    // * @notice Lists the all the hardfork names in the order they were created.
-    // */
-    //function enumerateAll() public view returns(bytes32[] memory){
-    //    return v1storage.getHardForkNames();
-    //}
-//
-    ///**
-    // * @notice Lists all the pending hardfork names in the order they were created.
-    // * @dev Two for-loops used guarantee the final array is not permanently stored.
-    // */
-    //function enumeratePending() public view returns(bytes32[] memory){
-    //    uint index;
-    //    uint pending_HFs;
-    //    bytes32[] memory all_names = enumerateAll();
-    //    for (uint i = 0; i < all_names.length; i++) {
-    //        bytes32 name = all_names[i];
-    //        if (!isActive(name)) {
-    //            pending_HFs++;
-    //        }
-    //    }
-//
-    //    bytes32[] memory pending_names = new bytes32[](pending_HFs);
-    //    for (uint i = 0; i < all_names.length; i++) {
-    //        bytes32 name = all_names[i];
-    //        if (!isActive(name)) {
-    //            pending_names[index] = name;
-    //            index++;
-    //        }
-    //    }
-    //    return pending_names;
-    //}
-//
-    ///**
-    // * @notice Lists all the active hardfork names in the order they were created.
-    // * @dev Two for-loops used guarantee the final array is not permanently stored.
-    // */
-    //function enumerateActive() public view returns(bytes32[] memory){
-    //    uint index;
-    //    uint active_HFs;
-    //    bytes32[] memory all_names = enumerateAll();
-    //    for (uint i = 0; i < all_names.length; i++) {
-    //        bytes32 name = all_names[i];
-    //        if (isActive(name)) {
-    //            active_HFs++;
-    //        }
-    //    }
-//
-    //    bytes32[] memory active_names = new bytes32[](active_HFs);
-    //    for (uint i = 0; i < all_names.length; i++) {
-    //        bytes32 name = all_names[i];
-    //        if (isActive(name)) {
-    //            active_names[index] = name;
-    //            index++;
-    //        }
-    //    }
-    //    return active_names;
-    //}
-//
-    ///**
-    // * @notice Checks if the hardfork block has been achieved.
-    // * @param name hardfork name to be searched.
-    // */
-    //function isActive(bytes32 name) public view returns (bool) {
-    //    // if name is empty return false
-    //    if (name == bytes32(0)) return false;
-//
-    //    bytes32 _name;
-    //    uint256 block_no;
-    //    (_name,block_no,,) = v1storage.hardforks(name);
-    //    return (block.number >= block_no && _name != bytes32(0));
-    //}
+    /// @notice move data to new hardfork registry during upgrade
+    function _migrate(IGovernedContract _newimpl) internal
+    {
+        // TODO: implement me
+    }
 
-    //---------------------------------
-    // IGovernedContract
-    //---------------------------------
-
-    /**
-     * @notice sets the owner of the new implementation.
-     */
-    function _destroy(IGovernedContract _newImpl) internal {
+    /// @notice called to finalize a governance upgrade
+    function _destroy(IGovernedContract _newImpl) internal
+    {
         v1storage.setOwner(_newImpl);
     }
 
-    // Safety
-    //---------------------------------
-    function () external payable {
+    /// @notice fallback function not allowed
+    function () external payable
+    {
         revert("Not supported");
     }
 }
