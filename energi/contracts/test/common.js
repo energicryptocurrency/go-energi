@@ -132,7 +132,7 @@ exports.govPostTests = (s) => {
             s.assert.match(e.message, /Not supported/);
         }
     });
-    
+
     if ('storage' in s) s.it('should refuse to accept funds to storage', async () => {
         try {
             await s.storage.send(s.web3.utils.toWei('1', "ether"));
@@ -168,7 +168,7 @@ exports.govPostTests = (s) => {
 
         s.assert.equal(logs.length, 1);
         const proposal = await MockProposal.at(logs[0].args['1']);
-        
+
         await proposal.setAccepted();
         await s.proxy.upgrade(proposal.address);
 
@@ -187,4 +187,3 @@ exports.govPostTests = (s) => {
         await s.fake.killStorage(s.storage.address);
     });
 };
-

@@ -40,6 +40,9 @@ var logAllHfs = int32(1)
 // logIntervals defines the block interval in which pending blocks will be logged.
 var logIntervals = big.NewInt(20)
 
+// limiting logged hardforks allows proper real estate usage.
+const loggedCount = 10
+
 // HardforkService defines the hardfork service type.
 type HardforkService struct {
 	eth *eth.Ethereum
@@ -155,9 +158,8 @@ func (hf *HardforkService) onChainHead(block *types.Block) {
 
 	period := hf.eth.BlockChain().Config().HFFinalizationPeriod
 
-	// The first time log the last 10 hardforks otherwise log only the last one.
+	// The first time log the last loggedCount hardforks otherwise log only the last one.
 	if atomic.CompareAndSwapInt32(&logAllHfs, 1, 0) {
-		loggedCount := 10 // limiting logged hardforks allows proper real estate usage.
 		offset := len(hardforks) - loggedCount
 		if offset < 0 {
 			offset = 0
@@ -179,12 +181,16 @@ func (hf *HardforkService) onChainHead(block *types.Block) {
 			log.Debug("No pending hardforks currently available in the system")
 		}
 
-		// Otherwise only log information about the pending hardforks.
-		for _, hfInfo := range pendingHardforks {
-			// log this data at intervals of logIntervals.
-			mod := new(big.Int).Mod(block.Number(), logIntervals)
-			if mod.Cmp(common.Big0) == 0 {
-				logHardforkInfo(block.Number(), period, hfInfo)
+
+		//check pendingHardforks not to be nil
+		if er == nil {
+			// Otherwise only log information about the pending hardforks.
+			for _, hfInfo := range pendingHardforks {
+				// log this data at intervals of logIntervals.
+				mod := new(big.Int).Mod(block.Number(), logIntervals)
+				if mod.Cmp(common.Big0) == 0 {
+					logHardforkInfo(block.Number(), period, hfInfo)
+				}
 			}
 		}
 

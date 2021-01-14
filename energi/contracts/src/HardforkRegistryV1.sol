@@ -71,16 +71,19 @@ contract StorageHardforkRegistryV1 is
         requireOwner
         contentEditable(_hardfork_name)
     {
+        //don't allow illogical empty _hardfork_name
+        require(_hardfork_name != bytes32(0), "Hardfork name cannot be empty");
+
         Hardfork storage item = hardforks[_hardfork_name];
         // Update the hardfork names array once the first hardfork name is set.
-        if (item.name == bytes32(0) && _hardfork_name != bytes32(0)) {
+        if (item.name == bytes32(0)) {
             hardfork_names.push(_hardfork_name);
         }
 
         item.block_number = _block_no;
         if (_sw_features != 0) item.sw_features = _sw_features;
         if (_block_hash != bytes32(0)) item.block_hash = _block_hash;
-        if (_hardfork_name != bytes32(0)) item.name = _hardfork_name;
+        item.name = _hardfork_name;
     }
 
     /**
@@ -173,7 +176,7 @@ contract HardforkRegistryV1 is
 
             if (block_no < block.number) {
                 // During hardfork finalization period, block hash cannot be empty.
-                require(block_hash != bytes32(0), "HF finalization block hash cannot be empty");
+                require(block_hash == blockhash(block_no), "HF finalization block must be corresponding to block with number block_no");
             }
         } else {
             // Hardfork doesn't exist: new instance will be created.
@@ -189,15 +192,16 @@ contract HardforkRegistryV1 is
             }
         }
 
+        //store new/updated hardfork info
         v1storage.setHardfork(block_no, block_hash, name, sw_features);
 
-        if (name != bytes32(0) && block_hash != bytes32(0)) {
-            emit Hardfork (
-                block_no,
-                block_hash,
-                name,
-                sw_features
-            );
+        if (block_hash != bytes32(0)) {
+          emit Hardfork (
+              block_no,
+              block_hash,
+              name,
+              sw_features
+          );
         }
     }
 

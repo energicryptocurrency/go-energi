@@ -55,6 +55,8 @@ func UpdateHfActive(name string, blockNo *big.Int, blockHash common.Hash, swFeat
 	switch {
 	case name == "":
 		return errInvalidHfName
+	case blockHash == common.Hash{}:
+		return errEmptyHash
 
 	default:
 		hfInfo.hfs[name] = hardforkInfo{

@@ -38,7 +38,7 @@ import (
 const (
 	// maxHardforkNameSize defines the max length in bytes a hf name can have.
 	maxHardforkNameSize = 32
-	// minHardforkNameSize defines the max length in bytes a hf name can have.
+	// minHardforkNameSize defines the min length in bytes a hf name can have.
 	minHardforkNameSize = 1
 )
 
@@ -339,6 +339,12 @@ func (hf *HardforkRegistryAPI) DropHardfork(
 	name string,
 	password *string,
 ) (common.Hash, error) {
+
+	//hardfork name cannot be empty
+	if name == "" {
+		return common.Hash{}, errors.New("Empty hardfork name is not allowed")
+	}
+
 	txHash := common.Hash{}
 	dst := hf.backend.ChainConfig().Energi.HFSigner
 	registry, err := registrySession(hf.backend, dst, hf.proxyAddr, password)
