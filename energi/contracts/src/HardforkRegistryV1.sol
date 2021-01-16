@@ -98,7 +98,7 @@ contract StorageHardforkRegistryV1 is StorageBase
         Hardfork storage hf = hardforks[name];
         require(hf.name != bytes32(0), "Hardfork doesn't exist");
         require(block.number > (hf.block_number + finalization_confirmations), "Hardfork not eligible for finalizing");
-        bytes32 hardfork_block = block.blockhash(hf.block_number);
+        bytes32 hardfork_block = blockhash(hf.block_number);
         require(hardfork_block != bytes32(0), "No block hash to finalize");
         hf.block_hash = hardfork_block;
     }
@@ -258,14 +258,29 @@ contract HardforkRegistryV1 is
         bytes32[] memory hf_names = v1storage.get_names();
         uint names_count = hf_names.length;
 
-        bytes32[] memory pending;
+        //count the number of pending hfs
+        uint pendingNum = 0;
         for (uint i = 0; i < names_count; i++) {
             uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number < block_number) {
-                pending.push(hf_names[i]);
+                pendingNum++;
             }
         }
+
+        //collect pending hfs
+        bytes32[] memory pending = new bytes32[](pendingNum);
+        uint ind = 0;
+        for (uint i = 0; i < names_count; i++) {
+            uint256 block_number;
+            (, block_number, ,) = v1storage.hardforks(hf_names[i]);
+            if (block.number < block_number) {
+              pending[ind] = hf_names[i];
+              ind++;
+            }
+        }
+
+
 
         return pending;
     }
@@ -277,12 +292,25 @@ contract HardforkRegistryV1 is
         bytes32[] memory hf_names = v1storage.get_names();
         uint names_count = hf_names.length;
 
-        bytes32[] memory active;
+        //count the number of active hfs
+        uint activeNum = 0;
         for (uint i = 0; i < names_count; i++) {
             uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number >= block_number) {
-                active.push(hf_names[i]);
+                activeNum++;
+            }
+        }
+
+        //collect active hfs
+        bytes32[] memory active = new bytes32[](activeNum);
+        uint ind = 0;
+        for (uint i = 0; i < names_count; i++) {
+            uint256 block_number;
+            (, block_number, ,) = v1storage.hardforks(hf_names[i]);
+            if (block.number >= block_number) {
+                active[ind] = hf_names[i];
+                ind++;
             }
         }
 
