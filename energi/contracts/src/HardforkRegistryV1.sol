@@ -48,9 +48,7 @@ contract StorageHardforkRegistryV1 is StorageBase
         require(name != bytes32(0), "Hardfork name cannot be empty");
         Hardfork storage hf = hardforks[name];
         // once a hard fork block number happens, any change to the hard fork would be dangerous
-        require(hf.block_number < block.number, "Hardfork is already in effect");
-        // once the hard fork is finalized we disallow any changes
-        require(hf.block_hash == bytes32(0), "Hardfork is already finalized");
+        require(hf.block_number > block.number, "Hardfork is already in effect");
         _;
     }
 
@@ -65,23 +63,28 @@ contract StorageHardforkRegistryV1 is StorageBase
     )
         external
         requireOwner
-        requirePending(name)
         returns(bool new_hardfork)
     {
-        require(block_number < block.number, "Hardfork is too soon");
+        require(name != bytes32(0), "Hardfork name cannot be empty");
+        require(block_number > block.number, "Hardfork is too soon");
 
-        new_hardfork = false;
+        //name associated hardfork
         Hardfork storage hf = hardforks[name];
 
-        // save new mapping key
+        //if Hardfork name is not present push as a new hardfork name
         if (hf.name == bytes32(0)) {
             hardfork_names.push(name);
+            hf.name = name;
             new_hardfork = true;
+        } else {
+            require(hf.block_number > block.number, "Cannot modify active Hardfork");
+            new_hardfork = false;
         }
 
-        hf.name = name;
+        //set/modify hardfork activation block/version
         hf.block_number = block_number;
         hf.sw_features = sw_features;
+
     }
 
     /// @notice Once a hard fork has been finalized, it is no longer possible to change.
@@ -93,14 +96,12 @@ contract StorageHardforkRegistryV1 is StorageBase
     function finalize(bytes32 name, uint256 finalization_confirmations)
         external
         requireOwner
-        requirePending(name)
     {
         Hardfork storage hf = hardforks[name];
         require(hf.name != bytes32(0), "Hardfork doesn't exist");
         require(block.number > (hf.block_number + finalization_confirmations), "Hardfork not eligible for finalizing");
-        bytes32 hardfork_block = blockhash(hf.block_number);
-        require(hardfork_block != bytes32(0), "No block hash to finalize");
-        hf.block_hash = hardfork_block;
+        hf.block_hash = blockhash(hf.block_number);
+        require(hf.block_hash != bytes32(0), "No block hash to finalize");
     }
 
     /// @notice removes a hard fork from the registry
@@ -297,7 +298,7 @@ contract HardforkRegistryV1 is
         for (uint i = 0; i < names_count; i++) {
             uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
-            if (block.number >= block_number) {
+            if (block.number <= block_number) {
                 activeNum++;
             }
         }
@@ -308,7 +309,7 @@ contract HardforkRegistryV1 is
         for (uint i = 0; i < names_count; i++) {
             uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
-            if (block.number >= block_number) {
+            if (block.number <= block_number) {
                 active[ind] = hf_names[i];
                 ind++;
             }
@@ -326,7 +327,7 @@ contract HardforkRegistryV1 is
         bytes32 _name;
         uint256 block_number;
         (_name, block_number, ,) = v1storage.hardforks(name);
-        return ((block.number >= block_number) && (_name != bytes32(0)));
+        return ((block.number <= block_number) && (_name != bytes32(0)));
     }
 
     /// @notice move data to new hardfork registry during upgrade
