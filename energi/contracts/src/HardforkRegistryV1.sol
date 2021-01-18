@@ -100,7 +100,7 @@ contract StorageHardforkRegistryV1 is StorageBase
         Hardfork storage hf = hardforks[name];
         require(hf.name != bytes32(0), "Hardfork doesn't exist");
         require(block.number > (hf.block_number + finalization_confirmations), "Hardfork not eligible for finalizing");
-        require(hf.block_hash == bytes32(0), "Hardfork already finalized")
+        require(hf.block_hash == bytes32(0), "Hardfork already finalized");
         hf.block_hash = blockhash(hf.block_number);
         require(hf.block_hash != bytes32(0), "No block hash to finalize");
     }
