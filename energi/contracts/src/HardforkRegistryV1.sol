@@ -48,7 +48,7 @@ contract StorageHardforkRegistryV1 is StorageBase
         require(name != bytes32(0), "Hardfork name cannot be empty");
         Hardfork storage hf = hardforks[name];
         // once a hard fork block number happens, any change to the hard fork would be dangerous
-        require(hf.block_number > block.number, "Hardfork is already in effect");
+        require(hf.block_number > block.number, "Hardfork is already in effect or doesn't exist");
         _;
     }
 
@@ -328,7 +328,7 @@ contract HardforkRegistryV1 is
         bytes32 _name;
         uint256 block_number;
         (_name, block_number, ,) = v1storage.hardforks(name);
-        return block.number <= block_number;
+        return block.number >= block_number;
     }
 
     /// @notice move data to new hardfork registry during upgrade
