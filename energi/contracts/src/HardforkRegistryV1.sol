@@ -235,15 +235,16 @@ contract HardforkRegistryV1 is
         // check if the hard fork is found
         if (_name != bytes32(0)) {
             state = 0;
-        }
-        // check if the hard fork is active
-        if (block_number >= block.number) {
-            state = 1;
-        }
-        // check if the hard fork is finalized
-        if (block_hash != bytes32(0)) {
-            state = 2;
-        }
+
+            // check if the hard fork is active
+            if (block_number <= block.number) {
+                state = 1;
+            }
+            // check if the hard fork is finalized
+            if (block_hash != bytes32(0)) {
+                state = 2;
+            }
+        } 
     }
 
     /// @notice get the names of all the hard forks
