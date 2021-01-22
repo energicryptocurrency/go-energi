@@ -474,51 +474,6 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
 
-        it("should get active hf to be finalized", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
-            try {
-                var res = await s.proxy_hf.get(hf_active[0] ,{from: hf_signer});
-                expect(res.state.toNumber()).to.equal(2);
-            } catch (e) {
-                assert.fail('It must fail');
-            }
-        });
-
-
-        it("should return -1 as non existing hardfork active hf to be finalized", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
-            try {
-                var res = await s.proxy_hf.get(b32("non-existing") ,{from: hf_signer});
-                expect(res.state.toNumber()).to.equal(-1);
-            } catch (e) {
-                assert.fail('It must fail');
-            }
-        });
-
-
-        it("should return 0 for being pending hardfork", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
-            try {
-                var res = await s.proxy_hf.get(hf_pending[0] ,{from: hf_signer});
-                expect(res.state.toNumber()).to.equal(0);
-            } catch (e) {
-                assert.fail('It must fail');
-            }
-        });
-
-        it("should return 1 as active hardfork (but not finalized)", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
-            try {
-                var res = await s.proxy_hf.get(hf_active[2] ,{from: hf_signer});
-                expect(res.state.toNumber()).to.equal(1);
-            } catch (e) {
-                assert.fail('It must fail');
-            }
-        });
 
 
 

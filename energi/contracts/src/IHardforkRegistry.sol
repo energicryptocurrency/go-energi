@@ -67,7 +67,7 @@ interface IHardforkRegistry {
     /// @return block_number the block number on which the hard fork will become active
     /// @return block_hash the hash of the block on which a finalized hard fork became active
     /// @return sw_fetaures A version integer describing the minimum software required for the hard fork
-    function get(bytes32 name) external view returns(int state, uint256 block_number, bytes32 block_hash, uint256 sw_features);
+    function get(bytes32 name) external view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features);
 
     /// @notice get the names of all the hard forks
     /// @return A list of hard fork names

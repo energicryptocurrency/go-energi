@@ -223,28 +223,9 @@ contract HardforkRegistryV1 is
     /// @return block_number the block number on which the hard fork will become active
     /// @return block_hash the hash of the block on which a finalized hard fork became active
     /// @return sw_fetaures A version integer describing the minimum software required for the hard fork
-    function get(bytes32 name) external view returns(int state, uint256 block_number, bytes32 block_hash, uint256 sw_features)
+    function get(bytes32 name) external view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
     {
-        // default state of -1 unless we can find this hard fork
-        state = -1;
-
-        // look up the hard fork
-        bytes32 _name;
-        (_name, block_number, block_hash, sw_features) = v1storage.hardforks(name);
-
-        // check if the hard fork is found
-        if (_name != bytes32(0)) {
-            state = 0;
-
-            // check if the hard fork is active
-            if (block_number <= block.number) {
-                state = 1;
-            }
-            // check if the hard fork is finalized
-            if (block_hash != bytes32(0)) {
-                state = 2;
-            }
-        }
+        (, block_number, block_hash, sw_features) = v1storage.hardforks(name);
     }
 
     /// @notice get the names of all the hard forks
