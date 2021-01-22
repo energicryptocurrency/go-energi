@@ -154,6 +154,19 @@ contract("HardforkRegistryV1", async accounts => {
               }
           });
 
+          it("should show hardfork is not active (as it doesn't exist)", async () => {
+              for (var i=0;i<41;i++) {
+                await common.moveTime(web3, 1);
+              }
+              const b = await web3.eth.getBlock('latest');
+              try {
+                  var isactive = await s.proxy_hf.isActive(b32("some name"),{from: hf_signer});
+                  expect(isactive).to.equal(false);
+              } catch (e) {
+                  assert.fail('It must fail');
+              }
+          });
+
 
           it("should fail adding incorrect block_number", async () => {
             await common.moveTime(web3, 1);

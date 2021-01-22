@@ -244,7 +244,7 @@ contract HardforkRegistryV1 is
             if (block_hash != bytes32(0)) {
                 state = 2;
             }
-        } 
+        }
     }
 
     /// @notice get the names of all the hard forks
@@ -329,7 +329,8 @@ contract HardforkRegistryV1 is
         bytes32 _name;
         uint256 block_number;
         (_name, block_number, ,) = v1storage.hardforks(name);
-        return block.number >= block_number;
+
+        return ((block.number >= block_number) && (_name != bytes32(0)));
     }
 
     /// @notice move data to new hardfork registry during upgrade
