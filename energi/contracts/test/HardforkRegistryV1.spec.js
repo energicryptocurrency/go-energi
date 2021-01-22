@@ -175,7 +175,7 @@ contract("HardforkRegistryV1", async accounts => {
                   await s.proxy_hf.add(hf_names[0], b.number, hf_sw_feature, {from: hf_signer});
                   assert.fail('It must fail');
               } catch (e) {
-                  assert.match(e.message, /Hardfork is too soon/);
+                  assert.match(e.message, /Hardfork is already in effect or doesn't exist/);
               }
           });
 
@@ -187,7 +187,7 @@ contract("HardforkRegistryV1", async accounts => {
                   await s.proxy_hf.add(hf_names[0], b.number+100, hf_sw_feature, {from: hf_signer});
                   assert.fail('It must fail');
               } catch (e) {
-                  assert.match(e.message, /Cannot modify active Hardfork/);
+                  assert.match(e.message, /Hardfork is already in effect or doesn't exist/);
               }
           });
 
@@ -256,13 +256,12 @@ contract("HardforkRegistryV1", async accounts => {
             const b = await web3.eth.getBlock('latest');
             try {
                 var res = await s.proxy_hf.remove(b32("non existing hardfork"), {from: hf_signer});
-                assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message,/Hardfork is already in effect or doesn't exist/);
             }
         });
 
-        it("should fail on removing non-existing hardfork", async () => {
+        it("should fail on removing hardfork", async () => {
             await common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
             try {
@@ -325,7 +324,7 @@ contract("HardforkRegistryV1", async accounts => {
             await common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
             try {
-                await s.proxy_hf.finalize(b32("non existing hardfork"),{from: hf_signer});
+                await s.proxy_hf.finalize(b32("some non existing hardfork"),{from: hf_signer});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message,/Hardfork doesn't exist/);

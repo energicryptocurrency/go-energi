@@ -48,7 +48,9 @@ contract StorageHardforkRegistryV1 is StorageBase
         require(name != bytes32(0), "Hardfork name cannot be empty");
         Hardfork storage hf = hardforks[name];
         // once a hard fork block number happens, any change to the hard fork would be dangerous
-        require(hf.block_number > block.number, "Hardfork is already in effect or doesn't exist");
+        if (hf.name != bytes32(0)) require(hf.block_number > block.number, "Hardfork is already in effect or doesn't exist");
+        // once the hard fork is finalized we disallow any changes
+        require(hf.block_hash == bytes32(0), "Hardfork is already finalized");
         _;
     }
 
@@ -63,9 +65,9 @@ contract StorageHardforkRegistryV1 is StorageBase
     )
         external
         requireOwner
+        requirePending(name)
         returns(bool new_hardfork)
     {
-        require(name != bytes32(0), "Hardfork name cannot be empty");
         require(block_number > block.number, "Hardfork is too soon");
 
         //name associated hardfork
