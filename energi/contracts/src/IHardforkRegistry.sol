@@ -1,4 +1,4 @@
-// Copyright 2020 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -63,11 +63,10 @@ interface IHardforkRegistry {
 
     /// @notice get the information for a hard fork
     /// @param name The name of the hard fork to look up
-    /// @return state the state of the hard fork: -1: no hard fork, 0: hard fork pending, 1: hard fork active, 2: hard fork final
     /// @return block_number the block number on which the hard fork will become active
     /// @return block_hash the hash of the block on which a finalized hard fork became active
     /// @return sw_fetaures A version integer describing the minimum software required for the hard fork
-    function get(bytes32 name) external view returns(int state, uint256 block_number, bytes32 block_hash, uint256 sw_features);
+    function get(bytes32 name) external view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features);
 
     /// @notice get the names of all the hard forks
     /// @return A list of hard fork names

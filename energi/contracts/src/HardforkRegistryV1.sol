@@ -1,4 +1,4 @@
-// Copyright 2020 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -48,7 +48,7 @@ contract StorageHardforkRegistryV1 is StorageBase
         require(name != bytes32(0), "Hardfork name cannot be empty");
         Hardfork storage hf = hardforks[name];
         // once a hard fork block number happens, any change to the hard fork would be dangerous
-        require(hf.block_number < block.number, "Hardfork is already in effect");
+        if (hf.name != bytes32(0)) require(hf.block_number > block.number, "Hardfork is already in effect or doesn't exist");
         // once the hard fork is finalized we disallow any changes
         require(hf.block_hash == bytes32(0), "Hardfork is already finalized");
         _;
@@ -68,20 +68,25 @@ contract StorageHardforkRegistryV1 is StorageBase
         requirePending(name)
         returns(bool new_hardfork)
     {
-        require(block_number < block.number, "Hardfork is too soon");
+        require(block_number > block.number, "Hardfork is too soon");
 
-        new_hardfork = false;
+        //name associated hardfork
         Hardfork storage hf = hardforks[name];
 
-        // save new mapping key
+        //if Hardfork name is not present push as a new hardfork name
         if (hf.name == bytes32(0)) {
             hardfork_names.push(name);
+            hf.name = name;
             new_hardfork = true;
+        } else {
+            require(hf.block_number > block.number, "Cannot modify active Hardfork");
+            new_hardfork = false;
         }
 
-        hf.name = name;
+        //set/modify hardfork activation block/version
         hf.block_number = block_number;
         hf.sw_features = sw_features;
+
     }
 
     /// @notice Once a hard fork has been finalized, it is no longer possible to change.
@@ -93,14 +98,13 @@ contract StorageHardforkRegistryV1 is StorageBase
     function finalize(bytes32 name, uint256 finalization_confirmations)
         external
         requireOwner
-        requirePending(name)
     {
         Hardfork storage hf = hardforks[name];
         require(hf.name != bytes32(0), "Hardfork doesn't exist");
         require(block.number > (hf.block_number + finalization_confirmations), "Hardfork not eligible for finalizing");
-        bytes32 hardfork_block = block.blockhash(hf.block_number);
-        require(hardfork_block != bytes32(0), "No block hash to finalize");
-        hf.block_hash = hardfork_block;
+        require(hf.block_hash == bytes32(0), "Hardfork already finalized");
+        hf.block_hash = blockhash(hf.block_number);
+        require(hf.block_hash != bytes32(0), "No block hash to finalize");
     }
 
     /// @notice removes a hard fork from the registry
@@ -112,11 +116,11 @@ contract StorageHardforkRegistryV1 is StorageBase
         requirePending(name)
         returns (bool)
     {
-        bool found=false;
+        bool found = false;
 
         for (uint i = 0; i < hardfork_names.length; i++) {
             if (hardfork_names[i] == name) {
-                found=true;
+                found = true;
 
                 // remove the name from the hardfork_names array
                 for (uint k = i; k < (hardfork_names.length - 1); k++) {
@@ -221,27 +225,9 @@ contract HardforkRegistryV1 is
     /// @return block_number the block number on which the hard fork will become active
     /// @return block_hash the hash of the block on which a finalized hard fork became active
     /// @return sw_fetaures A version integer describing the minimum software required for the hard fork
-    function get(bytes32 name) external view returns(int state, uint256 block_number, bytes32 block_hash, uint256 sw_features)
+    function get(bytes32 name) external view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
     {
-        // default state of -1 unless we can find this hard fork
-        state = -1;
-
-        // look up the hard fork
-        bytes32 _name;
-        (_name, block_number, block_hash, sw_features) = v1storage.hardforks(name);
-
-        // check if the hard fork is found
-        if (_name != bytes32(0)) {
-            state = 0;
-        }
-        // check if the hard fork is active
-        if (block_number >= block.number) {
-            state = 1;
-        }
-        // check if the hard fork is finalized
-        if (block_hash != bytes32(0)) {
-            state = 2;
-        }
+        (, block_number, block_hash, sw_features) = v1storage.hardforks(name);
     }
 
     /// @notice get the names of all the hard forks
@@ -258,14 +244,29 @@ contract HardforkRegistryV1 is
         bytes32[] memory hf_names = v1storage.get_names();
         uint names_count = hf_names.length;
 
-        bytes32[] memory pending;
+        //count the number of pending hfs
+        uint pendingNum = 0;
         for (uint i = 0; i < names_count; i++) {
             uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number < block_number) {
-                pending.push(hf_names[i]);
+                pendingNum++;
             }
         }
+
+        //collect pending hfs
+        bytes32[] memory pending = new bytes32[](pendingNum);
+        uint ind = 0;
+        for (uint i = 0; i < names_count; i++) {
+            uint256 block_number;
+            (, block_number, ,) = v1storage.hardforks(hf_names[i]);
+            if (block.number < block_number) {
+              pending[ind] = hf_names[i];
+              ind++;
+            }
+        }
+
+
 
         return pending;
     }
@@ -277,12 +278,25 @@ contract HardforkRegistryV1 is
         bytes32[] memory hf_names = v1storage.get_names();
         uint names_count = hf_names.length;
 
-        bytes32[] memory active;
+        //count the number of active hfs
+        uint activeNum = 0;
         for (uint i = 0; i < names_count; i++) {
             uint256 block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number >= block_number) {
-                active.push(hf_names[i]);
+                activeNum++;
+            }
+        }
+
+        //collect active hfs
+        bytes32[] memory active = new bytes32[](activeNum);
+        uint ind = 0;
+        for (uint i = 0; i < names_count; i++) {
+            uint256 block_number;
+            (, block_number, ,) = v1storage.hardforks(hf_names[i]);
+            if (block.number >= block_number) {
+                active[ind] = hf_names[i];
+                ind++;
             }
         }
 
@@ -298,6 +312,7 @@ contract HardforkRegistryV1 is
         bytes32 _name;
         uint256 block_number;
         (_name, block_number, ,) = v1storage.hardforks(name);
+
         return ((block.number >= block_number) && (_name != bytes32(0)));
     }
 
