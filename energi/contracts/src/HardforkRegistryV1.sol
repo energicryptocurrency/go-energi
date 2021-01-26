@@ -1,4 +1,4 @@
-// Copyright 2020 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -116,11 +116,11 @@ contract StorageHardforkRegistryV1 is StorageBase
         requirePending(name)
         returns (bool)
     {
-        bool found=false;
+        bool found = false;
 
         for (uint i = 0; i < hardfork_names.length; i++) {
             if (hardfork_names[i] == name) {
-                found=true;
+                found = true;
 
                 // remove the name from the hardfork_names array
                 for (uint k = i; k < (hardfork_names.length - 1); k++) {
