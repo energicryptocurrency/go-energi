@@ -20,7 +20,6 @@ var (
 	_ = big.NewInt
 	_ = strings.NewReader
 	_ = ethereum.NotFound
-	_ = abi.U256
 	_ = bind.Bind
 	_ = common.Big1
 	_ = types.BloomLookup
@@ -28,7 +27,19 @@ var (
 )
 
 // IHardforkRegistryABI is the input ABI used to generate the binding from.
-const IHardforkRegistryABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"Hardfork\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"active_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateAll\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"all_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumeratePending\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"pending_hf_names\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_hardfork_name\",\"type\":\"bytes32\"}],\"name\":\"getHardfork\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"block_no\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"propose\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_hardfork_name\",\"type\":\"bytes32\"}],\"name\":\"remove\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+const IHardforkRegistryABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"block_number\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"HardforkCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"block_number\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"HardforkFinalized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"HardforkRemoved\",\"type\":\"event\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"block_number\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"name\":\"add\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerate\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumerateActive\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"enumeratePending\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"finalize\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"get\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"block_number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"block_hash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"sw_features\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"isActive\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"name\",\"type\":\"bytes32\"}],\"name\":\"remove\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]"
+
+// IHardforkRegistryFuncSigs maps the 4-byte function signature to its string representation.
+var IHardforkRegistryFuncSigs = map[string]string{
+	"aa61604f": "add(bytes32,uint256,uint256)",
+	"ff9f78b3": "enumerate()",
+	"e1d6f43a": "enumerateActive()",
+	"ca89ad5f": "enumeratePending()",
+	"92584d80": "finalize(bytes32)",
+	"8eaa6ac0": "get(bytes32)",
+	"5c36901c": "isActive(bytes32)",
+	"95bc2673": "remove(bytes32)",
+}
 
 // IHardforkRegistry is an auto generated Go binding around an Ethereum contract.
 type IHardforkRegistry struct {
@@ -138,7 +149,7 @@ func bindIHardforkRegistry(address common.Address, caller bind.ContractCaller, t
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_IHardforkRegistry *IHardforkRegistryRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_IHardforkRegistry *IHardforkRegistryRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _IHardforkRegistry.Contract.IHardforkRegistryCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -157,7 +168,7 @@ func (_IHardforkRegistry *IHardforkRegistryRaw) Transact(opts *bind.TransactOpts
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_IHardforkRegistry *IHardforkRegistryCallerRaw) Call(opts *bind.CallOpts, result interface{}, method string, params ...interface{}) error {
+func (_IHardforkRegistry *IHardforkRegistryCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
 	return _IHardforkRegistry.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -172,195 +183,243 @@ func (_IHardforkRegistry *IHardforkRegistryTransactorRaw) Transact(opts *bind.Tr
 	return _IHardforkRegistry.Contract.contract.Transact(opts, method, params...)
 }
 
-// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
+// Enumerate is a free data retrieval call binding the contract method 0xff9f78b3.
 //
-// Solidity: function enumerateActive() constant returns(bytes32[] active_hf_names)
-func (_IHardforkRegistry *IHardforkRegistryCaller) EnumerateActive(opts *bind.CallOpts) ([][32]byte, error) {
-	var (
-		ret0 = new([][32]byte)
-	)
-	out := ret0
-	err := _IHardforkRegistry.contract.Call(opts, out, "enumerateActive")
-	return *ret0, err
+// Solidity: function enumerate() view returns(bytes32[])
+func (_IHardforkRegistry *IHardforkRegistryCaller) Enumerate(opts *bind.CallOpts) ([][32]byte, error) {
+	var out []interface{}
+	err := _IHardforkRegistry.contract.Call(opts, &out, "enumerate")
+
+	if err != nil {
+		return *new([][32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([][32]byte)).(*[][32]byte)
+
+	return out0, err
+
+}
+
+// Enumerate is a free data retrieval call binding the contract method 0xff9f78b3.
+//
+// Solidity: function enumerate() view returns(bytes32[])
+func (_IHardforkRegistry *IHardforkRegistrySession) Enumerate() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.Enumerate(&_IHardforkRegistry.CallOpts)
+}
+
+// Enumerate is a free data retrieval call binding the contract method 0xff9f78b3.
+//
+// Solidity: function enumerate() view returns(bytes32[])
+func (_IHardforkRegistry *IHardforkRegistryCallerSession) Enumerate() ([][32]byte, error) {
+	return _IHardforkRegistry.Contract.Enumerate(&_IHardforkRegistry.CallOpts)
 }
 
 // EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
 //
-// Solidity: function enumerateActive() constant returns(bytes32[] active_hf_names)
+// Solidity: function enumerateActive() view returns(bytes32[])
+func (_IHardforkRegistry *IHardforkRegistryCaller) EnumerateActive(opts *bind.CallOpts) ([][32]byte, error) {
+	var out []interface{}
+	err := _IHardforkRegistry.contract.Call(opts, &out, "enumerateActive")
+
+	if err != nil {
+		return *new([][32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([][32]byte)).(*[][32]byte)
+
+	return out0, err
+
+}
+
+// EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
+//
+// Solidity: function enumerateActive() view returns(bytes32[])
 func (_IHardforkRegistry *IHardforkRegistrySession) EnumerateActive() ([][32]byte, error) {
 	return _IHardforkRegistry.Contract.EnumerateActive(&_IHardforkRegistry.CallOpts)
 }
 
 // EnumerateActive is a free data retrieval call binding the contract method 0xe1d6f43a.
 //
-// Solidity: function enumerateActive() constant returns(bytes32[] active_hf_names)
+// Solidity: function enumerateActive() view returns(bytes32[])
 func (_IHardforkRegistry *IHardforkRegistryCallerSession) EnumerateActive() ([][32]byte, error) {
 	return _IHardforkRegistry.Contract.EnumerateActive(&_IHardforkRegistry.CallOpts)
 }
 
-// EnumerateAll is a free data retrieval call binding the contract method 0xbc393afb.
-//
-// Solidity: function enumerateAll() constant returns(bytes32[] all_hf_names)
-func (_IHardforkRegistry *IHardforkRegistryCaller) EnumerateAll(opts *bind.CallOpts) ([][32]byte, error) {
-	var (
-		ret0 = new([][32]byte)
-	)
-	out := ret0
-	err := _IHardforkRegistry.contract.Call(opts, out, "enumerateAll")
-	return *ret0, err
-}
-
-// EnumerateAll is a free data retrieval call binding the contract method 0xbc393afb.
-//
-// Solidity: function enumerateAll() constant returns(bytes32[] all_hf_names)
-func (_IHardforkRegistry *IHardforkRegistrySession) EnumerateAll() ([][32]byte, error) {
-	return _IHardforkRegistry.Contract.EnumerateAll(&_IHardforkRegistry.CallOpts)
-}
-
-// EnumerateAll is a free data retrieval call binding the contract method 0xbc393afb.
-//
-// Solidity: function enumerateAll() constant returns(bytes32[] all_hf_names)
-func (_IHardforkRegistry *IHardforkRegistryCallerSession) EnumerateAll() ([][32]byte, error) {
-	return _IHardforkRegistry.Contract.EnumerateAll(&_IHardforkRegistry.CallOpts)
-}
-
 // EnumeratePending is a free data retrieval call binding the contract method 0xca89ad5f.
 //
-// Solidity: function enumeratePending() constant returns(bytes32[] pending_hf_names)
+// Solidity: function enumeratePending() view returns(bytes32[])
 func (_IHardforkRegistry *IHardforkRegistryCaller) EnumeratePending(opts *bind.CallOpts) ([][32]byte, error) {
-	var (
-		ret0 = new([][32]byte)
-	)
-	out := ret0
-	err := _IHardforkRegistry.contract.Call(opts, out, "enumeratePending")
-	return *ret0, err
+	var out []interface{}
+	err := _IHardforkRegistry.contract.Call(opts, &out, "enumeratePending")
+
+	if err != nil {
+		return *new([][32]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([][32]byte)).(*[][32]byte)
+
+	return out0, err
+
 }
 
 // EnumeratePending is a free data retrieval call binding the contract method 0xca89ad5f.
 //
-// Solidity: function enumeratePending() constant returns(bytes32[] pending_hf_names)
+// Solidity: function enumeratePending() view returns(bytes32[])
 func (_IHardforkRegistry *IHardforkRegistrySession) EnumeratePending() ([][32]byte, error) {
 	return _IHardforkRegistry.Contract.EnumeratePending(&_IHardforkRegistry.CallOpts)
 }
 
 // EnumeratePending is a free data retrieval call binding the contract method 0xca89ad5f.
 //
-// Solidity: function enumeratePending() constant returns(bytes32[] pending_hf_names)
+// Solidity: function enumeratePending() view returns(bytes32[])
 func (_IHardforkRegistry *IHardforkRegistryCallerSession) EnumeratePending() ([][32]byte, error) {
 	return _IHardforkRegistry.Contract.EnumeratePending(&_IHardforkRegistry.CallOpts)
 }
 
-// GetHardfork is a free data retrieval call binding the contract method 0x44d396ff.
+// Get is a free data retrieval call binding the contract method 0x8eaa6ac0.
 //
-// Solidity: function getHardfork(bytes32 _hardfork_name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryCaller) GetHardfork(opts *bind.CallOpts, _hardfork_name [32]byte) (struct {
-	BlockNo    *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+// Solidity: function get(bytes32 name) view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryCaller) Get(opts *bind.CallOpts, name [32]byte) (struct {
+	BlockNumber *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
-	ret := new(struct {
-		BlockNo    *big.Int
-		BlockHash  [32]byte
-		SwFeatures *big.Int
+	var out []interface{}
+	err := _IHardforkRegistry.contract.Call(opts, &out, "get", name)
+
+	outstruct := new(struct {
+		BlockNumber *big.Int
+		BlockHash   [32]byte
+		SwFeatures  *big.Int
 	})
-	out := ret
-	err := _IHardforkRegistry.contract.Call(opts, out, "getHardfork", _hardfork_name)
-	return *ret, err
+
+	outstruct.BlockNumber = out[0].(*big.Int)
+	outstruct.BlockHash = out[1].([32]byte)
+	outstruct.SwFeatures = out[2].(*big.Int)
+
+	return *outstruct, err
+
 }
 
-// GetHardfork is a free data retrieval call binding the contract method 0x44d396ff.
+// Get is a free data retrieval call binding the contract method 0x8eaa6ac0.
 //
-// Solidity: function getHardfork(bytes32 _hardfork_name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistrySession) GetHardfork(_hardfork_name [32]byte) (struct {
-	BlockNo    *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+// Solidity: function get(bytes32 name) view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistrySession) Get(name [32]byte) (struct {
+	BlockNumber *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
-	return _IHardforkRegistry.Contract.GetHardfork(&_IHardforkRegistry.CallOpts, _hardfork_name)
+	return _IHardforkRegistry.Contract.Get(&_IHardforkRegistry.CallOpts, name)
 }
 
-// GetHardfork is a free data retrieval call binding the contract method 0x44d396ff.
+// Get is a free data retrieval call binding the contract method 0x8eaa6ac0.
 //
-// Solidity: function getHardfork(bytes32 _hardfork_name) constant returns(uint256 block_no, bytes32 block_hash, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryCallerSession) GetHardfork(_hardfork_name [32]byte) (struct {
-	BlockNo    *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+// Solidity: function get(bytes32 name) view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryCallerSession) Get(name [32]byte) (struct {
+	BlockNumber *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
-	return _IHardforkRegistry.Contract.GetHardfork(&_IHardforkRegistry.CallOpts, _hardfork_name)
+	return _IHardforkRegistry.Contract.Get(&_IHardforkRegistry.CallOpts, name)
 }
 
 // IsActive is a free data retrieval call binding the contract method 0x5c36901c.
 //
-// Solidity: function isActive(bytes32 name) constant returns(bool)
+// Solidity: function isActive(bytes32 name) view returns(bool)
 func (_IHardforkRegistry *IHardforkRegistryCaller) IsActive(opts *bind.CallOpts, name [32]byte) (bool, error) {
-	var (
-		ret0 = new(bool)
-	)
-	out := ret0
-	err := _IHardforkRegistry.contract.Call(opts, out, "isActive", name)
-	return *ret0, err
+	var out []interface{}
+	err := _IHardforkRegistry.contract.Call(opts, &out, "isActive", name)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
 }
 
 // IsActive is a free data retrieval call binding the contract method 0x5c36901c.
 //
-// Solidity: function isActive(bytes32 name) constant returns(bool)
+// Solidity: function isActive(bytes32 name) view returns(bool)
 func (_IHardforkRegistry *IHardforkRegistrySession) IsActive(name [32]byte) (bool, error) {
 	return _IHardforkRegistry.Contract.IsActive(&_IHardforkRegistry.CallOpts, name)
 }
 
 // IsActive is a free data retrieval call binding the contract method 0x5c36901c.
 //
-// Solidity: function isActive(bytes32 name) constant returns(bool)
+// Solidity: function isActive(bytes32 name) view returns(bool)
 func (_IHardforkRegistry *IHardforkRegistryCallerSession) IsActive(name [32]byte) (bool, error) {
 	return _IHardforkRegistry.Contract.IsActive(&_IHardforkRegistry.CallOpts, name)
 }
 
-// Propose is a paid mutator transaction binding the contract method 0x072a9823.
+// Add is a paid mutator transaction binding the contract method 0xaa61604f.
 //
-// Solidity: function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features) returns()
-func (_IHardforkRegistry *IHardforkRegistryTransactor) Propose(opts *bind.TransactOpts, block_no *big.Int, name [32]byte, block_hash [32]byte, sw_features *big.Int) (*types.Transaction, error) {
-	return _IHardforkRegistry.contract.Transact(opts, "propose", block_no, name, block_hash, sw_features)
+// Solidity: function add(bytes32 name, uint256 block_number, uint256 sw_features) returns()
+func (_IHardforkRegistry *IHardforkRegistryTransactor) Add(opts *bind.TransactOpts, name [32]byte, block_number *big.Int, sw_features *big.Int) (*types.Transaction, error) {
+	return _IHardforkRegistry.contract.Transact(opts, "add", name, block_number, sw_features)
 }
 
-// Propose is a paid mutator transaction binding the contract method 0x072a9823.
+// Add is a paid mutator transaction binding the contract method 0xaa61604f.
 //
-// Solidity: function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features) returns()
-func (_IHardforkRegistry *IHardforkRegistrySession) Propose(block_no *big.Int, name [32]byte, block_hash [32]byte, sw_features *big.Int) (*types.Transaction, error) {
-	return _IHardforkRegistry.Contract.Propose(&_IHardforkRegistry.TransactOpts, block_no, name, block_hash, sw_features)
+// Solidity: function add(bytes32 name, uint256 block_number, uint256 sw_features) returns()
+func (_IHardforkRegistry *IHardforkRegistrySession) Add(name [32]byte, block_number *big.Int, sw_features *big.Int) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Add(&_IHardforkRegistry.TransactOpts, name, block_number, sw_features)
 }
 
-// Propose is a paid mutator transaction binding the contract method 0x072a9823.
+// Add is a paid mutator transaction binding the contract method 0xaa61604f.
 //
-// Solidity: function propose(uint256 block_no, bytes32 name, bytes32 block_hash, uint256 sw_features) returns()
-func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Propose(block_no *big.Int, name [32]byte, block_hash [32]byte, sw_features *big.Int) (*types.Transaction, error) {
-	return _IHardforkRegistry.Contract.Propose(&_IHardforkRegistry.TransactOpts, block_no, name, block_hash, sw_features)
+// Solidity: function add(bytes32 name, uint256 block_number, uint256 sw_features) returns()
+func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Add(name [32]byte, block_number *big.Int, sw_features *big.Int) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Add(&_IHardforkRegistry.TransactOpts, name, block_number, sw_features)
+}
+
+// Finalize is a paid mutator transaction binding the contract method 0x92584d80.
+//
+// Solidity: function finalize(bytes32 name) returns()
+func (_IHardforkRegistry *IHardforkRegistryTransactor) Finalize(opts *bind.TransactOpts, name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.contract.Transact(opts, "finalize", name)
+}
+
+// Finalize is a paid mutator transaction binding the contract method 0x92584d80.
+//
+// Solidity: function finalize(bytes32 name) returns()
+func (_IHardforkRegistry *IHardforkRegistrySession) Finalize(name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Finalize(&_IHardforkRegistry.TransactOpts, name)
+}
+
+// Finalize is a paid mutator transaction binding the contract method 0x92584d80.
+//
+// Solidity: function finalize(bytes32 name) returns()
+func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Finalize(name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Finalize(&_IHardforkRegistry.TransactOpts, name)
 }
 
 // Remove is a paid mutator transaction binding the contract method 0x95bc2673.
 //
-// Solidity: function remove(bytes32 _hardfork_name) returns()
-func (_IHardforkRegistry *IHardforkRegistryTransactor) Remove(opts *bind.TransactOpts, _hardfork_name [32]byte) (*types.Transaction, error) {
-	return _IHardforkRegistry.contract.Transact(opts, "remove", _hardfork_name)
+// Solidity: function remove(bytes32 name) returns(bool)
+func (_IHardforkRegistry *IHardforkRegistryTransactor) Remove(opts *bind.TransactOpts, name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.contract.Transact(opts, "remove", name)
 }
 
 // Remove is a paid mutator transaction binding the contract method 0x95bc2673.
 //
-// Solidity: function remove(bytes32 _hardfork_name) returns()
-func (_IHardforkRegistry *IHardforkRegistrySession) Remove(_hardfork_name [32]byte) (*types.Transaction, error) {
-	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, _hardfork_name)
+// Solidity: function remove(bytes32 name) returns(bool)
+func (_IHardforkRegistry *IHardforkRegistrySession) Remove(name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, name)
 }
 
 // Remove is a paid mutator transaction binding the contract method 0x95bc2673.
 //
-// Solidity: function remove(bytes32 _hardfork_name) returns()
-func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Remove(_hardfork_name [32]byte) (*types.Transaction, error) {
-	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, _hardfork_name)
+// Solidity: function remove(bytes32 name) returns(bool)
+func (_IHardforkRegistry *IHardforkRegistryTransactorSession) Remove(name [32]byte) (*types.Transaction, error) {
+	return _IHardforkRegistry.Contract.Remove(&_IHardforkRegistry.TransactOpts, name)
 }
 
-// IHardforkRegistryHardforkIterator is returned from FilterHardfork and is used to iterate over the raw logs and unpacked data for Hardfork events raised by the IHardforkRegistry contract.
-type IHardforkRegistryHardforkIterator struct {
-	Event *IHardforkRegistryHardfork // Event containing the contract specifics and raw log
+// IHardforkRegistryHardforkCreatedIterator is returned from FilterHardforkCreated and is used to iterate over the raw logs and unpacked data for HardforkCreated events raised by the IHardforkRegistry contract.
+type IHardforkRegistryHardforkCreatedIterator struct {
+	Event *IHardforkRegistryHardforkCreated // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -374,7 +433,7 @@ type IHardforkRegistryHardforkIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *IHardforkRegistryHardforkIterator) Next() bool {
+func (it *IHardforkRegistryHardforkCreatedIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -383,7 +442,7 @@ func (it *IHardforkRegistryHardforkIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(IHardforkRegistryHardfork)
+			it.Event = new(IHardforkRegistryHardforkCreated)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -398,7 +457,7 @@ func (it *IHardforkRegistryHardforkIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(IHardforkRegistryHardfork)
+		it.Event = new(IHardforkRegistryHardforkCreated)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -414,44 +473,53 @@ func (it *IHardforkRegistryHardforkIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *IHardforkRegistryHardforkIterator) Error() error {
+func (it *IHardforkRegistryHardforkCreatedIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *IHardforkRegistryHardforkIterator) Close() error {
+func (it *IHardforkRegistryHardforkCreatedIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// IHardforkRegistryHardfork represents a Hardfork event raised by the IHardforkRegistry contract.
-type IHardforkRegistryHardfork struct {
-	BlockNo    *big.Int
-	BlockHash  [32]byte
-	Name       [32]byte
-	SwFeatures *big.Int
-	Raw        types.Log // Blockchain specific contextual infos
+// IHardforkRegistryHardforkCreated represents a HardforkCreated event raised by the IHardforkRegistry contract.
+type IHardforkRegistryHardforkCreated struct {
+	Name        [32]byte
+	BlockNumber *big.Int
+	SwFeatures  *big.Int
+	Raw         types.Log // Blockchain specific contextual infos
 }
 
-// FilterHardfork is a free log retrieval operation binding the contract event 0xb22930fde3f4a5bddcb906dc3248ab30f4549101ef99a59fbfbf6121d74c17c5.
+// FilterHardforkCreated is a free log retrieval operation binding the contract event 0x33bbb09eb0e71b49dacc2c0e0f73dd640a1314f0d08d5f8efa5c12eac770c4c3.
 //
-// Solidity: event Hardfork(uint256 block_no, bytes32 block_hash, bytes32 name, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryFilterer) FilterHardfork(opts *bind.FilterOpts) (*IHardforkRegistryHardforkIterator, error) {
+// Solidity: event HardforkCreated(bytes32 indexed name, uint256 block_number, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) FilterHardforkCreated(opts *bind.FilterOpts, name [][32]byte) (*IHardforkRegistryHardforkCreatedIterator, error) {
 
-	logs, sub, err := _IHardforkRegistry.contract.FilterLogs(opts, "Hardfork")
+	var nameRule []interface{}
+	for _, nameItem := range name {
+		nameRule = append(nameRule, nameItem)
+	}
+
+	logs, sub, err := _IHardforkRegistry.contract.FilterLogs(opts, "HardforkCreated", nameRule)
 	if err != nil {
 		return nil, err
 	}
-	return &IHardforkRegistryHardforkIterator{contract: _IHardforkRegistry.contract, event: "Hardfork", logs: logs, sub: sub}, nil
+	return &IHardforkRegistryHardforkCreatedIterator{contract: _IHardforkRegistry.contract, event: "HardforkCreated", logs: logs, sub: sub}, nil
 }
 
-// WatchHardfork is a free log subscription operation binding the contract event 0xb22930fde3f4a5bddcb906dc3248ab30f4549101ef99a59fbfbf6121d74c17c5.
+// WatchHardforkCreated is a free log subscription operation binding the contract event 0x33bbb09eb0e71b49dacc2c0e0f73dd640a1314f0d08d5f8efa5c12eac770c4c3.
 //
-// Solidity: event Hardfork(uint256 block_no, bytes32 block_hash, bytes32 name, uint256 sw_features)
-func (_IHardforkRegistry *IHardforkRegistryFilterer) WatchHardfork(opts *bind.WatchOpts, sink chan<- *IHardforkRegistryHardfork) (event.Subscription, error) {
+// Solidity: event HardforkCreated(bytes32 indexed name, uint256 block_number, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) WatchHardforkCreated(opts *bind.WatchOpts, sink chan<- *IHardforkRegistryHardforkCreated, name [][32]byte) (event.Subscription, error) {
 
-	logs, sub, err := _IHardforkRegistry.contract.WatchLogs(opts, "Hardfork")
+	var nameRule []interface{}
+	for _, nameItem := range name {
+		nameRule = append(nameRule, nameItem)
+	}
+
+	logs, sub, err := _IHardforkRegistry.contract.WatchLogs(opts, "HardforkCreated", nameRule)
 	if err != nil {
 		return nil, err
 	}
@@ -461,8 +529,8 @@ func (_IHardforkRegistry *IHardforkRegistryFilterer) WatchHardfork(opts *bind.Wa
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(IHardforkRegistryHardfork)
-				if err := _IHardforkRegistry.contract.UnpackLog(event, "Hardfork", log); err != nil {
+				event := new(IHardforkRegistryHardforkCreated)
+				if err := _IHardforkRegistry.contract.UnpackLog(event, "HardforkCreated", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -481,4 +549,307 @@ func (_IHardforkRegistry *IHardforkRegistryFilterer) WatchHardfork(opts *bind.Wa
 			}
 		}
 	}), nil
+}
+
+// ParseHardforkCreated is a log parse operation binding the contract event 0x33bbb09eb0e71b49dacc2c0e0f73dd640a1314f0d08d5f8efa5c12eac770c4c3.
+//
+// Solidity: event HardforkCreated(bytes32 indexed name, uint256 block_number, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) ParseHardforkCreated(log types.Log) (*IHardforkRegistryHardforkCreated, error) {
+	event := new(IHardforkRegistryHardforkCreated)
+	if err := _IHardforkRegistry.contract.UnpackLog(event, "HardforkCreated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IHardforkRegistryHardforkFinalizedIterator is returned from FilterHardforkFinalized and is used to iterate over the raw logs and unpacked data for HardforkFinalized events raised by the IHardforkRegistry contract.
+type IHardforkRegistryHardforkFinalizedIterator struct {
+	Event *IHardforkRegistryHardforkFinalized // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IHardforkRegistryHardforkFinalizedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IHardforkRegistryHardforkFinalized)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IHardforkRegistryHardforkFinalized)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IHardforkRegistryHardforkFinalizedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IHardforkRegistryHardforkFinalizedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IHardforkRegistryHardforkFinalized represents a HardforkFinalized event raised by the IHardforkRegistry contract.
+type IHardforkRegistryHardforkFinalized struct {
+	Name        [32]byte
+	BlockNumber *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
+	Raw         types.Log // Blockchain specific contextual infos
+}
+
+// FilterHardforkFinalized is a free log retrieval operation binding the contract event 0x6dc459fd769bc8043e2a9bf76cf8ca708f41158bb7d40566a9f488a8fc6c87da.
+//
+// Solidity: event HardforkFinalized(bytes32 indexed name, uint256 block_number, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) FilterHardforkFinalized(opts *bind.FilterOpts, name [][32]byte) (*IHardforkRegistryHardforkFinalizedIterator, error) {
+
+	var nameRule []interface{}
+	for _, nameItem := range name {
+		nameRule = append(nameRule, nameItem)
+	}
+
+	logs, sub, err := _IHardforkRegistry.contract.FilterLogs(opts, "HardforkFinalized", nameRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IHardforkRegistryHardforkFinalizedIterator{contract: _IHardforkRegistry.contract, event: "HardforkFinalized", logs: logs, sub: sub}, nil
+}
+
+// WatchHardforkFinalized is a free log subscription operation binding the contract event 0x6dc459fd769bc8043e2a9bf76cf8ca708f41158bb7d40566a9f488a8fc6c87da.
+//
+// Solidity: event HardforkFinalized(bytes32 indexed name, uint256 block_number, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) WatchHardforkFinalized(opts *bind.WatchOpts, sink chan<- *IHardforkRegistryHardforkFinalized, name [][32]byte) (event.Subscription, error) {
+
+	var nameRule []interface{}
+	for _, nameItem := range name {
+		nameRule = append(nameRule, nameItem)
+	}
+
+	logs, sub, err := _IHardforkRegistry.contract.WatchLogs(opts, "HardforkFinalized", nameRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IHardforkRegistryHardforkFinalized)
+				if err := _IHardforkRegistry.contract.UnpackLog(event, "HardforkFinalized", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseHardforkFinalized is a log parse operation binding the contract event 0x6dc459fd769bc8043e2a9bf76cf8ca708f41158bb7d40566a9f488a8fc6c87da.
+//
+// Solidity: event HardforkFinalized(bytes32 indexed name, uint256 block_number, bytes32 block_hash, uint256 sw_features)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) ParseHardforkFinalized(log types.Log) (*IHardforkRegistryHardforkFinalized, error) {
+	event := new(IHardforkRegistryHardforkFinalized)
+	if err := _IHardforkRegistry.contract.UnpackLog(event, "HardforkFinalized", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IHardforkRegistryHardforkRemovedIterator is returned from FilterHardforkRemoved and is used to iterate over the raw logs and unpacked data for HardforkRemoved events raised by the IHardforkRegistry contract.
+type IHardforkRegistryHardforkRemovedIterator struct {
+	Event *IHardforkRegistryHardforkRemoved // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IHardforkRegistryHardforkRemovedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IHardforkRegistryHardforkRemoved)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IHardforkRegistryHardforkRemoved)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IHardforkRegistryHardforkRemovedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IHardforkRegistryHardforkRemovedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IHardforkRegistryHardforkRemoved represents a HardforkRemoved event raised by the IHardforkRegistry contract.
+type IHardforkRegistryHardforkRemoved struct {
+	Name [32]byte
+	Raw  types.Log // Blockchain specific contextual infos
+}
+
+// FilterHardforkRemoved is a free log retrieval operation binding the contract event 0x7633164a5aa7e8b452d1c35fadd7abd1d59eb45b5fd97f68087b4a3ee2b280ed.
+//
+// Solidity: event HardforkRemoved(bytes32 indexed name)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) FilterHardforkRemoved(opts *bind.FilterOpts, name [][32]byte) (*IHardforkRegistryHardforkRemovedIterator, error) {
+
+	var nameRule []interface{}
+	for _, nameItem := range name {
+		nameRule = append(nameRule, nameItem)
+	}
+
+	logs, sub, err := _IHardforkRegistry.contract.FilterLogs(opts, "HardforkRemoved", nameRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IHardforkRegistryHardforkRemovedIterator{contract: _IHardforkRegistry.contract, event: "HardforkRemoved", logs: logs, sub: sub}, nil
+}
+
+// WatchHardforkRemoved is a free log subscription operation binding the contract event 0x7633164a5aa7e8b452d1c35fadd7abd1d59eb45b5fd97f68087b4a3ee2b280ed.
+//
+// Solidity: event HardforkRemoved(bytes32 indexed name)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) WatchHardforkRemoved(opts *bind.WatchOpts, sink chan<- *IHardforkRegistryHardforkRemoved, name [][32]byte) (event.Subscription, error) {
+
+	var nameRule []interface{}
+	for _, nameItem := range name {
+		nameRule = append(nameRule, nameItem)
+	}
+
+	logs, sub, err := _IHardforkRegistry.contract.WatchLogs(opts, "HardforkRemoved", nameRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IHardforkRegistryHardforkRemoved)
+				if err := _IHardforkRegistry.contract.UnpackLog(event, "HardforkRemoved", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseHardforkRemoved is a log parse operation binding the contract event 0x7633164a5aa7e8b452d1c35fadd7abd1d59eb45b5fd97f68087b4a3ee2b280ed.
+//
+// Solidity: event HardforkRemoved(bytes32 indexed name)
+func (_IHardforkRegistry *IHardforkRegistryFilterer) ParseHardforkRemoved(log types.Log) (*IHardforkRegistryHardforkRemoved, error) {
+	event := new(IHardforkRegistryHardforkRemoved)
+	if err := _IHardforkRegistry.contract.UnpackLog(event, "HardforkRemoved", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
 }
