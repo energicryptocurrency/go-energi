@@ -51,15 +51,16 @@ type HardforkService struct {
 	ctxCancel func()
 
 	inSync int32
+	callOpts   *bind.CallOpts
 
-	hfAPI *energi_api.HardforkRegistryAPI
+	hfRegistry *energi_api.IHardforkRegistry
 }
 
 // NewHardforkService returns a new HardforkService instance.
 func NewHardforkService(ethServ *eth.Ethereum) (*HardforkService, error) {
 	hf := &HardforkService{
 		eth:   ethServ,
-		hfAPI: energi_api.NewHardforkRegistryAPI(ethServ.APIBackend),
+		callOpts: &bind.CallOpts{},
 	}
 
 	hf.ctx, hf.ctxCancel = context.WithCancel(context.Background())
@@ -81,6 +82,28 @@ func (hf *HardforkService) APIs() []rpc.API {
 // Start is called after all services have been constructed and the networking
 // layer was also initialized to spawn any goroutines required by the service.
 func (hf *HardforkService) Start(server *p2p.Server) error {
+
+	//create hardfork registry interface object pointing to current hardforkregistry contract address
+	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(energi_params.Energi_HardforkRegistry, c.eth.APIBackend)
+	if err != nil {
+		return err
+	}
+
+	/*
+	Upon startup retrieve all active hardforks and check if the
+	active hardfork version parameter is higher than running core node version
+	then log error to let user know the core node version is behind
+	*/
+	activeHardforkNames, err := c.hfRegistry.enumerateActive()(c.callOpts)
+	if err != nil {
+		log.Error("Failed to get active hardforks (startup)", "err", err);
+	} else if lc := len(activeHardforkNames); lc > 0 {
+		if err := logHardForks(activeHardforkNames); err != nil {
+			log.Error("Failed to log active hardforks", "err", err);
+		}
+	}
+
+
 	go func() {
 		chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
 		headSub := hf.eth.BlockChain().SubscribeChainHeadEvent(chainHeadCh)
@@ -104,6 +127,13 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	}()
 
 	return nil
+}
+
+func (hf *HardforkService) logHardforks(hf_names [][32]byte) {
+	for _, hf_name := range active_hf_names {
+			 hf.get(hf_name, hf.callOpts)
+	 }
+	return nil;
 }
 
 // Stop terminates all goroutines belonging to the service, blocking until they
