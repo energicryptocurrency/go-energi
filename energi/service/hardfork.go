@@ -17,22 +17,27 @@
 package service
 
 import (
-	"bytes"
+	//"bytes"
 	"context"
 	"math/big"
-	"sync/atomic"
+	// "sync/atomic"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/accounts/abi/bind"
+	// "energi.world/core/gen3/common"
+	// "energi.world/core/gen3/core"
+	// "energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/eth/downloader"
+	// "energi.world/core/gen3/eth/downloader"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/p2p"
 	"energi.world/core/gen3/rpc"
 
-	energi_api "energi.world/core/gen3/energi/api"
-	energi_common "energi.world/core/gen3/energi/common"
+	// energi_api "energi.world/core/gen3/energi/api"
+	// energi_common "energi.world/core/gen3/energi/common"
+	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_params "energi.world/core/gen3/energi/params"
+
+
 )
 
 var logAllHfs = int32(1)
@@ -53,7 +58,7 @@ type HardforkService struct {
 	inSync int32
 	callOpts   *bind.CallOpts
 
-	hfRegistry *energi_api.IHardforkRegistry
+	hfRegistry *energi_abi.IHardforkRegistry
 }
 
 // NewHardforkService returns a new HardforkService instance.
@@ -84,7 +89,8 @@ func (hf *HardforkService) APIs() []rpc.API {
 func (hf *HardforkService) Start(server *p2p.Server) error {
 
 	//create hardfork registry interface object pointing to current hardforkregistry contract address
-	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(energi_params.Energi_HardforkRegistry, c.eth.APIBackend)
+	var err error
+	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(energi_params.Energi_HardforkRegistry, hf.eth.APIBackend)
 	if err != nil {
 		return err
 	}
@@ -94,45 +100,58 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	active hardfork version parameter is higher than running core node version
 	then log error to let user know the core node version is behind
 	*/
-	activeHardforkNames, err := c.hfRegistry.enumerateActive()(c.callOpts)
+	activeHardforkNames, err := hf.hfRegistry.EnumerateActive(hf.callOpts)
 	if err != nil {
 		log.Error("Failed to get active hardforks (startup)", "err", err);
 	} else if lc := len(activeHardforkNames); lc > 0 {
-		if err := logHardForks(activeHardforkNames); err != nil {
+		if err := hf.LogHardForks(); err != nil {
 			log.Error("Failed to log active hardforks", "err", err);
 		}
 	}
 
-
-	go func() {
-		chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
-		headSub := hf.eth.BlockChain().SubscribeChainHeadEvent(chainHeadCh)
-		defer headSub.Unsubscribe()
-
-		//---
-		for {
-			select {
-			case <-hf.ctx.Done(): // Triggers immediate shutdown.
-				return
-
-			case ev := <-chainHeadCh:
-				hf.onChainHead(ev.Block)
-				break
-
-			// Shutdown
-			case <-headSub.Err():
-				return
-			}
-		}
-	}()
+	//
+	// go func() {
+	// 	chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
+	// 	headSub := hf.eth.BlockChain().SubscribeChainHeadEvent(chainHeadCh)
+	// 	defer headSub.Unsubscribe()
+	//
+	// 	//---
+	// 	for {
+	// 		select {
+	// 		case <-hf.ctx.Done(): // Triggers immediate shutdown.
+	// 			return
+	//
+	// 		case ev := <-chainHeadCh:
+	// 			hf.onChainHead(ev.Block)
+	// 			break
+	//
+	// 		// Shutdown
+	// 		case <-headSub.Err():
+	// 			return
+	// 		}
+	// 	}
+	// }()
 
 	return nil
 }
 
-func (hf *HardforkService) logHardforks(hf_names [][32]byte) {
-	for _, hf_name := range active_hf_names {
-			 hf.get(hf_name, hf.callOpts)
-	 }
+func (hf *HardforkService) LogHardForks() error {
+	//
+	// //atomically read the pointer to the most recent block header
+	// currentBlockHeader := hf.eth.blockchain.currentBlock.Load().(*types.Header)
+	// currentBlockNumber := currentBlockHeader.Number
+	//
+	// //get the hf finalization period parameter from config
+	// hfFinalizationPeriod := hf.eth.BlockChain().Config().HFFinalizationPeriod
+	//
+	// /*
+	// for each hardfork name retrieve data from contract and
+	// log the information regarding the current block number
+  // */
+	// for _, hf_name := range active_hf_names {
+	// 		 logHardfork(hf.get(hf.callOpts, hf_name))
+	// }
+
 	return nil;
 }
 
@@ -146,124 +165,124 @@ func (hf *HardforkService) Stop() error {
 }
 
 func (hf *HardforkService) listenDownloader() {
-	events := hf.eth.EventMux().Subscribe(
-		downloader.StartEvent{},
-		downloader.DoneEvent{},
-		downloader.FailedEvent{},
-	)
-	defer events.Unsubscribe()
-
-	for {
-		select {
-		case <-hf.ctx.Done(): // Triggers immediate shutdown.
-			return
-		case ev := <-events.Chan():
-			if ev == nil {
-				return
-			}
-			switch ev.Data.(type) {
-			case downloader.StartEvent:
-				atomic.StoreInt32(&hf.inSync, 0)
-				log.Debug("Hardfork service is not in sync")
-			case downloader.DoneEvent, downloader.FailedEvent:
-				atomic.StoreInt32(&hf.inSync, 1)
-				log.Debug("Hardfork service is in sync")
-				return
-			}
-		}
-	}
+	// events := hf.eth.EventMux().Subscribe(
+	// 	downloader.StartEvent{},
+	// 	downloader.DoneEvent{},
+	// 	downloader.FailedEvent{},
+	// )
+	// defer events.Unsubscribe()
+	//
+	// for {
+	// 	select {
+	// 	case <-hf.ctx.Done(): // Triggers immediate shutdown.
+	// 		return
+	// 	case ev := <-events.Chan():
+	// 		if ev == nil {
+	// 			return
+	// 		}
+	// 		switch ev.Data.(type) {
+	// 		case downloader.StartEvent:
+	// 			atomic.StoreInt32(&hf.inSync, 0)
+	// 			log.Debug("Hardfork service is not in sync")
+	// 		case downloader.DoneEvent, downloader.FailedEvent:
+	// 			atomic.StoreInt32(&hf.inSync, 1)
+	// 			log.Debug("Hardfork service is in sync")
+	// 			return
+	// 		}
+	// 	}
+	// }
 }
-
-func (hf *HardforkService) onChainHead(block *types.Block) {
-	hardforks, err := hf.hfAPI.ListHardforks()
-	if err != nil {
-		log.Warn("ListHardforks error", "err", err)
-		return
-	}
-
-	if len(hardforks) < 1 {
-		log.Debug("No hardforks currently available in the system")
-		return
-	}
-
-	period := hf.eth.BlockChain().Config().HFFinalizationPeriod
-
-	// The first time log the last loggedCount hardforks otherwise log only the last one.
-	if atomic.CompareAndSwapInt32(&logAllHfs, 1, 0) {
-		offset := len(hardforks) - loggedCount
-		if offset < 0 {
-			offset = 0
-		}
-
-		for _, hfInfo := range hardforks[offset:] {
-			logHardforkInfo(block.Number(), period, hfInfo)
-		}
-
-		log.Info("Initial hardforks listing on startup", "logged", loggedCount,
-			"remaining", offset)
-	} else {
-		pendingHardforks, er := hf.hfAPI.ListPendingHardforks()
-		if er != nil {
-			log.Warn("ListPendingHardforks", "err", err)
-		}
-
-		if len(pendingHardforks) < 1 && er == nil {
-			log.Debug("No pending hardforks currently available in the system")
-		}
-
-
-		//check pendingHardforks not to be nil
-		if er == nil {
-			// Otherwise only log information about the pending hardforks.
-			for _, hfInfo := range pendingHardforks {
-				// log this data at intervals of logIntervals.
-				mod := new(big.Int).Mod(block.Number(), logIntervals)
-				if mod.Cmp(common.Big0) == 0 {
-					logHardforkInfo(block.Number(), period, hfInfo)
-				}
-			}
-		}
-
-	}
-
-	for _, fork := range hardforks {
-		// Updates the current list of Active(finalized) Hardforks.
-		energi_common.UpdateHfActive(fork.Name, fork.BlockNo.ToInt(),
-			fork.BlockHash, fork.SWFeatures.ToInt())
-	}
-}
+//
+// func (hf *HardforkService) onChainHead(block *types.Block) {
+// 	hardforks, err := hf.hfAPI.ListHardforks()
+// 	if err != nil {
+// 		log.Warn("ListHardforks error", "err", err)
+// 		return
+// 	}
+//
+// 	if len(hardforks) < 1 {
+// 		log.Debug("No hardforks currently available in the system")
+// 		return
+// 	}
+//
+// 	period := hf.eth.BlockChain().Config().HFFinalizationPeriod
+//
+// 	// The first time log the last loggedCount hardforks otherwise log only the last one.
+// 	if atomic.CompareAndSwapInt32(&logAllHfs, 1, 0) {
+// 		offset := len(hardforks) - loggedCount
+// 		if offset < 0 {
+// 			offset = 0
+// 		}
+//
+// 		for _, hfInfo := range hardforks[offset:] {
+// 			logHardforkInfo(block.Number(), period, hfInfo)
+// 		}
+//
+// 		log.Info("Initial hardforks listing on startup", "logged", loggedCount,
+// 			"remaining", offset)
+// 	} else {
+// 		pendingHardforks, er := hf.hfAPI.ListPendingHardforks()
+// 		if er != nil {
+// 			log.Warn("ListPendingHardforks", "err", err)
+// 		}
+//
+// 		if len(pendingHardforks) < 1 && er == nil {
+// 			log.Debug("No pending hardforks currently available in the system")
+// 		}
+//
+//
+// 		//check pendingHardforks not to be nil
+// 		if er == nil {
+// 			// Otherwise only log information about the pending hardforks.
+// 			for _, hfInfo := range pendingHardforks {
+// 				// log this data at intervals of logIntervals.
+// 				mod := new(big.Int).Mod(block.Number(), logIntervals)
+// 				if mod.Cmp(common.Big0) == 0 {
+// 					logHardforkInfo(block.Number(), period, hfInfo)
+// 				}
+// 			}
+// 		}
+//
+// 	}
+//
+// 	for _, fork := range hardforks {
+// 		// Updates the current list of Active(finalized) Hardforks.
+// 		energi_common.UpdateHfActive(fork.Name, fork.BlockNo.ToInt(),
+// 			fork.BlockHash, fork.SWFeatures.ToInt())
+// 	}
+// }
 
 // logHardfork logs information about the information about the provided hardfork.
-func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
-	logFunc := log.Debug
-	emptyHash := [32]byte{}
-	hfBlockNo := hfInfo.BlockNo.ToInt()
-	diff := new(big.Int).Sub(currentBlockNo, hfBlockNo)
-
-	if bytes.Compare(hfInfo.BlockHash[:], emptyHash[:]) == 0 {
-		if diff.Cmp(big.NewInt(-10)) > 0 && diff.Cmp(period) <= 0 {
-			// -10 < Currentblock - hfblock <= hfPeriod
-			logFunc = log.Warn
-		}
-
-		desc := "blocks To Hardfork"
-		if diff.Cmp(common.Big0) > 0 {
-			desc = "blocks after Hardfork"
-		}
-
-		// BlockHash not yet set.
-		logFunc("Hardfork almost being finalized", "block Number", hfBlockNo,
-			"hardfork Name", hfInfo.Name, desc, new(big.Int).Abs(diff),
-		)
-	} else {
-		if diff.Cmp(common.Big0) > 0 && diff.Cmp(period) <= 0 {
-			// 0 < Currentblock - hfblock <= hfPeriod
-			logFunc = log.Info
-		}
-
-		// BlockHash already set. Hardfork already finalized.
-		logFunc("Hardfork already finalized", "block Number", hfBlockNo,
-			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String(),
-		)
-	}
-}
+// func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
+// 	logFunc := log.Debug
+// 	emptyHash := [32]byte{}
+// 	hfBlockNo := hfInfo.BlockNo.ToInt()
+// 	diff := new(big.Int).Sub(currentBlockNo, hfBlockNo)
+//
+// 	if bytes.Compare(hfInfo.BlockHash[:], emptyHash[:]) == 0 {
+// 		if diff.Cmp(big.NewInt(-10)) > 0 && diff.Cmp(period) <= 0 {
+// 			// -10 < Currentblock - hfblock <= hfPeriod
+// 			logFunc = log.Warn
+// 		}
+//
+// 		desc := "blocks To Hardfork"
+// 		if diff.Cmp(common.Big0) > 0 {
+// 			desc = "blocks after Hardfork"
+// 		}
+//
+// 		// BlockHash not yet set.
+// 		logFunc("Hardfork almost being finalized", "block Number", hfBlockNo,
+// 			"hardfork Name", hfInfo.Name, desc, new(big.Int).Abs(diff),
+// 		)
+// 	} else {
+// 		if diff.Cmp(common.Big0) > 0 && diff.Cmp(period) <= 0 {
+// 			// 0 < Currentblock - hfblock <= hfPeriod
+// 			logFunc = log.Info
+// 		}
+//
+// 		// BlockHash already set. Hardfork already finalized.
+// 		logFunc("Hardfork already finalized", "block Number", hfBlockNo,
+// 			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String(),
+// 		)
+// 	}
+// }
