@@ -262,9 +262,9 @@ func (hf *HardforkRegistryAPI) GenerateHardfork(
 	}
 }
 
-// generateHardfork generates the actual hardfork. It also checks if the block
-// number is within its block finalization period where if affirmative the
-// hardfork is finalized.
+
+
+// generateHardfork generates the actual hardfork.
 func (hf *HardforkRegistryAPI) generateHardfork(
 	BlockNumber *hexutil.Big,
 	name string,
@@ -279,6 +279,45 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 	}
 
 	tx, err := registry.Add(energi_common.EncodeToString(name), BlockNumber.ToInt(), swFeatures.ToInt())
+	if err != nil {
+		return txHash, err
+	}
+
+	if tx != nil {
+		txHash = tx.Hash()
+		log.Info("Note: please wait till HF create TX gets into a block!", "tx", txHash.Hex())
+	}
+
+	return txHash, nil
+}
+
+
+
+// FinalizeHardfork validates hardfork name parameter and calls contract finalize function
+func (hf *HardforkRegistryAPI) FinalizeHardfork(name string, password *string) (common.Hash, error) {
+	switch {
+	case len([]byte(name)) > maxHardforkNameSize || len(name) == 0:
+		return (common.Hash{}), fmt.Errorf("incorrect Hardfork name size")
+
+	default:
+		return hf.finalizeHardfork(name, password)
+	}
+}
+
+
+/*
+finalizeHardfork calls finalize contract function that checks if hardfork
+with given name is finalizable and if so sets blockhash parameter for the hardfork
+*/
+func (hf *HardforkRegistryAPI) finalizeHardfork(name string, password *string) (common.Hash, error) {
+	txHash := common.Hash{}
+	dst := hf.backend.ChainConfig().Energi.HFSigner
+	registry, err := registrySession(hf.backend, dst, hf.proxyAddr, password)
+	if err != nil {
+		return txHash, err
+	}
+
+	tx, err := registry.Finalize(energi_common.EncodeToString(name))
 	if err != nil {
 		return txHash, err
 	}
