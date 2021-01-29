@@ -57,7 +57,6 @@ const (
 type HardforkService struct {
 	eth *eth.Ethereum
 	ctx context.Context
-
 	ctxCancel func()
 
 	inSync int32
@@ -84,6 +83,7 @@ func NewHardforkService(ethServ *eth.Ethereum) (*HardforkService, error) {
 		return nil, err
 	}
 
+	//listen and log downloading/syncing status
 	go hf.listenDownloader()
 
 	return hf, nil
@@ -239,7 +239,7 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 			return
 
 		case hardfork := <-hfFinalizedChan:
-			log.Warn("New Hardfork Finalized: ",
+			log.Info("New Hardfork Finalized: ",
 							"block Number",
 							hardfork.BlockNumber.String(),
 							"block Hash",
@@ -285,7 +285,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 			return
 
 		case hardfork := <-hfRemovedChan:
-			log.Warn("Hardfork Removed: ",
+			log.Info("Hardfork Removed: ",
 							 "Hardfork Number",
 							 hardfork.Name)
 		}
@@ -318,6 +318,7 @@ func (hf *HardforkService) Stop() error {
 	return nil
 }
 
+//log downloading status
 func (hf *HardforkService) listenDownloader() {
 	events := hf.eth.EventMux().Subscribe(
 		downloader.StartEvent{},
