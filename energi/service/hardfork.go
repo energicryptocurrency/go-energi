@@ -33,18 +33,24 @@ import (
 	"energi.world/core/gen3/rpc"
 
 	energi_api "energi.world/core/gen3/energi/api"
-	// energi_common "energi.world/core/gen3/energi/common"
+	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_params "energi.world/core/gen3/energi/params"
+	energi_common "energi.world/core/gen3/energi/common"
 
 
 )
 
-var logAllHfs = int32(1)
+var (
+	logAllHfs = int32(1)
+	// logIntervals defines the block interval in which pending blocks will be logged.
+	logIntervals = big.NewInt(20)
+)
 
-// logIntervals defines the block interval in which pending blocks will be logged.
-var logIntervals = big.NewInt(20)
 
-// limiting logged hardforks allows proper real estate usage.
-const loggedCount = 10
+const (
+	//event channel default site
+	EventChanBufferSize = 10
+)
 
 // HardforkService defines the hardfork service type.
 type HardforkService struct {
@@ -57,6 +63,8 @@ type HardforkService struct {
 	callOpts   *bind.CallOpts
 
 	hfAPI *energi_api.HardforkRegistryAPI
+	hfRegistry *energi_abi.IHardforkRegistry
+
 }
 
 // NewHardforkService returns a new HardforkService instance.
@@ -86,6 +94,14 @@ func (hf *HardforkService) APIs() []rpc.API {
 // layer was also initialized to spawn any goroutines required by the service.
 func (hf *HardforkService) Start(server *p2p.Server) error {
 
+	//initialize Ihardforkregistry for further calls
+	var err error
+	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(hf.eth.APIBackend.ChainConfig().HardforkRegistryProxyAddress, hf.eth.APIBackend)
+	if err != nil {
+		log.Error("Failed to get create NewIHardforkRegistry (startup)", "err", err);
+		return err
+	}
+
 	/*
 	Upon startup retrieve all active hardforks and check if the
 	active hardfork version parameter is higher than running core node version
@@ -98,30 +114,56 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 		hf.LogHardForks(activeHardforks);
 	}
 
-	//
-	// go func() {
-	// 	chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
-	// 	headSub := hf.eth.BlockChain().SubscribeChainHeadEvent(chainHeadCh)
-	// 	defer headSub.Unsubscribe()
-	//
-	// 	//---
-	// 	for {
-	// 		select {
-	// 		case <-hf.ctx.Done(): // Triggers immediate shutdown.
-	// 			return
-	//
-	// 		case ev := <-chainHeadCh:
-	// 			hf.onChainHead(ev.Block)
-	// 			break
-	//
-	// 		// Shutdown
-	// 		case <-headSub.Err():
-	// 			return
-	// 		}
-	// 	}
-	// }()
-
+	//routine will listen to events thrown when hardfork is created
+	go hf.listenHardforkCreatedEvents();
+	// //routine will listen to hardfork finalization event
+	// go hf.listenHardforkFinalizedEvents();
+	// //routine will listen to events thrown when hardfork is removed
+	// go hf.listenHardforkRemovedEvents();
 	return nil
+
+}
+
+//function is watches newly created hardfork events and logs them
+func (hf *HardforkService) listenHardforkCreatedEvents() {
+
+	//create chan for subscribing to  HardforkCreated events
+	hdCreatedChan := make(chan *energi_abi.IHardforkRegistryHardforkCreated, EventChanBufferSize)
+
+	//create Opts for call
+	watchOpts := &bind.WatchOpts{
+		Context: context.WithValue(
+			context.Background(),
+			energi_params.GeneralProxyCtxKey,
+			energi_common.GeneralProxyHashGen(hf.eth.BlockChain()),
+		),
+	}
+
+	//subscribe to event
+	subscribe, err := hf.hfRegistry.WatchHardforkCreated(watchOpts, hdCreatedChan, [][32]byte{})
+	if err != nil {
+		log.Error("Failed HardforkCreated subscription", "err", err)
+		return
+	}
+	defer subscribe.Unsubscribe()
+
+	//listen to events and log accordingly
+	for {
+		select {
+		case err = <-subscribe.Err():
+			log.Debug("HardforkCreated subscription error", "err", err)
+			return
+
+		case hardfork := <-hdCreatedChan:
+			log.Warn("New Hardfork  created: ",
+							"block Number",
+							hardfork.BlockNumber.String(),
+							"hardfork Name",
+							hardfork.Name,
+							"hardfork SwFeatures",
+							hardfork.SwFeatures.String())
+		}
+	}
 }
 
 func (hf *HardforkService) LogHardForks(hardforks []*energi_api.HardforkInfo)  {
