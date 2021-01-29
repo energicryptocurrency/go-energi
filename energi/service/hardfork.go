@@ -117,8 +117,8 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	//routine will listen to events thrown when hardfork is created
 	go hf.listenHardforkCreatedEvents();
 	// //routine will listen to hardfork finalization event
-	// go hf.listenHardforkFinalizedEvents();
-	// //routine will listen to events thrown when hardfork is removed
+	go hf.listenHardforkFinalizedEvents();
+	//routine will listen to events thrown when hardfork is removed
 	// go hf.listenHardforkRemovedEvents();
 	return nil
 
@@ -158,6 +158,51 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 			log.Warn("New Hardfork  created: ",
 							"block Number",
 							hardfork.BlockNumber.String(),
+							"hardfork Name",
+							hardfork.Name,
+							"hardfork SwFeatures",
+							hardfork.SwFeatures.String())
+		}
+	}
+}
+
+
+//function is watches newly created hardfork events and logs them
+func (hf *HardforkService) listenHardforkFinalizedEvents() {
+
+	//create chan for subscribing to  HardforkCreated events
+	hdFinalizedChan := make(chan *energi_abi.IHardforkRegistryHardforkFinalized, EventChanBufferSize)
+
+	//create Opts for call
+	watchOpts := &bind.WatchOpts{
+		Context: context.WithValue(
+			context.Background(),
+			energi_params.GeneralProxyCtxKey,
+			energi_common.GeneralProxyHashGen(hf.eth.BlockChain()),
+		),
+	}
+
+	//subscribe to event
+	subscribe, err := hf.hfRegistry.WatchHardforkFinalized(watchOpts, hdCreatedChan, [][32]byte{})
+	if err != nil {
+		log.Error("Failed HardforkCreated subscription", "err", err)
+		return
+	}
+	defer subscribe.Unsubscribe()
+
+	//listen to events and log accordingly
+	for {
+		select {
+		case err = <-subscribe.Err():
+			log.Debug("HardforkCreated subscription error", "err", err)
+			return
+
+		case hardfork := <-hdCreatedChan:
+			log.Warn("New Hardfork Finalized: ",
+							"block Number",
+							hardfork.BlockNumber.String(),
+							"block Hash",
+							hardfork.BlockHash.String(),
 							"hardfork Name",
 							hardfork.Name,
 							"hardfork SwFeatures",
