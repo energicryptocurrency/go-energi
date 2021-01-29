@@ -20,14 +20,14 @@ import (
 	"bytes"
 	"context"
 	"math/big"
-	// "sync/atomic"
+	"sync/atomic"
 
 	"energi.world/core/gen3/accounts/abi/bind"
 	"energi.world/core/gen3/common"
 	// "energi.world/core/gen3/core"
 	// "energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/eth"
-	// "energi.world/core/gen3/eth/downloader"
+	"energi.world/core/gen3/eth/downloader"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/p2p"
 	"energi.world/core/gen3/rpc"
@@ -278,92 +278,34 @@ func (hf *HardforkService) Stop() error {
 }
 
 func (hf *HardforkService) listenDownloader() {
-	// events := hf.eth.EventMux().Subscribe(
-	// 	downloader.StartEvent{},
-	// 	downloader.DoneEvent{},
-	// 	downloader.FailedEvent{},
-	// )
-	// defer events.Unsubscribe()
-	//
-	// for {
-	// 	select {
-	// 	case <-hf.ctx.Done(): // Triggers immediate shutdown.
-	// 		return
-	// 	case ev := <-events.Chan():
-	// 		if ev == nil {
-	// 			return
-	// 		}
-	// 		switch ev.Data.(type) {
-	// 		case downloader.StartEvent:
-	// 			atomic.StoreInt32(&hf.inSync, 0)
-	// 			log.Debug("Hardfork service is not in sync")
-	// 		case downloader.DoneEvent, downloader.FailedEvent:
-	// 			atomic.StoreInt32(&hf.inSync, 1)
-	// 			log.Debug("Hardfork service is in sync")
-	// 			return
-	// 		}
-	// 	}
-	// }
+	events := hf.eth.EventMux().Subscribe(
+		downloader.StartEvent{},
+		downloader.DoneEvent{},
+		downloader.FailedEvent{},
+	)
+	defer events.Unsubscribe()
+
+	for {
+		select {
+		case <-hf.ctx.Done(): // Triggers immediate shutdown.
+			return
+		case ev := <-events.Chan():
+			if ev == nil {
+				return
+			}
+			switch ev.Data.(type) {
+			case downloader.StartEvent:
+				atomic.StoreInt32(&hf.inSync, 0)
+				log.Debug("Hardfork service is not in sync")
+			case downloader.DoneEvent, downloader.FailedEvent:
+				atomic.StoreInt32(&hf.inSync, 1)
+				log.Debug("Hardfork service is in sync")
+				return
+			}
+		}
+	}
 }
-//
-// func (hf *HardforkService) onChainHead(block *types.Block) {
-// 	hardforks, err := hf.hfAPI.ListHardforks()
-// 	if err != nil {
-// 		log.Warn("ListHardforks error", "err", err)
-// 		return
-// 	}
-//
-// 	if len(hardforks) < 1 {
-// 		log.Debug("No hardforks currently available in the system")
-// 		return
-// 	}
-//
-// 	period := hf.eth.BlockChain().Config().HFFinalizationPeriod
-//
-// 	// The first time log the last loggedCount hardforks otherwise log only the last one.
-// 	if atomic.CompareAndSwapInt32(&logAllHfs, 1, 0) {
-// 		offset := len(hardforks) - loggedCount
-// 		if offset < 0 {
-// 			offset = 0
-// 		}
-//
-// 		for _, hfInfo := range hardforks[offset:] {
-// 			logHardforkInfo(block.Number(), period, hfInfo)
-// 		}
-//
-// 		log.Info("Initial hardforks listing on startup", "logged", loggedCount,
-// 			"remaining", offset)
-// 	} else {
-// 		pendingHardforks, er := hf.hfAPI.ListPendingHardforks()
-// 		if er != nil {
-// 			log.Warn("ListPendingHardforks", "err", err)
-// 		}
-//
-// 		if len(pendingHardforks) < 1 && er == nil {
-// 			log.Debug("No pending hardforks currently available in the system")
-// 		}
-//
-//
-// 		//check pendingHardforks not to be nil
-// 		if er == nil {
-// 			// Otherwise only log information about the pending hardforks.
-// 			for _, hfInfo := range pendingHardforks {
-// 				// log this data at intervals of logIntervals.
-// 				mod := new(big.Int).Mod(block.Number(), logIntervals)
-// 				if mod.Cmp(common.Big0) == 0 {
-// 					logHardforkInfo(block.Number(), period, hfInfo)
-// 				}
-// 			}
-// 		}
-//
-// 	}
-//
-// 	for _, fork := range hardforks {
-// 		// Updates the current list of Active(finalized) Hardforks.
-// 		energi_common.UpdateHfActive(fork.Name, fork.BlockNo.ToInt(),
-// 			fork.BlockHash, fork.SWFeatures.ToInt())
-// 	}
-// }
+
 
 //logHardfork logs the information about the provided hardforks.
 func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
