@@ -24,7 +24,7 @@ import (
 
 	"energi.world/core/gen3/accounts/abi/bind"
 	"energi.world/core/gen3/common"
-	// "energi.world/core/gen3/core"
+	"energi.world/core/gen3/core"
 	// "energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/eth"
 	"energi.world/core/gen3/eth/downloader"
@@ -41,7 +41,8 @@ import (
 )
 
 var (
-	logAllHfs = int32(1)
+	//if block height module pendingHardforkLogInterval = 0 then log pending hardforks
+	pendingHardforkLogInterval = big.NewInt(20);
 	// logIntervals defines the block interval in which pending blocks will be logged.
 	logIntervals = big.NewInt(20)
 )
@@ -73,8 +74,16 @@ func NewHardforkService(ethServ *eth.Ethereum) (*HardforkService, error) {
 		eth:   ethServ,
 		hfAPI: energi_api.NewHardforkRegistryAPI(ethServ.APIBackend),
 	}
-
 	hf.ctx, hf.ctxCancel = context.WithCancel(context.Background())
+
+	//initialize Ihardforkregistry for further calls
+	var err error
+	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(hf.eth.APIBackend.ChainConfig().HardforkRegistryProxyAddress, hf.eth.APIBackend)
+	if err != nil {
+		log.Error("Failed to get create NewIHardforkRegistry (startup)", "err", err);
+		return nil, err
+	}
+
 	go hf.listenDownloader()
 
 	return hf, nil
@@ -93,15 +102,6 @@ func (hf *HardforkService) APIs() []rpc.API {
 // Start is called after all services have been constructed and the networking
 // layer was also initialized to spawn any goroutines required by the service.
 func (hf *HardforkService) Start(server *p2p.Server) error {
-
-	//initialize Ihardforkregistry for further calls
-	var err error
-	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(hf.eth.APIBackend.ChainConfig().HardforkRegistryProxyAddress, hf.eth.APIBackend)
-	if err != nil {
-		log.Error("Failed to get create NewIHardforkRegistry (startup)", "err", err);
-		return err
-	}
-
 	/*
 	Upon startup retrieve all active hardforks and check if the
 	active hardfork version parameter is higher than running core node version
@@ -120,7 +120,48 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	go hf.listenHardforkFinalizedEvents();
 	//routine will listen to events thrown when hardfork is removed
 	go hf.listenHardforkRemovedEvents();
+	//logs upcoming pending hardforks notifying users about version change
+	go hf.logUpcomingHardforks();
+
 	return nil
+
+}
+
+//logUpcomingHardforks periodically logs upcoming (pending) hardforks
+func (hf *HardforkService) logUpcomingHardforks() {
+	  //create channel and subscribe for new chain events
+		chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
+		headSub := hf.eth.BlockChain().SubscribeChainHeadEvent(chainHeadCh)
+		defer headSub.Unsubscribe()
+
+		//listen for blockchain change and notify users about upcoming hardforks
+		for {
+			select {
+
+			case <-hf.ctx.Done(): // Triggers immediate shutdown.
+				return
+
+			case ev := <-chainHeadCh:
+				if new(big.Int).Mod(ev.Block.Number(), pendingHardforkLogInterval).Cmp(common.Big0) == 0 {
+					pendingHardforks, err := hf.hfAPI.ListPendingHardforks()
+					if err != nil {
+						log.Error("Failed to get pending hardforks from api", "err", err);
+						break;
+					}
+					//for each hardfork name 	log the information considering the current block number
+					for _, hardfork := range pendingHardforks {
+						logHardforkInfo(ev.Block.Header().Number, hf.eth.BlockChain().Config().HFFinalizationPeriod, hardfork)
+					}
+				}
+
+
+			// Shutdown
+			case <-headSub.Err():
+				return
+			}
+
+
+		}
 
 }
 
