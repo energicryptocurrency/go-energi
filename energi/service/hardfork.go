@@ -119,7 +119,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	// //routine will listen to hardfork finalization event
 	go hf.listenHardforkFinalizedEvents();
 	//routine will listen to events thrown when hardfork is removed
-	// go hf.listenHardforkRemovedEvents();
+	go hf.listenHardforkRemovedEvents();
 	return nil
 
 }
@@ -128,7 +128,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 func (hf *HardforkService) listenHardforkCreatedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
-	hdCreatedChan := make(chan *energi_abi.IHardforkRegistryHardforkCreated, EventChanBufferSize)
+	hfCreatedChan := make(chan *energi_abi.IHardforkRegistryHardforkCreated, EventChanBufferSize)
 
 	//create Opts for call
 	watchOpts := &bind.WatchOpts{
@@ -140,7 +140,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 	}
 
 	//subscribe to event
-	subscribe, err := hf.hfRegistry.WatchHardforkCreated(watchOpts, hdCreatedChan, [][32]byte{})
+	subscribe, err := hf.hfRegistry.WatchHardforkCreated(watchOpts, hfCreatedChan, [][32]byte{})
 	if err != nil {
 		log.Error("Failed HardforkCreated subscription", "err", err)
 		return
@@ -154,7 +154,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 			log.Debug("HardforkCreated subscription error", "err", err)
 			return
 
-		case hardfork := <-hdCreatedChan:
+		case hardfork := <-hfCreatedChan:
 			log.Warn("New Hardfork  created: ",
 							"block Number",
 							hardfork.BlockNumber.String(),
@@ -171,7 +171,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 func (hf *HardforkService) listenHardforkFinalizedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
-	hdFinalizedChan := make(chan *energi_abi.IHardforkRegistryHardforkFinalized, EventChanBufferSize)
+	hfFinalizedChan := make(chan *energi_abi.IHardforkRegistryHardforkFinalized, EventChanBufferSize)
 
 	//create Opts for call
 	watchOpts := &bind.WatchOpts{
@@ -183,7 +183,7 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 	}
 
 	//subscribe to event
-	subscribe, err := hf.hfRegistry.WatchHardforkFinalized(watchOpts, hdCreatedChan, [][32]byte{})
+	subscribe, err := hf.hfRegistry.WatchHardforkFinalized(watchOpts, hfFinalizedChan, [][32]byte{})
 	if err != nil {
 		log.Error("Failed HardforkCreated subscription", "err", err)
 		return
@@ -197,12 +197,12 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 			log.Debug("HardforkCreated subscription error", "err", err)
 			return
 
-		case hardfork := <-hdCreatedChan:
+		case hardfork := <-hfFinalizedChan:
 			log.Warn("New Hardfork Finalized: ",
 							"block Number",
 							hardfork.BlockNumber.String(),
 							"block Hash",
-							hardfork.BlockHash.String(),
+							string(hardfork.BlockHash[:]),
 							"hardfork Name",
 							hardfork.Name,
 							"hardfork SwFeatures",
@@ -210,6 +210,47 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 		}
 	}
 }
+
+
+
+//function is watches newly created hardfork events and logs them
+func (hf *HardforkService) listenHardforkRemovedEvents() {
+
+	//create chan for subscribing to  HardforkCreated events
+	hfRemovedChan := make(chan *energi_abi.IHardforkRegistryHardforkRemoved, EventChanBufferSize)
+
+	//create Opts for call
+	watchOpts := &bind.WatchOpts{
+		Context: context.WithValue(
+			context.Background(),
+			energi_params.GeneralProxyCtxKey,
+			energi_common.GeneralProxyHashGen(hf.eth.BlockChain()),
+		),
+	}
+
+	//subscribe to event
+	subscribe, err := hf.hfRegistry.WatchHardforkRemoved(watchOpts, hfRemovedChan, [][32]byte{})
+	if err != nil {
+		log.Error("Failed HardforkCreated subscription", "err", err)
+		return
+	}
+	defer subscribe.Unsubscribe()
+
+	//listen to events and log accordingly
+	for {
+		select {
+		case err = <-subscribe.Err():
+			log.Debug("HardforkCreated subscription error", "err", err)
+			return
+
+		case hardfork := <-hfRemovedChan:
+			log.Warn("Hardfork Removed: ",
+							 "Hardfork Number",
+							 hardfork.Name)
+		}
+	}
+}
+
 
 func (hf *HardforkService) LogHardForks(hardforks []*energi_api.HardforkInfo)  {
 
