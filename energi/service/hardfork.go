@@ -43,8 +43,6 @@ import (
 var (
 	//if block height module pendingHardforkLogInterval = 0 then log pending hardforks
 	pendingHardforkLogInterval = big.NewInt(20);
-	// logIntervals defines the block interval in which pending blocks will be logged.
-	logIntervals = big.NewInt(20)
 )
 
 
