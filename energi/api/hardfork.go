@@ -295,13 +295,10 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 
 // FinalizeHardfork validates hardfork name parameter and calls contract finalize function
 func (hf *HardforkRegistryAPI) FinalizeHardfork(name string, password *string) (common.Hash, error) {
-	switch {
-	case len([]byte(name)) > maxHardforkNameSize || len(name) == 0:
-		return (common.Hash{}), fmt.Errorf("incorrect Hardfork name size")
-
-	default:
-		return hf.finalizeHardfork(name, password)
-	}
+	if len([]byte(name)) > maxHardforkNameSize || len(name) == 0 {
+           return (common.Hash{}), fmt.Errorf("incorrect Hardfork name size")
+        }
+        return hf.finalizeHardfork(name, password)
 }
 
 
