@@ -40,15 +40,13 @@ import (
 
 )
 
-var (
-	//if block height module pendingHardforkLogInterval = 0 then log pending hardforks
-	pendingHardforkLogInterval = big.NewInt(20);
-)
-
 
 const (
 	//event channel default site
 	EventChanBufferSize = 10
+	
+	//if block height module pendingHardforkLogInterval = 0 then log pending hardforks
+	pendingHardforkLogInterval = big.NewInt(20);
 )
 
 // HardforkService defines the hardfork service type.
