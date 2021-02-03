@@ -35,7 +35,7 @@ var (
 
 type hardforkInfo struct {
 	name       string
-	blockNo    *big.Int
+	blockNumber    *big.Int
 	blockHash  common.Hash
 	swFeatures *big.Int
 }
@@ -48,7 +48,7 @@ type latestHardfork struct {
 
 // UpdateHfActive sets the list of finalized hardforks i.e. a hardfork with an empty
 // blockhash is rejected. A hardfork with an empty name is also rejected.
-func UpdateHfActive(name string, blockNo *big.Int, blockHash common.Hash, swFeatures *big.Int) error {
+func UpdateHfActive(name string, blockNumber *big.Int, blockHash common.Hash, swFeatures *big.Int) error {
 	hfInfo.mtx.Lock()
 	defer hfInfo.mtx.Unlock()
 
@@ -61,7 +61,7 @@ func UpdateHfActive(name string, blockNo *big.Int, blockHash common.Hash, swFeat
 	default:
 		hfInfo.hfs[name] = hardforkInfo{
 			name:       name,
-			blockNo:    blockNo,
+			blockNumber:    blockNumber,
 			blockHash:  blockHash,
 			swFeatures: swFeatures,
 		}

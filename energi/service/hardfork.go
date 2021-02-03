@@ -42,13 +42,17 @@ import (
 
 var (
 	//if block height module pendingHardforkLogInterval = 0 then log pending hardforks
-	pendingHardforkLogInterval = big.NewInt(20);
+	pendingHardforkLogInterval = big.NewInt(10);
 )
+
+
 
 
 const (
 	//event channel default site
 	EventChanBufferSize = 10
+	//remaining number of blocks where we start logging/notifying user about upcoming pending hardfork
+	lastBlockNumToLogPendingHardforks = int64(-100);
 )
 
 // HardforkService defines the hardfork service type.
@@ -146,6 +150,7 @@ func (hf *HardforkService) logUpcomingHardforks() {
 						log.Error("Failed to get pending hardforks from api", "err", err);
 						break;
 					}
+
 					//for each hardfork name 	log the information considering the current block number
 					for _, hardfork := range pendingHardforks {
 						logHardforkInfo(ev.Block.Header().Number, hf.eth.BlockChain().Config().HFFinalizationPeriod, hardfork)
@@ -198,7 +203,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 							"block Number",
 							hardfork.BlockNumber.String(),
 							"hardfork Name",
-							hardfork.Name,
+							string(hardfork.Name[:]),
 							"hardfork SwFeatures",
 							hardfork.SwFeatures.String())
 		}
@@ -241,9 +246,9 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 							"block Number",
 							hardfork.BlockNumber.String(),
 							"block Hash",
-							string(hardfork.BlockHash[:]),
+							common.BytesToHash(hardfork.BlockHash[:]).String(),
 							"hardfork Name",
-							hardfork.Name,
+							string(hardfork.Name[:]),
 							"hardfork SwFeatures",
 							hardfork.SwFeatures.String())
 		}
@@ -285,7 +290,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 		case hardfork := <-hfRemovedChan:
 			log.Info("Hardfork Removed: ",
 							 "Hardfork Number",
-							 hardfork.Name)
+							 string(hardfork.Name[:]))
 		}
 	}
 }
@@ -355,11 +360,10 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 	diff := new(big.Int).Sub(currentBlockNo, hfBlockNo)
 
 	if bytes.Compare(hfInfo.BlockHash[:], emptyHash[:]) == 0 {
-		if diff.Cmp(big.NewInt(-10)) > 0 && diff.Cmp(period) <= 0 {
+		if diff.Cmp(big.NewInt(lastBlockNumToLogPendingHardforks)) > 0 && diff.Cmp(period) <= 0 {
 			// -10 < Currentblock - hfblock <= hfPeriod
 			logFunc = log.Warn
 		}
-
 		desc := "blocks To Hardfork"
 		if diff.Cmp(common.Big0) > 0 {
 			desc = "blocks after Hardfork"
@@ -374,7 +378,6 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 			// 0 < Currentblock - hfblock <= hfPeriod
 			logFunc = log.Info
 		}
-
 		// BlockHash already set. Hardfork already finalized.
 		logFunc("Hardfork already finalized", "block Number", hfBlockNo,
 			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String(),

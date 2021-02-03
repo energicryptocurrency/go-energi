@@ -153,7 +153,6 @@ func (hf *HardforkRegistryAPI) listHardforks(num *big.Int) (interface{}, error) 
 	}
 
 	return processHfListings(HfNames, registry, callOpts)
-	return nil, nil
 }
 
 // ListPendingHardforks returns a list of the latest pending hardfork payload.
@@ -226,7 +225,6 @@ func processHfListings(
 			log.Error("Running GetHardfork failed", "err", err)
 			return nil, err
 		}
-
 		resp = append(resp, &HardforkInfo{
 			BlockNumber:    (*hexutil.Big)(data.BlockNumber),
 			Name:       energi_common.DecodeToString(name),
@@ -321,7 +319,7 @@ func (hf *HardforkRegistryAPI) finalizeHardfork(name string, password *string) (
 
 	if tx != nil {
 		txHash = tx.Hash()
-		log.Info("Note: please wait till HF create TX gets into a block!", "tx", txHash.Hex())
+		log.Info("Note: please wait till HF finalize TX gets into a block!", "tx", txHash.Hex())
 	}
 
 	return txHash, nil
