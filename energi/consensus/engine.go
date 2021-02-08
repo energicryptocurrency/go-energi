@@ -270,7 +270,7 @@ func (e *Energi) VerifyHeader(chain ChainReader, header *types.Header, seal bool
 		return eth_consensus.ErrInvalidNumber
 	}
 
-	// We skip checks only where full previous meturity period state is required.
+	// We skip checks only where full previous maturity period state is required.
 	if seal {
 		// Verify the engine specific seal securing the block
 		err = e.VerifySeal(chain, header)
