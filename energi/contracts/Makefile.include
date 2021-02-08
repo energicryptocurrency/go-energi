@@ -80,12 +80,9 @@ ENERGI_CONTRACTS_GOABI := $(addprefix $(ENERGI_CONTRACT_ABIGEN_DIR)/,$(ENERGI_CO
 
 .SECONDARY: $(ENERGI_CONTRACTS_BIN) $(ENERGI_CONTRACTS_ABI)
 
-prebuild: energi-contracts cp-deploy-scripts
+prebuild: energi-contracts
 
 energi-contracts: $(ENERGI_CONTRACTS_GOABI)
-
-cp-deploy-scripts:
-	@cp -rf $(ENERGI_CONTRACT_ROOT_DIR)/web3_deploy/* build/bin
 
 $(ENERGI_CONTRACT_BUILD_DIR):
 	@mkdir -p $(ENERGI_CONTRACT_BUILD_DIR)

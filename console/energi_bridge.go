@@ -74,8 +74,6 @@ var passwordIndexMap = map[string]info{
 	"denounce":               {"masternode", last},
 	"depositCollateral":      {"masternode", last},
 	"withdrawCollateral":     {"masternode", last},
-	"generateHardfork":       {"energi", last},
-	"dropHardfork":           {"energi", last},
 }
 
 func autoCompileAndRun(vm *otto.Otto, filename string, src interface{}) (otto.Value, error) {

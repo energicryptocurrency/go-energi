@@ -115,7 +115,6 @@ web3._extend({
 `
 
 const Energi_JS = `
-
 web3._extend.formatters.outputProposalFormatter = function(item){
 	var toDecimal = web3._extend.utils.toDecimal;
 	return {
@@ -140,16 +139,6 @@ web3._extend.formatters.coinSearchFormatter = function(list){
 		item.Amount = toDecimal(item.Amount);
 	}
 	return list;
-};
-
-web3._extend.formatters.hardforkFormatter = function(item) {
-	return {
-		blockNo:	web3._extend.utils.toDecimal(item.BlockNo),
-		hfName:  	item.Name,
-		blockHash:	item.BlockHash,
-		swFeatures:	item.SWFeatures,
-		swVersion:	item.SWVersion,
-	};
 };
 
 web3._extend({
@@ -498,73 +487,6 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
-
-		// Hardfork
-		new web3._extend.Method({
-			name: 'listHardforks',
-			call: 'energi_listHardforks',
-			params: 0,
-			outputFormatter: function(list) {
-				var res = [];
-				for (var i = 0; i < list.length; ++i) {
-					res.push(web3._extend.formatters.hardforkFormatter(list[i]));
-				}
-				return res;
-			},
-		}),
-		new web3._extend.Method({
-			name: 'listPendingHardforks',
-			call: 'energi_listPendingHardforks',
-			params: 0,
-			outputFormatter: function(list) {
-				var res = [];
-				for (var i = 0; i < list.length; ++i) {
-					res.push(web3._extend.formatters.hardforkFormatter(list[i]));
-				}
-				return res;
-			},
-		}),
-		new web3._extend.Method({
-			name: 'listActiveHardforks',
-			call: 'energi_listActiveHardforks',
-			params: 0,
-			outputFormatter: function(list) {
-				var res = [];
-				for (var i = 0; i < list.length; ++i) {
-					res.push(web3._extend.formatters.hardforkFormatter(list[i]));
-				}
-				return res;
-			},
-		}),
-		new web3._extend.Method({
-			name: 'generateHardfork',
-			call: 'energi_generateHardfork',
-			params: 3,
-			inputFormatter: [
-				web3._extend.utils.fromDecimal,
-				null,
-				null,
-			],
-		}),
-		new web3._extend.Method({
-			name: 'getHardfork',
-			call: 'energi_getHardfork',
-			params: 1,
-			inputFormatter: [null],
-			outputFormatter:  web3._extend.formatters.hardforkFormatter
-		}),
-		new web3._extend.Method({
-			name: 'dropHardfork',
-			call: 'energi_dropHardfork',
-			params: 2,
-			inputFormatter: [null, null],
-		}),
-		new web3._extend.Method({
-			name: 'isHardforkActive',
-			call: 'energi_isHardforkActive',
-			params: 1,
-			inputFormatter: [null],
-		}),
 	],
 	properties: [
 	]
@@ -600,7 +522,6 @@ web3._extend({
 `
 
 const Admin_JS = `
-
 web3._extend({
 	property: 'admin',
 	methods: [
@@ -663,7 +584,7 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'checkpointLocal',
 			call: 'admin_checkpointLocal',
-			params: 2,
+			params: 2
 			inputFormatter: [
 				null,
 				null,
