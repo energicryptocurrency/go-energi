@@ -755,7 +755,7 @@ contract MasternodeRegistryV2_3 is
                 uint attempts = 0;
 
                 // solium-disable-next-line no-empty-blocks
-                while ((gasleft() > GAS_RESERVE) && (total_attempts++ < 80) && (attempts++ < 10) && !_reward()) {}
+                while ((gasleft() > GAS_RESERVE) && (total_attempts++ < 50) && (attempts++ < 10) && !_reward()) {}
             }
         }
     }
