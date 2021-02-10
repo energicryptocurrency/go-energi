@@ -53,8 +53,8 @@ func TestHardforkManagement(t *testing.T) {
 	var blockNo *big.Int
 	hfInfo.mtx.RLock()
 	for _, info := range hfInfo.hfs {
-		if info.blockNo.Cmp(blockNo) == 1 {
-			blockNo = info.blockNo
+		if info.blockNumber.Cmp(blockNo) == 1 {
+			blockNo = info.blockNumber
 		}
 	}
 	hfInfo.mtx.RUnlock()
