@@ -115,7 +115,6 @@ web3._extend({
 `
 
 const Energi_JS = `
-
 web3._extend.formatters.outputProposalFormatter = function(item){
 	var toDecimal = web3._extend.utils.toDecimal;
 	return {

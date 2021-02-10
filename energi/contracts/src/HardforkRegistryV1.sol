@@ -317,9 +317,13 @@ contract HardforkRegistryV1 is
     }
 
     /// @notice move data to new hardfork registry during upgrade
-    function _migrate(IGovernedContract _newimpl) internal
+    function _migrate(IGovernedContract _oldImpl) internal
     {
-        // TODO: implement me
+        // move v1storage from oldImpl to this impl
+        // other storage variables finalization period and HF signer are set by the constructor
+        v1storage.kill();
+        HardforkRegistryV1 oldinstance = HardforkRegistryV1(address(uint160(address(_oldImpl))));
+        v1storage = oldinstance.v1storage();
     }
 
     /// @notice called to finalize a governance upgrade
