@@ -75,6 +75,7 @@ var passwordIndexMap = map[string]info{
 	"depositCollateral":      {"masternode", last},
 	"withdrawCollateral":     {"masternode", last},
 	"generateHardfork":       {"energi", last},
+	"finalize":       				{"energi", last},
 	"dropHardfork":           {"energi", last},
 }
 

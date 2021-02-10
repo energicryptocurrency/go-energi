@@ -144,7 +144,7 @@ web3._extend.formatters.coinSearchFormatter = function(list){
 
 web3._extend.formatters.hardforkFormatter = function(item) {
 	return {
-		blockNo:	web3._extend.utils.toDecimal(item.BlockNo),
+		blockNo:	web3._extend.utils.toDecimal(item.BlockNumber),
 		hfName:  	item.Name,
 		blockHash:	item.BlockHash,
 		swFeatures:	item.SWFeatures,
@@ -542,6 +542,15 @@ web3._extend({
 			params: 3,
 			inputFormatter: [
 				web3._extend.utils.fromDecimal,
+				null,
+				null,
+			],
+		}),
+		new web3._extend.Method({
+			name: 'finalizeHardfork',
+			call: 'energi_finalizeHardfork',
+			params: 2,
+			inputFormatter: [
 				null,
 				null,
 			],

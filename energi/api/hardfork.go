@@ -19,19 +19,17 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"math/big"
 
 	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
+	 "energi.world/core/gen3/common"
 	"energi.world/core/gen3/common/hexutil"
 	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_common "energi.world/core/gen3/energi/common"
+  energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -121,13 +119,13 @@ func registryCaller(
 
 // HardforkInfo defines the hardfork payload information returned.
 type HardforkInfo struct {
-	BlockNo    *hexutil.Big
+	BlockNumber    *hexutil.Big
 	Name       string
 	BlockHash  common.Hash
 	SWFeatures *hexutil.Big
 	SWVersion  string
 }
-
+//
 // ListHardforks returns a list of the latest hardfork payload information.
 // It caches the last fetched data till a new block is mined.
 func (hf *HardforkRegistryAPI) ListHardforks() (res []*HardforkInfo, err error) {
@@ -148,9 +146,9 @@ func (hf *HardforkRegistryAPI) listHardforks(num *big.Int) (interface{}, error) 
 		return nil, err
 	}
 
-	HfNames, err := registry.EnumerateAll(callOpts)
+	HfNames, err := registry.Enumerate(callOpts)
 	if err != nil {
-		log.Error("Running EnumerateAll failed", "err", err)
+		log.Error("Running Enumerate failed", "err", err)
 		return nil, err
 	}
 
@@ -222,14 +220,13 @@ func processHfListings(
 ) ([]*HardforkInfo, error) {
 	resp := make([]*HardforkInfo, 0, len(HfNames))
 	for _, name := range HfNames {
-		data, err := registry.GetHardfork(callOpts, name)
+		data, err := registry.Get(callOpts, name)
 		if err != nil {
 			log.Error("Running GetHardfork failed", "err", err)
 			return nil, err
 		}
-
 		resp = append(resp, &HardforkInfo{
-			BlockNo:    (*hexutil.Big)(data.BlockNo),
+			BlockNumber:    (*hexutil.Big)(data.BlockNumber),
 			Name:       energi_common.DecodeToString(name),
 			BlockHash:  common.BytesToHash(data.BlockHash[:]),
 			SWFeatures: (*hexutil.Big)(data.SwFeatures),
@@ -243,12 +240,12 @@ func processHfListings(
 // GenerateHardfork creates and updates the hardfork information.
 // It validates the block number and the hardfork name used as parameters.
 func (hf *HardforkRegistryAPI) GenerateHardfork(
-	blockNo *hexutil.Big,
+	BlockNumber *hexutil.Big,
 	name string,
 	password *string,
 ) (common.Hash, error) {
 	switch {
-	case blockNo.ToInt().Cmp(common.Big0) < 1:
+	case BlockNumber.ToInt().Cmp(common.Big0) < 1:
 		return (common.Hash{}), fmt.Errorf("Hardfork on the genesis block is not supportted")
 
 	case len([]byte(name)) > maxHardforkNameSize:
@@ -259,15 +256,15 @@ func (hf *HardforkRegistryAPI) GenerateHardfork(
 
 	default:
 		swFeatures := (*hexutil.Big)(energi_common.SWVersionToInt())
-		return hf.generateHardfork(blockNo, name, swFeatures, password)
+		return hf.generateHardfork(BlockNumber, name, swFeatures, password)
 	}
 }
 
-// generateHardfork generates the actual hardfork. It also checks if the block
-// number is within its block finalization period where if affirmative the
-// hardfork is finalized.
+
+
+// generateHardfork generates the actual hardfork.
 func (hf *HardforkRegistryAPI) generateHardfork(
-	blockNo *hexutil.Big,
+	BlockNumber *hexutil.Big,
 	name string,
 	swFeatures *hexutil.Big,
 	password *string,
@@ -279,16 +276,7 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 		return txHash, err
 	}
 
-	blockHash := common.Hash{}
-	block, err := hf.backend.BlockByNumber(context.Background(),
-		rpc.BlockNumber(blockNo.ToInt().Int64()))
-	if err == nil && block != nil {
-		// Its time to finalize the hardfork now.
-		blockHash = block.Hash()
-	}
-
-	tx, err := registry.Propose(blockNo.ToInt(), energi_common.EncodeToString(name),
-		blockHash, swFeatures.ToInt())
+	tx, err := registry.Add(energi_common.EncodeToString(name), BlockNumber.ToInt(), swFeatures.ToInt())
 	if err != nil {
 		return txHash, err
 	}
@@ -296,6 +284,42 @@ func (hf *HardforkRegistryAPI) generateHardfork(
 	if tx != nil {
 		txHash = tx.Hash()
 		log.Info("Note: please wait till HF create TX gets into a block!", "tx", txHash.Hex())
+	}
+
+	return txHash, nil
+}
+
+
+
+// FinalizeHardfork validates hardfork name parameter and calls contract finalize function
+func (hf *HardforkRegistryAPI) FinalizeHardfork(name string, password *string) (common.Hash, error) {
+	if len([]byte(name)) > maxHardforkNameSize || len(name) == 0 {
+           return (common.Hash{}), fmt.Errorf("incorrect Hardfork name size")
+        }
+        return hf.finalizeHardfork(name, password)
+}
+
+
+/*
+finalizeHardfork calls finalize contract function that checks if hardfork
+with given name is finalizable and if so sets blockhash parameter for the hardfork
+*/
+func (hf *HardforkRegistryAPI) finalizeHardfork(name string, password *string) (common.Hash, error) {
+	txHash := common.Hash{}
+	dst := hf.backend.ChainConfig().Energi.HFSigner
+	registry, err := registrySession(hf.backend, dst, hf.proxyAddr, password)
+	if err != nil {
+		return txHash, err
+	}
+
+	tx, err := registry.Finalize(energi_common.EncodeToString(name))
+	if err != nil {
+		return txHash, err
+	}
+
+	if tx != nil {
+		txHash = tx.Hash()
+		log.Info("Note: please wait till HF finalize TX gets into a block!", "tx", txHash.Hex())
 	}
 
 	return txHash, nil
@@ -312,23 +336,23 @@ func (hf *HardforkRegistryAPI) GetHardfork(name string) (*HardforkInfo, error) {
 		return nil, err
 	}
 
-	data, err := registry.GetHardfork(callOpts, energi_common.EncodeToString(name))
+	data, err := registry.Get(callOpts, energi_common.EncodeToString(name))
 	if err != nil {
 		log.Error("Running GetName Failed", "err", err)
 		return nil, err
 	}
 
 	// If hardfork data was not found, return an error.
-	if data.BlockNo.Cmp(common.Big0) == 0 {
+	if data.BlockNumber.Cmp(common.Big0) == 0 {
 		return nil, fmt.Errorf("hardfork with name: (%v) was not found", name)
 	}
 
 	resp := &HardforkInfo{
-		BlockNo:    (*hexutil.Big)(data.BlockNo),
-		Name:       name,
-		BlockHash:  common.BytesToHash(data.BlockHash[:]),
-		SWFeatures: (*hexutil.Big)(data.SwFeatures),
-		SWVersion:  energi_common.SWVersionIntToString(data.SwFeatures),
+		BlockNumber:    (*hexutil.Big)(data.BlockNumber),
+		Name:           name,
+		BlockHash:      common.BytesToHash(data.BlockHash[:]),
+		SWFeatures:     (*hexutil.Big)(data.SwFeatures),
+		SWVersion:      energi_common.SWVersionIntToString(data.SwFeatures),
 	}
 
 	return resp, nil
