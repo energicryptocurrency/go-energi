@@ -546,6 +546,15 @@ web3._extend({
 			],
 		}),
 		new web3._extend.Method({
+			name: 'finalizeHardfork',
+			call: 'energi_finalizeHardfork',
+			params: 2,
+			inputFormatter: [
+				null,
+				null,
+			],
+		}),
+		new web3._extend.Method({
 			name: 'getHardfork',
 			call: 'energi_getHardfork',
 			params: 1,

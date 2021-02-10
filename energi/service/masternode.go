@@ -17,6 +17,8 @@
 package service
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"math/big"
 	"sync/atomic"
@@ -35,6 +37,7 @@ import (
 	"energi.world/core/gen3/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_api "energi.world/core/gen3/energi/api"
 	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
@@ -76,6 +79,11 @@ type MasternodeService struct {
 	features *big.Int
 
 	validator *peerValidator
+
+	ctx           context.Context
+	ctxCancelFunc func()
+
+	hfAPI *energi_api.HardforkRegistryAPI
 }
 
 func NewMasternodeService(ethServ *eth.Ethereum, owner common.Address) (node.Service, error) {
@@ -89,7 +97,9 @@ func NewMasternodeService(ethServ *eth.Ethereum, owner common.Address) (node.Ser
 		nextHB: time.Now().Add(recheckInterval),
 
 		cpVoteChan: make(chan *checkpointVote, cpChanBufferSize),
+		hfAPI:      energi_api.NewHardforkRegistryAPI(ethServ.APIBackend),
 	}
+	r.ctx, r.ctxCancelFunc = context.WithCancel(context.Background())
 	go r.listenDownloader()
 	return r, nil
 }
@@ -166,6 +176,7 @@ func (m *MasternodeService) Start(server *p2p.Server) error {
 func (m *MasternodeService) Stop() error {
 	log.Info("Shutting down Energi Masternode", "addr", m.address)
 	m.validator.cancel()
+	m.ctxCancelFunc() // Cancel the context to trigger the immediate shutdown.
 	return nil
 }
 
@@ -179,6 +190,8 @@ func (m *MasternodeService) listenDownloader() {
 
 	for {
 		select {
+		case <-m.ctx.Done(): // Triggers immediate shutdown.
+			return
 		case ev := <-events.Chan():
 			if ev == nil {
 				return
@@ -239,6 +252,8 @@ func (m *MasternodeService) loop() {
 	//---
 	for {
 		select {
+		case <-m.ctx.Done(): // Triggers immediate shutdown.
+			return
 		case ev := <-events.Chan():
 			if ev == nil {
 				return
@@ -321,6 +336,9 @@ func (m *MasternodeService) voteOnCheckpoints() {
 
 	for {
 		select {
+		case <-m.ctx.Done(): // Triggers immediate shutdown.
+			return
+
 		case cpVote = <-m.cpVoteChan:
 			// Only vote on the latest due to zero fee triggers
 			break
@@ -344,6 +362,10 @@ func (m *MasternodeService) voteOnCheckpoints() {
 }
 
 func (m *MasternodeService) onChainHead(block *types.Block) {
+	if m.isValidMnVersion() {
+		return
+	}
+
 	if !m.isActive() {
 		do_cleanup := m.validator.target != common.Address{}
 		m.validator.cancel()
@@ -414,6 +436,35 @@ func (m *MasternodeService) onChainHead(block *types.Block) {
 			go m.validator.validate()
 		}
 	}
+}
+
+func (m *MasternodeService) isValidMnVersion() bool {
+	// Minimum Masternode software version enforcement. If the minimum
+	// masternode version is not found, the masternode service gracefully
+	// shutsdown.
+	hardforks, err := m.hfAPI.ListHardforks()
+	if err != nil {
+		log.Warn("ListHardforks error", "err", err)
+	}
+
+	emptyHash := [32]byte{}
+	swFeatures := energi_common.SWVersionToInt()
+	for _, fork := range hardforks {
+		// Enforce the minimum masternode version supported.
+		if bytes.Compare(fork.BlockHash[:], emptyHash[:]) != 0 &&
+			swFeatures.Cmp(fork.SWFeatures.ToInt()) < 0 {
+			versionFunc := energi_common.SWVersionIntToString
+			log.Error("Current masternode version is outdated",
+				"current", versionFunc(swFeatures),
+				"required", versionFunc(fork.SWFeatures.ToInt()),
+			)
+			log.Warn("Update to continue using the masternode service")
+
+			m.Stop()
+			return false
+		}
+	}
+	return true
 }
 
 type peerValidator struct {
