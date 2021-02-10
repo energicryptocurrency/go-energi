@@ -1493,7 +1493,7 @@ func RegisterEthStatsService(stack *node.Node, url string) {
 	}
 }
 
-// RegisterDynamicCheckpointService configures Energi Dynamic Checkpoint service.
+// Configure Energi Dynamic Checkpoint service
 func RegisterDynamicCheckpointService(stack *node.Node) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		var ethServ *eth.Ethereum
@@ -1502,18 +1502,6 @@ func RegisterDynamicCheckpointService(stack *node.Node) {
 		return energi_svc.NewCheckpointService(ethServ)
 	}); err != nil {
 		Fatalf("Failed to register the Energi Checkpoint service: %v", err)
-	}
-}
-
-// RegisterHardforkService configures the Energi hardfork management service.
-func RegisterHardforkService(stack *node.Node) {
-	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-		var ethServ *eth.Ethereum
-		ctx.Service(&ethServ)
-
-		return energi_svc.NewHardforkService(ethServ)
-	}); err != nil {
-		Fatalf("Failed to register the Energi Hardfork service: %v", err)
 	}
 }
 

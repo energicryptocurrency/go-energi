@@ -722,10 +722,9 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
 	}
 
-	switch config {
-	case params.EnergiMainnetChainConfig, params.EnergiTestnetChainConfig:
-	default:
-		// Should not result to a new genesis block requirement in mainnet and testnet.
+	// mainnet and testnet were deployed without the HF registry in the genesis block
+	// therefore we only deploy when on some other network (devnet / simnet)
+	if (config != params.EnergiMainnetChainConfig) && (config != params.EnergiTestnetChainConfig) {
 		deployEnergiContract(
 			&xfers,
 			energi_params.Energi_HardforkRegistryV1,

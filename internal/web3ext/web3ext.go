@@ -115,7 +115,6 @@ web3._extend({
 `
 
 const Energi_JS = `
-
 web3._extend.formatters.outputProposalFormatter = function(item){
 	var toDecimal = web3._extend.utils.toDecimal;
 	return {
@@ -542,15 +541,6 @@ web3._extend({
 			params: 3,
 			inputFormatter: [
 				web3._extend.utils.fromDecimal,
-				null,
-				null,
-			],
-		}),
-		new web3._extend.Method({
-			name: 'finalizeHardfork',
-			call: 'energi_finalizeHardfork',
-			params: 2,
-			inputFormatter: [
 				null,
 				null,
 			],

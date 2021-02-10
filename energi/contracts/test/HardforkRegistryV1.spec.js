@@ -56,7 +56,7 @@ contract("HardforkRegistryV1", async accounts => {
         const b32 = (name) => ethers.utils.formatBytes32String(name);
         const emptyB32 = b32(""); // "0x0000000000000000000000000000000000000000000000000000000000000000"
 
-        const hf_sw_feature = 3000600;
+        const hf_sw_feature = 3000700;
         const hf_signer = common.hf_signer;
         let hf_names = [b32("Ba Sing Se"), b32("Hogwarts"), b32("Mars"), b32("Random")];
         let hf_active = [b32("Ba Sing Se"), b32("Hogwarts"), b32("Mars"), b32("Random")];
