@@ -255,13 +255,13 @@ func (_IHardforkRegistry *IHardforkRegistryCallerSession) EnumeratePending() ([]
 // Solidity: function get(bytes32 name) constant returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
 func (_IHardforkRegistry *IHardforkRegistryCaller) Get(opts *bind.CallOpts, name [32]byte) (struct {
 	BlockNumber *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
 	ret := new(struct {
 		BlockNumber *big.Int
-		BlockHash  [32]byte
-		SwFeatures *big.Int
+		BlockHash   [32]byte
+		SwFeatures  *big.Int
 	})
 	out := ret
 	err := _IHardforkRegistry.contract.Call(opts, out, "get", name)
@@ -273,8 +273,8 @@ func (_IHardforkRegistry *IHardforkRegistryCaller) Get(opts *bind.CallOpts, name
 // Solidity: function get(bytes32 name) constant returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
 func (_IHardforkRegistry *IHardforkRegistrySession) Get(name [32]byte) (struct {
 	BlockNumber *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
 	return _IHardforkRegistry.Contract.Get(&_IHardforkRegistry.CallOpts, name)
 }
@@ -284,8 +284,8 @@ func (_IHardforkRegistry *IHardforkRegistrySession) Get(name [32]byte) (struct {
 // Solidity: function get(bytes32 name) constant returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
 func (_IHardforkRegistry *IHardforkRegistryCallerSession) Get(name [32]byte) (struct {
 	BlockNumber *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
 	return _IHardforkRegistry.Contract.Get(&_IHardforkRegistry.CallOpts, name)
 }
@@ -448,10 +448,10 @@ func (it *IHardforkRegistryHardforkCreatedIterator) Close() error {
 
 // IHardforkRegistryHardforkCreated represents a HardforkCreated event raised by the IHardforkRegistry contract.
 type IHardforkRegistryHardforkCreated struct {
-	Name       [32]byte
+	Name        [32]byte
 	BlockNumber *big.Int
-	SwFeatures *big.Int
-	Raw        types.Log // Blockchain specific contextual infos
+	SwFeatures  *big.Int
+	Raw         types.Log // Blockchain specific contextual infos
 }
 
 // FilterHardforkCreated is a free log retrieval operation binding the contract event 0x33bbb09eb0e71b49dacc2c0e0f73dd640a1314f0d08d5f8efa5c12eac770c4c3.

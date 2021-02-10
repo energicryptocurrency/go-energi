@@ -274,13 +274,13 @@ func (_HardforkRegistryV1 *HardforkRegistryV1CallerSession) EnumeratePending() (
 // Solidity: function get(bytes32 name) constant returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
 func (_HardforkRegistryV1 *HardforkRegistryV1Caller) Get(opts *bind.CallOpts, name [32]byte) (struct {
 	BlockNumber *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
 	ret := new(struct {
 		BlockNumber *big.Int
-		BlockHash  [32]byte
-		SwFeatures *big.Int
+		BlockHash   [32]byte
+		SwFeatures  *big.Int
 	})
 	out := ret
 	err := _HardforkRegistryV1.contract.Call(opts, out, "get", name)
@@ -292,8 +292,8 @@ func (_HardforkRegistryV1 *HardforkRegistryV1Caller) Get(opts *bind.CallOpts, na
 // Solidity: function get(bytes32 name) constant returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
 func (_HardforkRegistryV1 *HardforkRegistryV1Session) Get(name [32]byte) (struct {
 	BlockNumber *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
 	return _HardforkRegistryV1.Contract.Get(&_HardforkRegistryV1.CallOpts, name)
 }
@@ -303,8 +303,8 @@ func (_HardforkRegistryV1 *HardforkRegistryV1Session) Get(name [32]byte) (struct
 // Solidity: function get(bytes32 name) constant returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
 func (_HardforkRegistryV1 *HardforkRegistryV1CallerSession) Get(name [32]byte) (struct {
 	BlockNumber *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
 }, error) {
 	return _HardforkRegistryV1.Contract.Get(&_HardforkRegistryV1.CallOpts, name)
 }
@@ -601,7 +601,7 @@ func (_HardforkRegistryV1 *HardforkRegistryV1Filterer) FilterHardforkCreated(opt
 	var nameRule []interface{}
 	for _, nameItem := range name {
 		nameRule = append(nameRule, nameItem)
-}
+	}
 
 	logs, sub, err := _HardforkRegistryV1.contract.FilterLogs(opts, "HardforkCreated", nameRule)
 	if err != nil {
@@ -618,7 +618,7 @@ func (_HardforkRegistryV1 *HardforkRegistryV1Filterer) WatchHardforkCreated(opts
 	var nameRule []interface{}
 	for _, nameItem := range name {
 		nameRule = append(nameRule, nameItem)
-}
+	}
 
 	logs, sub, err := _HardforkRegistryV1.contract.WatchLogs(opts, "HardforkCreated", nameRule)
 	if err != nil {
@@ -723,9 +723,9 @@ func (it *HardforkRegistryV1HardforkFinalizedIterator) Close() error {
 type HardforkRegistryV1HardforkFinalized struct {
 	Name        [32]byte
 	BlockNumber *big.Int
-	BlockHash  [32]byte
-	SwFeatures *big.Int
-	Raw        types.Log // Blockchain specific contextual infos
+	BlockHash   [32]byte
+	SwFeatures  *big.Int
+	Raw         types.Log // Blockchain specific contextual infos
 }
 
 // FilterHardforkFinalized is a free log retrieval operation binding the contract event 0x6dc459fd769bc8043e2a9bf76cf8ca708f41158bb7d40566a9f488a8fc6c87da.
