@@ -36,6 +36,10 @@ func (f *fakeChain) CurrentBlock() *types.Block {
 	}, nil, nil, nil)
 }
 
+func (f *fakeChain) IsPublicService() bool {
+	return false
+}
+
 // TestDataCache tests the cache's setter and getter methods.
 func TestDataCache(t *testing.T) {
 	chain := new(fakeChain)
