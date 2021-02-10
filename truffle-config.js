@@ -22,6 +22,7 @@ const contracts = [
     'Gen2Migration',
     'GenericProposal',
     'GovernedProxy',
+    'HardforkRegistryV1',
     'MasternodeTokenV1',
     'MasternodeRegistryV1',
     'SporkRegistryV1',
