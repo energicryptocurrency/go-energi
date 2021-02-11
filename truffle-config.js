@@ -48,7 +48,7 @@ for (let c of contracts) {
 module.exports = {
     contracts_directory: './energi/contracts/src',
     contracts_build_directory: './build/contracts/truffle',
-    migrations_directory: './energi/contracts/test_deploy',
+    migrations_directory: './energi/contracts/migrations',
     test_directory: './energi/contracts/test',
     test_file_extension_regexp: /.*\.spec\.js$/,
     verboseRpc: false,
