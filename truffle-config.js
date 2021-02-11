@@ -58,6 +58,20 @@ module.exports = {
             host: "127.0.0.1",
             port: 8545,
             network_id: "*" // Match any network id
+        },
+        testnet: {
+            host: "nodeapi.test.energi.network",
+            port: 443,
+            network_id: "49797", // testnet network ID
+            from: "0x...",
+            gas: 40000000
+        },
+        mainnet: {
+            host: "nodeapi.test3.energi.network",
+            port: 443,
+            network_id: "39797", // mainnet network ID
+            from: "0x...",
+            gas: 40000000
         }
     },
     compilers: {
