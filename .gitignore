@@ -54,3 +54,5 @@ profile.cov
 
 **/yarn-error.log
 
+# direnv
+.envrc

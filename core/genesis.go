@@ -242,7 +242,8 @@ func (g *Genesis) configOrDefault(ghash common.Hash) *params.ChainConfig {
 	case ghash == params.TestnetGenesisHash:
 		return params.EnergiTestnetChainConfig
 	default:
-		return params.AllEthashProtocolChanges
+		// Returned when genesis is nil and matching ghash is not found.
+		return params.TestChainConfig
 	}
 }
 
@@ -464,6 +465,9 @@ func DeveloperEnergiGenesisBlock(customGenesisPath string) (*Genesis, error) {
 		return nil, fmt.Errorf("invalid genesis file: %v", err)
 	}
 	genesis.Xfers = append(genesis.Xfers, DeployEnergiGovernance(genesis.Config)...)
+	for addr, account := range DefaultPrealloc() {
+		genesis.Alloc[addr] = account
+	}
 	return genesis, nil
 }
 
@@ -717,6 +721,23 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_params.Energi_BlacklistRegistry:  energi_params.Energi_BlacklistRegistryV1,
 		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
 	}
+
+	// mainnet and testnet were deployed without the HF registry in the genesis block
+	// therefore we only deploy when on some other network (devnet / simnet)
+	if (config != params.EnergiMainnetChainConfig) && (config != params.EnergiTestnetChainConfig) {
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_HardforkRegistryV1,
+			nil,
+			energi_abi.HardforkRegistryV1ABI,
+			energi_abi.HardforkRegistryV1Bin,
+			energi_params.Energi_HardforkRegistry,
+			config.Energi.HFSigner,
+			config.HFFinalizationPeriod,
+		)
+		proxies[energi_params.Energi_HardforkRegistry] = energi_params.Energi_HardforkRegistryV1
+	}
+
 	for k, v := range proxies {
 		deployEnergiContract(
 			&xfers,

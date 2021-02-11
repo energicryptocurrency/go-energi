@@ -45,6 +45,7 @@ ENERGI_CONTRACTS := \
   BlockRewardV1.sol \
   CheckpointRegistryV2.sol \
   DummyAccount.sol \
+  HardforkRegistryV1.sol \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
   IBudgetProposal.sol \
@@ -52,6 +53,7 @@ ENERGI_CONTRACTS := \
   ICheckpointRegistry.sol \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
+  IHardforkRegistry.sol \
   IMasternodeRegistryV2.sol \
   IMasternodeToken.sol \
   IProposal.sol \
@@ -116,6 +118,7 @@ test-sol:
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef12345678ffffffff,100000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef1234567fffffffff,100000000000000000000000' \
 	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef123456ffffffffff,100000000000000000000000' \
+	    --account='0x1234567890abcdef1234567890abcdef1234567890abcdef12345fffffffffff,10000000000000000000000000' \
 	    -l 10000000 \
 	    2>&1 >build/contracts/ganache.log & \
 	  sleep 1; \

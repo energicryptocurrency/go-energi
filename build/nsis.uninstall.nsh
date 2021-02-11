@@ -15,6 +15,8 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\${APPNAME}\Attach.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Testnet Attach.lnk"
+  Delete "$SMPROGRAMS\${APPNAME}\Simnet Core Node.lnk"
+  Delete "$SMPROGRAMS\${APPNAME}\Simnet Attach.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Uninstall.lnk"
   rmDir "$SMPROGRAMS\${APPNAME}"
 
@@ -25,6 +27,9 @@ Section "Uninstall"
   SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet incoming peers (TCP:49797)"
   SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)"
   SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Simnet incoming peers (TCP:59797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Simnet outgoing peers (TCP:59797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Simnet UDP discovery (UDP:59797)"
 
   # Remove IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
   ${un.EnvVarUpdate} $0 "ENERGI3_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
