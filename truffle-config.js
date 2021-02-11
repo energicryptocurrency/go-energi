@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
 
+const HDWalletProvider = require("@truffle/hdwallet-provider");
+const mnemonicPhrase = process.env.TRUFFLE_MNEMONIC;
 
 const contracts = [
     'BackboneRewardV1',
@@ -60,17 +62,27 @@ module.exports = {
             network_id: "*" // Match any network id
         },
         testnet: {
-            host: "nodeapi.test.energi.network",
-            port: 443,
-            network_id: "49797", // testnet network ID
-            from: "0x...",
+            provider: () =>
+              new HDWalletProvider({
+                mnemonic: {
+                    phrase: mnemonicPhrase
+                },
+                providerOrUrl: "https://nodeapi.test.energi.network",
+                derivationPath: "m/44'/49797'/0'/0/"
+            }),
+            network_id: "49797",
             gas: 40000000
         },
         mainnet: {
-            host: "nodeapi.test3.energi.network",
-            port: 443,
-            network_id: "39797", // mainnet network ID
-            from: "0x...",
+            provider: () =>
+              new HDWalletProvider({
+                mnemonic: {
+                    phrase: mnemonicPhrase
+                },
+                providerOrUrl: "https://nodeapi.energi.network",
+                derivationPath: "m/44'/39797'/0'/0/"
+            }),
+            network_id: "39797",
             gas: 40000000
         }
     },
