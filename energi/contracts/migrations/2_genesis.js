@@ -45,7 +45,7 @@ const common = require('../test/common');
 
 module.exports = async (deployer, network, accounts) => {
     // mainnet and testnet don't do genesis deployment, they already have a genesis block
-    if ((network == "mainnet") || (network == "testnet")) {
+    if ((network === "mainnet") || (network === "testnet")) {
         console.log("Skipping genesis migration on " + network);
         return;
     }
