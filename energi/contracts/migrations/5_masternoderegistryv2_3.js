@@ -60,32 +60,34 @@ module.exports = async function(deployer, network, accounts) {
         );
 
         // perform data migration from previous masternode registry
-        var instance = await MasternodeRegistryV2_3.deployed();
-        for (var i = 0; i < migrate_max_calls; i++) {
-            console.log('   Calling function \'migrateStatusPartial()\'');
-            console.log('   ---------------------------------------------');
-            try {
-                const ret = await instance.migrateStatusPartial({from: accounts[0], gas: migrate_gas_limit, gasPrice: migrate_gas_price});
-                // TODO: get BigNumber working correctly to be able to call fromWei
-                //const bal = BigNumber(web3.eth.getBalance(accounts[0]));
-                //const total_cost = BigNumber(ret.receipt.gasUsed * migrate_gas_price);
-                console.log("   > transaction hash:\t" + ret.tx);
-                console.log("   > block number:\t\t" + ret.receipt.blockNumber);
-                console.log("   > account:\t\t\t" + accounts[0]);
-                //console.log("   > balance:\t\t\t" + web3.utils.fromWei(bal));
-                console.log("   > gas used:\t\t\t" + ret.receipt.gasUsed);
-                console.log("   > gas price:\t\t\t" + (migrate_gas_price / 10e8) + " gwei");
-                //console.log("   > total cost:\t\t\t" + web3.utils.fromWei(total_cost) + " NRG");
-                console.log();
-            } catch (e) {
-                // expected revert
-                if ((e.name === 'StatusError') && (e.reason === 'migration already done')) {
-                    console.log("   > migrateStatusPartial(): complete");
+        if ((network === "mainnet") || (network === "testnet")) {
+            var instance = await MasternodeRegistryV2_3.deployed();
+            for (var i = 0; i < migrate_max_calls; i++) {
+                console.log('   Calling function \'migrateStatusPartial()\'');
+                console.log('   ---------------------------------------------');
+                try {
+                    const ret = await instance.migrateStatusPartial({from: accounts[0], gas: migrate_gas_limit, gasPrice: migrate_gas_price});
+                    // TODO: get BigNumber working correctly to be able to call fromWei
+                    //const bal = BigNumber(web3.eth.getBalance(accounts[0]));
+                    //const total_cost = BigNumber(ret.receipt.gasUsed * migrate_gas_price);
+                    console.log("   > transaction hash:\t" + ret.tx);
+                    console.log("   > block number:\t\t" + ret.receipt.blockNumber);
+                    console.log("   > account:\t\t\t" + accounts[0]);
+                    //console.log("   > balance:\t\t\t" + web3.utils.fromWei(bal));
+                    console.log("   > gas used:\t\t\t" + ret.receipt.gasUsed);
+                    console.log("   > gas price:\t\t\t" + (migrate_gas_price / 10e8) + " gwei");
+                    //console.log("   > total cost:\t\t\t" + web3.utils.fromWei(total_cost) + " NRG");
                     console.log();
-                    break;
-                } else {
-                    console.dir(e);
-                    throw e;
+                } catch (e) {
+                    // expected revert
+                    if ((e.name === 'StatusError') && (e.reason === 'migration already done')) {
+                        console.log("   > migrateStatusPartial(): complete");
+                        console.log();
+                        break;
+                    } else {
+                        console.dir(e);
+                        throw e;
+                    }
                 }
             }
         }

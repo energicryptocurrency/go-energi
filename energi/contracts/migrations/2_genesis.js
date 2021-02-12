@@ -43,7 +43,13 @@ const MockProposal = artifacts.require("MockProposal");
 
 const common = require('../test/common');
 
-module.exports = async (deployer, _, accounts) => {
+module.exports = async (deployer, network, accounts) => {
+    // mainnet and testnet don't do genesis deployment, they already have a genesis block
+    if ((network === "mainnet") || (network === "testnet")) {
+        console.log("Skipping genesis migration on " + network);
+        return;
+    }
+
     try {
         // V1 instances
         await deployer.deploy(MockProxy);
