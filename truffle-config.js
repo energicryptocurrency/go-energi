@@ -15,7 +15,7 @@
 // along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
-const mnemonicPhrase = process.env.TRUFFLE_MNEMONIC;
+const mnemonicPhrase = process.env.TRUFFLE_MNEMONIC || "developers developers developers developers developers developers developers developers developers developers developers developers";
 
 const contracts = [
     'BackboneRewardV1',
