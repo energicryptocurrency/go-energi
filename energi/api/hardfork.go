@@ -62,9 +62,6 @@ func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 		r.proxyAddr = energi_params.Energi_HardforkRegistry
 	}
 
-	//b.OnSyncedHeadUpdates(func() {
-	//	r.ListHardforks()
-	//})
 	return r
 }
 
