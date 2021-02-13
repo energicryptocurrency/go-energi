@@ -488,8 +488,7 @@ web3._extend({
 			outputFormatter: console.log,
 		}),
 
-
-		// new hardfork
+		// hardfork registry
 		new web3._extend.Method({
 			name: 'hardforkList'
 			call: 'energi_hardforkEnumerate',
