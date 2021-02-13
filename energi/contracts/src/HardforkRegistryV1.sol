@@ -33,9 +33,9 @@ contract StorageHardforkRegistryV1 is StorageBase
 {
     struct Hardfork {
         bytes32 name;
-        uint256 block_number;
+        uint block_number;
         bytes32 block_hash;
-        uint256 sw_features;
+        uint sw_features;
     }
 
     bytes32[] public hardfork_names;
@@ -60,8 +60,8 @@ contract StorageHardforkRegistryV1 is StorageBase
     /// @param sw_features A software version number describing the minimum software needed for the hardfork.
     function set(
         bytes32 name,
-        uint256 block_number,
-        uint256 sw_features
+        uint block_number,
+        uint sw_features
     )
         external
         requireOwner
@@ -95,7 +95,7 @@ contract StorageHardforkRegistryV1 is StorageBase
     /// @dev a block hash associated to them are considered final and may no longer be changed in any way.
     /// @param name The name of the hardfork to finalize
     /// @param finalization_confirmations The number of block confirmations before a hardfork is eligible to finalize.
-    function finalize(bytes32 name, uint256 finalization_confirmations)
+    function finalize(bytes32 name, uint finalization_confirmations)
         external
         requireOwner
     {
@@ -155,7 +155,7 @@ contract HardforkRegistryV1 is
 {
     address public hf_signer;
     StorageHardforkRegistryV1 public v1storage;
-    uint256 finalization_confirmations;
+    uint finalization_confirmations;
 
     /// @notice Only hf_signer is allowed to update the HardforkRegistry
     modifier requireHardforkSigner()
@@ -168,7 +168,7 @@ contract HardforkRegistryV1 is
     /// @param _proxy The proxy address of the HardforkRegistry. If address(0) is used, a new proxy will be created.
     /// @param _hf_signer The address of the key responsible for managing hardforks.
     /// @param _finalization_confirmations The number of block confirmations before a hardfork is eligible to finalize.
-    constructor(address _proxy, address _hf_signer, uint256 _finalization_confirmations)
+    constructor(address _proxy, address _hf_signer, uint _finalization_confirmations)
         public GovernedContractAutoProxy(_proxy)
     {
         v1storage = new StorageHardforkRegistryV1();
@@ -183,7 +183,7 @@ contract HardforkRegistryV1 is
     /// @param name The name of the hard fork to add or update
     /// @param block_number The block number when the hard fork will go into effect
     /// @param sw_features A version integer describing the minimum software required for the hard fork
-    function add(bytes32 name, uint256 block_number, uint256 sw_features) external requireHardforkSigner
+    function add(bytes32 name, uint block_number, uint sw_features) external requireHardforkSigner
     {
         if (v1storage.set(name, block_number, sw_features)) {
             emit HardforkCreated(name, block_number, sw_features);
@@ -198,9 +198,9 @@ contract HardforkRegistryV1 is
     function finalize(bytes32 name) external requireHardforkSigner
     {
         v1storage.finalize(name, finalization_confirmations);
-        uint256 block_number;
+        uint block_number;
         bytes32 block_hash;
-        uint256 sw_features;
+        uint sw_features;
         (, block_number, block_hash, sw_features) = v1storage.hardforks(name);
         emit HardforkFinalized(name, block_number, block_hash, sw_features);
     }
@@ -225,9 +225,11 @@ contract HardforkRegistryV1 is
     /// @return block_number the block number on which the hard fork will become active
     /// @return block_hash the hash of the block on which a finalized hard fork became active
     /// @return sw_fetaures A version integer describing the minimum software required for the hard fork
-    function get(bytes32 name) external view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features)
+    function get(bytes32 name) external view returns(uint block_number, bytes32 block_hash, uint sw_features)
     {
-        (, block_number, block_hash, sw_features) = v1storage.hardforks(name);
+        bytes32 _name;
+        (_name, block_number, block_hash, sw_features) = v1storage.hardforks(name);
+        require(_name != bytes32(0), "no such hard fork");
     }
 
     /// @notice get the names of all the hard forks
@@ -247,7 +249,7 @@ contract HardforkRegistryV1 is
         //count the number of pending hfs
         uint pendingNum = 0;
         for (uint i = 0; i < names_count; i++) {
-            uint256 block_number;
+            uint block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number < block_number) {
                 pendingNum++;
@@ -258,15 +260,13 @@ contract HardforkRegistryV1 is
         bytes32[] memory pending = new bytes32[](pendingNum);
         uint ind = 0;
         for (uint i = 0; i < names_count; i++) {
-            uint256 block_number;
+            uint block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number < block_number) {
               pending[ind] = hf_names[i];
               ind++;
             }
         }
-
-
 
         return pending;
     }
@@ -281,7 +281,7 @@ contract HardforkRegistryV1 is
         //count the number of active hfs
         uint activeNum = 0;
         for (uint i = 0; i < names_count; i++) {
-            uint256 block_number;
+            uint block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number >= block_number) {
                 activeNum++;
@@ -292,7 +292,7 @@ contract HardforkRegistryV1 is
         bytes32[] memory active = new bytes32[](activeNum);
         uint ind = 0;
         for (uint i = 0; i < names_count; i++) {
-            uint256 block_number;
+            uint block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number >= block_number) {
                 active[ind] = hf_names[i];
@@ -310,7 +310,7 @@ contract HardforkRegistryV1 is
     function isActive(bytes32 name) external view returns(bool)
     {
         bytes32 _name;
-        uint256 block_number;
+        uint block_number;
         (_name, block_number, ,) = v1storage.hardforks(name);
 
         return ((block.number >= block_number) && (_name != bytes32(0)));
