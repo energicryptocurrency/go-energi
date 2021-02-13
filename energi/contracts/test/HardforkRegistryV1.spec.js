@@ -472,11 +472,15 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
-
-
-
+        it("should fail to get non-existant hardfork", async() => {
+            await common.moveTime(web3, 1);
+            try {
+                var res = await s.proxy_hf.get(b32("NotARealHardforkName"));
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /no such hard fork/);
+            }
+        });
 
     });
-
 });

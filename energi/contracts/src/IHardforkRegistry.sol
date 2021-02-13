@@ -25,15 +25,15 @@ pragma solidity 0.5.16;
 interface IHardforkRegistry {
     event HardforkCreated (
         bytes32 indexed name,
-        uint256 block_number,
-        uint256 sw_features
+        uint block_number,
+        uint sw_features
     );
 
     event HardforkFinalized (
         bytes32 indexed name,
-        uint256 block_number,
+        uint block_number,
         bytes32 block_hash,
-        uint256 sw_features
+        uint sw_features
     );
 
     event HardforkRemoved (bytes32 indexed name);
@@ -45,7 +45,7 @@ interface IHardforkRegistry {
     /// @param name The name of the hard fork to add or update
     /// @param block_number The block number when the hard fork will go into effect
     /// @param sw_features A version integer describing the minimum software required for the hard fork
-    function add(bytes32 name, uint256 block_number, uint256 sw_features) external;
+    function add(bytes32 name, uint block_number, uint sw_features) external;
 
     /// @notice finalize a hard fork
     /// @dev may only be called by the hard fork signer
@@ -66,7 +66,7 @@ interface IHardforkRegistry {
     /// @return block_number the block number on which the hard fork will become active
     /// @return block_hash the hash of the block on which a finalized hard fork became active
     /// @return sw_fetaures A version integer describing the minimum software required for the hard fork
-    function get(bytes32 name) external view returns(uint256 block_number, bytes32 block_hash, uint256 sw_features);
+    function get(bytes32 name) external view returns(uint block_number, bytes32 block_hash, uint sw_features);
 
     /// @notice get the names of all the hard forks
     /// @return A list of hard fork names
