@@ -35,7 +35,6 @@ import (
 // cache that temporarily holds regularly accessed data.
 type HardforkRegistryAPI struct {
 	backend   Backend
-	hfCache   *energi_common.CacheStorage
 	proxyAddr common.Address
 }
 
@@ -53,7 +52,6 @@ type HardforkInfo struct {
 func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	r := &HardforkRegistryAPI{
 		backend:   b,
-		hfCache:   energi_common.NewCacheStorage(),
 		proxyAddr: b.ChainConfig().HardforkRegistryProxyAddress,
 	}
 
@@ -93,75 +91,45 @@ func (hf *HardforkRegistryAPI) HardforkGet(name string) (info *HardforkInfo, err
 }
 
 func (hf *HardforkRegistryAPI) HardforkEnumerate() (hardforks []*HardforkInfo, err error) {
-	data, err := hf.hfCache.Get(hf.backend, func(*big.Int) (interface{}, error) {
-		registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
-		if err != nil {
-			return nil, err
-		}
-		names, err := registry.Enumerate(callOpts)
-		if err != nil {
-			log.Error("HardforkRegsitryAPI::Enumerate", "err", err)
-			return nil, err
-		}
-
-		return processHfListings(names, registry, callOpts)
-	});
-
-	if err != nil || data == nil {
-		log.Error("HardforkRegistryAPI::Enumerate", "err", err)
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+	names, err := registry.Enumerate(callOpts)
+	if err != nil {
+		log.Error("HardforkRegsitryAPI::Enumerate", "err", err)
 		return nil, err
 	}
 
-	hardforks = data.([]*HardforkInfo)
-	return
+	return processHfListings(names, registry, callOpts)
 }
 
 func (hf *HardforkRegistryAPI) HardforkEnumeratePending() (hardforks []*HardforkInfo, err error) {
-	data, err := hf.hfCache.Get(hf.backend, func(*big.Int) (interface{}, error) {
-		registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
-		if err != nil {
-			return nil, err
-		}
-		names, err := registry.EnumeratePending(callOpts)
-		if err != nil {
-			log.Error("HardforkRegsitryAPI::EnumeratePending", "err", err)
-			return nil, err
-		}
-
-		return processHfListings(names, registry, callOpts)
-	});
-
-	if err != nil || data == nil {
-		log.Error("HardforkRegistryAPI::EnumeratePending", "err", err)
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+	names, err := registry.EnumeratePending(callOpts)
+	if err != nil {
+		log.Error("HardforkRegsitryAPI::EnumeratePending", "err", err)
 		return nil, err
 	}
 
-	hardforks = data.([]*HardforkInfo)
-	return
+	return processHfListings(names, registry, callOpts)
 }
 
 func (hf *HardforkRegistryAPI) HardforkEnumerateActive() (hardforks []*HardforkInfo, err error) {
-	data, err := hf.hfCache.Get(hf.backend, func(*big.Int) (interface{}, error) {
-		registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
-		if err != nil {
-			return nil, err
-		}
-		names, err := registry.EnumerateActive(callOpts)
-		if err != nil {
-			log.Error("HardforkRegsitryAPI::EnumerateActive", "err", err)
-			return nil, err
-		}
-
-		return processHfListings(names, registry, callOpts)
-	});
-
-	if err != nil || data == nil {
-		log.Error("HardforkRegistryAPI::EnumerateActive", "err", err)
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+	names, err := registry.EnumerateActive(callOpts)
+	if err != nil {
+		log.Error("HardforkRegsitryAPI::EnumerateActive", "err", err)
 		return nil, err
 	}
 
-	hardforks = data.([]*HardforkInfo)
-	return
+	return processHfListings(names, registry, callOpts)
 }
 
 func (hf *HardforkRegistryAPI) HardforkIsActive(name string) bool {
