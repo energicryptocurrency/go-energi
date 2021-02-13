@@ -24,7 +24,6 @@ import (
 
 	"energi.world/core/gen3/accounts/abi/bind"
 	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
 	"energi.world/core/gen3/log"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
@@ -43,9 +42,9 @@ type HardforkRegistryAPI struct {
 // HardforkInfo defines the hardfork payload information returned.
 type HardforkInfo struct {
   Name          string          `json:"name"`
-  BlockNumber   *hexutil.Big    `json:"block_number"`
+  BlockNumber   *big.Int        `json:"block_number"`
   BlockHash     common.Hash     `json:"block_hash,omitempty"`
-  SWFeatures    *hexutil.Big    `json:"sw_features"`
+  SWFeatures    *big.Int        `json:"sw_features"`
   SWVersion     string          `json:"sw_version"`
 }
 
@@ -71,7 +70,7 @@ func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	return r
 }
 
-func (hf *HardforkRegistryAPI) Get(name string) (info *HardforkInfo, err error) {
+func (hf *HardforkRegistryAPI) HardforkGet(name string) (info *HardforkInfo, err error) {
   registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
   if err != nil {
     return nil, err
@@ -83,17 +82,17 @@ func (hf *HardforkRegistryAPI) Get(name string) (info *HardforkInfo, err error) 
   }
 
   info = &HardforkInfo{
-    BlockNumber:    (*hexutil.Big)(data.BlockNumber),
+    BlockNumber:    data.BlockNumber,
     Name:           name,
     BlockHash:      common.BytesToHash(data.BlockHash[:]),
-    SWFeatures:     (*hexutil.Big)(data.SwFeatures),
+    SWFeatures:     data.SwFeatures,
     SWVersion:      energi_common.SWVersionIntToString(data.SwFeatures),
   }
 
   return
 }
 
-func (hf *HardforkRegistryAPI) Enumerate() (hardforks []*HardforkInfo, err error) {
+func (hf *HardforkRegistryAPI) HardforkEnumerate() (hardforks []*HardforkInfo, err error) {
 	data, err := hf.hfCache.Get(hf.backend, func(*big.Int) (interface{}, error) {
 		registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 		if err != nil {
@@ -117,7 +116,7 @@ func (hf *HardforkRegistryAPI) Enumerate() (hardforks []*HardforkInfo, err error
 	return
 }
 
-func (hf *HardforkRegistryAPI) EnumeratePending() (hardforks []*HardforkInfo, err error) {
+func (hf *HardforkRegistryAPI) HardforkEnumeratePending() (hardforks []*HardforkInfo, err error) {
 	data, err := hf.hfCache.Get(hf.backend, func(*big.Int) (interface{}, error) {
 		registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 		if err != nil {
@@ -141,7 +140,7 @@ func (hf *HardforkRegistryAPI) EnumeratePending() (hardforks []*HardforkInfo, er
 	return
 }
 
-func (hf *HardforkRegistryAPI) EnumerateActive() (hardforks []*HardforkInfo, err error) {
+func (hf *HardforkRegistryAPI) HardforkEnumerateActive() (hardforks []*HardforkInfo, err error) {
 	data, err := hf.hfCache.Get(hf.backend, func(*big.Int) (interface{}, error) {
 		registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 		if err != nil {
@@ -165,7 +164,7 @@ func (hf *HardforkRegistryAPI) EnumerateActive() (hardforks []*HardforkInfo, err
 	return
 }
 
-func (hf *HardforkRegistryAPI) IsActive(name string) bool {
+func (hf *HardforkRegistryAPI) HardforkIsActive(name string) bool {
 	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 	if err != nil {
 		return false
@@ -212,17 +211,17 @@ func processHfListings(
 ) ([]*HardforkInfo, error) {
   resp := make([]*HardforkInfo, 0, len(HfNames))
   for _, name := range HfNames {
-    data, err := registry.Get(callOpts, name)
+    hf, err := registry.Get(callOpts, name)
     if err != nil {
       log.Error("HardforkRegistryAPI::Get", "err", err)
       return nil, err
     }
     resp = append(resp, &HardforkInfo{
-      BlockNumber:    (*hexutil.Big)(data.BlockNumber),
+      BlockNumber:    hf.BlockNumber,
       Name:           decodeName(name),
-      BlockHash:      common.BytesToHash(data.BlockHash[:]),
-      SWFeatures:     (*hexutil.Big)(data.SwFeatures),
-      SWVersion:      energi_common.SWVersionIntToString(data.SwFeatures),
+      BlockHash:      common.BytesToHash(hf.BlockHash[:]),
+      SWFeatures:     hf.SwFeatures,
+      SWVersion:      energi_common.SWVersionIntToString(hf.SwFeatures),
     })
   }
 
