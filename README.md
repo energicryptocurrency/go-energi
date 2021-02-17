@@ -8,16 +8,6 @@ Official golang implementation of the Energi Core based on Ethereum protocol.
 
     make all
 
-### (Optional) Build with Vagrant
-
-A consistent build environment can be provided with Vagrant.
-
-    vagrant up
-    vagrant ssh builder
-    cd /vagrant
-
-From within the Vagrant environment, follow the steps to build with FutoIn CID.
-
 ### (Optional) Build with Docker
 
 A consistent build environment can be provided with Docker. Release builds are produced through this process.
