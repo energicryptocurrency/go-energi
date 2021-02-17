@@ -131,6 +131,7 @@ func TestCheckpoints(t *testing.T) {
 		blocks[0].Header(),
 		blocks[1].Header(),
 	}, 1)
+
 	assert.Equal(t, ErrCheckpointMismatch, err)
 
 	_, err = chain.InsertChain(blocks)

@@ -23,6 +23,8 @@ Section "Gen 3 Core Node" GETH_IDX
   createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\energi3.exe" "attach \\.\pipe\energi3.ipc" "" ""
   createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk" "$INSTDIR\energi3.exe" "--testnet --cache=512 -ipcpath test-energi3.ipc"
   createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Attach.lnk" "$INSTDIR\energi3.exe" "--testnet attach \\.\pipe\test-energi3.ipc" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Core Node.lnk" "$INSTDIR\energi3.exe" "--simnet --cache=512 -ipcpath sim-energi3.ipc"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Attach.lnk" "$INSTDIR\energi3.exe" "--simnet attach \\.\pipe\sim-energi3.ipc" "" ""
   createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "" ""
 
   # Firewall - remove rules (if exists)
@@ -32,6 +34,9 @@ Section "Gen 3 Core Node" GETH_IDX
   SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet incoming peers (TCP:49797)"
   SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)"
   SimpleFC::AdvRemoveRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Simnet incoming peers (TCP:59797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Simnet outgoing peers (TCP:59797)"
+  SimpleFC::AdvRemoveRule "Energi Gen 3 Simnet UDP discovery (UDP:59797)"
 
 
   # Firewall - add rules
@@ -41,12 +46,17 @@ Section "Gen 3 Core Node" GETH_IDX
   SimpleFC::AdvAddRule "Energi Gen 3 Testnet incoming peers (TCP:49797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 49797 "" "" ""
   SimpleFC::AdvAddRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 49797 "" ""
   SimpleFC::AdvAddRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 49797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Simnet incoming peers (TCP:59797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 59797 "" "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Simnet outgoing peers (TCP:59797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 59797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Simnet UDP discovery (UDP:59797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 59797 "" ""
 
   # Set default IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
   ${EnvVarUpdate} $0 "ENERGI3_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
   ${EnvVarUpdate} $0 "ENERGI3_SOCKET" "A" "HKLM" "\\.\pipe\energi3.ipc"
   ${EnvVarUpdate} $0 "ENERGI3_TESTNET_SOCKET" "R" "HKLM" "\\.\pipe\test-energi3.ipc"
   ${EnvVarUpdate} $0 "ENERGI3_TESTNET_SOCKET" "A" "HKLM" "\\.\pipe\test-energi3.ipc"
+  ${EnvVarUpdate} $0 "ENERGI3_SIMNET_SOCKET" "R" "HKLM" "\\.\pipe\sim-energi3.ipc"
+  ${EnvVarUpdate} $0 "ENERGI3_SIMNET_SOCKET" "A" "HKLM" "\\.\pipe\sim-energi3.ipc"
 
   # Add instdir to PATH
   Push "$INSTDIR"

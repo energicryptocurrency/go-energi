@@ -45,6 +45,7 @@ ENERGI_CONTRACTS := \
   BlockRewardV1.sol \
   CheckpointRegistryV2.sol \
   DummyAccount.sol \
+  HardforkRegistryV1.sol \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
   IBudgetProposal.sol \
@@ -52,6 +53,7 @@ ENERGI_CONTRACTS := \
   ICheckpointRegistry.sol \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
+  IHardforkRegistry.sol \
   IMasternodeRegistryV2.sol \
   IMasternodeToken.sol \
   IProposal.sol \
