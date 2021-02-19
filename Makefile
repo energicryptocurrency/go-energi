@@ -44,25 +44,17 @@ ios:
 	@echo "Done building."
 	@echo "Import \"$(GOBIN)/EnergiCore.framework\" to use the library."
 
-check:
-	lint
-	test
+check: lint test
 
-test: all
-	test-go
-	test-sol
+test: all test-go test-sol
 
 test-go:
 	git submodule update --init --recursive
 	build/env.sh go run build/ci.go test
 
-test-sol:
-	yarn run eslint energi/contracts/
-	test-sol
+test-sol: lint-sol test-sol-contracts
 
-lint: # Run linters.
-	lint-go
-	lint-sol
+lint: lint-go lint-sol
 
 lint-go:
 	build/env.sh go run build/ci.go lint
