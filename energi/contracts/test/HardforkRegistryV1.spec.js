@@ -82,11 +82,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
-
         it("should return existing hardfork names", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 var existing_hf_names = await s.proxy_hf.enumerate({from: hf_signer});
                 expect(existing_hf_names).members(hf_names);
@@ -96,7 +93,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should refuse to set a hardfork directly", async () => {
-          await common.moveTime(web3, 1);
+            await common.moveTime(web3, 1);
             try {
                 await s.storage.set(hf_names[0], 10, 10);
                 assert.fail('It must fail');
@@ -106,7 +103,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should refuse to finalize a hardfork directly", async () => {
-          await common.moveTime(web3, 1);
+            await common.moveTime(web3, 1);
             try {
                 await s.storage.finalize(hf_names[0], 10);
                 assert.fail('It must fail');
@@ -116,7 +113,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should refuse to remove a hardfork directly", async () => {
-          await common.moveTime(web3, 1);
+            await common.moveTime(web3, 1);
             try {
                 await s.storage.remove(hf_names[0]);
                 assert.fail('It must fail');
@@ -125,9 +122,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
         it("should fail adding hardfork with empty name", async () => {
-          await common.moveTime(web3, 1);
+            await common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
 
             try {
@@ -138,82 +134,72 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
-
-
-          it("should show hardfork is active", async () => {
-              for (var i=0;i<41;i++) {
+        it("should show hardfork is active", async () => {
+            for (var i=0;i<41;i++) {
                 await common.moveTime(web3, 1);
-              }
-              const b = await web3.eth.getBlock('latest');
-              try {
-                  var isactive = await s.proxy_hf.isActive(hf_names[0],{from: hf_signer});
-                  expect(isactive).to.equal(true);
-              } catch (e) {
-                  assert.fail('It must fail');
-              }
-          });
+            }
+            try {
+                var isactive = await s.proxy_hf.isActive(hf_names[0],{from: hf_signer});
+                expect(isactive).to.equal(true);
+            } catch (e) {
+                assert.fail('It must fail');
+            }
+        });
 
-          it("should show hardfork is not active (as it doesn't exist)", async () => {
-              for (var i=0;i<41;i++) {
+        it("should show hardfork is not active (as it doesn't exist)", async () => {
+            for (var i=0;i<41;i++) {
                 await common.moveTime(web3, 1);
-              }
-              const b = await web3.eth.getBlock('latest');
-              try {
-                  var isactive = await s.proxy_hf.isActive(b32("some name"),{from: hf_signer});
-                  expect(isactive).to.equal(false);
-              } catch (e) {
-                  assert.fail('It must fail');
-              }
-          });
+            }
+            try {
+                var isactive = await s.proxy_hf.isActive(b32("some name"),{from: hf_signer});
+                expect(isactive).to.equal(false);
+            } catch (e) {
+                assert.fail('It must fail');
+            }
+        });
 
-
-          it("should fail adding incorrect block_number", async () => {
+        it("should fail adding incorrect block_number", async () => {
             await common.moveTime(web3, 1);
-              const b = await web3.eth.getBlock('latest');
-              try {
-                  await s.proxy_hf.add(hf_names[0], b.number, hf_sw_feature, {from: hf_signer});
-                  assert.fail('It must fail');
-              } catch (e) {
-                  assert.match(e.message, /Hardfork is already in effect or doesn't exist/);
-              }
-          });
+            const b = await web3.eth.getBlock('latest');
+            try {
+                await s.proxy_hf.add(hf_names[0], b.number, hf_sw_feature, {from: hf_signer});
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Hardfork is already in effect or doesn't exist/);
+            }
+        });
 
-
-          it("should fail updating active hardfork", async () => {
+        it("should fail updating active hardfork", async () => {
             await common.moveTime(web3, 1);
-              const b = await web3.eth.getBlock('latest');
-              try {
-                  await s.proxy_hf.add(hf_names[0], b.number+100, hf_sw_feature, {from: hf_signer});
-                  assert.fail('It must fail');
-              } catch (e) {
-                  assert.match(e.message, /Hardfork is already in effect or doesn't exist/);
-              }
-          });
+            const b = await web3.eth.getBlock('latest');
+            try {
+                await s.proxy_hf.add(hf_names[0], b.number+100, hf_sw_feature, {from: hf_signer});
+                assert.fail('It must fail');
+            } catch (e) {
+                assert.match(e.message, /Hardfork is already in effect or doesn't exist/);
+            }
+        });
 
-
-          it("should catch event for adding new hardfork", async () => {
+        it("should catch event for adding new hardfork", async () => {
             await common.moveTime(web3, 1);
-              const b = await web3.eth.getBlock('latest');
-              try {
-                  var res = await s.proxy_hf.add(b32("Aristotle"), b.number+40, hf_sw_feature, {from: hf_signer});
-                  const evt = await s.orig.getPastEvents('HardforkCreated', common.evt_last_block);
-                  expect(res.logs).lengthOf(1);
-                  common.stringifyBN(web3, evt[0].args);
-                  expect(evt[0].args).deep.include({
-                      block_number: (b.number+40).toString(),
-                      name: b32("Aristotle"),
-                      sw_features: hf_sw_feature.toString()
-                  });
-              } catch (e) {
-                  assert.fail('It must fail');
-              }
-          });
-
+            const b = await web3.eth.getBlock('latest');
+            try {
+                var res = await s.proxy_hf.add(b32("Aristotle"), b.number+40, hf_sw_feature, {from: hf_signer});
+                const evt = await s.orig.getPastEvents('HardforkCreated', common.evt_last_block);
+                expect(res.logs).lengthOf(1);
+                common.stringifyBN(web3, evt[0].args);
+                expect(evt[0].args).deep.include({
+                    block_number: (b.number+40).toString(),
+                    name: b32("Aristotle"),
+                    sw_features: hf_sw_feature.toString()
+                });
+            } catch (e) {
+                assert.fail('It must fail');
+            }
+        });
 
         it("should return hardfork is not active (false)", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
+            await common.moveTime(web3, 1);
             try {
                 var res = await s.proxy_hf.isActive(b32("Aristotle"), {from: hf_signer});
 
@@ -225,7 +211,6 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should have five active hardforks before removing", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 var res = await s.proxy_hf.enumerate({from: hf_signer});
                 expect(res.length).to.equal(5);
@@ -236,7 +221,6 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should remove pending hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 var res = await s.proxy_hf.remove(b32("Aristotle"), {from: hf_signer});
                 const evt = await s.orig.getPastEvents('HardforkRemoved', common.evt_last_block);
@@ -250,12 +234,10 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
         it("should fail on removing non-existing hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
-                var res = await s.proxy_hf.remove(b32("non existing hardfork"), {from: hf_signer});
+                await s.proxy_hf.remove(b32("non existing hardfork"), {from: hf_signer});
             } catch (e) {
                 assert.match(e.message,/Hardfork is already in effect or doesn't exist/);
             }
@@ -263,9 +245,8 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should fail on removing hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
-                var res = await s.proxy_hf.remove(hf_active[0], {from: hf_signer});
+                await s.proxy_hf.remove(hf_active[0], {from: hf_signer});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message,/Hardfork is already in effect or doesn't exist/);
@@ -274,31 +255,26 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should fail on removing empty-named hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
-                var res = await s.proxy_hf.remove(b32(""), {from: hf_signer});
+                await s.proxy_hf.remove(b32(""), {from: hf_signer});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message,/Hardfork name cannot be empty/);
             }
         });
 
-
         it("should fail on removing active hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
-                var res = await s.proxy_hf.remove(hf_names[0], {from: hf_signer});
+                await s.proxy_hf.remove(hf_names[0], {from: hf_signer});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message,/Hardfork is already in effect or doesn't exist/);
             }
         });
 
-
         it("should have four active hardforks after removing", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 var res = await s.proxy_hf.enumerate({from: hf_signer});
                 expect(res).members(hf_names);
@@ -307,10 +283,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
         it("should not finalize empty name hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 await s.proxy_hf.finalize(b32(""),{from: hf_signer});
                 assert.fail('It must fail');
@@ -319,10 +293,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
         it("should not finalize non existing hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 await s.proxy_hf.finalize(b32("some non existing hardfork"),{from: hf_signer});
                 assert.fail('It must fail');
@@ -331,10 +303,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
         it("should finalize hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 var res = await s.proxy_hf.finalize(hf_active[0],{from: hf_signer});
                 const evt = await s.orig.getPastEvents('HardforkFinalized', common.evt_last_block);
@@ -349,10 +319,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
         it("should not finalize already finalized hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 await s.proxy_hf.finalize(hf_active[0],{from: hf_signer});
                 assert.fail('It must fail');
@@ -361,11 +329,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
-
-
         it("should catch event for adding new hardfork", async () => {
-          await common.moveTime(web3, 1);
+            await common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
             try {
                 var res = await s.proxy_hf.add(b32("Fyodor Dostoevsky"), b.number+40, hf_sw_feature, {from: hf_signer});
@@ -384,7 +349,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should catch event for adding new hardfork", async () => {
-          await common.moveTime(web3, 1);
+            await common.moveTime(web3, 1);
             const b = await web3.eth.getBlock('latest');
             try {
                 var res = await s.proxy_hf.add(b32("Leo Tolstoy"), b.number+40, hf_sw_feature, {from: hf_signer});
@@ -404,7 +369,6 @@ contract("HardforkRegistryV1", async accounts => {
 
         it("should not finalize pending hardfork", async () => {
             await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
             try {
                 await s.proxy_hf.finalize(hf_pending[0],{from: hf_signer});
                 assert.fail('It must fail');
@@ -415,8 +379,7 @@ contract("HardforkRegistryV1", async accounts => {
 
 
         it("should enumerate pending hardforks", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
+            await common.moveTime(web3, 1);
             try {
                 var res = await s.proxy_hf.enumeratePending({from: hf_signer});
                 expect(res).members(hf_pending);
@@ -426,8 +389,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should enumerate active hardforks", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
+            await common.moveTime(web3, 1);
             try {
                 var res = await s.proxy_hf.enumerateActive({from: hf_signer});
                 expect(res).members(hf_active);
@@ -436,11 +398,8 @@ contract("HardforkRegistryV1", async accounts => {
             }
         });
 
-
-
         it("should enumerate hardforks", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
+            await common.moveTime(web3, 1);
             try {
                 var res = await s.proxy_hf.enumerate({from: hf_signer});
                 var enumerates = hf_active.concat(hf_pending);
@@ -451,8 +410,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should return hf to be active", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
+            await common.moveTime(web3, 1);
             try {
                 var res = await s.proxy_hf.isActive(hf_active[0] ,{from: hf_signer});
                 expect(res).to.equal(true);
@@ -462,8 +420,7 @@ contract("HardforkRegistryV1", async accounts => {
         });
 
         it("should return hf not to be active", async () => {
-          await common.moveTime(web3, 1);
-            const b = await web3.eth.getBlock('latest');
+            await common.moveTime(web3, 1);
             try {
                 var res = await s.proxy_hf.isActive(hf_pending[0] ,{from: hf_signer});
                 expect(res).to.equal(false);
@@ -475,7 +432,7 @@ contract("HardforkRegistryV1", async accounts => {
         it("should fail to get non-existant hardfork", async() => {
             await common.moveTime(web3, 1);
             try {
-                var res = await s.proxy_hf.get(b32("NotARealHardforkName"));
+                await s.proxy_hf.get(b32("NotARealHardforkName"));
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /no such hard fork/);
