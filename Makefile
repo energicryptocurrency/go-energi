@@ -70,7 +70,7 @@ clean:
 	rm -fr build/_workspace/pkg/ $(GOBIN)/*
 
 clean-vcs:
-	git clean -ffdx -e .vagrant/ . || true
+	git clean -fdx . || true
 
 update-license:
 	go run ./build/update-license.go
