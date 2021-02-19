@@ -52,12 +52,15 @@ test-go:
 	git submodule update --init --recursive
 	build/env.sh go run build/ci.go test
 
-test-sol: lint-sol test-sol-contracts
+test-sol: lint-sol-tests lint-sol test-sol-contracts
 
-lint: lint-go lint-sol
+lint: lint-go lint-sol-tests lint-sol
 
 lint-go:
 	build/env.sh go run build/ci.go lint
+
+lint-sol-tests:
+	yarn run eslint energi/contracts/
 
 lint-sol:
 	yarn run solium -d energi/contracts/
