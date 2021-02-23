@@ -20,27 +20,27 @@ const HardforkRegistryV1 = artifacts.require('HardforkRegistryV1');
 const common = require('../test/common');
 
 module.exports = async function(deployer, network) {
-  try {
-    var hf_signer = common.hf_signer;
-    var hf_finalization_period = common.hf_finalization_period;
+    try {
+        var hf_signer = common.hf_signer;
+        var hf_finalization_period = common.hf_finalization_period;
 
-    console.log("Deploying to " + network);
+        console.log("Deploying to " + network);
 
-    if (network === "mainnet") {
-      hf_signer = '0x44D16E845ec2d2D6A99a10fe44EE99DA0541CF31';
-      hf_finalization_period = 30;
-    } else if (network === "testnet") {
-      hf_signer = '0x5b00118464fa6e73f9c2a4ea44e1cbfa9f5b83c6';
-      hf_finalization_period = 10;
+        if (network === "mainnet") {
+            hf_signer = '0x44D16E845ec2d2D6A99a10fe44EE99DA0541CF31';
+            hf_finalization_period = 30;
+        } else if (network === "testnet") {
+            hf_signer = '0x5b00118464fa6e73f9c2a4ea44e1cbfa9f5b83c6';
+            hf_finalization_period = 10;
+        }
+
+        // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
+        await deployer.deploy(HardforkRegistryV1, common.default_address, hf_signer, hf_finalization_period);
+        var instance = await HardforkRegistryV1.deployed();
+        var proxyAddress = await instance.proxy();
+        console.log("   > proxy address:       " + proxyAddress);
+    } catch (e) {
+        console.dir(e);
+        throw e;
     }
-
-    // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
-    await deployer.deploy(HardforkRegistryV1, common.default_address, hf_signer, hf_finalization_period);
-    var instance = await HardforkRegistryV1.deployed();
-    var proxyAddress = await instance.proxy();
-    console.log("   > proxy address:       " + proxyAddress);
-  } catch (e) {
-    console.dir(e);
-    throw e;
-  }
 };
