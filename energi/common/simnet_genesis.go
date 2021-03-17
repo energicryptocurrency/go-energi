@@ -60,14 +60,16 @@ const (
 				"backboneAddress": "0xbbf49b4e3e363b5cbf1074cc52f4330764d5cf91",
 				"migrationSigner": "0x7d33f22bc04fd4f5041f13eb1183eff9ae7c7712",
 				"ebiSigner"      : "0x128eaec174d59a7a77be8a77899efe8ff8469e76",
-				"cppSigner"      : "0x21902f8414b0b4810d75ba40c651191bcf311552"
+				"cppSigner"      : "0x21902f8414b0b4810d75ba40c651191bcf311552",
+				"hfSigner"       : "0xfadfcbc05aa1f56d9ee0ee162ea9e77f49d5e45d"
 			},
 			"superblockCycle"    	: 100,
 			"mnRequireValidation"	: 2,
 			"mnValidationPeriod" 	: 2,
 			"mnCleanupPeriod"    	: 86400,
 			"mnEverCollateral"   	: 3000000000000000000000,
-			"mnRewardsPerBlock"  	: 10
+			"mnRewardsPerBlock"  	: 10,
+			"hfFinalizationPeriod"  : 30
 		}
 	}`
 )

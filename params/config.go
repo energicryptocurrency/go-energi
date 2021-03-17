@@ -38,6 +38,9 @@ var (
 	MainnetCPPSigner = common.HexToAddress("0xBD1C57eACcfD1519E342F870C1c551983F839479")
 	TestnetCPPSigner = common.HexToAddress("0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca")
 
+	MainnetHFSigner = common.HexToAddress("0x44D16E845ec2d2D6A99a10fe44EE99DA0541CF31")
+	TestnetHFSigner = common.HexToAddress("0x5b00118464fa6e73f9c2a4ea44e1cbfa9f5b83c6")
+
 	MainnetBackbone = common.HexToAddress("0x79C7CF016E53e5C47906c2daF6De2aA00AAcdB1e")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 )
@@ -77,6 +80,7 @@ var (
 			MigrationSigner: MainnetMigrationSigner,
 			EBISigner:       MainnetEBISigner,
 			CPPSigner:       MainnetCPPSigner,
+			HFSigner:        MainnetHFSigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24 * 14), // A super block happens at the end of every 20160 block (Approx. 14 days)
 		MNRequireValidation: big.NewInt(10),
@@ -84,6 +88,9 @@ var (
 		MNCleanupPeriod:     big.NewInt(60 * 60 * 24 * 14), // Inactive MN denounced after 1209600 sec (14 days/ 2 weeks)
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(3000000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10), // MN with the minimum collateral amount gets a block reward of (9.14/10) 0.914 NRG.
+
+		HardforkRegistryProxyAddress: common.Address{},
+		HFFinalizationPeriod: big.NewInt(30), // The hardfork should be finalized in 30 blocks.
 	}
 
 	EnergiTestnetChainConfig = &ChainConfig{
@@ -101,6 +108,7 @@ var (
 			MigrationSigner: TestnetMigrationSigner,
 			EBISigner:       TestnetEBISigner,
 			CPPSigner:       TestnetCPPSigner,
+			HFSigner:        TestnetHFSigner,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24),
 		MNRequireValidation: big.NewInt(5),
@@ -108,6 +116,9 @@ var (
 		MNCleanupPeriod:     big.NewInt(60 * 60 * 3),
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10),
+
+		HardforkRegistryProxyAddress: common.HexToAddress("0xD9161413B0ef8F730dCABeb8F1D7fC95FdCe47F1"),
+		HFFinalizationPeriod: big.NewInt(10), // The hardfork should be finalized in 10 blocks.
 	}
 
 	// MainnetChainConfig is the chain parameters to run a node on the main network.
@@ -161,16 +172,16 @@ var (
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
+	AllEthashProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}, big.NewInt(0)}
 
 	// AllCliqueProtocolChanges contains every protocol change (EIPs) introduced
 	// and accepted by the Ethereum core developers into the Clique consensus.
 	//
 	// This configuration is intentionally not using keyed fields to force anyone
 	// adding flags to the config to also have to set these fields.
-	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
+	AllCliqueProtocolChanges = &ChainConfig{big.NewInt(1337), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, nil, &CliqueConfig{Period: 0, Epoch: 30000}, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}, big.NewInt(0)}
 
-	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0)}
+	TestChainConfig = &ChainConfig{big.NewInt(1), big.NewInt(0), big.NewInt(0), common.Hash{}, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), nil, new(EthashConfig), nil, nil, big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), big.NewInt(0), common.Address{}, big.NewInt(0)}
 	TestRules       = TestChainConfig.Rules(new(big.Int))
 )
 
@@ -234,6 +245,14 @@ type ChainConfig struct {
 	// MNRewardsPerBlock defines the fraction of the total MN reward per block share
 	// payable to the MN holding the minimum amount of collateral.
 	MNRewardsPerBlock *big.Int `json:"mnRewardsPerBlock"`
+	// HardforkRegistryProxyAddress is the address of the proxy contract for
+	// the HardforkRegistry. This contract was not deployed via genesis so it can change
+	// between networks.
+	HardforkRegistryProxyAddress common.Address `json:"hfRegistryProxyAddress"`
+	// HFFinalizationPeriod is the number of blocks after the hardfork block,
+	// within which a given hardfork must be finalized and made immutable or
+	// rendered invalid and editable.
+	HFFinalizationPeriod *big.Int `json:"hfFinalizationPeriod"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -261,6 +280,7 @@ type EnergiConfig struct {
 	MigrationSigner common.Address `json:"migrationSigner"`
 	EBISigner       common.Address `json:"ebiSigner"`
 	CPPSigner       common.Address `json:"cppSigner"`
+	HFSigner        common.Address `json:"hfSigner"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
