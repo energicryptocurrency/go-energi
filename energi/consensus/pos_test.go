@@ -450,7 +450,7 @@ func TestStakeWeightLookup(t *testing.T) {
 		parent.Nonce = types.BlockNonce{255, 255, 255, 255, 255, 255, 255, 255}
 		weight, err = engine.lookupStakeWeight(fakeChain, header.Time, parent, header.Coinbase)
 		assert.Empty(t, err)
-		assert.Equal(t, weight, 0)
+		assert.Equal(t, weight, uint64(0))
 
 		parent.Coinbase = parentCoinbase
 		parent.Nonce = parentNonce
