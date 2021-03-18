@@ -79,6 +79,7 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 
 		// Concurrent update could happened
 		if force || state.entry == nil || state.blockHash != blockhash {
+
 			entry, err := source(block.Number())
 
 			if err != nil {
@@ -92,15 +93,17 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 		if state.entry == nil {
 			return nil, ErrInvalidData
 		}
-
 		return state.entry, nil
 	}
 
 	// First run or error recovery
 	if state.entry == nil {
 		return do_update(false)
-	} else if chain.IsPublicService() || (state.blockHash == blockhash) {
-		// Never block for public service and continusouly refresh in general
+	} else if !chain.IsPublicService() && state.blockHash != blockhash {
+		// Ensure not to provide the stale data for non-public services
+		return do_update(false)
+	} else if state.blockHash != blockhash {
+		// Never block for public service and continuously refresh in general
 		if atomic.CompareAndSwapInt32(&c.updating, 0, 1) {
 			go func() {
 				defer atomic.StoreInt32(&c.updating, 0)
@@ -115,9 +118,6 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 				do_update(true)
 			}()
 		}
-	} else if state.blockHash != blockhash {
-		// Ensure not to provide the stale data for non-public services
-		return do_update(false)
 	}
 
 	return state.entry, nil
