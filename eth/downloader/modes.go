@@ -39,7 +39,7 @@ func (mode SyncMode) String() string {
 	case FastSync:
 		return "fast"
 	case LightSync:
-		return "uknown"
+		return "unknown"
 	default:
 		return "unknown"
 	}
