@@ -85,6 +85,8 @@ func (e *Energi) processBlacklists(
 		statedb.SetState(energi_params.Energi_Blacklist, key, common.BytesToHash([]byte{0x00}))
 		return true
 	})
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Blacklist).CommitTrie(statedb.Database())
 
 	//set only blocked accounts
 	for _, addr := range *address_list {
@@ -93,6 +95,8 @@ func (e *Energi) processBlacklists(
 			statedb.SetState(energi_params.Energi_Blacklist, addr.Hash(), common.BytesToHash([]byte{0x01}))
 		}
 	}
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Blacklist).CommitTrie(statedb.Database())
 
 
 	//clear out the account storage
@@ -100,12 +104,16 @@ func (e *Energi) processBlacklists(
 		statedb.SetState(energi_params.Energi_Whitelist, key, common.BytesToHash([]byte{0x00}))
 		return true
 	})
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Whitelist).CommitTrie(statedb.Database())
 
 	//set whitelisted accounts in the Energi_Whitelist storage
 	for addr := range whitelist {
 		log.Trace("Whitelisting account", "addr", addr)
 		statedb.SetState(energi_params.Energi_Whitelist, addr.Hash(), common.BytesToHash([]byte{0x01}))
 	}
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Whitelist).CommitTrie(statedb.Database())
 
 	return nil
 }

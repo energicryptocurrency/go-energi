@@ -78,11 +78,16 @@ func (e *Energi) processMasternodes(
 		statedb.SetState(energi_params.Energi_MasternodeList, key, common.BytesToHash([]byte{0x00}))
 		return true
 	})
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_MasternodeList).CommitTrie(statedb.Database())
 
 	//set active masternodes
 	for _, addr := range *masternodes {
 		statedb.SetState(energi_params.Energi_MasternodeList, addr.Hash(), common.BytesToHash([]byte{0x01}))
 	}
+
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_MasternodeList).CommitTrie(statedb.Database())
 
 	return nil
 }

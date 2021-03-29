@@ -26,9 +26,6 @@ import (
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/trie"
-
-	"energi.world/core/gen3/log"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
