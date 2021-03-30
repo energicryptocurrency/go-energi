@@ -18,7 +18,7 @@ package trie
 
 import (
 	"fmt"
-
+	"reflect"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/log"
 )
@@ -134,6 +134,14 @@ func (t *SecureTrie) GetKey(shaKey []byte) []byte {
 	key, err := t.trie.db.preimage(common.BytesToHash(shaKey))
 	if err != nil {
 		panic(err)
+	}
+
+
+	//check if reverse hash of key equals to shaKey
+	keyCopy := common.CopyBytes(key)
+  keyHash := t.hashKey(keyCopy)
+	if reflect.DeepEqual(shaKey, keyHash) == false {
+		log.Error("Preimage damage - key: ",common.BytesToHash(shaKey).String(), " value: ", common.BytesToHash(key).String())
 	}
 	return key
 }
