@@ -970,10 +970,6 @@ func (d *Downloader) fetchHeaders(p *peerConnection, from uint64, pivot uint64) 
 							head = full
 						}
 					}
-				head = d.blockchain.CurrentFastBlock().NumberU64()
-				if full := d.blockchain.CurrentBlock().NumberU64(); head < full {
-					head = full
-				}
 					// If the head is way older than this batch, delay the last few headers
 					if head+uint64(reorgProtThreshold) < headers[n-1].Number.Uint64() {
 						delay := reorgProtHeaderDelay
