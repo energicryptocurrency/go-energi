@@ -332,9 +332,10 @@ var (
 		Value: int(state.MaxTrieCacheGen),
 	}
 	// Miner settings
-	MiningEnabledFlag = cli.BoolFlag{
+	MiningEnabledFlag = cli.IntFlag{
 		Name:  "mine",
-		Usage: "Enable mining",
+		Usage: "Enable Node mining. (default = 1 - enables node mining, 0 - disables node mining)",
+		Value: 1,
 	}
 	MinerThreadsFlag = cli.IntFlag{
 		Name:  "miner.threads",
