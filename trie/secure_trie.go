@@ -133,7 +133,7 @@ func (t *SecureTrie) GetKey(shaKey []byte) []byte {
 	}
 	key, err := t.trie.db.preimage(common.BytesToHash(shaKey))
 	if err != nil {
-		log.Error("error during retrieving key from preimage database with hash - ",common.BytesToHash(shaKey).String(), err.Error())
+		log.Error("error during retrieving key from preimage database with hash - ", common.BytesToHash(shaKey).String(), err.Error())
 	}
 
 
