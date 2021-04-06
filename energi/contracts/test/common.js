@@ -29,13 +29,16 @@ exports.mnregistry_config_v2 = [
     3, // ValidationPeriods
     24*60*60, // CleanupPeriod
     '10000000000000000000000', // 10,000 NRG,
-    1,
+    1, // RewardsPerBlock: Default is 10 but changing this is resulting to lots of tests failures.
 ];
 exports.superblock_cycles = 8;
 exports.chain_id = 49797;
 exports.migration_signer = '0x0000000000000000000000000000000012345678';
 exports.cpp_signer = '0x2D0bc327d0843CAF6Fd9ae1eFaB0bF7196Fc2FC8';
+exports.hf_finalization_period = 30;
+exports.hf_signer = '0xF98eAeF47624cEE5C1328cdA0018381b5790A9e6';
 exports.emergency_signer = '0x73E286b244c17F030F72e98C57FC83015a3C53Fd';
+exports.default_address = '0x0000000000000000000000000000000000000000';
 exports.zerofee_callopts = {
     gas: 250000, // real max is 500000
 };
@@ -129,7 +132,7 @@ exports.govPostTests = (s) => {
             s.assert.match(e.message, /Not supported/);
         }
     });
-    
+
     if ('storage' in s) s.it('should refuse to accept funds to storage', async () => {
         try {
             await s.storage.send(s.web3.utils.toWei('1', "ether"));
@@ -165,7 +168,7 @@ exports.govPostTests = (s) => {
 
         s.assert.equal(logs.length, 1);
         const proposal = await MockProposal.at(logs[0].args['1']);
-        
+
         await proposal.setAccepted();
         await s.proxy.upgrade(proposal.address);
 
@@ -184,4 +187,3 @@ exports.govPostTests = (s) => {
         await s.fake.killStorage(s.storage.address);
     });
 };
-

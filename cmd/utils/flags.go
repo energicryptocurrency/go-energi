@@ -60,6 +60,7 @@ import (
 	whisper "energi.world/core/gen3/whisper/whisperv6"
 	cli "gopkg.in/urfave/cli.v1"
 
+	energi_common "energi.world/core/gen3/energi/common"
 	energi "energi.world/core/gen3/energi/consensus"
 	energi_svc "energi.world/core/gen3/energi/service"
 )
@@ -109,6 +110,8 @@ func NewApp(gitCommit, usage string) *cli.App {
 	return app
 }
 
+const simnetGenesisBlock = "simnet-genesis.json"
+
 // These are all the command line flags we support.
 // If you add to this list, please remember to include the
 // flag in the appropriate command definition.
@@ -137,12 +140,16 @@ var (
 	}
 	NetworkIdFlag = cli.Uint64Flag{
 		Name:  "networkid",
-		Usage: "Network identifier (integer, 39797=EnergiMain, 49797=EnergiTest)",
+		Usage: "Network identifier (integer, 39797=EnergiMain, 49797=EnergiTest, 59797=EnergiSim)",
 		Value: eth.DefaultConfig.NetworkId,
 	}
 	TestnetFlag = cli.BoolFlag{
 		Name:  "testnet",
-		Usage: "EnergiTest network: pre-configured proof-of-work test network",
+		Usage: "EnergiTest network: pre-configured proof-of-stake test network",
+	}
+	SimnetFlag = cli.BoolFlag{
+		Name:  "simnet",
+		Usage: "EnergiSim network: pre-configured proof-of-stake dev network",
 	}
 	ConstantinopleOverrideFlag = cli.Uint64Flag{
 		Name:  "override.constantinople",
@@ -168,7 +175,7 @@ var (
 	defaultSyncMode = eth.DefaultConfig.SyncMode
 	SyncModeFlag    = TextMarshalerFlag{
 		Name:  "syncmode",
-		Usage: `Blockchain sync mode ("fast", "full", or "light")`,
+		Usage: `Blockchain sync mode ("fast" or "full")`,
 		Value: &defaultSyncMode,
 	}
 	GCModeFlag = cli.StringFlag{
@@ -325,9 +332,10 @@ var (
 		Value: int(state.MaxTrieCacheGen),
 	}
 	// Miner settings
-	MiningEnabledFlag = cli.BoolFlag{
+	MiningEnabledFlag = cli.IntFlag{
 		Name:  "mine",
-		Usage: "Enable mining",
+		Usage: "Enable Node mining. (default = 1 - enables node mining, 0 - disables node mining)",
+		Value: 1,
 	}
 	MinerThreadsFlag = cli.IntFlag{
 		Name:  "miner.threads",
@@ -695,6 +703,8 @@ func MakeDataDir(ctx *cli.Context) string {
 	if path := ctx.GlobalString(DataDirFlag.Name); path != "" {
 		if ctx.GlobalBool(TestnetFlag.Name) {
 			return filepath.Join(path, "testnet")
+		} else if ctx.GlobalBool(SimnetFlag.Name) {
+			return filepath.Join(path, "simnet")
 		}
 		return path
 	}
@@ -748,7 +758,8 @@ func setBootstrapNodes(ctx *cli.Context, cfg *p2p.Config) {
 		}
 	case ctx.GlobalBool(TestnetFlag.Name):
 		urls = params.TestnetBootnodes
-	case cfg.BootstrapNodes != nil:
+	case cfg.BootstrapNodes != nil || ctx.GlobalBool(SimnetFlag.Name):
+		// Simnet has no default boot nodes.
 		return // already set, don't apply defaults.
 	}
 
@@ -791,10 +802,21 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 // setListenAddress creates a TCP listening address string from set command
 // line flags.
 func setListenAddress(ctx *cli.Context, cfg *p2p.Config) {
-	if ctx.GlobalIsSet(ListenPortFlag.Name) {
-		cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt(ListenPortFlag.Name))
-	} else if ctx.GlobalIsSet(TestnetFlag.Name) {
-		cfg.ListenAddr = fmt.Sprintf(":%d", 49797)
+	if ctx.GlobalIsSet(TestnetFlag.Name) {
+		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
+			log.Error("Unacceptable port value. Testnet port is being set to 49797.")
+			cfg.ListenAddr = fmt.Sprintf(":%d", 49797)
+		}
+	} else if ctx.GlobalIsSet(SimnetFlag.Name) {
+		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 49797 {
+			log.Error("Unacceptable port value. Simnet port is being set to 59797.")
+			cfg.ListenAddr = fmt.Sprintf(":%d", 59797)
+		}
+	} else if ctx.GlobalIsSet(ListenPortFlag.Name) {
+		if ctx.GlobalInt64(ListenPortFlag.Name) == 49797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
+			log.Error("Unacceptable port value. Mainnet port is being set to 39797.")
+			cfg.ListenAddr = fmt.Sprintf(":%d", 39797)
+		}
 	}
 }
 
@@ -833,6 +855,8 @@ func setHTTP(ctx *cli.Context, cfg *node.Config) {
 		cfg.HTTPPort = ctx.GlobalInt(RPCPortFlag.Name)
 	} else if ctx.GlobalIsSet(TestnetFlag.Name) {
 		cfg.HTTPPort = 49796
+	} else if ctx.GlobalIsSet(SimnetFlag.Name) {
+		cfg.HTTPPort = 59796
 	}
 	if ctx.GlobalIsSet(RPCCORSDomainFlag.Name) {
 		cfg.HTTPCors = splitAndTrim(ctx.GlobalString(RPCCORSDomainFlag.Name))
@@ -859,6 +883,8 @@ func setWS(ctx *cli.Context, cfg *node.Config) {
 		cfg.WSPort = ctx.GlobalInt(WSPortFlag.Name)
 	} else if ctx.GlobalIsSet(TestnetFlag.Name) {
 		cfg.WSPort = 49795
+	} else if ctx.GlobalIsSet(SimnetFlag.Name) {
+		cfg.WSPort = 59795
 	}
 	if ctx.GlobalIsSet(WSAllowedOriginsFlag.Name) {
 		cfg.WSOrigins = splitAndTrim(ctx.GlobalString(WSAllowedOriginsFlag.Name))
@@ -1079,6 +1105,8 @@ func setDataDir(ctx *cli.Context, cfg *node.Config) {
 		cfg.DataDir = "" // unless explicitly requested, use memory databases
 	case ctx.GlobalBool(TestnetFlag.Name):
 		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "testnet")
+	case ctx.GlobalBool(SimnetFlag.Name):
+		cfg.DataDir = filepath.Join(node.DefaultDataDir(), "simnet")
 	}
 }
 
@@ -1239,7 +1267,7 @@ func SetShhConfig(ctx *cli.Context, stack *node.Node, cfg *whisper.Config) {
 // SetEthConfig applies eth-related command line flags to the config.
 func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	// Avoid conflicting network flags
-	checkExclusive(ctx, DeveloperFlag, TestnetFlag, EnergiInitDevFlag)
+	checkExclusive(ctx, DeveloperFlag, TestnetFlag, EnergiInitDevFlag, SimnetFlag)
 	checkExclusive(ctx, LightServFlag, SyncModeFlag, "light")
 
 	ks := stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
@@ -1349,6 +1377,28 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 			cfg.NetworkId = 49797
 		}
 		cfg.Genesis = core.DefaultEnergiTestnetGenesisBlock()
+	case ctx.GlobalBool(SimnetFlag.Name):
+		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
+			cfg.NetworkId = 59797
+		}
+
+		if cfg.MinerMigration == "" {
+			// Create a special migration tx if no migration file is set.
+			cfg.MinerMigration = energi_common.SimnetMigrationTx
+		}
+
+		// Load simnet's custom configuration.
+		var err error
+		genesisBlockPath := common.AbsolutePath(stack.DataDir(), simnetGenesisBlock)
+		// Create the genesis block file if it doesn't exist.
+		if err = energi_common.CreateEnergiSimnetGenesisBlock(genesisBlockPath); err != nil {
+			Fatalf("Failed to create a new simnet genesis block config: %v", err)
+		}
+		// Load the current simnet genesis block version.
+		cfg.Genesis, err = core.DeveloperEnergiGenesisBlock(genesisBlockPath)
+		if err != nil {
+			Fatalf("Valid custom genesis block configuration was not found: %v", err)
+		}
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		if !ctx.GlobalIsSet(NetworkIdFlag.Name) {
 			cfg.NetworkId = 1337
@@ -1533,13 +1583,20 @@ func MakeChainDatabase(ctx *cli.Context, stack *node.Node) ethdb.Database {
 	return chainDb
 }
 
-func MakeGenesis(ctx *cli.Context) *core.Genesis {
+func MakeGenesis(ctx *cli.Context, stack *node.Node) *core.Genesis {
 	var genesis *core.Genesis
 	switch {
 	case ctx.GlobalBool(TestnetFlag.Name):
 		genesis = core.DefaultTestnetGenesisBlock()
 	case ctx.GlobalBool(DeveloperFlag.Name):
 		Fatalf("Developer chains are ephemeral")
+	case ctx.GlobalBool(SimnetFlag.Name):
+		var err error
+		genesisBlockPath := common.AbsolutePath(stack.DataDir(), simnetGenesisBlock)
+		genesis, err = core.DeveloperEnergiGenesisBlock(genesisBlockPath)
+		if err != nil {
+			Fatalf("Valid custom genesis block configuration was not found: %v", err)
+		}
 	}
 	return genesis
 }
@@ -1548,7 +1605,7 @@ func MakeGenesis(ctx *cli.Context) *core.Genesis {
 func MakeChain(ctx *cli.Context, stack *node.Node) (chain *core.BlockChain, chainDb ethdb.Database) {
 	var err error
 	chainDb = MakeChainDatabase(ctx, stack)
-	config, _, err := core.SetupGenesisBlock(chainDb, MakeGenesis(ctx))
+	config, _, err := core.SetupGenesisBlock(chainDb, MakeGenesis(ctx, stack))
 	if err != nil {
 		Fatalf("%v", err)
 	}

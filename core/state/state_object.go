@@ -26,9 +26,6 @@ import (
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/trie"
-
-	"energi.world/core/gen3/log"
 )
 
 var emptyCodeHash = crypto.Keccak256(nil)
@@ -384,20 +381,4 @@ func (self *stateObject) Nonce() uint64 {
 // interface. Interfaces are awesome.
 func (self *stateObject) Value() *big.Int {
 	panic("Value on stateObject should never be called")
-}
-
-// Cleanup storage entries
-type KeepStorage map[common.Hash]bool
-
-func (self *stateObject) CleanupStorage(keep KeepStorage) {
-	db := self.db.Database()
-	tr := self.getTrie(db)
-	storageIt := trie.NewIterator(tr.NodeIterator(nil))
-	log.Trace("storageIt", "storageIt", storageIt, "dirtyStorage", self.dirtyStorage)
-	for storageIt.Next() {
-		k := common.BytesToHash(tr.GetKey(storageIt.Key))
-		if _, ok := keep[k]; !ok {
-			self.SetState(db, k, common.Hash{})
-		}
-	}
 }
