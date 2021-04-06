@@ -141,7 +141,7 @@ func (t *SecureTrie) GetKey(shaKey []byte) []byte {
 	keyCopy := common.CopyBytes(key)
   keyHash := t.hashKey(keyCopy)
 	if reflect.DeepEqual(shaKey, keyHash) == false {
-		log.Error("Preimage damage - key: ",common.BytesToHash(shaKey).String(), " value: ", common.BytesToHash(key).String())
+		log.Error("Preimage damage", "key", common.BytesToHash(shaKey).String(), "value", common.BytesToHash(key).String())
 	}
 	return key
 }
