@@ -76,44 +76,44 @@ func (e *Energi) processBlacklists(
 	}
 
 	log.Debug("Address blacklist", "address_list", address_list)
-	empty_addr := common.Address{}
-	state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Blacklist)
-	db := statedb.Database()
-	keep := make(state.KeepStorage, len(*address_list))
+	//if account is in whitelist don't set it as blocked in Energi_Blacklist account
 	whitelist := e.createWhitelist(statedb)
+	empty_addr := common.Address{}
 
+	//clear out the account storage
+	statedb.ForEachStorage(energi_params.Energi_Blacklist, func(key, value common.Hash) bool {
+		statedb.SetState(energi_params.Energi_Blacklist, key, common.BytesToHash([]byte{0x00}))
+		return true
+	})
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Blacklist).CommitTrie(statedb.Database())
+
+	//set only blocked accounts
 	for _, addr := range *address_list {
 		if addr != empty_addr && !whitelist[addr] {
-			addr_hash := addr.Hash()
-
-			if (state_obj.GetState(db, addr_hash) == common.Hash{}) {
-				log.Debug("New blacklisted account", "addr", addr)
-			}
-
 			log.Trace("Blacklisting account", "addr", addr)
-			state_obj.SetState(db, addr_hash, blacklistValue)
-			keep[addr_hash] = true
+			statedb.SetState(energi_params.Energi_Blacklist, addr.Hash(), common.BytesToHash([]byte{0x01}))
 		}
 	}
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Blacklist).CommitTrie(statedb.Database())
 
-	state_obj.CleanupStorage(keep)
 
-	//
-	wl_state_obj := statedb.GetOrNewStateObject(energi_params.Energi_Whitelist)
-	wl_keep := make(state.KeepStorage, len(whitelist))
+	//clear out the account storage
+	statedb.ForEachStorage(energi_params.Energi_Whitelist, func(key, value common.Hash) bool {
+		statedb.SetState(energi_params.Energi_Whitelist, key, common.BytesToHash([]byte{0x00}))
+		return true
+	})
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Whitelist).CommitTrie(statedb.Database())
+
+	//set whitelisted accounts in the Energi_Whitelist storage
 	for addr := range whitelist {
-		addr_hash := addr.Hash()
-
-		if (wl_state_obj.GetState(db, addr_hash) == common.Hash{}) {
-			log.Debug("New whitelisted account", "addr", addr)
-		}
-
 		log.Trace("Whitelisting account", "addr", addr)
-		wl_state_obj.SetState(db, addr_hash, blacklistValue)
-		wl_keep[addr_hash] = true
+		statedb.SetState(energi_params.Energi_Whitelist, addr.Hash(), common.BytesToHash([]byte{0x01}))
 	}
-
-	wl_state_obj.CleanupStorage(wl_keep)
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_Whitelist).CommitTrie(statedb.Database())
 
 	return nil
 }

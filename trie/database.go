@@ -53,8 +53,11 @@ var (
 // secureKeyPrefix is the database key prefix used to store trie node preimages.
 var secureKeyPrefix = []byte("secure-key-")
 
+// secureKeyPrefixLength is the length of the above prefix
+const secureKeyPrefixLength = 11
+
 // secureKeyLength is the length of the above prefix + 32byte hash.
-const secureKeyLength = 11 + 32
+const secureKeyLength = secureKeyPrefixLength + 32
 
 // DatabaseReader wraps the Get and Has method of a backing store for the trie.
 type DatabaseReader interface {
@@ -77,7 +80,6 @@ type Database struct {
 	newest  common.Hash                 // Newest tracked node, flush-list tail
 
 	preimages map[common.Hash][]byte // Preimages of nodes from the secure trie
-	seckeybuf [secureKeyLength]byte  // Ephemeral buffer for calculating preimage keys
 
 	gctime  time.Duration      // Time spent on garbage collection since last commit
 	gcnodes uint64             // Nodes garbage collected since last commit
@@ -436,15 +438,15 @@ func (db *Database) preimage(hash common.Hash) ([]byte, error) {
 		return preimage, nil
 	}
 	// Content unavailable in memory, attempt to retrieve from disk
-	return db.diskdb.Get(db.secureKey(hash[:]))
+	return db.diskdb.Get(secureKey(hash))
 }
 
-// secureKey returns the database key for the preimage of key, as an ephemeral
-// buffer. The caller must not hold onto the return value because it will become
-// invalid on the next call.
-func (db *Database) secureKey(key []byte) []byte {
-	buf := append(db.seckeybuf[:0], secureKeyPrefix...)
-	buf = append(buf, key...)
+// secureKey returns the database key for the preimage of key (as a newly
+// allocated byte-slice)
+func secureKey(hash common.Hash) []byte {
+	buf := make([]byte, secureKeyLength)
+	copy(buf, secureKeyPrefix)
+	copy(buf[secureKeyPrefixLength:], hash[:])
 	return buf
 }
 
@@ -577,12 +579,18 @@ func (db *Database) Cap(limit common.StorageSize) error {
 	// counted. For every useful node, we track 2 extra hashes as the flushlist.
 	size := db.dirtiesSize + common.StorageSize((len(db.dirties)-1)*2*common.HashLength)
 
+	// We reuse an ephemeral buffer for the keys. The batch Put operation
+	// copies it internally, so we can reuse it.
+	var keyBuf [secureKeyLength]byte
+	copy(keyBuf[:], secureKeyPrefix)
+
 	// If the preimage cache got large enough, push to disk. If it's still small
 	// leave for later to deduplicate writes.
 	flushPreimages := db.preimagesSize > 4*1024*1024
 	if flushPreimages {
 		for hash, preimage := range db.preimages {
-			if err := batch.Put(db.secureKey(hash[:]), preimage); err != nil {
+			copy(keyBuf[secureKeyPrefixLength:], hash[:])
+			if err := batch.Put(keyBuf[:], preimage); err != nil {
 				log.Error("Failed to commit preimage from trie database", "err", err)
 				db.lock.RUnlock()
 				return err
@@ -675,9 +683,15 @@ func (db *Database) Commit(node common.Hash, report bool) error {
 	start := time.Now()
 	batch := db.diskdb.NewBatch()
 
+	// We reuse an ephemeral buffer for the keys. The batch Put operation
+	// copies it internally, so we can reuse it.
+	var keyBuf [secureKeyLength]byte
+	copy(keyBuf[:], secureKeyPrefix)
+
 	// Move all of the accumulated preimages into a write batch
 	for hash, preimage := range db.preimages {
-		if err := batch.Put(db.secureKey(hash[:]), preimage); err != nil {
+		copy(keyBuf[secureKeyPrefixLength:], hash[:])
+		if err := batch.Put(keyBuf[:], preimage); err != nil {
 			log.Error("Failed to commit preimage from trie database", "err", err)
 			db.lock.RUnlock()
 			return err
