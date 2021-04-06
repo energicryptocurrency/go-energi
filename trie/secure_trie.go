@@ -136,13 +136,12 @@ func (t *SecureTrie) GetKey(shaKey []byte) []byte {
 		log.Error("error during retrieving key from preimage database with hash - ", common.BytesToHash(shaKey).String(), err.Error())
 	}
 
-
-	//check if reverse hash of key equals to shaKey
-	keyCopy := common.CopyBytes(key)
-  keyHash := t.hashKey(keyCopy)
-	if reflect.DeepEqual(shaKey, keyHash) == false {
-		log.Error("Preimage damage", "key", common.BytesToHash(shaKey).String(), "value", common.BytesToHash(key).String())
-	}
+	////check if reverse hash of key equals to shaKey
+	//keyCopy := common.CopyBytes(key)
+	//keyHash := t.hashKey(keyCopy)
+	//if reflect.DeepEqual(shaKey, keyHash) == false {
+	//	log.Error("Preimage damage", "key", common.BytesToHash(shaKey).String(), "value", common.BytesToHash(key).String())
+	//}
 	return key
 }
 
@@ -159,7 +158,7 @@ func (t *SecureTrie) Commit(onleaf LeafCallback) (root common.Hash, err error) {
 			//check if reverse hash of key equals to shaKey
 			if reflect.DeepEqual([]byte(hk), t.hashKey(common.CopyBytes(key))) == false {
 				log.Error("New Damaged Preimage insertion", "key", common.BytesToHash(common.CopyBytes(key)).String(), "value", common.BytesToHash(([]byte(hk))).String())
-			} 
+			}
 
 			t.trie.db.insertPreimage(common.BytesToHash([]byte(hk)), key)
 		}
