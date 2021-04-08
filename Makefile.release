@@ -13,8 +13,8 @@ TARGET_TOOLS += rlpdump
 RELEASE_GOFLAGS = -mod=vendor
 #RELEASE_GOFLAGS+=-v
 
-RELEASE_MAIN = energi
-RELEASE_RAW_VER = $(shell jq -r .version futoin.json)
+RELEASE_MAIN = energi3
+RELEASE_RAW_VER = $(shell jq -r .version package.json)
 RELEASE_VER = $(RELEASE_MAIN)-$(RELEASE_RAW_VER)
 
 .PHONY: release release-tools

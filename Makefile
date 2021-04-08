@@ -44,15 +44,36 @@ ios:
 	@echo "Done building."
 	@echo "Import \"$(GOBIN)/EnergiCore.framework\" to use the library."
 
-test: all
+check: lint test
+
+test: all test-go test-sol
+
+test-go:
+	git submodule update --init --recursive
 	build/env.sh go run build/ci.go test
 
-lint: ## Run linters.
+test-sol: lint-sol-tests lint-sol test-sol-contracts
+
+lint: lint-go lint-sol-tests lint-sol
+
+lint-go:
 	build/env.sh go run build/ci.go lint
+
+lint-sol-tests:
+	yarn run eslint energi/contracts/
+
+lint-sol:
+	yarn run solium -d energi/contracts/
 
 clean:
 	./build/clean_go_build_cache.sh
 	rm -fr build/_workspace/pkg/ $(GOBIN)/*
+
+clean-vcs:
+	git clean -fdx . || true
+
+update-license:
+	go run ./build/update-license.go
 
 # The devtools target installs tools required for 'go generate'.
 # You need to put $GOBIN (or $GOPATH/bin) in your PATH to use 'go generate'.

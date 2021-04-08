@@ -24,6 +24,7 @@ const CheckpointRegistryV2 = artifacts.require('CheckpointRegistryV2');
 const Gen2Migration = artifacts.require('Gen2Migration');
 //const GenericProposalV1 = artifacts.require('GenericProposalV1');
 const GovernedProxy = artifacts.require('GovernedProxy');
+const HardforkRegistryV1 = artifacts.require('HardforkRegistryV1');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const MasternodeTokenV2 = artifacts.require('MasternodeTokenV2');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
@@ -35,13 +36,20 @@ const StakerRewardV1 = artifacts.require('StakerRewardV1');
 const TreasuryV1 = artifacts.require('TreasuryV1');
 
 const MockProxy = artifacts.require("MockProxy");
+//const MockAutoProxy = artifacts.require("MockAutoProxy");
 const MockContract = artifacts.require("MockContract");
 const MockSporkRegistry = artifacts.require("MockSporkRegistry");
 const MockProposal = artifacts.require("MockProposal");
 
 const common = require('../test/common');
 
-module.exports = async (deployer, _, accounts) => {
+module.exports = async (deployer, network, accounts) => {
+    // mainnet and testnet don't do genesis deployment, they already have a genesis block
+    if ((network === "mainnet") || (network === "testnet")) {
+        console.log("Skipping genesis migration on " + network);
+        return;
+    }
+
     try {
         // V1 instances
         await deployer.deploy(MockProxy);
@@ -64,7 +72,9 @@ module.exports = async (deployer, _, accounts) => {
             }
 
             const instance = await deployer.deploy(type, proxy, ...args);
-            await (await MockProxy.at(proxy)).setImpl(instance.address);
+            if (proxy !== common.default_address) {
+                await (await MockProxy.at(proxy)).setImpl(instance.address);
+            }
         };
 
         await deployer.deploy(Gen2Migration, blacklist_registry, common.chain_id, common.migration_signer);
@@ -78,6 +88,7 @@ module.exports = async (deployer, _, accounts) => {
         await deploy_common(BackboneRewardV1, backbone_proxy, accounts[5]);
         await deploy_common(CheckpointRegistryV1, undefined, mn_registry_proxy, common.cpp_signer);
         await deploy_common(CheckpointRegistryV2, undefined, mn_registry_proxy, common.cpp_signer);
+        await deploy_common(HardforkRegistryV1, common.default_address, common.hf_signer, common.hf_finalization_period);
         await deploy_common(MasternodeTokenV1, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeTokenV2, mn_token_proxy, mn_registry_proxy);
         await deploy_common(MasternodeRegistryV1,

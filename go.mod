@@ -1,3 +1,3 @@
-go 1.13.8
+go 1.15
 
 module energi.world/core/gen3
