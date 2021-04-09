@@ -1,4 +1,4 @@
-// Copyright 2018 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // Copyright 2014 The go-ethereum Authors
 // This file is part of the Energi Core library.
 //
