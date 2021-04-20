@@ -31,7 +31,7 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
-// HardforkRegistryAPI is holds the data required to access the API. It has a
+// HardforkRegistryAPI holds the data required to access the API. It has a
 // cache that temporarily holds regularly accessed data.
 type HardforkRegistryAPI struct {
 	backend   Backend
