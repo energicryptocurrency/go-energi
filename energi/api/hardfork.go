@@ -169,25 +169,15 @@ func registryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.IHar
   return registry, callOpts, nil
 }
 
-func processHfListings(
-  HfNames [][32]byte,
-  registry *energi_abi.IHardforkRegistryCaller,
-  callOpts *bind.CallOpts,
-) ([]*HardforkInfo, error) {
+func processHfListings(HfNames [][32]byte) ([]*HardforkInfo, error) {
   resp := make([]*HardforkInfo, 0, len(HfNames))
   for _, name := range HfNames {
-    hf, err := registry.Get(callOpts, name)
+  	hf, err = HardforkGet(name)
     if err != nil {
-      log.Error("HardforkRegistryAPI::Get", "err", err)
+      log.Error("HardforkRegistryAPI::HardforkGet", "err", err)
       return nil, err
     }
-    resp = append(resp, &HardforkInfo{
-      BlockNumber:    hf.BlockNumber,
-      Name:           decodeName(name),
-      BlockHash:      common.BytesToHash(hf.BlockHash[:]),
-      SWFeatures:     hf.SwFeatures,
-      SWVersion:      energi_common.SWVersionIntToString(hf.SwFeatures),
-    })
+    resp = append(resp, hf)
   }
 
   return resp, nil
