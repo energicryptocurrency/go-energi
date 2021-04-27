@@ -98,7 +98,7 @@ func (hf *HardforkRegistryAPI) HardforkEnumerate() (hardforks []*HardforkInfo, e
 		return nil, err
 	}
 
-	return processHfListings(names, registry, callOpts)
+	return hf.processHfListings(names)
 }
 
 func (hf *HardforkRegistryAPI) HardforkEnumeratePending() (hardforks []*HardforkInfo, err error) {
@@ -112,7 +112,7 @@ func (hf *HardforkRegistryAPI) HardforkEnumeratePending() (hardforks []*Hardfork
 		return nil, err
 	}
 
-	return processHfListings(names, registry, callOpts)
+	return hf.processHfListings(names)
 }
 
 func (hf *HardforkRegistryAPI) HardforkEnumerateActive() (hardforks []*HardforkInfo, err error) {
@@ -126,7 +126,7 @@ func (hf *HardforkRegistryAPI) HardforkEnumerateActive() (hardforks []*HardforkI
 		return nil, err
 	}
 
-	return processHfListings(names, registry, callOpts)
+	return hf.processHfListings(names)
 }
 
 func (hf *HardforkRegistryAPI) HardforkIsActive(name string) bool {
@@ -169,10 +169,10 @@ func registryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.IHar
 	return registry, callOpts, nil
 }
 
-func processHfListings(HfNames [][32]byte) ([]*HardforkInfo, error) {
+func (hf *HardforkRegistryAPI) processHfListings(HfNames [][32]byte) ([]*HardforkInfo, error) {
 	resp := make([]*HardforkInfo, 0, len(HfNames))
 	for _, name := range HfNames {
-		hf, err = HardforkGet(name)
+		hf, err := hf.HardforkGet(decodeName(name))
 		if err != nil {
 			log.Error("HardforkRegistryAPI::HardforkGet", "err", err)
 			return nil, err
