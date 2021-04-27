@@ -117,7 +117,7 @@ var (
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10),
 
-		HardforkRegistryProxyAddress: common.HexToAddress("0xD9161413B0ef8F730dCABeb8F1D7fC95FdCe47F1"),
+		HardforkRegistryProxyAddress: common.Address{},
 		HFFinalizationPeriod: big.NewInt(10), // The hardfork should be finalized in 10 blocks.
 	}
 

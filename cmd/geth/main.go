@@ -202,14 +202,14 @@ func init() {
 		monitorCommand,
 		// See accountcmd.go:
 		accountCommand,
-		walletCommand,
+		//walletCommand,
 		// See consolecmd.go:
 		consoleCommand,
 		attachCommand,
 		javascriptCommand,
 		// See misccmd.go:
-		makecacheCommand,
-		makedagCommand,
+		//makecacheCommand,
+		//makedagCommand,
 		versionCommand,
 		bugCommand,
 		licenseCommand,
@@ -348,10 +348,9 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 	}()
 	wallets := stack.AccountManager().Wallets()
 	// Start auxiliary services if enabled
-	if ctx.GlobalBool(utils.MiningEnabledFlag.Name) ||
-		ctx.GlobalBool(utils.DeveloperFlag.Name) ||
+	if ctx.GlobalBool(utils.DeveloperFlag.Name) ||
 		// POS-25: enable staking by default
-		(ctx.GlobalString(utils.MiningEnabledFlag.Name) != "" &&
+		(ctx.GlobalInt(utils.MiningEnabledFlag.Name) != 0 &&
 			len(wallets) > 0 &&
 			len(wallets[0].Accounts()) > 0) {
 		// Mining only makes sense if a full Ethereum node is running

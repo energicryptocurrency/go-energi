@@ -124,7 +124,7 @@ contract StorageHardforkRegistryV1 is StorageBase
 
                 // remove the name from the hardfork_names array
                 for (uint k = i; k < (hardfork_names.length - 1); k++) {
-                   hardfork_names[k] = hardfork_names[k + 1];
+                    hardfork_names[k] = hardfork_names[k + 1];
                 }
                 hardfork_names.pop();
 
@@ -263,8 +263,8 @@ contract HardforkRegistryV1 is
             uint block_number;
             (, block_number, ,) = v1storage.hardforks(hf_names[i]);
             if (block.number < block_number) {
-              pending[ind] = hf_names[i];
-              ind++;
+                pending[ind] = hf_names[i];
+                ind++;
             }
         }
 
