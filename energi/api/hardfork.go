@@ -72,7 +72,7 @@ func (hf *HardforkRegistryAPI) HardforkGet(name string) (info *HardforkInfo, err
   }
   data, err := registry.Get(callOpts, encodeName(name))
   if err != nil {
-    log.Error("HardforkRegsitryAPI::EnumeratePending", "err", err)
+    log.Error("HardforkRegsitryAPI::HardforkGet", "err", err)
     return nil, err
   }
 
