@@ -40,11 +40,11 @@ type HardforkRegistryAPI struct {
 
 // HardforkInfo defines the hardfork payload information returned.
 type HardforkInfo struct {
-  Name          string          `json:"name"`
-  BlockNumber   *big.Int        `json:"block_number"`
-  BlockHash     common.Hash     `json:"block_hash,omitempty"`
-  SWFeatures    *big.Int        `json:"sw_features"`
-  SWVersion     string          `json:"sw_version"`
+	Name        string      `json:"name"`
+	BlockNumber *big.Int    `json:"block_number"`
+	BlockHash   common.Hash `json:"block_hash,omitempty"`
+	SWFeatures  *big.Int    `json:"sw_features"`
+	SWVersion   string      `json:"sw_version"`
 }
 
 // NewHardforkRegistryAPI returns a new HardforkRegistryAPI instance. It also
@@ -66,25 +66,25 @@ func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 }
 
 func (hf *HardforkRegistryAPI) HardforkGet(name string) (info *HardforkInfo, err error) {
-  registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
-  if err != nil {
-    return nil, err
-  }
-  data, err := registry.Get(callOpts, encodeName(name))
-  if err != nil {
-    log.Error("HardforkRegsitryAPI::HardforkGet", "err", err)
-    return nil, err
-  }
+	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+	data, err := registry.Get(callOpts, encodeName(name))
+	if err != nil {
+		log.Error("HardforkRegsitryAPI::HardforkGet", "err", err)
+		return nil, err
+	}
 
-  info = &HardforkInfo{
-    BlockNumber:    data.BlockNumber,
-    Name:           name,
-    BlockHash:      common.BytesToHash(data.BlockHash[:]),
-    SWFeatures:     data.SwFeatures,
-    SWVersion:      energi_common.SWVersionIntToString(data.SwFeatures),
-  }
+	info = &HardforkInfo{
+		BlockNumber: data.BlockNumber,
+		Name:        name,
+		BlockHash:   common.BytesToHash(data.BlockHash[:]),
+		SWFeatures:  data.SwFeatures,
+		SWVersion:   energi_common.SWVersionIntToString(data.SwFeatures),
+	}
 
-  return
+	return
 }
 
 func (hf *HardforkRegistryAPI) HardforkEnumerate() (hardforks []*HardforkInfo, err error) {
@@ -145,40 +145,40 @@ func (hf *HardforkRegistryAPI) HardforkIsActive(name string) bool {
 }
 
 func encodeName(data string) [32]byte {
-  value := [32]byte{}
-  copy(value[:], []byte(data))
-  return value
+	value := [32]byte{}
+	copy(value[:], []byte(data))
+	return value
 }
 
 func decodeName(data [32]byte) string {
-  return string(bytes.Trim(data[:], "\x00"))
+	return string(bytes.Trim(data[:], "\x00"))
 }
 
 func registryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.IHardforkRegistryCaller, *bind.CallOpts, error) {
-  registry, err := energi_abi.NewIHardforkRegistryCaller(proxyAddr, backend.(bind.ContractCaller))
-  if err != nil {
-    log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
-    return nil, nil, err
-  }
+	registry, err := energi_abi.NewIHardforkRegistryCaller(proxyAddr, backend.(bind.ContractCaller))
+	if err != nil {
+		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
+		return nil, nil, err
+	}
 
-  callOpts := &bind.CallOpts{
-    Pending:  true,
-    GasLimit: energi_params.UnlimitedGas,
-  }
+	callOpts := &bind.CallOpts{
+		Pending:  true,
+		GasLimit: energi_params.UnlimitedGas,
+	}
 
-  return registry, callOpts, nil
+	return registry, callOpts, nil
 }
 
 func processHfListings(HfNames [][32]byte) ([]*HardforkInfo, error) {
-  resp := make([]*HardforkInfo, 0, len(HfNames))
-  for _, name := range HfNames {
-  	hf, err = HardforkGet(name)
-    if err != nil {
-      log.Error("HardforkRegistryAPI::HardforkGet", "err", err)
-      return nil, err
-    }
-    resp = append(resp, hf)
-  }
+	resp := make([]*HardforkInfo, 0, len(HfNames))
+	for _, name := range HfNames {
+		hf, err = HardforkGet(name)
+		if err != nil {
+			log.Error("HardforkRegistryAPI::HardforkGet", "err", err)
+			return nil, err
+		}
+		resp = append(resp, hf)
+	}
 
-  return resp, nil
+	return resp, nil
 }
