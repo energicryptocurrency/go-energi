@@ -31,20 +31,20 @@ import { StorageBase }  from "./StorageBase.sol";
  */
 contract StorageCheckpointRegistryV2 is StorageBase {
 
-    //main storage data structure for queue implementation
+    // main storage data structure for queue implementation
     mapping(uint => ICheckpoint) public checkpoints;
-    //starting index(key) for checkpoints
+    // starting index(key) for checkpoints
     uint128 startingKeyIndex;
-    //number of checkpoints currently stored
+    // number of checkpoints currently stored
     uint128 size;
-    //number of stored checkpoints' limit
+    // number of stored checkpoints' limit
     uint constant maxSize = 10;
 
 
 
-    //push new checkpoint
+    // push new checkpoint
     function add(ICheckpoint cp) external requireOwner {
-        //if queue is full and needs first element to be deleted
+        // if queue is full and needs first element to be deleted
         if (size == maxSize)  {
           delete checkpoints[startingKeyIndex];
           checkpoints[startingKeyIndex + size] = cp;
@@ -55,23 +55,23 @@ contract StorageCheckpointRegistryV2 is StorageBase {
         }
     }
 
-    //pop first element
+    // pop first element
     function pop() external requireOwner {
-      //nothing to pop
+      // nothing to pop
       if (size == 0) return;
 
-      //remove last element
+      // remove last element
       delete checkpoints[startingKeyIndex];
       startingKeyIndex++;
       size--;
     }
 
 
-    //for removal we find the checkpoint and move the right part of the queue to the left
+    // for removal we find the checkpoint and move the right part of the queue to the left
     function remove(ICheckpoint cp) external  requireOwner returns(bool found) {
       uint foundCpIndex;
       found = false;
-      //find the cp in map
+      // find the cp in map
       (uint number_1, bytes32 hash_1,  ) = cp.info();
       for (foundCpIndex = startingKeyIndex; foundCpIndex < startingKeyIndex + size; foundCpIndex++) {
           (uint number_2, bytes32 hash_2,  ) = checkpoints[foundCpIndex].info();
@@ -82,13 +82,13 @@ contract StorageCheckpointRegistryV2 is StorageBase {
 
       }
 
-      //if we found the checkpoint
+      // if we found the checkpoint
       if (found == true) {
         //shift every element after index to the left by one
         for (uint i = foundCpIndex; i < startingKeyIndex + size - 1; i++) {
             checkpoints[i] = checkpoints[i + 1];
         }
-        //remove last element
+        // remove last element
         delete checkpoints[startingKeyIndex + size - 1];
         size--;
       }
@@ -96,7 +96,7 @@ contract StorageCheckpointRegistryV2 is StorageBase {
     }
 
 
-    //return checkpoinst  [startingKeyIndex, startingKeyIndex+size) from map
+    // return checkpoinst  [startingKeyIndex, startingKeyIndex+size) from map
     function listCheckpoints() external view returns(ICheckpoint[] memory res) {
         res = new ICheckpoint[](size);
         for (uint i = startingKeyIndex; i < startingKeyIndex + size; i++) {

@@ -19,7 +19,7 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.16;
-//pragma experimental SMTChecker;
+// pragma experimental SMTChecker;
 pragma experimental ABIEncoderV2;
 
 import { IGovernedContract, GovernedContract } from "./GovernedContract.sol";
@@ -41,11 +41,11 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
 
       // Data for migration
       //---------------------------------
-      //main storage contract (for current version queue style) that stores checkpoints
+      // main storage contract (for current version queue style) that stores checkpoints
       StorageCheckpointRegistryV2 public v2storage;
-      //Igoverned proxy registry that is checked to be active when creating new checkpoints
+      // Igoverned proxy registry that is checked to be active when creating new checkpoints
       IGovernedProxy public mnregistry_proxy;
-      //address that is expected to be making signatures for propose or removal of signatures
+      // address that is expected to be making signatures for propose or removal of signatures
       address public CPP_signer;
 
 
@@ -94,15 +94,15 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
       // Remove checkpoint from storage (always succeeds)
       function remove(uint number, bytes32 hash, bytes calldata signature) external returns(bool deleted) {
           // Allow to remove checkpoint by any caller as far as signature is correct.
-          //require(_callerAddress() == CPP_signer, "Invalid caller");
+          // require(_callerAddress() == CPP_signer, "Invalid caller");
 
-          //validation
+          // validation
           bytes32 sigbase = signatureBase(number, hash);
           require(signature.length == 65, "Invalid signature length");
           (bytes32 r, bytes32 s) = abi.decode(signature, (bytes32, bytes32));
           require(ecrecover(sigbase, uint8(signature[64]), r, s) == CPP_signer, "Invalid signer");
 
-          //remove checkpoint from storage
+          // remove checkpoint from storage
           deleted = v2storage.remove(new CheckpointV2(mnregistry_proxy, number, hash, sigbase, signature));
       }
 
