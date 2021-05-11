@@ -370,7 +370,7 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 		}
 
 		// BlockHash not yet set.
-		logFunc("Hardfork will be filalized in about " + string(diff.Int64()/60) + " hours and " + string(diff.Int64()%60) + " minutes" , "block Number", hfBlockNo,
+		logFunc("Hardfork will be finalized in about " + string(diff.Int64()/60) + " hours and " + string(diff.Int64()%60) + " minutes" , "block Number", hfBlockNo,
 			"hardfork Name", hfInfo.Name, desc, new(big.Int).Abs(diff))
 	} else {
 		if diff.Cmp(common.Big0) > 0 && diff.Cmp(period) <= 0 {
