@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"math/big"
+	"strconv"
 	"sync/atomic"
 
 	"energi.world/core/gen3/accounts/abi/bind"
@@ -356,8 +357,7 @@ func (hf *HardforkService) listenDownloader() {
 func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
 	logFunc := log.Debug
 	emptyHash := [32]byte{}
-	hfBlockNo := hfInfo.BlockNumber
-	diff := new(big.Int).Sub(currentBlockNo, hfBlockNo)
+	diff := new(big.Int).Sub(currentBlockNo, hfInfo.BlockNumber)
 
 	if bytes.Compare(hfInfo.BlockHash[:], emptyHash[:]) == 0 {
 		if diff.Cmp(big.NewInt(lastBlockNumToLogPendingHardforks)) > 0 && diff.Cmp(period) <= 0 {
@@ -370,7 +370,7 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 		}
 
 		// BlockHash not yet set.
-		logFunc("Hardfork will be finalized in about " + string(diff.Int64()/60) + " hours and " + string(diff.Int64()%60) + " minutes" , "block Number", hfBlockNo,
+		logFunc("Hardfork will be finalized in about " + strconv.FormatInt(diff.Int64()/60, 10)+ " hours and " + strconv.FormatInt(diff.Int64()%60, 10) + " minutes" , "block Number", hfInfo.BlockNumber,
 			"hardfork Name", hfInfo.Name, desc, new(big.Int).Abs(diff))
 	} else {
 		if diff.Cmp(common.Big0) > 0 && diff.Cmp(period) <= 0 {
@@ -378,7 +378,7 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 			logFunc = log.Info
 		}
 		// BlockHash already set. Hardfork already finalized.
-		logFunc("Hardfork already finalized", "block Number", hfBlockNo,
+		logFunc("Hardfork already finalized", "block Number", hfInfo.BlockNumber,
 			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String(),
 		)
 	}
