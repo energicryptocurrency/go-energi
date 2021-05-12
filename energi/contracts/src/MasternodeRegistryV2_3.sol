@@ -784,6 +784,7 @@ contract MasternodeRegistryV2_3 is
         ValidationStatus validation = _checkStatus(mns, mninfo);
         if (validation == ValidationStatus.MNActive) {
             uint reward_payment = REWARD_MASTERNODE_V1 / payments_per_block;
+            // solium-disable-next-line security/no-send
             success = mninfo.owner.send(reward_payment);
             current_payouts++;
         // denounce invalid masternodes if they have a collateral issue or have been around too long

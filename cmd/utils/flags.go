@@ -175,7 +175,7 @@ var (
 	defaultSyncMode = eth.DefaultConfig.SyncMode
 	SyncModeFlag    = TextMarshalerFlag{
 		Name:  "syncmode",
-		Usage: `Blockchain sync mode ("fast", "full", or "light")`,
+		Usage: `Blockchain sync mode ("fast" or "full")`,
 		Value: &defaultSyncMode,
 	}
 	GCModeFlag = cli.StringFlag{
@@ -332,9 +332,10 @@ var (
 		Value: int(state.MaxTrieCacheGen),
 	}
 	// Miner settings
-	MiningEnabledFlag = cli.BoolFlag{
+	MiningEnabledFlag = cli.IntFlag{
 		Name:  "mine",
-		Usage: "Enable mining",
+		Usage: "Enable Node mining. (default = 1 - enables node mining, 0 - disables node mining)",
+		Value: 1,
 	}
 	MinerThreadsFlag = cli.IntFlag{
 		Name:  "miner.threads",
@@ -801,12 +802,21 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 // setListenAddress creates a TCP listening address string from set command
 // line flags.
 func setListenAddress(ctx *cli.Context, cfg *p2p.Config) {
-	if ctx.GlobalIsSet(ListenPortFlag.Name) {
-		cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt(ListenPortFlag.Name))
-	} else if ctx.GlobalIsSet(TestnetFlag.Name) {
-		cfg.ListenAddr = fmt.Sprintf(":%d", 49797)
+	if ctx.GlobalIsSet(TestnetFlag.Name) {
+		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
+			log.Error("Unacceptable port value. Testnet port is being set to 49797.")
+			cfg.ListenAddr = fmt.Sprintf(":%d", 49797)
+		}
 	} else if ctx.GlobalIsSet(SimnetFlag.Name) {
-		cfg.ListenAddr = fmt.Sprintf(":%d", 59797)
+		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 49797 {
+			log.Error("Unacceptable port value. Simnet port is being set to 59797.")
+			cfg.ListenAddr = fmt.Sprintf(":%d", 59797)
+		}
+	} else if ctx.GlobalIsSet(ListenPortFlag.Name) {
+		if ctx.GlobalInt64(ListenPortFlag.Name) == 49797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
+			log.Error("Unacceptable port value. Mainnet port is being set to 39797.")
+			cfg.ListenAddr = fmt.Sprintf(":%d", 39797)
+		}
 	}
 }
 
@@ -1493,7 +1503,7 @@ func RegisterEthStatsService(stack *node.Node, url string) {
 	}
 }
 
-// RegisterDynamicCheckpointService configures Energi Dynamic Checkpoint service.
+// Configure Energi Dynamic Checkpoint service
 func RegisterDynamicCheckpointService(stack *node.Node) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		var ethServ *eth.Ethereum
@@ -1502,18 +1512,6 @@ func RegisterDynamicCheckpointService(stack *node.Node) {
 		return energi_svc.NewCheckpointService(ethServ)
 	}); err != nil {
 		Fatalf("Failed to register the Energi Checkpoint service: %v", err)
-	}
-}
-
-// RegisterHardforkService configures the Energi hardfork management service.
-func RegisterHardforkService(stack *node.Node) {
-	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
-		var ethServ *eth.Ethereum
-		ctx.Service(&ethServ)
-
-		return energi_svc.NewHardforkService(ethServ)
-	}); err != nil {
-		Fatalf("Failed to register the Energi Hardfork service: %v", err)
 	}
 }
 

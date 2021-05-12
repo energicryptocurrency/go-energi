@@ -196,14 +196,17 @@ contract MasternodeRegistryV2_2 is
         ValidationStatus validation = _checkStatus(mn_status[current_masternode], mninfo);
         if (validation == ValidationStatus.MNActive) {
             uint reward_payment = REWARD_MASTERNODE_V1 / payments_per_block;
+            // solium-disable-next-line security/no-send
             success = mninfo.owner.send(reward_payment);
             current_payouts++;
         // denounce invalid masternodes if they have a collateral issue or have been around too long
+        // solium-disable-next-line security/no-block-members
         } else if ((validation == ValidationStatus.MNCollaterIssue) || ((block.timestamp - mn_status[current_masternode].inactive_since) > cleanup_period)) {
             _denounce(current_masternode, mninfo.owner);
         // deactivate invalid masternodes
         } else if (mn_status[current_masternode].seq_payouts > 0) {
             mn_status[current_masternode].seq_payouts = 0;
+            // solium-disable-next-line security/no-block-members
             mn_status[current_masternode].inactive_since = block.timestamp;
             _deactive_common(current_masternode, mninfo.collateral);
             current_masternode = mninfo.next;

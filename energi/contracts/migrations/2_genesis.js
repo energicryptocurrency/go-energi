@@ -36,14 +36,20 @@ const StakerRewardV1 = artifacts.require('StakerRewardV1');
 const TreasuryV1 = artifacts.require('TreasuryV1');
 
 const MockProxy = artifacts.require("MockProxy");
-const MockAutoProxy = artifacts.require("MockAutoProxy");
+//const MockAutoProxy = artifacts.require("MockAutoProxy");
 const MockContract = artifacts.require("MockContract");
 const MockSporkRegistry = artifacts.require("MockSporkRegistry");
 const MockProposal = artifacts.require("MockProposal");
 
 const common = require('../test/common');
 
-module.exports = async (deployer, _, accounts) => {
+module.exports = async (deployer, network, accounts) => {
+    // mainnet and testnet don't do genesis deployment, they already have a genesis block
+    if ((network === "mainnet") || (network === "testnet")) {
+        console.log("Skipping genesis migration on " + network);
+        return;
+    }
+
     try {
         // V1 instances
         await deployer.deploy(MockProxy);

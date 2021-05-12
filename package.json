@@ -1,9 +1,10 @@
 {
   "name": "energi3",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "author": "Energi Core LTD <contact@energi.team>",
   "license": "GPL-3.0+",
   "devDependencies": {
+    "@truffle/hdwallet-provider": "^1.2.1",
     "eslint": "^6.8.0",
     "ethereumjs-util": "^6.2.0",
     "ethers": "^5.0.7",

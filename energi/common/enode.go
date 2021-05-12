@@ -17,7 +17,6 @@
 package common
 
 import (
-	"bytes"
 	"net"
 
 	"energi.world/core/gen3/crypto"
@@ -44,17 +43,4 @@ func MastenodeEnode(ipv4address uint32, pubkey [2][32]byte, cfg *params.ChainCon
 	}
 
 	return enode.NewV4(pk, ip, int(cfg.ChainID.Int64()), int(cfg.ChainID.Int64()))
-}
-
-// EncodeToString converts the string provided to a bytes32 bytes array.
-func EncodeToString(data string) [32]byte {
-	value := [32]byte{}
-	copy(value[:], []byte(data))
-	return value
-}
-
-// DecodeToString converts the bytes32 bytes array back to the original string.
-// It trims all the null characters from the string.
-func DecodeToString(data [32]byte) string {
-	return string(bytes.Trim(data[:], "\x00"))
 }
