@@ -109,7 +109,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	active hardfork version parameter is higher than running core node version
 	then log error to let user know the core node version is behind
 	*/
-	activeHardforks, err := hf.hfAPI.ListActiveHardforks()
+	activeHardforks, err := hf.hfAPI.HardforkEnumerateActive()
 	if err != nil {
 		log.Error("Failed to get active hardforks (startup)", "err", err);
 	} else if lc := len(activeHardforks); lc > 0 {
@@ -145,7 +145,7 @@ func (hf *HardforkService) logUpcomingHardforks() {
 
 			case ev := <-chainHeadCh:
 				if new(big.Int).Mod(ev.Block.Number(), pendingHardforkLogInterval).Cmp(common.Big0) == 0 {
-					pendingHardforks, err := hf.hfAPI.ListPendingHardforks()
+					pendingHardforks, err := hf.hfAPI.HardforkEnumeratePending()
 					if err != nil {
 						log.Error("Failed to get pending hardforks from api", "err", err);
 						break;
@@ -356,7 +356,7 @@ func (hf *HardforkService) listenDownloader() {
 func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
 	logFunc := log.Debug
 	emptyHash := [32]byte{}
-	hfBlockNo := hfInfo.BlockNumber.ToInt()
+	hfBlockNo := hfInfo.BlockNumber
 	diff := new(big.Int).Sub(currentBlockNo, hfBlockNo)
 
 	if bytes.Compare(hfInfo.BlockHash[:], emptyHash[:]) == 0 {
