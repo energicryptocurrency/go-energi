@@ -73,6 +73,8 @@ func (e *Energi) processMasternodes(
 
 	log.Debug("Masternode list", "masternodes", masternodes)
 
+	mnGauge.Update(int64(len(*masternodes)))
+
 	//clear out the account storage
 	statedb.ForEachStorage(energi_params.Energi_MasternodeList, func(key, value common.Hash) bool {
 		statedb.SetState(energi_params.Energi_MasternodeList, key, common.BytesToHash([]byte{0x00}))
