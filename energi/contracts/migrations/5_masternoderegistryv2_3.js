@@ -1,4 +1,4 @@
-// Copyright 2020 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
