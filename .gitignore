@@ -32,6 +32,7 @@ build/_vendor/pkg
 
 # used by the Makefile
 /build/_workspace/
+/build/cache/
 /build/bin/
 /geth*.zip
 

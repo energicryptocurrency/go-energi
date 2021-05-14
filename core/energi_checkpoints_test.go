@@ -25,7 +25,8 @@ import (
 	"energi.world/core/gen3/consensus/ethash"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
@@ -33,7 +34,7 @@ import (
 
 func TestCheckpoints(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	engine := ethash.NewFaker()
 	db, chain, err := newCanonical(engine, 10, true)
@@ -57,7 +58,7 @@ func TestCheckpoints(t *testing.T) {
 	curr_fork := chain.GetHeaderByNumber(fpn + 1).Hash()
 	assert.Equal(t, first_fork, curr_fork)
 
-	log.Trace("Forced fork via checkpoint")
+	// log.Trace("Forced fork via checkpoint")
 	err = chain.AddCheckpoint(
 		Checkpoint{
 			Number: fpn + 1,
@@ -72,7 +73,7 @@ func TestCheckpoints(t *testing.T) {
 	assert.Equal(t, second_fork, curr_fork)
 	assert.Equal(t, chain.checkpoints.latest, fpn+1)
 
-	log.Trace("Unknown fork")
+	// log.Trace("Unknown fork")
 	unknown_fork := second_fork
 	unknown_fork[0] = ^unknown_fork[0]
 
@@ -90,7 +91,7 @@ func TestCheckpoints(t *testing.T) {
 	curr_fork = chain.CurrentHeader().Hash()
 	assert.Equal(t, fp.Hash(), curr_fork)
 
-	log.Trace("Setup fake signer")
+	// log.Trace("Setup fake signer")
 	signer, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
 
 	cfg := *chain.chainConfig
@@ -99,7 +100,7 @@ func TestCheckpoints(t *testing.T) {
 		CPPSigner: crypto.PubkeyToAddress(signer.PublicKey),
 	}
 
-	log.Trace("Missing signature (remote)")
+	// log.Trace("Missing signature (remote)")
 	err = chain.AddCheckpoint(
 		Checkpoint{
 			Number: fpn + 1,
@@ -110,7 +111,7 @@ func TestCheckpoints(t *testing.T) {
 	)
 	assert.Equal(t, errors.New("missing checkpoint signatures"), err)
 
-	log.Trace("Invalid signature (remote)")
+	// log.Trace("Invalid signature (remote)")
 	sig, _ := crypto.Sign(curr_fork.Bytes(), signer)
 	err = chain.AddCheckpoint(
 		Checkpoint{
@@ -122,7 +123,7 @@ func TestCheckpoints(t *testing.T) {
 	)
 	assert.Equal(t, errors.New("invalid CPP signature"), err)
 
-	log.Trace("Failed at checkpoint")
+	// log.Trace("Failed at checkpoint")
 	blocks = makeBlockChain(fp, 2, engine, db, canonicalSeed+2)
 	third_fork := blocks[0].Hash()
 	third_second := blocks[1].Hash()
@@ -137,7 +138,7 @@ func TestCheckpoints(t *testing.T) {
 	_, err = chain.InsertChain(blocks)
 	assert.Equal(t, ErrCheckpointMismatch, err)
 
-	log.Trace("Valid remote checkpoint")
+	// log.Trace("Valid remote checkpoint")
 	cp := Checkpoint{
 		Number: fpn + 1,
 		Hash:   third_fork,
@@ -157,7 +158,7 @@ func TestCheckpoints(t *testing.T) {
 	curr_fork = chain.GetHeaderByNumber(fpn + 1).Hash()
 	assert.Equal(t, third_fork, curr_fork)
 
-	log.Trace("Valid remote checkpoint (second)")
+	// log.Trace("Valid remote checkpoint (second)")
 	cp = Checkpoint{
 		Number: fpn + 2,
 		Hash:   third_second,
@@ -171,7 +172,7 @@ func TestCheckpoints(t *testing.T) {
 	assert.Empty(t, err)
 	assert.Equal(t, chain.checkpoints.latest, fpn+2)
 
-	log.Trace("Valid remote checkpoint (future)")
+	// log.Trace("Valid remote checkpoint (future)")
 	cp = Checkpoint{
 		Number: fpn + 10,
 		Hash:   third_second,
