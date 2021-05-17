@@ -17,15 +17,15 @@
 'use strict';
 
 const MasternodeRegistryV2_1 = artifacts.require('MasternodeRegistryV2_1');
-
+const MockProxy = artifacts.require("MockProxy");
 const common = require('../test/common');
 
-module.exports = function(deployer, network) {
+module.exports = async function(deployer, network) {
     try {
-        const mn_registry_proxy = '0x0000000000000000000000000000000000000302';
-        const mn_token_proxy = '0x0000000000000000000000000000000000000309';
-        const treasury_proxy = '0x0000000000000000000000000000000000000301';
-        var mnregistry_config_v2_1 = [];
+        let mn_registry_proxy = '0x0000000000000000000000000000000000000302';
+        let mn_token_proxy = '0x0000000000000000000000000000000000000309';
+        let treasury_proxy = '0x0000000000000000000000000000000000000301';
+        let mnregistry_config_v2_1 = [];
 
         console.log("Deploying to " + network);
 
@@ -47,6 +47,12 @@ module.exports = function(deployer, network) {
             ];
         } else {
             mnregistry_config_v2_1 = common.mnregistry_config_v2;
+            await deployer.deploy(MockProxy);
+            mn_registry_proxy = MockProxy.address;
+            await deployer.deploy(MockProxy);
+            mn_token_proxy = MockProxy.address;
+            await deployer.deploy(MockProxy);
+            treasury_proxy = MockProxy.address
         }
 
         deployer.deploy(MasternodeRegistryV2_1,
