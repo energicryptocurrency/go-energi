@@ -62,7 +62,10 @@ func NewCacheStorage() *CacheStorage {
 	return c
 }
 
-// Get returns the cached data entry if it hasn't expired(new blockhash generated).
+
+// Get returns the cached data
+// The existing data is updated on private calls when the new blockhash is generated
+// othetwise (for publicservice calls) it returns existing data and asynchronously schedules the update
 // An error is returned if a nil cache instance is used or the cache query function
 // returns nil data.
 func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, error) {
