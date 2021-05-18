@@ -62,7 +62,10 @@ func NewCacheStorage() *CacheStorage {
 	return c
 }
 
-// Get returns the cached data entry if it hasn't expired(new blockhash generated).
+
+// Get returns the cached data
+// The existing data is updated on private calls when the new blockhash is generated
+// othetwise (for publicservice calls) it returns existing data and asynchronously schedules the update
 // An error is returned if a nil cache instance is used or the cache query function
 // returns nil data.
 func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, error) {
@@ -79,6 +82,7 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 
 		// Concurrent update could happened
 		if force || state.entry == nil || state.blockHash != blockhash {
+
 			entry, err := source(block.Number())
 
 			if err != nil {
@@ -92,15 +96,17 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 		if state.entry == nil {
 			return nil, ErrInvalidData
 		}
-
 		return state.entry, nil
 	}
 
 	// First run or error recovery
 	if state.entry == nil {
 		return do_update(false)
-	} else if chain.IsPublicService() || (state.blockHash == blockhash) {
-		// Never block for public service and continusouly refresh in general
+	} else if !chain.IsPublicService() && state.blockHash != blockhash {
+		// Ensure not to provide the stale data for non-public services
+		return do_update(false)
+	} else if state.blockHash != blockhash {
+		// Never block for public service and continuously refresh in general
 		if atomic.CompareAndSwapInt32(&c.updating, 0, 1) {
 			go func() {
 				defer atomic.StoreInt32(&c.updating, 0)
@@ -115,9 +121,6 @@ func (c *CacheStorage) Get(chain CacheChain, source CacheQuery) (interface{}, er
 				do_update(true)
 			}()
 		}
-	} else if state.blockHash != blockhash {
-		// Ensure not to provide the stale data for non-public services
-		return do_update(false)
 	}
 
 	return state.entry, nil
