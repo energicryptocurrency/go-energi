@@ -228,17 +228,6 @@ func doInstall(cmdline []string) {
 		}
 	}
 
-	// A minor hack to keep the same source structure
-	defer func() {
-		geth := executablePath("geth")
-		energi3 := executablePath("energi3")
-
-		if _, err := os.Stat(geth); err == nil {
-			fmt.Println(">>> Renaming ", geth, " to ", energi3)
-			os.Rename(geth, energi3)
-		}
-	}()
-
 	// Compile packages given as arguments, or everything if there are no arguments.
 	packages := []string{"./..."}
 	if flag.NArg() > 0 {
