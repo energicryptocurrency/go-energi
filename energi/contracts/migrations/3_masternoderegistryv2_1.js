@@ -22,9 +22,9 @@ const common = require('../test/common');
 
 module.exports = async function(deployer, network) {
     try {
-        let mn_registry_proxy = '0x0000000000000000000000000000000000000302';
-        let mn_token_proxy = '0x0000000000000000000000000000000000000309';
-        let treasury_proxy = '0x0000000000000000000000000000000000000301';
+        const mn_registry_proxy = '0x0000000000000000000000000000000000000302';
+        const mn_token_proxy = '0x0000000000000000000000000000000000000309';
+        const treasury_proxy = '0x0000000000000000000000000000000000000301';
         let mnregistry_config_v2_1 = [];
 
         console.log("Deploying to " + network);
@@ -37,6 +37,15 @@ module.exports = async function(deployer, network) {
                 '1000000000000000000000',   // minimum collateral 1000 NRG
                 10                          // MNRewardsPerBlock
             ];
+
+
+            deployer.deploy(MasternodeRegistryV2_1,
+                mn_registry_proxy,
+                mn_token_proxy,
+                treasury_proxy,
+                mnregistry_config_v2_1,
+                common.mnreg_deploy_opts
+            );
         } else if (network === "testnet") {
             mnregistry_config_v2_1 = [
                 5,                          // RequireValidation
@@ -45,23 +54,33 @@ module.exports = async function(deployer, network) {
                 '1000000000000000000000',   // minimum collateral 1000 NRG
                 10                          // MNRewardsPerBlock
             ];
+
+
+            deployer.deploy(MasternodeRegistryV2_1,
+                mn_registry_proxy,
+                mn_token_proxy,
+                treasury_proxy,
+                mnregistry_config_v2_1,
+                common.mnreg_deploy_opts
+            );
         } else {
             mnregistry_config_v2_1 = common.mnregistry_config_v2;
             await deployer.deploy(MockProxy);
-            mn_registry_proxy = MockProxy.address;
+            const mn_registry_mock_proxy = MockProxy.address;
             await deployer.deploy(MockProxy);
-            mn_token_proxy = MockProxy.address;
+            const mn_token_mock_proxy = MockProxy.address;
             await deployer.deploy(MockProxy);
-            treasury_proxy = MockProxy.address
-        }
+            const treasury_mock_proxy = MockProxy.address
 
-        deployer.deploy(MasternodeRegistryV2_1,
-            mn_registry_proxy, 
-            mn_token_proxy,
-            treasury_proxy,
-            mnregistry_config_v2_1,
-            common.mnreg_deploy_opts
-        );
+
+            deployer.deploy(MasternodeRegistryV2_1,
+                mn_registry_mock_proxy,
+                mn_token_mock_proxy,
+                treasury_mock_proxy,
+                mnregistry_config_v2_1,
+                common.mnreg_deploy_opts
+            );
+        }
     } catch (e) {
         console.dir(e);
         throw e;
