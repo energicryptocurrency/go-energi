@@ -21,6 +21,7 @@
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
 const CheckpointRegistryV3 = artifacts.require('CheckpointRegistryV3');
+const ICheckpointRegistry = artifacts.require('ICheckpointRegistry');
 const ICheckpoint = artifacts.require('ICheckpoint');
 const ICheckpointV2 = artifacts.require('ICheckpointV2');
 const ICheckpointRegistryV2 = artifacts.require('ICheckpointRegistryV2');
@@ -84,6 +85,7 @@ contract("CheckpointRegistryV3", async accounts => {
         const cp_max_count = 10;
         const cp_sign = cp_max_count - 1;
         const block_hash = '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+        const block_hash2 = '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
         let cp_list;
         let mn_sig;
@@ -142,157 +144,157 @@ contract("CheckpointRegistryV3", async accounts => {
         });
 
         describe('Primary', () => {
-            it('(QUEUE TEST) should propose() and add 5 checkpoints', async () => {
-                for (let i = 0; i < cp_count; i++) {
-                    cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
-                }
-                assert.equal((await s.token_abi.checkpoints()).length, 5 , "didnt add checkpoints");
-            });
+          it('(QUEUE TEST) should propose() and add 5 checkpoints', async () => {
+              for (let i = 0; i < cp_count; i++) {
+                  cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
+                  await s.token_abi.propose(i, block_hash, cpp_sig);
+              }
+              assert.equal((await s.token_abi.checkpoints()).length, 5 , "didnt add checkpoints");
+          });
 
-            it('(QUEUE TEST) should allow remove() from valid signer but checkpoint will not be found (size remains same)', async () => {
-                try {
-                    const cps1 = await s.token_abi.checkpoints();
-                    const num = 12831; //some random
-                    cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
-                    await s.token_abi.remove(num, block_hash, cpp_sig);
-                    const cps2 = await s.token_abi.checkpoints();
-                    assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
-                } catch (e) {
-                    assert.fail("must fail");
-                }
-            });
-
-
-            it('(QUEUE TEST) should allow remove() from valid signer and decrease checkpoint size', async () => {
-                try {
-                    const cps1 = await s.token_abi.checkpoints();
-                    const num = 3; //some random
-                    cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
-                    await s.token_abi.remove(num, block_hash, cpp_sig);
-                    const cps2 = await s.token_abi.checkpoints();
-                    assert.equal(cps1.length - 1, cps2.length,"stored checkpoints should remain same");
-                } catch (e) {
-                    assert.fail("must fail");
-                }
-            });
-
-            it('(QUEUE TEST) should allow remove() from valid signer but checkpoint will not be found (already deleted)', async () => {
-                try {
-                    const cps1 = await s.token_abi.checkpoints();
-                    const num = 3; //some random
-                    cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
-                    await s.token_abi.remove(num, block_hash, cpp_sig);
-                    const cps2 = await s.token_abi.checkpoints();
-                    assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
-                } catch (e) {
-                    assert.fail("must fail");
-                }
-            });
+          it('(QUEUE TEST) should allow remove() from valid signer but checkpoint will not be found (size remains same)', async () => {
+            try {
+              const cps1 = await s.token_abi.checkpoints();
+              const num = 12831; //some random
+              cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
+              await s.token_abi.remove(num, block_hash, cpp_sig);
+              const cps2 = await s.token_abi.checkpoints();
+              assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
+            } catch (e) {
+              assert.fail("must fail");
+            }
+          });
 
 
+          it('(QUEUE TEST) should allow remove() from valid signer and decrease checkpoint size', async () => {
+            try {
+              const cps1 = await s.token_abi.checkpoints();
+              const num = 3; //some random
+              cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
+              await s.token_abi.remove(num, block_hash, cpp_sig);
+              const cps2 = await s.token_abi.checkpoints();
+              assert.equal(cps1.length - 1, cps2.length,"stored checkpoints should remain same");
+            } catch (e) {
+              assert.fail("must fail");
+            }
+          });
+
+          it('(QUEUE TEST) should allow remove() from valid signer but checkpoint will not be found (already deleted)', async () => {
+            try {
+              const cps1 = await s.token_abi.checkpoints();
+              const num = 3; //some random
+              cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
+              await s.token_abi.remove(num, block_hash, cpp_sig);
+              const cps2 = await s.token_abi.checkpoints();
+              assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
+            } catch (e) {
+              assert.fail("must fail");
+            }
+          });
 
 
-            it('(QUEUE TEST) should be 10 checkpoints in the end()', async () => {
-                for (let i = 20; i < 100; i++) {
-                    cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
-                }
-                cp_list = await s.token_abi.checkpoints();
-                assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
-            });
 
-            it('(QUEUE TEST) should have removed the last element in queue()', async () => {
-                cpp_sig = await mn_sig_reg(sigacc, 99, block_hash);
-                await s.token_abi.remove(99, block_hash, cpp_sig);
-                cp_list = await s.token_abi.checkpoints();
-                assert.equal(cp_list.length, cp_max_count - 1, "must me 9 checkpoints remaining");
-            });
 
-            it('(QUEUE TEST) should have removed the first element in queue()', async () => {
-                cpp_sig = await mn_sig_reg(sigacc, 90, block_hash);
-                await s.token_abi.remove(90, block_hash, cpp_sig);
-                cp_list = await s.token_abi.checkpoints();
-                assert.equal(cp_list.length, cp_max_count - 2, "must me 8 checkpoints remaining");
-            });
+          it('(QUEUE TEST) should be 10 checkpoints in the end()', async () => {
+              for (let i = 20; i < 100; i++) {
+                cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
+                await s.token_abi.propose(i, block_hash, cpp_sig);
+              }
+              cp_list = await s.token_abi.checkpoints();
+              assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
+          });
 
-            it('(QUEUE TEST) should be max checkpoints ()', async () => {
-                for (let i = 100; i < 103; i++) {
-                    cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
-                }
-                cp_list = await s.token_abi.checkpoints();
-                assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
-            });
+          it('(QUEUE TEST) should have removed the last element in queue()', async () => {
+              cpp_sig = await mn_sig_reg(sigacc, 99, block_hash);
+              await s.token_abi.remove(99, block_hash, cpp_sig);
+              cp_list = await s.token_abi.checkpoints();
+              assert.equal(cp_list.length, cp_max_count - 1, "must me 9 checkpoints remaining");
+          });
 
-            it('(QUEUE TEST) should remove from the middle of the queue()', async () => {
-                cpp_sig = await mn_sig_reg(sigacc, 100, block_hash);
-                await s.token_abi.remove(100, block_hash, cpp_sig);
-                var cp_list2 = await s.token_abi.checkpoints();
-                assert.equal(cp_list2[0], cp_list[0], "first elements must remain same");
-                assert.equal(cp_list2[cp_list2.length-1], cp_list[cp_list.length-1], "last elements must remain same");
-                assert.equal(cp_list2.length, cp_max_count-1, "1 minus element");
-            });
+          it('(QUEUE TEST) should have removed the first element in queue()', async () => {
+              cpp_sig = await mn_sig_reg(sigacc, 90, block_hash);
+              await s.token_abi.remove(90, block_hash, cpp_sig);
+              cp_list = await s.token_abi.checkpoints();
+              assert.equal(cp_list.length, cp_max_count - 2, "must me 8 checkpoints remaining");
+          });
 
-            it('(QUEUE TEST) should be max checkpoints ()', async () => {
-                for (let i = 1000; i < 1002; i++) {
-                    cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
-                }
-                cp_list = await s.token_abi.checkpoints();
-                assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
-            });
+          it('(QUEUE TEST) should be max checkpoints ()', async () => {
+              for (let i = 100; i < 103; i++) {
+                cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
+                await s.token_abi.propose(i, block_hash, cpp_sig);
+              }
+              cp_list = await s.token_abi.checkpoints();
+              assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
+          });
 
-            it('(QUEUE TEST) should refuse to sign() by non-MN', async() => {
-                try {
-                    await s.token_abi.sign(cp_list[cp_sign], ecsign(nonmnacc1, block_hash));
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Not active MN/);
-                }
-            });
+          it('(QUEUE TEST) should remove from the middle of the queue()', async () => {
+              cpp_sig = await mn_sig_reg(sigacc, 100, block_hash);
+              await s.token_abi.remove(100, block_hash, cpp_sig);
+              var cp_list2 = await s.token_abi.checkpoints();
+              assert.equal(cp_list2[0], cp_list[0], "first elements must remain same");
+              assert.equal(cp_list2[cp_list2.length-1], cp_list[cp_list.length-1], "last elements must remain same");
+              assert.equal(cp_list2.length, cp_max_count-1, "1 minus element");
+          });
 
-            it('(QUEUE TEST) should refuse to sign() by invalid signature length', async() => {
-                try {
-                    await s.token_abi.sign(cp_list[cp_sign], block_hash);
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Invalid signature length/);
-                }
-            });
+          it('(QUEUE TEST) should be max checkpoints ()', async () => {
+              for (let i = 1000; i < 1002; i++) {
+                cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
+                await s.token_abi.propose(i, block_hash, cpp_sig);
+              }
+              cp_list = await s.token_abi.checkpoints();
+              assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
+          });
 
-            it('should sign() by MN', async() => {
-                mn_sig = await mn_sig_cp(mnacc1, cp_list[cp_sign]);
-                await s.token_abi.sign(cp_list[cp_sign], mn_sig);
-            });
+          it('(QUEUE TEST) should refuse to sign() by non-MN', async() => {
+              try {
+                  await s.token_abi.sign(cp_list[cp_sign], ecsign(nonmnacc1, block_hash));
+                  assert.fail('It must fail');
+              } catch (e) {
+                  assert.match(e.message, /Not active MN/);
+              }
+          });
 
-            it('should refuse to sign() by already signed MN', async() => {
-                try {
-                    await s.token_abi.sign(cp_list[cp_sign], await mn_sig_cp(mnacc1, cp_list[cp_sign]));
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Already signed/);
-                }
-            });
+          it('(QUEUE TEST) should refuse to sign() by invalid signature length', async() => {
+              try {
+                  await s.token_abi.sign(cp_list[cp_sign], block_hash);
+                  assert.fail('It must fail');
+              } catch (e) {
+                  assert.match(e.message, /Invalid signature length/);
+              }
+          });
 
-            it('should refuse to sign() by CPP signer', async() => {
-                try {
-                    await s.token_abi.sign(cp_list[cp_sign], await mn_sig_cp(sigacc, cp_list[cp_sign]));
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Already signed/);
-                }
-            });
+          it('should sign() by MN', async() => {
+              mn_sig = await mn_sig_cp(mnacc1, cp_list[cp_sign]);
+              await s.token_abi.sign(cp_list[cp_sign], mn_sig);
+          });
 
-            it('should have correct signatureBase()', async () => {
-                const hash = await s.token_abi.signatureBase(cp_sign + 1, block_hash);
-                const reqhash = web3.utils.soliditySha3(
-                    "||Energi Blockchain Checkpoint||",
-                    toBN(cp_sign + 1),
-                    toBN(block_hash),
-                );
-                expect(hash.toString()).equal(reqhash.toString());
-            });
+          it('should refuse to sign() by already signed MN', async() => {
+              try {
+                  await s.token_abi.sign(cp_list[cp_sign], await mn_sig_cp(mnacc1, cp_list[cp_sign]));
+                  assert.fail('It must fail');
+              } catch (e) {
+                  assert.match(e.message, /Already signed/);
+              }
+          });
+
+          it('should refuse to sign() by CPP signer', async() => {
+              try {
+                  await s.token_abi.sign(cp_list[cp_sign], await mn_sig_cp(sigacc, cp_list[cp_sign]));
+                  assert.fail('It must fail');
+              } catch (e) {
+                  assert.match(e.message, /Already signed/);
+              }
+          });
+
+          it('should have correct signatureBase()', async () => {
+              const hash = await s.token_abi.signatureBase(cp_sign + 1, block_hash);
+              const reqhash = web3.utils.soliditySha3(
+                  "||Energi Blockchain Checkpoint||",
+                  toBN(cp_sign + 1),
+                  toBN(block_hash),
+              );
+              expect(hash.toString()).equal(reqhash.toString());
+          });
         });
 
         describe('CheckpointV2', async () => {
