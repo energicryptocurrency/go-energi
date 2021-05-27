@@ -29,8 +29,6 @@ import { ICheckpointRegistryV2 } from "./ICheckpointRegistryV2.sol";
 import { StorageCheckpointRegistryV2 } from "./StorageCheckpointRegistryV2.sol";
 import { CheckpointV2 } from "./CheckpointRegistryV2.sol";
 
-// solium-disable-next-line no-empty-blocks
-
 
 /**
  * Genesis hardcoded version of CheckpointRegistry

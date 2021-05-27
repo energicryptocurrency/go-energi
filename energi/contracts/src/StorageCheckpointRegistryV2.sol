@@ -19,7 +19,7 @@
 // NOTE: It's not allowed to change the compiler due to byte-to-byte
 //       match requirement.
 pragma solidity 0.5.16;
-//pragma experimental SMTChecker;
+// pragma experimental SMTChecker;
 pragma experimental ABIEncoderV2;
 
 
@@ -84,7 +84,7 @@ contract StorageCheckpointRegistryV2 is StorageBase {
 
       // if we found the checkpoint
       if (found == true) {
-        //shift every element after index to the left by one
+        // shift every element after index to the left by one
         for (uint i = foundCpIndex; i < startingKeyIndex + size - 1; i++) {
             checkpoints[i] = checkpoints[i + 1];
         }
