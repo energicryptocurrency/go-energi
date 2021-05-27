@@ -5,7 +5,7 @@
   "license": "GPL-3.0+",
   "devDependencies": {
     "eslint": "^6.8.0",
-    "ethereumjs-util": "^6.2.0",
+    "ethereumjs-util": "^6.2.1",
     "ethlint": "^1.2.5"
   }
 }
