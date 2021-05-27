@@ -44,7 +44,7 @@ ENERGI_CONTRACTS := \
   BlacklistRegistryV1.sol \
   BlockRewardV1.sol \
   CheckpointRegistryV2.sol \
-  CheckpointRegistryV3.sol
+  CheckpointRegistryV3.sol \
   DummyAccount.sol \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
