@@ -1,3 +1,5 @@
+# Energi Governance Contracts
+This directory contains the Energi Governance smart contracts used by the Energi Core node as a key part of consensus. Most of these contracts were initially deployed as a part of the genesis block on the Energi Testnet and Energi Mainnet. They can be tested against a local ganache instance. All commands given here unless otherwise specified are meant to be run from the root of the repository, where [truffle-config.js](truffle-config.js) resides.
 
 ## Prerequisites
 At a minimum to build and test these repositories you need `nodejs-v12`, `truffle`, and `ganache-cli`. Some dependencies here have shown some issues with later versions of nodejs. If you have a suitable version of nodejs, running `npm install` should get you to a workable state.
