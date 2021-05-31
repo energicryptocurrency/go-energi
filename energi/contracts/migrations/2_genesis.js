@@ -76,7 +76,7 @@ module.exports = async (deployer, network, accounts) => {
 
             const instance = await deployer.deploy(type, proxy, ...args);
             if (proxy !== common.default_address) {
-            await (await MockProxy.at(proxy)).setImpl(instance.address);
+                await (await MockProxy.at(proxy)).setImpl(instance.address);
             }
         };
 
