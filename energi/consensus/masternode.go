@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -73,23 +73,21 @@ func (e *Energi) processMasternodes(
 
 	log.Debug("Masternode list", "masternodes", masternodes)
 
-	state_obj := statedb.GetOrNewStateObject(energi_params.Energi_MasternodeList)
-	db := statedb.Database()
-	value := common.BytesToHash([]byte{0x01})
-	keep := make(state.KeepStorage, len(*masternodes))
+	mnGauge.Update(int64(len(*masternodes)))
 
+	//clear out the account storage
+	statedb.ForEachStorage(energi_params.Energi_MasternodeList, func(key, value common.Hash) bool {
+		statedb.SetState(energi_params.Energi_MasternodeList, key, common.BytesToHash([]byte{0x00}))
+		return true
+	})
+
+	//set active masternodes
 	for _, addr := range *masternodes {
-		addr_hash := addr.Hash()
-
-		if (state_obj.GetState(db, addr_hash) == common.Hash{}) {
-			log.Debug("New masternode", "addr", addr)
-		}
-
-		state_obj.SetState(db, addr_hash, value)
-		keep[addr_hash] = true
+		statedb.SetState(energi_params.Energi_MasternodeList, addr.Hash(), common.BytesToHash([]byte{0x01}))
 	}
 
-	state_obj.CleanupStorage(keep)
+	//commit tree changes
+	statedb.GetOrNewStateObject(energi_params.Energi_MasternodeList).CommitTrie(statedb.Database())
 
 	return nil
 }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // Copyright 2015 The go-ethereum Authors
 // This file is part of the Energi Core library.
 //
@@ -94,7 +94,7 @@ var (
 	errCancelHeaderProcessing  = errors.New("header processing canceled (requested)")
 	errCancelContentProcessing = errors.New("content processing canceled (requested)")
 	errNoSyncActive            = errors.New("no sync active")
-	errTooOld                  = errors.New("peer doesn't speak recent enough protocol version (need version >= 62)")
+	errTooOld                  = errors.New("peer doesn't speak recent enough protocol version (need version >= 70)")
 )
 
 const (

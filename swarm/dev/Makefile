@@ -4,7 +4,7 @@ default: build
 
 build:
 	go build -o bin/swarm    github.com/ethereum/go-ethereum/cmd/swarm
-	go build -o bin/energi3     github.com/ethereum/go-ethereum/cmd/energi3
+	go build -o bin/energi     github.com/ethereum/go-ethereum/cmd/energi
 	go build -o bin/bootnode github.com/ethereum/go-ethereum/cmd/bootnode
 
 cluster: build

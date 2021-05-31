@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -27,7 +27,8 @@ import (
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +36,7 @@ import (
 
 func TestBlockRewards(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 	var (
 		testdb = ethdb.NewMemDatabase()
 		gspec  = &core.Genesis{

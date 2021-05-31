@@ -1,4 +1,4 @@
-// Copyright 2018 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // Copyright 2015 The go-ethereum Authors
 // This file is part of the Energi Core library.
 //
@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/log"
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/p2p"
 	"energi.world/core/gen3/p2p/enode"
 )
@@ -31,7 +31,7 @@ import (
 // Tests that fast sync gets disabled as soon as a real block is successfully
 // imported into the blockchain.
 func TestFastSyncDisabling(t *testing.T) {
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 	// Create a pristine protocol manager, check that fast sync is left enabled
 	pmEmpty, _ := newTestProtocolManagerMust(t, downloader.FastSync, 0, nil, nil)
 	if atomic.LoadUint32(&pmEmpty.fastSync) == 0 {
@@ -52,6 +52,13 @@ func TestFastSyncDisabling(t *testing.T) {
 	go pmEmpty.handle(pmEmpty.newPeer(nrg70, p2p.NewPeer(enode.ID{}, "full", nil), io1))
 
 	time.Sleep(250 * time.Millisecond)
+
+	// This discards the checkpoint request from the writer clearing way for others
+	// to use the writer freely.
+	if err := p2p.ExpectMsg(io1, GetCheckpointsMsg, nil); err != nil {
+		t.Fatalf(" GetCheckpointsMsg returned an error")
+	}
+
 	pmEmpty.synchronise(pmEmpty.peers.BestPeer())
 
 	// Check that fast sync was disabled

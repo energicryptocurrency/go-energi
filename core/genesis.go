@@ -1,4 +1,4 @@
-// Copyright 2018 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // Copyright 2014 The go-ethereum Authors
 // This file is part of the Energi Core library.
 //
@@ -721,6 +721,23 @@ func DeployEnergiGovernance(config *params.ChainConfig) GenesisXfers {
 		energi_params.Energi_BlacklistRegistry:  energi_params.Energi_BlacklistRegistryV1,
 		energi_params.Energi_MasternodeToken:    energi_params.Energi_MasternodeTokenV1,
 	}
+
+	// mainnet and testnet were deployed without the HF registry in the genesis block
+	// therefore we only deploy when on some other network (devnet / simnet)
+	if (config != params.EnergiMainnetChainConfig) && (config != params.EnergiTestnetChainConfig) {
+		deployEnergiContract(
+			&xfers,
+			energi_params.Energi_HardforkRegistryV1,
+			nil,
+			energi_abi.HardforkRegistryV1ABI,
+			energi_abi.HardforkRegistryV1Bin,
+			energi_params.Energi_HardforkRegistry,
+			config.Energi.HFSigner,
+			config.HFFinalizationPeriod,
+		)
+		proxies[energi_params.Energi_HardforkRegistry] = energi_params.Energi_HardforkRegistryV1
+	}
+
 	for k, v := range proxies {
 		deployEnergiContract(
 			&xfers,

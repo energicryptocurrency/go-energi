@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -103,7 +103,7 @@ func newCheckpointManager() *checkpointManager {
 }
 
 func (cm *checkpointManager) setup(chain CheckpointChain) {
-	genesis_hash := chain.GetHeaderByNumber(0).Hash();
+	genesis_hash := chain.GetHeaderByNumber(0).Hash()
 	if checkpoints, ok := energi_params.EnergiCheckpoints[genesis_hash]; ok {
 		for k, v := range checkpoints {
 			cm.addCheckpoint(
@@ -187,7 +187,7 @@ func (cm *checkpointManager) addCheckpoint(
 	if !local {
 		// ignore checkpoints which occur before the latest local checkpoint
 		var maxHardcodedCheckpoint uint64
-		genesis_hash := chain.GetHeaderByNumber(0).Hash();
+		genesis_hash := chain.GetHeaderByNumber(0).Hash()
 		for maxHardcodedCheckpoint = range energi_params.EnergiCheckpoints[genesis_hash] {
 			break
 		}
@@ -224,12 +224,14 @@ func (cm *checkpointManager) addCheckpoint(
 			log.Warn("Checkpoint: invalid CPP signature", "num", cp.Number, "hash", cp.Hash)
 			return errors.New("invalid CPP signature")
 		}
-	}
 
+	}
+	//only received(non-hardcoded) checkpoints will be stored in validated map
 	cm.validated[cp.Number] = validCheckpoint{
 		Checkpoint: cp,
 		signatures: append([]CheckpointSignature{}, sigs...),
 	}
+
 	log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
 
 	err = chain.EnforceCheckpoint(cp)
@@ -299,12 +301,9 @@ func (bc *BlockChain) ListCheckpoints() []CheckpointInfo {
 	res := make([]CheckpointInfo, 0, len(cm.validated))
 
 	for _, v := range cm.validated {
-		var sig CheckpointSignature
 		if len(v.signatures) > 0 {
-			sig = v.signatures[0]
+			res = append(res, CheckpointInfo{v.Checkpoint, v.signatures[0], uint64(len(v.signatures))})
 		}
-
-		res = append(res, CheckpointInfo{v.Checkpoint, sig, uint64(len(v.signatures))})
 	}
 
 	sort.Slice(res, func(i, j int) bool {

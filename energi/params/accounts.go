@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -36,6 +36,7 @@ var (
 	Energi_Blacklist          = common.BigToAddress(big.NewInt(0x30A))
 	Energi_Whitelist          = common.BigToAddress(big.NewInt(0x30B))
 	Energi_MasternodeList     = common.BigToAddress(big.NewInt(0x30C))
+	Energi_HardforkRegistry   = common.BigToAddress(big.NewInt(0x30D)) // Only used in simnet and devnet, check ChainConfig
 
 	Energi_BlockRewardV1        = common.BigToAddress(big.NewInt(0x310))
 	Energi_TreasuryV1           = common.BigToAddress(big.NewInt(0x311))
@@ -47,6 +48,7 @@ var (
 	Energi_BlacklistRegistryV1  = common.BigToAddress(big.NewInt(0x317))
 	Energi_CompensationFundV1   = common.BigToAddress(big.NewInt(0x318))
 	Energi_MasternodeTokenV1    = common.BigToAddress(big.NewInt(0x319))
+	Energi_HardforkRegistryV1   = common.BigToAddress(big.NewInt(0x321)) // Only used in simnet and devnet, check ChainConfig
 
 	Energi_SystemFaucet = common.BigToAddress(big.NewInt(0x320))
 	Energi_Ephemeral    = common.HexToAddress("0x457068656d6572616c")

@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -51,17 +51,17 @@ func (e *Energi) checkDoS(
 	header *types.Header,
 	parent *types.Header,
 ) error {
-	old_fork_threshold := e.now() - energi_params.OldForkPeriod
+	//old_fork_threshold := e.now() - energi_params.OldForkPeriod
 
 	// POS-8: allow old fork only if current head is not fresh enough
 	//---
-	if parent.Time < old_fork_threshold {
-		current := chain.CurrentHeader()
-
-		if current.Time > old_fork_threshold {
-			return eth_consensus.ErrDoSThrottle
-		}
-	}
+	// if parent.Time < old_fork_threshold {
+	// 	current := chain.CurrentHeader()
+	//
+	// 	if current.Time > old_fork_threshold {
+	// 		return eth_consensus.ErrDoSThrottle
+	// 	}
+	// }
 
 	// POS-9: stake throttling
 	//---

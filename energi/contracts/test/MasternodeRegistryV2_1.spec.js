@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -105,18 +105,15 @@ contract("MasternodeRegistryV2_1", async accounts => {
         const masternode1 = accounts[9];
         const masternode2 = accounts[8];
         const masternode3 = accounts[7];
-        const masternode4 = accounts[6];
 
         const ip1 = toBN(0x12345678);
         const ip2 = toBN(0x87654321);
         const ip3 = toBN(0x43218765);
-        const ip4 = toBN(0x41218785);
 
         const enode_common = '123456789012345678901234567890'
         const enode1 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '11')];
         const enode2 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '22')];
         const enode3 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '33')];
-        const enode4 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '33')];
 
         before(async () => {
             await s.mntoken_abi.depositCollateral({

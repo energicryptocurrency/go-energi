@@ -1,4 +1,4 @@
-// Copyright 2018 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // Copyright 2014 The go-ethereum Authors
 // This file is part of the Energi Core library.
 //
@@ -394,6 +394,11 @@ func (s *Ethereum) APIs() []rpc.API {
 			Namespace: "admin",
 			Version:   "1.0",
 			Service:   energi_api.NewCheckpointAdminAPI(s.APIBackend),
+		},
+		{
+			Namespace: "energi",
+			Version:   "1.0",
+			Service:   energi_api.NewHardforkRegistryAPI(s.APIBackend),
 		},
 		{
 			Namespace: "energi",

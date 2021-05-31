@@ -1,4 +1,4 @@
-// Copyright 2018 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // Copyright 2015 The go-ethereum Authors
 // This file is part of the Energi Core library.
 //
@@ -487,6 +487,33 @@ web3._extend({
 			],
 			outputFormatter: console.log,
 		}),
+
+		// hardfork registry
+		new web3._extend.Method({
+			name: 'hardforkList'
+			call: 'energi_hardforkEnumerate',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'hardforkListActive'
+			call: 'energi_hardforkEnumerateActive',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'hardforkListPending'
+			call: 'energi_hardforkEnumeratePending',
+			params: 0,
+		}),
+		new web3._extend.Method({
+			name: 'hardforkInfo'
+			call: 'energi_hardforkGet',
+			params: 1,
+		}),
+		new web3._extend.Method({
+			name: 'hardforkIsActive'
+			call: 'energi_hardforkIsActive',
+			params: 1,
+		})
 	],
 	properties: [
 	]
@@ -584,7 +611,7 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'checkpointLocal',
 			call: 'admin_checkpointLocal',
-			params: 2
+			params: 2,
 			inputFormatter: [
 				null,
 				null,

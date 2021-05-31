@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -30,7 +30,8 @@ import (
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
 
@@ -93,7 +94,7 @@ func generateAddresses(len int) ([]common.Address, map[common.Address]*ecdsa.Pri
 
 func TestPoSChain(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	results := make(chan *eth_consensus.SealResult, 1)
 	stop := make(chan struct{})
@@ -119,6 +120,7 @@ func TestPoSChain(t *testing.T) {
 			return crypto.Sign(hash, signers[addr])
 		},
 		func() int { return 1 },
+		func() bool { return true },
 	)
 
 	chainConfig := *params.EnergiTestnetChainConfig
@@ -283,7 +285,7 @@ func TestPoSChain(t *testing.T) {
 
 func TestPoSDiffV1(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	type TC struct {
 		parent  int64
@@ -386,7 +388,7 @@ func TestPoSDiffV1(t *testing.T) {
 
 func TestStakeWeightLookup(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, _, _, _ := generateAddresses(5)
 	engine := New(nil, nil)
@@ -448,7 +450,7 @@ func TestStakeWeightLookup(t *testing.T) {
 		parent.Nonce = types.BlockNonce{255, 255, 255, 255, 255, 255, 255, 255}
 		weight, err = engine.lookupStakeWeight(fakeChain, header.Time, parent, header.Coinbase)
 		assert.Empty(t, err)
-		assert.Equal(t, weight, 0)
+		assert.Equal(t, weight, uint64(0))
 
 		parent.Coinbase = parentCoinbase
 		parent.Nonce = parentNonce
@@ -464,7 +466,7 @@ func TestStakeWeightLookup(t *testing.T) {
 
 func TestPoSMine(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, signers, alloc, migrationSigner := generateAddresses(5)
 	testdb := ethdb.NewMemDatabase()
@@ -489,6 +491,7 @@ func TestPoSMine(t *testing.T) {
 			return crypto.Sign(hash, signers[addr])
 		},
 		func() int { return 1 },
+		func() bool { return true },
 	)
 
 	chainConfig := *params.EnergiTestnetChainConfig
@@ -599,7 +602,7 @@ func TestPoSMine(t *testing.T) {
 
 func TestVerifyPoSHash(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, _, alloc, migrationSigner := generateAddresses(5)
 	testdb := ethdb.NewMemDatabase()

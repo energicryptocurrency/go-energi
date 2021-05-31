@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of Energi Core.
 //
 // Energi Core is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ import { IUpgradeProposal } from "./IUpgradeProposal.sol";
 import { ISporkRegistry } from "./ISporkRegistry.sol";
 import { IGovernedProxy, GovernedProxy } from "./GovernedProxy.sol";
 import { StorageBase } from "./StorageBase.sol";
+import { GovernedContractAutoProxy } from "./GovernedContractAutoProxy.sol";
 
 contract MockContract is GovernedContract
 {
@@ -147,3 +148,68 @@ contract MockProposal is IUpgradeProposal {
     function setFee() external payable {}
 }
 
+// GovernedContractAutoProxy based implementation.
+
+contract MockAutoContract is GovernedContractAutoProxy
+{
+    constructor() public GovernedContractAutoProxy(address(0)) {}
+    function migrate(IGovernedContract) external {}
+    function destroy(IGovernedContract new_impl) external {
+        selfdestruct(address(new_impl));
+    }
+    function getAddress() external view returns (address) {
+        return address(this);
+    }
+    function killStorage(StorageBase _storage) external {
+        _storage.kill();
+    }
+    function testDrain() external {
+        selfdestruct(msg.sender);
+    }
+    function testDrain(uint amount) external {
+        msg.sender.transfer(amount);
+    }
+    function callProxy() external payable {
+        address payable p = address(uint160(proxy));
+        p.transfer(msg.value);
+    }
+    function () external payable {}
+}
+
+contract MockAutoProxy is GovernedProxy
+{
+    IGovernedContract impl;
+    IGovernedProxy spork_proxy;
+
+    constructor() public GovernedProxy(
+        IGovernedContract(address(0)),
+        new GovernedProxy(
+            new MockAutoSporkRegistry(),
+            IGovernedProxy(address(0))
+        )
+    ) {}
+
+    function setImpl(IGovernedContract _impl) external {
+        impl = _impl;
+    }
+
+    function setSporkProxy(IGovernedProxy _proxy) external {
+        spork_proxy = _proxy;
+    }
+}
+
+contract MockAutoSporkRegistry is MockAutoContract, ISporkRegistry {
+    constructor() public MockAutoContract() {}
+
+    function createUpgradeProposal(IGovernedContract impl, uint, address payable)
+        external payable
+        returns (IUpgradeProposal)
+    {
+        return new MockProposal(msg.sender, impl);
+    }
+
+    function consensusGasLimits()
+        external view
+        returns(uint callGas, uint xferGas)
+    {}
+}

@@ -228,17 +228,6 @@ func doInstall(cmdline []string) {
 		}
 	}
 
-	// A minor hack to keep the same source structure
-	defer func() {
-		geth := executablePath("geth")
-		energi3 := executablePath("energi3")
-
-		if _, err := os.Stat(geth); err == nil {
-			fmt.Println(">>> Renaming ", geth, " to ", energi3)
-			os.Rename(geth, energi3)
-		}
-	}()
-
 	// Compile packages given as arguments, or everything if there are no arguments.
 	packages := []string{"./..."}
 	if flag.NArg() > 0 {
@@ -358,7 +347,7 @@ func doTest(cmdline []string) {
 	// Test a single package at a time. CI builders are slow
 	// and some tests run into timeouts under load.
 	gotest := goTool("test", buildFlags(env)...)
-	gotest.Args = append(gotest.Args, "-p", "1", "-timeout", "5m")
+	gotest.Args = append(gotest.Args, "-p", "1", "-timeout", "10m")
 	if *coverage {
 		gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
 	}

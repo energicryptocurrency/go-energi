@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -31,7 +31,8 @@ import (
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
@@ -42,7 +43,7 @@ import (
 
 func TestBlacklist(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	testdb := ethdb.NewMemDatabase()
 	engine := New(&params.EnergiConfig{}, testdb)
@@ -122,7 +123,7 @@ func TestBlacklist(t *testing.T) {
 	)
 	evm := engine.createEVM(msg, chain, header, blstate)
 	gp := new(core.GasPool).AddGas(engine.callGas)
-	log.Trace("depositCollateral")
+	// log.Trace("depositCollateral")
 	core.ApplyMessage(evm, msg, gp)
 	//---
 	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
@@ -139,7 +140,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.callGas)
-	log.Trace("announce")
+	// log.Trace("announce")
 	_, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 
@@ -149,7 +150,7 @@ func TestBlacklist(t *testing.T) {
 	//---
 
 	//====================================
-	log.Info("Test: no change")
+	// log.Info("Test: no change")
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
@@ -169,7 +170,7 @@ func TestBlacklist(t *testing.T) {
 	evm = engine.createEVM(msg, chain, header, blstate)
 
 	//====================================
-	log.Info("Test: blacklist")
+	// log.Info("Test: blacklist")
 	blacklist_abi, _ := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
 	callData, err = blacklist_abi.Pack("propose", blacklist_addr1)
 	assert.Empty(t, err)
@@ -186,7 +187,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.xferGas)
-	log.Trace("propose")
+	// log.Trace("propose")
 	output, _, failed, err := core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, failed)
@@ -209,7 +210,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.callGas)
-	log.Trace("voteAccept")
+	// log.Trace("voteAccept")
 	output, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, output)
@@ -233,7 +234,7 @@ func TestBlacklist(t *testing.T) {
 	blstate, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
 
-	log.Info("Test Bug: in cleanup untouched when just referenced")
+	// log.Info("Test Bug: in cleanup untouched when just referenced")
 	blstate.AddBalance(owner_addr, common.Big1)
 	assert.True(t, core.CanTransfer(blstate, blacklist_addr1, common.Big0))
 	assert.False(t, core.CanTransfer(blstate, blacklist_addr1, common.Big1))
@@ -252,7 +253,7 @@ func TestBlacklist(t *testing.T) {
 	blstate.Database().TrieDB().Dereference(header.Root)
 
 	//====================================
-	log.Trace("coinbase blacklist")
+	// log.Trace("coinbase blacklist")
 	rawdb.WriteHeader(testdb, header)
 
 	header2 := &*header
@@ -268,7 +269,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Equal(t, errBlacklistedCoinbase, engine.VerifySeal(chain, header2))
 
 	//====================================
-	log.Info("Test: drain")
+	// log.Info("Test: drain")
 	evm = engine.createEVM(msg, chain, header, blstate)
 	callData, err = blacklist_abi.Pack("proposeDrain", blacklist_addr1)
 	assert.Empty(t, err)
@@ -285,7 +286,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.xferGas)
-	log.Trace("proposeDrain")
+	// log.Trace("proposeDrain")
 	output, _, failed, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, failed)
@@ -307,7 +308,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.callGas)
-	log.Trace("voteAccept")
+	// log.Trace("voteAccept")
 	output, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, output)
@@ -333,7 +334,7 @@ func TestBlacklist(t *testing.T) {
 	evm = engine.createEVM(msg, chain, header, blstate)
 
 	//====================================
-	log.Info("Test: no change")
+	// log.Info("Test: no change")
 	err = engine.processBlacklists(chain, header, blstate)
 	assert.Empty(t, err)
 	assert.False(t, core.IsBlacklisted(blstate, blacklist_addr1))
@@ -348,7 +349,7 @@ func TestBlacklist(t *testing.T) {
 	assert.Equal(t, blstate.GetBalance(blacklist_addr2).String(), amt.String())
 
 	//====================================
-	log.Info("Test: whitelist")
+	// log.Info("Test: whitelist")
 	callData, err = blacklist_abi.Pack("propose", energi_params.Energi_TreasuryV1)
 	assert.Empty(t, err)
 	fee = new(big.Int).Mul(big.NewInt(1000), big.NewInt(1e18))
@@ -364,7 +365,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.xferGas)
-	log.Trace("propose")
+	// log.Trace("propose")
 	output, _, failed, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, failed)
@@ -385,7 +386,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.callGas)
-	log.Trace("voteAccept")
+	// log.Trace("voteAccept")
 	output, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, output)
@@ -406,7 +407,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.xferGas)
-	log.Trace("proposeDrain")
+	// log.Trace("proposeDrain")
 	output, _, failed, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, failed)
@@ -427,7 +428,7 @@ func TestBlacklist(t *testing.T) {
 		false,
 	)
 	gp.AddGas(engine.callGas)
-	log.Trace("voteAccept")
+	// log.Trace("voteAccept")
 	output, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 	assert.Empty(t, output)

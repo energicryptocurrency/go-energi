@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -258,7 +258,7 @@ func (z *zeroFeeProtector) checkMasternode(
 
 	bc, ok := pool.chain.(*BlockChain)
 	if bc == nil || !ok {
-		log.Warn("ZeroFee DoS on missing blockchain")
+		log.Debug("ZeroFee DoS on missing blockchain")
 		return fmt.Errorf("err: %v desc: missing blockchain", ErrZeroFeeDoS)
 	}
 	vmc := bc.GetVMConfig()
@@ -276,7 +276,7 @@ func (z *zeroFeeProtector) checkMasternode(
 		if len(output) > 4 {
 			strOutput = string(output[4:])
 		}
-		log.Warn("ZeroFee DoS MN by execution",
+		log.Debug("ZeroFee DoS MN by execution",
 			"sender", sender, "err", err, "output", strOutput)
 		return fmt.Errorf("err: %v desc: %v", ErrZeroFeeDoS, err)
 	}
@@ -326,7 +326,7 @@ func (z *zeroFeeProtector) checkMigration(
 
 	bc, ok := pool.chain.(*BlockChain)
 	if bc == nil || !ok {
-		log.Warn("ZeroFee DoS on missing blockchain")
+		log.Debug("ZeroFee DoS on missing blockchain")
 		return fmt.Errorf("migrationErr: %v desc: missing blockchain", ErrZeroFeeDoS)
 	}
 	vmc := bc.GetVMConfig()
@@ -341,7 +341,7 @@ func (z *zeroFeeProtector) checkMigration(
 		strOutput = string(output[4:])
 	}
 	if failed || err != nil {
-		log.Warn("ZeroFee DoS by execution",
+		log.Debug("ZeroFee DoS by execution",
 			"item", item_id, "err", err, "output", strOutput)
 		return fmt.Errorf("migrationErr: %v desc: %v", ErrZeroFeeDoS, err)
 	}

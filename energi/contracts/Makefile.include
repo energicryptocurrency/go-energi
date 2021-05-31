@@ -31,7 +31,7 @@ ABIGEN ?= build/bin/abigen
 
 abigen: $(ABIGEN)
 $(ABIGEN):
-	cid run cigo -- install ./cmd/abigen
+	./build/env.sh go run ./build/ci.go install ./cmd/abigen
 
 # ---
 ENERGI_CONTRACT_ROOT_DIR := energi/contracts
@@ -46,6 +46,7 @@ ENERGI_CONTRACTS := \
   CheckpointRegistryV2.sol \
   CheckpointRegistryV3.sol \
   DummyAccount.sol \
+  HardforkRegistryV1.sol \
   IBlacklistRegistry.sol \
   IBlockReward.sol \
   IBudgetProposal.sol \
@@ -53,6 +54,7 @@ ENERGI_CONTRACTS := \
   ICheckpointRegistry.sol \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
+  IHardforkRegistry.sol \
   IMasternodeRegistryV2.sol \
   IMasternodeToken.sol \
   IProposal.sol \
@@ -100,9 +102,9 @@ $(ENERGI_CONTRACT_BUILD_DIR)/%.$(SOLC_ABI_EXT): $(ENERGI_CONTRACT_SRC_DIR)/%.sol
 	@true
 
 # ---
-.PHONY: test-sol
+.PHONY: test-sol-contracts
 
-test-sol:
+test-sol-contracts:
 	@echo "Checking if precompiled contracts have changes"
 	@git diff --exit-code $(ENERGI_CONTRACTS_GOABI) >/dev/null
 	@which ganache-cli 2>&1 >/dev/null || npm install -g ganache-cli

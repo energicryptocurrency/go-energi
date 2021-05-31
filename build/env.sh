@@ -9,6 +9,7 @@ fi
 
 export GO111MODULE=on
 export GOFLAGS=-mod=vendor
+export SKIP_KNOWN_FAIL=1
 
 # Launch the arguments with the configured environment.
 exec "$@"
