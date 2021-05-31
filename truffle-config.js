@@ -30,6 +30,8 @@ const contracts = [
     'SporkRegistryV1',
     'StakerRewardV1',
     'TreasuryV1',
+    'CheckpointRegistryV3',
+    'StorageCheckpointRegistryV2',
 ];
 const targets = [];
 
