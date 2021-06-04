@@ -1,4 +1,4 @@
-// Copyright 2021 The Energi Core Authors
+// Copyright 2018 The Energi Core Authors
 // Copyright 2016 The go-ethereum Authors
 // This file is part of Energi Core.
 //
@@ -114,7 +114,7 @@ func init() {
 	app.Action = bzzd
 	app.Version = sv.ArchiveVersion(gitCommit)
 	app.Copyright = strings.Join([]string{
-		"Copyright 2018-2021 The Energi Core Authors",
+		"Copyright 2018-2020 The Energi Core Authors",
 		"Copyright 2013-2016 The go-ethereum Authors",
 	}, "\n   ")
 	app.Commands = []cli.Command{
