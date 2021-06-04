@@ -123,7 +123,7 @@ release-windows: release-windows-amd64 release-windows-i686
 RELEASE_WINDOWS_COMMON := make -f Makefile.release release-windows-common --no-print-directory
 RELEASE_RENDER_NSIS := sed \
   -e 's,{{.License}},COPYING.txt,g' \
-  -e 's,{{.EnergiCore}},bin/energi.exe,g'
+  -e 's,{{.EnergiCore}},bin/energi3.exe,g'
 #  -e 's,{{range .DevTools}}file {{.}},file bin/abigen.exe\n  file bin/bootnode.exe\n  file bin/clef.exe\n  file bin/evm.exe\n  file bin/rlpdump.exe,g' \
 #  -e 's,{{range $$}}Delete $$INSTDIR\\{{.}},Delete \$$INSTDIR\abigen.exe\n  Delete \$$INSTDIR\bootnode.exe\n  Delete \$$INSTDIR\clef.exe\n  Delete \$$INSTDIR\evm.exe\n  Delete $$INSTDIR\rlpdump.exe,g' \
 #  -e 's,{{end}},,g'
@@ -146,7 +146,7 @@ release-windows-common:
 	done
 	@mv build/release/$(RELEASE_TARGET)/bin/geth.exe build/release/$(RELEASE_TARGET)/bin/$(RELEASE_MAIN).exe
 	@unix2dos -n COPYING build/release/$(RELEASE_TARGET)/COPYING.txt
-	@$(RELEASE_RENDER_NSIS) < build/nsis.geth.nsi > build/release/$(RELEASE_TARGET)/energi.nsi
+	@$(RELEASE_RENDER_NSIS) < build/nsis.geth.nsi > build/release/$(RELEASE_TARGET)/energi3.nsi
 	@$(RELEASE_RENDER_NSIS) < build/nsis.install.nsh > build/release/$(RELEASE_TARGET)/install.nsh
 	@$(RELEASE_RENDER_NSIS) < build/nsis.uninstall.nsh > build/release/$(RELEASE_TARGET)/uninstall.nsh
 	@$(RELEASE_RENDER_NSIS) < build/nsis.pathupdate.nsh > build/release/$(RELEASE_TARGET)/PathUpdate.nsh
@@ -158,7 +158,7 @@ release-windows-common:
 	  -DMINORVERSION=$(word 2,$(subst ., ,$(RELEASE_RAW_VER))) \
 	  -DBUILDVERSION=$(word 3,$(subst ., ,$(RELEASE_RAW_VER))) \
 	  -DARCH=$(GOARCH) \
-	  build/release/$(RELEASE_TARGET)/energi.nsi
+	  build/release/$(RELEASE_TARGET)/energi3.nsi
 	@cd build/release && zip $(RELEASE_TARGET)/$(RELEASE_TARGET).zip \
 	  $(RELEASE_TARGET)/bin/$(RELEASE_MAIN).exe $(RELEASE_TARGET)/COPYING.txt
 	@cd build/release && zip $(RELEASE_TARGET)/$(RELEASE_TARGET)-alltools.zip \
