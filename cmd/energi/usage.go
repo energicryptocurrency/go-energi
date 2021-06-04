@@ -1,4 +1,4 @@
-// Copyright 2021 The Energi Core Authors
+// Copyright 2018 The Energi Core Authors
 // Copyright 2015 The go-ethereum Authors
 // This file is part of Energi Core.
 //
@@ -34,7 +34,7 @@ import (
 var AppHelpTemplate = `NAME:
    {{.App.Name}} - {{.App.Usage}}
 
-   Copyright 2018-2021 The Energi Core Authors
+   Copyright 2018-2020 The Energi Core Authors
    Copyright 2013-2018 The go-ethereum Authors
 
 USAGE:
