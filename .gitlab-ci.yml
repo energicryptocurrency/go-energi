@@ -17,6 +17,16 @@ cleanrepo:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
+# TODO: this actually tries to execute the merge, may not be the best way to check this
+# it will also fail for master branch merges
+branchcheck:
+  stage: clean
+  extends: .runner
+  script:
+    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
 # must run make all
 # must complete successfully
 # must not leave modified files in the git repository
