@@ -43,7 +43,6 @@ import (
 	"golang.org/x/crypto/sha3"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_api "energi.world/core/gen3/energi/api"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -77,6 +76,7 @@ type Energi struct {
 	sporkAbi     abi.ABI
 	mnregAbi     abi.ABI
 	treasuryAbi  abi.ABI
+	hardforkAbi  abi.ABI
 	systemFaucet common.Address
 	xferGas      uint64
 	callGas      uint64
@@ -130,6 +130,12 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		return nil
 	}
 
+	hardfork_abi, err := abi.JSON(strings.NewReader(energi_abi.IHardforkRegistryABI))
+	if err != nil {
+		panic(err)
+		return nil
+	}
+
 	txhashMap, err := lru.New(8)
 	if err != nil {
 		panic(err)
@@ -145,6 +151,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		sporkAbi:     spork_abi,
 		mnregAbi:     mngreg_abi,
 		treasuryAbi:  treasury_abi,
+		hardforkAbi: 	hardfork_abi,
 		systemFaucet: energi_params.Energi_SystemFaucet,
 		xferGas:      0,
 		callGas:      30000,
@@ -443,6 +450,59 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	return nil
 }
 
+// checks if hardfork is active
+func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardforkName string) (bool, error) {
+	// get state for snapshot
+	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
+	if blockst == nil {
+		log.Error("PoS state root failure", "header", header.ParentHash)
+		return false, eth_consensus.ErrMissingState
+	}
+
+	// get parent
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return false, eth_consensus.ErrUnknownAncestor
+	}
+
+	callData, err := e.hardforkAbi.Pack("isActive", hardforkName)
+	if err != nil {
+		log.Error("Fail to check if hardfork is active", "err", err)
+		return false, err
+	}
+
+	msg := types.NewMessage(
+		e.systemFaucet,
+		&energi_params.Energi_HardforkRegistry,
+		0,
+		common.Big0,
+		e.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+
+	rev_id := blockst.Snapshot()
+	evm := e.createEVM(msg, chain, parent, blockst)
+	gp := core.GasPool(e.callGas)
+	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+	blockst.RevertToSnapshot(rev_id)
+	if err != nil {
+		log.Trace("Fail to get signerAddress()", "err", err)
+		return false, err
+	}
+
+	//
+	var isActive bool
+	err = e.hardforkAbi.Unpack(&isActive, "signerAddress", output)
+	if err != nil {
+		log.Error("Failed to unpack signerAddress() call", "err", err)
+		return false, err
+	}
+
+	return isActive, nil
+}
+
 // Prepare initializes the consensus fields of a block header according to the
 // rules of a particular engine. The changes are executed inline.
 func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
@@ -454,7 +514,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := energi_api.HardforkIsActive("Asgard")
+	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
 	if err != nil {
 		log.Error("Asgard hf check failed: " + err.Error())
 		return err
@@ -465,7 +525,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 		return e.posPrepareV2(chain, header, parent, &timeTargetV2{})
 	}
 
-	_, err := e.posPrepare(chain, header, parent)
+	_, err = e.posPrepare(chain, header, parent)
 	return err
 }
 
@@ -628,10 +688,10 @@ func (e *Energi) Seal(
 			var err error
 
 			// check if Asgard hardfork is activated use new difficulty algorithm
-			isAsgardActive, err := energi_api.HardforkIsActive("Asgard")
+			isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
 			if err != nil {
 				log.Error("Asgard hf check failed: " + err.Error())
-				return err
+				return
 			}
 
 			// choose mining function depending on hf status

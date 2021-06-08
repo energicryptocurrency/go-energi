@@ -141,7 +141,7 @@ func (hf *HardforkRegistryAPI) HardforkIsActive(name string) (bool, error) {
 		return false, err
 	}
 
-	return isActive
+	return isActive, nil
 }
 
 func encodeName(data string) [32]byte {
