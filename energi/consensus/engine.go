@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -43,6 +43,7 @@ import (
 	"golang.org/x/crypto/sha3"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_api "energi.world/core/gen3/energi/api"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -452,7 +453,48 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 		return eth_consensus.ErrUnknownAncestor
 	}
 
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	isAsgardActive, err := energi_api.HardforkIsActive("Asgard")
+	if err != nil {
+		log.Error("Asgard hf check failed: " + err.Error())
+		return err
+	}
+
+	// if asgard hf is active
+	if isAsgardActive {
+		return e.posPrepareV2(chain, header, parent, &timeTargetV2{})
+	}
+
 	_, err := e.posPrepare(chain, header, parent)
+	return err
+}
+
+// posPrepareV2 version 2
+func (e *Energi) posPrepareV2(
+	chain ChainReader,
+	header *types.Header,
+	parent *types.Header,
+	blockTarget *timeTargetV2,
+) (err error) {
+	// Clear field to be set in mining
+	header.Coinbase = common.Address{}
+	header.Nonce = types.BlockNonce{}
+
+	e.calcTimeTargetV2(chain, parent, blockTarget)
+	blockTargetV1 := &timeTarget{
+		min_time:      blockTarget.minTime,
+		max_time:      blockTarget.maxTime,
+		block_target:  blockTarget.target,
+		period_target: blockTarget.target,
+	}
+	err = e.enforceTime(header, blockTargetV1)
+
+	// Repurpose the MixDigest field
+	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
+
+	// Diff
+	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, blockTarget)
+
 	return err
 }
 
@@ -581,7 +623,23 @@ func (e *Energi) Seal(
 		result := eth_consensus.NewSealResult(block, nil, nil)
 
 		if header.Number.Cmp(common.Big0) != 0 {
-			success, err := e.mine(chain, header, stop)
+
+			var success bool
+			var err error
+
+			// check if Asgard hardfork is activated use new difficulty algorithm
+			isAsgardActive, err := energi_api.HardforkIsActive("Asgard")
+			if err != nil {
+				log.Error("Asgard hf check failed: " + err.Error())
+				return err
+			}
+
+			// choose mining function depending on hf status
+			if isAsgardActive {
+				success, err = e.mineV2(chain, header, stop)
+			} else {
+				success, err = e.mine(chain, header, stop)
+			}
 
 			// NOTE: due to the fact that PoS mining may change Coinbase
 			//       it is required to reprocess all transaction with correct

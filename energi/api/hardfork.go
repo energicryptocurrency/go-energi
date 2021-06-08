@@ -129,16 +129,16 @@ func (hf *HardforkRegistryAPI) HardforkEnumerateActive() (hardforks []*HardforkI
 	return hf.processHfListings(names)
 }
 
-func (hf *HardforkRegistryAPI) HardforkIsActive(name string) bool {
+func (hf *HardforkRegistryAPI) HardforkIsActive(name string) (bool, error) {
 	registry, callOpts, err := registryCaller(hf.backend, hf.proxyAddr)
 	if err != nil {
-		return false
+		return false, err
 	}
 
 	isActive, err := registry.IsActive(callOpts, encodeName(name))
 	if err != nil {
 		log.Error("HardforkRegistryAPI::IsActive", "err", err)
-		return false
+		return false, err
 	}
 
 	return isActive
