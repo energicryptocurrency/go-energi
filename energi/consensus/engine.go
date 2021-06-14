@@ -465,7 +465,9 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		return false, eth_consensus.ErrUnknownAncestor
 	}
 
-	callData, err := e.hardforkAbi.Pack("isActive", hardforkName)
+	var hardforkNameArray [32]byte
+	copy(hardforkNameArray[:],[]byte(hardforkName))
+	callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
 	if err != nil {
 		log.Error("Fail to check if hardfork is active", "err", err)
 		return false, err
@@ -488,15 +490,15 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	blockst.RevertToSnapshot(rev_id)
 	if err != nil {
-		log.Trace("Fail to get signerAddress()", "err", err)
+		log.Trace("Fail to get isActive status", "err", err)
 		return false, err
 	}
 
 	//
 	var isActive bool
-	err = e.hardforkAbi.Unpack(&isActive, "signerAddress", output)
+	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
 	if err != nil {
-		log.Error("Failed to unpack signerAddress() call", "err", err)
+		log.Error("Failed to get isActive status", "err", err)
 		return false, err
 	}
 
