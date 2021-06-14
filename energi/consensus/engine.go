@@ -494,7 +494,7 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		return false, err
 	}
 
-	//
+	// unpack the output
 	var isActive bool
 	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
 	if err != nil {
@@ -517,6 +517,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
 	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	fmt.Println("isAsgardActive",isAsgardActive)
 	if err != nil {
 		log.Error("Asgard hf check failed: " + err.Error())
 		return err
