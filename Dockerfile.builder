@@ -50,3 +50,6 @@ RUN sha256sum -c ${nodejs_filename}.sha256
 RUN tar -C /usr/local -xzf ${nodejs_filename}
 RUN rm -rf ${nodejs_filename}*
 ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
+
+# install node packages
+RUN npm install -g yarn
