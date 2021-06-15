@@ -10,7 +10,8 @@ build-builder:
     - docker build -t corenode_builder -f Dockerfile.builder .
   rules:
     #- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - changes: "Dockerfile.builder"
+    changes:
+      - Dockerfile.builder
 
 #  - clean
 #  - build
