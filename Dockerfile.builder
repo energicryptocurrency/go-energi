@@ -55,3 +55,14 @@ ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
 
 # install node packages
 RUN npm install -g yarn
+
+# clone core node repository and install dependencies
+ARG repository_remote="https://github.com/energicryptocurrency/energi3"
+RUN mkdir "/builder"
+RUN pushd "/builder"
+RUN git clone "${repository_remote}"
+RUN pushd "energi3"
+RUN npm install
+RUN make -f Makefile.release release-tools
+RUN popd
+RUN popd
