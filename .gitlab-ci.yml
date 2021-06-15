@@ -7,7 +7,7 @@ build-builder:
   stage: base
   tags: [docker_runner]
   script:
-    - docker build -t corenode_builder -f Dockerfile.builder .
+    - docker build -t corenode_builder -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
   rules:
     #- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - changes:
