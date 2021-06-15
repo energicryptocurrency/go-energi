@@ -20,7 +20,7 @@ RUN apt -y autoremove
 RUN apt -y clean
 
 # install development tools
-RUN apt -y install git vim htop apg jq direnv build-essential wget awscli
+RUN apt -y install git vim htop apg jq direnv build-essential wget awscli sudo
 
 # golang variables
 ARG golang_version="1.15.8"
