@@ -59,10 +59,8 @@ RUN npm install -g yarn
 # clone core node repository and install dependencies
 ARG repository_remote="https://github.com/energicryptocurrency/energi3"
 RUN mkdir "/builder"
-RUN pushd "/builder"
+RUN cd "/builder"
 RUN git clone "${repository_remote}"
-RUN pushd "energi3"
+RUN cd "energi3"
 RUN npm install
 RUN make -f Makefile.release release-tools
-RUN popd
-RUN popd
