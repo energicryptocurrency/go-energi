@@ -60,7 +60,7 @@ RUN npm install -g yarn
 ARG repository_remote="https://github.com/energicryptocurrency/energi3"
 RUN mkdir "/builder"
 RUN cd "/builder"
-RUN git clone "${repository_remote}"
+RUN git -c http.sslVerify=false clone "${repository_remote}"
 RUN cd "energi3"
 RUN npm install
 RUN make -f Makefile.release release-tools
