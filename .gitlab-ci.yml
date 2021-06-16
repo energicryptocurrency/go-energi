@@ -6,7 +6,13 @@ stages:
 build-builder:
   stage: base
   tags: [docker_runner]
+  before_script:
+    - apk add --no-cache curl unzip python3 py3-pip
+    - pip3 install --upgrade pip
+    - pip3 install awscli
+    - rm -rf /var/cache/apk/*
   script:
+    - aws s3 ls
     - docker build -t corenode_builder -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
   rules:
     #- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
