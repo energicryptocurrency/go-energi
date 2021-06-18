@@ -465,6 +465,7 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		return false, eth_consensus.ErrUnknownAncestor
 	}
 
+	// create call data
 	var hardforkNameArray [32]byte
 	copy(hardforkNameArray[:],[]byte(hardforkName))
 	callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
@@ -473,6 +474,7 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		return false, err
 	}
 
+	// construct the contract call message
 	msg := types.NewMessage(
 		e.systemFaucet,
 		&energi_params.Energi_HardforkRegistry,
@@ -484,11 +486,10 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		false,
 	)
 
-	rev_id := blockst.Snapshot()
+	// create environment and apply message
 	evm := e.createEVM(msg, chain, parent, blockst)
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
-	blockst.RevertToSnapshot(rev_id)
 	if err != nil {
 		log.Trace("Fail to get isActive status", "err", err)
 		return false, err
