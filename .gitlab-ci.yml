@@ -17,7 +17,7 @@ build-builder:
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
     - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
-    - docker push energi3_builder:latest
+    - docker push ${container_registry}/energi3_builder:latest
   rules:
     #- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - changes:
