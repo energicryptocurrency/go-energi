@@ -72,7 +72,8 @@ var customGenesisTests = []struct {
 					"backboneAddress": "0x0000000000000000000000000000000000400001",
 					"migrationSigner": "0x0000000000000000000000000000000000400002",
 					"ebiSigner"      : "0x0000000000000000000000000000000000400003",
-					"cppSigner"      : "0x0000000000000000000000000000000000400004"
+					"cppSigner"      : "0x0000000000000000000000000000000000500004",
+					"hfSigner"       : "0x0000000000000000000000000000000000500005"
 				},
 				"constantinopleBlock": 0,
 				"superblockCycle"    : 10,
@@ -80,7 +81,8 @@ var customGenesisTests = []struct {
 				"mnValidationPeriod" : 5,
 				"mnCleanupPeriod"    : 1209600,
 				"mnEverCollateral"   : 30000000000000000000000,
-				"mnRewardsPerBlock"  : 10
+				"mnRewardsPerBlock"  : 10,
+				"hfFinalizationPeriod": 10
 			}
 		}`,
 		query:  "eth.getBlock(0).nonce",
@@ -113,7 +115,8 @@ var customGenesisTests = []struct {
 					"backboneAddress": "0x0000000000000000000000000000000000500001",
 					"migrationSigner": "0x0000000000000000000000000000000000500002",
 					"ebiSigner"      : "0x0000000000000000000000000000000000500003",
-					"cppSigner"      : "0x0000000000000000000000000000000000500004"
+					"cppSigner"      : "0x0000000000000000000000000000000000500004",
+					"hfSigner"       : "0x0000000000000000000000000000000000500005"
 				},
 				"constantinopleBlock": 0,
 				"superblockCycle"    : 10,
@@ -122,6 +125,7 @@ var customGenesisTests = []struct {
 				"mnCleanupPeriod"    : 1209600,
 				"mnEverCollateral"   : 30000000000000000000000,
 				"mnRewardsPerBlock"  : 10,
+				"hfFinalizationPeriod": 10,
 				"homesteadBlock"     : 314,
 				"daoForkBlock"       : 141,
 				"daoForkSupport"     : true
