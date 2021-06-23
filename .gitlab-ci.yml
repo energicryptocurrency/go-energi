@@ -1,51 +1,73 @@
 variables:
 
 stages:
-  - clean
-  - build
+  - base
 
-.runner:
-  tags: [runner02]
-
-# make our repo does not have any artifacts of previous builds
-cleanrepo:
-  stage: clean
-  extends: .runner
+build-builder:
+  stage: base
+  tags: [docker_runner]
+  before_script:
+    - apk add --no-cache curl unzip python3 py3-pip
+    - pip3 install --upgrade pip
+    - pip3 install awscli
+    - rm -rf /var/cache/apk/*
   script:
-    - git checkout -- .
-    - git clean -fdx .
+    - aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${container_registry}
+    - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
+    - docker push ${container_registry}/energi3_builder:latest
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    #- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - changes:
+      - Dockerfile.builder
 
-# TODO: this actually tries to execute the merge, may not be the best way to check this
-# it will also fail for master branch merges
-branchcheck:
-  stage: clean
-  extends: .runner
-  script:
-    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
-# must run make all
-# must complete successfully
-# must not leave modified files in the git repository
-compile:
-  stage: build
-  extends: .runner
-  script:
-    - export GOROOT=/usr/local/go
-    - export GOPATH=${CI_PROJECT_DIR//$CI_PROJECT_PATH/}
-    - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-    - echo $CI_PROJECT_DIR
-    - echo $CI_PROJECT_PATH
-    - echo $GOROOT
-    - echo $GOPATH
-    - echo $PATH
-    - make all
-    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo "[Error] compile job left modified files in working directory"; exit 1; fi
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#  - clean
+#  - build
+#
+#.runner:
+#  tags: [runner02]
+#
+## make our repo does not have any artifacts of previous builds
+#cleanrepo:
+#  stage: clean
+#  extends: .runner
+#  script:
+#    - git checkout -- .
+#    - git clean -fdx .
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#
+## TODO: this actually tries to execute the merge, may not be the best way to check this
+## it will also fail for master branch merges
+#branchcheck:
+#  stage: clean
+#  extends: .runner
+#  script:
+#    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#
+## must run make all
+## must complete successfully
+## must not leave modified files in the git repository
+#compile:
+#  stage: build
+#  extends: .runner
+#  script:
+#    - export GOROOT=/usr/local/go
+#    - export GOPATH=${CI_PROJECT_DIR//$CI_PROJECT_PATH/}
+#    - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+#    - echo $CI_PROJECT_DIR
+#    - echo $CI_PROJECT_PATH
+#    - echo $GOROOT
+#    - echo $GOPATH
+#    - echo $PATH
+#    - make all
+#    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo "[Error] compile job left modified files in working directory"; exit 1; fi
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 ## must run make test
 ## must complete successfully (tests must pass)
