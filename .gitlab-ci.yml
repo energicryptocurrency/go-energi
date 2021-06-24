@@ -25,11 +25,11 @@ build-builder:
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
     - docker push ${container_registry}/energi3_builder:latest
   rules:
-    - only:
-      - develop
-      - master
     - changes:
       - Dockerfile.builder
+  only:
+    - develop
+    - master
 
 # make sure our repo does not have any artifacts of previous builds
 clean-repo:
