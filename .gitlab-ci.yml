@@ -24,10 +24,10 @@ build-builder:
     - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
     - docker push ${container_registry}/energi3_builder:latest
-  rules:
-    - changes:
+  only:
+    changes:
       - Dockerfile.builder
-    - refs:
+    refs:
       - develop
       - master
 
