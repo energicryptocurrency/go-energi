@@ -174,5 +174,4 @@ deploy-release:
   script:
     - make -f Makefile.release release-upload
   only:
-    - develop
-    - master
+    - tags
