@@ -7,6 +7,7 @@ stages:
   - build
   - test
   - deploy
+  - cleanup
 
 build-builder:
   stage: base
@@ -175,3 +176,11 @@ deploy-release:
     - make -f Makefile.release release-upload
   only:
     - tags
+
+cleanup_docker:
+  stage: cleanup
+  tags: [docker_runner]
+  script:
+    - docker system prune --force
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
