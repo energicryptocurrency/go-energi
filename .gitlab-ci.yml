@@ -89,6 +89,21 @@ build-linux:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
+build-docker:
+  stage: build
+  tags: [docker_runner]
+  before_script:
+    - apk add --no-cache curl unzip python3 py3-pip
+    - pip3 install --upgrade pip
+    - pip3 install awscli
+    - rm -rf /var/cache/apk/*
+  script:
+    - aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${container_registry}
+    - docker build -t ${container_registry}/energi3 -f Dockerfile .
+    - docker push ${container_registry}/energi3
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
 build-release-linux:
   stage: build
   image: ${container_registry}/energi3_builder
