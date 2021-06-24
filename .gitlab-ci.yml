@@ -30,6 +30,7 @@ build-builder:
 # make sure our repo does not have any artifacts of previous builds
 clean-repo:
   stage: clean
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   before_script:
     - pwd
@@ -43,6 +44,7 @@ clean-repo:
 # it will also fail for master branch merges
 branch-check:
   stage: clean
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   before_script:
     - pwd
@@ -53,6 +55,7 @@ branch-check:
 
 lint-go:
   stage: lint
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   script:
     - make lint-go
@@ -62,6 +65,7 @@ lint-go:
 
 lint-sol-tests:
   stage: lint
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   script:
     - make lint-sol-tests
@@ -71,6 +75,7 @@ lint-sol-tests:
 
 lint-sol:
   stage: lint
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   script:
     - make lint-sol
@@ -80,6 +85,7 @@ lint-sol:
 
 build-linux:
   stage: build
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   before_script:
     - pwd
@@ -106,6 +112,7 @@ build-docker:
 
 build-release-linux:
   stage: build
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   before_script:
     - pwd
@@ -117,6 +124,7 @@ build-release-linux:
 
 build-release-windows:
   stage: build
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   before_script:
     - pwd
@@ -128,6 +136,7 @@ build-release-windows:
 
 test-go:
   stage: test
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   script:
     - make test-go
@@ -137,6 +146,7 @@ test-go:
 
 test-solidity:
   stage: test
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   script:
     - make test-sol-contracts
@@ -147,6 +157,7 @@ test-solidity:
 # TODO: macos is a native compile, this can't run in docker needs a macos runner
 #release-build-macos:
 #  stage: build
+#  tags: [docker_runner]
 #  script:
 #    - make -f Makefile.release release-macos
 #  rules:
@@ -156,6 +167,7 @@ test-solidity:
 
 deploy-release:
   stage: deploy
+  tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   before_script:
     - pwd
