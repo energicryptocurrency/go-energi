@@ -24,7 +24,6 @@ build-builder:
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
     - docker push ${container_registry}/energi3_builder:latest
   rules:
-    #- if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - changes:
       - Dockerfile.builder
 
@@ -49,6 +48,17 @@ branch-check:
     - pwd
   script:
     - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; git merge --abort; exit 1; fi
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+build-linux:
+  stage: build
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make all
+    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo "[Error] compile job left modified files in working directory"; exit 1; fi
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
