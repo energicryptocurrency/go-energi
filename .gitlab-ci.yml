@@ -17,7 +17,7 @@ build-builder:
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
   script:
-    - aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${container_registry}
+    - docker login --username ${docker_user} --password ${docker_key}
     - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
     - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
@@ -104,9 +104,9 @@ build-docker:
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
   script:
-    - aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${container_registry}
-    - docker build -t ${container_registry}/energi3 -f Dockerfile .
-    - docker push ${container_registry}/energi3
+    - docker login --username ${docker_user} --password ${docker_key}
+    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
+    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
