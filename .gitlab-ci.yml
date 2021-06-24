@@ -2,6 +2,11 @@ variables:
 
 stages:
   - base
+  - clean
+  - lint
+  - build
+  - test
+  - deploy
 
 build-builder:
   stage: base
@@ -23,32 +28,72 @@ build-builder:
     - changes:
       - Dockerfile.builder
 
-#  - clean
-#  - build
-#
-#.runner:
-#  tags: [runner02]
-#
-## make our repo does not have any artifacts of previous builds
-#cleanrepo:
-#  stage: clean
-#  extends: .runner
+# make sure our repo does not have any artifacts of previous builds
+clean-repo:
+  stage: clean
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - git checkout -- .
+    - git clean -fdx .
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# TODO: this actually tries to execute the merge, may not be the best way to check this
+# it will also fail for master branch merges
+branch-check:
+  stage: clean
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; git merge --abort; exit 1; fi
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+build-release-linux:
+  stage: build
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make -f Makefile.release release-linux
+  rules:
+    - only:
+      - develop
+      - master
+
+build-release-windows:
+  stage: build
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make -f Makefile.release release-windows
+  rules:
+    - only:
+      - develop
+      - master
+
+# TODO: macos is a native compile, this can't run in docker needs a macos runner
+#release-build-macos:
+#  stage: build
 #  script:
-#    - git checkout -- .
-#    - git clean -fdx .
+#    - make -f Makefile.release release-macos
 #  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#
-## TODO: this actually tries to execute the merge, may not be the best way to check this
-## it will also fail for master branch merges
-#branchcheck:
-#  stage: clean
-#  extends: .runner
-#  script:
-#    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#
+#    - only:
+#      - develop
+#      - master
+
+deploy-release:
+  stage: deploy
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make -f Makefile.release release-upload
+
 ## must run make all
 ## must complete successfully
 ## must not leave modified files in the git repository
