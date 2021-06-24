@@ -1,4 +1,4 @@
 [submodule "tests"]
 	path = tests/testdata
-	url = ../energi3-tests
+	url = ../tests
 	branch = develop
