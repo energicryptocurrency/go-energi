@@ -51,6 +51,30 @@ branch-check:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
+lint-go:
+  stage: lint
+  image: ${container_registry}/energi3_builder
+  script:
+    - make lint-go
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+lint-sol-tests:
+  stage: lint
+  image: ${container_registry}/energi3_builder
+  script:
+    - make lint-sol-tests
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+lint-sol:
+  stage: lint
+  image: ${container_registry}/energi3_builder
+  script:
+    - make lint-sol
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
 build-linux:
   stage: build
   image: ${container_registry}/energi3_builder
