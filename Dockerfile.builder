@@ -28,6 +28,7 @@ RUN sha256sum -c ${golang_filename}.sha256
 RUN tar -C /usr/local -xzf ${golang_filename}
 RUN rm -rf ${golang_filename}*
 ENV PATH="${PATH}:/usr/local/go/bin"
+ENV GOROOT="/usr/local/go"
 
 # nodejs variables
 ARG nodejs_version="12.22.1"
@@ -57,3 +58,7 @@ WORKDIR "/builder/energi3"
 RUN npm install
 RUN make -f Makefile.release release-tools
 ENV WORKDIR="/builder/energi3"
+ENV GOPATH="/builder"
+ENV GOBIN="/builder/energi3/build/bin"
+ENV GO111MODULE="on"
+ENV GOFLAGS="-mod=vendor -v"
