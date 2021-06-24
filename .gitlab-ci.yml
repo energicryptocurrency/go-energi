@@ -1,5 +1,4 @@
 variables:
-  GIT_SUBMODULE_STRATEGY: recursive
 
 stages:
   - base
