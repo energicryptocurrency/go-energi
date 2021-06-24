@@ -51,14 +51,14 @@ RUN npm install -g yarn
 
 # clone core node repository and install dependencies
 ARG repository_remote="https://github.com/energicryptocurrency/energi3.git"
-RUN mkdir "/builder"
-WORKDIR "/builder"
+# /builds/energi/tech/gen3/energi3
+RUN mkdir -p "/builds/energi/tech/gen3"
+WORKDIR "/builds/energi/tech/gen3"
 RUN git clone "${repository_remote}"
-WORKDIR "/builder/energi3"
+WORKDIR "/builds/energi/tech/gen3/energi3"
 RUN npm install
 RUN make -f Makefile.release release-tools
-ENV WORKDIR="/builder/energi3"
-ENV GOPATH="/builder"
-ENV GOBIN="/builder/energi3/build/bin"
+ENV GOPATH="/builds/energi/tech/gen3"
+ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
 ENV GO111MODULE="on"
 ENV GOFLAGS="-mod=vendor -v"
