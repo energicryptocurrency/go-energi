@@ -38,7 +38,6 @@ module.exports = async function(deployer, network) {
                 10                          // MNRewardsPerBlock
             ];
 
-
             deployer.deploy(MasternodeRegistryV2_1,
                 mn_registry_proxy,
                 mn_token_proxy,
@@ -55,7 +54,6 @@ module.exports = async function(deployer, network) {
                 10                          // MNRewardsPerBlock
             ];
 
-
             deployer.deploy(MasternodeRegistryV2_1,
                 mn_registry_proxy,
                 mn_token_proxy,
@@ -71,7 +69,6 @@ module.exports = async function(deployer, network) {
             const mn_token_mock_proxy = MockProxy.address;
             await deployer.deploy(MockProxy);
             const treasury_mock_proxy = MockProxy.address
-
 
             deployer.deploy(MasternodeRegistryV2_1,
                 mn_registry_mock_proxy,
