@@ -58,6 +58,7 @@ lint-go:
     - make lint-go
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
 
 lint-sol-tests:
   stage: lint
@@ -66,6 +67,7 @@ lint-sol-tests:
     - make lint-sol-tests
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
 
 lint-sol:
   stage: lint
@@ -74,6 +76,7 @@ lint-sol:
     - make lint-sol
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
 
 build-linux:
   stage: build
