@@ -1,4 +1,4 @@
 [submodule "tests"]
 	path = tests/testdata
-	url = ../tests
+	url = https://github.com/energicryptocurrency/energi3-tests.git
 	branch = develop
