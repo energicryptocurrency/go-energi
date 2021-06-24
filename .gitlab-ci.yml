@@ -59,10 +59,9 @@ build-release-linux:
     - pwd
   script:
     - make -f Makefile.release release-linux
-  rules:
-    - only:
-      - develop
-      - master
+  only:
+    - develop
+    - master
 
 build-release-windows:
   stage: build
@@ -71,10 +70,9 @@ build-release-windows:
     - pwd
   script:
     - make -f Makefile.release release-windows
-  rules:
-    - only:
-      - develop
-      - master
+  only:
+    - develop
+    - master
 
 # TODO: macos is a native compile, this can't run in docker needs a macos runner
 #release-build-macos:
@@ -93,6 +91,9 @@ deploy-release:
     - pwd
   script:
     - make -f Makefile.release release-upload
+  only:
+    - develop
+    - master
 
 ## must run make all
 ## must complete successfully
