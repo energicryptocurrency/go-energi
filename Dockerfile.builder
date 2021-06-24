@@ -56,3 +56,4 @@ RUN git clone "${repository_remote}"
 WORKDIR "/builder/energi3"
 RUN npm install
 RUN make -f Makefile.release release-tools
+ENV WORKDIR="/builder/energi3"
