@@ -27,9 +27,9 @@ build-builder:
   rules:
     - changes:
       - Dockerfile.builder
-  only:
-    - develop
-    - master
+    - refs:
+      - develop
+      - master
 
 # make sure our repo does not have any artifacts of previous builds
 clean-repo:
