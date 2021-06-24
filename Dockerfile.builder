@@ -6,7 +6,7 @@ ENV TZ=GMT
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # update software
-RUN apt -y update
+RUN apt -y --fix-missing update
 RUN apt -y full-upgrade
 RUN apt -y autoremove
 RUN apt -y clean
