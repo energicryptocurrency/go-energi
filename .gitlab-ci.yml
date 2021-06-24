@@ -126,6 +126,24 @@ build-release-windows:
     - develop
     - master
 
+test-go:
+  stage: test
+  image: ${container_registry}/energi3_builder
+  script:
+    - make test-go
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
+
+test-solidity:
+  stage: test
+  image: ${container_registry}/energi3_builder
+  script:
+    - make test-sol-contracts
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
+
 # TODO: macos is a native compile, this can't run in docker needs a macos runner
 #release-build-macos:
 #  stage: build
