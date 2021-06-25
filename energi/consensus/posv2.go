@@ -17,7 +17,6 @@
 package consensus
 
 import (
-	"math"
 	"math/big"
 	"sort"
 	"time"
@@ -26,18 +25,18 @@ import (
 	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/energi/diffv1"
-	energi_params "energi.world/core/gen3/energi/params"
+	"energi.world/core/gen3/energi/params"
 	"energi.world/core/gen3/log"
 )
 
 const (
-	targetWindow          = energi_params.TargetWindow
-	maxTimeDifferenceDrop = energi_params.MaxTimeDifferenceDrop
-	difficultyChangeBase  = energi_params.DifficultyChangeBase
+	targetWindow          = params.TargetWindow
+	maxTimeDifferenceDrop = params.MaxTimeDifferenceDrop
+	difficultyChangeBase  = params.DifficultyChangeBase
 
-	diffV2MigrationStakerTimeDelay  = energi_params.DiffV2MigrationStakerTimeDelay
-	diffV2MigrationStakerBlockDelay = energi_params.DiffV2MigrationStakerBlockDelay
-	diffV2MigrationStakerTarget     = energi_params.DiffV2MigrationStakerTarget
+	diffV2MigrationStakerTimeDelay  = params.DiffV2MigrationStakerTimeDelay
+	diffV2MigrationStakerBlockDelay = params.DiffV2MigrationStakerBlockDelay
+	diffV2MigrationStakerTarget     = params.DiffV2MigrationStakerTarget
 )
 
 type timeTargetV2 struct {
@@ -101,69 +100,93 @@ func (t *timeTargetV2) getPeriodTarget() interface{} {
  * The minimum block time is 30 seconds
  */
 func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *timeTargetV2 {
+
+	// a scaling factor of 10^6 allows 6 decimals of precision
+	var precision uint64 = 1e6
+
 	ret := &timeTargetV2{}
 	parentBlockTime := parent.Time // Defines the original parent block time.
 	parentNumber := parent.Number.Uint64()
-	smoothingFactor := 2.0 / float64(targetWindow+1)
+	// smoothingFactor := 2.0 / float64(targetWindow+1) // evaluates to 1/3rd
+	var smoothingInverse uint64 = 3
 
 	// POS-11: Block time restrictions
-	ret.maxTime = e.now() + energi_params.MaxFutureGap
+	ret.maxTime = e.now() + params.MaxFutureGap
 
 	// POS-11: Block time restrictions
-	ret.minTime = parentBlockTime + energi_params.MinBlockGap
-	ret.target = parentBlockTime + energi_params.TargetBlockGap
+	ret.minTime = parentBlockTime + params.MinBlockGap
+	ret.target = parentBlockTime + params.TargetBlockGap
+
+	if ret.pHash == parent.Hash() {
+		// If no chain reorg has happened after the previous target calculation,
+		// do not recalculate the target again.
+		return nil
+	}
+
 	ret.pHash = parent.Hash()
 
 	// Block interval enforcement
 	// ---
-	if parentNumber > energi_params.AverageTimeBlocks {
+	if parentNumber > params.AverageTimeBlocks {
 		// TODO: LRU cache here for extra DoS mitigation
-		timeDiff := make([]float64, energi_params.AverageTimeBlocks)
+		timeDiff := make([]uint64, params.AverageTimeBlocks)
 
 		// NOTE: we have to do this way as parent may be not part of canonical
 		//       chain. As no mutex is held, we cannot do checks for canonical.
-		for i := energi_params.AverageTimeBlocks; i > 0; i-- {
+		for i := params.AverageTimeBlocks; i > 0; i-- {
 			past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
 			if past == nil {
 				log.Trace("Inconsistent tree, shutdown?")
 				return ret
 			}
-			timeDiff[i-1] = float64(parent.Time - past.Time)
+			timeDiff[i-1] = parent.Time - past.Time
 			parent = past
 		}
 
 		// Holds the simple moving average of blocktime difference calculated
 		// at the moving average interval window.
-		SMA := make([]float64, (energi_params.AverageTimeBlocks - targetWindow + 1))
-		var sum float64
+		SMA := make([]uint64, params.AverageTimeBlocks-params.
+			TargetWindow+1)
+		var sum uint64
 		for i := 0; i < len(SMA); i++ {
 			if sum == 0 {
 				for _, val := range timeDiff[:targetWindow] {
-					sum += val
+					// scale the value for the average
+					sum += val * precision
 				}
 			} else {
-				sum = sum - timeDiff[i-1]
-				sum = sum + timeDiff[i+int(targetWindow)-1]
+				// values are scaled to allow fixed precision
+				sum = sum - timeDiff[i-1]*precision
+				sum = sum +
+					timeDiff[i+int(targetWindow)-1]*precision
 			}
 			// Obtain average at the specified target window.
-			SMA[i] = sum / float64(targetWindow)
+			SMA[i] = sum / targetWindow
 		}
 
 		// Holds the exponential moving average calculated from the simple moving
 		// list average.
-		EMA := make([]float64, (energi_params.AverageTimeBlocks - targetWindow + 1))
-		for i, val := range SMA {
+		EMA := make([]uint64,
+			params.AverageTimeBlocks-params.TargetWindow+1)
+		for ii, val := range SMA {
+			i := uint64(ii)
 			forecastedDiff := SMA[0]
 			if i > 0 {
-				forecastedDiff = (val * smoothingFactor) + (1-smoothingFactor)*EMA[i-1]
+				// forecastedDiff = (val * smoothingFactor) + (1-smoothingFactor)*EMA[i-1]
+				forecastedDiff = val/smoothingInverse +
+					smoothingInverse*EMA[ii-1]
 			}
 			EMA[i] = forecastedDiff
 		}
 
-		forecastTimeDiff := uint64(EMA[len(EMA)-1])
-		if forecastTimeDiff > energi_params.TargetBlockGap {
+		// now we reverse the precision amplification to test against
+		// the timestamps, this essentially rounds down from 0.
+		// 999999 to 0, giving an exact second while allowing the
+		// SMA/EMA to compute with 6 decimals of precision
+		forecastTimeDiff := EMA[len(EMA)-1]/precision
+		if forecastTimeDiff > params.TargetBlockGap {
 			// Max block gap should not exceed value defined in TargetBlockGap.
-			forecastTimeDiff = energi_params.TargetBlockGap
+			forecastTimeDiff = params.TargetBlockGap
 		}
 
 		ret.target = parentBlockTime + forecastTimeDiff
@@ -204,25 +227,29 @@ func calcPoSDifficultyV2(
 		return parent.Difficulty
 	}
 
-	// TimeDifference = timeTarget - newBlockTime
-	timeDiff := float64(target) - float64(newBlockTime)
+	timeDiff := target - newBlockTime
 	if timeDiff < maxTimeDifferenceDrop {
 		timeDiff = maxTimeDifferenceDrop
 	}
 
-	preMultiplier := big.NewFloat(math.Pow(difficultyChangeBase, timeDiff))
+	const factorInverse = 10000 // 0.0001 is the same as 1/10000
+	const precision = 1000000   // we want 2 decimal places precision lower
+	var scaledPreMultiplier = precision
 
-	// To reduce the possibility of difficulty collision likely to happen between
-	// simultaneously mining nodes, add the current nanoseconds as the
-	// mantissa to the multiplier. Divide by 10^15 to make a mantissa with
-	// a small to negligible effect to the overall difficulty value.
-	// Max mantissa added => 999999999.0/1000000000000000.0 = 0.000000999999999 = 9.99999999e-7
-	salt := big.NewFloat(float64(time.Now().Nanosecond()) / 1000000000000000.0) // mantissa
-	multiplier := new(big.Float).Add(preMultiplier, salt)
+	var i uint64
+	for i = 0; i < timeDiff; i++ {
+		// the function of 1.0001 ^ timeDiff means the same as
+		// repeatedly add 1/10000th to the previous result value as many
+		// times as timeDiff, starting with an initial (scaled) value
+		scaledPreMultiplier += scaledPreMultiplier / factorInverse
+	}
 
-	parentDiff := new(big.Float).SetInt(parent.Difficulty)
-	difficulty := new(big.Int)
-	new(big.Float).Mul(parentDiff, multiplier).Int(difficulty)
+	// multiply the parent difficulty by the multiplier and divide back
+	// by the precision value, applying the difficulty change without using
+	// floating point numbers
+	difficulty := big.NewInt(0).Mul(parent.Difficulty,
+		big.NewInt(int64(scaledPreMultiplier)))
+	difficulty = difficulty.Div(difficulty, big.NewInt(int64(precision)))
 
 	log.Trace("Difficulty change",
 		"parent", parent.Difficulty, "new difficulty", difficulty,
@@ -269,7 +296,7 @@ func (e *Energi) MineV2(
 		})
 		// log.Trace("PoS miner candidate found", "address", a)
 
-		if a == energi_params.Energi_MigrationContract {
+		if a == params.Energi_MigrationContract {
 			migrationDPOS = true
 		}
 	}
@@ -293,16 +320,16 @@ func (e *Energi) MineV2(
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
 	if migrationDPOS && !e.testing && header.Number.Uint64(
-		) < energi_params.DiffV2MigrationStakerBlockDelay {
+		) < params.DiffV2MigrationStakerBlockDelay {
 		// Obey block target
 		if blockTime < blockTarget.target {
 			blockTime = blockTarget.target
 		}
 
 		// Decrease difficulty, if it got bumped
-		if header.Difficulty.Uint64() > energi_params.
+		if header.Difficulty.Uint64() > params.
 			DiffV2MigrationStakerTarget {
-			blockTime += energi_params.
+			blockTime += params.
 				DiffV2MigrationStakerTimeDelay
 		}
 	}
@@ -314,7 +341,7 @@ func (e *Energi) MineV2(
 			// Ensure that a shutdown request is handled as fast as possible.
 			return false, nil
 		default:
-			if maxTime := e.now() + energi_params.
+			if maxTime := e.now() + params.
 				MaxFutureGap; blockTime > maxTime {
 				// NOTE: it's very important to ignore stop until all variants are tried
 				//       to prevent rogue stakers taking the initiative.

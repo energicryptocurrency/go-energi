@@ -275,7 +275,6 @@ func TestPoSChainV2(t *testing.T) {
 		// Time tests
 		// ---
 		tt := engine.calcTimeTargetV2(chain, parent)
-		
 		if !assert.True(t, tt.maxTime >= now) {
 			t.FailNow()
 		}
@@ -444,7 +443,7 @@ func TestPoSDiffV2(t *testing.T) {
 			minTime: tc.min,
 			target:  tc.target,
 		}
-		
+
 		res := calcPoSDifficultyV2(tc.time, parent, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
