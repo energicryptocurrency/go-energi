@@ -2,12 +2,17 @@ variables:
 
 stages:
   - base
-  - clean
+  - prepare
   - lint
   - build
   - test
   - deploy
   - cleanup
+
+cache:
+  paths:
+    - node_modules/
+    - build/
 
 build-builder:
   stage: base
@@ -24,36 +29,41 @@ build-builder:
     - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
     - docker push ${container_registry}/energi3_builder:latest
-  only:
-    changes:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - changes:
       - Dockerfile.builder
-    refs:
-      - develop
-      - master
 
 # make sure our repo does not have any artifacts of previous builds
 clean-repo:
-  stage: clean
+  stage: prepare
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder
-  before_script:
-    - pwd
   script:
     - git checkout -- .
-    - git clean -fdx .
+    - git clean -fdx -e node_modules .
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 # TODO: this actually tries to execute the merge, may not be the best way to check this
 # it will also fail for master branch merges
 branch-check:
-  stage: clean
+  stage: prepare
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder
   before_script:
     - pwd
   script:
-    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; git merge --abort; exit 1; fi
+    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+npm-install:
+  stage: prepare
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  script:
+    - npm install
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
@@ -67,16 +77,6 @@ lint-go:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   allow_failure: true
 
-lint-sol-tests:
-  stage: lint
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
-  script:
-    - make lint-sol-tests
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  allow_failure: true
-
 lint-sol:
   stage: lint
   tags: [docker_runner]
@@ -85,7 +85,15 @@ lint-sol:
     - make lint-sol
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  allow_failure: true
+
+lint-sol-tests:
+  stage: lint
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  script:
+    - make lint-sol-tests
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-linux:
   stage: build

@@ -43,11 +43,13 @@ RUN wget -nv ${nodejs_url}
 RUN echo "${nodejs_sha256} ${nodejs_filename}" > "${nodejs_filename}.sha256"
 RUN sha256sum -c ${nodejs_filename}.sha256
 RUN tar -C /usr/local -xzf ${nodejs_filename}
+RUN chown -R "root:root" "/usr/local/${nodejs_spec}"
 RUN rm -rf ${nodejs_filename}*
 ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
 
 # install node packages
-RUN npm install -g yarn
+RUN npm -g config set user root
+RUN npm install -g yarn ganache-cli truffle
 
 # clone core node repository and install dependencies
 ARG repository_remote="https://github.com/energicryptocurrency/energi3.git"
@@ -63,3 +65,8 @@ ENV GOPATH="/builds/energi/tech/gen3"
 ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
 ENV GO111MODULE="on"
 ENV GOFLAGS="-mod=vendor -v"
+
+# do a build at the end to ensure we have everything
+RUN make all
+# make check is known to fail now due to issues in tests and the linter so we ignore the error code
+RUN make check || echo "make check failed"
