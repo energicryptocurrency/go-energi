@@ -253,25 +253,25 @@ func TestPoSChain(t *testing.T) {
 		// Time tests
 		//---
 		tt := engine.calcTimeTarget(chain, parent)
-		assert.True(t, tt.max_time >= now)
-		assert.True(t, tt.max_time <= engine.now()+30)
+		assert.True(t, tt.max >= now)
+		assert.True(t, tt.max <= engine.now()+30)
 
 		if i < 60 {
 			assert.Equal(t, header.Time, parent.Time+30)
 
-			assert.Equal(t, tt.min_time, header.Time)
-			assert.Equal(t, tt.block_target, header.Time+30)
+			assert.Equal(t, tt.min, header.Time)
+			assert.Equal(t, tt.blockTarget, header.Time+30)
 		} else if i < 61 {
 			assert.Equal(t, header.Time, genesis.Time()+3570)
 			assert.Equal(t, header.Time, parent.Time+1800)
 
-			assert.Equal(t, tt.min_time, header.Time)
-			assert.Equal(t, tt.block_target, parent.Time+60)
+			assert.Equal(t, tt.min, header.Time)
+			assert.Equal(t, tt.blockTarget, parent.Time+60)
 		} else if i < 62 {
 			assert.Equal(t, header.Time, genesis.Time()+3600)
 		}
 
-		assert.True(t, parent.Time < tt.min_time, "Header %v", i)
+		assert.True(t, parent.Time < tt.min, "Header %v", i)
 
 		assert.Empty(t, engine.enforceTime(header, tt))
 		assert.Empty(t, engine.checkTime(header, tt))
@@ -376,9 +376,9 @@ func TestPoSDiffV1(t *testing.T) {
 			Difficulty: big.NewInt(tc.parent),
 		}
 		tt := &timeTarget{
-			min_time:      tc.min,
-			block_target:  tc.btarget,
-			period_target: tc.ptarget,
+			min:      tc.min,
+			blockTarget:  tc.btarget,
+			periodTarget: tc.ptarget,
 		}
 
 		res := calcPoSDifficultyV1(nil, tc.time, parent, tt)

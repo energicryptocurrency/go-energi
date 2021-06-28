@@ -465,156 +465,6 @@ func (e *Energi) lookupStakeWeight(
 
 /**
  * POS-19: PoS miner implementation
-
-todo: this function is replaced by mine() down below, delete when it is finished
-*/
-func (e *Energi) mine2(
-	chain ChainReader, header *types.Header, stop <-chan struct{},
-) (success bool, err error) {
-
-	type Candidates struct {
-		addr   common.Address
-		weight uint64
-	}
-
-	accounts := e.accountsFn()
-	// if no accounts are found, just pause and wait for the stop signal
-	//
-	// todo: is this what is intended? Is there a case where this value can
-	//  change but this thread is then dead? I think that very likely this
-	//  should be a repeating loop that retries every minute or something like
-	//  this in case an account is created that can be used, while the server is
-	//  running.
-	if len(accounts) == 0 {
-		select {
-		case <-stop:
-			return false, nil
-		}
-	}
-
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		return false, consensus.ErrUnknownAncestor
-	}
-
-	timeTarget := e.calcTimeTarget(chain, parent)
-	blockTime := timeTarget.min
-
-	// Special case due to expected very large gap between Genesis and Migration
-	if header.IsGen2Migration() && !e.testing {
-		blockTime = e.now()
-	}
-
-	candidates := make([]Candidates, 0, len(accounts))
-	migrationDPoS := false
-
-	for _, a := range accounts {
-		candidates = append(candidates, Candidates{a, 0})
-		if a == params.Energi_MigrationContract {
-			migrationDPoS = true
-		}
-	}
-
-	// A special workaround to obey target time when migration contract is used
-	// for mining to prevent any difficulty bombs.
-	if migrationDPoS && !e.testing {
-
-		// clamp blockTime to block target
-		if blockTime < timeTarget.blockTarget {
-			blockTime = timeTarget.blockTarget
-		}
-
-		// further, clamp to period target
-		if blockTime < timeTarget.periodTarget {
-			blockTime = timeTarget.periodTarget
-		}
-
-		// Decrease difficulty, if it got bumped
-		if header.Difficulty.Uint64() > diffV1_MigrationStakerTarget {
-			blockTime += diffV1_MigrationStakerDelay
-		}
-	}
-
-	// ---
-	for ; ; blockTime++ {
-		// if there is no more options to try pause and wait for next
-		if maxTime := e.now() + params.MaxFutureGap; blockTime > maxTime {
-			log.Trace("PoS miner is sleeping")
-			select {
-			case <-stop:
-				// NOTE: it's very important to ignore stop until all variants
-				//  are tried to prevent rogue stakers taking the initiative.
-				return false, nil
-			case <-time.After(time.Duration(blockTime-maxTime) * time.Second):
-				// wait until the next window opens
-			}
-		}
-
-		if e.peerCountFn() == 0 {
-			log.Trace("Skipping PoS miner due to missing peers")
-			continue
-		}
-
-		header.Time = blockTime
-		if timeTarget, err = e.posPrepare(chain, header, parent); err != nil {
-			return false, err
-		}
-
-		target := new(big.Int).Div(diff1Target, header.Difficulty)
-		log.Trace("PoS miner time", "time", blockTime)
-
-		// It could be done once, but then there is a chance to miss blocks.
-		// Some significant algo optimizations are possible, but we start with
-		// simplicity.
-		for i := range candidates {
-			v := &candidates[i]
-			if v.weight, err = e.lookupStakeWeight(
-				chain, blockTime, parent, v.addr,
-			); err != nil {
-				// if the comment above were correct why would we break here?
-				return false, err
-			}
-		}
-
-		// Try smaller amounts first
-		sort.Slice(
-			candidates,
-			func(i, j int) bool {
-				return candidates[i].weight < candidates[j].weight
-			},
-		)
-
-		// Try to match target
-		for _, v := range candidates {
-			if v.weight < 1 {
-				continue
-			}
-
-			// log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
-
-			header.Coinbase = v.addr
-			posHash, usedWeight := e.calcPoSHash(header, target, v.weight)
-
-			nonceCap := e.GetMinerNonceCap()
-			if nonceCap != 0 && nonceCap < usedWeight {
-				continue
-			} else if posHash != nil {
-				log.Trace(
-					"PoS stake", "addr", v.addr, "weight", v.weight,
-					"used_weight", usedWeight,
-				)
-				header.Nonce = types.EncodeNonce(usedWeight)
-				return true, nil
-			}
-		}
-	}
-
-	// this is dead code as there is no break in the for loop above
-	// return false, nil
-}
-
-/**
- * POS-19: PoS miner implementation
  */
 func (e *Energi) mine(
 	chain ChainReader, header *types.Header, stop <-chan struct{},
@@ -720,7 +570,8 @@ out:
 		// better sequence to work in.
 		for _, candidate := range candidates {
 			// if there is no more options to try pause and wait for next
-			if maxTime := e.now() + params.MaxFutureGap; blockTime > maxTime {
+			if maxTime := e.now() + params.
+				MaxFutureGap; blockTime > maxTime {
 				log.Trace("PoS miner is sleeping")
 				select {
 				case <-stop:
@@ -746,7 +597,7 @@ out:
 			}
 
 			header.Time = blockTime
-			if timeTarget, err = e.posPrepare(
+			if timeTarget, err = e.PoSPrepare(
 				chain, header, parent,
 			); err != nil {
 				break out

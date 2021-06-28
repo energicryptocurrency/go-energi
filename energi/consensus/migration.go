@@ -24,7 +24,7 @@ import (
 	"math/big"
 	"os"
 	"strings"
-
+	
 	"energi.world/core/gen3/accounts/abi"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/consensus"
@@ -34,9 +34,9 @@ import (
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"energi.world/core/gen3/rlp"
-
+	
 	"github.com/shengdoushi/base58"
-
+	
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
@@ -55,25 +55,25 @@ func (e *Energi) finalizeMigration(
 	if !header.IsGen2Migration() {
 		return nil
 	}
-
+	
 	// One migration and one block reward
 	if len(txs) != 2 {
 		err := errors.New("Wrong number of migration block txs")
 		log.Error("Failed to finalize migration", "err", err)
 		return err
 	}
-
+	
 	migration_abi, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
 	if err != nil {
 		return err
 	}
-
+	
 	callData, err := migration_abi.Pack("totalAmount")
 	if err != nil {
 		log.Error("Failed to prepare totalAmount() call", "err", err)
 		return err
 	}
-
+	
 	// totalAmount()
 	msg := types.NewMessage(
 		e.systemFaucet,
@@ -94,7 +94,7 @@ func (e *Energi) finalizeMigration(
 		log.Error("Failed in totalAmount() call", "err", err)
 		return err
 	}
-
+	
 	//
 	totalAmount := big.NewInt(0)
 	err = migration_abi.Unpack(&totalAmount, "totalAmount", output)
@@ -102,10 +102,10 @@ func (e *Energi) finalizeMigration(
 		log.Error("Failed to unpack totalAmount() call", "err", err)
 		return err
 	}
-
+	
 	statedb.SetBalance(energi_params.Energi_MigrationContract, totalAmount)
 	log.Warn("Setting Migration contract balance", "amount", totalAmount)
-
+	
 	return nil
 }
 
@@ -119,20 +119,20 @@ func MigrationTx(
 	if tx, ok := createEnergiSimnetMigrationTx(signer, header, migration_file, engine); ok {
 		return tx
 	}
-
+	
 	file, err := os.Open(migration_file)
 	if err != nil {
 		log.Error("Failed to open snapshot", "err", err)
 		return nil
 	}
 	defer file.Close()
-
+	
 	snapshot, err := parseSnapshot(file)
 	if err != nil {
 		log.Error("Failed to parse snapshot", "err", err)
 		return nil
 	}
-
+	
 	return migrationTx(signer, header, snapshot, engine)
 }
 
@@ -147,23 +147,23 @@ func migrationTx(
 		log.Error("Not Energi consensus engine")
 		return nil
 	}
-
+	
 	owners, amounts, blacklist := createSnapshotParams(snapshot)
 	if owners == nil || amounts == nil || blacklist == nil {
 		log.Error("Failed to create arguments")
 		return nil
 	}
-
+	
 	migration_abi, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
 	if err != nil {
 		panic(err)
 	}
-
+	
 	callData, err := migration_abi.Pack("setSnapshot", owners, amounts, blacklist)
 	if err != nil {
 		panic(err)
 	}
-
+	
 	gasLimit := gasPerMigrationEntry * uint64(len(owners))
 	header.GasLimit = gasLimit
 	header.Extra, err = rlp.EncodeToBytes([]interface{}{
@@ -174,7 +174,7 @@ func migrationTx(
 	if err != nil {
 		panic(err)
 	}
-
+	
 	res = types.NewTransaction(
 		uint64(0), // it should be the first transaction
 		energi_params.Energi_MigrationContract,
@@ -183,24 +183,24 @@ func migrationTx(
 		common.Big0,
 		callData,
 	)
-
+	
 	if e.signerFn == nil {
 		log.Error("Signer is not set")
 		return nil
 	}
-
+	
 	if e.config == nil {
 		log.Error("Engine config is not set")
 		return nil
 	}
-
+	
 	tx_hash := signer.Hash(res)
 	tx_sig, err := e.signerFn(e.config.MigrationSigner, tx_hash.Bytes())
 	if err != nil {
 		log.Error("Failed to sign migration tx")
 		return nil
 	}
-
+	
 	res, err = res.WithSignature(signer, tx_sig)
 	if err != nil {
 		log.Error("Failed to pack migration tx")
@@ -217,35 +217,35 @@ func createSnapshotParams(ss *snapshot) (
 	owners = make([]common.Address, len(ss.Txouts))
 	amounts = make([]*big.Int, len(ss.Txouts))
 	blacklist = make([]common.Address, len(ss.Blacklist))
-
+	
 	// NOTE: Gen 2 precision is 8, but Gen 3 is 18
 	multiplier := big.NewInt(1e10)
-
+	
 	for i, info := range ss.Txouts {
 		owner, err := base58.Decode(info.Owner, base58.BitcoinAlphabet)
-
+		
 		if err != nil {
 			log.Error("Failed to decode address", "err", err, "address", info.Owner)
 			return nil, nil, nil
 		}
-
+		
 		owner = owner[1 : len(owner)-4]
 		owners[i] = common.BytesToAddress(owner)
 		amounts[i] = new(big.Int).Mul(info.Amount, multiplier)
 	}
-
+	
 	for i, blo := range ss.Blacklist {
 		owner, err := base58.Decode(blo, base58.BitcoinAlphabet)
-
+		
 		if err != nil {
 			log.Error("Failed to decode address", "err", err, "address", blo)
 			return nil, nil, nil
 		}
-
+		
 		owner = owner[1 : len(owner)-4]
 		blacklist[i] = common.BytesToAddress(owner)
 	}
-
+	
 	return
 }
 
@@ -279,40 +279,40 @@ func ValidateMigration(
 		return false
 	}
 	defer file.Close()
-
+	
 	snapshot, err := parseSnapshot(file)
 	if err != nil {
 		log.Error("Failed to parse snapshot", "err", err)
 		return false
 	}
-
+	
 	owners, amounts, blacklist := createSnapshotParams(snapshot)
 	if owners == nil || amounts == nil || blacklist == nil {
 		log.Error("Failed to create arguments")
 		return false
 	}
-
+	
 	migration_abi, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
 	if err != nil {
 		panic(err)
 	}
-
+	
 	callData, err := migration_abi.Pack("setSnapshot", owners, amounts, blacklist)
 	if err != nil {
 		panic(err)
 	}
-
+	
 	txs := block.Transactions()
 	if len(txs) != 2 {
 		log.Error("Invalid transaction count")
 		return false
 	}
-
+	
 	if !bytes.Equal(txs[0].Data(), callData) {
 		log.Error("Migration transaction data mismatch")
 		return false
 	}
-
+	
 	return true
 }
 
@@ -326,15 +326,15 @@ func createEnergiSimnetMigrationTx(
 	if migrationFile != energi_common.SimnetMigrationTx {
 		return
 	}
-
+	
 	isOK = true
-
+	
 	e, ok := engine.(*Energi)
 	if !ok {
 		log.Error("Not Energi consensus engine in simnet tx")
 		return
 	}
-
+	
 	extra, err := rlp.EncodeToBytes([]interface{}{
 		uint(params.VersionMajor<<16 | params.VersionMinor<<8 | params.VersionPatch),
 		"energi3",
@@ -343,12 +343,12 @@ func createEnergiSimnetMigrationTx(
 	if err != nil {
 		panic(err)
 	}
-
+	
 	migrationABI, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
 	if err != nil {
 		panic(err)
 	}
-
+	
 	owners := []common.Address{header.Coinbase}
 	amounts := []*big.Int{new(big.Int).Mul(big.NewInt(9000000000000000000), big.NewInt(100000))}
 	blacklist := make([]common.Address, 0)
@@ -356,7 +356,7 @@ func createEnergiSimnetMigrationTx(
 	if err != nil {
 		panic(err)
 	}
-
+	
 	header.GasLimit = params.GenesisGasLimit
 	header.Extra = extra
 	tx = types.NewTransaction(
@@ -367,29 +367,29 @@ func createEnergiSimnetMigrationTx(
 		common.Big0,
 		callData,
 	)
-
+	
 	if e.signerFn == nil {
 		log.Error("Signer is not set in simnet tx")
 		return
 	}
-
+	
 	if e.config == nil {
 		log.Error("Engine config is not set in simnet tx")
 		return
 	}
-
+	
 	txHash := signer.Hash(tx)
 	txSig, err := e.signerFn(e.config.MigrationSigner, txHash.Bytes())
 	if err != nil {
 		log.Error("Failed to sign migration tx in simnet tx", "err", err)
 		return
 	}
-
+	
 	tx, err = tx.WithSignature(signer, txSig)
 	if err != nil {
 		log.Error("Failed to pack migration tx in simnet tx")
 		return
 	}
-
+	
 	return
 }
