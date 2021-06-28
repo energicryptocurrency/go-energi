@@ -5,6 +5,13 @@ FROM ubuntu:18.04
 ENV TZ=GMT
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# install docker
+RUN apt -y update
+RUN apt -y install curl gnupg lsb-release software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt -y install docker-ci docker-ci-cli containerd.io
+
 # update software
 RUN apt -y --fix-missing update
 RUN apt -y full-upgrade
