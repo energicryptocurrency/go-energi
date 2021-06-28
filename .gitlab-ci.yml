@@ -23,7 +23,6 @@ build-builder:
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
   script:
-    - docker login --username ${docker_user} --password ${docker_key}
     - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
     - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
     - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
@@ -116,7 +115,6 @@ build-docker:
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
   script:
-    - docker login --username ${docker_user} --password ${docker_key}
     - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
     - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
   rules:
