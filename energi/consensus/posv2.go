@@ -227,7 +227,7 @@ func calcPoSDifficultyV2(
 		return parent.Difficulty
 	}
 
-	timeDiff := target - newBlockTime
+	timeDiff := int(target) - int(newBlockTime)
 	if timeDiff < maxTimeDifferenceDrop {
 		timeDiff = maxTimeDifferenceDrop
 	}
@@ -236,8 +236,7 @@ func calcPoSDifficultyV2(
 	const precision = 1000000   // we want 2 decimal places precision lower
 	var scaledPreMultiplier = precision
 
-	var i uint64
-	for i = 0; i < timeDiff; i++ {
+	for i := 0; i < timeDiff; i++ {
 		// the function of 1.0001 ^ timeDiff means the same as
 		// repeatedly add 1/10000th to the previous result value as many
 		// times as timeDiff, starting with an initial (scaled) value

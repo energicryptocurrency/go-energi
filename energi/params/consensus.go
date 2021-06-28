@@ -53,7 +53,7 @@ const (
 	// MaxTimeDifferenceDrop defines the maximum time difference that can be used
 	// to calculate the difficulty drop when the newly created block is found long
 	// after block target time. This
-	MaxTimeDifferenceDrop = -30.0
+	MaxTimeDifferenceDrop = -30
 	
 	// DifficultyChangeBase defines the base constant that is used generate the
 	// difficulty multiplier. i.e.
