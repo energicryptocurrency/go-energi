@@ -410,28 +410,28 @@ func TestPoSDiffV2(t *testing.T) {
 			time:   91,
 			min:    31,
 			target: 61,
-			result: 1744,
+			result: 1738,
 		},
 		{
 			parent: 1744,
 			time:   121,
 			min:    31,
 			target: 61,
-			result: 1744,
+			result: 1738,
 		},
 		{
 			parent: 1744,
 			time:   200,
 			min:    31,
 			target: 61,
-			result: 1744,
+			result: 1738,
 		},
 		{
 			parent: 1744,
 			time:   181,
 			min:    31,
 			target: 61,
-			result: 1744,
+			result: 1738,
 		},
 	}
 	
