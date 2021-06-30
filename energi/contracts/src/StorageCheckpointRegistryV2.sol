@@ -44,52 +44,52 @@ contract StorageCheckpointRegistryV2 is StorageBase {
     function add(ICheckpoint cp) external requireOwner {
         // if queue is full and needs first element to be deleted
         if (size == maxSize)  {
-          delete checkpoints[startingKeyIndex];
-          checkpoints[startingKeyIndex + size] = cp;
-          startingKeyIndex++;
+            delete checkpoints[startingKeyIndex];
+            checkpoints[startingKeyIndex + size] = cp;
+            startingKeyIndex++;
         } else {
-          checkpoints[startingKeyIndex + size] = cp;
-          size++;
+            checkpoints[startingKeyIndex + size] = cp;
+            size++;
         }
     }
 
     // pop first element
     function pop() external requireOwner {
-      // nothing to pop
-      if (size == 0) return;
+        // nothing to pop
+        if (size == 0) return;
 
-      // remove last element
-      delete checkpoints[startingKeyIndex];
-      startingKeyIndex++;
-      size--;
+        // remove last element
+        delete checkpoints[startingKeyIndex];
+        startingKeyIndex++;
+        size--;
     }
 
     // for removal we find the checkpoint and move the right part of the queue to the left
     function remove(ICheckpoint cp) external  requireOwner returns(bool found) {
-      uint foundCpIndex;
-      found = false;
-      // find the cp in map
-      (uint number_1, bytes32 hash_1,  ) = cp.info();
-      for (foundCpIndex = startingKeyIndex; foundCpIndex < startingKeyIndex + size; foundCpIndex++) {
-          (uint number_2, bytes32 hash_2,  ) = checkpoints[foundCpIndex].info();
-          if (number_1 == number_2 && hash_1 == hash_2) {
-            found = true;
-            break;
-          }
+        uint foundCpIndex;
+        found = false;
+        // find the cp in map
+        (uint number_1, bytes32 hash_1,  ) = cp.info();
+        for (foundCpIndex = startingKeyIndex; foundCpIndex < startingKeyIndex + size; foundCpIndex++) {
+            (uint number_2, bytes32 hash_2,  ) = checkpoints[foundCpIndex].info();
+            if (number_1 == number_2 && hash_1 == hash_2) {
+                found = true;
+                break;
+            }
 
-      }
-
-      // if we found the checkpoint
-      if (found == true) {
-        // shift every element after index to the left by one
-        for (uint i = foundCpIndex; i < startingKeyIndex + size - 1; i++) {
-            checkpoints[i] = checkpoints[i + 1];
         }
-        // remove last element
-        delete checkpoints[startingKeyIndex + size - 1];
-        size--;
-      }
-      return found;
+
+        // if we found the checkpoint
+        if (found == true) {
+            // shift every element after index to the left by one
+            for (uint i = foundCpIndex; i < startingKeyIndex + size - 1; i++) {
+                checkpoints[i] = checkpoints[i + 1];
+            }
+            // remove last element
+            delete checkpoints[startingKeyIndex + size - 1];
+            size--;
+        }
+        return found;
     }
 
     // return checkpoinst  [startingKeyIndex, startingKeyIndex+size) from map
