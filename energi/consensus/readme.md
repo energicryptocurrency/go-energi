@@ -2,6 +2,24 @@
 
 ![difficulty adjustment chart](doc/diffv2.png)
 
+
+### Constant values as used in the algorithm
+
+- K = 10
+
+- M = 1.005 -
+
+- Target Block Gap = 60 seconds
+
+- Maximum difficulty drop time difference =
+  -30 (or 30 seconds after the block target)
+
+- Maximum difficulty rise multiplier per block => 1.005^60 = 1.348850153 (
+  increases to 130%)
+
+- Minimum difficulty drop multiplier per block => 1.005^-30 = 0.86102973 (drops to
+  80%)
+
 ## How Difficulty of the next block is obtained
 
 1. An [Exponential Moving Average](doc/ema.md) of `K` blocks time differences is
@@ -50,20 +68,3 @@
    difficulty. 
 
 5. Base M should always guarantee a small rise or a smaller drop in difficulty.
-
-### Constant values as used in the algorithm 
-
-- K = 10 
-
-- M = 1.005 -
-
-- Target Block Gap = 60 seconds 
-
-- Maximum difficulty drop time difference = 
-  -30 (or 30 seconds after the block target)
-
-- Maximum difficulty rise multiplier per block => 1.005^60 = 1.348850153 (
-increases to 130%)
-
-- Minimum difficulty drop multiplier per block => 1.005^-30 = 0.86102973 (drops to
-80%)
