@@ -40,8 +40,6 @@ contract StorageCheckpointRegistryV2 is StorageBase {
     // number of stored checkpoints' limit
     uint constant maxSize = 10;
 
-
-
     // push new checkpoint
     function add(ICheckpoint cp) external requireOwner {
         // if queue is full and needs first element to be deleted
@@ -65,7 +63,6 @@ contract StorageCheckpointRegistryV2 is StorageBase {
       startingKeyIndex++;
       size--;
     }
-
 
     // for removal we find the checkpoint and move the right part of the queue to the left
     function remove(ICheckpoint cp) external  requireOwner returns(bool found) {
@@ -94,7 +91,6 @@ contract StorageCheckpointRegistryV2 is StorageBase {
       }
       return found;
     }
-
 
     // return checkpoinst  [startingKeyIndex, startingKeyIndex+size) from map
     function listCheckpoints() external view returns(ICheckpoint[] memory res) {

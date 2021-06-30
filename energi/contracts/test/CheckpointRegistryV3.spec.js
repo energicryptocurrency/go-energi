@@ -21,7 +21,6 @@
 const MockProxy = artifacts.require('MockProxy');
 const MockContract = artifacts.require('MockContract');
 const CheckpointRegistryV3 = artifacts.require('CheckpointRegistryV3');
-const ICheckpointRegistry = artifacts.require('ICheckpointRegistry');
 const ICheckpoint = artifacts.require('ICheckpoint');
 const ICheckpointV2 = artifacts.require('ICheckpointV2');
 const ICheckpointRegistryV2 = artifacts.require('ICheckpointRegistryV2');
@@ -85,7 +84,6 @@ contract("CheckpointRegistryV3", async accounts => {
         const cp_max_count = 10;
         const cp_sign = cp_max_count - 1;
         const block_hash = '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
-        const block_hash2 = '0x0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
         let cp_list;
         let mn_sig;
