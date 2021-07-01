@@ -126,71 +126,68 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	ret.pHash = parent.Hash()
 
 	// Block interval enforcement
-	// ---
-	if parentNumber > params.AverageTimeBlocks {
-		// TODO: LRU cache here for extra DoS mitigation
-		timeDiff := make([]uint64, params.AverageTimeBlocks)
+	// TODO: LRU cache here for extra DoS mitigation
+	timeDiffs := make([]uint64, params.AveragingWindow)
 
-		// NOTE: we have to do this way as parent may be not part of canonical
-		//       chain. As no mutex is held, we cannot do checks for canonical.
-		for i := params.AverageTimeBlocks; i > 0; i-- {
-			past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
-			if past == nil {
-				log.Trace("Inconsistent tree, shutdown?")
-				return ret
-			}
-			timeDiff[i-1] = parent.Time - past.Time
-			parent = past
+	// NOTE: we have to do this way as parent may be not part of canonical
+	//       chain. As no mutex is held, we cannot do checks for canonical.
+	for i := params.AveragingWindow; i > 0; i-- {
+		past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
+		if past == nil {
+			log.Trace("Inconsistent tree, shutdown?")
+			return ret
 		}
-
-		// Holds the simple moving average of blocktime difference calculated
-		// at the moving average interval window.
-		SMA := make([]uint64, params.AverageTimeBlocks-params.
-			TargetWindow+1)
-		var sum uint64
-		for i := 0; i < len(SMA); i++ {
-			if sum == 0 {
-				for _, val := range timeDiff[:targetWindow] {
-					// scale the value for the average
-					sum += val * precision
-				}
-			} else {
-				// values are scaled to allow fixed precision
-				sum = sum - timeDiff[i-1]*precision
-				sum = sum +
-					timeDiff[i+int(targetWindow)-1]*precision
-			}
-			// Obtain average at the specified target window.
-			SMA[i] = sum / targetWindow
-		}
-
-		// Holds the exponential moving average calculated from the simple moving
-		// list average.
-		EMA := make([]uint64,
-			params.AverageTimeBlocks-params.TargetWindow+1)
-		for ii, val := range SMA {
-			i := uint64(ii)
-			forecastedDiff := SMA[0]
-			if i > 0 {
-				// forecastedDiff = (val * smoothingFactor) + (1-smoothingFactor)*EMA[i-1]
-				forecastedDiff = val/smoothingInverse +
-					smoothingInverse*EMA[ii-1]
-			}
-			EMA[i] = forecastedDiff
-		}
-
-		// now we reverse the precision amplification to test against
-		// the timestamps, this essentially rounds down from 0.
-		// 999999 to 0, giving an exact second while allowing the
-		// SMA/EMA to compute with 6 decimals of precision
-		forecastTimeDiff := EMA[len(EMA)-1]/precision
-		if forecastTimeDiff > params.TargetBlockGap {
-			// Max block gap should not exceed value defined in TargetBlockGap.
-			forecastTimeDiff = params.TargetBlockGap
-		}
-
-		ret.target = parentBlockTime + forecastTimeDiff
+		timeDiffs[i-1] = parent.Time - past.Time
+		parent = past
 	}
+
+	// Holds the simple moving average of blocktime difference calculated
+	// at the moving average interval window.
+	SMA := make([]uint64, params.AveragingWindow-params.
+		TargetWindow+1)
+	var sum uint64
+	for i := 0; i < len(SMA); i++ {
+		if sum == 0 {
+			for _, val := range timeDiffs[:targetWindow] {
+				// scale the value for the average
+				sum += val * precision
+			}
+		} else {
+			// values are scaled to allow fixed precision
+			sum = sum - timeDiffs[i-1]*precision
+			sum = sum +
+				timeDiffs[i+int(targetWindow)-1]*precision
+		}
+		// Obtain average at the specified target window.
+		SMA[i] = sum / targetWindow
+	}
+
+	// Holds the exponential moving average calculated from the simple moving
+	// list average.
+	EMA := make([]uint64,
+		params.AveragingWindow-params.TargetWindow+1)
+	for ii, val := range SMA {
+		i := uint64(ii)
+		forecastedDiff := SMA[0]
+		if i > 0 {
+			// forecastedDiff = (val * smoothingFactor) + (1-smoothingFactor)*EMA[i-1]
+			forecastedDiff = val/smoothingInverse +
+				smoothingInverse*EMA[ii-1]
+		}
+		EMA[i] = forecastedDiff
+	}
+
+	// now we reverse the precision amplification to test against
+	// the timestamps, this essentially rounds down from 0.
+	// 999999 to 0, giving an exact second while allowing the
+	// SMA/EMA to compute with 6 decimals of precision
+	forecastTimeDiff := EMA[len(EMA)-1] / precision
+	if forecastTimeDiff > params.TargetBlockGap {
+		// Max block gap should not exceed value defined in TargetBlockGap.
+		forecastTimeDiff = params.TargetBlockGap
+	}
+
+	ret.target = parentBlockTime + forecastTimeDiff
 
 	log.Trace("PoS time", "block", parentNumber+1,
 		"min", ret.minTime, "max", ret.maxTime,
