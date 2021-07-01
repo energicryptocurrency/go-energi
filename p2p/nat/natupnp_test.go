@@ -166,6 +166,10 @@ func TestUPNP_DDWRT(t *testing.T) {
 	}
 	upnp, _ := discovered.(*upnp)
 	if upnp.service != "IGDv1-IP1" {
+		if upnp.service != "" {
+			t.Skipf("Found another upnp service: %q, %q", upnp.service, upnp.dev.URLBaseStr)
+		}
+
 		t.Errorf("upnp.service mismatch: got %q, want %q", upnp.service, "IGDv1-IP1")
 	}
 	wantURL := "http://" + dev.listener.Addr().String() + "/InternetGatewayDevice.xml"
