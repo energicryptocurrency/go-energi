@@ -26,8 +26,10 @@ const (
 	MaxFutureGap    uint64 = 3  // only accept blocks this many seconds ahead
 	// (subjective time)
 	TargetPeriodGap uint64 = AveragingWindow * TargetBlockGap
+	SMAPeriod       uint64 = 5
 
 	// DoS protection
+
 	OldForkPeriod uint64 = 15 * 60
 	StakeThrottle uint64 = 60
 
@@ -61,11 +63,11 @@ const (
 	// Time difference :   Difficulty Multiplier
 	//  +23            =>  1.0001^23 = 1.00230253177
 	//  -23            =>  1.0001^-23 = 0.9977027577
-
+	//
 	// Maximum positive time difference will never exceed 60 (TargetBlockGap)
 	// and Minimum negative time difference will never exceed -30 (MaxTimeDifferenceDrop)
 	// Therefore:
-
+	//
 	// Max difficulty rise multiplier => 1.0001^60 = 1.00601773427 (increases to 100.6%)
 	// Min difficulty drop multiplier => 1.0001^-30 = 0.9977027577 (drops to 99.77%)
 	DifficultyChangeBase = 1.0001
