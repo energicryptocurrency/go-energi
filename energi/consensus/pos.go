@@ -34,7 +34,7 @@ import (
 // removing this because why clutter namespaces more than they have to be?
 // const (
 //	MaturityPeriod    = params.MaturityPeriod
-//	AverageTimeBlocks = params.AverageTimeBlocks
+//	AveragingWindow = params.AveragingWindow
 //	TargetBlockGap    = params.TargetBlockGap
 //	MinBlockGap       = params.MinBlockGap
 //	MaxFutureGap      = params.MaxFutureGap
@@ -81,13 +81,13 @@ func (e *Energi) calcTimeTarget(
 
 	// POS-12: Block interval enforcement
 	// ---
-	if blockNumber >= params.AverageTimeBlocks {
+	if blockNumber >= params.AveragingWindow {
 		// TODO: LRU cache here for extra DoS mitigation
 		past := parent
 
 		// NOTE: we have to do this way as parent may be not part of canonical
 		//       chain. As no mutex is held, we cannot do checks for canonical.
-		for i := params.AverageTimeBlocks - 1; i > 0; i-- {
+		for i := params.AveragingWindow - 1; i > 0; i-- {
 			past = chain.GetHeader(past.ParentHash, past.Number.Uint64()-1)
 
 			if past == nil {
