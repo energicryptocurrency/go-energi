@@ -42,7 +42,7 @@ import (
 // )
 
 var (
-	minStake    = big.NewInt(1e18) // 1000000000000000000.000000
+	minStake    = big.NewInt(1e18)// 1000000000000000000
 	diff1Target = new(big.Int).Exp(
 		big.NewInt(2), big.NewInt(256), big.NewInt(0),
 	)
@@ -586,7 +586,7 @@ out:
 			if candidate.weight < 1 {
 				log.Trace(
 					"Skipping candidate due less than 1 weight",
-					candidate,
+					"candidate", candidate,
 				)
 				continue
 			}

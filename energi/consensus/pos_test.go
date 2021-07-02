@@ -67,9 +67,9 @@ func (cr *mockChainReader) CalculateBlockState(hash common.Hash, number uint64) 
 }
 
 func generateAddresses(len int) ([]common.Address, map[common.Address]*ecdsa.PrivateKey, core.GenesisAlloc, common.Address) {
-	signers := make(map[common.Address]*ecdsa.PrivateKey, len+1)
+	signers := make(map[common.Address]*ecdsa.PrivateKey, len)
 	addresses := make([]common.Address, 0, len)
-	alloc := make(core.GenesisAlloc, 61)
+	alloc := make(core.GenesisAlloc, len)
 
 	for i := 0; i < len; i++ {
 		k, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
