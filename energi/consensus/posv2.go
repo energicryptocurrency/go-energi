@@ -97,18 +97,15 @@ func (t *timeTargetV2) getPeriodTarget() interface{} {
  * Implements the Exponential Moving Average in calculating the block target time
  * Based on the last 60 blocks
  * A block cannot be created with a time greater than 3 seconds in the future
- * The minimum block time is 30 seconds
+ * ~~The minimum block time is 30 seconds~~ - This should not be enforced
+here as an early or late target is for difficulty adjustment not the block
+timestamp
  */
 func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *timeTargetV2 {
-
-	// a scaling factor of 10^6 allows 6 decimals of precision
-	var precision uint64 = 1e6
 
 	ret := &timeTargetV2{}
 	parentBlockTime := parent.Time // Defines the original parent block time.
 	parentNumber := parent.Number.Uint64()
-	// smoothingFactor := 2.0 / float64(targetWindow+1) // evaluates to 1/3rd
-	var smoothingInverse uint64 = 3
 
 	// POS-11: Block time restrictions
 	ret.maxTime = e.now() + params.MaxFutureGap
@@ -116,12 +113,6 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	// POS-11: Block time restrictions
 	ret.minTime = parentBlockTime + params.MinBlockGap
 	ret.target = parentBlockTime + params.TargetBlockGap
-
-	if ret.pHash == parent.Hash() {
-		// If no chain reorg has happened after the previous target calculation,
-		// do not recalculate the target again.
-		return nil
-	}
 
 	ret.pHash = parent.Hash()
 
@@ -131,63 +122,22 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 
 	// NOTE: we have to do this way as parent may be not part of canonical
 	//       chain. As no mutex is held, we cannot do checks for canonical.
-	for i := params.AveragingWindow; i > 0; i-- {
+	for i := params.AveragingWindow-1; i >= 0; i-- {
 		past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
 		if past == nil {
+			// this normally can't happen because there is more
+			// than enough blocks before the hard fork to always
+			// get params.AveragingWindow timestamps
 			log.Trace("Inconsistent tree, shutdown?")
 			return ret
 		}
-		timeDiffs[i-1] = parent.Time - past.Time
+		timeDiffs[i] = parent.Time - past.Time
 		parent = past
 	}
 
-	// Holds the simple moving average of blocktime difference calculated
-	// at the moving average interval window.
-	SMA := make([]uint64, params.AveragingWindow-params.
-		TargetWindow+1)
-	var sum uint64
-	for i := 0; i < len(SMA); i++ {
-		if sum == 0 {
-			for _, val := range timeDiffs[:targetWindow] {
-				// scale the value for the average
-				sum += val * precision
-			}
-		} else {
-			// values are scaled to allow fixed precision
-			sum = sum - timeDiffs[i-1]*precision
-			sum = sum +
-				timeDiffs[i+int(targetWindow)-1]*precision
-		}
-		// Obtain average at the specified target window.
-		SMA[i] = sum / targetWindow
-	}
-
-	// Holds the exponential moving average calculated from the simple moving
-	// list average.
-	EMA := make([]uint64,
-		params.AveragingWindow-params.TargetWindow+1)
-	for ii, val := range SMA {
-		i := uint64(ii)
-		forecastedDiff := SMA[0]
-		if i > 0 {
-			// forecastedDiff = (val * smoothingFactor) + (1-smoothingFactor)*EMA[i-1]
-			forecastedDiff = val/smoothingInverse +
-				smoothingInverse*EMA[ii-1]
-		}
-		EMA[i] = forecastedDiff
-	}
-
-	// now we reverse the precision amplification to test against
-	// the timestamps, this essentially rounds down from 0.
-	// 999999 to 0, giving an exact second while allowing the
-	// SMA/EMA to compute with 6 decimals of precision
-	forecastTimeDiff := EMA[len(EMA)-1] / precision
-	if forecastTimeDiff > params.TargetBlockGap {
-		// Max block gap should not exceed value defined in TargetBlockGap.
-		forecastTimeDiff = params.TargetBlockGap
-	}
-
-	ret.target = parentBlockTime + forecastTimeDiff
+	emaLast := CalcEMAUint64(timeDiffs, 2, params.SMAPeriod+1, params.SMAPeriod)
+	
+	ret.target = parentBlockTime + emaLast
 
 	log.Trace("PoS time", "block", parentNumber+1,
 		"min", ret.minTime, "max", ret.maxTime,
@@ -213,27 +163,30 @@ func calcPoSDifficultyV2(
 	parent *types.Header,
 	timeTarget *timeTargetV2,
 ) *big.Int {
-	// Find out our target anchor
+	
 	target := timeTarget.target
-	if target < timeTarget.minTime {
-		target = timeTarget.minTime
-	}
-
+	// if the target is the new block time we use the parent difficulty
 	if newBlockTime == target {
 		log.Trace("No difficulty change", "parent", parent.Difficulty)
 		return parent.Difficulty
 	}
-
-	timeDiff := int(target) - int(newBlockTime)
-	if timeDiff < maxTimeDifferenceDrop {
-		timeDiff = maxTimeDifferenceDrop
+	// The divergence from the target time to the new block time
+	// determines the new difficulty
+	targetDivergence := target - newBlockTime
+	// clamp to minimum -30
+	if targetDivergence < params.MaxTimeDifferenceDrop {
+		targetDivergence = params.MaxTimeDifferenceDrop
 	}
-
+	// clamp to maximum 60
+	if targetDivergence > params.TargetBlockGap {
+		targetDivergence = params.TargetPeriodGap
+	}
 	const factorInverse = 10000 // 0.0001 is the same as 1/10000
 	const precision = 1000000   // we want 2 decimal places precision lower
-	var scaledPreMultiplier = precision
+	var scaledPreMultiplier = precision // this levels it to 1 by
+	// dividing the result back by precision
 
-	for i := 0; i < timeDiff; i++ {
+	for i := 0; i < int(targetDivergence); i++ {
 		// the function of 1.0001 ^ timeDiff means the same as
 		// repeatedly add 1/10000th to the previous result value as many
 		// times as timeDiff, starting with an initial (scaled) value
