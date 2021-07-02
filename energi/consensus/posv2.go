@@ -172,14 +172,14 @@ func calcPoSDifficultyV2(
 	}
 	// The divergence from the target time to the new block time
 	// determines the new difficulty
-	targetDivergence := target - newBlockTime
+	targetDivergence := int(target) - int(newBlockTime)
 	// clamp to minimum -30
 	if targetDivergence < params.MaxTimeDifferenceDrop {
 		targetDivergence = params.MaxTimeDifferenceDrop
 	}
 	// clamp to maximum 60
-	if targetDivergence > params.TargetBlockGap {
-		targetDivergence = params.TargetPeriodGap
+	if targetDivergence > int(params.TargetBlockGap) {
+		targetDivergence = int(params.TargetBlockGap)
 	}
 	const factorInverse = 10000 // 0.0001 is the same as 1/10000
 	const precision = 1000000   // we want 2 decimal places precision lower

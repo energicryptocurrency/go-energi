@@ -21,7 +21,7 @@ import (
 	"math/big"
 	"os"
 	"testing"
-	
+
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core"
@@ -33,7 +33,7 @@ import (
 	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
-	
+
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -61,16 +61,16 @@ func TestPoSChainV2(t *testing.T) {
 	)
 	// this enables code location printing
 	log.PrintOrigins(true)
-	
+
 	results := make(chan *eth_consensus.SealResult, 1)
 	stop := make(chan struct{})
-	
+
 	addresses, signers, alloc, migrationSigner := generateAddresses(60)
-	
+
 	testdb := ethdb.NewMemDatabase()
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	var header *types.Header
-	
+
 	engine.testing = true
 	engine.SetMinerCB(
 		func() []common.Address {
@@ -79,7 +79,7 @@ func TestPoSChainV2(t *testing.T) {
 					energi_params.Energi_MigrationContract,
 				}
 			}
-			
+
 			return addresses
 		},
 		func(addr common.Address, hash []byte) ([]byte, error) {
@@ -92,12 +92,12 @@ func TestPoSChainV2(t *testing.T) {
 		func() int { return 1 },
 		func() bool { return true },
 	)
-	
+
 	chainConfig := *params.EnergiTestnetChainConfig
 	chainConfig.Energi = &params.EnergiConfig{
 		MigrationSigner: migrationSigner,
 	}
-	
+
 	var (
 		gspec = &core.Genesis{
 			Config:     &chainConfig,
@@ -109,37 +109,37 @@ func TestPoSChainV2(t *testing.T) {
 			Xfers:      core.DeployEnergiGovernance(&chainConfig),
 		}
 		genesis = gspec.MustCommit(testdb)
-		
+
 		now = engine.now()
 	)
-	
+
 	chain, err := core.NewBlockChain(testdb, nil, &chainConfig, engine, vm.Config{}, nil)
 	if !assert.Empty(t, err) {
 		t.FailNow()
 	}
 	defer chain.Stop()
-	
+
 	// --
 	_, err = chain.InsertChain([]*types.Block{genesis})
 	if !assert.Empty(t, err) {
 		t.FailNow()
 	}
-	
+
 	parent := chain.GetHeaderByHash(genesis.Hash())
 	if !assert.NotEmpty(t, parent) {
 		t.FailNow()
 	}
-	
+
 	iterCount := 150
-	
+
 	engine.diffFn = func(ChainReader, uint64, *types.Header,
 		*timeTarget) *big.Int {
 		return common.Big1
 	}
-	
+
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
-		
+
 		// ---
 		header = &types.Header{
 			ParentHash: parent.Hash(),
@@ -192,7 +192,7 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.Empty(t, err) {
 			t.FailNow()
 		}
-		
+
 		if i == 1 {
 			if !assert.Equal(t, 1, len(finalizedReceipts)) {
 				t.FailNow()
@@ -202,14 +202,14 @@ func TestPoSChainV2(t *testing.T) {
 				t.FailNow()
 			}
 		}
-		
+
 		// ---
 		log.Debug("sealing migration block")
 		err = engine.Seal(chain, block, results, stop)
 		if !assert.Empty(t, err) {
 			t.FailNow()
 		}
-		
+
 		log.Debug("waiting for results", "number", block.Number())
 		seal_res := <-results
 		log.Debug("received results")
@@ -238,30 +238,30 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.Empty(t, err) {
 			t.FailNow()
 		}
-		
+
 		// Test consensus tx check during block processing
 		// ---
 		if i == 2 {
 			tmptxs := block.Transactions()
 			tmpheader := *header
-			
+
 			if !assert.Equal(t, len(tmptxs), 1) {
 				t.FailNow()
 			}
-			
+
 			_, _, err = engine.Finalize(
 				chain, &tmpheader, blstate.Copy(), tmptxs, nil, finalizedReceipts)
 			if !assert.Empty(t, err) {
 				t.FailNow()
 			}
-			
+
 			_, _, err = engine.Finalize(
 				chain, &tmpheader, blstate.Copy(), append(tmptxs, tmptxs[len(tmptxs)-1]), nil, finalizedReceipts)
 			if !assert.Equal(t, eth_consensus.ErrInvalidConsensusTx,
 				err) {
 				t.FailNow()
 			}
-			
+
 			_, _, err = engine.Finalize(
 				chain, &tmpheader, blstate.Copy(),
 				append(tmptxs[:len(tmptxs)-1], tmptxs[len(tmptxs)-1].WithConsensusSender(common.Address{})),
@@ -271,7 +271,7 @@ func TestPoSChainV2(t *testing.T) {
 				t.FailNow()
 			}
 		}
-		
+
 		// Time tests
 		// ---
 		tt := engine.calcTimeTargetV2(chain, parent)
@@ -281,7 +281,7 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.True(t, tt.maxTime <= engine.now()+30) {
 			t.FailNow()
 		}
-		
+
 		if i < 60 {
 			// parent header and current header must be minTime apart(30s)
 			if !assert.Equal(t, header.Time,
@@ -297,42 +297,43 @@ func TestPoSChainV2(t *testing.T) {
 				t.FailNow()
 			}
 		} else if i < 61 {
-			if !assert.Equal(t, header.Time,
-				genesis.Time()+3570) {
+			if !assert.Equal(t, header.Time, genesis.Time()+1800) {
 				t.FailNow()
 			}
-			if !assert.Equal(t, header.Time,
-				parent.Time+1800) {
+			if !assert.Equal(t, header.Time, parent.Time+30) {
 				t.FailNow()
 			}
-			if !assert.Equal(t, tt.minTime, header.Time-1770) {
-				t.
-					FailNow()
+			if !assert.Equal(t, tt.minTime, header.Time) {
+				t.FailNow()
 			}
 			if !assert.Equal(t, tt.target,
 				parent.Time+60) {
 				t.FailNow()
 			}
 		} else if i < 62 {
+			log.Debug("time test", "header.Time", header.Time,
+				"genesis.Time()", genesis.Time(),
+				"difference", header.Time-genesis.Time(),
+			)
 			if !assert.Equal(t, header.Time,
-				genesis.Time()+3600) {
+				genesis.Time()+1830) {
 				t.FailNow()
 			}
 		}
-		
+
 		if !assert.True(t, parent.Time < tt.minTime, "Header %v",
 			i) {
 			t.FailNow()
 		}
-		
+
 		//		assert.Empty(t, engine.enforceTime(header, tt))
 		//		assert.Empty(t, engine.checkTime(header, tt))
-		
+
 		_, err = chain.WriteBlockWithState(block, finalizedReceipts, blstate)
 		if !assert.Empty(t, err) {
 			t.FailNow()
 		}
-		
+
 		parent = header
 	}
 }
@@ -358,8 +359,7 @@ func TestPoSDiffV2(t *testing.T) {
 	)
 	// this enables code location printing
 	log.PrintOrigins(true)
-	
-	
+
 	type TC struct {
 		parent int64
 		time   uint64
@@ -367,7 +367,7 @@ func TestPoSDiffV2(t *testing.T) {
 		target uint64
 		result uint64
 	}
-	
+
 	tests := []TC{
 		{
 			parent: 100,
@@ -433,7 +433,7 @@ func TestPoSDiffV2(t *testing.T) {
 			result: 1738,
 		},
 	}
-	
+
 	log.Debug("looping over tests")
 	for i, tc := range tests {
 		parent := &types.Header{
