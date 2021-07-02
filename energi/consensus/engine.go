@@ -572,9 +572,8 @@ func (e *Energi) posPrepareV2(
 		min:          blockTarget.minTime,
 		max:          blockTarget.maxTime,
 		blockTarget:  blockTarget.target,
-		periodTarget: blockTarget.target,
 	}
-	err = e.enforceTime(header, blockTargetV1)
+	err = e.enforceMinTime(header, blockTargetV1)
 	
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
@@ -598,7 +597,7 @@ func (e *Energi) PoSPrepare(
 	
 	timeTarget = e.calcTimeTarget(chain, parent)
 	
-	err = e.enforceTime(header, timeTarget)
+	err = e.enforceMinTime(header, timeTarget)
 	
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)

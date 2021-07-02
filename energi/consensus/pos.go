@@ -53,7 +53,7 @@ var (
 )
 
 type timeTarget struct {
-	min, max, blockTarget, periodTarget uint64
+	min, max, blockTarget uint64
 }
 
 /**
@@ -77,7 +77,7 @@ func (e *Energi) calcTimeTarget(
 	// POS-11: Block time restrictions
 	ret.min = parent.Time + params.MinBlockGap
 	ret.blockTarget = parent.Time + params.TargetBlockGap
-	ret.periodTarget = ret.blockTarget
+	// ret.periodTarget = ret.blockTarget
 
 	// POS-12: Block interval enforcement
 	// ---
@@ -96,24 +96,24 @@ func (e *Energi) calcTimeTarget(
 			}
 		}
 
-		ret.periodTarget = past.Time + params.TargetPeriodGap
-		periodMinTime := ret.periodTarget - params.MinBlockGap
-
-		if periodMinTime > ret.min {
-			ret.min = periodMinTime
-		}
+		// ret.periodTarget = past.Time + params.TargetPeriodGap
+		// periodMinTime := ret.periodTarget - params.MinBlockGap
+		//
+		// if periodMinTime > ret.min {
+		// 	ret.min = periodMinTime
+		// }
 	}
 
 	log.Trace(
 		"PoS time", "block", blockNumber,
 		"min", ret.min, "max", ret.max,
 		"blockTarget", ret.blockTarget,
-		"periodTarget", ret.periodTarget,
+		// "periodTarget", ret.periodTarget,
 	)
 	return
 }
 
-func (e *Energi) enforceTime(
+func (e *Energi) enforceMinTime(
 	header *types.Header, timeTarget *timeTarget,
 ) error {
 
@@ -246,7 +246,7 @@ func calcPoSDifficultyV1(
 	tt *timeTarget,
 ) (D *big.Int) {
 	// Find the target anchor
-	target := (tt.blockTarget + tt.periodTarget) / 2
+	target := tt.blockTarget
 	if target < tt.min {
 		target = tt.min
 	}
@@ -538,11 +538,6 @@ func (e *Energi) mine(
 			// clamp blockTime to block target
 			if blockTime < timeTarget.blockTarget {
 				blockTime = timeTarget.blockTarget
-			}
-
-			// further, clamp to period target
-			if blockTime < timeTarget.periodTarget {
-				blockTime = timeTarget.periodTarget
 			}
 
 			// Decrease difficulty, if it got bumped

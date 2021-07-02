@@ -273,7 +273,7 @@ func TestPoSChain(t *testing.T) {
 
 		assert.True(t, parent.Time < tt.min, "Header %v", i)
 
-		assert.Empty(t, engine.enforceTime(header, tt))
+		assert.Empty(t, engine.enforceMinTime(header, tt))
 		assert.Empty(t, engine.checkTime(header, tt))
 
 		_, err = chain.WriteBlockWithState(block, receipts, blstate)
@@ -378,7 +378,6 @@ func TestPoSDiffV1(t *testing.T) {
 		tt := &timeTarget{
 			min:      tc.min,
 			blockTarget:  tc.btarget,
-			periodTarget: tc.ptarget,
 		}
 
 		res := calcPoSDifficultyV1(nil, tc.time, parent, tt)
