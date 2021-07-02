@@ -159,22 +159,26 @@ func TestUPNP_DDWRT(t *testing.T) {
 	dev.serve()
 	defer dev.close()
 
+	var service *upnp
 	// Attempt to discover the fake device.
-	discovered := discoverUPnP()
+	discovered := getAllUPnP()
 	if discovered == nil {
 		t.Fatalf("not discovered")
 	}
-	upnp, _ := discovered.(*upnp)
-	if upnp.service != "IGDv1-IP1" {
-		if upnp.service != "" {
-			t.Skipf("Found another upnp service: %q, %q", upnp.service, upnp.dev.URLBaseStr)
-		}
 
-		t.Errorf("upnp.service mismatch: got %q, want %q", upnp.service, "IGDv1-IP1")
+	for _, u := range discovered {
+		if u.service == "IGDv1-IP1" {
+			service = u
+		}
+	}
+
+	if service == nil {
+		t.Errorf("upnp.service not found suiitable service: want %q", "IGDv1-IP1")
+		return
 	}
 	wantURL := "http://" + dev.listener.Addr().String() + "/InternetGatewayDevice.xml"
-	if upnp.dev.URLBaseStr != wantURL {
-		t.Errorf("upnp.dev.URLBaseStr mismatch: got %q, want %q", upnp.dev.URLBaseStr, wantURL)
+	if service.dev.URLBaseStr != wantURL {
+		t.Errorf("upnp.dev.URLBaseStr mismatch: got %q, want %q", service.dev.URLBaseStr, wantURL)
 	}
 }
 
