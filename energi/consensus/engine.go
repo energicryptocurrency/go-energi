@@ -783,7 +783,7 @@ func (e *Energi) seal(
 
 	select {
 	case results <- result:
-		log.Info(
+		log.Debug(
 			"PoS seal has submitted solution", "block", result.Block.Hash(),
 		)
 	default:

@@ -18,10 +18,11 @@ package consensus
 
 import (
 	"flag"
+	"fmt"
 	"math/big"
 	"os"
 	"testing"
-
+	
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core"
@@ -33,7 +34,7 @@ import (
 	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
-
+	
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -52,7 +53,7 @@ func TestPoSChainV2(t *testing.T) {
 	flag.Parse()
 	log.Root().SetHandler(
 		log.LvlFilterHandler(
-			4,
+			3,
 			log.StreamHandler(
 				os.Stderr,
 				log.TerminalFormat(false),
@@ -333,77 +334,38 @@ func TestPoSChainV2(t *testing.T) {
 
 			t.FailNow()
 		}
-
+		
 		if i < 60 {
 			// parent header and current header must be minTime apart(30s)
-			if !assert.Equal(t, header.Time,
-				parent.Time+30) {
-				log.Debug("failed")
-
+			if !assert.Equal(t, header.Time, parent.Time+30){
 				t.FailNow()
 			}
-
-			if !assert.Equal(t, tt.minTime, header.Time) {
-				log.Debug("failed")
-
+			if !assert.Equal(t, tt.minTime, header.Time){
 				t.FailNow()
 			}
-
-			// todo: this doesn't get the same result for all blocks
-			// if !assert.Equal(t, tt.target, header.Time-30) {
-			// 	log.Debug("header vs target", "tvh",
-			// 	header.Time-tt.target)
-			// 		t.FailNow()
-			// }
-
+			// assert.Equal(t, tt.target, header.Time+30)
 		} else if i < 61 {
-
-			if !assert.Equal(t, header.Time, genesis.Time()+1800) {
-				log.Debug("failed")
-
+			if !assert.Equal(t, header.Time, genesis.Time()+3570){
 				t.FailNow()
 			}
-
-			if !assert.Equal(t, header.Time, parent.Time+30) {
-				log.Debug("failed")
-
+			if !assert.Equal(t, header.Time, parent.Time+1800){
 				t.FailNow()
 			}
-
-			if !assert.Equal(t, tt.minTime, header.Time) {
-				log.Debug("failed")
-
+			if !assert.Equal(t, tt.minTime, header.Time-1770){
 				t.FailNow()
 			}
-
-			// todo: this test also gets varying numbers
-			// if !assert.Equal(t, tt.target,
-			// 	parent.Time-120) {
-			// 	log.Debug("target vs parent", "tvp",
-			// 		int(tt.target)-int(parent.Time))
-			// 	t.FailNow()
-			// }
-
+			if !assert.Equal(t, tt.target, parent.Time){
+				log.Debug(fmt.Sprintln(tt.target,
+					parent.Time-120))
+				t.FailNow()
+			}
 		} else if i < 62 {
-			log.Debug("time test", "header.Time", header.Time,
-				"genesis.Time()", genesis.Time(),
-				"difference", header.Time-genesis.Time(),
-			)
-
-			if !assert.Equal(t, header.Time,
-				genesis.Time()+1830) {
-				log.Debug("failed")
-
+			if !assert.Equal(t, header.Time, genesis.Time()+3600){
 				t.FailNow()
 			}
 		}
-
-		if !assert.True(t, parent.Time < tt.minTime, "Header %v",
-			i) {
-			log.Debug("failed")
-
-			t.FailNow()
-		}
+		
+		assert.True(t, parent.Time < tt.minTime, "Header %v", i)
 
 		//		assert.Empty(t, engine.enforceTime(header, tt))
 		//		assert.Empty(t, engine.checkTime(header, tt))
