@@ -584,10 +584,10 @@ out:
 			}
 
 			if candidate.weight < 1 {
-				log.Trace(
-					"Skipping candidate due less than 1 weight",
-					"candidate", candidate,
-				)
+				// log.Trace(
+				// 	"Skipping candidate due less than 1 weight",
+				// 	"candidate", candidate,
+				// )
 				continue
 			}
 
