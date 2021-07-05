@@ -100,9 +100,9 @@ func (t *timeTargetV2) getPeriodTarget() interface{} {
  * ~~The minimum block time is 30 seconds~~ - This should not be enforced
 here as an early or late target is for difficulty adjustment not the block
 timestamp
- */
+*/
 func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *timeTargetV2 {
-	
+
 	ret := &timeTargetV2{}
 	parentBlockTime := parent.Time // Defines the original parent block time.
 	parentNumber := parent.Number.Uint64()
@@ -122,8 +122,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 
 	// NOTE: we have to do this way as parent may be not part of canonical
 	//       chain. As no mutex is held, we cannot do checks for canonical.
-	for i := params.AveragingWindow-1; i > 0 && parent.Number.Uint64(
-		)>3; i-- {
+	for i := params.AveragingWindow - 1; i > 0 && parent.Number.Uint64() > 3; i-- {
 		past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
 		if past == nil {
 			// this normally can't happen because there is more
@@ -141,7 +140,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 		// Max block gap should not exceed value defined in TargetBlockGap.
 		emaLast = params.TargetBlockGap
 	}
-	
+
 	ret.target = parentBlockTime + emaLast
 
 	log.Trace("PoS time", "block", parentNumber+1,
@@ -168,7 +167,7 @@ func calcPoSDifficultyV2(
 	parent *types.Header,
 	timeTarget *timeTargetV2,
 ) *big.Int {
-	
+
 	target := timeTarget.target
 	// if the target is the new block time we use the parent difficulty
 	if newBlockTime == target {
@@ -177,7 +176,7 @@ func calcPoSDifficultyV2(
 	}
 	// The divergence from the target time to the new block time
 	// determines the new difficulty
-	targetDivergence := int(target) - int(newBlockTime)
+	targetDivergence := int(newBlockTime) - int(target)
 	// clamp to minimum -30
 	if targetDivergence < params.MaxTimeDifferenceDrop {
 		targetDivergence = params.MaxTimeDifferenceDrop
@@ -186,18 +185,27 @@ func calcPoSDifficultyV2(
 	if targetDivergence > int(params.TargetBlockGap) {
 		targetDivergence = int(params.TargetBlockGap)
 	}
-	const factorInverse = 10000 // 0.0001 is the same as 1/10000
-	const precision = 1000000   // we want 2 decimal places precision lower
-	var scaledPreMultiplier = precision // this levels it to 1 by
+	log.Debug(">>>","target", targetDivergence)
+	const factorInverse = 10000               // 0.0001 is the same as 1/10000
+	const precision = 1000000                 // we want 2 decimal places precision lower
+	var scaledPreMultiplier = precision + 100 // this levels it to 1 by
 	// dividing the result back by precision
 
-	for i := 0; i < int(targetDivergence); i++ {
+	sense := false
+	if targetDivergence < 0 {
+		targetDivergence = -targetDivergence
+		sense = true
+	}
+	for i := 0; i < targetDivergence; i++ {
 		// the function of 1.0001 ^ timeDiff means the same as
 		// repeatedly add 1/10000th to the previous result value as many
 		// times as timeDiff, starting with an initial (scaled) value
-		scaledPreMultiplier += scaledPreMultiplier / factorInverse
+		if !sense {
+			scaledPreMultiplier += scaledPreMultiplier / factorInverse
+		} else {
+			scaledPreMultiplier -= scaledPreMultiplier / factorInverse
+		}
 	}
-
 	// multiply the parent difficulty by the multiplier and divide back
 	// by the precision value, applying the difficulty change without using
 	// floating point numbers
@@ -273,8 +281,7 @@ func (e *Energi) MineV2(
 
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
-	if migrationDPOS && !e.testing && header.Number.Uint64(
-		) < params.DiffV2MigrationStakerBlockDelay {
+	if migrationDPOS && !e.testing && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay {
 		// Obey block target
 		if blockTime < blockTarget.target {
 			blockTime = blockTarget.target
