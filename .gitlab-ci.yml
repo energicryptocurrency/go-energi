@@ -150,12 +150,13 @@ test-go-report:
   image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - make test-go-report
+  artifacts:
+    when: always
+    reports:
+      junit: .test-go-report.xml
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   allow_failure: true
-  artifacts:
-    when: always
-    reports: .test-go-report.xml
 
 test-solidity:
   stage: test
