@@ -147,7 +147,7 @@ func TestPoSChain(t *testing.T) {
 	assert.Empty(t, err)
 	defer chain.Stop()
 
-	//--
+	// --
 	_, err = chain.InsertChain([]*types.Block{genesis})
 	assert.Empty(t, err)
 
@@ -163,7 +163,7 @@ func TestPoSChain(t *testing.T) {
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
 
-		//---
+		// ---
 		header = &types.Header{
 			ParentHash: parent.Hash(),
 			Coinbase:   common.Address{},
@@ -210,7 +210,7 @@ func TestPoSChain(t *testing.T) {
 			assert.Empty(t, receipts)
 		}
 
-		//---
+		// ---
 		err = engine.Seal(chain, block, results, stop)
 		assert.Empty(t, err)
 
@@ -222,13 +222,13 @@ func TestPoSChain(t *testing.T) {
 		assert.NotEmpty(t, blstate)
 		assert.NotEmpty(t, receipts)
 		header = block.Header()
-		//assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
+		// assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
 		assert.NotEqual(t, parent.Coinbase, common.Address{}, "Header %v", i)
 		err = engine.VerifySeal(chain, header)
 		assert.Empty(t, err)
 
 		// Test consensus tx check during block processing
-		//---
+		// ---
 		if i == 2 {
 			tmptxs := block.Transactions()
 			tmpheader := *header
@@ -251,7 +251,7 @@ func TestPoSChain(t *testing.T) {
 		}
 
 		// Time tests
-		//---
+		// ---
 		tt := engine.calcTimeTarget(chain, parent)
 		assert.True(t, tt.max >= now)
 		assert.True(t, tt.max <= engine.now()+30)
@@ -376,8 +376,9 @@ func TestPoSDiffV1(t *testing.T) {
 			Difficulty: big.NewInt(tc.parent),
 		}
 		tt := &timeTarget{
-			min:      tc.min,
+			min:          tc.min,
 			blockTarget:  tc.btarget,
+			periodTarget: tc.ptarget,
 		}
 
 		res := calcPoSDifficultyV1(nil, tc.time, parent, tt)
