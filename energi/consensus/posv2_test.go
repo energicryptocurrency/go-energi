@@ -52,7 +52,7 @@ func TestPoSChainV2(t *testing.T) {
 	flag.Parse()
 	log.Root().SetHandler(
 		log.LvlFilterHandler(
-			5,
+			4,
 			log.StreamHandler(
 				os.Stderr,
 				log.TerminalFormat(false),
@@ -127,14 +127,14 @@ func TestPoSChainV2(t *testing.T) {
 	_, err = chain.InsertChain([]*types.Block{genesis})
 	if !assert.Empty(t, err) {
 		log.Debug("failed")
-	
+
 		t.FailNow()
 	}
 
 	parent := chain.GetHeaderByHash(genesis.Hash())
 	if !assert.NotEmpty(t, parent) {
 		log.Debug("failed")
-	
+
 		t.FailNow()
 	}
 
@@ -160,19 +160,19 @@ func TestPoSChainV2(t *testing.T) {
 		blstate := chain.CalculateBlockState(header.ParentHash, parent.Number.Uint64())
 		if !assert.NotEmpty(t, blstate) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		log.Debug("preparing engine")
 		err = engine.Prepare(chain, header)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		if !assert.NotEmpty(t, header.Difficulty) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		txs := types.Transactions{}
@@ -198,7 +198,7 @@ func TestPoSChainV2(t *testing.T) {
 				&header.GasUsed, *chain.GetVMConfig())
 			if !assert.Empty(t, err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 			txs = append(txs, tx)
@@ -210,7 +210,7 @@ func TestPoSChainV2(t *testing.T) {
 			chain, header, blstate, txs, nil, receipts)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -233,7 +233,7 @@ func TestPoSChainV2(t *testing.T) {
 		err = engine.Seal(chain, block, results, stop)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -246,20 +246,20 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.NotEmpty(t, block) {
 			log.Debug("block was empty")
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		if !assert.NotEmpty(t, blstate) {
 			log.Debug("state was empty")
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
 		if !assert.NotEmpty(t, finalizedReceipts) {
 			log.Debug("receipts were empty")
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		header = block.Header()
@@ -268,13 +268,13 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.NotEqual(t, parent.Coinbase, common.Address{},
 			"Header %v", i) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		err = engine.VerifySeal(chain, header)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -286,7 +286,7 @@ func TestPoSChainV2(t *testing.T) {
 
 			if !assert.Equal(t, len(tmptxs), 1) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 
@@ -294,7 +294,7 @@ func TestPoSChainV2(t *testing.T) {
 				chain, &tmpheader, blstate.Copy(), tmptxs, nil, finalizedReceipts)
 			if !assert.Empty(t, err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 
@@ -303,7 +303,7 @@ func TestPoSChainV2(t *testing.T) {
 			if !assert.Equal(t, eth_consensus.ErrInvalidConsensusTx,
 				err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 
@@ -314,7 +314,7 @@ func TestPoSChainV2(t *testing.T) {
 			if !assert.Equal(t, eth_consensus.ErrInvalidConsensusTx,
 				err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 		}
@@ -325,12 +325,12 @@ func TestPoSChainV2(t *testing.T) {
 		_ = tt
 		if !assert.True(t, tt.maxTime >= now) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		if !assert.True(t, tt.maxTime <= engine.now()+30) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -339,13 +339,13 @@ func TestPoSChainV2(t *testing.T) {
 			if !assert.Equal(t, header.Time,
 				parent.Time+30) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
-			
+
 			if !assert.Equal(t, tt.minTime, header.Time) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 
@@ -355,27 +355,27 @@ func TestPoSChainV2(t *testing.T) {
 			// 	header.Time-tt.target)
 			// 		t.FailNow()
 			// }
-			
+
 		} else if i < 61 {
-			
+
 			if !assert.Equal(t, header.Time, genesis.Time()+1800) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
-			
+
 			if !assert.Equal(t, header.Time, parent.Time+30) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
-			
+
 			if !assert.Equal(t, tt.minTime, header.Time) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
-			
+
 			// todo: this test also gets varying numbers
 			// if !assert.Equal(t, tt.target,
 			// 	parent.Time-120) {
@@ -383,7 +383,7 @@ func TestPoSChainV2(t *testing.T) {
 			// 		int(tt.target)-int(parent.Time))
 			// 	t.FailNow()
 			// }
-			
+
 		} else if i < 62 {
 			log.Debug("time test", "header.Time", header.Time,
 				"genesis.Time()", genesis.Time(),
@@ -393,7 +393,7 @@ func TestPoSChainV2(t *testing.T) {
 			if !assert.Equal(t, header.Time,
 				genesis.Time()+1830) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 		}
@@ -401,7 +401,7 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.True(t, parent.Time < tt.minTime, "Header %v",
 			i) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -411,7 +411,7 @@ func TestPoSChainV2(t *testing.T) {
 		_, err = chain.WriteBlockWithState(block, finalizedReceipts, blstate)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
