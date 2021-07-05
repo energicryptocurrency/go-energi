@@ -191,16 +191,16 @@ func calcPoSDifficultyV2(
 	var scaledPreMultiplier = precision + 100 // this levels it to 1 by
 	// dividing the result back by precision
 
-	sense := false
+	negative := false
 	if targetDivergence < 0 {
 		targetDivergence = -targetDivergence
-		sense = true
+		negative = true
 	}
 	for i := 0; i < targetDivergence; i++ {
 		// the function of 1.0001 ^ timeDiff means the same as
 		// repeatedly add 1/10000th to the previous result value as many
 		// times as timeDiff, starting with an initial (scaled) value
-		if !sense {
+		if !negative {
 			scaledPreMultiplier += scaledPreMultiplier / factorInverse
 		} else {
 			scaledPreMultiplier -= scaledPreMultiplier / factorInverse
