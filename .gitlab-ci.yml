@@ -152,6 +152,8 @@ test-go-report:
     - make test-go-report
   artifacts:
     when: always
+    paths:
+      - .test-go-report.xml
     reports:
       junit: .test-go-report.xml
   rules:
