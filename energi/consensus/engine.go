@@ -964,6 +964,14 @@ func (e *Energi) SetMinerCB(
 func (e *Energi) CalcDifficulty(
 	chain ChainReader, time uint64, parent *types.Header,
 ) *big.Int {
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	var isAsgardActive bool
+	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
+	log.Debug("hard fork", "status", isAsgardActive)
+	if isAsgardActive {
+		time_target := e.calcTimeTargetV2(chain, parent)
+		return calcPoSDifficultyV2(time, parent, time_target)
+	}
 	time_target := e.calcTimeTarget(chain, parent)
 	return e.calcPoSDifficulty(chain, time, parent, time_target)
 }
