@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync/atomic"
 	"time"
-	
+
 	"energi.world/core/gen3/accounts/abi"
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
@@ -68,7 +68,7 @@ type (
 	Energi struct {
 		// Atomic alignment to 64-bit
 		nonceCap uint64
-		
+
 		// The rest
 		config *params.EnergiConfig
 		db     ethdb.Database
@@ -102,43 +102,43 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	dposAbi, err := abi.JSON(strings.NewReader(energi_abi.IDelegatedPoSABI))
 	if err != nil {
 		panic(err)
 	}
-	
+
 	blacklistAbi, err := abi.JSON(strings.NewReader(energi_abi.IBlacklistRegistryABI))
 	if err != nil {
 		panic(err)
 	}
-	
+
 	sporkAbi, err := abi.JSON(strings.NewReader(energi_abi.ISporkRegistryABI))
 	if err != nil {
 		panic(err)
 	}
-	
+
 	mngregAbi, err := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	if err != nil {
 		panic(err)
 	}
-	
+
 	treasuryAbi, err := abi.JSON(strings.NewReader(energi_abi.ITreasuryABI))
 	if err != nil {
 		panic(err)
 	}
-	
+
 	hardforkAbi, err := abi.JSON(strings.NewReader(energi_abi.
 		IHardforkRegistryABI))
 	if err != nil {
 		panic(err)
 	}
-	
+
 	txhashMap, err := lru.New(8)
 	if err != nil {
 		panic(err)
 	}
-	
+
 	return &Energi{
 		config:       config,
 		db:           db,
@@ -157,7 +157,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		now:          func() uint64 { return uint64(time.Now().Unix()) },
 		nextKSPurge:  0,
 		txhashMap:    txhashMap,
-		
+
 		accountsFn:  func() []common.Address { return nil },
 		peerCountFn: func() int { return 0 },
 		isMiningFn:  func() bool { return false },
@@ -172,11 +172,11 @@ func (e *Energi) createEVM(
 	stateDB *state.StateDB,
 ) *vm.EVM {
 	vmc := &vm.Config{}
-	
+
 	if bc, ok := chain.(*core.BlockChain); ok {
 		vmc = bc.GetVMConfig()
 	}
-	
+
 	// Only From() is used by fact
 	ctx := core.NewEVMContext(
 		msg, header, chain.(core.ChainContext), &header.Coinbase,
@@ -200,7 +200,7 @@ func (e *Energi) VerifyHeader(
 ) error {
 	var err error
 	is_migration := header.IsGen2Migration()
-	
+
 	// Ensure that the header's extra-data section is of a reasonable size
 	if uint64(len(header.Extra)) > params.MaximumExtraDataSize && !is_migration {
 		return fmt.Errorf(
@@ -208,7 +208,7 @@ func (e *Energi) VerifyHeader(
 			len(header.Extra), params.MaximumExtraDataSize,
 		)
 	}
-	
+
 	// A special Migration block #1
 	if is_migration && (header.Coinbase != energi_params.Energi_MigrationContract) {
 		log.Error(
@@ -218,9 +218,9 @@ func (e *Energi) VerifyHeader(
 		)
 		return errors.New("Invalid Migration")
 	}
-	
+
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	
+
 	if parent == nil {
 		if header.Number.Cmp(common.Big0) != 0 {
 			log.Trace(
@@ -229,16 +229,16 @@ func (e *Energi) VerifyHeader(
 			)
 			return eth_consensus.ErrUnknownAncestor
 		}
-		
+
 		return nil
 	}
-	
+
 	time_target := e.calcTimeTarget(chain, parent)
 	err = e.checkTime(header, time_target)
 	if err != nil {
 		return err
 	}
-	
+
 	modifier := e.calcPoSModifier(chain, header.Time, parent)
 	if header.MixDigest != modifier {
 		return fmt.Errorf(
@@ -246,16 +246,16 @@ func (e *Energi) VerifyHeader(
 			header.MixDigest, modifier,
 		)
 	}
-	
+
 	difficulty := e.calcPoSDifficulty(chain, header.Time, parent, time_target)
-	
+
 	if header.Difficulty.Cmp(difficulty) != 0 {
 		return fmt.Errorf(
 			"invalid difficulty: have %v, want %v",
 			header.Difficulty, difficulty,
 		)
 	}
-	
+
 	cap := uint64(0x7fffffffffffffff)
 	if header.GasLimit > cap {
 		return fmt.Errorf(
@@ -263,7 +263,7 @@ func (e *Energi) VerifyHeader(
 			header.GasLimit, cap,
 		)
 	}
-	
+
 	// Verify that the gasUsed is <= gasLimit, except for migration
 	if (header.GasUsed > header.GasLimit) && !is_migration {
 		return fmt.Errorf(
@@ -271,35 +271,35 @@ func (e *Energi) VerifyHeader(
 			header.GasUsed, header.GasLimit,
 		)
 	}
-	
+
 	// Verify that the gas limit remains within allowed bounds
 	diff := int64(parent.GasLimit) - int64(header.GasLimit)
 	if diff < 0 {
 		diff *= -1
 	}
 	limit := parent.GasLimit / params.GasLimitBoundDivisor
-	
+
 	if (uint64(diff) >= limit) && !is_migration && !parent.IsGen2Migration() {
 		return fmt.Errorf(
 			"invalid gas limit: have %d, want %d += %d",
 			header.GasLimit, parent.GasLimit, limit,
 		)
 	}
-	
+
 	if header.GasLimit < params.MinGasLimit {
 		return fmt.Errorf(
 			"invalid gas limit: have %d, minimum %d",
 			header.GasLimit, params.MinGasLimit,
 		)
 	}
-	
+
 	// Verify that the block number is parent's +1
 	if diff := new(big.Int).Sub(
 		header.Number, parent.Number,
 	); diff.Cmp(big.NewInt(1)) != 0 {
 		return eth_consensus.ErrInvalidNumber
 	}
-	
+
 	// We skip checks only where full previous maturity period state is required.
 	if seal {
 		// Verify the engine specific seal securing the block
@@ -307,24 +307,24 @@ func (e *Energi) VerifyHeader(
 		if err != nil {
 			return err
 		}
-		
+
 		err = e.verifyPoSHash(chain, header)
 		if err != nil {
 			return err
 		}
 	}
-	
+
 	if err = misc.VerifyForkHashes(chain.Config(), header, false); err != nil {
 		return err
 	}
-	
+
 	// DoS protection
 	if seal && chain.GetHeader(header.Hash(), header.Number.Uint64()) == nil {
 		if err = e.checkDoS(chain, header, parent); err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
@@ -340,7 +340,7 @@ func (e *Energi) VerifyHeaders(
 	abort := make(chan struct{})
 	results := make(chan error, len(headers))
 	ready := make(chan bool, len(headers))
-	
+
 	go func() {
 		for i, header := range headers {
 			// NOTE: unlike Ethash with DAG, there is little sense of this
@@ -350,9 +350,9 @@ func (e *Energi) VerifyHeaders(
 				return
 			case <-ready:
 			}
-			
+
 			err := e.VerifyHeader(chain, header, seals[i])
-			
+
 			select {
 			case <-abort:
 				return
@@ -360,7 +360,7 @@ func (e *Energi) VerifyHeaders(
 			}
 		}
 	}()
-	
+
 	return abort, results, ready
 }
 
@@ -382,37 +382,37 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 		log.Error("PoS state root failure", "header", header.ParentHash)
 		return eth_consensus.ErrMissingState
 	}
-	
+
 	// DBL-8: blacklist block generation
 	if core.IsBlacklisted(blockState, header.Coinbase) {
 		log.Debug("Blacklisted Coinbase", "addr", header.Coinbase)
 		return errBlacklistedCoinbase
 	}
-	
+
 	// Retrieve the signature from the header extra-data
 	if len(header.Signature) != sealLen {
 		return errMissingSig
 	}
-	
+
 	sighash := e.SignatureHash(header)
 	log.Trace("PoS verify signature hash", "sighash", sighash)
-	
+
 	r := new(big.Int).SetBytes(header.Signature[:32])
 	s := new(big.Int).SetBytes(header.Signature[32:64])
 	v := header.Signature[64]
-	
+
 	if !crypto.ValidateSignatureValues(v, r, s, true) {
 		return types.ErrInvalidSig
 	}
-	
+
 	pubKey, err := crypto.Ecrecover(sighash.Bytes(), header.Signature)
 	if err != nil {
 		return err
 	}
-	
+
 	var addr common.Address
 	copy(addr[:], crypto.Keccak256(pubKey[1:])[12:])
-	
+
 	if addr != header.Coinbase {
 		// POS-5: Delegated PoS
 		// --
@@ -420,14 +420,14 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 		if parent == nil {
 			return eth_consensus.ErrUnknownAncestor
 		}
-		
+
 		if blockState.GetCodeSize(header.Coinbase) > 0 {
 			signerData, err := e.dposAbi.Pack("signerAddress")
 			if err != nil {
 				log.Error("Fail to prepare signerAddress() call", "err", err)
 				return err
 			}
-			
+
 			msg := types.NewMessage(
 				e.systemFaucet,
 				&header.Coinbase,
@@ -438,7 +438,7 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 				signerData,
 				false,
 			)
-			
+
 			revID := blockState.Snapshot()
 			evm := e.createEVM(msg, chain, parent, blockState)
 			gp := core.GasPool(e.callGas)
@@ -448,18 +448,18 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 				log.Trace("Fail to get signerAddress()", "err", err)
 				return err
 			}
-			
+
 			signer := common.Address{}
 			err = e.dposAbi.Unpack(&signer, "signerAddress", output)
 			if err != nil {
 				log.Error("Failed to unpack signerAddress() call", "err", err)
 				return err
 			}
-			
+
 			if signer == addr {
 				return nil
 			}
-			
+
 			log.Trace("PoS seal compare", "addr", addr, "signer", signer)
 		} else {
 			log.Trace(
@@ -469,7 +469,7 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 
 		return errInvalidSig
 	}
-	
+
 	return nil
 }
 
@@ -481,13 +481,13 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		log.Error("PoS state root failure", "header", header.ParentHash)
 		return false, eth_consensus.ErrMissingState
 	}
-	
+
 	// get parent
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
 		return false, eth_consensus.ErrUnknownAncestor
 	}
-	
+
 	// create call data
 	var hardforkNameArray [32]byte
 	copy(hardforkNameArray[:], []byte(hardforkName))
@@ -496,7 +496,7 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		log.Error("Fail to check if hardfork is active", "err", err)
 		return false, err
 	}
-	
+
 	// construct the contract call message
 	msg := types.NewMessage(
 		e.systemFaucet,
@@ -508,7 +508,7 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		callData,
 		false,
 	)
-	
+
 	// create environment and apply message
 	evm := e.createEVM(msg, chain, parent, blockst)
 	gp := core.GasPool(e.callGas)
@@ -517,7 +517,7 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		log.Trace("Fail to get isActive status", "err", err)
 		return false, err
 	}
-	
+
 	// unpack the output
 	var isActive bool
 	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
@@ -525,7 +525,7 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 		log.Error("Failed to get isActive status", "err", err)
 		return false, err
 	}
-	
+
 	return isActive, nil
 }
 
@@ -533,25 +533,24 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 // rules of a particular engine. The changes are executed inline.
 func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	
+
 	if parent == nil {
 		log.Error("Fail to find parent", "header", header)
 		return eth_consensus.ErrUnknownAncestor
 	}
-	
+
 	// check if Asgard hardfork is activated use new difficulty algorithm
 	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	if err != nil {
 		log.Error("Asgard hf check failed: " + err.Error())
-		return err
 	}
-	
+
 	// if asgard hf is active
 	if isAsgardActive {
 		return e.posPrepareV2(chain, header, parent, &timeTargetV2{})
 	}
-	
+
 	_, err = e.PoSPrepare(chain, header, parent)
 	return err
 }
@@ -566,7 +565,7 @@ func (e *Energi) posPrepareV2(
 	// Clear field to be set in mining
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
-	
+
 	blockTarget = e.calcTimeTargetV2(chain, parent)
 	blockTargetV1 := &timeTarget{
 		min:          blockTarget.minTime,
@@ -574,14 +573,14 @@ func (e *Energi) posPrepareV2(
 		blockTarget:  blockTarget.target,
 	}
 	err = e.enforceMinTime(header, blockTargetV1)
-	
+
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
-	
+
 	// Diff
 	header.Difficulty = calcPoSDifficultyV2(header.Time, parent,
 		blockTarget)
-	
+
 	return err
 }
 
@@ -594,19 +593,19 @@ func (e *Energi) PoSPrepare(
 	// Clear field to be set in mining
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
-	
+
 	timeTarget = e.calcTimeTarget(chain, parent)
-	
+
 	err = e.enforceMinTime(header, timeTarget)
-	
+
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
-	
+
 	// Diff
 	header.Difficulty = e.calcPoSDifficulty(
 		chain, header.Time, parent, timeTarget,
 	)
-	
+
 	return timeTarget, err
 }
 
@@ -621,7 +620,7 @@ func (e *Energi) Finalize(
 	uncles []*types.Header, receipts []*types.Receipt,
 ) (*types.Block, []*types.Receipt, error) {
 	ctxs := types.Transactions{}
-	
+
 	for i := (len(txs) - 1); i >= 0; i-- {
 		if !txs[i].IsConsensus() {
 			i++
@@ -634,14 +633,14 @@ func (e *Energi) Finalize(
 			break
 		}
 	}
-	
+
 	block, receipts, err := e.finalize(
 		chain, header, state, txs, receipts,
 	)
 	if err != nil {
 		return nil, nil, err
 	}
-	
+
 	ntxs := block.Transactions()[len(txs):]
 	if len(ntxs) != len(ctxs) {
 		log.Trace(
@@ -659,7 +658,7 @@ func (e *Energi) Finalize(
 			return nil, nil, eth_consensus.ErrInvalidConsensusTx
 		}
 	}
-	
+
 	return block, receipts, err
 }
 
@@ -668,7 +667,7 @@ func (e *Energi) finalize(
 	txs []*types.Transaction, receipts []*types.Receipt,
 ) (*types.Block, []*types.Receipt, error) {
 	var err error
-	
+
 	// Do not finalize too early in mining
 	if (header.Coinbase != common.Address{}) {
 		txs, receipts, err = e.govFinalize(chain, header, state, txs, receipts)
@@ -721,20 +720,19 @@ func (e *Energi) seal(
 	header := block.Header()
 	txhash := header.TxHash
 	result := eth_consensus.NewSealResult(block, nil, nil)
-	
+
 	if header.Number.Cmp(common.Big0) != 0 {
-		
+
 		var success bool
-		
+
 		log.Debug("checking hard fork status")
 		// check if Asgard hardfork is activated use new difficulty algorithm
 		var isAsgardActive bool
 		isAsgardActive, err = e.hardforkIsActive(chain, header, "Asgard")
 		if err != nil {
 			log.Error("Asgard hf check failed: " + err.Error())
-			return
 		}
-		
+
 		// choose mining function depending on hf status
 		if isAsgardActive {
 			success, err = e.MineV2(chain, header, stop)
@@ -745,7 +743,7 @@ func (e *Energi) seal(
 			log.Error("PoS miner error", "err", err)
 			success = false
 		}
-		
+
 		if !success || err != nil {
 			log.Debug("empty seal function?")
 			select {
@@ -755,7 +753,7 @@ func (e *Energi) seal(
 			log.Debug("empty seal function done")
 			return
 		}
-		
+
 		// NOTE: due to the fact that PoS mining may change Coinbase
 		//       it is required to reprocess all transaction with correct
 		//       state of the block (input parameters). This is essential
@@ -770,22 +768,22 @@ func (e *Energi) seal(
 				return
 			}
 		}
-		
+
 		header = result.Block.Header()
 	}
-	
+
 	sighash := e.SignatureHash(header)
 	log.Trace("PoS seal hash", "sighash", sighash)
-	
+
 	header.Signature, err = e.signerFn(header.Coinbase, sighash.Bytes())
 	if err != nil {
 		log.Error("PoS miner error", "err", err)
 		return
 	}
-	
+
 	result.Block = result.Block.WithSeal(header)
 	e.txhashMap.Add(header.TxHash, txhash)
-	
+
 	select {
 	case results <- result:
 		log.Info(
@@ -810,9 +808,9 @@ func (e *Energi) Seal(
 	results chan<- *eth_consensus.SealResult,
 	stop <-chan struct{},
 ) (err error) {
-	
+
 	go e.seal(chain,block,results,stop)
-	
+
 	return nil
 }
 
@@ -827,11 +825,11 @@ func (e *Energi) recreateBlock(
 	var (
 		usedGas = new(uint64)
 		gp      = new(core.GasPool).AddGas(header.GasLimit)
-		
+
 		bc *core.BlockChain
 		ok bool
 	)
-	
+
 	height := header.Number.Uint64() // -1
 	// if height < 1 {
 	// 	log.Debug("error")
@@ -846,14 +844,14 @@ func (e *Energi) recreateBlock(
 		log.Debug("nil block state")
 		return nil, eth_consensus.ErrUnknownAncestor
 	}
-	
+
 	vmc := &vm.Config{}
 	if bc, ok = chain.(*core.BlockChain); ok {
 		vmc = bc.GetVMConfig()
 	}
-	
+
 	receipts := make(types.Receipts, 0, len(txs))
-	
+
 	for i, tx := range txs {
 		blstate.Prepare(tx.Hash(), common.Hash{}, i)
 		receipt, _, err := core.ApplyTransaction(
@@ -865,27 +863,27 @@ func (e *Energi) recreateBlock(
 		}
 		receipts = append(receipts, receipt)
 	}
-	
+
 	header.GasUsed = *usedGas
 	header.Bloom = types.Bloom{}
-	
+
 	block, receipts, err := e.finalize(
 		chain, header, blstate, txs, receipts,
 	)
-	
+
 	return eth_consensus.NewSealResult(block, blstate, receipts), err
 }
 
 // SealHash returns the hash of a block prior to it being sealed.
 func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 	hasher := sha3.NewLegacyKeccak256()
-	
+
 	txhash := header.TxHash
-	
+
 	if item, ok := e.txhashMap.Get(txhash); ok {
 		txhash = item.(common.Hash)
 	}
-	
+
 	rlp.Encode(
 		hasher, []interface{}{
 			// NOTE: commented parts are part of "mining" process
@@ -914,7 +912,7 @@ func (e *Energi) SealHash(header *types.Header) (hash common.Hash) {
 // SignatureHash generates the hash that will be used by the signer
 func (e *Energi) SignatureHash(header *types.Header) (hash common.Hash) {
 	hasher := sha3.NewLegacyKeccak256()
-	
+
 	rlp.Encode(
 		hasher, []interface{}{
 			header.ParentHash,
@@ -957,7 +955,7 @@ func (e *Energi) SetMinerCB(
 	if e.signerFn != nil {
 		panic("Callbacks must be set only once!")
 	}
-	
+
 	e.accountsFn = accountsFn
 	e.signerFn = signerFn
 	e.peerCountFn = peerCountFn
@@ -1000,7 +998,7 @@ func (e *Energi) processConsensusGasLimits(
 		log.Error("Fail to prepare consensusGasLimits() call", "err", err)
 		return err
 	}
-	
+
 	// consensusGasLimits()
 	msg := types.NewMessage(
 		e.systemFaucet,
@@ -1021,7 +1019,7 @@ func (e *Energi) processConsensusGasLimits(
 		log.Error("Failed in consensusGasLimits() call", "err", err)
 		return err
 	}
-	
+
 	//
 	ret := new(
 		struct {
@@ -1034,10 +1032,10 @@ func (e *Energi) processConsensusGasLimits(
 		log.Error("Failed to unpack consensusGasLimits() call", "err", err)
 		return err
 	}
-	
+
 	e.callGas = ret.CallGas.Uint64()
 	e.xferGas = ret.XferGas.Uint64()
 	log.Trace("Consensus Gas", "call", e.callGas, "xfer", e.xferGas)
-	
+
 	return nil
 }
