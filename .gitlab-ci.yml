@@ -144,15 +144,18 @@ build-release-windows:
     - develop
     - master
 
-test-go:
+test-go-report:
   stage: test
   tags: [docker_runner]
   image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
-    - make test-go
+    - make test-go-report
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   allow_failure: true
+  artifacts:
+    when: always
+    reports: .test-go-report.xml
 
 test-solidity:
   stage: test

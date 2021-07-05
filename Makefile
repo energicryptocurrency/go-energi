@@ -48,9 +48,14 @@ check: lint test
 
 test: all test-go test-sol
 
-test-go:
+test-data-submodule:
 	git submodule update --init --recursive
+
+test-go: test-data-submodule
 	build/env.sh go run build/ci.go test
+
+test-go-report: test-data-submodule
+	build/env.sh go run build/ci.go test | go-junit-report -set-exit-code > .test-go-report.xml
 
 test-sol: lint-sol-tests lint-sol test-sol-contracts
 
