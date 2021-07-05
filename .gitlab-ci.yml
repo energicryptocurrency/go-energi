@@ -1,197 +1,191 @@
-variables:
-
+# You can override the included template(s) by including variable overrides
+# See https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#priority-of-environment-variables
 stages:
-  - base
-  - prepare
-  - lint
-  - build
-  - test
-  - deploy
-  - cleanup
-
+- base
+- prepare
+- lint
+- build
+- test
+- deploy
+- cleanup
 cache:
   paths:
-    - node_modules/
-    - build/
-
+  - node_modules/
+  - build/
 build-builder:
   stage: base
-  tags: [docker_runner]
+  tags:
+  - docker_runner
   before_script:
-    - apk add --no-cache curl unzip python3 py3-pip
-    - pip3 install --upgrade pip
-    - pip3 install awscli
-    - rm -rf /var/cache/apk/*
+  - apk add --no-cache curl unzip python3 py3-pip
+  - pip3 install --upgrade pip
+  - pip3 install awscli
+  - rm -rf /var/cache/apk/*
   script:
-    - docker login --username ${docker_user} --password ${docker_key}
-    - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
-    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
-    - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
-    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
-    - docker push ${container_registry}/energi3_builder:latest
+  - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg
+    repository_remote=${repository_remote} .
+  - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${AWS_CONTAINER_REGISTRY}/energi3_builder:${CI_COMMIT_REF_NAME}
+  - docker push ${AWS_CONTAINER_REGISTRY}/energi3_builder:${CI_COMMIT_REF_NAME}
+  - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${AWS_CONTAINER_REGISTRY}/energi3_builder:latest
+  - docker push ${AWS_CONTAINER_REGISTRY}/energi3_builder:latest
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - changes:
-      - Dockerfile.builder
-
-# make sure our repo does not have any artifacts of previous builds
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  - changes:
+    - Dockerfile.builder
 clean-repo:
   stage: prepare
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   script:
-    - git checkout -- .
-    - git clean -fdx -e node_modules .
+  - git checkout -- .
+  - git clean -fdx -e node_modules .
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
-# TODO: this actually tries to execute the merge, may not be the best way to check this
-# it will also fail for master branch merges
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 branch-check:
   stage: prepare
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   before_script:
-    - pwd
+  - pwd
   script:
-    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
+  - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error]
+    branch is not up to date with develop"; exit 1; fi
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 npm-install:
   stage: prepare
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   script:
-    - npm install
+  - npm install
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 lint-go:
   stage: lint
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   script:
-    - make lint-go
+  - make lint-go
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   allow_failure: true
-
 lint-sol:
   stage: lint
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   script:
-    - make lint-sol
+  - make lint-sol
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 lint-sol-tests:
   stage: lint
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   script:
-    - make lint-sol-tests
+  - make lint-sol-tests
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 build-linux:
   stage: build
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   before_script:
-    - pwd
+  - pwd
   script:
-    - make all
-    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo "[Error] compile job left modified files in working directory"; exit 1; fi
+  - make all
+  - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean";
+    else echo "[Error] compile job left modified files in working directory"; exit
+    1; fi
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 build-docker:
   stage: build
-  tags: [docker_runner]
+  tags:
+  - docker_runner
   before_script:
-    - apk add --no-cache curl unzip python3 py3-pip
-    - pip3 install --upgrade pip
-    - pip3 install awscli
-    - rm -rf /var/cache/apk/*
+  - apk add --no-cache curl unzip python3 py3-pip
+  - pip3 install --upgrade pip
+  - pip3 install awscli
+  - rm -rf /var/cache/apk/*
   script:
-    - docker login --username ${docker_user} --password ${docker_key}
-    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
-    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
+  - docker build -t ${AWS_CONTAINER_REGISTRY}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile
+    .
+  - docker push ${AWS_CONTAINER_REGISTRY}/energi3:${CI_COMMIT_REF_NAME}
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 build-release-linux:
   stage: build
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   before_script:
-    - pwd
+  - pwd
   script:
-    - make -f Makefile.release release-linux
+  - make -f Makefile.release release-linux
   only:
-    - develop
-    - master
-
+  - develop
+  - master
 build-release-windows:
   stage: build
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   before_script:
-    - pwd
+  - pwd
   script:
-    - make -f Makefile.release release-windows
+  - make -f Makefile.release release-windows
   only:
-    - develop
-    - master
-
+  - develop
+  - master
 test-go:
   stage: test
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   script:
-    - make test-go
+  - make test-go
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   allow_failure: true
-
 test-solidity:
   stage: test
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   script:
-    - make test-sol-contracts
+  - make test-sol-contracts
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   allow_failure: true
-
-# TODO: macos is a native compile, this can't run in docker needs a macos runner
-#release-build-macos:
-#  stage: build
-#  tags: [docker_runner]
-#  script:
-#    - make -f Makefile.release release-macos
-#  rules:
-#    - only:
-#      - develop
-#      - master
-
 deploy-release:
   stage: deploy
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  tags:
+  - docker_runner
+  image: "${AWS_CONTAINER_REGISTRY}/energi3_builder"
   before_script:
-    - pwd
+  - pwd
   script:
-    - make -f Makefile.release release-upload
+  - make -f Makefile.release release-upload
   only:
-    - tags
-
+  - tags
 cleanup_docker:
   stage: cleanup
-  tags: [docker_runner]
+  tags:
+  - docker_runner
   script:
-    - docker system prune --force
+  - docker system prune --force
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+sast:
+  stage: test
+include:
+- template: Security/SAST.gitlab-ci.yml
