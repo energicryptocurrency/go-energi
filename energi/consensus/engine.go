@@ -525,9 +525,6 @@ func (e *Energi) hardforkIsActive(
 	// unpack the output
 	var isActive bool
 	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
-	if err != nil {
-		log.Error("Failed to get isActive status", "err", err)
-	}
 
 	return isActive, err
 }
@@ -546,7 +543,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	if err != nil {
-		log.Error("Asgard hf check failed: " + err.Error())
+		log.Trace("Asgard hf check failed: " + err.Error())
 	}
 
 	// if asgard hf is active
