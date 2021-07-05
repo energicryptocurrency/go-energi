@@ -11,6 +11,13 @@ RUN apt -y full-upgrade
 RUN apt -y autoremove
 RUN apt -y clean
 
+# install docker
+RUN apt -y update
+RUN apt -y install curl gnupg lsb-release software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt -y install docker-ce docker-ce-cli containerd.io
+
 # install development tools
 RUN apt -y install git vim htop apg jq direnv build-essential wget awscli sudo
 
