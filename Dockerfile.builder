@@ -38,7 +38,7 @@ ENV PATH="${PATH}:/usr/local/go/bin"
 ENV GOROOT="/usr/local/go"
 
 # install go-junit-report
-RUN go get -u github.com/RyanLucchese/go-junit-report
+RUN go get -v -u github.com/RyanLucchese/go-junit-report
 ENV PATH="${PATH}:/root/go/bin"
 
 # nodejs variables
