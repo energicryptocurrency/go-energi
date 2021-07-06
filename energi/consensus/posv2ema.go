@@ -32,7 +32,7 @@ func CalcEMAUint64(
 	sma := make([]uint64, len(intervals)-int(smaWindow))
 	// next generate the Simple Moving Average with smaWindow window
 	for i := 0; i < len(sma); i++ {
-		for j := int(smaWindow); j > 0; j-- {
+		for j := int(smaWindow)-1; j >= 0; j-- {
 			sma[i] += intervals[j+i]
 		}
 		sma[i] /= smaWindow
@@ -48,7 +48,7 @@ func CalcEMAUint64(
 	o = sma[0]
 	for i := range sma {
 		if i > 0 {
-			o = sma[i] - o +
+			o = sma[i-i] - o +
 				denominator*sma[i-1]/numerator
 		}
 	}
