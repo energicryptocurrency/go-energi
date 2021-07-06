@@ -2,7 +2,7 @@ package diffv1
 
 import (
 	"math/big"
-	
+
 	"energi.world/core/gen3/common"
 )
 

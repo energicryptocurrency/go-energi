@@ -578,8 +578,8 @@ func (e *Energi) posPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV2(header.Time, parent,
-		blockTarget)
+	header.Difficulty =
+		calcPoSDifficultyV2(header.Time, parent, blockTarget)
 
 	return err
 }
@@ -828,10 +828,6 @@ func (e *Energi) recreateBlock(
 	)
 
 	height := header.Number.Uint64() - 1
-	// if height < 1 {
-	// 	log.Debug("error")
-	// 	return nil, eth_consensus.ErrUnknownAncestor
-	// }
 	log.Debug("calculating block state", "height", height)
 	blstate := chain.CalculateBlockState(
 		header.ParentHash, height,

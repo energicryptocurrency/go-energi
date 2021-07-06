@@ -38,10 +38,17 @@ func CalcEMAUint64(
 		sma[i] /= smaWindow
 	}
 	// then compute the EMA with the given smoothing ratio
+	//
+	// EMA = (closing price − previous day’s EMA) × smoothing constant as a
+	// decimal * previous day’s EMA
+	//
+	// The last clause of the formula is equivalent to multiplying by a
+	// fraction, such as 2/(5+1) as used in this difficulty adjustment
+	// algorithm
 	o = sma[0]
 	for i := range sma {
 		if i > 0 {
-			o = numerator*sma[i]/denominator +
+			o = sma[i] - o +
 				denominator*sma[i-1]/numerator
 		}
 	}
