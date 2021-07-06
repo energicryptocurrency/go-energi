@@ -55,7 +55,7 @@ test-go: test-data-submodule
 	build/env.sh go run build/ci.go test
 
 test-go-report: test-data-submodule
-	build/env.sh go run build/ci.go test 2>&1 | go-junit-report -set-exit-code > .test-go-report.xml
+	build/env.sh go run build/ci.go test 2>&1 | go-junit-report -set-exit-code -output .test-go-report.xml
 
 test-sol: lint-sol-tests lint-sol test-sol-contracts
 
