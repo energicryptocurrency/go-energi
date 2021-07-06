@@ -5,26 +5,25 @@
 
 ### Constant values as used in the algorithm
 
-- K = 10
+- `K` = 60
 
-- M = 1.005 -
+- `W` = 5
 
-- Target Block Gap = 60 seconds
+- `M` = 1.0001
 
-- Maximum difficulty drop time difference =
-  -30 (or 30 seconds after the block target)
+- `Target Block Gap` = 60 seconds
 
-- Maximum difficulty rise multiplier per block => 1.005^60 = 1.348850153 (
-  increases to 130%)
+- `Maximum difficulty drop time difference` = -30 (or 30 seconds after the block target)
 
-- Minimum difficulty drop multiplier per block => 1.005^-30 = 0.86102973 (drops to
-  80%)
+- `Maximum difficulty rise multiplier` per block = 1.0001^60 = 1.006017734 (increases to 100.6%)
+
+- `Minimum difficulty drop multiplier` per block = 1.0001^-30 = 0.997004645 (drops to 99.7%)
 
 ## How Difficulty of the next block is obtained
 
-1. An [Exponential Moving Average](doc/ema.md) of `K` blocks time differences is
-   computed and used to generate the `Forecasted Time difference` as shown on
-   the chart above.
+1. An [Exponential Moving Average](doc/ema.md) of `K` blocks time samples and SMA 
+   window of `W` is computed and used to generate the `Forecasted Time difference` as 
+   shown on the chart above.
 
 2. Target block time is set as the summation of the parent block time and
    the `Forecasted Time difference`.
@@ -38,16 +37,18 @@
 
 5. The multiplier is generated via an exponential function where the base M is a
    carefully selected constant and the exponent is the time difference between
-   the BlockTarget and NewBlockTime (i.e BlockTarget - NewBlockTime).
+   the `BlockTarget` and `NewBlockTime` (i.e `BlockTarget - NewBlockTime`).
 
 6. The exponent can be a positive or a negative number. The negative time
-   difference should never be lower than the Maximum difficulty drop time
-   difference. Therefore:
+   difference should never be lower than the `Maximum difficulty drop time difference`. 
+   
+   Therefore:
 
-> Difficulty multiplier = M ^ max( (BlockTarget - NewBlockTime), maximum difficulty drop time difference )
->
-> New Block difficulty = parent difficulty x max( (BlockTarget - NewBlockTime), maximum difficulty drop time difference)
->
+   Difficulty multiplier = M ^ <sup>max( (`BlockTarget` - `NewBlockTime`), `Maximum difficulty drop time difference` )</sup>
+
+   and
+
+   New Block difficulty = parent difficulty **x** max( (`BlockTarget` - `NewBlockTime`), `Maximum difficulty drop time difference` )
 
 ## V2 Upgrades
 
