@@ -37,6 +37,10 @@ RUN rm -rf ${golang_filename}*
 ENV PATH="${PATH}:/usr/local/go/bin"
 ENV GOROOT="/usr/local/go"
 
+# install go-junit-report
+RUN go get -u github.com/RyanLucchese/go-junit-report
+ENV PATH="${PATH}:/root/go/bin"
+
 # nodejs variables
 ARG nodejs_version="12.22.1"
 ARG nodejs_hostarch="linux-x64"
