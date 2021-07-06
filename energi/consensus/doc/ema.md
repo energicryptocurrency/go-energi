@@ -21,12 +21,12 @@ The Exponential Moving Average is calculated in two steps:
    This is performed in the code:
 
 ```go
-	o = sma[0]
-	for i := range sma {
-		if i > 0 {
-			o = sma[i] - o +
-				denominator*sma[i-1]/numerator
-		}
-	}
+o = sma[0]
+for i := range sma {
+        if i > 0 {
+                o = sma[i-i] - o +
+                sma[i-1]*numerator/denominator
+        }
+}
 
 ```

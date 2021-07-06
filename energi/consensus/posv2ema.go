@@ -49,7 +49,7 @@ func CalcEMAUint64(
 	for i := range sma {
 		if i > 0 {
 			o = sma[i-i] - o +
-				denominator*sma[i-1]/numerator
+				sma[i-1]*numerator/denominator
 		}
 	}
 	return
