@@ -93,7 +93,7 @@ build-linux:
 
 build-docker:
   stage: build
-  extends: .docker_job
+  extends: .docker-job
   script:
     - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
     - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
