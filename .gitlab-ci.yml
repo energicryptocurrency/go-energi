@@ -23,22 +23,23 @@ build-builder:
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
   script:
-    - docker login --username ${docker_user} --password ${docker_key}
     - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
-    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
-    - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
-    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
-    - docker push ${container_registry}/energi3_builder:latest
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${AWS_CONTAINER_REGISTRY}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker push ${AWS_CONTAINER_REGISTRY}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${AWS_CONTAINER_REGISTRY}/energi3_builder:latest
+    - docker push ${AWS_CONTAINER_REGISTRY}/energi3_builder:latest
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - changes:
-      - Dockerfile.builder
+      changes:
+        - Dockerfile.builder
+    - if: $CI_COMMIT_TAG
+    - if: '$CI_COMMIT_BRANCH == "develop"'
 
 # make sure our repo does not have any artifacts of previous builds
 clean-repo:
   stage: prepare
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - git checkout -- .
     - git clean -fdx -e node_modules .
@@ -50,7 +51,7 @@ clean-repo:
 branch-check:
   stage: prepare
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   before_script:
     - pwd
   script:
@@ -61,7 +62,7 @@ branch-check:
 npm-install:
   stage: prepare
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - npm install
   rules:
@@ -70,7 +71,7 @@ npm-install:
 lint-go:
   stage: lint
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - make lint-go
   rules:
@@ -80,7 +81,7 @@ lint-go:
 lint-sol:
   stage: lint
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - make lint-sol
   rules:
@@ -89,7 +90,7 @@ lint-sol:
 lint-sol-tests:
   stage: lint
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - make lint-sol-tests
   rules:
@@ -98,7 +99,7 @@ lint-sol-tests:
 build-linux:
   stage: build
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   before_script:
     - pwd
   script:
@@ -116,16 +117,15 @@ build-docker:
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
   script:
-    - docker login --username ${docker_user} --password ${docker_key}
-    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
-    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
+    - docker build -t ${AWS_CONTAINER_REGISTRY}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
+    - docker push ${AWS_CONTAINER_REGISTRY}/energi3:${CI_COMMIT_REF_NAME}
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-release-linux:
   stage: build
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   before_script:
     - pwd
   script:
@@ -137,7 +137,7 @@ build-release-linux:
 build-release-windows:
   stage: build
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   before_script:
     - pwd
   script:
@@ -149,7 +149,7 @@ build-release-windows:
 test-go:
   stage: test
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - make test-go
   rules:
@@ -159,7 +159,7 @@ test-go:
 test-solidity:
   stage: test
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   script:
     - make test-sol-contracts
   rules:
@@ -180,7 +180,7 @@ test-solidity:
 deploy-release:
   stage: deploy
   tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
+  image: ${AWS_CONTAINER_REGISTRY}/energi3_builder
   before_script:
     - pwd
   script:

@@ -11,6 +11,13 @@ RUN apt -y full-upgrade
 RUN apt -y autoremove
 RUN apt -y clean
 
+# install docker
+RUN apt -y update
+RUN apt -y install curl gnupg lsb-release software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt -y install docker-ce docker-ce-cli containerd.io
+
 # install development tools
 RUN apt -y install git vim htop apg jq direnv build-essential wget awscli sudo
 
@@ -29,6 +36,10 @@ RUN tar -C /usr/local -xzf ${golang_filename}
 RUN rm -rf ${golang_filename}*
 ENV PATH="${PATH}:/usr/local/go/bin"
 ENV GOROOT="/usr/local/go"
+
+# install go-junit-report
+RUN go get -v -u github.com/RyanLucchese/go-junit-report
+ENV PATH="${PATH}:/root/go/bin"
 
 # nodejs variables
 ARG nodejs_version="12.22.1"
