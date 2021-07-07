@@ -8,9 +8,9 @@ import (
 
 func TestCalcEMAUint64(t *testing.T) {
 	o := CalcEMAUint64(emaSamples, 2, params.SMAPeriod+1, params.SMAPeriod)
-	if o != 63 {
+	if o != 56 {
 		t.Log("EMA calculation did not produce expected result")
-		t.Log("expected 63, got", o)
+		t.Log("expected 56, got", o)
 		t.FailNow()
 	}
 }
