@@ -249,8 +249,22 @@ func (e *Energi) MineV2(
 		}
 	}
 
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		err = consensus.ErrUnknownAncestor
+		return
+	}
+
+	blockTarget := e.calcTimeTargetV2(chain, parent)
+	blockTime := blockTarget.minTime
+
+	// Special case due to expected very large gap between Genesis and Migration
+	if header.IsGen2Migration() && !e.testing {
+		blockTime = e.now()
+	}
+
 	candidates := make([]Candidates, 0, len(accounts))
-	migrationDPOS := false
+	migrationDPoS := false
 	for _, a := range accounts {
 		candidates = append(candidates, Candidates{
 			addr:   a,
@@ -259,7 +273,7 @@ func (e *Energi) MineV2(
 		// log.Trace("PoS miner candidate found", "address", a)
 
 		if a == params.Energi_MigrationContract {
-			migrationDPOS = true
+			migrationDPoS = true
 		}
 	}
 
@@ -270,18 +284,9 @@ func (e *Energi) MineV2(
 		return false, eth_consensus.ErrUnknownAncestor
 	}
 
-	blockTarget := e.calcTimeTargetV2(chain, parent)
-
-	blockTime := blockTarget.minTime
-
-	// Special case due to expected very large gap between Genesis and Migration
-	if header.IsGen2Migration() && !e.testing {
-		blockTime = e.now()
-	}
-
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
-	if migrationDPOS && !e.testing && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay {
+	if migrationDPoS && !e.testing && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay {
 		// Obey block target
 		if blockTime < blockTarget.target {
 			blockTime = blockTarget.target
