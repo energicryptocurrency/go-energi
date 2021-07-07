@@ -70,8 +70,8 @@ type (
 		nonceCap uint64
 
 		// The rest
-		config *params.EnergiConfig
-		db     ethdb.Database
+		config       *params.EnergiConfig
+		db           ethdb.Database
 		rewardAbi    abi.ABI
 		dposAbi      abi.ABI
 		blacklistAbi abi.ABI
@@ -86,11 +86,11 @@ type (
 		signerFn     SignerFn
 		accountsFn   AccountsFn
 		peerCountFn  PeerCountFn
-		isMiningFn IsMiningFn
-		diffFn     DiffFn
-		testing    bool
-		now         func() uint64
-		knownStakes KnownStakes
+		isMiningFn   IsMiningFn
+		diffFn       DiffFn
+		testing      bool
+		now          func() uint64
+		knownStakes  KnownStakes
 		nextKSPurge  uint64
 		txhashMap    *lru.Cache
 	}
@@ -474,7 +474,11 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 }
 
 // checks if hardfork is active
-func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardforkName string) (bool, error) {
+func (e *Energi) hardforkIsActive(
+	chain ChainReader,
+	header *types.Header,
+	hardforkName string,
+) (bool, error) {
 	// get state for snapshot
 	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
 	if blockst == nil {
@@ -521,12 +525,8 @@ func (e *Energi) hardforkIsActive(chain ChainReader, header *types.Header, hardf
 	// unpack the output
 	var isActive bool
 	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
-	if err != nil {
-		log.Error("Failed to get isActive status", "err", err)
-		return false, err
-	}
 
-	return isActive, nil
+	return isActive, err
 }
 
 // Prepare initializes the consensus fields of a block header according to the
@@ -543,7 +543,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	if err != nil {
-		log.Error("Asgard hf check failed: " + err.Error())
+		log.Trace("Asgard hf check failed: " + err.Error())
 	}
 
 	// if asgard hf is active
@@ -568,9 +568,9 @@ func (e *Energi) posPrepareV2(
 
 	blockTarget = e.calcTimeTargetV2(chain, parent)
 	blockTargetV1 := &timeTarget{
-		min:          blockTarget.minTime,
-		max:          blockTarget.maxTime,
-		blockTarget:  blockTarget.target,
+		min:         blockTarget.minTime,
+		max:         blockTarget.maxTime,
+		blockTarget: blockTarget.target,
 	}
 	err = e.enforceMinTime(header, blockTargetV1)
 
@@ -578,8 +578,8 @@ func (e *Energi) posPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV2(header.Time, parent,
-		blockTarget)
+	header.Difficulty =
+		calcPoSDifficultyV2(header.Time, parent, blockTarget)
 
 	return err
 }
@@ -725,13 +725,10 @@ func (e *Energi) seal(
 
 		var success bool
 
-		log.Debug("checking hard fork status")
 		// check if Asgard hardfork is activated use new difficulty algorithm
 		var isAsgardActive bool
 		isAsgardActive, err = e.hardforkIsActive(chain, header, "Asgard")
-		if err != nil {
-			log.Error("Asgard hf check failed: " + err.Error())
-		}
+		log.Debug("hard fork", "status", isAsgardActive)
 
 		// choose mining function depending on hf status
 		if isAsgardActive {
@@ -786,7 +783,7 @@ func (e *Energi) seal(
 
 	select {
 	case results <- result:
-		log.Info(
+		log.Debug(
 			"PoS seal has submitted solution", "block", result.Block.Hash(),
 		)
 	default:
@@ -809,7 +806,7 @@ func (e *Energi) Seal(
 	stop <-chan struct{},
 ) (err error) {
 
-	go e.seal(chain,block,results,stop)
+	go e.seal(chain, block, results, stop)
 
 	return nil
 }
@@ -830,11 +827,7 @@ func (e *Energi) recreateBlock(
 		ok bool
 	)
 
-	height := header.Number.Uint64() // -1
-	// if height < 1 {
-	// 	log.Debug("error")
-	// 	return nil, eth_consensus.ErrUnknownAncestor
-	// }
+	height := header.Number.Uint64() - 1
 	log.Debug("calculating block state", "height", height)
 	blstate := chain.CalculateBlockState(
 		header.ParentHash, height,
@@ -967,6 +960,14 @@ func (e *Energi) SetMinerCB(
 func (e *Energi) CalcDifficulty(
 	chain ChainReader, time uint64, parent *types.Header,
 ) *big.Int {
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	var isAsgardActive bool
+	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
+	log.Debug("hard fork", "status", isAsgardActive)
+	if isAsgardActive {
+		time_target := e.calcTimeTargetV2(chain, parent)
+		return calcPoSDifficultyV2(time, parent, time_target)
+	}
 	time_target := e.calcTimeTarget(chain, parent)
 	return e.calcPoSDifficulty(chain, time, parent, time_target)
 }

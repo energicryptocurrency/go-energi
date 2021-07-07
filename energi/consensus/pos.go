@@ -42,7 +42,7 @@ import (
 // )
 
 var (
-	minStake    = big.NewInt(1e18)// 1000000000000000000
+	minStake    = big.NewInt(1e18) // 1000000000000000000
 	diff1Target = new(big.Int).Exp(
 		big.NewInt(2), big.NewInt(256), big.NewInt(0),
 	)
@@ -53,7 +53,7 @@ var (
 )
 
 type timeTarget struct {
-	min, max, blockTarget uint64
+	min, max, blockTarget, periodTarget uint64
 }
 
 /**
@@ -77,7 +77,7 @@ func (e *Energi) calcTimeTarget(
 	// POS-11: Block time restrictions
 	ret.min = parent.Time + params.MinBlockGap
 	ret.blockTarget = parent.Time + params.TargetBlockGap
-	// ret.periodTarget = ret.blockTarget
+	ret.periodTarget = ret.blockTarget
 
 	// POS-12: Block interval enforcement
 	// ---
@@ -96,19 +96,19 @@ func (e *Energi) calcTimeTarget(
 			}
 		}
 
-		// ret.periodTarget = past.Time + params.TargetPeriodGap
-		// periodMinTime := ret.periodTarget - params.MinBlockGap
-		//
-		// if periodMinTime > ret.min {
-		// 	ret.min = periodMinTime
-		// }
+		ret.periodTarget = past.Time + params.TargetPeriodGap
+		periodMinTime := ret.periodTarget - params.MinBlockGap
+
+		if periodMinTime > ret.min {
+			ret.min = periodMinTime
+		}
 	}
 
 	log.Trace(
 		"PoS time", "block", blockNumber,
 		"min", ret.min, "max", ret.max,
 		"blockTarget", ret.blockTarget,
-		// "periodTarget", ret.periodTarget,
+		"periodTarget", ret.periodTarget,
 	)
 	return
 }
@@ -246,7 +246,7 @@ func calcPoSDifficultyV1(
 	tt *timeTarget,
 ) (D *big.Int) {
 	// Find the target anchor
-	target := tt.blockTarget
+	target := (tt.blockTarget + tt.periodTarget) / 2
 	if target < tt.min {
 		target = tt.min
 	}
@@ -538,6 +538,11 @@ func (e *Energi) mine(
 			// clamp blockTime to block target
 			if blockTime < timeTarget.blockTarget {
 				blockTime = timeTarget.blockTarget
+			}
+
+			// further, clamp to period target
+			if blockTime < timeTarget.periodTarget {
+				blockTime = timeTarget.periodTarget
 			}
 
 			// Decrease difficulty, if it got bumped

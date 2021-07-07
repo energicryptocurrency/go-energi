@@ -18,10 +18,11 @@ package consensus
 
 import (
 	"flag"
+	"fmt"
 	"math/big"
 	"os"
 	"testing"
-
+	
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core"
@@ -33,7 +34,7 @@ import (
 	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
-
+	
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -52,7 +53,7 @@ func TestPoSChainV2(t *testing.T) {
 	flag.Parse()
 	log.Root().SetHandler(
 		log.LvlFilterHandler(
-			5,
+			3,
 			log.StreamHandler(
 				os.Stderr,
 				log.TerminalFormat(false),
@@ -127,14 +128,14 @@ func TestPoSChainV2(t *testing.T) {
 	_, err = chain.InsertChain([]*types.Block{genesis})
 	if !assert.Empty(t, err) {
 		log.Debug("failed")
-	
+
 		t.FailNow()
 	}
 
 	parent := chain.GetHeaderByHash(genesis.Hash())
 	if !assert.NotEmpty(t, parent) {
 		log.Debug("failed")
-	
+
 		t.FailNow()
 	}
 
@@ -160,19 +161,19 @@ func TestPoSChainV2(t *testing.T) {
 		blstate := chain.CalculateBlockState(header.ParentHash, parent.Number.Uint64())
 		if !assert.NotEmpty(t, blstate) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		log.Debug("preparing engine")
 		err = engine.Prepare(chain, header)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		if !assert.NotEmpty(t, header.Difficulty) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		txs := types.Transactions{}
@@ -198,7 +199,7 @@ func TestPoSChainV2(t *testing.T) {
 				&header.GasUsed, *chain.GetVMConfig())
 			if !assert.Empty(t, err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 			txs = append(txs, tx)
@@ -210,7 +211,7 @@ func TestPoSChainV2(t *testing.T) {
 			chain, header, blstate, txs, nil, receipts)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -233,7 +234,7 @@ func TestPoSChainV2(t *testing.T) {
 		err = engine.Seal(chain, block, results, stop)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -246,20 +247,20 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.NotEmpty(t, block) {
 			log.Debug("block was empty")
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		if !assert.NotEmpty(t, blstate) {
 			log.Debug("state was empty")
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
 		if !assert.NotEmpty(t, finalizedReceipts) {
 			log.Debug("receipts were empty")
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		header = block.Header()
@@ -268,13 +269,13 @@ func TestPoSChainV2(t *testing.T) {
 		if !assert.NotEqual(t, parent.Coinbase, common.Address{},
 			"Header %v", i) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		err = engine.VerifySeal(chain, header)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -286,7 +287,7 @@ func TestPoSChainV2(t *testing.T) {
 
 			if !assert.Equal(t, len(tmptxs), 1) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 
@@ -294,7 +295,7 @@ func TestPoSChainV2(t *testing.T) {
 				chain, &tmpheader, blstate.Copy(), tmptxs, nil, finalizedReceipts)
 			if !assert.Empty(t, err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 
@@ -303,7 +304,7 @@ func TestPoSChainV2(t *testing.T) {
 			if !assert.Equal(t, eth_consensus.ErrInvalidConsensusTx,
 				err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 
@@ -314,7 +315,7 @@ func TestPoSChainV2(t *testing.T) {
 			if !assert.Equal(t, eth_consensus.ErrInvalidConsensusTx,
 				err) {
 				log.Debug("failed")
-			
+
 				t.FailNow()
 			}
 		}
@@ -325,85 +326,46 @@ func TestPoSChainV2(t *testing.T) {
 		_ = tt
 		if !assert.True(t, tt.maxTime >= now) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 		if !assert.True(t, tt.maxTime <= engine.now()+30) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
-
+		
 		if i < 60 {
 			// parent header and current header must be minTime apart(30s)
-			if !assert.Equal(t, header.Time,
-				parent.Time+30) {
-				log.Debug("failed")
-			
+			if !assert.Equal(t, header.Time, parent.Time+30){
 				t.FailNow()
 			}
-			
-			if !assert.Equal(t, tt.minTime, header.Time) {
-				log.Debug("failed")
-			
+			if !assert.Equal(t, tt.minTime, header.Time){
 				t.FailNow()
 			}
-
-			// todo: this doesn't get the same result for all blocks
-			// if !assert.Equal(t, tt.target, header.Time-30) {
-			// 	log.Debug("header vs target", "tvh",
-			// 	header.Time-tt.target)
-			// 		t.FailNow()
-			// }
-			
+			// assert.Equal(t, tt.target, header.Time+30)
 		} else if i < 61 {
-			
-			if !assert.Equal(t, header.Time, genesis.Time()+1800) {
-				log.Debug("failed")
-			
+			if !assert.Equal(t, header.Time, genesis.Time()+3570){
 				t.FailNow()
 			}
-			
-			if !assert.Equal(t, header.Time, parent.Time+30) {
-				log.Debug("failed")
-			
+			if !assert.Equal(t, header.Time, parent.Time+1800){
 				t.FailNow()
 			}
-			
-			if !assert.Equal(t, tt.minTime, header.Time) {
-				log.Debug("failed")
-			
+			if !assert.Equal(t, tt.minTime, header.Time-1770){
 				t.FailNow()
 			}
-			
-			// todo: this test also gets varying numbers
-			// if !assert.Equal(t, tt.target,
-			// 	parent.Time-120) {
-			// 	log.Debug("target vs parent", "tvp",
-			// 		int(tt.target)-int(parent.Time))
-			// 	t.FailNow()
-			// }
-			
+			if !assert.Equal(t, tt.target, parent.Time){
+				log.Debug(fmt.Sprintln(tt.target,
+					parent.Time-120))
+				t.FailNow()
+			}
 		} else if i < 62 {
-			log.Debug("time test", "header.Time", header.Time,
-				"genesis.Time()", genesis.Time(),
-				"difference", header.Time-genesis.Time(),
-			)
-
-			if !assert.Equal(t, header.Time,
-				genesis.Time()+1830) {
-				log.Debug("failed")
-			
+			if !assert.Equal(t, header.Time, genesis.Time()+3600){
 				t.FailNow()
 			}
 		}
-
-		if !assert.True(t, parent.Time < tt.minTime, "Header %v",
-			i) {
-			log.Debug("failed")
 		
-			t.FailNow()
-		}
+		assert.True(t, parent.Time < tt.minTime, "Header %v", i)
 
 		//		assert.Empty(t, engine.enforceTime(header, tt))
 		//		assert.Empty(t, engine.checkTime(header, tt))
@@ -411,7 +373,7 @@ func TestPoSChainV2(t *testing.T) {
 		_, err = chain.WriteBlockWithState(block, finalizedReceipts, blstate)
 		if !assert.Empty(t, err) {
 			log.Debug("failed")
-		
+
 			t.FailNow()
 		}
 
@@ -449,73 +411,96 @@ func TestPoSDiffV2(t *testing.T) {
 		result uint64
 	}
 
+	// the numbers below create an example with 10 second segments both
+	// where target is before progressing to target is after and the
+	// first and last ones are there to show the limit
 	tests := []TC{
 		{
-			parent: 100,
-			time:   61,
-			min:    31,
-			target: 61,
-			result: 100,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 140,
+			result: 9971,
 		},
 		{
-			parent: 100,
-			time:   31,
-			min:    31,
-			target: 61,
-			result: 100,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 130,
+			result: 9971,
 		},
 		{
-			parent: 100,
-			time:   31,
-			min:    31,
-			target: 51,
-			result: 100,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 120,
+			result: 9981,
 		},
 		{
-			parent: 100,
-			time:   31,
-			min:    61,
-			target: 31,
-			result: 100,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 110,
+			result: 9991,
 		},
 		{
-			parent: 100,
-			time:   31,
-			min:    31,
-			target: 31,
-			result: 100,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 100,
+			result: 10000,
 		},
 		{
-			parent: 1744,
-			time:   91,
-			min:    31,
-			target: 61,
-			result: 1744,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 90,
+			result: 10011,
 		},
 		{
-			parent: 1744,
-			time:   121,
-			min:    31,
-			target: 61,
-			result: 1744,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 80,
+			result: 10021,
 		},
 		{
-			parent: 1744,
-			time:   200,
-			min:    31,
-			target: 61,
-			result: 1744,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 70,
+			result: 10031,
 		},
 		{
-			parent: 1744,
-			time:   181,
-			min:    31,
-			target: 61,
-			result: 1744,
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 60,
+			result: 10041,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 50,
+			result: 10051,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 40,
+			result: 10061,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 30,
+			result: 10061,
 		},
 	}
 
-	log.Debug("looping over tests")
 	for i, tc := range tests {
 		parent := &types.Header{
 			Difficulty: big.NewInt(tc.parent),
