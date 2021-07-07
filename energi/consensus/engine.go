@@ -827,6 +827,10 @@ func (e *Energi) recreateBlock(
 		ok bool
 	)
 
+	if header.Number.Uint64 < 1 {
+		log.Error("Can not recreateBlock before the genesis block")
+		return nil, eth_consensus.ErrUnknownAncestor
+	}
 	height := header.Number.Uint64() - 1
 	log.Debug("calculating block state", "height", height)
 	blstate := chain.CalculateBlockState(
@@ -965,11 +969,11 @@ func (e *Energi) CalcDifficulty(
 	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
 	log.Debug("hard fork", "status", isAsgardActive)
 	if isAsgardActive {
-		time_target := e.calcTimeTargetV2(chain, parent)
-		return calcPoSDifficultyV2(time, parent, time_target)
+		timeTarget := e.calcTimeTargetV2(chain, parent)
+		return calcPoSDifficultyV2(time, parent, timeTarget)
 	}
-	time_target := e.calcTimeTarget(chain, parent)
-	return e.calcPoSDifficulty(chain, time, parent, time_target)
+	timeTarget := e.calcTimeTarget(chain, parent)
+	return e.calcPoSDifficulty(chain, time, parent, timeTarget)
 }
 
 // APIs returns the RPC APIs this consensus engine provides.
