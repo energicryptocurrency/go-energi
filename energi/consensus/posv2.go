@@ -224,28 +224,28 @@ func calcPoSDifficultyV2(
 // PoS V2 miner implementation
 //
 func (e *Energi) MineV2(
-	chain ChainReader,
-	header *types.Header,
-	stop <-chan struct{},
+	chain ChainReader, header *types.Header, stop <-chan struct{},
 ) (success bool, err error) {
+
 	type Candidates struct {
 		addr   common.Address
 		weight uint64
 	}
 
 	accounts := e.accountsFn()
+	// if no accounts are found, just pause and wait for the stop signal
+	//
+	// todo: is this what is intended? Is there a case where this value can
+	//  change but this thread is then dead? I think that very likely this
+	//  should be a repeating loop that retries every minute or something like
+	//  this in case an account is created that can be used, while the server is
+	//  running.
+	//  further thoughts: generally it seems like this function returns quite
+	//  quickly so probably this is fine
 	if len(accounts) == 0 {
 		select {
-		case <-time.After(10 * time.Second):
-			// If no mining accounts that are found in 10 seconds quit.
-			accounts = e.accountsFn()
-			if len(accounts) == 0 {
-				log.Error("No mining candidate accounts found: timeout")
-				return false, nil
-			}
 		case <-stop:
-			log.Error("No mining candidate accounts found")
-			return false, nil
+			return
 		}
 	}
 
