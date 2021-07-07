@@ -390,16 +390,15 @@ func TestPoSChainV2(t *testing.T) {
 func TestPoSDiffV2(t *testing.T) {
 	// t.Parallel()
 	// log.Root().SetHandler(log.StdoutHandler)
-	flag.Parse()
-	log.Root().SetHandler(
-		log.LvlFilterHandler(
-			5,
-			log.StreamHandler(
-				os.Stderr,
-				log.TerminalFormat(false),
-			),
-		),
-	)
+	// log.Root().SetHandler(
+	// 	log.LvlFilterHandler(
+	// 		5,
+	// 		log.StreamHandler(
+	// 			os.Stderr,
+	// 			log.TerminalFormat(false),
+	// 		),
+	// 	),
+	// )
 	// this enables code location printing
 	log.PrintOrigins(true)
 
