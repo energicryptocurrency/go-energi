@@ -827,7 +827,7 @@ func (e *Energi) recreateBlock(
 		ok bool
 	)
 
-	if header.Number.Uint64 < 1 {
+	if header.Number.Uint64() < 1 {
 		log.Error("Can not recreateBlock before the genesis block")
 		return nil, eth_consensus.ErrUnknownAncestor
 	}
