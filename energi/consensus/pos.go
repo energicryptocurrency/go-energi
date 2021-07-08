@@ -509,9 +509,6 @@ func (e *Energi) mine(
 	candidates := make([]Candidates, 0, len(accounts))
 	migrationDPoS := false
 
-	// so we only do this once
-	migrating := false
-
 	for _, a := range accounts {
 
 		if a == params.Energi_MigrationContract {
@@ -519,74 +516,83 @@ func (e *Energi) mine(
 		}
 
 		candidate := Candidates{a, 0}
-
-		if candidate.weight, err = e.lookupStakeWeight(
-			chain, blockTime, parent, candidate.addr,
-		); err != nil {
-			success = false
-			return
-		}
 		candidates = append(candidates, candidate)
-
-		// A special workaround to obey target time when migration contract is
-		// used for mining to prevent any difficulty bombs.
-		if !migrating && // do this only once, no reason for doing it again
-			migrationDPoS && !e.testing {
-
-			migrating = true
-
-			// clamp blockTime to block target
-			if blockTime < timeTarget.blockTarget {
-				blockTime = timeTarget.blockTarget
-			}
-
-			// further, clamp to period target
-			if blockTime < timeTarget.periodTarget {
-				blockTime = timeTarget.periodTarget
-			}
-
-			// Decrease difficulty, if it got bumped
-			if header.Difficulty.Uint64() > diffV1_MigrationStakerTarget {
-				blockTime += diffV1_MigrationStakerDelay
-			}
-		}
 	}
 
-	// Try smaller amounts first
-	sort.Slice(
-		candidates,
-		func(i, j int) bool {
-			return candidates[i].weight < candidates[j].weight
-		},
-	)
+	// A special workaround to obey target time when migration contract is
+	// used for mining to prevent any difficulty bombs.
+	if migrationDPoS && !e.testing {
+
+		// clamp blockTime to block target
+		if blockTime < timeTarget.blockTarget {
+			blockTime = timeTarget.blockTarget
+		}
+
+		// further, clamp to period target
+		if blockTime < timeTarget.periodTarget {
+			blockTime = timeTarget.periodTarget
+		}
+
+		// Decrease difficulty, if it got bumped
+		if header.Difficulty.Uint64() > diffV1_MigrationStakerTarget {
+			blockTime += diffV1_MigrationStakerDelay
+		}
+	}
 
 out:
 	// Try to match target
 	for ; ; blockTime++ {
+
+		if max_time := e.now() + params.MaxFutureGap; blockTime > max_time {
+			log.Trace("PoS miner is sleeping")
+			select {
+			case <-stop:
+				// NOTE: it's very important to ignore stop until all variants are tried
+				//       to prevent rogue stakers taking the initiative.
+				return false, nil
+			case <-time.After(time.Duration(blockTime-max_time) * time.Second):
+			}
+		}
+
+
+		// check account axistance
+		if e.peerCountFn() == 0 {
+			log.Trace("Skipping PoS miner due to missing peers")
+			continue
+		}
+
+		header.Time = blockTime
+		if timeTarget, err = e.PoSPrepare(
+			chain, header, parent,
+		); err != nil {
+			break out
+		}
+
+
+		target := new(big.Int).Div(diff1Target, header.Difficulty)
+		log.Trace("PoS miner time", "time", blockTime)
+
+		// It could be done once, but then there is a chance to miss blocks.
+		// Some significant algo optimizations are possible, but we start with simplicity.
+		for i := range candidates {
+			v := &candidates[i]
+			v.weight, err = e.lookupStakeWeight(
+				chain, blockTime, parent, v.addr)
+			if err != nil {
+				return false, err
+			}
+		}
+		// Try smaller amounts first
+		sort.Slice(candidates, func(i, j int) bool {
+			return candidates[i].weight < candidates[j].weight
+		})
+
 
 		// This tries each candidate for each timestamp before progressing the
 		// timestamp. If the reverse order was desired, the block time needs to
 		// be saved and reset here. Since older is better, this is probably the
 		// better sequence to work in.
 		for _, candidate := range candidates {
-			// if there is no more options to try pause and wait for next
-			if maxTime := e.now() + params.
-				MaxFutureGap; blockTime > maxTime {
-				log.Trace("PoS miner is sleeping")
-				select {
-				case <-stop:
-					// NOTE: it's very important to ignore stop until all variants
-					//  are tried to prevent rogue stakers taking the initiative.
-					break out
-				case <-time.After(time.Duration(blockTime-maxTime) * time.Second):
-					// wait until the next window opens
-				}
-			}
-
-			if e.peerCountFn() == 0 {
-				log.Trace("Skipping PoS miner due to missing peers")
-				continue
-			}
 
 			if candidate.weight < 1 {
 				// log.Trace(
@@ -596,23 +602,9 @@ out:
 				continue
 			}
 
-			header.Time = blockTime
-			if timeTarget, err = e.PoSPrepare(
-				chain, header, parent,
-			); err != nil {
-				break out
-			}
-
-			target := new(big.Int).Div(diff1Target, header.Difficulty)
-			log.Trace("PoS miner time", "time", blockTime)
-
-			// log.Trace("PoS stake candidate", "addr", candidate.addr, "weight",
-			// candidate.weight)
-
+			//log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
 			header.Coinbase = candidate.addr
-			posHash, usedWeight := e.calcPoSHash(
-				header, target, candidate.weight,
-			)
+			posHash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
 
 			nonceCap := e.GetMinerNonceCap()
 			if nonceCap != 0 && nonceCap < usedWeight {

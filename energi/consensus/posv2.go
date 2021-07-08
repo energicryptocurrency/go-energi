@@ -251,7 +251,7 @@ func (e *Energi) MineV2(
 
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
-		err = consensus.ErrUnknownAncestor
+		err = eth_consensus.ErrUnknownAncestor
 		return
 	}
 
@@ -265,23 +265,22 @@ func (e *Energi) MineV2(
 
 	candidates := make([]Candidates, 0, len(accounts))
 	migrationDPoS := false
+
 	for _, a := range accounts {
-		candidates = append(candidates, Candidates{
-			addr:   a,
-			weight: 0,
-		})
-		// log.Trace("PoS miner candidate found", "address", a)
 
 		if a == params.Energi_MigrationContract {
 			migrationDPoS = true
 		}
-	}
 
-	// ---
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+		candidate := Candidates{a, 0}
 
-	if parent == nil {
-		return false, eth_consensus.ErrUnknownAncestor
+		if candidate.weight, err = e.lookupStakeWeight(
+			chain, blockTime, parent, candidate.addr,
+		); err != nil {
+			success = false
+			return
+		}
+		candidates = append(candidates, candidate)
 	}
 
 	// A special workaround to obey target time when migration contract is used
@@ -307,8 +306,7 @@ func (e *Energi) MineV2(
 			// Ensure that a shutdown request is handled as fast as possible.
 			return false, nil
 		default:
-			if maxTime := e.now() + params.
-				MaxFutureGap; blockTime > maxTime {
+			if maxTime := e.now() + params.MaxFutureGap; blockTime > maxTime {
 				// NOTE: it's very important to ignore stop until all variants are tried
 				//       to prevent rogue stakers taking the initiative.
 				log.Trace("PoS miner is sleeping", "seconds", blockTime-maxTime)
