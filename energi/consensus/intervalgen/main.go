@@ -14,7 +14,7 @@ func main() {
 	// rand.Seed(time.Now().UnixNano())
 	// create 60 samples as per needed for the interval test
 	samples := make([]uint64, sampleNum)
-	samples[0] = uint64(30 + rand.Int63n(60))
+	samples[0] = uint64(30 + rand.Int63n(sampleNum))
 	for i := range samples {
 		if i > 0 {
 			samples[i] = samples[i-1] + uint64(30+rand.Int63n(
