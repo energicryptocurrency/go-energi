@@ -568,9 +568,9 @@ func (e *Energi) posPrepareV2(
 
 	blockTarget = e.calcTimeTargetV2(chain, parent)
 	blockTargetV1 := &timeTarget{
-		min:         blockTarget.minTime,
-		max:         blockTarget.maxTime,
-		blockTarget: blockTarget.target,
+		min:         blockTarget.min,
+		max:         blockTarget.max,
+		blockTarget: blockTarget.blockTarget,
 	}
 	err = e.enforceMinTime(header, blockTargetV1)
 

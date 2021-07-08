@@ -53,7 +53,10 @@ var (
 )
 
 type timeTarget struct {
-	min, max, blockTarget, periodTarget uint64
+	min uint64
+	max uint64
+	blockTarget uint64
+	periodTarget uint64
 }
 
 /**
@@ -519,27 +522,40 @@ func (e *Energi) mine(
 		candidates = append(candidates, candidate)
 	}
 
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	if err != nil {
+		log.Trace("Asgard hf check failed: " + err.Error())
+	}
+
 	// A special workaround to obey target time when migration contract is
 	// used for mining to prevent any difficulty bombs.
 	if migrationDPoS && !e.testing {
-
-		// clamp blockTime to block target
-		if blockTime < timeTarget.blockTarget {
+		// new version modifications
+		if isAsgardActive && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay && blockTime < timeTarget.blockTarget {
 			blockTime = timeTarget.blockTarget
 		}
 
-		// further, clamp to period target
-		if blockTime < timeTarget.periodTarget {
+		if isAsgardActive && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay && header.Difficulty.Uint64() > params.DiffV2MigrationStakerTarget {
+			blockTime += params.DiffV2MigrationStakerTimeDelay
+		}
+
+		// old version modifications
+		if isAsgardActive == false && blockTime < timeTarget.blockTarget {
+			blockTime = timeTarget.blockTarget
+		}
+
+		if isAsgardActive == false && blockTime < timeTarget.periodTarget {
 			blockTime = timeTarget.periodTarget
 		}
 
-		// Decrease difficulty, if it got bumped
-		if header.Difficulty.Uint64() > diffV1_MigrationStakerTarget {
+		if isAsgardActive == false &&  header.Difficulty.Uint64() > diffV1_MigrationStakerTarget {
 			blockTime += diffV1_MigrationStakerDelay
 		}
+
 	}
 
-out:
 	// Try to match target
 	for ; ; blockTime++ {
 
@@ -565,7 +581,7 @@ out:
 		if timeTarget, err = e.PoSPrepare(
 			chain, header, parent,
 		); err != nil {
-			break out
+			return false, err
 		}
 
 		target := new(big.Int).Div(diff1Target, header.Difficulty)
@@ -611,7 +627,7 @@ out:
 					"used_weight", usedWeight,
 				)
 				success = true
-				break out
+				return success, err
 			}
 		}
 	}
