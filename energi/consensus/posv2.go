@@ -313,9 +313,7 @@ func (e *Energi) MineV2(
 		}
 
 		header.Time = blockTime
-		if err = e.posPrepareV2(
-			chain, header, parent, blockTarget
-		); err != nil {
+		if err = e.posPrepareV2(chain, header, parent, blockTarget); err != nil {
 			return false, err
 		}
 
@@ -324,7 +322,7 @@ func (e *Energi) MineV2(
 
 		// It could be done once, but then there is a chance to miss blocks.
 		// Some significant algo optimizations are possible, but we start with simplicity.
-		for candidate := range candidates {
+		for i := range candidates {
 			candidate := &candidates[i]
 			candidate.weight, err = e.lookupStakeWeight(
 				chain, blockTime, parent, candidate.addr)
@@ -356,7 +354,7 @@ func (e *Energi) MineV2(
 			if nonceCap != 0 && e.nonceCap < usedWeight {
 				continue
 			} else if poshash != nil {
-				log.Trace("PoS stake", "addr", v.addr, "weight", v.weight, "usedWeight", usedWeight)
+				log.Trace("PoS stake", "addr", candidate.addr, "weight", candidate.weight, "usedWeight", usedWeight)
 
 				return true, nil
 			}

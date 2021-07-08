@@ -573,7 +573,7 @@ out:
 
 		// It could be done once, but then there is a chance to miss blocks.
 		// Some significant algo optimizations are possible, but we start with simplicity.
-		for candidate := range candidates {
+		for i := range candidates {
 			candidate := &candidates[i]
 			candidate.weight, err = e.lookupStakeWeight(
 				chain, blockTime, parent, candidate.addr)
