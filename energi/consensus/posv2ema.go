@@ -17,7 +17,7 @@ func CalcEMAUint64(
 	n, // numerator
 	d uint64, // denominator
 	smaWindow uint64,
-) (o uint64) {
+) (emaLast uint64) {
 	// nothing to do, nothing to do
 	if len(samples) < 2 {
 		return
@@ -45,10 +45,10 @@ func CalcEMAUint64(
 	// The last clause of the formula is equivalent to multiplying by a
 	// fraction, such as 2/(5+1) as used in this difficulty adjustment
 	// algorithm
-	o = sma[0]
+	emaLast = sma[0]
 	for i := range sma {
 		if i > 0 {
-			o = sma[i]*n/d + sma[i-1]*(d-n)/d
+			emaLast = sma[i]*n/d + sma[i-1]*(d-n)/d
 		}
 	}
 	return
