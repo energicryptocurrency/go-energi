@@ -221,8 +221,9 @@ func calcPoSDifficultyV2(
 
 // MineV2 ...
 //
-// PoS V2 miner implementation
-//
+// PoS V2 miner implementation,
+// NOTE: this function is no longer used as it's functionality is integrated into mine function and 
+// the code that was different is chosen in runtime depending on asgard hardfork status
 func (e *Energi) MineV2(
 	chain ChainReader, header *types.Header, stop <-chan struct{},
 ) (success bool, err error) {
