@@ -348,14 +348,13 @@ func (e *Energi) MineV2(
 			// log.Trace("PoS stake candidate", "addr", candidate.addr, "weight", candidate.weight)
 			header.Coinbase = candidate.addr
 			poshash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
-
-			header.Nonce = types.EncodeNonce(usedWeight)
 			nonceCap := e.GetMinerNonceCap()
+			
 			if nonceCap != 0 && e.nonceCap < usedWeight {
 				continue
 			} else if poshash != nil {
 				log.Trace("PoS stake", "addr", candidate.addr, "weight", candidate.weight, "usedWeight", usedWeight)
-
+				header.Nonce = types.EncodeNonce(usedWeight)
 				return true, nil
 			}
 		}

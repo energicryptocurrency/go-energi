@@ -599,8 +599,9 @@ out:
 			//log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
 			header.Coinbase = candidate.addr
 			posHash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
-
 			nonceCap := e.GetMinerNonceCap()
+
+			header.Nonce = types.EncodeNonce(usedWeight)
 			if nonceCap != 0 && nonceCap < usedWeight {
 				continue
 			} else if posHash != nil {
@@ -609,7 +610,6 @@ out:
 					"weight", candidate.weight,
 					"used_weight", usedWeight,
 				)
-				header.Nonce = types.EncodeNonce(usedWeight)
 				success = true
 				break out
 			}
