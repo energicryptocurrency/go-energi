@@ -721,18 +721,7 @@ func (e *Energi) seal(
 	if header.Number.Cmp(common.Big0) != 0 {
 
 		var success bool
-
-		// check if Asgard hardfork is activated use new difficulty algorithm
-		var isAsgardActive bool
-		isAsgardActive, err = e.hardforkIsActive(chain, header, "Asgard")
-		log.Debug("hard fork", "status", isAsgardActive)
-
-		// choose mining function depending on hf status
-		if isAsgardActive {
-			success, err = e.MineV2(chain, header, stop)
-		} else {
-			success, err = e.mine(chain, header, stop)
-		}
+		success, err = e.mine(chain, header, stop)
 		if err != nil {
 			log.Error("PoS miner error", "err", err)
 			success = false
