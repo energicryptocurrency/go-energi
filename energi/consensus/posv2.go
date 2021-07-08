@@ -59,27 +59,27 @@ type mineTimeTarget interface {
 	setTarget(uint64)
 }
 
-func (t *timeTargetV2) getMin() uint64 {
+func (t *timeTargetV2) getMinTime() uint64 {
 	return t.min
 }
 
-func (t *timeTargetV2) setMin(minTime uint64) {
+func (t *timeTargetV2) setMinTime(minTime uint64) {
 	t.min = minTime
 }
 
-func (t *timeTargetV2) getMax() uint64 {
+func (t *timeTargetV2) getMaxTime() uint64 {
 	return t.max
 }
 
-func (t *timeTargetV2) setMax(maxTime uint64) {
+func (t *timeTargetV2) setMaxTime(maxTime uint64) {
 	t.max = maxTime
 }
 
-func (t *timeTargetV2) getBlockTarget() uint64 {
+func (t *timeTargetV2) getTarget() uint64 {
 	return t.blockTarget
 }
 
-func (t *timeTargetV2) setBlockTarget(target uint64) {
+func (t *timeTargetV2) setTarget(target uint64) {
 	t.blockTarget = target
 }
 

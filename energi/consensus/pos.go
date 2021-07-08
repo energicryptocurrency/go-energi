@@ -59,6 +59,36 @@ type timeTarget struct {
 	periodTarget uint64
 }
 
+func (t *timeTarget) getMinTime() uint64 {
+	return t.min
+}
+
+func (t *timeTarget) setMinTime(minTime uint64) {
+	t.min = minTime
+}
+
+func (t *timeTarget) getMaxTime() uint64 {
+	return t.max
+}
+
+func (t *timeTarget) setMaxTime(maxTime uint64) {
+	t.max = maxTime
+}
+
+func (t *timeTarget) getTarget() uint64 {
+	return t.blockTarget
+}
+
+func (t *timeTarget) setTarget(target uint64) {
+	t.blockTarget = target
+}
+
+func (t *timeTarget) getPeriodTarget() interface{} {
+	return t.periodTarget
+}
+
+
+
 /**
  * Implements block time consensus
  *
@@ -501,8 +531,22 @@ func (e *Energi) mine(
 		return
 	}
 
-	timeTarget := e.calcTimeTarget(chain, parent)
-	blockTime := timeTarget.min
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	if err != nil {
+		log.Trace("Asgard hf check failed: " + err.Error())
+	}
+
+
+	// make time target calculation depending on asgard status
+	var timeTarget mineTimeTarget
+	if isAsgardActive {
+		timeTarget = e.calcTimeTargetV2(chain, parent)
+	} else {
+		timeTarget = e.calcTimeTarget(chain, parent)
+	}
+	blockTime := timeTarget.getMinTime()
 
 	// Special case due to expected very large gap between Genesis and Migration
 	if header.IsGen2Migration() && !e.testing {
@@ -522,19 +566,14 @@ func (e *Energi) mine(
 		candidates = append(candidates, candidate)
 	}
 
-	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
-	log.Debug("hf check", "isAsgardActive", isAsgardActive)
-	if err != nil {
-		log.Trace("Asgard hf check failed: " + err.Error())
-	}
+
 
 	// A special workaround to obey target time when migration contract is
 	// used for mining to prevent any difficulty bombs.
 	if migrationDPoS && !e.testing {
 		// new version modifications
-		if isAsgardActive && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay && blockTime < timeTarget.blockTarget {
-			blockTime = timeTarget.blockTarget
+		if isAsgardActive && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay && blockTime < timeTarget.getTarget() {
+			blockTime = timeTarget.getTarget()
 		}
 
 		if isAsgardActive && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay && header.Difficulty.Uint64() > params.DiffV2MigrationStakerTarget {
@@ -542,12 +581,12 @@ func (e *Energi) mine(
 		}
 
 		// old version modifications
-		if isAsgardActive == false && blockTime < timeTarget.blockTarget {
-			blockTime = timeTarget.blockTarget
+		if isAsgardActive == false && blockTime < timeTarget.getTarget() {
+			blockTime = timeTarget.getTarget()
 		}
 
-		if isAsgardActive == false && blockTime < timeTarget.periodTarget {
-			blockTime = timeTarget.periodTarget
+		if isAsgardActive == false && blockTime < timeTarget.getTarget() {
+			blockTime = timeTarget.getTarget()
 		}
 
 		if isAsgardActive == false &&  header.Difficulty.Uint64() > diffV1_MigrationStakerTarget {
@@ -578,8 +617,15 @@ func (e *Energi) mine(
 		}
 
 		header.Time = blockTime
-		if timeTarget, err = e.PoSPrepare(chain, header, parent); err != nil {
-			return false, err
+
+		if isAsgardActive {
+			if timeTarget, err = e.posPrepareV2(chain, header, parent); err != nil {
+				return false, err
+			}
+		} else {
+			if timeTarget, err = e.PoSPrepare(chain, header, parent); err != nil {
+				return false, err
+			}
 		}
 
 		target := new(big.Int).Div(diff1Target, header.Difficulty)
