@@ -568,16 +568,15 @@ out:
 			break out
 		}
 
-
 		target := new(big.Int).Div(diff1Target, header.Difficulty)
 		log.Trace("PoS miner time", "time", blockTime)
 
 		// It could be done once, but then there is a chance to miss blocks.
 		// Some significant algo optimizations are possible, but we start with simplicity.
-		for i := range candidates {
-			v := &candidates[i]
-			v.weight, err = e.lookupStakeWeight(
-				chain, blockTime, parent, v.addr)
+		for candidate := range candidates {
+			candidate := &candidates[i]
+			candidate.weight, err = e.lookupStakeWeight(
+				chain, blockTime, parent, candidate.addr)
 			if err != nil {
 				return false, err
 			}
@@ -587,7 +586,6 @@ out:
 			return candidates[i].weight < candidates[j].weight
 		})
 
-
 		// This tries each candidate for each timestamp before progressing the
 		// timestamp. If the reverse order was desired, the block time needs to
 		// be saved and reset here. Since older is better, this is probably the
@@ -595,10 +593,6 @@ out:
 		for _, candidate := range candidates {
 
 			if candidate.weight < 1 {
-				// log.Trace(
-				// 	"Skipping candidate due less than 1 weight",
-				// 	"candidate", candidate,
-				// )
 				continue
 			}
 

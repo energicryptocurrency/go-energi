@@ -273,13 +273,6 @@ func (e *Energi) MineV2(
 		}
 
 		candidate := Candidates{a, 0}
-
-		if candidate.weight, err = e.lookupStakeWeight(
-			chain, blockTime, parent, candidate.addr,
-		); err != nil {
-			success = false
-			return
-		}
 		candidates = append(candidates, candidate)
 	}
 
@@ -320,7 +313,9 @@ func (e *Energi) MineV2(
 		}
 
 		header.Time = blockTime
-		if err = e.posPrepareV2(chain, header, parent, blockTarget); err != nil {
+		if err = e.posPrepareV2(
+			chain, header, parent, blockTarget
+		); err != nil {
 			return false, err
 		}
 
@@ -329,10 +324,10 @@ func (e *Energi) MineV2(
 
 		// It could be done once, but then there is a chance to miss blocks.
 		// Some significant algo optimizations are possible, but we start with simplicity.
-		for i := range candidates {
-			v := &candidates[i]
-			v.weight, err = e.lookupStakeWeight(
-				chain, blockTime, parent, v.addr)
+		for candidate := range candidates {
+			candidate := &candidates[i]
+			candidate.weight, err = e.lookupStakeWeight(
+				chain, blockTime, parent, candidate.addr)
 			if err != nil {
 				return false, err
 			}
@@ -342,22 +337,21 @@ func (e *Energi) MineV2(
 			return candidates[i].weight < candidates[j].weight
 		})
 
-		// Try to match target
-		for i := range candidates {
-			v := &candidates[i]
-			if v.weight < 1 {
+		// This tries each candidate for each timestamp before progressing the
+		// timestamp. If the reverse order was desired, the block time needs to
+		// be saved and reset here. Since older is better, this is probably the
+		// better sequence to work in.
+		for _, candidate := range candidates {
+
+			if candidate.weight < 1 {
 				continue
 			}
 
-			// log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
-			header.Coinbase = v.addr
-			poshash, usedWeight := e.calcPoSHash(
-				header,
-				target,
-				v.weight,
-			)
-			header.Nonce = types.EncodeNonce(usedWeight)
+			// log.Trace("PoS stake candidate", "addr", candidate.addr, "weight", candidate.weight)
+			header.Coinbase = candidate.addr
+			poshash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
 
+			header.Nonce = types.EncodeNonce(usedWeight)
 			nonceCap := e.GetMinerNonceCap()
 			if nonceCap != 0 && e.nonceCap < usedWeight {
 				continue
