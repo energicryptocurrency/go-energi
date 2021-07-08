@@ -311,7 +311,7 @@ func (e *Energi) MineV2(
 		}
 
 		header.Time = blockTime
-		if err = e.posPrepareV2(chain, header, parent, blockTarget); err != nil {
+		if blockTarget, err = e.posPrepareV2(chain, header, parent); err != nil {
 			return false, err
 		}
 

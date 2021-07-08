@@ -548,10 +548,11 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 
 	// if asgard hf is active
 	if isAsgardActive {
-		return e.posPrepareV2(chain, header, parent, &timeTargetV2{})
+		_, err = e.posPrepareV2(chain, header, parent)
+	} else {
+		_, err = e.PoSPrepare(chain, header, parent)
 	}
 
-	_, err = e.PoSPrepare(chain, header, parent)
 	return err
 }
 
@@ -560,17 +561,16 @@ func (e *Energi) posPrepareV2(
 	chain ChainReader,
 	header *types.Header,
 	parent *types.Header,
-	blockTarget *timeTargetV2,
-) (err error) {
+) (tTarget *timeTargetV2, err error) {
 	// Clear field to be set in mining
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
 
-	blockTarget = e.calcTimeTargetV2(chain, parent)
+	tTarget = e.calcTimeTargetV2(chain, parent)
 	blockTargetV1 := &timeTarget{
-		min:         blockTarget.min,
-		max:         blockTarget.max,
-		blockTarget: blockTarget.blockTarget,
+		min:         tTarget.min,
+		max:         tTarget.max,
+		blockTarget: tTarget.blockTarget,
 	}
 	err = e.enforceMinTime(header, blockTargetV1)
 
@@ -578,9 +578,9 @@ func (e *Energi) posPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, blockTarget)
+	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, tTarget)
 
-	return err
+	return tTarget, err
 }
 
 // PoSPrepare generates a time target for a PoS mining round
