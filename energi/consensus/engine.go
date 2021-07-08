@@ -578,8 +578,7 @@ func (e *Energi) posPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty =
-		calcPoSDifficultyV2(header.Time, parent, blockTarget)
+	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, blockTarget)
 
 	return err
 }
@@ -602,9 +601,7 @@ func (e *Energi) PoSPrepare(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = e.calcPoSDifficulty(
-		chain, header.Time, parent, timeTarget,
-	)
+	header.Difficulty = e.calcPoSDifficulty(chain, header.Time, parent, timeTarget)
 
 	return timeTarget, err
 }
