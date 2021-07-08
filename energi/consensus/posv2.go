@@ -357,4 +357,6 @@ func (e *Energi) MineV2(
 			}
 		}
 	}
+	// this doesn't need to be strictly stated but this is a long function
+	return success, err
 }

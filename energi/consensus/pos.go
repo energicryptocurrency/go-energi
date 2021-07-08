@@ -578,9 +578,7 @@ func (e *Energi) mine(
 		}
 
 		header.Time = blockTime
-		if timeTarget, err = e.PoSPrepare(
-			chain, header, parent,
-		); err != nil {
+		if timeTarget, err = e.PoSPrepare(chain, header, parent); err != nil {
 			return false, err
 		}
 
@@ -617,17 +615,17 @@ func (e *Energi) mine(
 			posHash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
 			nonceCap := e.GetMinerNonceCap()
 
-			header.Nonce = types.EncodeNonce(usedWeight)
+			if isAsgardActive == false {
+				header.Nonce = types.EncodeNonce(usedWeight)
+			}
 			if nonceCap != 0 && nonceCap < usedWeight {
 				continue
 			} else if posHash != nil {
-				log.Trace(
-					"PoS stake", "addr", candidate.addr,
-					"weight", candidate.weight,
-					"used_weight", usedWeight,
-				)
-				success = true
-				return success, err
+				log.Trace("PoS stake", "addr", candidate.addr, "weight", candidate.weight, "used_weight", usedWeight)
+				if isAsgardActive {
+					header.Nonce = types.EncodeNonce(usedWeight)
+				}
+				return true, err
 			}
 		}
 	}
