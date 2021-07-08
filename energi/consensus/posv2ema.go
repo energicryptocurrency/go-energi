@@ -14,8 +14,8 @@ package consensus
 // any interval that computes as negative with signed integers.
 func CalcEMAUint64(
 	samples []uint64,
-	numerator,
-	denominator uint64,
+	n, // numerator
+	d uint64, // denominator
 	smaWindow uint64,
 ) (o uint64) {
 	// nothing to do, nothing to do
@@ -48,8 +48,7 @@ func CalcEMAUint64(
 	o = sma[0]
 	for i := range sma {
 		if i > 0 {
-			o = sma[i]*numerator/denominator +
-				sma[i-1]*(denominator-numerator)/denominator
+			o = sma[i]*n/d + sma[i-1]*(d-n)/d
 		}
 	}
 	return
