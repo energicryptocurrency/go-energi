@@ -140,7 +140,6 @@ test-go-report:
   stage: test
   extends: .merge-request-job
   script:
-    - go get -v -u github.com/RyanLucchese/go-junit-report
     - make test-go-report
   artifacts:
     when: always
@@ -148,8 +147,6 @@ test-go-report:
       - .test-go-report.xml
     reports:
       junit: .test-go-report.xml
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   allow_failure: true
 
 test-solidity:
