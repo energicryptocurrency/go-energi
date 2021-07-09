@@ -116,6 +116,7 @@ func TestPoSDoS(t *testing.T) {
 	err := engine.checkDoS(fc, h1, p)
 	assert.Equal(t, eth_consensus.ErrDoSThrottle, err)
 
+	// these are commented out because POS-8 is disabled
 	/*
 		// log.Trace("Side chain as old fork")
 			curr_time = base
