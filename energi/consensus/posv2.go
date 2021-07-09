@@ -46,7 +46,7 @@ type timeTargetV2 struct {
 	pHash   common.Hash
 }
 
-type mineTimeTarget interface {
+type MineTimeTarget interface {
 	// getters
 	getMinTime() uint64
 	getMaxTime() uint64
@@ -222,7 +222,7 @@ func calcPoSDifficultyV2(
 // MineV2 ...
 //
 // PoS V2 miner implementation,
-// NOTE: this function is no longer used as it's functionality is integrated into mine function and 
+// NOTE: this function is no longer used as it's functionality is integrated into mine function and
 // the code that was different is chosen in runtime depending on asgard hardfork status
 func (e *Energi) MineV2(
 	chain ChainReader, header *types.Header, stop <-chan struct{},

@@ -540,7 +540,7 @@ func (e *Energi) mine(
 
 
 	// make time target calculation depending on asgard status
-	var timeTarget mineTimeTarget
+	var timeTarget MineTimeTarget
 	if isAsgardActive {
 		timeTarget = e.calcTimeTargetV2(chain, parent)
 	} else {
