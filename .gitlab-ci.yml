@@ -65,12 +65,12 @@ npm-install:
   script:
     - npm install
 
-lint-go:
-  stage: lint
-  extends: .merge-request-job
-  script:
-    - make lint-go
-  allow_failure: true
+#lint-go:
+#  stage: lint
+#  extends: .merge-request-job
+#  script:
+#    - make lint-go
+#  allow_failure: true
 
 lint-sol:
   stage: lint
@@ -89,7 +89,7 @@ build-linux:
   extends: .merge-request-job
   script:
     - make all
-    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo "[Error] compile job left modified files in working directory"; exit 1; fi
+    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
 
 build-docker:
   stage: build
@@ -159,14 +159,13 @@ test-solidity:
     - make test-sol-contracts
   allow_failure: true
 
-deploy-release:
-  stage: deploy
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder
-  before_script:
-    - pwd
-  script:
-    - make -f Makefile.release release-upload
-  only:
-    - tags
-
+#deploy-release:
+#  stage: deploy
+#  tags: [docker_runner]
+#  image: ${container_registry}/energi3_builder
+#  before_script:
+#    - pwd
+#  script:
+#    - make -f Makefile.release release-upload
+#  only:
+#    - tags
