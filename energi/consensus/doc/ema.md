@@ -24,8 +24,8 @@ The Exponential Moving Average is calculated in two steps:
 o = sma[0]
 for i := range sma {
         if i > 0 {
-                o = sma[i-i] - o +
-                sma[i-1]*numerator/denominator
+                o = sma[i]*numerator/denominator +
+                        sma[i-1]*(denominator-numerator)/denominator
         }
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -54,6 +54,8 @@ var (
 	errInvalidSig = errors.New("Invalid signature")
 
 	errBlacklistedCoinbase = errors.New("Blacklisted coinbase")
+
+	hardfork1Name = "Asgard"
 )
 
 type (
@@ -70,29 +72,31 @@ type (
 		nonceCap uint64
 
 		// The rest
-		config       *params.EnergiConfig
-		db           ethdb.Database
-		rewardAbi    abi.ABI
-		dposAbi      abi.ABI
-		blacklistAbi abi.ABI
-		sporkAbi     abi.ABI
-		mnregAbi     abi.ABI
-		treasuryAbi  abi.ABI
-		hardforkAbi  abi.ABI
-		systemFaucet common.Address
-		xferGas      uint64
-		callGas      uint64
-		unlimitedGas uint64
-		signerFn     SignerFn
-		accountsFn   AccountsFn
-		peerCountFn  PeerCountFn
-		isMiningFn   IsMiningFn
-		diffFn       DiffFn
-		testing      bool
-		now          func() uint64
-		knownStakes  KnownStakes
-		nextKSPurge  uint64
-		txhashMap    *lru.Cache
+		config         *params.EnergiConfig
+		db             ethdb.Database
+		rewardAbi      abi.ABI
+		dposAbi        abi.ABI
+		blacklistAbi   abi.ABI
+		sporkAbi       abi.ABI
+		mnregAbi       abi.ABI
+		treasuryAbi    abi.ABI
+		hardforkAbi    abi.ABI
+		systemFaucet   common.Address
+		xferGas        uint64
+		callGas        uint64
+		unlimitedGas   uint64
+		signerFn       SignerFn
+		accountsFn     AccountsFn
+		peerCountFn    PeerCountFn
+		isMiningFn     IsMiningFn
+		diffFn         DiffFn
+		testing        bool
+		now            func() uint64
+		knownStakes    KnownStakes
+		nextKSPurge    uint64
+		txhashMap      *lru.Cache
+		activeHardFork [32]byte
+		hfLastChecked  *big.Int
 	}
 )
 
@@ -140,23 +144,24 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 	}
 
 	return &Energi{
-		config:       config,
-		db:           db,
-		rewardAbi:    rewardAbi,
-		dposAbi:      dposAbi,
-		blacklistAbi: blacklistAbi,
-		sporkAbi:     sporkAbi,
-		mnregAbi:     mngregAbi,
-		treasuryAbi:  treasuryAbi,
-		hardforkAbi:  hardforkAbi,
-		systemFaucet: energi_params.Energi_SystemFaucet,
-		xferGas:      0,
-		callGas:      30000,
-		unlimitedGas: energi_params.UnlimitedGas,
-		diffFn:       calcPoSDifficultyV1,
-		now:          func() uint64 { return uint64(time.Now().Unix()) },
-		nextKSPurge:  0,
-		txhashMap:    txhashMap,
+		config:        config,
+		db:            db,
+		rewardAbi:     rewardAbi,
+		dposAbi:       dposAbi,
+		blacklistAbi:  blacklistAbi,
+		sporkAbi:      sporkAbi,
+		mnregAbi:      mngregAbi,
+		treasuryAbi:   treasuryAbi,
+		hardforkAbi:   hardforkAbi,
+		hfLastChecked: big.NewInt(0),
+		systemFaucet:  energi_params.Energi_SystemFaucet,
+		xferGas:       0,
+		callGas:       30000,
+		unlimitedGas:  energi_params.UnlimitedGas,
+		diffFn:        calcPoSDifficultyV1,
+		now:           func() uint64 { return uint64(time.Now().Unix()) },
+		nextKSPurge:   0,
+		txhashMap:     txhashMap,
 
 		accountsFn:  func() []common.Address { return nil },
 		peerCountFn: func() int { return 0 },
@@ -479,54 +484,74 @@ func (e *Energi) hardforkIsActive(
 	header *types.Header,
 	hardforkName string,
 ) (bool, error) {
-	// get state for snapshot
-	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
-	if blockst == nil {
-		log.Error("PoS state root failure", "header", header.ParentHash)
-		return false, eth_consensus.ErrMissingState
+
+	// the testing flag is here extended to indicate that hard fork is
+	// already stored in the Energi state structure for testing a specific
+	// fork
+	if !e.testing && header.Number.Cmp(e.hfLastChecked) != 0 {
+
+		// copy in the height to the last checked
+		*e.hfLastChecked = *header.Number
+
+		// get state for snapshot
+		blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
+		if blockst == nil {
+			log.Error("PoS state root failure", "header", header.ParentHash)
+			return false, eth_consensus.ErrMissingState
+		}
+
+		// get parent
+		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+		if parent == nil {
+			return false, eth_consensus.ErrUnknownAncestor
+		}
+
+		// create call data
+		var hardforkNameArray [32]byte
+		copy(hardforkNameArray[:], []byte(hardforkName))
+		callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
+		if err != nil {
+			log.Error("Fail to check if hardfork is active", "err", err)
+			return false, err
+		}
+
+		// construct the contract call message
+		msg := types.NewMessage(
+			e.systemFaucet,
+			&energi_params.Energi_HardforkRegistry,
+			0,
+			common.Big0,
+			e.callGas,
+			common.Big0,
+			callData,
+			false,
+		)
+
+		// create environment and apply message
+		evm := e.createEVM(msg, chain, parent, blockst)
+		gp := core.GasPool(e.callGas)
+		output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+		if err != nil {
+			log.Trace("Fail to get isActive status", "err", err)
+			return false, err
+		}
+
+		// unpack the output
+		var isActive bool
+		err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
+
+		return isActive, err
+	} else {
+
+		// copy the name into the byte array for comparison
+		var hardforkNameArray [32]byte
+		// note that strings copy into bytes, in case you are wondering
+		copy(hardforkNameArray[:], hardforkName)
+		// return whether the currently stored active hard fork is
+		// the one being queried
+		return hardforkNameArray == e.activeHardFork, nil
+
 	}
-
-	// get parent
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		return false, eth_consensus.ErrUnknownAncestor
-	}
-
-	// create call data
-	var hardforkNameArray [32]byte
-	copy(hardforkNameArray[:], []byte(hardforkName))
-	callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
-	if err != nil {
-		log.Error("Fail to check if hardfork is active", "err", err)
-		return false, err
-	}
-
-	// construct the contract call message
-	msg := types.NewMessage(
-		e.systemFaucet,
-		&energi_params.Energi_HardforkRegistry,
-		0,
-		common.Big0,
-		e.callGas,
-		common.Big0,
-		callData,
-		false,
-	)
-
-	// create environment and apply message
-	evm := e.createEVM(msg, chain, parent, blockst)
-	gp := core.GasPool(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
-	if err != nil {
-		log.Trace("Fail to get isActive status", "err", err)
-		return false, err
-	}
-
-	// unpack the output
-	var isActive bool
-	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
-
-	return isActive, err
 }
 
 // Prepare initializes the consensus fields of a block header according to the
@@ -540,7 +565,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	isAsgardActive, err := e.hardforkIsActive(chain, header, hardfork1Name)
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	if err != nil {
 		log.Trace("Asgard hf check failed: " + err.Error())
@@ -727,7 +752,7 @@ func (e *Energi) seal(
 
 		// check if Asgard hardfork is activated use new difficulty algorithm
 		var isAsgardActive bool
-		isAsgardActive, err = e.hardforkIsActive(chain, header, "Asgard")
+		isAsgardActive, err = e.hardforkIsActive(chain, header, hardfork1Name)
 		log.Debug("hard fork", "status", isAsgardActive)
 
 		// choose mining function depending on hf status
@@ -827,10 +852,6 @@ func (e *Energi) recreateBlock(
 		ok bool
 	)
 
-	if header.Number.Uint64() < 1 {
-		log.Error("Can not recreateBlock before the genesis block")
-		return nil, eth_consensus.ErrUnknownAncestor
-	}
 	height := header.Number.Uint64() - 1
 	log.Debug("calculating block state", "height", height)
 	blstate := chain.CalculateBlockState(
@@ -966,14 +987,14 @@ func (e *Energi) CalcDifficulty(
 ) *big.Int {
 	// check if Asgard hardfork is activated use new difficulty algorithm
 	var isAsgardActive bool
-	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
+	isAsgardActive, _ = e.hardforkIsActive(chain, parent, hardfork1Name)
 	log.Debug("hard fork", "status", isAsgardActive)
 	if isAsgardActive {
-		timeTarget := e.calcTimeTargetV2(chain, parent)
-		return calcPoSDifficultyV2(time, parent, timeTarget)
+		time_target := e.calcTimeTargetV2(chain, parent)
+		return calcPoSDifficultyV2(time, parent, time_target)
 	}
-	timeTarget := e.calcTimeTarget(chain, parent)
-	return e.calcPoSDifficulty(chain, time, parent, timeTarget)
+	time_target := e.calcTimeTarget(chain, parent)
+	return e.calcPoSDifficulty(chain, time, parent, time_target)
 }
 
 // APIs returns the RPC APIs this consensus engine provides.
