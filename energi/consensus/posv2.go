@@ -209,8 +209,7 @@ func calcPoSDifficultyV2(
 	// multiply the parent difficulty by the multiplier and divide back
 	// by the precision value, applying the difficulty change without using
 	// floating point numbers
-	difficulty := big.NewInt(0).Mul(parent.Difficulty,
-		big.NewInt(int64(scaledPreMultiplier)))
+	difficulty := big.NewInt(0).Mul(parent.Difficulty, big.NewInt(int64(scaledPreMultiplier)))
 	difficulty = difficulty.Div(difficulty, big.NewInt(int64(precision)))
 
 	log.Trace("Difficulty change",
