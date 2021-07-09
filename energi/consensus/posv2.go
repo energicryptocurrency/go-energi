@@ -122,7 +122,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 
 	// NOTE: we have to do this way as parent may be not part of canonical
 	//       chain. As no mutex is held, we cannot do checks for canonical.
-	for i := params.AveragingWindow - 1; i > 0 && parent.Number.Uint64() > 3; i-- {
+	for i := params.AveragingWindow - 1; i > 0; i-- {
 		past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
 		if past == nil {
 			// this normally can't happen because there is more
