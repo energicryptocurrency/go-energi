@@ -402,7 +402,9 @@ func (e *Energi) lookupStakeWeight(
 	for (until.Time > since) || firstRun {
 
 		if blockState == nil {
-			log.Warn("PoS state root failure", "header", until.Hash())
+			log.Warn("PoS state root failure",
+				"header", until.Hash(),
+				"number", until.Number)
 			return 0, consensus.ErrMissingState
 		}
 
