@@ -6,10 +6,17 @@ ENV TZ=GMT
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # update software
-RUN apt -y update
+RUN apt -y --fix-missing update
 RUN apt -y full-upgrade
 RUN apt -y autoremove
 RUN apt -y clean
+
+# install docker
+RUN apt -y update
+RUN apt -y install curl gnupg lsb-release software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+RUN apt -y install docker-ce docker-ce-cli containerd.io
 
 # install development tools
 RUN apt -y install git vim htop apg jq direnv build-essential wget awscli sudo
@@ -28,6 +35,11 @@ RUN sha256sum -c ${golang_filename}.sha256
 RUN tar -C /usr/local -xzf ${golang_filename}
 RUN rm -rf ${golang_filename}*
 ENV PATH="${PATH}:/usr/local/go/bin"
+ENV GOROOT="/usr/local/go"
+
+# install go-junit-report
+RUN go get -u github.com/RyanLucchese/go-junit-report
+ENV PATH="${PATH}:/root/go/bin"
 
 # nodejs variables
 ARG nodejs_version="12.22.1"
@@ -42,17 +54,30 @@ RUN wget -nv ${nodejs_url}
 RUN echo "${nodejs_sha256} ${nodejs_filename}" > "${nodejs_filename}.sha256"
 RUN sha256sum -c ${nodejs_filename}.sha256
 RUN tar -C /usr/local -xzf ${nodejs_filename}
+RUN chown -R "root:root" "/usr/local/${nodejs_spec}"
 RUN rm -rf ${nodejs_filename}*
 ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
 
 # install node packages
-RUN npm install -g yarn
+RUN npm -g config set user root
+RUN npm install -g yarn ganache-cli truffle
 
 # clone core node repository and install dependencies
 ARG repository_remote="https://github.com/energicryptocurrency/energi3.git"
-RUN mkdir "/builder"
-WORKDIR "/builder"
+# /builds/energi/tech/gen3/energi3
+RUN mkdir -p "/builds/energi/tech/gen3"
+WORKDIR "/builds/energi/tech/gen3"
 RUN git clone "${repository_remote}"
-WORKDIR "/builder/energi3"
+WORKDIR "/builds/energi/tech/gen3/energi3"
+RUN git submodule update --init --recursive
 RUN npm install
 RUN make -f Makefile.release release-tools
+ENV GOPATH="/builds/energi/tech/gen3"
+ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
+ENV GO111MODULE="on"
+ENV GOFLAGS="-mod=vendor -v"
+
+# do a build at the end to ensure we have everything
+RUN make all
+# TODO: make check is known to fail now due to issues in tests and the linter
+#RUN make check
