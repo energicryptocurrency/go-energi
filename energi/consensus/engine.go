@@ -71,7 +71,6 @@ type (
 		// Atomic alignment to 64-bit
 		nonceCap uint64
 
-		// The rest
 		config         *params.EnergiConfig
 		db             ethdb.Database
 		rewardAbi      abi.ABI
