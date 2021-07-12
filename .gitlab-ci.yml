@@ -10,8 +10,8 @@ stages:
 
 cache:
   paths:
-    - /node_modules
-    - /build
+    - node_modules
+    - build
 
 .docker-job:
   tags: [docker_runner]
