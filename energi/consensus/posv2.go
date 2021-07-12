@@ -223,54 +223,38 @@ func calcPoSDifficultyV2(
 // PoS V2 miner implementation
 //
 func (e *Energi) MineV2(
-	chain ChainReader,
-	header *types.Header,
-	stop <-chan struct{},
+	chain ChainReader, header *types.Header, stop <-chan struct{},
 ) (success bool, err error) {
+
 	type Candidates struct {
 		addr   common.Address
 		weight uint64
 	}
 
 	accounts := e.accountsFn()
+	// if no accounts are found, just pause and wait for the stop signal
+	//
+	// todo: is this what is intended? Is there a case where this value can
+	//  change but this thread is then dead? I think that very likely this
+	//  should be a repeating loop that retries every minute or something like
+	//  this in case an account is created that can be used, while the server is
+	//  running.
+	//  further thoughts: generally it seems like this function returns quite
+	//  quickly so probably this is fine
 	if len(accounts) == 0 {
 		select {
-		case <-time.After(10 * time.Second):
-			// If no mining accounts that are found in 10 seconds quit.
-			accounts = e.accountsFn()
-			if len(accounts) == 0 {
-				log.Error("No mining candidate accounts found: timeout")
-				return false, nil
-			}
 		case <-stop:
-			log.Error("No mining candidate accounts found")
-			return false, nil
+			return
 		}
 	}
 
-	candidates := make([]Candidates, 0, len(accounts))
-	migrationDPOS := false
-	for _, a := range accounts {
-		candidates = append(candidates, Candidates{
-			addr:   a,
-			weight: 0,
-		})
-		// log.Trace("PoS miner candidate found", "address", a)
-
-		if a == params.Energi_MigrationContract {
-			migrationDPOS = true
-		}
-	}
-
-	// ---
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-
 	if parent == nil {
-		return false, eth_consensus.ErrUnknownAncestor
+		err = eth_consensus.ErrUnknownAncestor
+		return
 	}
 
 	blockTarget := e.calcTimeTargetV2(chain, parent)
-
 	blockTime := blockTarget.minTime
 
 	// Special case due to expected very large gap between Genesis and Migration
@@ -278,9 +262,22 @@ func (e *Energi) MineV2(
 		blockTime = e.now()
 	}
 
+	candidates := make([]Candidates, 0, len(accounts))
+	migrationDPoS := false
+
+	for _, a := range accounts {
+
+		if a == params.Energi_MigrationContract {
+			migrationDPoS = true
+		}
+
+		candidate := Candidates{a, 0}
+		candidates = append(candidates, candidate)
+	}
+
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
-	if migrationDPOS && !e.testing && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay {
+	if migrationDPoS && !e.testing && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay {
 		// Obey block target
 		if blockTime < blockTarget.target {
 			blockTime = blockTarget.target
@@ -301,8 +298,7 @@ func (e *Energi) MineV2(
 			// Ensure that a shutdown request is handled as fast as possible.
 			return false, nil
 		default:
-			if maxTime := e.now() + params.
-				MaxFutureGap; blockTime > maxTime {
+			if maxTime := e.now() + params.MaxFutureGap; blockTime > maxTime {
 				// NOTE: it's very important to ignore stop until all variants are tried
 				//       to prevent rogue stakers taking the initiative.
 				log.Trace("PoS miner is sleeping", "seconds", blockTime-maxTime)
@@ -326,9 +322,9 @@ func (e *Energi) MineV2(
 		// It could be done once, but then there is a chance to miss blocks.
 		// Some significant algo optimizations are possible, but we start with simplicity.
 		for i := range candidates {
-			v := &candidates[i]
-			v.weight, err = e.lookupStakeWeight(
-				chain, blockTime, parent, v.addr)
+			candidate := &candidates[i]
+			candidate.weight, err = e.lookupStakeWeight(
+				chain, blockTime, parent, candidate.addr)
 			if err != nil {
 				return false, err
 			}
@@ -338,28 +334,26 @@ func (e *Energi) MineV2(
 			return candidates[i].weight < candidates[j].weight
 		})
 
-		// Try to match target
-		for i := range candidates {
-			v := &candidates[i]
-			if v.weight < 1 {
+		// This tries each candidate for each timestamp before progressing the
+		// timestamp. If the reverse order was desired, the block time needs to
+		// be saved and reset here. Since older is better, this is probably the
+		// better sequence to work in.
+		for _, candidate := range candidates {
+
+			if candidate.weight < 1 {
 				continue
 			}
 
-			// log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
-			header.Coinbase = v.addr
-			poshash, usedWeight := e.calcPoSHash(
-				header,
-				target,
-				v.weight,
-			)
-			header.Nonce = types.EncodeNonce(usedWeight)
-
+			// log.Trace("PoS stake candidate", "addr", candidate.addr, "weight", candidate.weight)
+			header.Coinbase = candidate.addr
+			poshash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
 			nonceCap := e.GetMinerNonceCap()
+			
 			if nonceCap != 0 && e.nonceCap < usedWeight {
 				continue
 			} else if poshash != nil {
-				log.Trace("PoS stake", "addr", v.addr, "weight", v.weight, "usedWeight", usedWeight)
-
+				log.Trace("PoS stake", "addr", candidate.addr, "weight", candidate.weight, "usedWeight", usedWeight)
+				header.Nonce = types.EncodeNonce(usedWeight)
 				return true, nil
 			}
 		}
