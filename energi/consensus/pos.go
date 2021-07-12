@@ -187,7 +187,7 @@ func (e *Energi) calcPoSDifficulty(
 	parent *types.Header,
 	tt *timeTarget,
 ) (ret *big.Int) {
-	ret = e.diffFn(chain, time, parent, tt)
+	ret = e.diffFn(time, parent, tt)
 	log.Trace(
 		"PoS difficulty", "block", parent.Number.Uint64()+1, "time", time,
 		"diff", ret,
@@ -231,7 +231,6 @@ func init() {
 }
 
 func calcPoSDifficultyV1(
-	chain ChainReader,
 	time uint64,
 	parent *types.Header,
 	tt *timeTarget,

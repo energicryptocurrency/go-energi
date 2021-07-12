@@ -381,7 +381,7 @@ func TestPoSDiffV1(t *testing.T) {
 			periodTarget: tc.ptarget,
 		}
 
-		res := calcPoSDifficultyV1(nil, tc.time, parent, tt)
+		res := calcPoSDifficultyV1(tc.time, parent, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }

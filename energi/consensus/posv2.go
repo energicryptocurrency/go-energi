@@ -96,7 +96,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
  * If the block time is more than the target time the difficulty must be reduced
  * New Difficulty = Parent Difficulty * (1.0001 ^ Block Time)
  */
-func (e *Energi) calcPoSDifficultyV2(
+func calcPoSDifficultyV2(
 	newBlockTime uint64,
 	parent *types.Header,
 	timeTarget *timeTarget,
