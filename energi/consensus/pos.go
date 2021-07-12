@@ -31,15 +31,6 @@ import (
 	"energi.world/core/gen3/log"
 )
 
-// removing this because why clutter namespaces more than they have to be?
-// const (
-//	MaturityPeriod    = params.MaturityPeriod
-//	AveragingWindow = params.AveragingWindow
-//	TargetBlockGap    = params.TargetBlockGap
-//	MinBlockGap       = params.MinBlockGap
-//	MaxFutureGap      = params.MaxFutureGap
-//	TargetPeriodGap   = params.TargetPeriodGap
-// )
 
 var (
 	minStake    = big.NewInt(1e18) // 1000000000000000000
@@ -505,9 +496,21 @@ func (e *Energi) mine(
 		return false, eth_consensus.ErrUnknownAncestor
 	}
 
-	time_target := e.calcTimeTarget(chain, parent)
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	if err != nil {
+		log.Trace("Asgard hf check failed: " + err.Error())
+	}
 
-	blockTime := time_target.min_time
+	// make time target calculation depending on asgard status
+	var timeTarget timeTarget{}
+	if isAsgardActive {
+		timeTarget = e.calcTimeTargetV2(chain, parent)
+	} else {
+		timeTarget = e.calcTimeTarget(chain, parent)
+	}
+	blockTime := timeTarget.min
 
 	// Special case due to expected very large gap between Genesis and Migration
 	if header.IsGen2Migration() && !e.testing {
@@ -516,15 +519,15 @@ func (e *Energi) mine(
 
 	// A special workaround to obey target time when migration contract is used
 	// for mining to prevent any difficult bombs.
-	if migration_dpos && !e.testing {
+	if migration_dpos && !isAsgardActive && !e.testing {
 		// Obey block target
-		if blockTime < time_target.block_target {
-			blockTime = time_target.block_target
+		if blockTime < timeTarget.blockTarget {
+			blockTime = timeTarget.blockTarget
 		}
 
 		// Also, obey period target
-		if blockTime < time_target.period_target {
-			blockTime = time_target.period_target
+		if blockTime < timeTarget.periodTarget {
+			blockTime = timeTarget.periodTarget
 		}
 
 		// Decrease difficulty, if it got bumped
@@ -535,14 +538,14 @@ func (e *Energi) mine(
 
 	//---
 	for ; ; blockTime++ {
-		if max_time := e.now() + MaxFutureGap; blockTime > max_time {
+		if maxTime := e.now() + MaxFutureGap; blockTime > maxTime {
 			log.Trace("PoS miner is sleeping")
 			select {
 			case <-stop:
 				// NOTE: it's very important to ignore stop until all variants are tried
 				//       to prevent rogue stakers taking the initiative.
 				return false, nil
-			case <-time.After(time.Duration(blockTime-max_time) * time.Second):
+			case <-time.After(time.Duration(blockTime-maxTime) * time.Second):
 			}
 		}
 
@@ -552,7 +555,11 @@ func (e *Energi) mine(
 		}
 
 		header.Time = blockTime
-		time_target, err = e.posPrepare(chain, header, parent)
+		if isAsgardActive {
+			timeTarget, err = e.posPrepareV2(chain, header, parent)
+		} else {
+			timeTarget, err = e.posPrepare(chain, header, parent)
+		}
 		if err != nil {
 			return false, err
 		}
