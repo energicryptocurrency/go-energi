@@ -23,9 +23,6 @@ import (
 )
 
 func TestBlockchain(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	t.Parallel()
 
 	bt := new(testMatcher)
