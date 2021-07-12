@@ -22,7 +22,6 @@ import (
 	"math/big"
 	"math/rand"
 	"net"
-	"os"
 	"reflect"
 	"strings"
 	"testing"

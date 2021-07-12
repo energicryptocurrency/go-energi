@@ -22,7 +22,6 @@ import (
 	"crypto/ecdsa"
 	"math/big"
 	"net"
-	"os"
 	"reflect"
 	"strings"
 	"testing"

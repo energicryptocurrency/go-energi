@@ -19,7 +19,6 @@ package tests
 
 import (
 	"math/big"
-	"os"
 	"testing"
 
 	"energi.world/core/gen3/common"

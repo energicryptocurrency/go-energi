@@ -18,7 +18,6 @@
 package tests
 
 import (
-	"os"
 	"testing"
 )
 

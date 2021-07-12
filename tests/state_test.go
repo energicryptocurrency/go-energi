@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"os"
 	"reflect"
 	"testing"
 
