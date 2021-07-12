@@ -556,7 +556,7 @@ func (e *Energi) hardforkIsActive(
 
 // Prepare initializes the consensus fields of a block header according to the
 // rules of a particular engine. The changes are executed inline.
-func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
+func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 
 	if parent == nil {
@@ -571,56 +571,54 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) error {
 		log.Trace("Asgard hf check failed: " + err.Error())
 	}
 
-	// if asgard hf is active
-	if isAsgardActive {
-		return e.posPrepareV2(chain, header, parent, &timeTargetV2{})
-	}
-
-	_, err = e.PoSPrepare(chain, header, parent)
-	return err
-}
-
-// posPrepareV2 version 2
-func (e *Energi) posPrepareV2(
-	chain ChainReader,
-	header *types.Header,
-	parent *types.Header,
-	blockTarget *timeTargetV2,
-) (err error) {
 	// Clear field to be set in mining
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
 
-	blockTarget = e.calcTimeTargetV2(chain, parent)
-	blockTargetV1 := &timeTarget{
-		min:         blockTarget.minTime,
-		max:         blockTarget.maxTime,
-		blockTarget: blockTarget.target,
+	// if asgard hf is active
+	if isAsgardActive {
+		_, err = e.PoSPrepareV2(chain, header, parent)
+		return
 	}
-	err = e.enforceMinTime(header, blockTargetV1)
+
+	_, err = e.PoSPrepareV1(chain, header, parent)
+	return
+}
+
+// posPrepareV2 version 2
+func (e *Energi) PoSPrepareV2(
+	chain ChainReader,
+	header *types.Header,
+	parent *types.Header,
+) (timeTarget *timeTarget, err error) {
+	timeTarget = e.calcTimeTargetV2(chain, parent)
+
+	err = e.enforceMinTime(header, timeTarget)
+	if err != nil {
+		log.Error("enforceMinTime error", err)
+	}
 
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, tTarget)
+	header.Difficulty = e.calcPoSDifficultyV2(header.Time, parent, timeTarget)
 
-	return err
+	return timeTarget, err
 }
 
 // PoSPrepare generates a time target for a PoS mining round
-func (e *Energi) PoSPrepare(
+func (e *Energi) PoSPrepareV1(
 	chain ChainReader,
 	header *types.Header,
 	parent *types.Header,
 ) (timeTarget *timeTarget, err error) {
-	// Clear field to be set in mining
-	header.Coinbase = common.Address{}
-	header.Nonce = types.BlockNonce{}
-
 	timeTarget = e.calcTimeTarget(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
+	if err != nil {
+		log.Error("enforceMinTime error", err)
+	}
 
 	// Repurpose the MixDigest field
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
@@ -754,12 +752,7 @@ func (e *Energi) seal(
 		isAsgardActive, err = e.hardforkIsActive(chain, header, hardfork1Name)
 		log.Debug("hard fork", "status", isAsgardActive)
 
-		// choose mining function depending on hf status
-		if isAsgardActive {
-			success, err = e.MineV2(chain, header, stop)
-		} else {
-			success, err = e.mine(chain, header, stop)
-		}
+		success, err = e.mine(chain, header, stop)
 		if err != nil {
 			log.Error("PoS miner error", "err", err)
 			success = false
@@ -990,7 +983,7 @@ func (e *Energi) CalcDifficulty(
 	log.Debug("hard fork", "status", isAsgardActive)
 	if isAsgardActive {
 		time_target := e.calcTimeTargetV2(chain, parent)
-		return calcPoSDifficultyV2(time, parent, time_target)
+		return e.calcPoSDifficultyV2(time, parent, time_target)
 	}
 	time_target := e.calcTimeTarget(chain, parent)
 	return e.calcPoSDifficulty(chain, time, parent, time_target)
