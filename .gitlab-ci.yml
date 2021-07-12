@@ -10,8 +10,8 @@ stages:
 
 cache:
   paths:
-    - node_modules/
-    - build/
+    - node_modules
+    - build
 
 .docker-job:
   tags: [docker_runner]
@@ -88,17 +88,19 @@ build-linux:
   stage: build
   extends: .merge-request-job
   script:
+    - git checkout -- .
+    - git clean -fdx -e node_modules .
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
 
-build-docker:
-  stage: build
-  extends: .docker-job
-  script:
-    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
-    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#build-docker:
+#  stage: build
+#  extends: .docker-job
+#  script:
+#    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
+#    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 # TODO: release-builds should be implemented better
 #build-release-linux:
@@ -136,11 +138,17 @@ build-docker:
 #      - develop
 #      - master
 
-test-go:
+test-go-report:
   stage: test
   extends: .merge-request-job
   script:
-    - make test-go
+    - make test-go-report
+  artifacts:
+    when: always
+    paths:
+      - .test-go-report.xml
+    reports:
+      junit: .test-go-report.xml
   allow_failure: true
 
 test-solidity:
