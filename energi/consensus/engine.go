@@ -71,6 +71,7 @@ type (
 		// Atomic alignment to 64-bit
 		nonceCap uint64
 
+		// The rest
 		config         *params.EnergiConfig
 		db             ethdb.Database
 		rewardAbi      abi.ABI
@@ -602,7 +603,7 @@ func (e *Energi) posPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, blockTarget)
+	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, tTarget)
 
 	return err
 }

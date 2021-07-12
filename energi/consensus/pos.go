@@ -31,6 +31,16 @@ import (
 	"energi.world/core/gen3/log"
 )
 
+// removing this because why clutter namespaces more than they have to be?
+// const (
+//	MaturityPeriod    = params.MaturityPeriod
+//	AveragingWindow = params.AveragingWindow
+//	TargetBlockGap    = params.TargetBlockGap
+//	MinBlockGap       = params.MinBlockGap
+//	MaxFutureGap      = params.MaxFutureGap
+//	TargetPeriodGap   = params.TargetPeriodGap
+// )
+
 var (
 	minStake    = big.NewInt(1e18) // 1000000000000000000
 	diff1Target = new(big.Int).Exp(
@@ -392,9 +402,7 @@ func (e *Energi) lookupStakeWeight(
 	for (until.Time > since) || firstRun {
 
 		if blockState == nil {
-			log.Warn("PoS state root failure",
-				"header", until.Hash(),
-				"number", until.Number)
+			log.Warn("PoS state root failure", "header", until.Hash())
 			return 0, consensus.ErrMissingState
 		}
 

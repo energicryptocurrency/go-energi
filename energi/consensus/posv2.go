@@ -40,13 +40,13 @@ const (
 )
 
 type timeTargetV2 struct {
-	minTime uint64
-	maxTime uint64
-	target  uint64
+	min uint64
+	max uint64
+	blockTarget  uint64
 	pHash   common.Hash
 }
 
-type mineTimeTarget interface {
+type MineTimeTarget interface {
 	// getters
 	getMinTime() uint64
 	getMaxTime() uint64
@@ -60,27 +60,27 @@ type mineTimeTarget interface {
 }
 
 func (t *timeTargetV2) getMinTime() uint64 {
-	return t.minTime
+	return t.min
 }
 
 func (t *timeTargetV2) setMinTime(minTime uint64) {
-	t.minTime = minTime
+	t.min = minTime
 }
 
 func (t *timeTargetV2) getMaxTime() uint64 {
-	return t.maxTime
+	return t.max
 }
 
 func (t *timeTargetV2) setMaxTime(maxTime uint64) {
-	t.maxTime = maxTime
+	t.max = maxTime
 }
 
 func (t *timeTargetV2) getTarget() uint64 {
-	return t.target
+	return t.blockTarget
 }
 
 func (t *timeTargetV2) setTarget(target uint64) {
-	t.target = target
+	t.blockTarget = target
 }
 
 func (t *timeTargetV2) getPeriodTarget() interface{} {
@@ -108,11 +108,11 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	parentNumber := parent.Number.Uint64()
 
 	// POS-11: Block time restrictions
-	ret.maxTime = e.now() + params.MaxFutureGap
+	ret.max = e.now() + params.MaxFutureGap
 
 	// POS-11: Block time restrictions
-	ret.minTime = parentBlockTime + params.MinBlockGap
-	ret.target = parentBlockTime + params.TargetBlockGap
+	ret.min = parentBlockTime + params.MinBlockGap
+	ret.blockTarget = parentBlockTime + params.TargetBlockGap
 
 	ret.pHash = parent.Hash()
 
@@ -141,11 +141,11 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 		emaLast = params.TargetBlockGap
 	}
 
-	ret.target = parentBlockTime + emaLast
+	ret.blockTarget = parentBlockTime + emaLast
 
 	log.Trace("PoS time", "block", parentNumber+1,
-		"min", ret.minTime, "max", ret.maxTime,
-		"timeTarget", ret.target,
+		"min", ret.min, "max", ret.max,
+		"timeTarget", ret.blockTarget,
 	)
 	return ret
 }
@@ -168,7 +168,7 @@ func calcPoSDifficultyV2(
 	timeTarget *timeTargetV2,
 ) *big.Int {
 
-	target := timeTarget.target
+	target := timeTarget.blockTarget
 	// if the target is the new block time we use the parent difficulty
 	if newBlockTime == target {
 		log.Trace("No difficulty change", "parent", parent.Difficulty)
@@ -220,8 +220,9 @@ func calcPoSDifficultyV2(
 
 // MineV2 ...
 //
-// PoS V2 miner implementation
-//
+// PoS V2 miner implementation,
+// NOTE: this function is no longer used as it's functionality is integrated into mine function and
+// the code that was different is chosen in runtime depending on asgard hardfork status
 func (e *Energi) MineV2(
 	chain ChainReader, header *types.Header, stop <-chan struct{},
 ) (success bool, err error) {
@@ -255,7 +256,7 @@ func (e *Energi) MineV2(
 	}
 
 	blockTarget := e.calcTimeTargetV2(chain, parent)
-	blockTime := blockTarget.minTime
+	blockTime := blockTarget.min
 
 	// Special case due to expected very large gap between Genesis and Migration
 	if header.IsGen2Migration() && !e.testing {
@@ -279,15 +280,13 @@ func (e *Energi) MineV2(
 	// for mining to prevent any difficult bombs.
 	if migrationDPoS && !e.testing && header.Number.Uint64() < params.DiffV2MigrationStakerBlockDelay {
 		// Obey block target
-		if blockTime < blockTarget.target {
-			blockTime = blockTarget.target
+		if blockTime < blockTarget.blockTarget {
+			blockTime = blockTarget.blockTarget
 		}
 
 		// Decrease difficulty, if it got bumped
-		if header.Difficulty.Uint64() > params.
-			DiffV2MigrationStakerTarget {
-			blockTime += params.
-				DiffV2MigrationStakerTimeDelay
+		if header.Difficulty.Uint64() > params.DiffV2MigrationStakerTarget {
+			blockTime += params.DiffV2MigrationStakerTimeDelay
 		}
 	}
 
@@ -312,7 +311,7 @@ func (e *Energi) MineV2(
 		}
 
 		header.Time = blockTime
-		if err = e.posPrepareV2(chain, header, parent, blockTarget); err != nil {
+		if blockTarget, err = e.posPrepareV2(chain, header, parent); err != nil {
 			return false, err
 		}
 
@@ -348,7 +347,7 @@ func (e *Energi) MineV2(
 			header.Coinbase = candidate.addr
 			poshash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
 			nonceCap := e.GetMinerNonceCap()
-			
+
 			if nonceCap != 0 && e.nonceCap < usedWeight {
 				continue
 			} else if poshash != nil {
@@ -358,4 +357,6 @@ func (e *Energi) MineV2(
 			}
 		}
 	}
+	// this doesn't need to be strictly stated but this is a long function
+	return success, err
 }
