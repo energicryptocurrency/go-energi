@@ -88,6 +88,8 @@ build-linux:
   stage: build
   extends: .merge-request-job
   script:
+    - git checkout -- .
+    - git clean -fdx -e node_modules .
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
 
