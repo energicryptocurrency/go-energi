@@ -504,7 +504,7 @@ func (e *Energi) mine(
 	}
 
 	// make time target calculation depending on asgard status
-	var timeTarget timeTarget
+	var timeTarget *timeTarget
 	if isAsgardActive {
 		timeTarget = e.calcTimeTargetV2(chain, parent)
 	} else {
@@ -538,7 +538,7 @@ func (e *Energi) mine(
 
 	//---
 	for ; ; blockTime++ {
-		if maxTime := e.now() + MaxFutureGap; blockTime > maxTime {
+		if maxTime := e.now() + params.MaxFutureGap; blockTime > maxTime {
 			log.Trace("PoS miner is sleeping")
 			select {
 			case <-stop:
@@ -555,7 +555,7 @@ func (e *Energi) mine(
 		}
 
 		header.Time = blockTime
-		timeTarget, err = e.Prepare(chain, header)
+		err = e.Prepare(chain, header)
 		if err != nil {
 			return false, err
 		}
