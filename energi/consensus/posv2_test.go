@@ -50,15 +50,15 @@ func TestPoSChainV2(t *testing.T) {
 	// t.Parallel()
 	// log.Root().SetHandler(log.StdoutHandler)
 	flag.Parse()
-	log.Root().SetHandler(
-		log.LvlFilterHandler(
-			3,
-			log.StreamHandler(
-				os.Stderr,
-				log.TerminalFormat(false),
-			),
-		),
-	)
+	//log.Root().SetHandler(
+	//	log.LvlFilterHandler(
+	//		3,
+	//		log.StreamHandler(
+	//			os.Stderr,
+	//			log.TerminalFormat(false),
+	//		),
+	//	),
+	//)
 	// this enables code location printing
 	log.PrintOrigins(true)
 
@@ -323,23 +323,23 @@ func TestPoSChainV2(t *testing.T) {
 		// ---
 		tt := engine.calcTimeTargetV2(chain, parent)
 		_ = tt
-		if !assert.True(t, tt.maxTime >= now) {
+		if !assert.True(t, tt.max >= now) {
 			log.Debug("failed")
 
 			t.FailNow()
 		}
-		if !assert.True(t, tt.maxTime <= engine.now()+30) {
+		if !assert.True(t, tt.max <= engine.now()+30) {
 			log.Debug("failed")
 
 			t.FailNow()
 		}
 		
 		if i < 60 {
-			// parent header and current header must be minTime apart(30s)
+			// parent header and current header must be timeTarget.min apart(30s)
 			if !assert.Equal(t, header.Time, parent.Time+30){
 				t.FailNow()
 			}
-			if !assert.Equal(t, tt.minTime, header.Time){
+			if !assert.Equal(t, tt.min, header.Time){
 				t.FailNow()
 			}
 			// assert.Equal(t, tt.target, header.Time+30)
@@ -350,7 +350,7 @@ func TestPoSChainV2(t *testing.T) {
 			if !assert.Equal(t, header.Time, parent.Time+1800){
 				t.FailNow()
 			}
-			if !assert.Equal(t, tt.minTime, header.Time-1770){
+			if !assert.Equal(t, tt.min, header.Time-1770){
 				t.FailNow()
 			}
 			// todo: this test is getting different numbers for
@@ -366,7 +366,7 @@ func TestPoSChainV2(t *testing.T) {
 			}
 		}
 		
-		assert.True(t, parent.Time < tt.minTime, "Header %v", i)
+		assert.True(t, parent.Time < tt.min, "Header %v", i)
 
 		//		assert.Empty(t, engine.enforceTime(header, tt))
 		//		assert.Empty(t, engine.checkTime(header, tt))
@@ -505,7 +505,7 @@ func TestPoSDiffV2(t *testing.T) {
 		parent := &types.Header{
 			Difficulty: big.NewInt(tc.parent),
 		}
-		tt := &timeTargetV2{
+		tt := &timeTarget{
 			minTime: tc.min,
 			target:  tc.target,
 		}
