@@ -484,7 +484,7 @@ func (e *Energi) mine(
 		})
 		//log.Trace("PoS miner candidate found", "address", a)
 
-		if a == energi_params.Energi_MigrationContract {
+		if a == params.Energi_MigrationContract {
 			migration_dpos = true
 		}
 	}
@@ -493,7 +493,7 @@ func (e *Energi) mine(
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 
 	if parent == nil {
-		return false, eth_consensus.ErrUnknownAncestor
+		return false, consensus.ErrUnknownAncestor
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
@@ -504,7 +504,7 @@ func (e *Energi) mine(
 	}
 
 	// make time target calculation depending on asgard status
-	var timeTarget timeTarget{}
+	var timeTarget timeTarget
 	if isAsgardActive {
 		timeTarget = e.calcTimeTargetV2(chain, parent)
 	} else {
@@ -555,11 +555,7 @@ func (e *Energi) mine(
 		}
 
 		header.Time = blockTime
-		if isAsgardActive {
-			timeTarget, err = e.posPrepareV2(chain, header, parent)
-		} else {
-			timeTarget, err = e.posPrepare(chain, header, parent)
-		}
+		timeTarget, err = e.Prepare(chain, header)
 		if err != nil {
 			return false, err
 		}
@@ -590,14 +586,14 @@ func (e *Energi) mine(
 
 			//log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
 			header.Coinbase = v.addr
-			poshash, used_weight := e.calcPoSHash(header, target, v.weight)
+			poshash, usedWeight := e.calcPoSHash(header, target, v.weight)
 
 			nonceCap := e.GetMinerNonceCap()
-			if nonceCap != 0 && nonceCap < used_weight {
+			if nonceCap != 0 && nonceCap < usedWeight {
 				continue
 			} else if poshash != nil {
-				log.Trace("PoS stake", "addr", v.addr, "weight", v.weight, "used_weight", used_weight)
-				header.Nonce = types.EncodeNonce(used_weight)
+				log.Trace("PoS stake", "addr", v.addr, "weight", v.weight, "used_weight", usedWeight)
+				header.Nonce = types.EncodeNonce(usedWeight)
 				return true, nil
 			}
 		}
