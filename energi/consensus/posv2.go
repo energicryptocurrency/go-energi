@@ -24,16 +24,6 @@ import (
 	"energi.world/core/gen3/log"
 )
 
-const (
-	targetWindow          = params.TargetWindow
-	maxTimeDifferenceDrop = params.MaxTimeDifferenceDrop
-	difficultyChangeBase  = params.DifficultyChangeBase
-
-	diffV2MigrationStakerTimeDelay  = params.DiffV2MigrationStakerTimeDelay
-	diffV2MigrationStakerBlockDelay = params.DiffV2MigrationStakerBlockDelay
-	diffV2MigrationStakerTarget     = params.DiffV2MigrationStakerTarget
-)
-
 /*
  * Block Time Target Calculation V2
  * @chain Current Chain
