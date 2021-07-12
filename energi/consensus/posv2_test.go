@@ -19,7 +19,6 @@ package consensus
 import (
 	"flag"
 	"math/big"
-	"os"
 	"testing"
 	
 	"energi.world/core/gen3/common"
@@ -506,8 +505,8 @@ func TestPoSDiffV2(t *testing.T) {
 			Difficulty: big.NewInt(tc.parent),
 		}
 		tt := &timeTarget{
-			minTime: tc.min,
-			target:  tc.target,
+			min: tc.min,
+			blockTarget:  tc.target,
 		}
 
 		res := calcPoSDifficultyV2(tc.time, parent, tt)

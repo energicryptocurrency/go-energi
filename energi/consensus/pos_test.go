@@ -156,7 +156,7 @@ func TestPoSChain(t *testing.T) {
 
 	iterCount := 150
 
-	engine.diffFn = func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int {
+	engine.diffFn = func(uint64, *types.Header, *timeTarget) *big.Int {
 		return common.Big1
 	}
 
@@ -474,7 +474,7 @@ func TestPoSMine(t *testing.T) {
 
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	engine.testing = true
-	engine.diffFn = func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int {
+	engine.diffFn = func(uint64, *types.Header, *timeTarget) *big.Int {
 		return common.Big1
 	}
 	engine.SetMinerCB(
