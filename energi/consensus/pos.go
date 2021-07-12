@@ -31,16 +31,6 @@ import (
 	"energi.world/core/gen3/log"
 )
 
-// removing this because why clutter namespaces more than they have to be?
-// const (
-//	MaturityPeriod    = params.MaturityPeriod
-//	AveragingWindow = params.AveragingWindow
-//	TargetBlockGap    = params.TargetBlockGap
-//	MinBlockGap       = params.MinBlockGap
-//	MaxFutureGap      = params.MaxFutureGap
-//	TargetPeriodGap   = params.TargetPeriodGap
-// )
-
 var (
 	minStake    = big.NewInt(1e18) // 1000000000000000000
 	diff1Target = new(big.Int).Exp(
@@ -469,70 +459,64 @@ func (e *Energi) lookupStakeWeight(
  * POS-19: PoS miner implementation
  */
 func (e *Energi) mine(
-	chain ChainReader, header *types.Header, stop <-chan struct{},
+	chain ChainReader,
+	header *types.Header,
+	stop <-chan struct{},
 ) (success bool, err error) {
-
 	type Candidates struct {
 		addr   common.Address
 		weight uint64
 	}
 
 	accounts := e.accountsFn()
-	// if no accounts are found, just pause and wait for the stop signal
-	//
-	// todo: is this what is intended? Is there a case where this value can
-	//  change but this thread is then dead? I think that very likely this
-	//  should be a repeating loop that retries every minute or something like
-	//  this in case an account is created that can be used, while the server is
-	//  running.
-	//  further thoughts: generally it seems like this function returns quite
-	//  quickly so probably this is fine
 	if len(accounts) == 0 {
 		select {
 		case <-stop:
-			return
+			return false, nil
 		}
 	}
 
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		err = consensus.ErrUnknownAncestor
-		return
+	candidates := make([]Candidates, 0, len(accounts))
+	migration_dpos := false
+	for _, a := range accounts {
+		candidates = append(candidates, Candidates{
+			addr:   a,
+			weight: 0,
+		})
+		//log.Trace("PoS miner candidate found", "address", a)
+
+		if a == energi_params.Energi_MigrationContract {
+			migration_dpos = true
+		}
 	}
 
-	timeTarget := e.calcTimeTarget(chain, parent)
-	blockTime := timeTarget.min
+	//---
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+
+	if parent == nil {
+		return false, eth_consensus.ErrUnknownAncestor
+	}
+
+	time_target := e.calcTimeTarget(chain, parent)
+
+	blockTime := time_target.min_time
 
 	// Special case due to expected very large gap between Genesis and Migration
 	if header.IsGen2Migration() && !e.testing {
 		blockTime = e.now()
 	}
 
-	candidates := make([]Candidates, 0, len(accounts))
-	migrationDPoS := false
-
-	for _, a := range accounts {
-
-		if a == params.Energi_MigrationContract {
-			migrationDPoS = true
+	// A special workaround to obey target time when migration contract is used
+	// for mining to prevent any difficult bombs.
+	if migration_dpos && !e.testing {
+		// Obey block target
+		if blockTime < time_target.block_target {
+			blockTime = time_target.block_target
 		}
 
-		candidate := Candidates{a, 0}
-		candidates = append(candidates, candidate)
-	}
-
-	// A special workaround to obey target time when migration contract is
-	// used for mining to prevent any difficulty bombs.
-	if migrationDPoS && !e.testing {
-
-		// clamp blockTime to block target
-		if blockTime < timeTarget.blockTarget {
-			blockTime = timeTarget.blockTarget
-		}
-
-		// further, clamp to period target
-		if blockTime < timeTarget.periodTarget {
-			blockTime = timeTarget.periodTarget
+		// Also, obey period target
+		if blockTime < time_target.period_target {
+			blockTime = time_target.period_target
 		}
 
 		// Decrease difficulty, if it got bumped
@@ -541,11 +525,9 @@ func (e *Energi) mine(
 		}
 	}
 
-out:
-	// Try to match target
+	//---
 	for ; ; blockTime++ {
-
-		if max_time := e.now() + params.MaxFutureGap; blockTime > max_time {
+		if max_time := e.now() + MaxFutureGap; blockTime > max_time {
 			log.Trace("PoS miner is sleeping")
 			select {
 			case <-stop:
@@ -556,18 +538,15 @@ out:
 			}
 		}
 
-
-		// check account axistance
 		if e.peerCountFn() == 0 {
 			log.Trace("Skipping PoS miner due to missing peers")
 			continue
 		}
 
 		header.Time = blockTime
-		if timeTarget, err = e.PoSPrepare(
-			chain, header, parent,
-		); err != nil {
-			break out
+		time_target, err = e.posPrepare(chain, header, parent)
+		if err != nil {
+			return false, err
 		}
 
 		target := new(big.Int).Div(diff1Target, header.Difficulty)
@@ -576,9 +555,9 @@ out:
 		// It could be done once, but then there is a chance to miss blocks.
 		// Some significant algo optimizations are possible, but we start with simplicity.
 		for i := range candidates {
-			candidate := &candidates[i]
-			candidate.weight, err = e.lookupStakeWeight(
-				chain, blockTime, parent, candidate.addr)
+			v := &candidates[i]
+			v.weight, err = e.lookupStakeWeight(
+				chain, blockTime, parent, v.addr)
 			if err != nil {
 				return false, err
 			}
@@ -587,36 +566,27 @@ out:
 		sort.Slice(candidates, func(i, j int) bool {
 			return candidates[i].weight < candidates[j].weight
 		})
-
-		// This tries each candidate for each timestamp before progressing the
-		// timestamp. If the reverse order was desired, the block time needs to
-		// be saved and reset here. Since older is better, this is probably the
-		// better sequence to work in.
-		for _, candidate := range candidates {
-
-			if candidate.weight < 1 {
+		// Try to match target
+		for i := range candidates {
+			v := &candidates[i]
+			if v.weight < 1 {
 				continue
 			}
 
 			//log.Trace("PoS stake candidate", "addr", v.addr, "weight", v.weight)
-			header.Coinbase = candidate.addr
-			posHash, usedWeight := e.calcPoSHash(header, target, candidate.weight)
-			nonceCap := e.GetMinerNonceCap()
+			header.Coinbase = v.addr
+			poshash, used_weight := e.calcPoSHash(header, target, v.weight)
 
-			header.Nonce = types.EncodeNonce(usedWeight)
-			if nonceCap != 0 && nonceCap < usedWeight {
+			nonceCap := e.GetMinerNonceCap()
+			if nonceCap != 0 && nonceCap < used_weight {
 				continue
-			} else if posHash != nil {
-				log.Trace(
-					"PoS stake", "addr", candidate.addr,
-					"weight", candidate.weight,
-					"used_weight", usedWeight,
-				)
-				success = true
-				break out
+			} else if poshash != nil {
+				log.Trace("PoS stake", "addr", v.addr, "weight", v.weight, "used_weight", used_weight)
+				header.Nonce = types.EncodeNonce(used_weight)
+				return true, nil
 			}
 		}
 	}
-	// this doesn't need to be strictly stated but this is a long function
-	return success, err
+
+	return false, nil
 }
