@@ -54,8 +54,6 @@ var (
 	errInvalidSig = errors.New("Invalid signature")
 
 	errBlacklistedCoinbase = errors.New("Blacklisted coinbase")
-
-	hardfork1Name = "Asgard"
 )
 
 type (
@@ -565,7 +563,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, hardfork1Name)
+	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	if err != nil {
 		log.Trace("Asgard hf check failed: " + err.Error())
@@ -749,7 +747,7 @@ func (e *Energi) seal(
 
 		// check if Asgard hardfork is activated use new difficulty algorithm
 		var isAsgardActive bool
-		isAsgardActive, err = e.hardforkIsActive(chain, header, hardfork1Name)
+		isAsgardActive, err = e.hardforkIsActive(chain, header, "Asgard")
 		log.Debug("hard fork", "status", isAsgardActive)
 
 		success, err = e.mine(chain, header, stop)
@@ -979,7 +977,7 @@ func (e *Energi) CalcDifficulty(
 ) *big.Int {
 	// check if Asgard hardfork is activated use new difficulty algorithm
 	var isAsgardActive bool
-	isAsgardActive, _ = e.hardforkIsActive(chain, parent, hardfork1Name)
+	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
 	log.Debug("hard fork", "status", isAsgardActive)
 	if isAsgardActive {
 		time_target := e.calcTimeTargetV2(chain, parent)
