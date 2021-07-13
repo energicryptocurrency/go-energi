@@ -479,6 +479,11 @@ func (e *Energi) hardforkIsActive(
 	header *types.Header,
 	hardforkName string,
 ) (bool, error) {
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		return false, nil
+	}
+
 	// get state for snapshot
 	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
 	if blockst == nil {
