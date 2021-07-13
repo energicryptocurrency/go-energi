@@ -93,8 +93,6 @@ type (
 		knownStakes    KnownStakes
 		nextKSPurge    uint64
 		txhashMap      *lru.Cache
-		activeHardFork [32]byte
-		hfLastChecked  *big.Int
 	}
 )
 
@@ -151,7 +149,6 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		mnregAbi:      mngregAbi,
 		treasuryAbi:   treasuryAbi,
 		hardforkAbi:   hardforkAbi,
-		hfLastChecked: big.NewInt(0),
 		systemFaucet:  energi_params.Energi_SystemFaucet,
 		xferGas:       0,
 		callGas:       30000,
@@ -482,73 +479,54 @@ func (e *Energi) hardforkIsActive(
 	header *types.Header,
 	hardforkName string,
 ) (bool, error) {
-	// the testing flag is here extended to indicate that hard fork is
-	// already stored in the Energi state structure for testing a specific
-	// fork
-	if !e.testing && header.Number.Cmp(e.hfLastChecked) != 0 {
-
-		// copy in the height to the last checked
-		*e.hfLastChecked = *header.Number
-
-		// get state for snapshot
-		blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
-		if blockst == nil {
-			log.Error("PoS state root failure", "header", header.ParentHash)
-			return false, eth_consensus.ErrMissingState
-		}
-
-		// get parent
-		parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-		if parent == nil {
-			return false, eth_consensus.ErrUnknownAncestor
-		}
-
-		// create call data
-		var hardforkNameArray [32]byte
-		copy(hardforkNameArray[:], []byte(hardforkName))
-		callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
-		if err != nil {
-			log.Error("Fail to check if hardfork is active", "err", err)
-			return false, err
-		}
-
-		// construct the contract call message
-		msg := types.NewMessage(
-			e.systemFaucet,
-			&energi_params.Energi_HardforkRegistry,
-			0,
-			common.Big0,
-			e.callGas,
-			common.Big0,
-			callData,
-			false,
-		)
-
-		// create environment and apply message
-		evm := e.createEVM(msg, chain, parent, blockst)
-		gp := core.GasPool(e.callGas)
-		output, _, _, err := core.ApplyMessage(evm, msg, &gp)
-		if err != nil {
-			log.Trace("Fail to get isActive status", "err", err)
-			return false, err
-		}
-
-		// unpack the output
-		var isActive bool
-		err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
-
-		return isActive, err
-	} else {
-
-		// copy the name into the byte array for comparison
-		var hardforkNameArray [32]byte
-		// note that strings copy into bytes, in case you are wondering
-		copy(hardforkNameArray[:], hardforkName)
-		// return whether the currently stored active hard fork is
-		// the one being queried
-		return hardforkNameArray == e.activeHardFork, nil
-
+	// get state for snapshot
+	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
+	if blockst == nil {
+		log.Error("PoS state root failure", "header", header.ParentHash)
+		return false, eth_consensus.ErrMissingState
 	}
+
+	// get parent
+	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
+	if parent == nil {
+		return false, eth_consensus.ErrUnknownAncestor
+	}
+
+	// create call data
+	var hardforkNameArray [32]byte
+	copy(hardforkNameArray[:], []byte(hardforkName))
+	callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
+	if err != nil {
+		log.Error("Fail to check if hardfork is active", "err", err)
+		return false, err
+	}
+
+	// construct the contract call message
+	msg := types.NewMessage(
+		e.systemFaucet,
+		&energi_params.Energi_HardforkRegistry,
+		0,
+		common.Big0,
+		e.callGas,
+		common.Big0,
+		callData,
+		false,
+	)
+
+	// create environment and apply message
+	evm := e.createEVM(msg, chain, parent, blockst)
+	gp := core.GasPool(e.callGas)
+	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
+	if err != nil {
+		log.Trace("Fail to get isActive status", "err", err)
+		return false, err
+	}
+
+	// unpack the output
+	var isActive bool
+	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
+
+	return isActive, err
 }
 
 // Prepare initializes the consensus fields of a block header according to the
