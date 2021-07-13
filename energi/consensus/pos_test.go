@@ -92,7 +92,7 @@ func generateAddresses(len int) ([]common.Address, map[common.Address]*ecdsa.Pri
 	return addresses, signers, alloc, migrationSigner
 }
 
-func TestPoSChain(t *testing.T) {
+func TestPoSChainV1(t *testing.T) {
 	t.Parallel()
 	// log.Root().SetHandler(log.StdoutHandler)
 
