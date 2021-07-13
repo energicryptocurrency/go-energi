@@ -62,8 +62,8 @@ type (
 	SignerFn    func(common.Address, []byte) ([]byte, error)
 	PeerCountFn func() int
 	IsMiningFn  func() bool
-	DiffFn      func(uint64, *types.Header,
-		*timeTarget) *big.Int
+	DiffFn      func(uint64, *types.Header, *timeTarget) *big.Int
+
 	// Energi is the state data for Energi Proof of Stake consensus
 	Energi struct {
 		// Atomic alignment to 64-bit
@@ -482,7 +482,6 @@ func (e *Energi) hardforkIsActive(
 	header *types.Header,
 	hardforkName string,
 ) (bool, error) {
-
 	// the testing flag is here extended to indicate that hard fork is
 	// already stored in the Energi state structure for testing a specific
 	// fork
