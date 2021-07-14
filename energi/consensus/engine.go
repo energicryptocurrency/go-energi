@@ -493,6 +493,7 @@ func (e *Energi) hardforkIsActive(
 	// get parent
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
+		log.Error("Failed to check if hardfork is active", "err", ErrUnknownAncestor)
 		return false, eth_consensus.ErrUnknownAncestor
 	}
 
