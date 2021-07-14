@@ -540,7 +540,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 
 	if parent == nil {
-		log.Error("Fail to find parent", "header", header)
+		log.Error("Failed to find parent", "header", header)
 		return eth_consensus.ErrUnknownAncestor
 	}
 
