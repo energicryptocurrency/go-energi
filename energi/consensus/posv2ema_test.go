@@ -2,15 +2,13 @@ package consensus
 
 import (
 	"testing"
-
-	"energi.world/core/gen3/energi/params"
 )
 
-func TestCalcEMAUint64(t *testing.T) {
-	o := CalcEMAUint64(emaSamples, 2, params.SMAPeriod+1, params.SMAPeriod)
-	if o != 56 {
-		t.Log("EMA calculation did not produce expected result")
-		t.Log("expected 56, got", o)
+func TestCalculateBlockTimeEMA(t *testing.T) {
+	emaCalculated := CalculateBlockTimeEMA(emaSamples)
+	emaExpected := uint64(59161280)
+	if emaCalculated != emaExpected {
+		t.Log("EMA mismatch - expected", emaExpected, "got", emaCalculated)
 		t.FailNow()
 	}
 }
