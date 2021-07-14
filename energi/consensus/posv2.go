@@ -70,7 +70,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 		parent = past
 	}
 
-	emaLast := CalcEMAUint64(timeDiffs, 2, params.SMAPeriod+1, params.SMAPeriod)
+	emaLast := CalculateBlockTimeEMA(timeDiffs)
 	if emaLast > params.TargetBlockGap {
 		// Max block gap should not exceed value defined in TargetBlockGap.
 		emaLast = params.TargetBlockGap
