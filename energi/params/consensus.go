@@ -21,11 +21,10 @@ type ctxKey string
 const (
 	MaturityPeriod  uint64 = 60 * 60
 	AveragingWindow uint64 = 60 // 60 blocks
-	TargetBlockGap  uint64 = 60 // 60 seconds after the target is max diff
+	TargetBlockGap  uint64 = 60 // 60 second block time
 	MinBlockGap     uint64 = 30 // 30 seconds minimum before new timestamp
 	MaxFutureGap    uint64 = 3  // only accept blocks this many seconds ahead
 	TargetPeriodGap uint64 = AveragingWindow * TargetBlockGap
-	SMAPeriod       uint64 = 5
 
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
