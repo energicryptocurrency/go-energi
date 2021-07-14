@@ -16,18 +16,13 @@ func main() {
 	// rand.Seed(time.Now().UnixNano()) which will have a typical average
 	// around the same as params.TargetBlockGap (60 second block interval)
 	samples := make([]uint64, sampleNum)
-	samples[0] = uint64(int64(params.MinBlockGap) +
-		rand.Int63n(int64(params.TargetBlockGap)))
 	for i := range samples {
-		if i > 0 {
-			samples[i] = samples[i-1] +
-				uint64(int64(params.MinBlockGap)+
-					rand.Int63n(int64(params.TargetBlockGap)))
-		}
+		samples[i] = uint64(int64(params.MinBlockGap)+
+				rand.Int63n(int64(params.TargetBlockGap)))
 	}
 	output := `package consensus
 	
-` + `//go:generate go run ./intervalgen/.
+//go:generate go run ./intervalgen/.
 
 var emaSamples = []uint64{
 `
