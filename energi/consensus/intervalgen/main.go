@@ -30,5 +30,5 @@ var emaSamples = []uint64{
 		output += fmt.Sprint("\t", samples[i], ",\n")
 	}
 	output += "}\n"
-	ioutil.WriteFile("posv2emasamples.go", []byte(output), 0660)
+	ioutil.WriteFile("posv2emasamples_test.go", []byte(output), 0660)
 }
