@@ -83,6 +83,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	// POS-11: Block time restrictions
 	ret.min = parentBlockTime + params.MinBlockGap
 	ret.blockTarget = parentBlockTime + params.TargetBlockGap
+	ret.periodTarget = ret.blockTarget
 
 	// Block interval enforcement
 	// TODO: LRU cache here for extra DoS mitigation
@@ -103,13 +104,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 		parent = past
 	}
 
-	emaLast := CalculateBlockTimeEMA(timeDiffs)
-	if emaLast > params.TargetBlockGap {
-		// Max block gap should not exceed value defined in TargetBlockGap.
-		emaLast = params.TargetBlockGap
-	}
-
-	ret.blockTarget = parentBlockTime + emaLast
+	ret.periodTarget = CalculateBlockTimeEMA(timeDiffs)
 
 	log.Trace("PoS time", "block", parentNumber+1,
 		"min", ret.min, "max", ret.max,
