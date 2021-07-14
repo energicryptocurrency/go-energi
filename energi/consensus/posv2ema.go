@@ -14,15 +14,13 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64) (ema uint64) {
 	// we use a scaling factor due to entirely integer calculation for this function
 	// scaling up lets us calculate an EMA at a higher resolution that 1 second
 	scalingFactor := 1000000 // after scaling the units will be microseconds
-	for i := 0; i < sampleSize; i++ {
-		blockTimeDifferences[i] *= scalingFactor
-	}
 
 	// choice of initial condition is important for an EMA. We could use the first
 	// block time difference, but instead we'll set it to the target value so our
 	// EMA will tend toward the target
 	ema = params.TargetBlockGap * scalingFactor
 	for i := 1; i < sampleSize; i++ {
+		blockTimeDifferences[i-1] *= scalingFactor
 		// this formula has a factor of 2/(N+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
 		// not precomputed this value so we don't lose precision on early division
