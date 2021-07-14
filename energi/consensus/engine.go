@@ -501,7 +501,7 @@ func (e *Energi) hardforkIsActive(
 	copy(hardforkNameArray[:], []byte(hardforkName))
 	callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
 	if err != nil {
-		log.Error("Fail to check if hardfork is active", "err", err)
+		log.Error("Failed to check if hardfork is active", "err", err)
 		return false, err
 	}
 
@@ -522,7 +522,7 @@ func (e *Energi) hardforkIsActive(
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
-		log.Trace("Fail to get isActive status", "err", err)
+		log.Trace("Failed to get isActive status", "err", err)
 		return false, err
 	}
 
