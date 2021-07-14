@@ -65,7 +65,7 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64) (ema uint64) {
  * Populates ret with an updated Time Target
  * Calculates a Target Block Time based on previous block times in order to maintain a 60 second average time
  * Implements the Exponential Moving Average in calculating the block target time
- * Based on the last 60 blocks
+ * Based on the last 60 elapsed block times
  * A block cannot be created with a time greater than 3 seconds in the future
  * ~~The minimum block time is 30 seconds~~ - This should not be enforced
 here as an early or late target is for difficulty adjustment not the block
@@ -89,8 +89,9 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	// TODO: LRU cache here for extra DoS mitigation
 	timeDiffs := make([]uint64, params.AveragingWindow)
 
-	// NOTE: we have to do this way as parent may be not part of canonical
-	//       chain. As no mutex is held, we cannot do checks for canonical.
+	// compute block time differences
+	// note that the most recent time difference will be the most
+	// weighted by the EMA, and the oldest time difference will be the least
 	for i := params.AveragingWindow; i > 0; i-- {
 		past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
 		if past == nil {
@@ -109,6 +110,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	log.Trace("PoS time", "block", parentNumber+1,
 		"min", ret.min, "max", ret.max,
 		"timeTarget", ret.blockTarget,
+		"averageBlockTimeMicroseconds", ret.periodTarget,
 	)
 	return ret
 }
