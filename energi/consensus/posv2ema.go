@@ -10,10 +10,12 @@ import (
 // see https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
 func CalculateBlockTimeEMA(blockTimeDifferences []uint64) (ema uint64) {
 	sampleSize := len(blockTimeDifferences)
+	two := uint64(2)
+	N := uint64(sampleSize + 1)
 
 	// we use a scaling factor due to entirely integer calculation for this function
 	// scaling up lets us calculate an EMA at a higher resolution that 1 second
-	scalingFactor := 1000000 // after scaling the units will be microseconds
+	scalingFactor := uint64(1000000) // after scaling the units will be microseconds
 
 	// choice of initial condition is important for an EMA. We could use the first
 	// block time difference, but instead we'll set it to the target value so our
@@ -24,7 +26,7 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64) (ema uint64) {
 		// this formula has a factor of 2/(N+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
 		// not precomputed this value so we don't lose precision on early division
-		ema = ((2 * blockTimeDifferences[i-1])/(sampleSize + 1)) + (ema - ((ema * 2)/(sampleSize + 1))
+		ema = ((two * blockTimeDifferences[i-1])/N) + (ema - ((ema * two)/N))
 	}
 	return
 }
