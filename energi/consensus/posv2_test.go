@@ -37,6 +37,7 @@ import (
 )
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
+	t.Parallel()
 	emaCalculated := CalculateBlockTimeEMA(emaSamples)
 	emaExpected := uint64(59161280)
 	if emaCalculated != emaExpected {
