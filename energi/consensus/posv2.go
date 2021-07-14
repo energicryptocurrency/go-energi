@@ -41,6 +41,12 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64) (ema uint64) {
 	// block time difference, but instead we'll set it to the target value so our
 	// EMA will tend toward the target
 	ema = params.TargetBlockGap * scalingFactor
+
+	// return the target block gap as EMA if we don't have enough samples
+	if (sampleSize < 2) {
+		return
+	}
+
 	for i := 1; i < sampleSize; i++ {
 		blockTimeDifferences[i-1] *= scalingFactor
 		// this formula has a factor of 2/(N+1) in a couple places. This is our
