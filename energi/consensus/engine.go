@@ -712,55 +712,45 @@ func (e *Energi) govFinalize(
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	return txs, receipts, err
 }
-func (e *Energi) seal(
+
+// Seal generates a new sealing request for the given input block and pushes
+// the result into the given channel.
+//
+// Note, the method returns immediately and will send the result async. More
+// than one result may also be returned depending on the consensus algorithm.
+func (e *Energi) Seal(
 	chain ChainReader,
 	block *types.Block,
 	results chan<- *eth_consensus.SealResult,
 	stop <-chan struct{},
 ) (err error) {
-	log.Debug("starting seal goroutine")
+	go func() {
 	header := block.Header()
 	txhash := header.TxHash
 	result := eth_consensus.NewSealResult(block, nil, nil)
 
 	if header.Number.Cmp(common.Big0) != 0 {
+			success, err := e.mine(chain, header, stop)
 
-		var success bool
+			// NOTE: due to the fact that PoS mining may change Coinbase
+			//       it is required to reprocess all transaction with correct
+			//       state of the block (input parameters). This is essential
+			//       for consensus and correct distribution of gas.
+			if success && err == nil {
+				result, err = e.recreateBlock(chain, header, block.Transactions())
+			}
 
-		// check if Asgard hardfork is activated use new difficulty algorithm
-		var isAsgardActive bool
-		isAsgardActive, err = e.hardforkIsActive(chain, header, "Asgard")
-		log.Debug("hard fork", "status", isAsgardActive)
-
-		success, err = e.mine(chain, header, stop)
 		if err != nil {
 			log.Error("PoS miner error", "err", err)
 			success = false
 		}
 
-		if !success || err != nil {
-			log.Debug("empty seal function?")
+			if !success {
 			select {
 			case results <- eth_consensus.NewSealResult(nil, nil, nil):
 			default:
 			}
-			log.Debug("empty seal function done")
 			return
-		}
-
-		// NOTE: due to the fact that PoS mining may change Coinbase
-		//       it is required to reprocess all transaction with correct
-		//       state of the block (input parameters). This is essential
-		//       for consensus and correct distribution of gas.
-		if success {
-			log.Debug("recreating block", "height",
-				header.Number.Uint64())
-			result, err = e.recreateBlock(
-				chain, header, block.Transactions(),
-			)
-			if err != nil {
-				return
-			}
 		}
 
 		header = result.Block.Header()
@@ -780,30 +770,11 @@ func (e *Energi) seal(
 
 	select {
 	case results <- result:
-		log.Debug(
-			"PoS seal has submitted solution", "block", result.Block.Hash(),
-		)
+			log.Info("PoS seal has submitted solution", "block", result.Block.Hash())
 	default:
-		log.Warn(
-			"PoS seal is not read by miner", "sealhash", e.SealHash(header),
-		)
+			log.Warn("PoS seal is not read by miner", "sealhash", e.SealHash(header))
 	}
-	return nil
-}
-
-// Seal generates a new sealing request for the given input block and pushes
-// the result into the given channel.
-//
-// Note, the method returns immediately and will send the result async. More
-// than one result may also be returned depending on the consensus algorithm.
-func (e *Energi) Seal(
-	chain ChainReader,
-	block *types.Block,
-	results chan<- *eth_consensus.SealResult,
-	stop <-chan struct{},
-) (err error) {
-
-	go e.seal(chain, block, results, stop)
+	}()
 
 	return nil
 }
@@ -824,14 +795,8 @@ func (e *Energi) recreateBlock(
 		ok bool
 	)
 
-	height := header.Number.Uint64() - 1
-	log.Debug("calculating block state", "height", height)
-	blstate := chain.CalculateBlockState(
-		header.ParentHash, height,
-	)
-	log.Debug("block state", "state", blstate != nil)
-	if blstate == nil {
-		log.Debug("nil block state")
+	blstate := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
+	if err != nil {
 		return nil, eth_consensus.ErrUnknownAncestor
 	}
 
