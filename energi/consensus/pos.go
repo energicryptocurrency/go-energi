@@ -33,7 +33,7 @@ import (
 
 
 var (
-	minStake    = big.NewInt(1e18) // 1000000000000000000
+	minStake    = big.NewInt(1e18) // 1 NRG
 	diff1Target = new(big.Int).Exp(
 		big.NewInt(2), big.NewInt(256), big.NewInt(0),
 	)
