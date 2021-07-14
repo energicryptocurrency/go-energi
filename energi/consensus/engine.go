@@ -128,8 +128,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		panic(err)
 	}
 
-	hardforkAbi, err := abi.JSON(strings.NewReader(energi_abi.
-		IHardforkRegistryABI))
+	hardforkAbi, err := abi.JSON(strings.NewReader(energi_abi.IHardforkRegistryABI))
 	if err != nil {
 		panic(err)
 	}
