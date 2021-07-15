@@ -36,7 +36,7 @@ var (
 	Energi_Blacklist          = common.BigToAddress(big.NewInt(0x30A))
 	Energi_Whitelist          = common.BigToAddress(big.NewInt(0x30B))
 	Energi_MasternodeList     = common.BigToAddress(big.NewInt(0x30C))
-	Energi_HardforkRegistry   = common.BigToAddress(big.NewInt(0x30D)) // Only used in simnet and devnet, check ChainConfig
+	Energi_HardforkRegistry   = common.HexToAddress(big.NewInt(0x30D)) // Only used in simnet and devnet, check ChainConfig
 
 	Energi_BlockRewardV1        = common.BigToAddress(big.NewInt(0x310))
 	Energi_TreasuryV1           = common.BigToAddress(big.NewInt(0x311))

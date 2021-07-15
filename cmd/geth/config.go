@@ -184,6 +184,7 @@ func makeFullNode(ctx *cli.Context) *node.Node {
 	}
 
 	utils.RegisterDynamicCheckpointService(stack)
+	utils.RegisterHardforkService(stack)
 
 	if ctx.GlobalBool(utils.MasternodeFlag.Name) {
 		var owner common.Address
