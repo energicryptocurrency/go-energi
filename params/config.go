@@ -286,7 +286,7 @@ type EnergiConfig struct {
 	EBISigner                     common.Address `json:"ebiSigner"`
 	CPPSigner                     common.Address `json:"cppSigner"`
 	HFSigner                      common.Address `json:"hfSigner"`
-	HardforkRegistryProxyAddress  common.Address `json:"hfProxySigner"`
+	HardforkRegistryProxyAddress  common.Address `json:"hfProxyAddress"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
