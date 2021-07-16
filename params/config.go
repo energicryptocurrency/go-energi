@@ -45,7 +45,7 @@ var (
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 
 	MainnetHFProxy = common.HexToAddress("")
-	TestnetHFProxy = common.HexToAddress("0xBB067D951f2329fD16084F1788b36c024Cc9febB")
+	TestnetHFProxy = common.HexToAddress("")
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
@@ -79,11 +79,11 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Energi: &EnergiConfig{
-			BackboneAddress: 							MainnetBackbone,
-			MigrationSigner: 							MainnetMigrationSigner,
-			EBISigner:       							MainnetEBISigner,
-			CPPSigner:       							MainnetCPPSigner,
-			HFSigner:        							MainnetHFSigner,
+			BackboneAddress:              MainnetBackbone,
+			MigrationSigner:              MainnetMigrationSigner,
+			EBISigner:                    MainnetEBISigner,
+			CPPSigner:                    MainnetCPPSigner,
+			HFSigner:                     MainnetHFSigner,
 			HardforkRegistryProxyAddress: MainnetHFProxy,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24 * 14), // A super block happens at the end of every 20160 block (Approx. 14 days)
@@ -107,11 +107,11 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Energi: &EnergiConfig{
-			BackboneAddress: 							TestnetBackbone,
-			MigrationSigner: 							TestnetMigrationSigner,
-			EBISigner:       							TestnetEBISigner,
-			CPPSigner:       							TestnetCPPSigner,
-			HFSigner:        							TestnetHFSigner,
+			BackboneAddress:              TestnetBackbone,
+			MigrationSigner:              TestnetMigrationSigner,
+			EBISigner:                    TestnetEBISigner,
+			CPPSigner:                    TestnetCPPSigner,
+			HFSigner:                     TestnetHFSigner,
 			HardforkRegistryProxyAddress: TestnetHFProxy,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24),
@@ -279,12 +279,12 @@ func (c *CliqueConfig) String() string {
 
 // EnergiConfig is the consensus engine config for proof-of-stake based sealing.
 type EnergiConfig struct {
-	BackboneAddress 						 common.Address `json:"backboneAddress"`
-	MigrationSigner 						 common.Address `json:"migrationSigner"`
-	EBISigner      							 common.Address `json:"ebiSigner"`
-	CPPSigner       						 common.Address `json:"cppSigner"`
-	HFSigner        						 common.Address `json:"hfSigner"`
-	HardforkRegistryProxyAddress common.Address `json:"hfProxySigner"`
+	BackboneAddress               common.Address `json:"backboneAddress"`
+	MigrationSigner               common.Address `json:"migrationSigner"`
+	EBISigner                     common.Address `json:"ebiSigner"`
+	CPPSigner                     common.Address `json:"cppSigner"`
+	HFSigner                      common.Address `json:"hfSigner"`
+	HardforkRegistryProxyAddress  common.Address `json:"hfProxySigner"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
