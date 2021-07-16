@@ -509,7 +509,7 @@ func (e *Energi) hardforkIsActive(
 	// construct the contract call message
 	msg := types.NewMessage(
 		e.systemFaucet,
-		&energi_params.Energi_HardforkRegistry,
+		&e.config.HardforkRegistryProxyAddress,
 		0,
 		common.Big0,
 		e.callGas,
