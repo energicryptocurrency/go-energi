@@ -43,6 +43,9 @@ var (
 
 	MainnetBackbone = common.HexToAddress("0x79C7CF016E53e5C47906c2daF6De2aA00AAcdB1e")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
+
+	MainnetHFProxy = common.HexToAddress("")
+	TestnetHFProxy = common.HexToAddress("0xBB067D951f2329fD16084F1788b36c024Cc9febB")
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
@@ -81,6 +84,7 @@ var (
 			EBISigner:       MainnetEBISigner,
 			CPPSigner:       MainnetCPPSigner,
 			HFSigner:        MainnetHFSigner,
+			HardforkRegistryProxyAddress: MainnetHFProxy,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24 * 14), // A super block happens at the end of every 20160 block (Approx. 14 days)
 		MNRequireValidation: big.NewInt(10),
@@ -89,7 +93,6 @@ var (
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(3000000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10), // MN with the minimum collateral amount gets a block reward of (9.14/10) 0.914 NRG.
 
-		HardforkRegistryProxyAddress: common.Address{},
 		HFFinalizationPeriod: big.NewInt(30), // The hardfork should be finalized in 30 blocks.
 	}
 
@@ -109,6 +112,7 @@ var (
 			EBISigner:       TestnetEBISigner,
 			CPPSigner:       TestnetCPPSigner,
 			HFSigner:        TestnetHFSigner,
+			HardforkRegistryProxyAddress: TestnetHFProxy,
 		},
 		SuperblockCycle:     big.NewInt(60 * 24),
 		MNRequireValidation: big.NewInt(5),
@@ -117,7 +121,6 @@ var (
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10),
 
-		HardforkRegistryProxyAddress: common.Address{},
 		HFFinalizationPeriod: big.NewInt(10), // The hardfork should be finalized in 10 blocks.
 	}
 
@@ -281,6 +284,7 @@ type EnergiConfig struct {
 	EBISigner       common.Address `json:"ebiSigner"`
 	CPPSigner       common.Address `json:"cppSigner"`
 	HFSigner        common.Address `json:"hfSigner"`
+	HardforkRegistryProxyAddress common.Address `json:"hfProxySigner"`
 }
 
 // String implements the stringer interface, returning the consensus engine details.
