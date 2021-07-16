@@ -84,7 +84,10 @@ var testVMConfig = func() vm.Config {
 }()
 
 func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
-	junit := os.Getenv("JUNIT") == "true"
+	var junit bool
+	if val, ok := os.LookupEnv("JUNIT"); ok && val == "true" {
+		junit = true
+	}
 	err := test(testVMConfig)
 	if err == nil {
 		return
@@ -105,10 +108,10 @@ func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
 	if buf.Len() == 0 {
 		t.Log("no EVM operation logs generated")
 	} else {
-		if !junit {
-			t.Log("EVM operation log:\n" + buf.String())
-		} else {
+		if junit {
 			t.Log("JUNIT test mode: no EVM operation logs generated")
+		} else {
+			t.Log("EVM operation log:\n" + buf.String())
 		}
 	}
 	//t.Logf("EVM output: 0x%x", tracer.Output())
