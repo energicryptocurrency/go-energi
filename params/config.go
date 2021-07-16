@@ -93,6 +93,7 @@ var (
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(3000000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10), // MN with the minimum collateral amount gets a block reward of (9.14/10) 0.914 NRG.
 
+		HardforkRegistryProxyAddress: MainnetHFProxy,
 		HFFinalizationPeriod: big.NewInt(30), // The hardfork should be finalized in 30 blocks.
 	}
 
@@ -121,6 +122,7 @@ var (
 		MNEverCollateral:    new(big.Int).Mul(big.NewInt(30000), big.NewInt(Ether)),
 		MNRewardsPerBlock:   big.NewInt(10),
 
+		HardforkRegistryProxyAddress: TestnetHFProxy,
 		HFFinalizationPeriod: big.NewInt(10), // The hardfork should be finalized in 10 blocks.
 	}
 
