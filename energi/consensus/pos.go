@@ -146,7 +146,7 @@ func (e *Energi) calcPoSModifier(
 	// maturity period is reduced to 30m in Asgard
 	maturityPeriod := params.MaturityPeriod
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	isAsgardActive, err := e.hardforkIsActive(chain, parent, "Asgard")
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	if err != nil {
 		log.Trace("Asgard hf check failed: " + err.Error())
@@ -390,7 +390,7 @@ func (e *Energi) lookupStakeWeight(
 	// maturity period is reduced to 30m in Asgard
 	maturityPeriod := params.MaturityPeriod
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	isAsgardActive, err := e.hardforkIsActive(chain, until, "Asgard")
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	if err != nil {
 		log.Trace("Asgard hf check failed: " + err.Error())
