@@ -22,6 +22,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 
@@ -83,6 +84,7 @@ var testVMConfig = func() vm.Config {
 }()
 
 func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
+	junit := os.Getenv("JUNIT") == "true"
 	err := test(testVMConfig)
 	if err == nil {
 		return
@@ -103,7 +105,11 @@ func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
 	if buf.Len() == 0 {
 		t.Log("no EVM operation logs generated")
 	} else {
-		t.Log("EVM operation log:\n" + buf.String())
+		if !junit {
+			t.Log("EVM operation log:\n" + buf.String())
+		} else {
+			t.Log("JUNIT test mode: no EVM operation logs generated")
+		}
 	}
 	//t.Logf("EVM output: 0x%x", tracer.Output())
 	//t.Logf("EVM error: %v", tracer.Error())
