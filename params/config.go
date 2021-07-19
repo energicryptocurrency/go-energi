@@ -134,6 +134,9 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Ethash:              new(EthashConfig),
+		Energi: &EnergiConfig{
+			HardforkRegistryProxyAddress: common.Address{},
+		},
 	}
 
 	// MainnetTrustedCheckpoint contains the light client trusted checkpoint for the main network.
@@ -157,6 +160,9 @@ var (
 		ConstantinopleBlock: big.NewInt(0),
 		PetersburgBlock:     big.NewInt(0),
 		Ethash:              new(EthashConfig),
+		Energi: &EnergiConfig{
+			HardforkRegistryProxyAddress: common.Address{},
+		},
 	}
 
 	// TestnetTrustedCheckpoint contains the light client trusted checkpoint for the Ropsten test network.
