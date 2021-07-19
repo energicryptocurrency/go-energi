@@ -1515,7 +1515,7 @@ func RegisterDynamicCheckpointService(stack *node.Node) {
 	}
 }
 
-// Configure Energi Dynamic Checkpoint service
+// Registering hardfork service for monitoring the contract events
 func RegisterHardforkService(stack *node.Node) {
 	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
 		var ethServ *eth.Ethereum
