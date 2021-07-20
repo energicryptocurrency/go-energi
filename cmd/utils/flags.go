@@ -1515,6 +1515,18 @@ func RegisterDynamicCheckpointService(stack *node.Node) {
 	}
 }
 
+// Registering hardfork service for monitoring the contract events
+func RegisterHardforkService(stack *node.Node) {
+	if err := stack.Register(func(ctx *node.ServiceContext) (node.Service, error) {
+		var ethServ *eth.Ethereum
+		ctx.Service(&ethServ)
+
+		return energi_svc.NewHardforkService(ethServ)
+	}); err != nil {
+		Fatalf("Failed to register the Energi Hardfork service: %v", err)
+	}
+}
+
 // RegisterMasternodeService configures Energi Masternode service. It also accepts
 // the owner parameter which is an optional user set cmd argument.
 func RegisterMasternodeService(stack *node.Node, owner common.Address) {
