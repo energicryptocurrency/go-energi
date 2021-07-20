@@ -31,9 +31,6 @@ import (
 )
 
 func TestState(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	t.Parallel()
 
 	st := new(testMatcher)
@@ -87,6 +84,10 @@ var testVMConfig = func() vm.Config {
 }()
 
 func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
+	var trace bool
+	if val, ok := os.LookupEnv("EVM_TRACE"); ok && val == "true" {
+		trace = true
+	}
 	err := test(testVMConfig)
 	if err == nil {
 		return
@@ -104,9 +105,7 @@ func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
 		t.Errorf("different error for second run: %v", err2)
 	}
 	w.Flush()
-	if buf.Len() == 0 {
-		t.Log("no EVM operation logs generated")
-	} else {
+	if buf.Len() != 0 && trace {
 		t.Log("EVM operation log:\n" + buf.String())
 	}
 	//t.Logf("EVM output: 0x%x", tracer.Output())
