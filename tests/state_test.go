@@ -105,14 +105,8 @@ func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
 		t.Errorf("different error for second run: %v", err2)
 	}
 	w.Flush()
-	if buf.Len() == 0 {
-		t.Log("no EVM operation logs generated")
-	} else {
-		if trace {
-			t.Log("EVM operation log:\n" + buf.String())
-		} else {
-			t.Log("TRACE disabled: no EVM operation logs generated")
-		}
+	if buf.Len() != 0 && trace {
+		t.Log("EVM operation log:\n" + buf.String())
 	}
 	//t.Logf("EVM output: 0x%x", tracer.Output())
 	//t.Logf("EVM error: %v", tracer.Error())
