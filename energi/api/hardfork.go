@@ -52,7 +52,7 @@ type HardforkInfo struct {
 func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	r := &HardforkRegistryAPI{
 		backend:   b,
-		proxyAddr: b.ChainConfig().HardforkRegistryProxyAddress,
+		proxyAddr: b.ChainConfig().Energi.HardforkRegistryProxyAddress,
 	}
 
 	// use the default proxy address if we don't have it from ChainConfig

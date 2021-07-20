@@ -22,7 +22,6 @@ import (
 	"math/big"
 	"math/rand"
 	"net"
-	"os"
 	"reflect"
 	"strings"
 	"testing"
@@ -152,9 +151,6 @@ var parseNodeTests = []struct {
 }
 
 func TestParseNode(t *testing.T) {
-	if val, ok := os.LookupEnv("SKIP_KNOWN_FAIL"); ok && val == "1" {
-		t.Skip("unit test is broken: conditional test skipping activated")
-	}
 	for _, test := range parseNodeTests {
 		n, err := ParseNode(test.rawurl)
 		if test.wantError != "" {
