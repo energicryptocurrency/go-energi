@@ -58,5 +58,6 @@ profile.cov
 # direnv
 .envrc
 
-# go-junit-report
+# testing junit reports
 /.test-go-report.xml
+/.test-sol-report.xml
