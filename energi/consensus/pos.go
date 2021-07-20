@@ -143,11 +143,23 @@ func (e *Energi) calcPoSModifier(
 	// Find maturity period border
 	maturityBorder := time
 
-	if maturityBorder < params.MaturityPeriod {
+	// maturity period is reduced to 30m in Asgard
+	maturityPeriod := params.MaturityPeriod
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	isAsgardActive, err := e.hardforkIsActive(chain, parent, "Asgard")
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	if err != nil {
+		log.Trace("Asgard hf check failed: " + err.Error())
+	}
+	if isAsgardActive {
+		maturityPeriod = params.MaturityPeriodAsgard
+	}
+
+	if maturityBorder < maturityPeriod {
 		// This should happen only in testing
 		maturityBorder = 0
 	} else {
-		maturityBorder -= params.MaturityPeriod
+		maturityBorder -= maturityPeriod
 	}
 
 	// Find the oldest inside maturity period
@@ -375,9 +387,20 @@ func (e *Energi) lookupStakeWeight(
 ) (weight uint64, err error) {
 	var since uint64
 
-	if now > params.MaturityPeriod {
-		since = now - params.MaturityPeriod
+	// maturity period is reduced to 30m in Asgard
+	maturityPeriod := params.MaturityPeriod
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	isAsgardActive, err := e.hardforkIsActive(chain, until, "Asgard")
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	if err != nil {
+		log.Trace("Asgard hf check failed: " + err.Error())
+	}
+	if isAsgardActive {
+		maturityPeriod = params.MaturityPeriodAsgard
+	}
 
+	if now > maturityPeriod {
+		since = now - maturityPeriod
 	} else {
 		since = 0
 	}
