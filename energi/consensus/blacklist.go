@@ -76,39 +76,38 @@ func (e *Energi) processBlacklists(
 	}
 
 	log.Debug("Address blacklist", "address_list", address_list)
-	//if account is in whitelist don't set it as blocked in Energi_Blacklist account
+	// if account is in whitelist don't set it as blocked in Energi_Blacklist account
 	whitelist := e.createWhitelist(statedb)
 	empty_addr := common.Address{}
 
-	//clear out the account storage
+	// clear out the account storage
 	statedb.ForEachStorage(energi_params.Energi_Blacklist, func(key, value common.Hash) bool {
 		statedb.SetState(energi_params.Energi_Blacklist, key, common.BytesToHash([]byte{0x00}))
 		return true
 	})
 
-	//set only blocked accounts
+	// set only blocked accounts
 	for _, addr := range *address_list {
 		if addr != empty_addr && !whitelist[addr] {
 			log.Trace("Blacklisting account", "addr", addr)
 			statedb.SetState(energi_params.Energi_Blacklist, addr.Hash(), common.BytesToHash([]byte{0x01}))
 		}
 	}
-	//commit tree changes
+	// commit tree changes
 	statedb.GetOrNewStateObject(energi_params.Energi_Blacklist).CommitTrie(statedb.Database())
 
-
-	//clear out the account storage
+	// clear out the account storage
 	statedb.ForEachStorage(energi_params.Energi_Whitelist, func(key, value common.Hash) bool {
 		statedb.SetState(energi_params.Energi_Whitelist, key, common.BytesToHash([]byte{0x00}))
 		return true
 	})
 
-	//set whitelisted accounts in the Energi_Whitelist storage
+	// set whitelisted accounts in the Energi_Whitelist storage
 	for addr := range whitelist {
-		log.Trace("Whitelisting account", "addr", addr)
+		// log.Trace("Whitelisting account", "addr", addr)
 		statedb.SetState(energi_params.Energi_Whitelist, addr.Hash(), common.BytesToHash([]byte{0x01}))
 	}
-	//commit tree changes
+	// commit tree changes
 	statedb.GetOrNewStateObject(energi_params.Energi_Whitelist).CommitTrie(statedb.Database())
 
 	return nil
@@ -165,7 +164,7 @@ func (e *Energi) processDrainable(
 	statedb.Prepare(txhash, bhash, len(txs))
 
 	// 1. List drainable addresses address
-	//---
+	// ---
 	enumerateData, err := e.blacklistAbi.Pack("enumerateDrainable")
 	if err != nil {
 		log.Error("Fail to prepare enumerateDrainable() call", "err", err)
@@ -242,7 +241,7 @@ func (e *Energi) processDrainable(
 	}
 
 	// 3. Drain
-	//---
+	// ---
 	empty_addr := common.Address{}
 
 	for _, addr := range *address_list {
@@ -250,7 +249,7 @@ func (e *Energi) processDrainable(
 			continue
 		}
 
-		//--
+		// --
 		bal := statedb.GetBalance(addr)
 
 		// Skip, if nothing
@@ -265,7 +264,7 @@ func (e *Energi) processDrainable(
 
 		log.Trace("Draining account", "fund", comp_fund, "addr", addr, "bal", bal)
 
-		//====================================
+		// ====================================
 		contributeData, err := e.treasuryAbi.Pack("contribute")
 		if err != nil {
 			log.Error("Fail to prepare contribute() call", "err", err)
@@ -311,7 +310,7 @@ func (e *Energi) processDrainable(
 		txs = append(txs, tx)
 		receipts = append(receipts, receipt)
 
-		//====================================
+		// ====================================
 		collectData, err := e.blacklistAbi.Pack("onDrain", addr)
 		if err != nil {
 			log.Error("Fail to prepare onDrain() call", "err", err, "addr", addr)
