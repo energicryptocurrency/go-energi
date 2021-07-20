@@ -85,7 +85,7 @@ var testVMConfig = func() vm.Config {
 
 func withTrace(t *testing.T, gasLimit uint64, test func(vm.Config) error) {
 	var trace bool
-	if val, ok := os.LookupEnv("EVM-TRACE"); ok && val == "true" {
+	if val, ok := os.LookupEnv("EVM_TRACE"); ok && val == "true" {
 		trace = true
 	}
 	err := test(testVMConfig)
