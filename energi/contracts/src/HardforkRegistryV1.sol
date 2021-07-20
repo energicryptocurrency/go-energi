@@ -213,7 +213,7 @@ contract HardforkRegistryV1 is
     function remove(bytes32 name) external requireHardforkSigner returns(bool)
     {
         if (v1storage.remove(name)) {
-            emit HardforkRemoved(name);
+            emit HardforkRemoved(name, name);
             return true;
         }
         return false;

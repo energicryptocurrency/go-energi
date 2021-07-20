@@ -36,7 +36,10 @@ interface IHardforkRegistry {
         uint sw_features
     );
 
-    event HardforkRemoved (bytes32 indexed name);
+    event HardforkRemoved (
+      bytes32 indexed name,
+      bytes32 unindexed_name
+    );
 
     /// @notice add a new hard fork to the registry, or update an existing hard fork
     /// @dev may only be called by the hard fork signer
