@@ -39,7 +39,7 @@ import (
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
 	const averagingWindow uint64 = 60
-	emaCalculated := CalculateBlockTimeEMA(emaSamples, averagingWindow)
+	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, averagingWindow)
 
 	// check a known value
 	emaExpected58 := uint64(59161280)
@@ -50,12 +50,33 @@ func TestCalculateBlockTimeEMA(t *testing.T) {
 
 	// check the entire series
 	for i := range emaCalculated {
-		if emaCalculated[i] != emaSamplesExpected[i] {
-			t.Log("EMA mismatch at index", i, "- expected", emaSamplesExpected[i], "got", emaCalculated[i])
+		if emaCalculated[i] != testDataBlockTimeEMA[i] {
+			t.Log("EMA mismatch at index", i, "- expected", testDataBlockTimeEMA[i], "got", emaCalculated[i])
 			t.FailNow()
 		}
 	}
 }
+
+func TestCalculateBlockTimeDrift(t *testing.T) {
+	t.Parallel()
+	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA)
+
+	// check a known value
+	blockDriftExpected58 := int64(-838720)
+	if blockDrift[58] != blockDriftExpected58 {
+		t.Log("Block Time Drift mismatch - expected", blockDriftExpected58, "got", blockDrift[58])
+		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range blockDrift {
+		if blockDrift[i] != testDataBlockTimeDrift[i] {
+			t.Log("Block Time Drift mismatch at index", i, "- expected", testDataBlockTimeDrift[i], "got", blockDrift[i])
+			t.FailNow()
+		}
+	}
+}
+
 
 /*
  * Create a mock chain
