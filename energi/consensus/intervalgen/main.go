@@ -11,6 +11,7 @@ import (
 
 func main() {
 	const sampleNum = 1440
+	const averagingWindow uint64 = 60
 	// This will generate a consistent set of random values
 	rand.Seed(32)
 	// // This will generate an always changing set of random values
@@ -19,23 +20,23 @@ func main() {
 	samples := make([]uint64, sampleNum)
 	for i := range samples {
 		samples[i] = uint64(int64(params.MinBlockGap)+
-				rand.Int63n(int64(params.TargetBlockGap+1)))
+				rand.Int63n(int64(params.TargetBlockGap)))
 	}
 
 	// calculate the EMA from samples
-	samplesEMA := consensus.CalculateBlockTimeEMA(samples)
+	samplesEMA := consensus.CalculateBlockTimeEMA(samples, averagingWindow)
 	output := `package consensus
 	
 //go:generate go run ./intervalgen/.
 
-const emaSamples = []uint64{
+var emaSamples = []uint64{
 `
 	for i := range samples {
 		output += fmt.Sprint("\t", samples[i], ",\n")
 	}
 	output += `}
 
-const emaSamplesExpected = []uint64{
+var emaSamplesExpected = []uint64{
 `
 	for i := range samplesEMA {
 		output += fmt.Sprint("\t", samplesEMA[i], ",\n")

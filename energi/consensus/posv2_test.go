@@ -38,10 +38,11 @@ import (
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
-	emaCalculated := CalculateBlockTimeEMA(emaSamples)
-	emaExpected := uint64(59161280)
-	if emaCalculated != emaExpected {
-		t.Log("EMA mismatch - expected", emaExpected, "got", emaCalculated)
+	const averagingWindow uint64 = 60
+	emaCalculated := CalculateBlockTimeEMA(emaSamples, averagingWindow)
+	emaExpected58 := uint64(59161280)
+	if emaCalculated[58] != emaExpected58 {
+		t.Log("EMA mismatch - expected", emaExpected58, "got", emaCalculated[58])
 		t.FailNow()
 	}
 }
