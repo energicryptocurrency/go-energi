@@ -173,9 +173,10 @@ func ExpandPackagesNoVendor(patterns []string) []string {
 			if strings.Contains(line, "go: ") {
 				continue
 			}
-			if strings.Contains(line, "/energi/") {
-				continue
-			}
+			/*
+				if strings.Contains(line, "/energi/") {
+					continue
+				}*/
 			if !strings.Contains(line, "/vendor/") {
 				packages = append(packages, strings.TrimSpace(line))
 			}
