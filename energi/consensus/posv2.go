@@ -24,38 +24,31 @@ import (
 	"energi.world/core/gen3/log"
 )
 
+const (
+	// we compute in microseconds so that we can do integer math with higher precision
+	microseconds uint64 = 1000000
+	two uint64 = 2 // just here to avoid extra typecasts in calculation
+)
+
 // CalculateBlockTimeEMA computes the exponential moving average of block times
 // this will return the EMA of block times as microseconds
 // for a description of the EMA algorithm, please see:
 // see https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
 func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema []uint64) {
 	sampleSize := len(blockTimeDifferences)
-	const two uint64 = 2
 	N := emaPeriod
-
-	// we use a scaling factor due to entirely integer calculation for this function
-	// scaling up lets us calculate an EMA at a higher resolution that 1 second
-	const scalingFactor uint64 = 1000000 // after scaling the units will be microseconds
-
-
 	ema = make([]uint64, sampleSize)
-	//ema[0] = params.TargetBlockGap * scalingFactor
-
-	// return the target block gap as EMA if we don't have enough samples
-	if (sampleSize < 2) {
-		return
-	}
 
 	// choice of initial condition is important for an EMA. We could use the first
 	// block time difference, but instead we'll set it to the target value so our
 	// EMA will tend toward the target. However we don't include this value in our
 	// EMA series data that we return, we only use it to calculate the first EMA
-	emaPrev := params.TargetBlockGap * scalingFactor
+	emaPrev := params.TargetBlockGap * microseconds
 	for i := 0; i < sampleSize; i++ {
 		// this formula has a factor of 2/(N+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
 		// not precomputed this value so we don't lose precision on early division
-		ema[i] = ((two * blockTimeDifferences[i] * scalingFactor)/(N+1)) + (emaPrev - ((emaPrev * two)/(N+1)))
+		ema[i] = ((two * blockTimeDifferences[i] * microseconds)/(N+1)) + (emaPrev - ((emaPrev * two)/(N+1)))
 		emaPrev = ema[i]
 	}
 	return
