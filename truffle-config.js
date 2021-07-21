@@ -16,6 +16,7 @@
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const mnemonicPhrase = process.env.TRUFFLE_MNEMONIC || "developers developers developers developers developers developers developers developers developers developers developers developers";
+const mochaReporters = process.env.MOCHA_REPORTERS || "spec" // to get test output XML use MOCHA_REPORTERS="mocha-junit-reporter, spec"
 
 const contracts = [
     'BackboneRewardV1',
@@ -56,6 +57,14 @@ module.exports = {
     verboseRpc: false,
     mocha: {
         spec: './energi/contracts/test/*.spec.js',
+        useColors: true,
+        reporter: "mocha-multi-reporters",
+        reporterOptions: {
+            "reporterEnabled": mochaReporters,
+            "mochaJunitReporterReporterOptions": {
+                "mochaFile": ".test-sol-report.xml"
+            }
+        }
     },
     networks: {
         development: {

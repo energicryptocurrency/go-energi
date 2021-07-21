@@ -1,100 +1,175 @@
 variables:
 
 stages:
-  - clean
+  - base
+  - prepare
+  - lint
   - build
+  - test
+  - deploy
 
-.runner:
-  tags: [runner02]
+cache:
+  paths:
+    - node_modules
+    - build
 
-# make our repo does not have any artifacts of previous builds
-cleanrepo:
-  stage: clean
-  extends: .runner
-  script:
-    - git checkout -- .
-    - git clean -fdx .
+.docker-job:
+  tags: [docker_runner]
+  before_script:
+    - apk add --no-cache curl unzip python3 py3-pip
+    - pip3 install --upgrade pip
+    - pip3 install awscli
+    - rm -rf /var/cache/apk/*
+
+.merge-request-job:
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+build-builder:
+  stage: base
+  extends: .docker-job
+  script:
+    - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
+    - docker push ${container_registry}/energi3_builder:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - Dockerfile.builder
+    - if: $CI_COMMIT_TAG
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+# make sure our repo does not have any artifacts of previous builds
+clean-repo:
+  stage: prepare
+  extends: .merge-request-job
+  script:
+    - git checkout -- .
+    - git clean -fdx -e node_modules .
 
 # TODO: this actually tries to execute the merge, may not be the best way to check this
 # it will also fail for master branch merges
-branchcheck:
-  stage: clean
-  extends: .runner
+branch-check:
+  stage: prepare
+  extends: .merge-request-job
   script:
     - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-# must run make all
-# must complete successfully
-# must not leave modified files in the git repository
-compile:
-  stage: build
-  extends: .runner
+npm-install:
+  stage: prepare
+  extends: .merge-request-job
   script:
-    - export GOROOT=/usr/local/go
-    - export GOPATH=${CI_PROJECT_DIR//$CI_PROJECT_PATH/}
-    - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-    - echo $CI_PROJECT_DIR
-    - echo $CI_PROJECT_PATH
-    - echo $GOROOT
-    - echo $GOPATH
-    - echo $PATH
-    - make all
-    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo "[Error] compile job left modified files in working directory"; exit 1; fi
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - npm install
 
-## must run make test
-## must complete successfully (tests must pass)
-## must not leave modified files in the git repository
-#pr-test:
-#  stage: unit-tests
-#  extends: .runner
-#  script:
-#    - export GOROOT=/usr/local/go
-#    - export GOPATH=${CI_PROJECT_DIR//$CI_PROJECT_PATH/}
-#    - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-#    - make test-go
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#
-## must run make lint
-## must complete successfully
-#pr-lint:
+#lint-go:
 #  stage: lint
-#  extends: .runner
+#  extends: .merge-request-job
 #  script:
-#    - export GOROOT=/usr/local/go
-#    - export GOPATH=${CI_PROJECT_DIR//$CI_PROJECT_PATH/}
-#    - export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
-#    # - make lint
+#    - make lint-go
+#  allow_failure: true
+
+lint-sol:
+  stage: lint
+  extends: .merge-request-job
+  script:
+    - make lint-sol
+
+lint-sol-tests:
+  stage: lint
+  extends: .merge-request-job
+  script:
+    - make lint-sol-tests
+
+build-linux:
+  stage: build
+  extends: .merge-request-job
+  script:
+    - git checkout -- .
+    - git clean -fdx -e node_modules .
+    - make all
+    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
+
+#build-docker:
+#  stage: build
+#  extends: .docker-job
+#  script:
+#    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
+#    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
 #  rules:
 #    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#
-## must run docker build -f Dockerfile -t [tag] .
-## [tag] must be appropriate for pushing to our private registry
-## must push image to our private registry
-#registry:
-#  stage: container
-#  extends: .runner
+
+# TODO: release-builds should be implemented better
+#build-release-linux:
+#  stage: build
+#  tags: [docker_runner]
+#  image: ${container_registry}/energi3_builder
+#  before_script:
+#    - pwd
 #  script:
-#    - docker build -f Dockerfile -t [core:master] .
-#    - docker login ${CI_REGISTRY} -u gitlab-ci-token -p ${CI_BUILD_TOKEN}
-#    - docker tag core:latest ${CI_REGISTRY_IMAGE}/core:master
-#    - docker push ${CI_REGISTRY_IMAGE}/core:master
-#  rules:
-#    - if: '$CI_COMMIT_BRANCH == "master"'
+#    - make -f Makefile.release release-linux
+#  only:
+#    - develop
+#    - master
 #
-## must produce a complete set of release binaries
-## must deploy binaries to s3 with SHASUMS file
-## must produce a production docker build and push to dockerhub
-#release:
-#  stage: binary
-#  extends: .runner
+#build-release-windows:
+#  stage: build
+#  tags: [docker_runner]
+#  image: ${container_registry}/energi3_builder
+#  before_script:
+#    - pwd
 #  script:
-#    - echo
+#    - make -f Makefile.release release-windows
+#  only:
+#    - develop
+#    - master
+#
+# TODO: macos is a native compile, this can't run in docker needs a macos runner
+#release-build-macos:
+#  stage: build
+#  tags: [docker_runner]
+#  script:
+#    - make -f Makefile.release release-macos
 #  rules:
-#    - if: '$CI_COMMIT_BRANCH == "master"'
+#    - only:
+#      - develop
+#      - master
+
+test-go-report:
+  stage: test
+  extends: .merge-request-job
+  script:
+    - make test-go-report
+  artifacts:
+    when: always
+    paths:
+      - .test-go-report.xml
+    reports:
+      junit: .test-go-report.xml
+  allow_failure: true
+
+test-solidity:
+  stage: test
+  extends: .merge-request-job
+  script:
+    - make test-sol-contracts
+  artifacts:
+    when: always
+    paths:
+      - .test-sol-report.xml
+    reports:
+      junit: .test-sol-report.xml
+
+#deploy-release:
+#  stage: deploy
+#  tags: [docker_runner]
+#  image: ${container_registry}/energi3_builder
+#  before_script:
+#    - pwd
+#  script:
+#    - make -f Makefile.release release-upload
+#  only:
+#    - tags
