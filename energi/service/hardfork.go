@@ -80,7 +80,7 @@ func NewHardforkService(ethServ *eth.Ethereum) (*HardforkService, error) {
 
 	//initialize Ihardforkregistry for further calls
 	var err error
-	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(hf.eth.APIBackend.ChainConfig().HardforkRegistryProxyAddress, hf.eth.APIBackend)
+	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(hf.eth.APIBackend.ChainConfig().Energi.HardforkRegistryProxyAddress, hf.eth.APIBackend)
 	if err != nil {
 		log.Error("Failed to get create NewIHardforkRegistry (startup)", "err", err);
 		return nil, err
