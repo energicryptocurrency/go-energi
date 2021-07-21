@@ -148,7 +148,7 @@ func (hf *HardforkService) logUpcomingHardforks() {
 					break;
 				}
 
-				//for each hardfork name 	log the information considering the current block number
+				// for each hardfork name log the information considering the current block number
 				for _, hardfork := range pendingHardforks {
 					logHardforkInfo(ev.Block.Header().Number, hf.eth.BlockChain().Config().HFFinalizationPeriod, hardfork)
 				}
