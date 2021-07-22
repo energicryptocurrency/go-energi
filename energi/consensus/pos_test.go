@@ -392,6 +392,7 @@ func TestStakeWeightLookup(t *testing.T) {
 
 	addresses, _, _, _ := generateAddresses(5)
 	engine := New(nil, nil)
+	engine.testing = true
 
 	genesis := types.NewBlock(&types.Header{
 		Number:     big.NewInt(0),
