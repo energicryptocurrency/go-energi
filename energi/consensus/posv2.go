@@ -66,6 +66,21 @@ func CalculateBlockTimeDrift(ema []uint64) (drift []int64) {
 	return
 }
 
+// CalculateBlockTimeIntegral calculates the integral of the block drift function
+// This provides us with some idea fo historical "error", how far the block time
+// has been from the target value for the duration of the period
+// We use the trapezoidal rule here for integration
+func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
+	sampleSize := len(drift)
+	integral = 0
+	// this is a simplification of the trapezoid rule based on uniform spacing
+	for i := 1; i < sampleSize - 1; i++ {
+		integral += drift[i]
+	}
+	integral += (drift[0] + drift[sampleSize-1]) / 2
+	return
+}
+
 /*
  * Block Time Target Calculation V2
  * @chain Current Chain

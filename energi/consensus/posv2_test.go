@@ -77,6 +77,17 @@ func TestCalculateBlockTimeDrift(t *testing.T) {
 	}
 }
 
+func TestCalculateBlockTimeIntegral(t *testing.T) {
+	t.Parallel()
+	integral := CalculateBlockTimeIntegral(testDataBlockTimeDrift)
+	integralExpected := int64(-602336201)
+	// check a known value
+	if integral != integralExpected {
+		t.Log("Block Time Integral mismatch - expected", integralExpected, "got", integral)
+		t.FailNow()
+	}
+}
+
 
 /*
  * Create a mock chain

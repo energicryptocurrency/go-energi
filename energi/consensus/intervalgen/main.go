@@ -65,6 +65,12 @@ func addBlockTimeDrift(ema []uint64, output *string) (drift []int64) {
 	return
 }
 
+func addBlockTimeIntegral(drift []int64, output *string) (integral int64) {
+	integral = consensus.CalculateBlockTimeIntegral(drift)
+	*output += fmt.Sprint("\nvar testDataBlockTimeIntegral int64 = ", integral, "\n")
+	return
+}
+
 func main() {
 	output := `// Copyright 2021 The Energi Core Authors
 // This file is part of Energi Core.
@@ -91,6 +97,7 @@ package consensus
 	samples := addBlockTimes(&output)
 	ema := addBlockTimeEMA(samples, &output)
 	drift := addBlockTimeDrift(ema, &output)
-	_ = drift
+	integral := addBlockTimeIntegral(drift, &output)
+	_ = integral
 	ioutil.WriteFile("posv2emasamples_test.go", []byte(output), 0660)
 }
