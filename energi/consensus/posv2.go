@@ -27,7 +27,9 @@ import (
 const (
 	// we compute in microseconds so that we can do integer math with higher precision
 	microseconds uint64 = 1000000
-	two uint64 = 2 // just here to avoid extra typecasts in calculation
+
+	// just here to avoid extra typecasts in calculation
+	two uint64 = 2
 )
 
 // CalculateBlockTimeEMA computes the exponential moving average of block times
