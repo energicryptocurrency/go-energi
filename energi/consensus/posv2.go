@@ -81,6 +81,19 @@ func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
 	return
 }
 
+// CalculateBlockTimeDerivative computes the derivative series of a data series
+// Here we use the central difference formula, for some small step h (each block)
+// f'(x) = 1/2h * (f(x+h) - f(x-h))
+func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
+	sampleSize := len(drift)
+	derivative = make([]int64, sampleSize - 2)
+
+	for i := 1; i < sampleSize - 1; i++ {
+		derivative[i-1] = (drift[i+1] - drift[i-1]) / 2
+	}
+	return
+}
+
 /*
  * Block Time Target Calculation V2
  * @chain Current Chain

@@ -88,6 +88,25 @@ func TestCalculateBlockTimeIntegral(t *testing.T) {
 	}
 }
 
+func TestCalculateBlockTimeDerivative(t *testing.T) {
+	t.Parallel()
+	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
+
+	// check a known value
+	derivativeExpected58 := int64(73541)
+	if derivative[58] != derivativeExpected58 {
+		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
+		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range derivative {
+		if derivative[i] != testDataBlockTimeDerivative[i] {
+			t.Log("Block Time Drift mismatch at index", i, "- expected", testDataBlockTimeDerivative[i], "got", derivative[i])
+			t.FailNow()
+		}
+	}
+}
 
 /*
  * Create a mock chain
