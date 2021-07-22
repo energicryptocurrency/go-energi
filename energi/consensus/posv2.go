@@ -38,7 +38,7 @@ const (
 // see https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
 func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema []uint64) {
 	sampleSize := len(blockTimeDifferences)
-	N := emaPeriod
+	N := emaPeriod + 1
 	ema = make([]uint64, sampleSize)
 
 	// choice of initial condition is important for an EMA. We could use the first
@@ -47,10 +47,10 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema
 	// EMA series data that we return, we only use it to calculate the first EMA
 	emaPrev := params.TargetBlockGap * microseconds
 	for i := 0; i < sampleSize; i++ {
-		// this formula has a factor of 2/(N+1) in a couple places. This is our
+		// this formula has a factor of 2/(emaPeriod+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
 		// not precomputed this value so we don't lose precision on early division
-		ema[i] = ((two * blockTimeDifferences[i] * microseconds)/(N+1)) + (emaPrev - ((emaPrev * two)/(N+1)))
+		ema[i] = ((two * blockTimeDifferences[i] * microseconds)/ N) + (emaPrev - ((emaPrev * two)/N))
 		emaPrev = ema[i]
 	}
 	return
