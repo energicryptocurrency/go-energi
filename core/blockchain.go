@@ -72,6 +72,8 @@ const (
 )
 
 func init() {
+	// this doesn't need to reduce for Asgard, since the MaturityPeriod was reduced it will
+	// only have the effect of keeping some extra tries in memory
 	max_maturity_blocks := ((energi_params.MaturityPeriod / energi_params.MinBlockGap) + 1)
 	max_fork_blocks := ((energi_params.OldForkPeriod / energi_params.MinBlockGap) + 1)
 
