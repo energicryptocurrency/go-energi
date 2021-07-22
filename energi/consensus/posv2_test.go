@@ -38,8 +38,7 @@ import (
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
-	const averagingWindow uint64 = 60
-	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, averagingWindow)
+	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.AveragingWindow)
 
 	// check a known value
 	emaExpected58 := uint64(59161280)

@@ -11,7 +11,6 @@ import (
 
 const (
 	sampleNum = 360
-	averagingWindow = 60
 )
 
 func addBlockTimes(output *string) (samples []uint64) {
@@ -36,7 +35,7 @@ func addBlockTimes(output *string) (samples []uint64) {
 }
 
 func addBlockTimeEMA(samples []uint64, output *string) (ema []uint64) {
-	ema = consensus.CalculateBlockTimeEMA(samples, averagingWindow)
+	ema = consensus.CalculateBlockTimeEMA(samples, params.AveragingWindow)
 	*output += "\nvar testDataBlockTimeEMA = []uint64{\n  "
 	for i := range ema {
 		*output += fmt.Sprint(ema[i])
