@@ -24,6 +24,7 @@ import (
 	"sync/atomic"
 
 	"energi.world/core/gen3/accounts/abi/bind"
+
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core"
 	// "energi.world/core/gen3/core/types"
@@ -40,14 +41,6 @@ import (
 
 
 )
-
-var (
-	//if block height module pendingHardforkLogInterval = 0 then log pending hardforks
-	pendingHardforkLogInterval = big.NewInt(10);
-)
-
-
-
 
 const (
 	//event channel default site
@@ -112,7 +105,9 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	*/
 	activeHardforks, err := hf.hfAPI.HardforkEnumerateActive()
 	if err != nil {
-		log.Error("Failed to get active hardforks (startup)", "err", err);
+		if err != bind.ErrNoCode {
+			log.Error("Failed to get active hardforks (startup)", "err", err);
+		}
 	} else if lc := len(activeHardforks); lc > 0 {
 		hf.LogHardForks(activeHardforks);
 	}
@@ -145,17 +140,17 @@ func (hf *HardforkService) logUpcomingHardforks() {
 				return
 
 			case ev := <-chainHeadCh:
-				if new(big.Int).Mod(ev.Block.Number(), pendingHardforkLogInterval).Cmp(common.Big0) == 0 {
-					pendingHardforks, err := hf.hfAPI.HardforkEnumeratePending()
-					if err != nil {
+				pendingHardforks, err := hf.hfAPI.HardforkEnumeratePending()
+				if err != nil {
+					if err != bind.ErrNoCode {
 						log.Error("Failed to get pending hardforks from api", "err", err);
-						break;
 					}
+					break;
+				}
 
-					//for each hardfork name 	log the information considering the current block number
-					for _, hardfork := range pendingHardforks {
-						logHardforkInfo(ev.Block.Header().Number, hf.eth.BlockChain().Config().HFFinalizationPeriod, hardfork)
-					}
+				// for each hardfork name log the information considering the current block number
+				for _, hardfork := range pendingHardforks {
+					logHardforkInfo(ev.Block.Header().Number, hf.eth.BlockChain().Config().HFFinalizationPeriod, hardfork)
 				}
 
 

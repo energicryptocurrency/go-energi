@@ -156,7 +156,12 @@ test-solidity:
   extends: .merge-request-job
   script:
     - make test-sol-contracts
-  allow_failure: true
+  artifacts:
+    when: always
+    paths:
+      - .test-sol-report.xml
+    reports:
+      junit: .test-sol-report.xml
 
 #deploy-release:
 #  stage: deploy
