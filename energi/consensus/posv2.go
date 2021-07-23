@@ -194,6 +194,13 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 // The derivative term accounts for future error in block time.
 // By carefully weighting these 3, we can quickly approach the set point
 // without much oscillation.
+//
+// The PID control implemented here is generally called the "standard form"
+// which has only a single gain, and the derivative and integral terms are
+// scaled by time.
+//
+// See https://en.wikipedia.org/wiki/PID_controller#Mathematical_form for more
+// information.
 func calcPoSDifficultyV2(
 	newBlockTime uint64,
 	parent *types.Header,
