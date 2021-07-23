@@ -6,29 +6,114 @@ import (
 	"math/rand"
 
 	"energi.world/core/gen3/energi/params"
+	"energi.world/core/gen3/energi/consensus"
 )
 
-func main() {
-	const sampleNum = 60
-	// This will generate a consistent set of random values
-	rand.Seed(32)
-	// // This will generate an always changing set of random values
-	// rand.Seed(time.Now().UnixNano()) which will have a typical average
-	// around the same as params.TargetBlockGap (60 second block interval)
-	samples := make([]uint64, sampleNum)
-	for i := range samples {
-		samples[i] = uint64(int64(params.MinBlockGap)+
-				rand.Int63n(int64(params.TargetBlockGap)))
-	}
-	output := `package consensus
-	
-//go:generate go run ./intervalgen/.
+const (
+	sampleNum = 360
+)
 
-var emaSamples = []uint64{
-`
+func addBlockTimes(output *string) (samples []uint64) {
+	// generate random block times that average about 60 seconds
+	rand.Seed(32)
+	samples = make([]uint64, sampleNum)
 	for i := range samples {
-		output += fmt.Sprint("\t", samples[i], ",\n")
+		samples[i] = uint64(int64(params.MinBlockGap)+rand.Int63n(int64(params.TargetBlockGap)))
 	}
-	output += "}\n"
+
+	*output += "\nvar testDataBlockTimes = []uint64{\n  "
+	for i := range samples {
+		*output += fmt.Sprint(samples[i])
+		if (i+1) % 30 == 0 {
+			*output += ",\n  "
+		} else {
+			*output += ","
+		}
+	}
+	*output += "}\n"
+	return
+}
+
+func addBlockTimeEMA(samples []uint64, output *string) (ema []uint64) {
+	ema = consensus.CalculateBlockTimeEMA(samples, params.AveragingWindow)
+	*output += "\nvar testDataBlockTimeEMA = []uint64{\n  "
+	for i := range ema {
+		*output += fmt.Sprint(ema[i])
+		if (i+1) % 10 == 0 {
+			*output += ",\n  "
+		} else {
+			*output += ","
+		}
+	}
+	*output += "}\n"
+	return
+}
+
+func addBlockTimeDrift(ema []uint64, output *string) (drift []int64) {
+	drift = consensus.CalculateBlockTimeDrift(ema)
+	*output += "\nvar testDataBlockTimeDrift = []int64{\n  "
+	for i := range drift {
+		*output += fmt.Sprint(drift[i])
+		if (i+1) % 10 == 0 {
+			*output += ",\n  "
+		} else {
+			*output += ","
+		}
+	}
+	*output += "}\n"
+	return
+}
+
+func addBlockTimeIntegral(drift []int64, output *string) (integral int64) {
+	integral = consensus.CalculateBlockTimeIntegral(drift)
+	*output += fmt.Sprint("\nvar testDataBlockTimeIntegral int64 = ", integral, "\n")
+	return
+}
+
+func addBlockTimeDerivative(drift []int64, output *string) (derivative []int64) {
+	derivative = consensus.CalculateBlockTimeDerivative(drift)
+	*output += "\nvar testDataBlockTimeDerivative = []int64{\n  "
+	for i := range derivative {
+		*output += fmt.Sprint(derivative[i])
+		if (i+1) % 10 == 0 {
+			*output += ",\n  "
+		} else {
+			*output += ","
+		}
+	}
+	*output += "}\n"
+	return
+}
+
+func main() {
+	output := `// Copyright 2021 The Energi Core Authors
+// This file is part of Energi Core.
+//
+// Energi Core is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Energi Core is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Energi Core. If not, see <http://www.gnu.org/licenses/>.
+
+// IMPORTANT: this file is code generated, DO NOT EDIT
+
+package consensus
+
+//go:generate go run ./intervalgen/.
+`
+	samples := addBlockTimes(&output)
+	ema := addBlockTimeEMA(samples, &output)
+	drift := addBlockTimeDrift(ema, &output)
+	integral := addBlockTimeIntegral(drift, &output)
+	derivative := addBlockTimeDerivative(drift, &output)
+	_ = integral
+	_ = derivative
 	ioutil.WriteFile("posv2emasamples_test.go", []byte(output), 0660)
 }
