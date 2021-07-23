@@ -61,7 +61,7 @@ func TestCalculateBlockTimeDrift(t *testing.T) {
 	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA)
 
 	// check a known value
-	blockDriftExpected58 := int64(-838732)
+	blockDriftExpected58 := int64(838732)
 	if blockDrift[58] != blockDriftExpected58 {
 		t.Log("Block Time Drift mismatch - expected", blockDriftExpected58, "got", blockDrift[58])
 		t.FailNow()
@@ -79,7 +79,7 @@ func TestCalculateBlockTimeDrift(t *testing.T) {
 func TestCalculateBlockTimeIntegral(t *testing.T) {
 	t.Parallel()
 	integral := CalculateBlockTimeIntegral(testDataBlockTimeDrift)
-	integralExpected := int64(-602341371)
+	integralExpected := int64(602341371)
 	// check a known value
 	if integral != integralExpected {
 		t.Log("Block Time Integral mismatch - expected", integralExpected, "got", integral)
@@ -92,7 +92,7 @@ func TestCalculateBlockTimeDerivative(t *testing.T) {
 	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
 
 	// check a known value
-	derivativeExpected58 := int64(73541)
+	derivativeExpected58 := int64(-73541)
 	if derivative[58] != derivativeExpected58 {
 		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
 		t.FailNow()
