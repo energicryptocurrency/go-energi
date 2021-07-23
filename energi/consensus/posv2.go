@@ -57,13 +57,14 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema
 }
 
 // CalculateBlockTimeDrift calculates the difference between the target block time
-// and the EMA block time. Drift should be a positive value if blocks are too slow
-// and a negative value if blocks are too fast
+// and the EMA block time. Drift should be a negative value if blocks are too slow
+// and a positive value if blocks are too fast, representing the direction
+// to adjust the difficulty
 func CalculateBlockTimeDrift(ema []uint64) (drift []int64) {
 	target := int64(params.TargetBlockGap * microseconds)
 	drift = make([]int64, len(ema))
 	for i := range ema {
-		drift[i] = int64(ema[i]) - target
+		drift[i] = target - int64(ema[i])
 	}
 	return
 }
