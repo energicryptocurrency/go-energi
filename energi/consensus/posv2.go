@@ -145,7 +145,16 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	}
 
 	ema := CalculateBlockTimeEMA(timeDiffs, params.AveragingWindow)
+
 	ret.periodTarget = ema[len(ema)-1]
+
+	// set up the parameters for PID control (diffV2)
+	drift := CalculateBlockTimeDrift(ema)
+	integral := CalculateBlockTimeIntegral(drift)
+	derivative := CalculateBlockTimeDerivative(drift)
+	ret.drift = drift[len(drift)-1]
+	ret.integral = integral
+	ret.derivative = derivative[len(derivative)-1]
 
 	log.Trace("PoS time", "block", parentNumber+1,
 		"min", ret.min, "max", ret.max,

@@ -45,6 +45,7 @@ var (
 
 type timeTarget struct {
 	min, max, blockTarget, periodTarget uint64
+	drift, integral, derivative int64
 }
 
 /**
