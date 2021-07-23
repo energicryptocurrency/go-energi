@@ -50,7 +50,7 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema
 		// this formula has a factor of 2/(emaPeriod+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
 		// not precomputed this value so we don't lose precision on early division
-		ema[i] = ((two * blockTimeDifferences[i] * microseconds)/ N) + (emaPrev - ((emaPrev * two)/N))
+		ema[i] = ((two * blockTimeDifferences[i] * microseconds) + (emaPrev * (N - two))) / N
 		emaPrev = ema[i]
 	}
 	return
