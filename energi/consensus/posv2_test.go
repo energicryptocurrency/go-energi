@@ -38,11 +38,72 @@ import (
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
-	emaCalculated := CalculateBlockTimeEMA(emaSamples)
-	emaExpected := uint64(59161280)
-	if emaCalculated != emaExpected {
-		t.Log("EMA mismatch - expected", emaExpected, "got", emaCalculated)
+	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.AveragingWindow)
+
+	// check a known value
+	emaExpected58 := uint64(59161268)
+	if emaCalculated[58] != emaExpected58 {
+		t.Log("EMA mismatch - expected", emaExpected58, "got", emaCalculated[58])
 		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range emaCalculated {
+		if emaCalculated[i] != testDataBlockTimeEMA[i] {
+			t.Log("EMA mismatch at index", i, "- expected", testDataBlockTimeEMA[i], "got", emaCalculated[i])
+			t.FailNow()
+		}
+	}
+}
+
+func TestCalculateBlockTimeDrift(t *testing.T) {
+	t.Parallel()
+	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA)
+
+	// check a known value
+	blockDriftExpected58 := int64(-838732)
+	if blockDrift[58] != blockDriftExpected58 {
+		t.Log("Block Time Drift mismatch - expected", blockDriftExpected58, "got", blockDrift[58])
+		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range blockDrift {
+		if blockDrift[i] != testDataBlockTimeDrift[i] {
+			t.Log("Block Time Drift mismatch at index", i, "- expected", testDataBlockTimeDrift[i], "got", blockDrift[i])
+			t.FailNow()
+		}
+	}
+}
+
+func TestCalculateBlockTimeIntegral(t *testing.T) {
+	t.Parallel()
+	integral := CalculateBlockTimeIntegral(testDataBlockTimeDrift)
+	integralExpected := int64(-602341371)
+	// check a known value
+	if integral != integralExpected {
+		t.Log("Block Time Integral mismatch - expected", integralExpected, "got", integral)
+		t.FailNow()
+	}
+}
+
+func TestCalculateBlockTimeDerivative(t *testing.T) {
+	t.Parallel()
+	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
+
+	// check a known value
+	derivativeExpected58 := int64(73541)
+	if derivative[58] != derivativeExpected58 {
+		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
+		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range derivative {
+		if derivative[i] != testDataBlockTimeDerivative[i] {
+			t.Log("Block Time Drift mismatch at index", i, "- expected", testDataBlockTimeDerivative[i], "got", derivative[i])
+			t.FailNow()
+		}
 	}
 }
 
