@@ -26,6 +26,7 @@ const (
 	MinBlockGap           uint64 = 30 // 30 seconds minimum before new timestamp
 	MaxFutureGap          uint64 = 3  // only accept blocks this many seconds ahead
 	TargetPeriodGap       uint64 = AveragingWindow * TargetBlockGap
+	DifficultyV2Gain			int64  = 100000000
 
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60

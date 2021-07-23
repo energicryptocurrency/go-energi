@@ -165,69 +165,60 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	return ret
 }
 
-/*
- * Difficulty algorithm V2
- * Returns a difficulty value to be used in the next Block
- * @newBlockTime Last Block Time
- * @parent Parent Block Header
- * @timeTarget Target Block Time
- * If the block time is less than the minimum time, the difficulty must be increased
- * If the block time is the target time, the difficulty should stay the same
- * If the block time is more than the target time the difficulty must be reduced
- * New Difficulty = Parent Difficulty * (1.0001 ^ Block Time)
- */
+// calcPoSDifficultyV2 is our v2 difficulty algorithm
+// this algorithm is a PID controlled difficulty
+// first we take an Exponential Moving Average of
+// the last 60 elapsed block times. EMA was chosen because it
+// favors more recent block times, and so should be more responsive.
+// Then we compute the drift, which is the difference between EMA
+// block time, and the target time of 60 seconds.
+// Finally, we take the integral and derivative of the drift.
+// This gives us 3 terms for PID control:
+// proportional (drift)
+// integral
+// derivative
+//
+// A PID controller is an excellent way to remove oscillation when
+// approaching a target value. To describe the difficulty algorithm
+// as a PID controller we need a set point, a process variable,
+// and a control variable.
+//
+// The set point is our 60 second block time. Block time EMA is our
+// process variable. The difficulty itself is the control variable.
+// We calculate a new difficulty as a weighted sum of the difference
+// between the set point and process variable,
+// the integral of this difference, and the derivative of this difference.
+//
+// The proportional term accounts for current error in block time.
+// The integral term accounts for past error in block time.
+// The derivative term accounts for future error in block time.
+// By carefully weighting these 3, we can quickly approach the set point
+// without much oscillation.
 func calcPoSDifficultyV2(
 	newBlockTime uint64,
 	parent *types.Header,
 	timeTarget *timeTarget,
 ) *big.Int {
+	gain := big.NewInt(params.DifficultyV2Gain)
+	integralTime := big.NewInt(60)
+	derivativeTime := big.NewInt(1)
 
-	target := timeTarget.blockTarget
-	// if the target is the new block time we use the parent difficulty
-	if newBlockTime == target {
-		log.Trace("No difficulty change", "parent", parent.Difficulty)
-		return parent.Difficulty
-	}
-	// The divergence from the target time to the new block time
-	// determines the new difficulty
-	targetDivergence := int(newBlockTime) - int(target)
-	// clamp to minimum -30
-	if targetDivergence < params.MaxTimeDifferenceDrop {
-		targetDivergence = params.MaxTimeDifferenceDrop
-	}
-	// clamp to maximum 60
-	if targetDivergence > int(params.TargetBlockGap) {
-		targetDivergence = int(params.TargetBlockGap)
-	}
-	log.Debug(">>>","target", targetDivergence)
-	const factorInverse = 10000               // 0.0001 is the same as 1/10000
-	const precision = 1000000                 // we want 2 decimal places precision lower
-	var scaledPreMultiplier = precision + 100 // this levels it to 1 by
-	// dividing the result back by precision
+	difficultyAdjustmentProportional := big.NewInt(timeTarget.drift)
+	difficultyAdjustmentIntegral := big.NewInt(timeTarget.integral)
+	difficultyAdjustmentIntegral.Div(difficultyAdjustmentIntegral, integralTime)
+	difficultyAdjustmentDerivative := big.NewInt(timeTarget.derivative)
+	difficultyAdjustmentDerivative.Mul(difficultyAdjustmentDerivative, derivativeTime)
 
-	negative := false
-	if targetDivergence < 0 {
-		targetDivergence = -targetDivergence
-		negative = true
-	}
-	for i := 0; i < targetDivergence; i++ {
-		// the function of 1.0001 ^ timeDiff means the same as
-		// repeatedly add 1/10000th to the previous result value as many
-		// times as timeDiff, starting with an initial (scaled) value
-		if !negative {
-			scaledPreMultiplier += scaledPreMultiplier / factorInverse
-		} else {
-			scaledPreMultiplier -= scaledPreMultiplier / factorInverse
-		}
-	}
-	// multiply the parent difficulty by the multiplier and divide back
-	// by the precision value, applying the difficulty change without using
-	// floating point numbers
-	difficulty := big.NewInt(0).Mul(parent.Difficulty, big.NewInt(int64(scaledPreMultiplier)))
-	difficulty = difficulty.Div(difficulty, big.NewInt(int64(precision)))
+	difficultyAdjustment := big.NewInt(0)
+	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentProportional)
+	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentIntegral)
+	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentDerivative)
+	difficultyAdjustment.Mul(difficultyAdjustment, gain)
 
-	log.Trace("Difficulty change",
+	difficulty := big.NewInt(0).Set(parent.Difficulty)
+	difficulty.Add(difficulty, difficultyAdjustment)
+	log.Trace("Difficulty adjustment",
 		"parent", parent.Difficulty, "new difficulty", difficulty,
-		"block time", newBlockTime, "target time", target)
+		"block time", newBlockTime, "target time", timeTarget)
 	return difficulty
 }
