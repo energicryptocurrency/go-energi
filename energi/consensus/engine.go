@@ -62,7 +62,7 @@ type (
 	SignerFn    func(common.Address, []byte) ([]byte, error)
 	PeerCountFn func() int
 	IsMiningFn  func() bool
-	DiffFn      func(uint64, *types.Header, *timeTarget) *big.Int
+	DiffFn      func(uint64, *types.Header, *TimeTarget) *big.Int
 
 	// Energi is the state data for Energi Proof of Stake consensus
 	Energi struct {
@@ -570,7 +570,7 @@ func (e *Energi) PoSPrepareV2(
 	chain ChainReader,
 	header *types.Header,
 	parent *types.Header,
-) (timeTarget *timeTarget, err error) {
+) (timeTarget *TimeTarget, err error) {
 	timeTarget = e.calcTimeTargetV2(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
@@ -582,7 +582,7 @@ func (e *Energi) PoSPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV2(header.Time, parent, timeTarget)
+	header.Difficulty = CalcPoSDifficultyV2(header.Time, parent, timeTarget)
 
 	return timeTarget, err
 }
@@ -592,7 +592,7 @@ func (e *Energi) PoSPrepareV1(
 	chain ChainReader,
 	header *types.Header,
 	parent *types.Header,
-) (timeTarget *timeTarget, err error) {
+) (timeTarget *TimeTarget, err error) {
 	timeTarget = e.calcTimeTarget(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
@@ -928,7 +928,7 @@ func (e *Energi) CalcDifficulty(
 	log.Debug("hard fork", "status", isAsgardActive)
 	if isAsgardActive {
 		time_target := e.calcTimeTargetV2(chain, parent)
-		return calcPoSDifficultyV2(time, parent, time_target)
+		return CalcPoSDifficultyV2(time, parent, time_target)
 	}
 	time_target := e.calcTimeTarget(chain, parent)
 	return e.calcPoSDifficulty(chain, time, parent, time_target)

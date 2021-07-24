@@ -19,6 +19,7 @@ package consensus
 import (
 	"math/big"
 
+	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/energi/params"
 	"energi.world/core/gen3/log"
@@ -111,9 +112,9 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *timeTarget {
+func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 
-	ret := &timeTarget{}
+	ret := &TimeTarget{}
 	parentBlockTime := parent.Time // Defines the original parent block time.
 	parentNumber := parent.Number.Uint64()
 
@@ -153,19 +154,19 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 	drift := CalculateBlockTimeDrift(ema)
 	integral := CalculateBlockTimeIntegral(drift)
 	derivative := CalculateBlockTimeDerivative(drift)
-	ret.drift = drift[len(drift)-1]
-	ret.integral = integral
-	ret.derivative = derivative[len(derivative)-1]
+	ret.Drift = drift[len(drift)-1]
+	ret.Integral = integral
+	ret.Derivative = derivative[len(derivative)-1]
 
 	log.Trace("PoS time", "block", parentNumber+1,
 		"min", ret.min, "max", ret.max,
-		"timeTarget", ret.blockTarget,
+		"TimeTarget", ret.blockTarget,
 		"averageBlockTimeMicroseconds", ret.periodTarget,
 	)
 	return ret
 }
 
-// calcPoSDifficultyV2 is our v2 difficulty algorithm
+// CalcPoSDifficultyV2 is our v2 difficulty algorithm
 // this algorithm is a PID controlled difficulty
 // first we take an Exponential Moving Average of
 // the last 60 elapsed block times. EMA was chosen because it
@@ -201,19 +202,20 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 //
 // See https://en.wikipedia.org/wiki/PID_controller#Mathematical_form for more
 // information.
-func calcPoSDifficultyV2(
-	newBlockTime uint64,
+func CalcPoSDifficultyV2(
+	newBlockTime uint64, // TODO: maybe we should be recalculating ema/drift/etc with the new time included?
 	parent *types.Header,
-	timeTarget *timeTarget,
+	timeTarget *TimeTarget,
 ) *big.Int {
-	gain := big.NewInt(params.DifficultyV2Gain)
-	integralTime := big.NewInt(60)
-	derivativeTime := big.NewInt(1)
+	// set tuning parameters
+	gain := big.NewInt(50000)
+	integralTime := big.NewInt(720)
+	derivativeTime := big.NewInt(60)
 
-	difficultyAdjustmentProportional := big.NewInt(timeTarget.drift)
-	difficultyAdjustmentIntegral := big.NewInt(timeTarget.integral)
+	difficultyAdjustmentProportional := big.NewInt(timeTarget.Drift)
+	difficultyAdjustmentIntegral := big.NewInt(timeTarget.Integral)
 	difficultyAdjustmentIntegral.Div(difficultyAdjustmentIntegral, integralTime)
-	difficultyAdjustmentDerivative := big.NewInt(timeTarget.derivative)
+	difficultyAdjustmentDerivative := big.NewInt(timeTarget.Derivative)
 	difficultyAdjustmentDerivative.Mul(difficultyAdjustmentDerivative, derivativeTime)
 
 	difficultyAdjustment := big.NewInt(0)

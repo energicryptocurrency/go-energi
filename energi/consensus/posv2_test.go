@@ -211,7 +211,7 @@ func TestPoSChainV2(t *testing.T) {
 	iterCount := 150
 
 	engine.diffFn = func(uint64, *types.Header,
-		*timeTarget) *big.Int {
+		*TimeTarget) *big.Int {
 		return common.Big1
 	}
 
@@ -405,7 +405,7 @@ func TestPoSChainV2(t *testing.T) {
 		}
 		
 		if i < 60 {
-			// parent header and current header must be timeTarget.min apart(30s)
+			// parent header and current header must be TimeTarget.min apart(30s)
 			if !assert.Equal(t, header.Time, parent.Time+30){
 				t.FailNow()
 			}
@@ -575,12 +575,12 @@ func TestPoSDiffV2(t *testing.T) {
 		parent := &types.Header{
 			Difficulty: big.NewInt(tc.parent),
 		}
-		tt := &timeTarget{
+		tt := &TimeTarget{
 			min: tc.min,
 			blockTarget:  tc.target,
 		}
 
-		res := calcPoSDifficultyV2(tc.time, parent, tt)
+		res := CalcPoSDifficultyV2(tc.time, parent, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }
