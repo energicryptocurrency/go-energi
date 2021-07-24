@@ -65,7 +65,7 @@ func CalculateBlockTimeDrift(ema []uint64) (drift []int64) {
 	target := int64(params.TargetBlockGap * microseconds)
 	drift = make([]int64, len(ema))
 	for i := range ema {
-		drift[i] = target - int64(ema[i])
+		drift[i] = (target - int64(ema[i])) / int64(microseconds)
 	}
 	return
 }
