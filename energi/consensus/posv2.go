@@ -128,17 +128,17 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 
 	// Block interval enforcement
 	// TODO: LRU cache here for extra DoS mitigation
-	timeDiffs := make([]uint64, params.AveragingWindow)
+	timeDiffs := make([]uint64, params.BlockTimeEMAPeriod)
 
 	// compute block time differences
 	// note that the most recent time difference will be the most
 	// weighted by the EMA, and the oldest time difference will be the least
-	for i := params.AveragingWindow; i > 0; i-- {
+	for i := params.BlockTimeEMAPeriod; i > 0; i-- {
 		past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
 		if past == nil {
 			// this normally can't happen because there is more
 			// than enough blocks before the hard fork to always
-			// get params.AveragingWindow timestamps
+			// get params.BlockTimeEMAPeriod timestamps
 			log.Trace("Inconsistent tree, shutdown?")
 			return ret
 		}
@@ -146,7 +146,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 		parent = past
 	}
 
-	ema := CalculateBlockTimeEMA(timeDiffs, params.AveragingWindow)
+	ema := CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod)
 
 	ret.periodTarget = ema[len(ema)-1]
 

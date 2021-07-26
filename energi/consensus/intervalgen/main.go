@@ -37,7 +37,7 @@ func addBlockTimes(output *string) (samples []uint64) {
 }
 
 func addBlockTimeEMA(samples []uint64, output *string) (ema []uint64) {
-	ema = consensus.CalculateBlockTimeEMA(samples, params.AveragingWindow)
+	ema = consensus.CalculateBlockTimeEMA(samples, params.BlockTimeEMAPeriod)
 	*output += "\nvar testDataBlockTimeEMA = []uint64{\n  "
 	for i := range ema {
 		*output += fmt.Sprint(ema[i])
@@ -131,7 +131,7 @@ func simulateStaking(
 				// rather than initialize a whole engine let's just build a time target
 				timeTarget := &consensus.TimeTarget{}
 				timeSlice := blockTimes[blockCount-61:blockCount-1]
-				ema := consensus.CalculateBlockTimeEMA(timeSlice, params.AveragingWindow)
+				ema := consensus.CalculateBlockTimeEMA(timeSlice, params.BlockTimeEMAPeriod)
 				drift := consensus.CalculateBlockTimeDrift(ema)
 				integral := consensus.CalculateBlockTimeIntegral(drift)
 				derivative := consensus.CalculateBlockTimeDerivative(drift)
@@ -175,7 +175,7 @@ func simulateStaking(
 	}
 	*output += "}\n"
 
-	emaTimes := consensus.CalculateBlockTimeEMA(blockTimes, params.AveragingWindow)
+	emaTimes := consensus.CalculateBlockTimeEMA(blockTimes, params.BlockTimeEMAPeriod)
 
 	// write simulated data to CSV
 	csvData := "time,emaTime,difficulty\n"
