@@ -163,31 +163,17 @@ func simulateStaking(
 			}
 		}
 	}
+	emaTimes := consensus.CalculateBlockTimeEMA(blockTimes, params.BlockTimeEMAPeriod)
 
-	*output += "\nvar simulatedBlockTime = []uint64{\n  "
-	for i := range blockTimes {
-		*output += fmt.Sprint(blockTimes[i])
-		if (i+1) % 30 == 0 {
-			*output += ",\n  "
-		} else {
-			*output += ","
-		}
+	// write the final sampuleNum (block time, difficulty) pairs for unit tests
+	if len(blockTimes) != len(difficulty) {
+		panic("[ERROR]: inconsistent difficulty data!")
 	}
-	*output += "}\n"
-
-	*output += "\nvar simulatedBlockDifficulty = []uint64{\n  "
-	for i := range blockTimes {
-		*output += fmt.Sprint(difficulty[i].Uint64())
-		if (i+1) % 10 == 0 {
-			*output += ",\n  "
-		} else {
-			*output += ","
-		}
+	if len(blockTimes) != len(emaTimes) {
+		panic("[ERROR]: inconsistent EMA data")
 	}
-	*output += "}\n"
 
 	// write simulated data to CSV
-	emaTimes := consensus.CalculateBlockTimeEMA(blockTimes, params.BlockTimeEMAPeriod)
 	csvData := "time,emaTime,difficulty\n"
 	for i := range blockTimes {
 		csvData += fmt.Sprint(blockTimes[i], ",", emaTimes[i], ",", difficulty[i].Uint64(), "\n")
