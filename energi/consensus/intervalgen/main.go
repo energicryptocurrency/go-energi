@@ -123,13 +123,19 @@ func simulateStaking(
 	}
 
 	for blockCount := simulationStartBlock; blockCount < totalBlocks; blockCount++ {
+		// double the amount of NRG at stake at block 10000
 		if blockCount == 10000 {
 			nrgStaking *= 2
 		}
+
+		// cut the amount of NRG at stake to 1/4 at block 20000
 		if blockCount == 20000 {
 			nrgStaking /= 4
 		}
+
+		// simulated mining - starting from 30 seconds to some timeout value
 		for t := uint64(30); t < maxStakeTime; t++ {
+			// the odds of finding a block with any timestamp are nrgAtStake/difficulty
 			if blockFound(r, difficulty[blockCount-1]) {
 				// rather than initialize a whole engine let's just build a time target
 				timeTarget := &consensus.TimeTarget{}
@@ -142,6 +148,7 @@ func simulateStaking(
 				timeTarget.Integral = integral
 				timeTarget.Derivative = derivative[len(derivative)-1]
 
+				// create a header with the previous difficulty
 				parentHeader := &types.Header{}
 				parentHeader.Difficulty = difficulty[blockCount-1]
 
@@ -150,6 +157,7 @@ func simulateStaking(
 				difficulty[blockCount] = consensus.CalcPoSDifficultyV2(t, parentHeader, timeTarget)
 				break
 			}
+			// timeout - prevent infinite mining loop if simulation difficulty gets too high
 			if t + 1 == maxStakeTime {
 				panic("[ERROR]: Stake timeout, something wrong?")
 			}
@@ -178,9 +186,8 @@ func simulateStaking(
 	}
 	*output += "}\n"
 
-	emaTimes := consensus.CalculateBlockTimeEMA(blockTimes, params.BlockTimeEMAPeriod)
-
 	// write simulated data to CSV
+	emaTimes := consensus.CalculateBlockTimeEMA(blockTimes, params.BlockTimeEMAPeriod)
 	csvData := "time,emaTime,difficulty\n"
 	for i := range blockTimes {
 		csvData += fmt.Sprint(blockTimes[i], ",", emaTimes[i], ",", difficulty[i].Uint64(), "\n")
