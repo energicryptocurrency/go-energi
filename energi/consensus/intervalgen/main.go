@@ -97,7 +97,7 @@ func simulateStaking(
 ) {
 	const (
 		initialDifficulty int64 = 343768608 // mainnet difficulty number
-		simulationBlockCount = 1440*14
+		simulationBlockCount = 1440*28
 		maxStakeTime uint64 = 10000
 	)
 
@@ -125,6 +125,9 @@ func simulateStaking(
 	for blockCount := simulationStartBlock; blockCount < totalBlocks; blockCount++ {
 		if blockCount == 10000 {
 			nrgStaking *= 2
+		}
+		if blockCount == 20000 {
+			nrgStaking /= 4
 		}
 		for t := uint64(30); t < maxStakeTime; t++ {
 			if blockFound(r, difficulty[blockCount-1]) {
