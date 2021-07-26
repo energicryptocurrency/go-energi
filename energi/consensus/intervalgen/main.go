@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	sampleNum = 1440
+	sampleNum = 360
 )
 
 func addBlockTimes(output *string) (samples []uint64) {
@@ -97,7 +97,7 @@ func simulateStaking(
 ) {
 	const (
 		initialDifficulty int64 = 343768608 // mainnet difficulty number
-		simulationBlockCount = 1440*28
+		simulationBlockCount = 1440*21
 		maxStakeTime uint64 = 10000
 	)
 
