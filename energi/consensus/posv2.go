@@ -65,7 +65,7 @@ func CalculateBlockTimeDrift(ema []uint64) (drift []int64) {
 	target := int64(params.TargetBlockGap * microseconds)
 	drift = make([]int64, len(ema))
 	for i := range ema {
-		drift[i] = (target - int64(ema[i])) / int64(microseconds)
+		drift[i] = target - int64(ema[i])
 	}
 	return
 }
@@ -223,6 +223,7 @@ func CalcPoSDifficultyV2(
 	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentIntegral)
 	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentDerivative)
 	difficultyAdjustment.Mul(difficultyAdjustment, gain)
+	difficultyAdjustment.Div(difficultyAdjustment, big.NewInt(int64(microseconds)))
 
 	difficulty := big.NewInt(0).Set(parent.Difficulty)
 	difficulty.Add(difficulty, difficultyAdjustment)
