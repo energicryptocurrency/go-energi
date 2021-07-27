@@ -361,13 +361,13 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 		}
 		if diff.Cmp(common.Big0) <= 0 {
 			// BlockHash not yet set but hardfork is active
-			logFunc("block Number", hfInfo.BlockNumber, "hardfork Name", hfInfo.Name, "blocks after Hardfork", new(big.Int).Abs(diff))
+			logFunc("Hard fork", hfInfo.Name, "activated at", hfInfo.BlockNumber, "block")
 		} else {
 			// hardfork is to be activated in the future
 			hours := strconv.FormatInt(diff.Int64()/60, 10)
 			minutes := strconv.FormatInt(diff.Int64()%60, 10)
 			blockNum := new(big.Int).Abs(diff)
-			logFunc("Hardfork will be finalized in about " + hours + " hours and " + minutes + " minutes" , "block Number", hfInfo.BlockNumber, "hardfork Name", hfInfo.Name, "blocks To Hardfork", blockNum)
+			logFunc("Hard fork will activate in approximately " + hours + " hours and " + minutes + " minutes" , "block Number", hfInfo.BlockNumber, "hardfork Name", hfInfo.Name, "blocks To Hardfork", blockNum)
 		}
 
 	} else {
