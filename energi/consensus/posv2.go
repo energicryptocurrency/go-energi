@@ -228,7 +228,6 @@ func CalcPoSDifficultyV2(
 	difficulty := big.NewInt(0).Set(parent.Difficulty)
 	difficulty.Add(difficulty, difficultyAdjustment)
 
-	//difficulty.Set(difficultyAdjustment)
 	// ensure the difficulty does not fall below 1
 	if difficulty.Cmp(common.Big1) < 0 {
 		difficulty = common.Big1
