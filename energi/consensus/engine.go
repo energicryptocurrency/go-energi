@@ -234,7 +234,7 @@ func (e *Energi) VerifyHeader(
 
 	// get hf status
 	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
-	var time_target *timeTarget
+	var time_target *TimeTarget
 
 	// calculate time target based on hf status
 	if isAsgardActive {
