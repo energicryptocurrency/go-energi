@@ -90,10 +90,10 @@ func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
 // f'(x) = 1/2h * (f(x+h) - f(x-h))
 func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 	sampleSize := len(drift)
-	derivative = make([]int64, sampleSize - 2)
+	derivative = make([]int64, sampleSize - 1)
 
-	for i := 1; i < sampleSize - 1; i++ {
-		derivative[i-1] = (drift[i+1] - drift[i-1]) / 2
+	for i := 1; i < sampleSize; i++ {
+		derivative[i-1] = (drift[i] - drift[i-1])
 	}
 	return
 }
