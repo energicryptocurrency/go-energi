@@ -364,21 +364,24 @@ func (hf *HardforkService) listenDownloader() {
 func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
 	logFunc := log.Debug
 	emptyHash := [32]byte{}
-	diff := new(big.Int).Sub(currentBlockNo, hfInfo.BlockNumber)
+	diff := new(big.Int).Sub(hfInfo.BlockNumber, currentBlockNo)
 
 	if bytes.Compare(hfInfo.BlockHash[:], emptyHash[:]) == 0 {
 		if diff.Cmp(big.NewInt(lastBlockNumToLogPendingHardforks)) > 0 && diff.Cmp(period) <= 0 {
 			// -10 < Currentblock - hfblock <= hfPeriod
 			logFunc = log.Warn
 		}
-		desc := "blocks To Hardfork"
-		if diff.Cmp(common.Big0) > 0 {
-			desc = "blocks after Hardfork"
+		if diff.Cmp(common.Big0) <= 0 {
+			// BlockHash not yet set but hardfork is active
+			logFunc("Hard fork", formatHfName(hfInfo.Name), "activated at", hfInfo.BlockNumber, "block")
+		} else {
+			// hardfork is to be activated in the future
+			hours := strconv.FormatInt(diff.Int64()/60, 10)
+			minutes := strconv.FormatInt(diff.Int64()%60, 10)
+			blockNum := new(big.Int).Abs(diff)
+			logFunc("Hard fork will activate in approximately " + hours + " hours and " + minutes + " minutes" , "block Number", hfInfo.BlockNumber, "hardfork Name", formatHfName(hfInfo.Name), "blocks To Hardfork", blockNum)
 		}
 
-		// BlockHash not yet set.
-		logFunc("Hardfork will be finalized in about " + strconv.FormatInt(diff.Int64()/60, 10) + " hours and " + strconv.FormatInt(diff.Int64()%60, 10) + " minutes" , "block Number", hfInfo.BlockNumber,
-			"hardfork Name", formatHfName(hfInfo.Name), desc, new(big.Int).Abs(diff))
 	} else {
 		if diff.Cmp(common.Big0) > 0 && diff.Cmp(period) <= 0 {
 			// 0 < Currentblock - hfblock <= hfPeriod
