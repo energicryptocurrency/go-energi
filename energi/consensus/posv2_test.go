@@ -20,7 +20,7 @@ import (
 	"flag"
 	"math/big"
 	"testing"
-	
+
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core"
@@ -32,7 +32,7 @@ import (
 	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
-	
+
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -90,9 +90,8 @@ func TestCalculateBlockTimeIntegral(t *testing.T) {
 func TestCalculateBlockTimeDerivative(t *testing.T) {
 	t.Parallel()
 	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
-
 	// check a known value
-	derivativeExpected58 := int64(-9289)
+	derivativeExpected58 := int64(testDataBlockTimeDrift[59] - testDataBlockTimeDrift[58])
 	if derivative[58] != derivativeExpected58 {
 		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
 		t.FailNow()
@@ -403,7 +402,7 @@ func TestPoSChainV2(t *testing.T) {
 
 			t.FailNow()
 		}
-		
+
 		if i < 60 {
 			// parent header and current header must be TimeTarget.min apart(30s)
 			if !assert.Equal(t, header.Time, parent.Time+30){
@@ -435,7 +434,7 @@ func TestPoSChainV2(t *testing.T) {
 				t.FailNow()
 			}
 		}
-		
+
 		assert.True(t, parent.Time < tt.min, "Header %v", i)
 
 		//		assert.Empty(t, engine.enforceTime(header, tt))
