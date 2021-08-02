@@ -38,10 +38,10 @@ import (
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
-	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.AveragingWindow)
+	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.BlockTimeEMAPeriod)
 
 	// check a known value
-	emaExpected58 := uint64(59161268)
+	emaExpected58 := uint64(59808819)
 	if emaCalculated[58] != emaExpected58 {
 		t.Log("EMA mismatch - expected", emaExpected58, "got", emaCalculated[58])
 		t.FailNow()
@@ -61,7 +61,7 @@ func TestCalculateBlockTimeDrift(t *testing.T) {
 	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA)
 
 	// check a known value
-	blockDriftExpected58 := int64(-838732)
+	blockDriftExpected58 := int64(191181)
 	if blockDrift[58] != blockDriftExpected58 {
 		t.Log("Block Time Drift mismatch - expected", blockDriftExpected58, "got", blockDrift[58])
 		t.FailNow()
@@ -79,7 +79,7 @@ func TestCalculateBlockTimeDrift(t *testing.T) {
 func TestCalculateBlockTimeIntegral(t *testing.T) {
 	t.Parallel()
 	integral := CalculateBlockTimeIntegral(testDataBlockTimeDrift)
-	integralExpected := int64(-602341371)
+	integralExpected := int64(363392749)
 	// check a known value
 	if integral != integralExpected {
 		t.Log("Block Time Integral mismatch - expected", integralExpected, "got", integral)
@@ -92,7 +92,7 @@ func TestCalculateBlockTimeDerivative(t *testing.T) {
 	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
 
 	// check a known value
-	derivativeExpected58 := int64(73541)
+	derivativeExpected58 := int64(-9289)
 	if derivative[58] != derivativeExpected58 {
 		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
 		t.FailNow()
@@ -211,7 +211,7 @@ func TestPoSChainV2(t *testing.T) {
 	iterCount := 150
 
 	engine.diffFn = func(uint64, *types.Header,
-		*timeTarget) *big.Int {
+		*TimeTarget) *big.Int {
 		return common.Big1
 	}
 
@@ -405,7 +405,7 @@ func TestPoSChainV2(t *testing.T) {
 		}
 		
 		if i < 60 {
-			// parent header and current header must be timeTarget.min apart(30s)
+			// parent header and current header must be TimeTarget.min apart(30s)
 			if !assert.Equal(t, header.Time, parent.Time+30){
 				t.FailNow()
 			}
@@ -452,6 +452,8 @@ func TestPoSChainV2(t *testing.T) {
 	}
 }
 
+// TODO: this test case needs to be fixed so it can properly calculate
+// the PID difficulty, currently it lacks the data to do so
 /*
  * Run multiple test cases
  * Call CalcPoSDifficultyV2, analyzing the result
@@ -575,12 +577,12 @@ func TestPoSDiffV2(t *testing.T) {
 		parent := &types.Header{
 			Difficulty: big.NewInt(tc.parent),
 		}
-		tt := &timeTarget{
+		tt := &TimeTarget{
 			min: tc.min,
 			blockTarget:  tc.target,
 		}
 
-		res := calcPoSDifficultyV2(tc.time, parent, tt)
+		res := CalcPoSDifficultyV2(tc.time, parent, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }

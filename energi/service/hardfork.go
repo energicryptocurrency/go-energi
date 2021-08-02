@@ -63,6 +63,18 @@ type HardforkService struct {
 
 }
 
+// hf names are represented as byte32 and when printing extra spaces
+func formatHfName(name string) string {
+	firstSpace := len(name)
+	for i, v := range name {
+		if v == 0 {
+			firstSpace = i
+			break
+		}
+	}
+	return name[0:firstSpace]
+}
+
 // NewHardforkService returns a new HardforkService instance.
 func NewHardforkService(ethServ *eth.Ethereum) (*HardforkService, error) {
 	hf := &HardforkService{
@@ -366,7 +378,7 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 
 		// BlockHash not yet set.
 		logFunc("Hardfork will be finalized in about " + strconv.FormatInt(diff.Int64()/60, 10) + " hours and " + strconv.FormatInt(diff.Int64()%60, 10) + " minutes" , "block Number", hfInfo.BlockNumber,
-			"hardfork Name", hfInfo.Name, desc, new(big.Int).Abs(diff))
+			"hardfork Name", formatHfName(hfInfo.Name), desc, new(big.Int).Abs(diff))
 	} else {
 		if diff.Cmp(common.Big0) > 0 && diff.Cmp(period) <= 0 {
 			// 0 < Currentblock - hfblock <= hfPeriod
@@ -374,7 +386,7 @@ func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.Hardfor
 		}
 		// BlockHash already set. Hardfork already finalized.
 		logFunc("Hardfork already finalized", "block Number", hfInfo.BlockNumber,
-			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String(),
+			"hardfork Name", formatHfName(hfInfo.Name), "block Hash", hfInfo.BlockHash.String(),
 		)
 	}
 }

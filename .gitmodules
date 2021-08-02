@@ -1,4 +1,5 @@
-[submodule "tests"]
-	path = tests/testdata
-	url = https://github.com/energicryptocurrency/energi3-tests.git
-	branch = develop
+[submodule "tech/gen3/tests"]
+    path = tests/testdata
+    url = ../tests
+    branch = develop
+
