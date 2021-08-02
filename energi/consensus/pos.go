@@ -43,8 +43,9 @@ var (
 	errInvalidPoSNonce = errors.New("invalid stake weight")
 )
 
-type timeTarget struct {
+type TimeTarget struct {
 	min, max, blockTarget, periodTarget uint64
+	Drift, Integral, Derivative int64
 }
 
 /**
@@ -55,9 +56,9 @@ type timeTarget struct {
  */
 func (e *Energi) calcTimeTarget(
 	chain ChainReader, parent *types.Header,
-) (ret *timeTarget) {
+) (ret *TimeTarget) {
 
-	ret = new(timeTarget)
+	ret = new(TimeTarget)
 	now := e.now()
 	parentNumber := parent.Number.Uint64()
 	blockNumber := parentNumber + 1
@@ -105,7 +106,7 @@ func (e *Energi) calcTimeTarget(
 }
 
 func (e *Energi) enforceMinTime(
-	header *types.Header, timeTarget *timeTarget,
+	header *types.Header, timeTarget *TimeTarget,
 ) error {
 
 	// NOTE: allow Miner to hint already tried period by
@@ -116,7 +117,7 @@ func (e *Energi) enforceMinTime(
 	return nil
 }
 
-func (e *Energi) checkTime(header *types.Header, timeTarget *timeTarget) error {
+func (e *Energi) checkTime(header *types.Header, timeTarget *TimeTarget) error {
 
 	if header.Time < timeTarget.min {
 		return errBlockMinTime
@@ -199,7 +200,7 @@ func (e *Energi) calcPoSDifficulty(
 	chain ChainReader,
 	time uint64,
 	parent *types.Header,
-	tt *timeTarget,
+	tt *TimeTarget,
 ) (ret *big.Int) {
 	ret = e.diffFn(time, parent, tt)
 	log.Trace(
@@ -247,7 +248,7 @@ func init() {
 func calcPoSDifficultyV1(
 	time uint64,
 	parent *types.Header,
-	tt *timeTarget,
+	tt *TimeTarget,
 ) (D *big.Int) {
 	// Find the target anchor
 	target := (tt.blockTarget + tt.periodTarget) / 2
@@ -530,7 +531,7 @@ func (e *Energi) mine(
 	}
 
 	// make time target calculation depending on asgard status
-	var timeTarget *timeTarget
+	var timeTarget *TimeTarget
 	if isAsgardActive {
 		timeTarget = e.calcTimeTargetV2(chain, parent)
 	} else {

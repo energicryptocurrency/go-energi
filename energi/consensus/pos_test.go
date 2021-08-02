@@ -156,7 +156,7 @@ func TestPoSChainV1(t *testing.T) {
 
 	iterCount := 150
 
-	engine.diffFn = func(uint64, *types.Header, *timeTarget) *big.Int {
+	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
 		return common.Big1
 	}
 
@@ -375,7 +375,7 @@ func TestPoSDiffV1(t *testing.T) {
 		parent := &types.Header{
 			Difficulty: big.NewInt(tc.parent),
 		}
-		tt := &timeTarget{
+		tt := &TimeTarget{
 			min:          tc.min,
 			blockTarget:  tc.btarget,
 			periodTarget: tc.ptarget,
@@ -475,7 +475,7 @@ func TestPoSMine(t *testing.T) {
 
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	engine.testing = true
-	engine.diffFn = func(uint64, *types.Header, *timeTarget) *big.Int {
+	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
 		return common.Big1
 	}
 	engine.SetMinerCB(

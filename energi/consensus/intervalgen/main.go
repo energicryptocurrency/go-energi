@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math/big"
 	"math/rand"
 
+	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/energi/params"
 	"energi.world/core/gen3/energi/consensus"
 )
@@ -35,7 +37,7 @@ func addBlockTimes(output *string) (samples []uint64) {
 }
 
 func addBlockTimeEMA(samples []uint64, output *string) (ema []uint64) {
-	ema = consensus.CalculateBlockTimeEMA(samples, params.AveragingWindow)
+	ema = consensus.CalculateBlockTimeEMA(samples, params.BlockTimeEMAPeriod)
 	*output += "\nvar testDataBlockTimeEMA = []uint64{\n  "
 	for i := range ema {
 		*output += fmt.Sprint(ema[i])
@@ -85,6 +87,100 @@ func addBlockTimeDerivative(drift []int64, output *string) (derivative []int64) 
 	return
 }
 
+func simulateStaking(
+	blockTimesInitial   []uint64,
+	ema                 []uint64,
+	drift               []int64,
+	integral              int64,
+	derivative          []int64,
+	output               *string,
+) {
+	const (
+		initialDifficulty int64 = 343768608 // mainnet difficulty number
+		simulationBlockCount = 1440*21 // 21 days
+		maxStakeTime uint64 = 10000
+	)
+
+	nrgStaking := int64(5500000)
+	simulationStartBlock := len(blockTimesInitial)
+	totalBlocks := simulationStartBlock + simulationBlockCount
+
+	blockTimes := make([]uint64, totalBlocks)
+	difficulty := make([]*big.Int, totalBlocks)
+
+	for i := 0; i < simulationStartBlock; i++ {
+		blockTimes[i] = blockTimesInitial[i]
+		difficulty[i] = big.NewInt(initialDifficulty)
+	}
+
+	// initialDifficulty is just used for some deterministic number to seed the rand source
+	s := rand.NewSource(initialDifficulty)
+	r := rand.New(s)
+
+	// P(blockFound) is nrgStaking / difficulty
+	blockFound := func (r *rand.Rand, diff *big.Int) (bool) {
+		return r.Int63n(diff.Int64()) <= nrgStaking
+	}
+
+	for blockCount := simulationStartBlock; blockCount < totalBlocks; blockCount++ {
+		// double the amount of NRG at stake at block 10000
+		if blockCount == 10000 {
+			nrgStaking *= 2
+		}
+
+		// cut the amount of NRG at stake to 1/4 at block 20000
+		if blockCount == 20000 {
+			nrgStaking /= 4
+		}
+
+		// simulated mining - starting from 30 seconds to some timeout value
+		for t := uint64(30); t < maxStakeTime; t++ {
+			// the odds of finding a block with any timestamp are nrgAtStake/difficulty
+			if blockFound(r, difficulty[blockCount-1]) {
+				// rather than initialize a whole engine let's just build a time target
+				timeTarget := &consensus.TimeTarget{}
+				timeSlice := blockTimes[blockCount-61:blockCount-1]
+				ema := consensus.CalculateBlockTimeEMA(timeSlice, params.BlockTimeEMAPeriod)
+				drift := consensus.CalculateBlockTimeDrift(ema)
+				integral := consensus.CalculateBlockTimeIntegral(drift)
+				derivative := consensus.CalculateBlockTimeDerivative(drift)
+				timeTarget.Drift = drift[len(drift)-1]
+				timeTarget.Integral = integral
+				timeTarget.Derivative = derivative[len(derivative)-1]
+
+				// create a header with the previous difficulty
+				parentHeader := &types.Header{}
+				parentHeader.Difficulty = difficulty[blockCount-1]
+
+				// calculate the difficulty
+				blockTimes[blockCount] = t
+				difficulty[blockCount] = consensus.CalcPoSDifficultyV2(t, parentHeader, timeTarget)
+				break
+			}
+			// timeout - prevent infinite mining loop if simulation difficulty gets too high
+			if t + 1 == maxStakeTime {
+				panic("[ERROR]: Stake timeout, something wrong?")
+			}
+		}
+	}
+	emaTimes := consensus.CalculateBlockTimeEMA(blockTimes, params.BlockTimeEMAPeriod)
+
+	// write the final sampuleNum (block time, difficulty) pairs for unit tests
+	if len(blockTimes) != len(difficulty) {
+		panic("[ERROR]: inconsistent difficulty data!")
+	}
+	if len(blockTimes) != len(emaTimes) {
+		panic("[ERROR]: inconsistent EMA data")
+	}
+
+	// write simulated data to CSV
+	csvData := "time,emaTime,difficulty\n"
+	for i := range blockTimes {
+		csvData += fmt.Sprint(blockTimes[i], ",", emaTimes[i], ",", difficulty[i].Uint64(), "\n")
+	}
+	ioutil.WriteFile("staking_simulation.csv", []byte(csvData), 0660)
+}
+
 func main() {
 	output := `// Copyright 2021 The Energi Core Authors
 // This file is part of Energi Core.
@@ -113,7 +209,6 @@ package consensus
 	drift := addBlockTimeDrift(ema, &output)
 	integral := addBlockTimeIntegral(drift, &output)
 	derivative := addBlockTimeDerivative(drift, &output)
-	_ = integral
-	_ = derivative
+	simulateStaking(samples, ema, drift, integral, derivative, &output)
 	ioutil.WriteFile("posv2emasamples_test.go", []byte(output), 0660)
 }
