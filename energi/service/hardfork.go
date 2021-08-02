@@ -67,7 +67,7 @@ type HardforkService struct {
 func formatHfName(name string) string {
 	firstSpace := len(name)
 	for i, v := range name {
-		if v == ' ' {
+		if v == 0 || v == ' ' {
 			firstSpace = i
 			break
 		}
