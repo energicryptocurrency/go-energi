@@ -256,7 +256,12 @@ func (e *Energi) VerifyHeader(
 		)
 	}
 
-	difficulty := e.calcPoSDifficulty(chain, header.Time, parent, time_target)
+	var difficulty *big.Int
+	if isAsgardActive {
+		difficulty = calcPoSDifficultyV2(header.Time, parent, time_target)
+	} else {
+		difficulty = e.calcPoSDifficulty(chain, header.Time, parent, time_target)
+	}
 
 	if header.Difficulty.Cmp(difficulty) != 0 {
 		return fmt.Errorf(
