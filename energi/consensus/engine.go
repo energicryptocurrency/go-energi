@@ -549,8 +549,13 @@ func (e *Energi) hardforkIsActive(
 			version *big.Int
 	} )
 
-	err = e.hardforkAbi.Unpack(&ret, "isActive", output)
-	return header.Number.Uint64() >= ret.blockNumber.Uint64(), err
+	err = e.hardforkAbi.Unpack(&ret, "get", output)
+	if err != nil {
+		log.Trace("Failed to unpack returned hf", "err", err)
+		return false, err
+	}
+
+	return header.Number.Uint64() >= ret.blockNumber.Uint64(), nil
 }
 
 // Prepare initializes the consensus fields of a block header according to the
