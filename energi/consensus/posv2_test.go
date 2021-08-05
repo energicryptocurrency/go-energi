@@ -20,7 +20,7 @@ import (
 	"flag"
 	"math/big"
 	"testing"
-	
+
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/core"
@@ -32,17 +32,77 @@ import (
 	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
-	
+
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
-	emaCalculated := CalculateBlockTimeEMA(emaSamples)
-	emaExpected := uint64(59161280)
-	if emaCalculated != emaExpected {
-		t.Log("EMA mismatch - expected", emaExpected, "got", emaCalculated)
+	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.BlockTimeEMAPeriod)
+
+	// check a known value
+	emaExpected58 := uint64(59808819)
+	if emaCalculated[58] != emaExpected58 {
+		t.Log("EMA mismatch - expected", emaExpected58, "got", emaCalculated[58])
 		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range emaCalculated {
+		if emaCalculated[i] != testDataBlockTimeEMA[i] {
+			t.Log("EMA mismatch at index", i, "- expected", testDataBlockTimeEMA[i], "got", emaCalculated[i])
+			t.FailNow()
+		}
+	}
+}
+
+func TestCalculateBlockTimeDrift(t *testing.T) {
+	t.Parallel()
+	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA)
+
+	// check a known value
+	blockDriftExpected58 := int64(191181)
+	if blockDrift[58] != blockDriftExpected58 {
+		t.Log("Block Time Drift mismatch - expected", blockDriftExpected58, "got", blockDrift[58])
+		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range blockDrift {
+		if blockDrift[i] != testDataBlockTimeDrift[i] {
+			t.Log("Block Time Drift mismatch at index", i, "- expected", testDataBlockTimeDrift[i], "got", blockDrift[i])
+			t.FailNow()
+		}
+	}
+}
+
+func TestCalculateBlockTimeIntegral(t *testing.T) {
+	t.Parallel()
+	integral := CalculateBlockTimeIntegral(testDataBlockTimeDrift)
+	integralExpected := int64(363392749)
+	// check a known value
+	if integral != integralExpected {
+		t.Log("Block Time Integral mismatch - expected", integralExpected, "got", integral)
+		t.FailNow()
+	}
+}
+
+func TestCalculateBlockTimeDerivative(t *testing.T) {
+	t.Parallel()
+	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
+	// check a known value
+	derivativeExpected58 := int64(testDataBlockTimeDrift[59] - testDataBlockTimeDrift[58])
+	if derivative[58] != derivativeExpected58 {
+		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
+		t.FailNow()
+	}
+
+	// check the entire series
+	for i := range derivative {
+		if derivative[i] != testDataBlockTimeDerivative[i] {
+			t.Log("Block Time Drift mismatch at index", i, "- expected", testDataBlockTimeDerivative[i], "got", derivative[i])
+			t.FailNow()
+		}
 	}
 }
 
@@ -150,7 +210,7 @@ func TestPoSChainV2(t *testing.T) {
 	iterCount := 150
 
 	engine.diffFn = func(uint64, *types.Header,
-		*timeTarget) *big.Int {
+		*TimeTarget) *big.Int {
 		return common.Big1
 	}
 
@@ -342,9 +402,9 @@ func TestPoSChainV2(t *testing.T) {
 
 			t.FailNow()
 		}
-		
+
 		if i < 60 {
-			// parent header and current header must be timeTarget.min apart(30s)
+			// parent header and current header must be TimeTarget.min apart(30s)
 			if !assert.Equal(t, header.Time, parent.Time+30){
 				t.FailNow()
 			}
@@ -374,7 +434,7 @@ func TestPoSChainV2(t *testing.T) {
 				t.FailNow()
 			}
 		}
-		
+
 		assert.True(t, parent.Time < tt.min, "Header %v", i)
 
 		//		assert.Empty(t, engine.enforceTime(header, tt))
@@ -391,6 +451,8 @@ func TestPoSChainV2(t *testing.T) {
 	}
 }
 
+// TODO: this test case needs to be fixed so it can properly calculate
+// the PID difficulty, currently it lacks the data to do so
 /*
  * Run multiple test cases
  * Call CalcPoSDifficultyV2, analyzing the result
@@ -514,12 +576,12 @@ func TestPoSDiffV2(t *testing.T) {
 		parent := &types.Header{
 			Difficulty: big.NewInt(tc.parent),
 		}
-		tt := &timeTarget{
+		tt := &TimeTarget{
 			min: tc.min,
 			blockTarget:  tc.target,
 		}
 
-		res := calcPoSDifficultyV2(tc.time, parent, tt)
+		res := CalcPoSDifficultyV2(tc.time, parent, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }

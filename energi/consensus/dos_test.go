@@ -95,6 +95,7 @@ func TestPoSDoS(t *testing.T) {
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 
 	// log.Trace("Side chain as new fork")
+
 	curr_time = base
 	p.Time = base - energi_params.OldForkPeriod
 	c.Time = base
@@ -106,29 +107,40 @@ func TestPoSDoS(t *testing.T) {
 	p.Time = base - energi_params.OldForkPeriod
 	c.Time = base
 	h.Time = base + energi_params.MinBlockGap
-	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+	h1 := &types.Header{
+		Time: base + energi_params.MinBlockGap,
+		Nonce: types.BlockNonce{
+			12, 15, 35,
+		},
+	}
+	err := engine.checkDoS(fc, h1, p)
+	assert.Equal(t, eth_consensus.ErrDoSThrottle, err)
 
-	// log.Trace("Side chain as old fork")
-	curr_time = base
-	p.Time = base - energi_params.OldForkPeriod - 1
-	c.Time = base
-	h.Time = base + energi_params.MinBlockGap
-	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+	// these are commented out because POS-8 is disabled
+	/*
+		// log.Trace("Side chain as old fork")
+			curr_time = base
+			p.Time = base - energi_params.OldForkPeriod - 1
+			c.Time = base
+			h.Time = base + energi_params.MinBlockGap
+			err = engine.checkDoS(fc, h, p)
+			assert.Equal(t, eth_consensus.ErrDoSThrottle, err)
 
-	// log.Trace("Side chain as old fork an near old current")
-	curr_time = base + energi_params.OldForkPeriod - 1
-	p.Time = base - energi_params.OldForkPeriod - 1
-	c.Time = base
-	h.Time = base + energi_params.MinBlockGap
-	assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
+			// log.Trace("Side chain as old fork an near old current")
+			curr_time = base + energi_params.OldForkPeriod - 1
+			p.Time = base - energi_params.OldForkPeriod - 1
+			c.Time = base
+			h.Time = base + energi_params.MinBlockGap
+			assert.Equal(t, eth_consensus.ErrDoSThrottle, engine.checkDoS(fc, h, p))
 
-	// log.Trace("Side chain as old fork an old current - allow old forks")
-	curr_time = base + energi_params.OldForkPeriod
-	p.Time = base - energi_params.OldForkPeriod - 1
-	c.Time = base
-	h.Time = base + energi_params.MinBlockGap
-	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
+			// log.Trace("Side chain as old fork an old current - allow old forks")
+			curr_time = base + energi_params.OldForkPeriod
+			p.Time = base - energi_params.OldForkPeriod - 1
+			c.Time = base
+			h.Time = base + energi_params.MinBlockGap
+			assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 
+	*/
 	// POS-9: stake throttling
 	//============================
 
@@ -159,7 +171,7 @@ func TestPoSDoS(t *testing.T) {
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
 	h.Coinbase = common.HexToAddress("0x3456")
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
+	assert.Equal(t, 4, KnownStakesTestCount(&engine.knownStakes))
 
 	curr_time += energi_params.StakeThrottle / 2
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
@@ -169,5 +181,5 @@ func TestPoSDoS(t *testing.T) {
 
 	curr_time += energi_params.StakeThrottle
 	assert.Equal(t, nil, engine.checkDoS(fc, h, p))
-	assert.Equal(t, 1, KnownStakesTestCount(&engine.knownStakes))
+	assert.Equal(t, 3, KnownStakesTestCount(&engine.knownStakes))
 }

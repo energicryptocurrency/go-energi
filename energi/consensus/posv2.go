@@ -19,40 +19,81 @@ package consensus
 import (
 	"math/big"
 
+	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/energi/params"
 	"energi.world/core/gen3/log"
+)
+
+const (
+	// we compute in microseconds so that we can do integer math with higher precision
+	microseconds uint64 = 1000000
+
+	// just here to avoid extra typecasts in calculation
+	two uint64 = 2
 )
 
 // CalculateBlockTimeEMA computes the exponential moving average of block times
 // this will return the EMA of block times as microseconds
 // for a description of the EMA algorithm, please see:
 // see https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
-func CalculateBlockTimeEMA(blockTimeDifferences []uint64) (ema uint64) {
+func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema []uint64) {
 	sampleSize := len(blockTimeDifferences)
-	two := uint64(2)
-	N := uint64(sampleSize)
-
-	// we use a scaling factor due to entirely integer calculation for this function
-	// scaling up lets us calculate an EMA at a higher resolution that 1 second
-	scalingFactor := uint64(1000000) // after scaling the units will be microseconds
+	N := emaPeriod + 1
+	ema = make([]uint64, sampleSize)
 
 	// choice of initial condition is important for an EMA. We could use the first
 	// block time difference, but instead we'll set it to the target value so our
-	// EMA will tend toward the target
-	ema = params.TargetBlockGap * scalingFactor
-
-	// return the target block gap as EMA if we don't have enough samples
-	if (sampleSize < 2) {
-		return
-	}
-
-	for i := 1; i < sampleSize; i++ {
-		blockTimeDifferences[i-1] *= scalingFactor
-		// this formula has a factor of 2/(N+1) in a couple places. This is our
+	// EMA will tend toward the target. However we don't include this value in our
+	// EMA series data that we return, we only use it to calculate the first EMA
+	emaPrev := params.TargetBlockGap * microseconds
+	for i := 0; i < sampleSize; i++ {
+		// this formula has a factor of 2/(emaPeriod+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
 		// not precomputed this value so we don't lose precision on early division
-		ema = ((two * blockTimeDifferences[i-1])/(N+1)) + (ema - ((ema * two)/(N+1)))
+		ema[i] = ((two * blockTimeDifferences[i] * microseconds) + (emaPrev * (N - two))) / N
+		emaPrev = ema[i]
+	}
+	return
+}
+
+// CalculateBlockTimeDrift calculates the difference between the target block time
+// and the EMA block time. Drift should be a negative value if blocks are too slow
+// and a positive value if blocks are too fast, representing the direction
+// to adjust the difficulty
+func CalculateBlockTimeDrift(ema []uint64) (drift []int64) {
+	target := int64(params.TargetBlockGap * microseconds)
+	drift = make([]int64, len(ema))
+	for i := range ema {
+		drift[i] = target - int64(ema[i])
+	}
+	return
+}
+
+// CalculateBlockTimeIntegral calculates the integral of the block drift function
+// This provides us with some idea fo historical "error", how far the block time
+// has been from the target value for the duration of the period
+// We use the trapezoidal rule here for integration
+func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
+	sampleSize := len(drift)
+	integral = 0
+	// this is a simplification of the trapezoid rule based on uniform spacing
+	for i := 1; i < sampleSize - 1; i++ {
+		integral += drift[i]
+	}
+	integral += (drift[0] + drift[sampleSize-1]) / 2
+	return
+}
+
+// CalculateBlockTimeDerivative computes the derivative series of a data series
+// Here we use the central difference formula, for some small step h (each block)
+// f'(x) = 1/2h * (f(x+h) - f(x-h))
+func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
+	sampleSize := len(drift)
+	derivative = make([]int64, sampleSize - 1)
+
+	for i := 1; i < sampleSize; i++ {
+		derivative[i-1] = (drift[i] - drift[i-1])
 	}
 	return
 }
@@ -71,9 +112,9 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64) (ema uint64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *timeTarget {
+func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 
-	ret := &timeTarget{}
+	ret := &TimeTarget{}
 	parentBlockTime := parent.Time // Defines the original parent block time.
 	parentNumber := parent.Number.Uint64()
 
@@ -87,17 +128,17 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 
 	// Block interval enforcement
 	// TODO: LRU cache here for extra DoS mitigation
-	timeDiffs := make([]uint64, params.AveragingWindow)
+	timeDiffs := make([]uint64, params.BlockTimeEMAPeriod)
 
 	// compute block time differences
 	// note that the most recent time difference will be the most
 	// weighted by the EMA, and the oldest time difference will be the least
-	for i := params.AveragingWindow; i > 0; i-- {
+	for i := params.BlockTimeEMAPeriod; i > 0; i-- {
 		past := chain.GetHeader(parent.ParentHash, parent.Number.Uint64()-1)
 		if past == nil {
 			// this normally can't happen because there is more
 			// than enough blocks before the hard fork to always
-			// get params.AveragingWindow timestamps
+			// get params.BlockTimeEMAPeriod timestamps
 			log.Trace("Inconsistent tree, shutdown?")
 			return ret
 		}
@@ -105,79 +146,95 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *time
 		parent = past
 	}
 
-	ret.periodTarget = CalculateBlockTimeEMA(timeDiffs)
+	ema := CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod)
+
+	ret.periodTarget = ema[len(ema)-1]
+
+	// set up the parameters for PID control (diffV2)
+	drift := CalculateBlockTimeDrift(ema)
+	integral := CalculateBlockTimeIntegral(drift)
+	derivative := CalculateBlockTimeDerivative(drift)
+	ret.Drift = drift[len(drift)-1]
+	ret.Integral = integral
+	ret.Derivative = derivative[len(derivative)-1]
 
 	log.Trace("PoS time", "block", parentNumber+1,
 		"min", ret.min, "max", ret.max,
-		"timeTarget", ret.blockTarget,
+		"TimeTarget", ret.blockTarget,
 		"averageBlockTimeMicroseconds", ret.periodTarget,
 	)
 	return ret
 }
 
-/*
- * Difficulty algorithm V2
- * Returns a difficulty value to be used in the next Block
- * @newBlockTime Last Block Time
- * @parent Parent Block Header
- * @timeTarget Target Block Time
- * If the block time is less than the minimum time, the difficulty must be increased
- * If the block time is the target time, the difficulty should stay the same
- * If the block time is more than the target time the difficulty must be reduced
- * New Difficulty = Parent Difficulty * (1.0001 ^ Block Time)
- */
-func calcPoSDifficultyV2(
-	newBlockTime uint64,
+// CalcPoSDifficultyV2 is our v2 difficulty algorithm
+// this algorithm is a PID controlled difficulty
+// first we take an Exponential Moving Average of
+// the last 60 elapsed block times. EMA was chosen because it
+// favors more recent block times, and so should be more responsive.
+// Then we compute the drift, which is the difference between EMA
+// block time, and the target time of 60 seconds.
+// Finally, we take the integral and derivative of the drift.
+// This gives us 3 terms for PID control:
+// proportional (drift)
+// integral
+// derivative
+//
+// A PID controller is an excellent way to remove oscillation when
+// approaching a target value. To describe the difficulty algorithm
+// as a PID controller we need a set point, a process variable,
+// and a control variable.
+//
+// The set point is our 60 second block time. Block time EMA is our
+// process variable. The difficulty itself is the control variable.
+// We calculate a new difficulty as a weighted sum of the difference
+// between the set point and process variable,
+// the integral of this difference, and the derivative of this difference.
+//
+// The proportional term accounts for current error in block time.
+// The integral term accounts for past error in block time.
+// The derivative term accounts for future error in block time.
+// By carefully weighting these 3, we can quickly approach the set point
+// without much oscillation.
+//
+// The PID control implemented here is generally called the "standard form"
+// which has only a single gain, and the derivative and integral terms are
+// scaled by time.
+//
+// See https://en.wikipedia.org/wiki/PID_controller#Mathematical_form for more
+// information.
+func CalcPoSDifficultyV2(
+	newBlockTime uint64, // TODO: maybe we should be recalculating ema/drift/etc with the new time included?
 	parent *types.Header,
-	timeTarget *timeTarget,
+	timeTarget *TimeTarget,
 ) *big.Int {
+	// set tuning parameters
+	gain := big.NewInt(50000)
+	integralTime := big.NewInt(720)
+	derivativeTime := big.NewInt(60)
 
-	target := timeTarget.blockTarget
-	// if the target is the new block time we use the parent difficulty
-	if newBlockTime == target {
-		log.Trace("No difficulty change", "parent", parent.Difficulty)
-		return parent.Difficulty
-	}
-	// The divergence from the target time to the new block time
-	// determines the new difficulty
-	targetDivergence := int(newBlockTime) - int(target)
-	// clamp to minimum -30
-	if targetDivergence < params.MaxTimeDifferenceDrop {
-		targetDivergence = params.MaxTimeDifferenceDrop
-	}
-	// clamp to maximum 60
-	if targetDivergence > int(params.TargetBlockGap) {
-		targetDivergence = int(params.TargetBlockGap)
-	}
-	log.Debug(">>>","target", targetDivergence)
-	const factorInverse = 10000               // 0.0001 is the same as 1/10000
-	const precision = 1000000                 // we want 2 decimal places precision lower
-	var scaledPreMultiplier = precision + 100 // this levels it to 1 by
-	// dividing the result back by precision
+	difficultyAdjustmentProportional := big.NewInt(timeTarget.Drift)
+	difficultyAdjustmentIntegral := big.NewInt(timeTarget.Integral)
+	difficultyAdjustmentIntegral.Div(difficultyAdjustmentIntegral, integralTime)
+	difficultyAdjustmentDerivative := big.NewInt(timeTarget.Derivative)
+	difficultyAdjustmentDerivative.Mul(difficultyAdjustmentDerivative, derivativeTime)
 
-	negative := false
-	if targetDivergence < 0 {
-		targetDivergence = -targetDivergence
-		negative = true
-	}
-	for i := 0; i < targetDivergence; i++ {
-		// the function of 1.0001 ^ timeDiff means the same as
-		// repeatedly add 1/10000th to the previous result value as many
-		// times as timeDiff, starting with an initial (scaled) value
-		if !negative {
-			scaledPreMultiplier += scaledPreMultiplier / factorInverse
-		} else {
-			scaledPreMultiplier -= scaledPreMultiplier / factorInverse
-		}
-	}
-	// multiply the parent difficulty by the multiplier and divide back
-	// by the precision value, applying the difficulty change without using
-	// floating point numbers
-	difficulty := big.NewInt(0).Mul(parent.Difficulty, big.NewInt(int64(scaledPreMultiplier)))
-	difficulty = difficulty.Div(difficulty, big.NewInt(int64(precision)))
+	difficultyAdjustment := big.NewInt(0)
+	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentProportional)
+	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentIntegral)
+	difficultyAdjustment.Add(difficultyAdjustment, difficultyAdjustmentDerivative)
+	difficultyAdjustment.Mul(difficultyAdjustment, gain)
+	difficultyAdjustment.Div(difficultyAdjustment, big.NewInt(int64(microseconds)))
 
-	log.Trace("Difficulty change",
+	difficulty := big.NewInt(0).Set(parent.Difficulty)
+	difficulty.Add(difficulty, difficultyAdjustment)
+
+	// ensure the difficulty does not fall below 1
+	if difficulty.Cmp(common.Big1) < 0 {
+		difficulty = common.Big1
+	}
+
+	log.Trace("Difficulty adjustment",
 		"parent", parent.Difficulty, "new difficulty", difficulty,
-		"block time", newBlockTime, "target time", target)
+		"block time", newBlockTime, "target time", timeTarget)
 	return difficulty
 }
