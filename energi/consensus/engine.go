@@ -498,6 +498,11 @@ func (e *Energi) hardforkIsActive(
 		return false, nil
 	}
 
+	// check if parent hash is empty
+	if (header.ParentHash == common.Hash{}) {
+		return false, nil
+	}
+
 	// get state for snapshot
 	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
 	if blockst == nil {
