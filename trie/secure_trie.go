@@ -156,8 +156,12 @@ func (t *SecureTrie) Commit(onleaf LeafCallback) (root common.Hash, err error) {
 		t.trie.db.lock.Lock()
 		for hk, key := range t.secKeyCache {
 			//check if reverse hash of key equals to shaKey
-			if reflect.DeepEqual([]byte(hk), t.hashKey(common.CopyBytes(key))) == false {
+			recomputedHash := t.hashKey(common.CopyBytes(key))
+			if reflect.DeepEqual([]byte(hk), recomputedHash) == false {
 				log.Error("New Damaged Preimage insertion", "key", common.BytesToHash(common.CopyBytes(key)).String(), "value", common.BytesToHash(([]byte(hk))).String())
+				// the corresponding hash is incorrect at this point so insert correct pair
+				t.trie.db.insertPreimage(common.BytesToHash(recomputedHash), key)
+				continue
 			}
 
 			t.trie.db.insertPreimage(common.BytesToHash([]byte(hk)), key)
