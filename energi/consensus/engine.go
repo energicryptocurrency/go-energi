@@ -508,14 +508,14 @@ func (e *Energi) hardforkIsActive(
 	// get parent
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
-		log.Error("Failed to check if hardfork is active", "err", eth_consensus.ErrUnknownAncestor)
+		log.Error("Failed to get parent", eth_consensus.ErrUnknownAncestor)
 		return false, eth_consensus.ErrUnknownAncestor
 	}
 
 	// create call data
 	var hardforkNameArray [32]byte
 	copy(hardforkNameArray[:], []byte(hardforkName))
-	callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
+	callData, err := e.hardforkAbi.Pack("get", hardforkNameArray)
 	if err != nil {
 		log.Error("Failed to check if hardfork is active", "err", err)
 		return false, err
@@ -538,15 +538,19 @@ func (e *Energi) hardforkIsActive(
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
-		log.Trace("Failed to get isActive status", "err", err)
+		log.Trace("Failed to get hardfork", "err", err)
 		return false, err
 	}
 
-	// unpack the output
-	var isActive bool
-	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
+	// return struct
+	ret := new ( struct {
+			blockNumber *big.Int
+			blockHash [32]byte
+			version *big.Int
+	} )
 
-	return isActive, err
+	err = e.hardforkAbi.Unpack(&ret, "isActive", output)
+	return header.Number.Uint64() >= ret.blockNumber.Uint64(), err
 }
 
 // Prepare initializes the consensus fields of a block header according to the
