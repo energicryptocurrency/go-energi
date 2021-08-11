@@ -117,7 +117,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	// //routine will listen to hardfork finalization event
 	go hf.listenHardforkFinalizedEvents();
 	//routine will listen to events thrown when hardfork is removed
-	go hf.listenHardforkRemovedEvents();
+	//go hf.listenHardforkRemovedEvents();
 	//logs upcoming pending hardforks notifying users about version change
 	go hf.logUpcomingHardforks();
 
@@ -285,7 +285,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 
 		case hardfork := <-hfRemovedChan:
 			log.Info("Hardfork Removed: ",
-							 "Hardfork Number",
+							 "Hardfork Name",
 							 string(hardfork.Name[:]))
 		}
 	}
