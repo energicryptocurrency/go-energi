@@ -543,24 +543,24 @@ func (e *Energi) hardforkIsActive(
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
-		log.Trace("Failed to get hardfork", "err", err)
+		log.Error("Failed to get hardfork", "err", err)
 		return false, err
 	}
 
 	// return struct
 	ret := new ( struct {
-			blockNumber *big.Int
-			blockHash [32]byte
-			version *big.Int
+			BlockNumber *big.Int
+			BlockHash [32]byte
+			SwFeatures *big.Int
 	} )
 
-	err = e.hardforkAbi.Unpack(&ret, "get", output)
+	err = e.hardforkAbi.Unpack(ret, "get", output)
 	if err != nil {
-		log.Trace("Failed to unpack returned hf", "err", err)
+		log.Error("Failed to unpack returned hf", "err", err)
 		return false, err
 	}
 
-	return header.Number.Uint64() >= ret.blockNumber.Uint64(), nil
+	return header.Number.Uint64() >= ret.BlockNumber.Uint64(), nil
 }
 
 // Prepare initializes the consensus fields of a block header according to the
