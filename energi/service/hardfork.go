@@ -238,7 +238,7 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 			return
 
 		case hardfork := <-hfFinalizedChan:
-			log.Info("New Hardfork Finalized: ",
+			log.Warn("New Hardfork Finalized: ",
 							"block Number",
 							hardfork.BlockNumber.String(),
 							"block Hash",
