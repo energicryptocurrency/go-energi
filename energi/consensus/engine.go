@@ -557,7 +557,7 @@ func (e *Energi) hardforkIsActive(
 	err = e.hardforkAbi.Unpack(ret, "get", output)
 	if err != nil  {
 		if strings.Contains(err.Error(), "no such hard fork") || strings.Contains(err.Error(), "unmarshalling empty output"){
-			log.Trace("Failed to unpack returned hf", "err", err)
+			return false, err
 		} else{
 			log.Error("Failed to unpack returned hf", "err", err)
 		}
