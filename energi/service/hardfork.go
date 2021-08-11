@@ -113,9 +113,9 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	}
 
 	//routine will listen to events thrown when hardfork is created
-	go hf.listenHardforkCreatedEvents();
+	// go hf.listenHardforkCreatedEvents();
 	// //routine will listen to hardfork finalization event
-	go hf.listenHardforkFinalizedEvents();
+	// go hf.listenHardforkFinalizedEvents();
 	//routine will listen to events thrown when hardfork is removed
 	//go hf.listenHardforkRemovedEvents();
 	//logs upcoming pending hardforks notifying users about version change
