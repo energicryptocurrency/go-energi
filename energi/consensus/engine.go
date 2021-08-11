@@ -70,29 +70,29 @@ type (
 		nonceCap uint64
 
 		// The rest
-		config       *params.EnergiConfig
-		db           ethdb.Database
-		rewardAbi    abi.ABI
-		dposAbi      abi.ABI
-		blacklistAbi abi.ABI
-		sporkAbi     abi.ABI
-		mnregAbi     abi.ABI
-		treasuryAbi  abi.ABI
-		hardforkAbi  abi.ABI
-		systemFaucet common.Address
-		xferGas      uint64
-		callGas      uint64
-		unlimitedGas uint64
-		signerFn     SignerFn
-		accountsFn   AccountsFn
-		peerCountFn  PeerCountFn
-		isMiningFn   IsMiningFn
-		diffFn       DiffFn
-		testing      bool
-		now          func() uint64
-		knownStakes  KnownStakes
-		nextKSPurge  uint64
-		txhashMap    *lru.Cache
+		config         *params.EnergiConfig
+		db             ethdb.Database
+		rewardAbi      abi.ABI
+		dposAbi        abi.ABI
+		blacklistAbi   abi.ABI
+		sporkAbi       abi.ABI
+		mnregAbi       abi.ABI
+		treasuryAbi    abi.ABI
+		hardforkAbi    abi.ABI
+		systemFaucet   common.Address
+		xferGas        uint64
+		callGas        uint64
+		unlimitedGas   uint64
+		signerFn       SignerFn
+		accountsFn     AccountsFn
+		peerCountFn    PeerCountFn
+		isMiningFn     IsMiningFn
+		diffFn         DiffFn
+		testing        bool
+		now            func() uint64
+		knownStakes    KnownStakes
+		nextKSPurge    uint64
+		txhashMap      *lru.Cache
 	}
 )
 
@@ -139,23 +139,23 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 	}
 
 	return &Energi{
-		config:       config,
-		db:           db,
-		rewardAbi:    rewardAbi,
-		dposAbi:      dposAbi,
-		blacklistAbi: blacklistAbi,
-		sporkAbi:     sporkAbi,
-		mnregAbi:     mngregAbi,
-		treasuryAbi:  treasuryAbi,
-		hardforkAbi:  hardforkAbi,
-		systemFaucet: energi_params.Energi_SystemFaucet,
-		xferGas:      0,
-		callGas:      30000,
-		unlimitedGas: energi_params.UnlimitedGas,
-		diffFn:       calcPoSDifficultyV1,
-		now:          func() uint64 { return uint64(time.Now().Unix()) },
-		nextKSPurge:  0,
-		txhashMap:    txhashMap,
+		config:        config,
+		db:            db,
+		rewardAbi:     rewardAbi,
+		dposAbi:       dposAbi,
+		blacklistAbi:  blacklistAbi,
+		sporkAbi:      sporkAbi,
+		mnregAbi:      mngregAbi,
+		treasuryAbi:   treasuryAbi,
+		hardforkAbi:   hardforkAbi,
+		systemFaucet:  energi_params.Energi_SystemFaucet,
+		xferGas:       0,
+		callGas:       30000,
+		unlimitedGas:  energi_params.UnlimitedGas,
+		diffFn:        calcPoSDifficultyV1,
+		now:           func() uint64 { return uint64(time.Now().Unix()) },
+		nextKSPurge:   0,
+		txhashMap:     txhashMap,
 
 		accountsFn:  func() []common.Address { return nil },
 		peerCountFn: func() int { return 0 },
@@ -548,17 +548,22 @@ func (e *Energi) hardforkIsActive(
 	}
 
 	// return struct
-	ret := new(struct {
-		BlockNumber *big.Int
-		BlockHash   [32]byte
-		SwFeatures  *big.Int
-	})
+	ret := new ( struct {
+			BlockNumber *big.Int
+			BlockHash [32]byte
+			SwFeatures *big.Int
+	} )
 
 	err = e.hardforkAbi.Unpack(ret, "get", output)
-	if err != nil && !strings.Contains(err.Error(), "no such hard fork") {
-		log.Error("Failed to unpack returned hf", "err", err)
+	if err != nil  {
+		if strings.Contains(err.Error(), "no such hard fork") || strings.Contains(err.Error(), "unmarshalling empty output"){
+			log.Trace("Failed to unpack returned hf", "err", err)
+		} else{
+			log.Error("Failed to unpack returned hf", "err", err)
+		}
 		return false, err
 	}
+
 	return header.Number.Uint64() >= ret.BlockNumber.Uint64(), nil
 }
 
@@ -753,11 +758,11 @@ func (e *Energi) Seal(
 	stop <-chan struct{},
 ) (err error) {
 	go func() {
-		header := block.Header()
-		txhash := header.TxHash
-		result := eth_consensus.NewSealResult(block, nil, nil)
+	header := block.Header()
+	txhash := header.TxHash
+	result := eth_consensus.NewSealResult(block, nil, nil)
 
-		if header.Number.Cmp(common.Big0) != 0 {
+	if header.Number.Cmp(common.Big0) != 0 {
 			success, err := e.mine(chain, header, stop)
 
 			// NOTE: due to the fact that PoS mining may change Coinbase
@@ -768,40 +773,40 @@ func (e *Energi) Seal(
 				result, err = e.recreateBlock(chain, header, block.Transactions())
 			}
 
-			if err != nil {
-				log.Error("PoS miner error", "err", err)
-				success = false
-			}
-
-			if !success {
-				select {
-				case results <- eth_consensus.NewSealResult(nil, nil, nil):
-				default:
-				}
-				return
-			}
-
-			header = result.Block.Header()
-		}
-
-		sighash := e.SignatureHash(header)
-		log.Trace("PoS seal hash", "sighash", sighash)
-
-		header.Signature, err = e.signerFn(header.Coinbase, sighash.Bytes())
 		if err != nil {
 			log.Error("PoS miner error", "err", err)
+			success = false
+		}
+
+			if !success {
+			select {
+			case results <- eth_consensus.NewSealResult(nil, nil, nil):
+			default:
+			}
 			return
 		}
 
-		result.Block = result.Block.WithSeal(header)
-		e.txhashMap.Add(header.TxHash, txhash)
+		header = result.Block.Header()
+	}
 
-		select {
-		case results <- result:
+	sighash := e.SignatureHash(header)
+	log.Trace("PoS seal hash", "sighash", sighash)
+
+	header.Signature, err = e.signerFn(header.Coinbase, sighash.Bytes())
+	if err != nil {
+		log.Error("PoS miner error", "err", err)
+		return
+	}
+
+	result.Block = result.Block.WithSeal(header)
+	e.txhashMap.Add(header.TxHash, txhash)
+
+	select {
+	case results <- result:
 			log.Info("PoS seal has submitted solution", "block", result.Block.Hash())
-		default:
+	default:
 			log.Warn("PoS seal is not read by miner", "sealhash", e.SealHash(header))
-		}
+	}
 	}()
 
 	return nil
