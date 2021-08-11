@@ -543,7 +543,7 @@ func (e *Energi) hardforkIsActive(
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
-		log.Trace("Failed to get hardfork", "err", err)
+		log.Error("Failed to get hardfork", "err", err)
 		return false, err
 	}
 
@@ -556,7 +556,7 @@ func (e *Energi) hardforkIsActive(
 
 	err = e.hardforkAbi.Unpack(&ret, "get", output)
 	if err != nil {
-		log.Trace("Failed to unpack returned hf", "err", err)
+		log.Error("Failed to unpack returned hf", "err", err)
 		return false, err
 	}
 
