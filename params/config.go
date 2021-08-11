@@ -45,7 +45,7 @@ var (
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 
 	MainnetHFProxy = common.HexToAddress("")
-	TestnetHFProxy = common.HexToAddress("")
+	TestnetHFProxy = common.HexToAddress("0x4BabCccF844Bd920044aAA4F6Abb05526f92cb69")
 )
 
 // TrustedCheckpoints associates each known checkpoint with the genesis hash of
