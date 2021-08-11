@@ -70,7 +70,7 @@ type (
 		nonceCap uint64
 
 		// The rest
-		config           		 *params.EnergiConfig
+		config               *params.EnergiConfig
 		db                   ethdb.Database
 		rewardAbi            abi.ABI
 		dposAbi              abi.ABI
