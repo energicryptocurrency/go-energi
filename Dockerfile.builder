@@ -74,8 +74,3 @@ ENV GOPATH="/builds/energi/tech/gen3"
 ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
 ENV GO111MODULE="on"
 ENV GOFLAGS="-mod=vendor -v"
-
-# do a build at the end to ensure we have everything
-RUN make all
-# TODO: make check is known to fail now due to issues in tests and the linter
-#RUN make check
