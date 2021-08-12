@@ -82,7 +82,7 @@ module.exports = {
                 derivationPath: "m/44'/49797'/0'/0/"
             }),
             network_id: "49797",
-            gas: 40000000
+            gas: 30000000
         },
         mainnet: {
             provider: () =>
@@ -94,7 +94,7 @@ module.exports = {
                 derivationPath: "m/44'/39797'/0'/0/"
             }),
             network_id: "39797",
-            gas: 40000000
+            gas: 30000000
         }
     },
     compilers: {
