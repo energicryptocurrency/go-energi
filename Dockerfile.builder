@@ -62,22 +62,15 @@ ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
 RUN npm -g config set user root
 RUN npm install -g yarn ganache-cli truffle
 
-# clone core node repository and install dependencies
-ARG repository_remote="https://github.com/energicryptocurrency/energi3.git"
 # /builds/energi/tech/gen3/energi3
 RUN mkdir -p "/builds/energi/tech/gen3"
 WORKDIR "/builds/energi/tech/gen3"
-RUN git clone "${repository_remote}"
 WORKDIR "/builds/energi/tech/gen3/energi3"
-RUN git submodule update --init --recursive
+ADD Makefile.release Makefile.release
+ADD package.json package.json
 RUN npm install
 RUN make -f Makefile.release release-tools
 ENV GOPATH="/builds/energi/tech/gen3"
 ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
 ENV GO111MODULE="on"
 ENV GOFLAGS="-mod=vendor -v"
-
-# do a build at the end to ensure we have everything
-RUN make all
-# TODO: make check is known to fail now due to issues in tests and the linter
-#RUN make check

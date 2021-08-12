@@ -103,29 +103,29 @@ build-linux:
 #    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 # TODO: release-builds should be implemented better
-#build-release-linux:
-#  stage: build
-#  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder
-#  before_script:
-#    - pwd
-#  script:
-#    - make -f Makefile.release release-linux
-#  only:
-#    - develop
-#    - master
-#
-#build-release-windows:
-#  stage: build
-#  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder
-#  before_script:
-#    - pwd
-#  script:
-#    - make -f Makefile.release release-windows
-#  only:
-#    - develop
-#    - master
+build-release-linux:
+  stage: build
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make -f Makefile.release release-linux
+    - make -f Makefile.release release-upload
+  only:
+    - tags
+
+build-release-windows:
+  stage: build
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make -f Makefile.release release-windows
+    - make -f Makefile.release release-upload
+  only:
+    - tags
 #
 # TODO: macos is a native compile, this can't run in docker needs a macos runner
 #release-build-macos:
