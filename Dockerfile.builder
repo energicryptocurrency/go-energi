@@ -62,12 +62,9 @@ ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
 RUN npm -g config set user root
 RUN npm install -g yarn ganache-cli truffle
 
-# clone core node repository and install dependencies
-ARG repository_remote="https://github.com/energicryptocurrency/energi3.git"
 # /builds/energi/tech/gen3/energi3
 RUN mkdir -p "/builds/energi/tech/gen3"
 WORKDIR "/builds/energi/tech/gen3"
-RUN git clone "${repository_remote}"
 WORKDIR "/builds/energi/tech/gen3/energi3"
 ADD Makefile.release Makefile.release
 ADD package.json package.json
