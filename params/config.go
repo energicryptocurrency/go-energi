@@ -44,7 +44,7 @@ var (
 	MainnetBackbone = common.HexToAddress("0x79C7CF016E53e5C47906c2daF6De2aA00AAcdB1e")
 	TestnetBackbone = common.HexToAddress("0x5143c57fcde025f05a19d0de9a7dac852e553624")
 
-	MainnetHFProxy = common.HexToAddress("")
+	MainnetHFProxy = common.HexToAddress("0xe2616f793916A0BD9C66939c08c94693d483df03")
 	TestnetHFProxy = common.HexToAddress("0x886c71F1Af530478204dD12fB0BA34A46899C16D")
 )
 
