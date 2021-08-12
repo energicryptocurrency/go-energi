@@ -69,7 +69,8 @@ RUN mkdir -p "/builds/energi/tech/gen3"
 WORKDIR "/builds/energi/tech/gen3"
 RUN git clone "${repository_remote}"
 WORKDIR "/builds/energi/tech/gen3/energi3"
-RUN git submodule update --init --recursive
+ADD Makefile.release Makefile.release
+ADD package.json package.json
 RUN npm install
 RUN make -f Makefile.release release-tools
 ENV GOPATH="/builds/energi/tech/gen3"
