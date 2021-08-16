@@ -1,6 +1,6 @@
 # Core Node Changelog
 
-## 3.1.0 (2021-08-12)
+## 3.1.0 (Asgard Hard Fork)
 
 ### Added
 - masternode stats now available through RPC services
