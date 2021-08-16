@@ -4,19 +4,18 @@
 
 ### Added
 - masternode stats now available through RPC services
-- hardfork registry
-- checkpoint registry
+- hardfork registry to enable scheduling and alerting users of upcoming hardforks
+- new optimized version of checkpoint registry
 - preimage hash correction upon detecting damage
 
-
 ### Changed
-- improved logs
+- improved log messages
 - disabled light client
-- silenced zero fee tx errors
 - disabled usb flag
-- preimage insertion check
 - stake cooldown reduced from 60 to 30 minutes
 
 ### Fixed
 - data race concerning secKeyBuf buffer
 - difficulty adjustment (based on PID controller)
+- issue syncing on mainnet
+- issue where preimages may become corrupted
