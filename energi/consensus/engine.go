@@ -498,6 +498,11 @@ func (e *Energi) hardforkIsActive(
 		return false, nil
 	}
 
+	// check if parent hash is empty
+	if (header.ParentHash == common.Hash{}) {
+		return false, nil
+	}
+
 	// get state for snapshot
 	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
 	if blockst == nil {
@@ -508,14 +513,14 @@ func (e *Energi) hardforkIsActive(
 	// get parent
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
 	if parent == nil {
-		log.Error("Failed to check if hardfork is active", "err", eth_consensus.ErrUnknownAncestor)
+		log.Error("Failed to get parent", eth_consensus.ErrUnknownAncestor)
 		return false, eth_consensus.ErrUnknownAncestor
 	}
 
 	// create call data
 	var hardforkNameArray [32]byte
 	copy(hardforkNameArray[:], []byte(hardforkName))
-	callData, err := e.hardforkAbi.Pack("isActive", hardforkNameArray)
+	callData, err := e.hardforkAbi.Pack("get", hardforkNameArray)
 	if err != nil {
 		log.Error("Failed to check if hardfork is active", "err", err)
 		return false, err
@@ -538,15 +543,28 @@ func (e *Energi) hardforkIsActive(
 	gp := core.GasPool(e.callGas)
 	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
 	if err != nil {
-		log.Trace("Failed to get isActive status", "err", err)
+		log.Error("Failed to get hardfork", "err", err)
 		return false, err
 	}
 
-	// unpack the output
-	var isActive bool
-	err = e.hardforkAbi.Unpack(&isActive, "isActive", output)
+	// return struct
+	ret := new ( struct {
+			BlockNumber *big.Int
+			BlockHash [32]byte
+			SwFeatures *big.Int
+	} )
 
-	return isActive, err
+	err = e.hardforkAbi.Unpack(ret, "get", output)
+	if err != nil  {
+		if strings.Contains(err.Error(), "no such hard fork") || strings.Contains(err.Error(), "unmarshalling empty output"){
+			return false, nil
+		} else{
+			log.Error("Failed to unpack returned hf", "err", err)
+		}
+		return false, err
+	}
+
+	return header.Number.Uint64() >= ret.BlockNumber.Uint64(), nil
 }
 
 // Prepare initializes the consensus fields of a block header according to the
