@@ -70,29 +70,33 @@ type (
 		nonceCap uint64
 
 		// The rest
-		config         *params.EnergiConfig
-		db             ethdb.Database
-		rewardAbi      abi.ABI
-		dposAbi        abi.ABI
-		blacklistAbi   abi.ABI
-		sporkAbi       abi.ABI
-		mnregAbi       abi.ABI
-		treasuryAbi    abi.ABI
-		hardforkAbi    abi.ABI
-		systemFaucet   common.Address
-		xferGas        uint64
-		callGas        uint64
-		unlimitedGas   uint64
-		signerFn       SignerFn
-		accountsFn     AccountsFn
-		peerCountFn    PeerCountFn
-		isMiningFn     IsMiningFn
-		diffFn         DiffFn
-		testing        bool
-		now            func() uint64
-		knownStakes    KnownStakes
-		nextKSPurge    uint64
-		txhashMap      *lru.Cache
+		config               *params.EnergiConfig
+		db                   ethdb.Database
+		rewardAbi            abi.ABI
+		dposAbi              abi.ABI
+		blacklistAbi         abi.ABI
+		sporkAbi             abi.ABI
+		mnregAbi             abi.ABI
+		treasuryAbi          abi.ABI
+		hardforkAbi          abi.ABI
+		systemFaucet         common.Address
+		xferGas              uint64
+		callGas              uint64
+		unlimitedGas         uint64
+		signerFn             SignerFn
+		accountsFn           AccountsFn
+		peerCountFn          PeerCountFn
+		isMiningFn           IsMiningFn
+		diffFn               DiffFn
+		testing              bool
+		now                  func() uint64
+		knownStakes          KnownStakes
+		nextKSPurge          uint64
+		txhashMap            *lru.Cache
+
+		// optimize blocktarget calculation for same block
+		calculatedTimeTarget TimeTarget
+		calculatedBlockHash  common.Hash
 	}
 )
 
