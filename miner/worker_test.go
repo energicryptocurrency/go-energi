@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"energi.world/core/gen3/accounts"
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/consensus"
 	"energi.world/core/gen3/consensus/clique"
@@ -124,6 +125,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 				return crypto.Sign(hash, migrationSigner)
 			},
 			func() int { return 1 },
+			func() bool { return true },
 		)
 		chainConfig.Energi = &params.EnergiConfig{
 			MigrationSigner: crypto.PubkeyToAddress(migrationSigner.PublicKey),
@@ -174,6 +176,9 @@ func (b *testWorkerBackend) BlockChain() *core.BlockChain { return b.chain }
 func (b *testWorkerBackend) TxPool() *core.TxPool         { return b.txPool }
 func (b *testWorkerBackend) PostChainEvents(events []interface{}) {
 	b.chain.PostChainEvents(events, nil)
+}
+func (b *testWorkerBackend) AccountManager() *accounts.Manager {
+	return nil
 }
 func (b *testWorkerBackend) CleanUp() error { return b.migration.CleanUp() }
 
@@ -308,6 +313,8 @@ func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consens
 }
 
 func TestStreamUncleBlock(t *testing.T) {
+	t.Skip("Uncle block implementation is not supported on Energi")
+
 	ethash := ethash.NewFaker()
 	defer ethash.Close()
 

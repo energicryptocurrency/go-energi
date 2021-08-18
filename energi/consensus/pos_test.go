@@ -30,7 +30,8 @@ import (
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 	"github.com/stretchr/testify/assert"
 
@@ -66,9 +67,9 @@ func (cr *mockChainReader) CalculateBlockState(hash common.Hash, number uint64) 
 }
 
 func generateAddresses(len int) ([]common.Address, map[common.Address]*ecdsa.PrivateKey, core.GenesisAlloc, common.Address) {
-	signers := make(map[common.Address]*ecdsa.PrivateKey, len+1)
+	signers := make(map[common.Address]*ecdsa.PrivateKey, len)
 	addresses := make([]common.Address, 0, len)
-	alloc := make(core.GenesisAlloc, 61)
+	alloc := make(core.GenesisAlloc, len)
 
 	for i := 0; i < len; i++ {
 		k, _ := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
@@ -91,9 +92,9 @@ func generateAddresses(len int) ([]common.Address, map[common.Address]*ecdsa.Pri
 	return addresses, signers, alloc, migrationSigner
 }
 
-func TestPoSChain(t *testing.T) {
+func TestPoSChainV1(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	results := make(chan *eth_consensus.SealResult, 1)
 	stop := make(chan struct{})
@@ -119,6 +120,7 @@ func TestPoSChain(t *testing.T) {
 			return crypto.Sign(hash, signers[addr])
 		},
 		func() int { return 1 },
+		func() bool { return true },
 	)
 
 	chainConfig := *params.EnergiTestnetChainConfig
@@ -145,7 +147,7 @@ func TestPoSChain(t *testing.T) {
 	assert.Empty(t, err)
 	defer chain.Stop()
 
-	//--
+	// --
 	_, err = chain.InsertChain([]*types.Block{genesis})
 	assert.Empty(t, err)
 
@@ -154,14 +156,14 @@ func TestPoSChain(t *testing.T) {
 
 	iterCount := 150
 
-	engine.diffFn = func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int {
+	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
 		return common.Big1
 	}
 
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
 
-		//---
+		// ---
 		header = &types.Header{
 			ParentHash: parent.Hash(),
 			Coinbase:   common.Address{},
@@ -208,7 +210,7 @@ func TestPoSChain(t *testing.T) {
 			assert.Empty(t, receipts)
 		}
 
-		//---
+		// ---
 		err = engine.Seal(chain, block, results, stop)
 		assert.Empty(t, err)
 
@@ -220,13 +222,13 @@ func TestPoSChain(t *testing.T) {
 		assert.NotEmpty(t, blstate)
 		assert.NotEmpty(t, receipts)
 		header = block.Header()
-		//assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
+		// assert.NotEqual(t, parent.Coinbase, header.Coinbase, "Header %v", i)
 		assert.NotEqual(t, parent.Coinbase, common.Address{}, "Header %v", i)
 		err = engine.VerifySeal(chain, header)
 		assert.Empty(t, err)
 
 		// Test consensus tx check during block processing
-		//---
+		// ---
 		if i == 2 {
 			tmptxs := block.Transactions()
 			tmpheader := *header
@@ -249,29 +251,29 @@ func TestPoSChain(t *testing.T) {
 		}
 
 		// Time tests
-		//---
+		// ---
 		tt := engine.calcTimeTarget(chain, parent)
-		assert.True(t, tt.max_time >= now)
-		assert.True(t, tt.max_time <= engine.now()+30)
+		assert.True(t, tt.max >= now)
+		assert.True(t, tt.max <= engine.now()+30)
 
 		if i < 60 {
 			assert.Equal(t, header.Time, parent.Time+30)
 
-			assert.Equal(t, tt.min_time, header.Time)
-			assert.Equal(t, tt.block_target, header.Time+30)
+			assert.Equal(t, tt.min, header.Time)
+			assert.Equal(t, tt.blockTarget, header.Time+30)
 		} else if i < 61 {
 			assert.Equal(t, header.Time, genesis.Time()+3570)
 			assert.Equal(t, header.Time, parent.Time+1800)
 
-			assert.Equal(t, tt.min_time, header.Time)
-			assert.Equal(t, tt.block_target, parent.Time+60)
+			assert.Equal(t, tt.min, header.Time)
+			assert.Equal(t, tt.blockTarget, parent.Time+60)
 		} else if i < 62 {
 			assert.Equal(t, header.Time, genesis.Time()+3600)
 		}
 
-		assert.True(t, parent.Time < tt.min_time, "Header %v", i)
+		assert.True(t, parent.Time < tt.min, "Header %v", i)
 
-		assert.Empty(t, engine.enforceTime(header, tt))
+		assert.Empty(t, engine.enforceMinTime(header, tt))
 		assert.Empty(t, engine.checkTime(header, tt))
 
 		_, err = chain.WriteBlockWithState(block, receipts, blstate)
@@ -283,7 +285,7 @@ func TestPoSChain(t *testing.T) {
 
 func TestPoSDiffV1(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	type TC struct {
 		parent  int64
@@ -373,23 +375,24 @@ func TestPoSDiffV1(t *testing.T) {
 		parent := &types.Header{
 			Difficulty: big.NewInt(tc.parent),
 		}
-		tt := &timeTarget{
-			min_time:      tc.min,
-			block_target:  tc.btarget,
-			period_target: tc.ptarget,
+		tt := &TimeTarget{
+			min:          tc.min,
+			blockTarget:  tc.btarget,
+			periodTarget: tc.ptarget,
 		}
 
-		res := calcPoSDifficultyV1(nil, tc.time, parent, tt)
+		res := calcPoSDifficultyV1(tc.time, parent, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }
 
 func TestStakeWeightLookup(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, _, _, _ := generateAddresses(5)
 	engine := New(nil, nil)
+	engine.testing = true
 
 	genesis := types.NewBlock(&types.Header{
 		Number:     big.NewInt(0),
@@ -448,7 +451,7 @@ func TestStakeWeightLookup(t *testing.T) {
 		parent.Nonce = types.BlockNonce{255, 255, 255, 255, 255, 255, 255, 255}
 		weight, err = engine.lookupStakeWeight(fakeChain, header.Time, parent, header.Coinbase)
 		assert.Empty(t, err)
-		assert.Equal(t, weight, 0)
+		assert.Equal(t, weight, uint64(0))
 
 		parent.Coinbase = parentCoinbase
 		parent.Nonce = parentNonce
@@ -464,7 +467,7 @@ func TestStakeWeightLookup(t *testing.T) {
 
 func TestPoSMine(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, signers, alloc, migrationSigner := generateAddresses(5)
 	testdb := ethdb.NewMemDatabase()
@@ -472,7 +475,7 @@ func TestPoSMine(t *testing.T) {
 
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	engine.testing = true
-	engine.diffFn = func(ChainReader, uint64, *types.Header, *timeTarget) *big.Int {
+	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
 		return common.Big1
 	}
 	engine.SetMinerCB(
@@ -489,6 +492,7 @@ func TestPoSMine(t *testing.T) {
 			return crypto.Sign(hash, signers[addr])
 		},
 		func() int { return 1 },
+		func() bool { return true },
 	)
 
 	chainConfig := *params.EnergiTestnetChainConfig
@@ -599,7 +603,7 @@ func TestPoSMine(t *testing.T) {
 
 func TestVerifyPoSHash(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	addresses, _, alloc, migrationSigner := generateAddresses(5)
 	testdb := ethdb.NewMemDatabase()

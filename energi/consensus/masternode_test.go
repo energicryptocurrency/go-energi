@@ -27,7 +27,8 @@ import (
 	"energi.world/core/gen3/core/types"
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
@@ -38,7 +39,7 @@ import (
 
 func TestMasternodeList(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	testdb := ethdb.NewMemDatabase()
 	engine := New(&params.EnergiConfig{}, testdb)
@@ -108,7 +109,7 @@ func TestMasternodeList(t *testing.T) {
 	)
 	evm := engine.createEVM(msg, chain, header, blstate)
 	gp := new(core.GasPool).AddGas(engine.callGas)
-	log.Trace("depositCollateral")
+	// log.Trace("depositCollateral")
 	core.ApplyMessage(evm, msg, gp)
 	msg = types.NewMessage(
 		owner_addr2,
@@ -122,7 +123,7 @@ func TestMasternodeList(t *testing.T) {
 	)
 	evm = engine.createEVM(msg, chain, header, blstate)
 	gp = new(core.GasPool).AddGas(engine.callGas)
-	log.Trace("depositCollateral")
+	// log.Trace("depositCollateral")
 	core.ApplyMessage(evm, msg, gp)
 	//---
 	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
@@ -140,7 +141,7 @@ func TestMasternodeList(t *testing.T) {
 	)
 	evm = engine.createEVM(msg, chain, header, blstate)
 	gp.AddGas(engine.callGas)
-	log.Trace("announce")
+	// log.Trace("announce")
 	_, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 
@@ -158,7 +159,7 @@ func TestMasternodeList(t *testing.T) {
 	)
 	evm = engine.createEVM(msg, chain, header, blstate)
 	gp.AddGas(engine.callGas)
-	log.Trace("announce")
+	// log.Trace("announce")
 	_, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 
@@ -189,7 +190,7 @@ func TestMasternodeList(t *testing.T) {
 	)
 	evm = engine.createEVM(msg, chain, header, blstate)
 	gp.AddGas(engine.callGas)
-	log.Trace("denounce")
+	// log.Trace("denounce")
 	_, _, _, err = core.ApplyMessage(evm, msg, gp)
 	assert.Empty(t, err)
 

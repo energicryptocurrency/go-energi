@@ -31,7 +31,8 @@ import (
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/ethdb"
 	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
+
+	// "energi.world/core/gen3/log"
 	"energi.world/core/gen3/params"
 
 	"github.com/stretchr/testify/assert"
@@ -61,7 +62,7 @@ func (s *fakeSigner) Equal(types.Signer) bool {
 
 func TestPreBlacklist(t *testing.T) {
 	t.Parallel()
-	log.Root().SetHandler(log.StdoutHandler)
+	// log.Root().SetHandler(log.StdoutHandler)
 
 	now := time.Now() // It can be fixed
 	adjust_time := time.Duration(0)
@@ -141,14 +142,14 @@ func TestPreBlacklist(t *testing.T) {
 	)
 	assert.True(t, IsWhitelisted(pool.currentState, wladdr1))
 
-	log.Trace("Make sure removed in pool")
+	// log.Trace("Make sure removed in pool")
 	signer.sender = bladdr1
 	err = pool.AddLocal(revoke)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, len(pool.queue[bladdr1].Flatten()))
 	signer.sender = sender
 
-	log.Trace("Initial")
+	// log.Trace("Initial")
 	err = prebl.processTx(pool, revoke)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 0, len(prebl.proposed))
@@ -177,7 +178,7 @@ func TestPreBlacklist(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 2, len(prebl.proposed))
 
-	log.Trace("Check if filtered properly")
+	// log.Trace("Check if filtered properly")
 	signer.sender = bladdr1
 	err = prebl.processTx(pool, revoke)
 	assert.Equal(t, ErrPreBlacklist, err)
@@ -192,7 +193,7 @@ func TestPreBlacklist(t *testing.T) {
 
 	signer.sender = sender
 
-	log.Trace("Check block filter hook")
+	// log.Trace("Check block filter hook")
 	blocks := make(types.Blocks, 0, 3)
 	blocks = append(blocks, types.NewBlockWithHeader(&types.Header{Coinbase: sender}))
 	blocks = append(blocks, types.NewBlockWithHeader(&types.Header{Coinbase: bladdr1}))
@@ -201,7 +202,7 @@ func TestPreBlacklist(t *testing.T) {
 	assert.Equal(t, 1, len(blocks))
 	assert.Equal(t, sender, blocks[0].Coinbase())
 
-	log.Trace("After timeout")
+	// log.Trace("After timeout")
 	adjust_time = pbPeriod + time.Minute
 
 	err = prebl.processTx(pool, revoke)
@@ -221,7 +222,7 @@ func TestPreBlacklist(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 0, len(prebl.proposed))
 
-	log.Trace("Ignore not valid proposals")
+	// log.Trace("Ignore not valid proposals")
 
 	pool.currentState.SetCode(
 		energi_params.Energi_BlacklistRegistry,

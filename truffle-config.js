@@ -16,6 +16,7 @@
 
 const HDWalletProvider = require("@truffle/hdwallet-provider");
 const mnemonicPhrase = process.env.TRUFFLE_MNEMONIC || "developers developers developers developers developers developers developers developers developers developers developers developers";
+const mochaReporters = process.env.MOCHA_REPORTERS || "spec" // to get test output XML use MOCHA_REPORTERS="mocha-junit-reporter, spec"
 
 const contracts = [
     'BackboneRewardV1',
@@ -30,6 +31,8 @@ const contracts = [
     'SporkRegistryV1',
     'StakerRewardV1',
     'TreasuryV1',
+    'CheckpointRegistryV3',
+    'StorageCheckpointRegistryV2',
 ];
 const targets = [];
 
@@ -54,6 +57,14 @@ module.exports = {
     verboseRpc: false,
     mocha: {
         spec: './energi/contracts/test/*.spec.js',
+        useColors: true,
+        reporter: "mocha-multi-reporters",
+        reporterOptions: {
+            "reporterEnabled": mochaReporters,
+            "mochaJunitReporterReporterOptions": {
+                "mochaFile": ".test-sol-report.xml"
+            }
+        }
     },
     networks: {
         development: {
@@ -71,7 +82,7 @@ module.exports = {
                 derivationPath: "m/44'/49797'/0'/0/"
             }),
             network_id: "49797",
-            gas: 40000000
+            gas: 30000000
         },
         mainnet: {
             provider: () =>
@@ -83,7 +94,7 @@ module.exports = {
                 derivationPath: "m/44'/39797'/0'/0/"
             }),
             network_id: "39797",
-            gas: 40000000
+            gas: 30000000
         }
     },
     compilers: {

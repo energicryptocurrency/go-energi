@@ -25,7 +25,7 @@ ganache-cli \
       -l 10000000
 ```
 
-Once `ganache-cli` is running, you can simply run `truffle test` in order to run all the tests, or to run a specific test you should run `truffle test energi/contracts/test/MyTestFile.spec.js`.
+Once `ganache-cli` is running, make sure that its `port`, `host` and `network id` parameters are correctly configured in `truffle-config.js` file and default balance is above `10000000`, and then you can simply run `truffle test` in order to run all the tests, or to run a specific test you should run `truffle test energi/contracts/test/MyTestFile.spec.js`.
 
 ## Deploying
 There are two types of deployment for these contracts. First is genesis block deployment, and second is deployment with truffle. The difference is whether contracts were deployed with the network as a part of the genesis block, or deployed after for the purpose of a governance upgrade or additional governance contract.

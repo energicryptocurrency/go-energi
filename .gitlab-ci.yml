@@ -1,0 +1,175 @@
+variables:
+
+stages:
+  - base
+  - prepare
+  - lint
+  - build
+  - test
+  - deploy
+
+cache:
+  paths:
+    - node_modules
+    - build
+
+.docker-job:
+  tags: [docker_runner]
+  before_script:
+    - apk add --no-cache curl unzip python3 py3-pip
+    - pip3 install --upgrade pip
+    - pip3 install awscli
+    - rm -rf /var/cache/apk/*
+
+.merge-request-job:
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+build-builder:
+  stage: base
+  extends: .docker-job
+  script:
+    - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker push ${container_registry}/energi3_builder:${CI_COMMIT_REF_NAME}
+    - docker tag energi3_builder:${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:latest
+    - docker push ${container_registry}/energi3_builder:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes:
+        - Dockerfile.builder
+    - if: $CI_COMMIT_TAG
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+
+# make sure our repo does not have any artifacts of previous builds
+clean-repo:
+  stage: prepare
+  extends: .merge-request-job
+  script:
+    - git checkout -- .
+    - git clean -fdx -e node_modules .
+
+# TODO: this actually tries to execute the merge, may not be the best way to check this
+# it will also fail for master branch merges
+branch-check:
+  stage: prepare
+  extends: .merge-request-job
+  script:
+    - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
+
+npm-install:
+  stage: prepare
+  extends: .merge-request-job
+  script:
+    - npm install
+
+#lint-go:
+#  stage: lint
+#  extends: .merge-request-job
+#  script:
+#    - make lint-go
+#  allow_failure: true
+
+lint-sol:
+  stage: lint
+  extends: .merge-request-job
+  script:
+    - make lint-sol
+
+lint-sol-tests:
+  stage: lint
+  extends: .merge-request-job
+  script:
+    - make lint-sol-tests
+
+build-linux:
+  stage: build
+  extends: .merge-request-job
+  script:
+    - git checkout -- .
+    - git clean -fdx -e node_modules .
+    - make all
+    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
+
+#build-docker:
+#  stage: build
+#  extends: .docker-job
+#  script:
+#    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
+#    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+
+# TODO: release-builds should be implemented better
+build-release-linux:
+  stage: build
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make -f Makefile.release release-linux
+    - make -f Makefile.release release-upload
+  only:
+    - tags
+
+build-release-windows:
+  stage: build
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  before_script:
+    - pwd
+  script:
+    - make -f Makefile.release release-windows
+    - make -f Makefile.release release-upload
+  only:
+    - tags
+#
+# TODO: macos is a native compile, this can't run in docker needs a macos runner
+#release-build-macos:
+#  stage: build
+#  tags: [docker_runner]
+#  script:
+#    - make -f Makefile.release release-macos
+#  rules:
+#    - only:
+#      - develop
+#      - master
+
+test-go-report:
+  stage: test
+  extends: .merge-request-job
+  script:
+    - make test-go-report
+  artifacts:
+    when: always
+    paths:
+      - .test-go-report.xml
+    reports:
+      junit: .test-go-report.xml
+  allow_failure: true
+
+test-solidity:
+  stage: test
+  extends: .merge-request-job
+  script:
+    - make test-sol-contracts
+  artifacts:
+    when: always
+    paths:
+      - .test-sol-report.xml
+    reports:
+      junit: .test-sol-report.xml
+
+#deploy-release:
+#  stage: deploy
+#  tags: [docker_runner]
+#  image: ${container_registry}/energi3_builder
+#  before_script:
+#    - pwd
+#  script:
+#    - make -f Makefile.release release-upload
+#  only:
+#    - tags

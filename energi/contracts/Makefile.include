@@ -20,11 +20,18 @@ SOLC_ABI_EXT := abi
 
 solc: $(SOLC)
 $(SOLC):
+ifeq ($(shell uname -s), Darwin)
+	@mkdir -p $$(dirname $(SOLC))
+	@wget -q -O $(SOLC).tmp 'https://github.com/ethereum/solc-bin/raw/gh-pages/macosx-amd64/solc-macosx-amd64-v$(SOLC_VERSION)%2Bcommit.9c3226ce'
+	@chmod +x $(SOLC).tmp
+	@mv -f $(SOLC).tmp $(SOLC)
+else 
 	@mkdir -p $$(dirname $(SOLC))
 	@wget -q -O $(SOLC).tmp 'https://github.com/ethereum/solidity/releases/download/v$(SOLC_VERSION)/solc-static-linux'
 	@test "$$(sha256sum $(SOLC).tmp | cut -f1 -d' ')" = "$(SOLC_SHA256)"
 	@chmod +x $(SOLC).tmp
 	@mv -f $(SOLC).tmp $(SOLC)
+endif
 
 # ---
 ABIGEN ?= build/bin/abigen
@@ -44,6 +51,7 @@ ENERGI_CONTRACTS := \
   BlacklistRegistryV1.sol \
   BlockRewardV1.sol \
   CheckpointRegistryV2.sol \
+  CheckpointRegistryV3.sol \
   DummyAccount.sol \
   HardforkRegistryV1.sol \
   IBlacklistRegistry.sol \
@@ -65,7 +73,8 @@ ENERGI_CONTRACTS := \
   MasternodeRegistryV2.sol \
   SporkRegistryV2.sol \
   StakerRewardV1.sol \
-  TreasuryV1.sol
+  TreasuryV1.sol \
+  StorageCheckpointRegistryV2.sol
 
 ENERGI_CONTRACTS_SRC := $(addprefix $(ENERGI_CONTRACT_SRC_DIR)/,$(ENERGI_CONTRACTS))
 

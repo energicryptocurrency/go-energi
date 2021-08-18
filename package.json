@@ -1,6 +1,6 @@
 {
   "name": "energi3",
-  "version": "3.0.8",
+  "version": "3.1.0",
   "author": "Energi Core LTD <contact@energi.team>",
   "license": "GPL-3.0+",
   "devDependencies": {
@@ -8,6 +8,8 @@
     "eslint": "^6.8.0",
     "ethereumjs-util": "^6.2.0",
     "ethers": "^5.0.7",
-    "ethlint": "^1.2.5"
+    "ethlint": "^1.2.5",
+    "mocha-junit-reporter": "^2.0.0",
+    "mocha-multi-reporters": "^1.5.1"
   }
 }

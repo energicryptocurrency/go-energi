@@ -37,7 +37,7 @@ func (f *fakeChain) CurrentBlock() *types.Block {
 }
 
 func (f *fakeChain) IsPublicService() bool {
-	return false
+	return true
 }
 
 // TestDataCache tests the cache's setter and getter methods.
@@ -48,10 +48,6 @@ func TestDataCache(t *testing.T) {
 	var newData interface{}
 	cacheQueryfunc := func(num *big.Int) (interface{}, error) {
 		return newData, nil
-	}
-	delayedQueryfunc := func(num *big.Int) (interface{}, error) {
-		time.Sleep(time.Second)
-		return cacheQueryfunc(num)
 	}
 
 	t.Run("Test_adding_new_data_nil_data", func(t *testing.T) {
@@ -125,31 +121,30 @@ func TestDataCache(t *testing.T) {
 			"rsc": 3711,
 		}
 
+		data, err := cacheInstance.Get(chain, cacheQueryfunc)
+		if err != nil {
+			t.Fatalf("expected no error but found %v", err)
+		}
+
+		if reflect.DeepEqual(data, newData) {
+			t.Fatalf("expected the returned data to be old on the first call")
+		}
+
+		time.Sleep(1 * time.Second)
+
 		tf := func() {
-			data, err := cacheInstance.Get(chain, delayedQueryfunc)
+			data, err := cacheInstance.Get(chain, cacheQueryfunc)
 			if err != nil {
 				t.Fatalf("expected no error but found %v", err)
 			}
 
-			if reflect.DeepEqual(data, newData) {
-				t.Fatalf("expected the returned data to be old on the first call")
+			if !reflect.DeepEqual(data, newData) {
+				t.Fatalf("expected the returned data to match it didn't")
 			}
 		}
 
 		for i := 100; i > 0; i-- {
 			tf()
 		}
-
-		time.Sleep(1100 * time.Millisecond)
-
-		data, err := cacheInstance.Get(chain, cacheQueryfunc)
-		if err != nil {
-			t.Fatalf("expected no error but found %v", err)
-		}
-
-		if !reflect.DeepEqual(data, newData) {
-			t.Fatalf("expected the returned data to match it didn't")
-		}
 	})
-
 }

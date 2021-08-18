@@ -8,7 +8,7 @@ if [ ! -f "build/env.sh" ]; then
 fi
 
 export GO111MODULE=on
-export GOFLAGS=-mod=vendor
+export GOFLAGS="-mod=vendor -v"
 
 # Launch the arguments with the configured environment.
 exec "$@"
