@@ -54,7 +54,7 @@ const (
 
 	accountPass     = "secret-pass"
 	peerConInterval = 1 * time.Minute
-	miningInterval  = 4 * time.Minute // Max interval which the test can run before its seen as failed.
+	miningInterval  = 5 * time.Minute // Max interval which the test can run before its seen as failed.
 	peerSyncDelay   = 20 * time.Second
 
 	gasLimit          = 40000000
