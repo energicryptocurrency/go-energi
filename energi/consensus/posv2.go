@@ -114,6 +114,12 @@ timestamp
 */
 func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 
+	// check if we have already calculated
+	if parent.Hash() == e.calculatedBlockHash {
+		timeTarget := e.calculatedTimeTarget
+		return &timeTarget
+	}
+
 	ret := &TimeTarget{}
 	parentBlockTime := parent.Time // Defines the original parent block time.
 	parentNumber := parent.Number.Uint64()
@@ -163,6 +169,11 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 		"TimeTarget", ret.blockTarget,
 		"averageBlockTimeMicroseconds", ret.periodTarget,
 	)
+
+	// set calculated results for optimization
+	e.calculatedBlockHash = parent.Hash()
+	e.calculatedTimeTarget = *ret
+
 	return ret
 }
 
