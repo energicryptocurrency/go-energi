@@ -267,19 +267,6 @@ contract("MasternodeRegistryV1", async accounts => {
                 expect(await s.token_abi.enumerate()).lengthOf(0);
             });
 
-            it.skip('must forbid more than one reward() per block', async () => {
-                // Bug: https://github.com/trufflesuite/truffle/issues/1389
-                const batch = web3.eth.BatchRequest();
-                batch.add(s.reward_abi.reward.request({value: reward}));
-                batch.add(s.reward_abi.reward.request({value: reward}));
-
-                try {
-                    await batch.execute();
-                    assert.fail('It must fail');
-                } catch (e) {
-                    assert.match(e.message, /Call outside of governance/);
-                }
-            });
         });
 
         describe('Single MN', () => {
@@ -1023,7 +1010,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
             });
 
-            it.skip('should refuse invalidate() wrong target', async () => {
+            it('should refuse invalidate() wrong target', async () => {
                 try {
                     let target = await s.token_abi.validationTarget(masternode1);
 
