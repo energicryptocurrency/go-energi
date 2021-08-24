@@ -131,6 +131,40 @@ func discoverUPnP() Interface {
 	return nil
 }
 
+// getAllUPnP searches for Internet Gateway Devices
+// and returns a slice of them.
+func getAllUPnP() (result []*upnp) {
+	found := make(chan *upnp, 2)
+	// IGDv1
+	go discover(found, internetgateway1.URN_WANConnectionDevice_1, func(dev *goupnp.RootDevice, sc goupnp.ServiceClient) *upnp {
+		switch sc.Service.ServiceType {
+		case internetgateway1.URN_WANIPConnection_1:
+			return &upnp{dev, "IGDv1-IP1", &internetgateway1.WANIPConnection1{ServiceClient: sc}}
+		case internetgateway1.URN_WANPPPConnection_1:
+			return &upnp{dev, "IGDv1-PPP1", &internetgateway1.WANPPPConnection1{ServiceClient: sc}}
+		}
+		return nil
+	})
+	// IGDv2
+	go discover(found, internetgateway2.URN_WANConnectionDevice_2, func(dev *goupnp.RootDevice, sc goupnp.ServiceClient) *upnp {
+		switch sc.Service.ServiceType {
+		case internetgateway2.URN_WANIPConnection_1:
+			return &upnp{dev, "IGDv2-IP1", &internetgateway2.WANIPConnection1{ServiceClient: sc}}
+		case internetgateway2.URN_WANIPConnection_2:
+			return &upnp{dev, "IGDv2-IP2", &internetgateway2.WANIPConnection2{ServiceClient: sc}}
+		case internetgateway2.URN_WANPPPConnection_1:
+			return &upnp{dev, "IGDv2-PPP1", &internetgateway2.WANPPPConnection1{ServiceClient: sc}}
+		}
+		return nil
+	})
+	for i := 0; i < cap(found); i++ {
+		if c := <-found; c != nil {
+			result = append(result, c)
+		}
+	}
+	return result
+}
+
 // finds devices matching the given target and calls matcher for all
 // advertised services of each device. The first non-nil service found
 // is sent into out. If no service matched, nil is sent.
