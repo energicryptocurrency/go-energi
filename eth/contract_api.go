@@ -29,7 +29,6 @@ import (
 	"energi.world/core/gen3/event"
 	"energi.world/core/gen3/rpc"
 
-	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
@@ -217,18 +216,6 @@ func (b *EthAPIBackend) isFilteredLog(
 	log *types.Log,
 	blockNo *uint64,
 ) bool {
-
-	for _, addr := range q.Addresses {
-		generalProxyHash := energi_common.GeneralProxyHashExtractor(ctx, addr, blockNo)
-		if generalProxyHash != nil && log.Address.Hash() == *generalProxyHash {
-			return true
-		}
-
-		if addr == log.Address {
-			return true
-		}
-	}
-
 	for _, queryTopics := range q.Topics {
 		if len(queryTopics) > 0 {
 			for _, foundTopic := range log.Topics {
