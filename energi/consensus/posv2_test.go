@@ -405,21 +405,21 @@ func TestPoSChainV2(t *testing.T) {
 
 		if i < 60 {
 			// parent header and current header must be TimeTarget.min apart(30s)
-			if !assert.Equal(t, header.Time, parent.Time+30){
+			if !assert.Equal(t, header.Time, parent.Time+30) {
 				t.FailNow()
 			}
-			if !assert.Equal(t, tt.min, header.Time){
+			if !assert.Equal(t, tt.min, header.Time) {
 				t.FailNow()
 			}
 			// assert.Equal(t, tt.target, header.Time+30)
 		} else if i < 61 {
-			if !assert.Equal(t, header.Time, genesis.Time()+3570){
+			if !assert.Equal(t, header.Time, genesis.Time()+3570) {
 				t.FailNow()
 			}
-			if !assert.Equal(t, header.Time, parent.Time+1800){
+			if !assert.Equal(t, header.Time, parent.Time+1800) {
 				t.FailNow()
 			}
-			if !assert.Equal(t, tt.min, header.Time-1770){
+			if !assert.Equal(t, tt.min, header.Time-1770) {
 				t.FailNow()
 			}
 			// todo: this test is getting different numbers for
@@ -430,7 +430,7 @@ func TestPoSChainV2(t *testing.T) {
 			// 	t.FailNow()
 			// }
 		} else if i < 62 {
-			if !assert.Equal(t, header.Time, genesis.Time()+3600){
+			if !assert.Equal(t, header.Time, genesis.Time()+3600) {
 				t.FailNow()
 			}
 		}
@@ -491,28 +491,28 @@ func TestPoSDiffV2(t *testing.T) {
 			time:   100,
 			min:    100,
 			target: 140,
-			result: 9971,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 130,
-			result: 9971,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 120,
-			result: 9981,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 110,
-			result: 9991,
+			result: 10000,
 		},
 		{
 			parent: 10000,
@@ -526,49 +526,49 @@ func TestPoSDiffV2(t *testing.T) {
 			time:   100,
 			min:    100,
 			target: 90,
-			result: 10011,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 80,
-			result: 10021,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 70,
-			result: 10031,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 60,
-			result: 10041,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 50,
-			result: 10051,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 40,
-			result: 10061,
+			result: 10000,
 		},
 		{
 			parent: 10000,
 			time:   100,
 			min:    100,
 			target: 30,
-			result: 10061,
+			result: 10000,
 		},
 	}
 
@@ -577,8 +577,8 @@ func TestPoSDiffV2(t *testing.T) {
 			Difficulty: big.NewInt(tc.parent),
 		}
 		tt := &TimeTarget{
-			min: tc.min,
-			blockTarget:  tc.target,
+			min:         tc.min,
+			blockTarget: tc.target,
 		}
 
 		res := CalcPoSDifficultyV2(tc.time, parent, tt)
