@@ -30,6 +30,7 @@ var EnergiCheckpoints = map[common.Hash]map[uint64]common.Hash{
 		uint64(324913): common.HexToHash("0x7ea1dd2b9b737ea22232dc55378ea9c11aa8e5d1712ad650f1cf2fa53fe820c8"),
 		uint64(325054): common.HexToHash("0x9d33948d3411b8276696e2a4422b412830a4083082d523463bd79ab572803ddd"),
 		uint64(563400): common.HexToHash("0xfc5725db1869a1ca7a19769e376c826792719fe8d361f5fc9d8407725faae3f5"),
+		uint64(765780): common.HexToHash("0x265f3b69f31a6f077db1acd84680dd8177eedbd7167b510997cfaa92fd31358c"),
 	},
 	eth_params.TestnetGenesisHash: {},
 }
