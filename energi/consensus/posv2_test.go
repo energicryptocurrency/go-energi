@@ -451,14 +451,15 @@ func TestPoSChainV2(t *testing.T) {
 	}
 }
 
-// TODO: this test case needs to be fixed so it can properly calculate
-// the PID difficulty, currently it lacks the data to do so
 /*
- * Run multiple test cases
+ * Run multiple test cases which are found in intervalgen/PoSV2_test_cases.json
+	* In order to generate a new testcase set
+			cd intervalgen
+			go build main.go
  * Call CalcPoSDifficultyV2, analyzing the result
  * Assertions:
  * - Difficulty is correct
- */
+*/
 
 func TestPoSDiffV2(t *testing.T) {
 	// t.Parallel()

@@ -190,7 +190,7 @@ func simulateStaking(
 	}
 	ioutil.WriteFile("staking_simulation.csv", []byte(csvData), 0660)
 	jsonCases, _ := json.Marshal(result)
-	ioutil.WriteFile("PoSV2_test_cases.json", jsonCases, 0660)
+	ioutil.WriteFile("energi/consensus/intervalgen/PoSV2_test_cases.json", jsonCases, 0660)
 }
 
 func main() {
