@@ -459,6 +459,7 @@ func TestPoSChainV2(t *testing.T) {
  * Assertions:
  * - Difficulty is correct
  */
+
 func TestPoSDiffV2(t *testing.T) {
 	// t.Parallel()
 	// log.Root().SetHandler(log.StdoutHandler)
@@ -474,114 +475,19 @@ func TestPoSDiffV2(t *testing.T) {
 	// this enables code location printing
 	log.PrintOrigins(true)
 
-	type TC struct {
-		parent int64
-		time   uint64
-		min    uint64
-		target uint64
-		result uint64
-	}
+	cases := readJsonPoSV2TestCases()
 
-	// the numbers below create an example with 10 second segments both
-	// where target is before progressing to target is after and the
-	// first and last ones are there to show the limit
-	tests := []TC{
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 140,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 130,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 120,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 110,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 100,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 90,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 80,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 70,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 60,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 50,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 40,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 30,
-			result: 10000,
-		},
-	}
-
-	for i, tc := range tests {
+	for i, tc := range cases {
 		parent := &types.Header{
-			Difficulty: big.NewInt(tc.parent),
+			Difficulty: big.NewInt(tc.Parent),
 		}
 		tt := &TimeTarget{
-			min:         tc.min,
-			blockTarget: tc.target,
+			Drift:      tc.Drift,
+			Integral:   tc.Integral,
+			Derivative: tc.Derivative,
 		}
 
-		res := CalcPoSDifficultyV2(tc.time, parent, tt)
-		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
+		res := CalcPoSDifficultyV2(tc.Time, parent, tt).Int64()
+		assert.Equal(t, tc.Result, res, "TC %v", i)
 	}
 }

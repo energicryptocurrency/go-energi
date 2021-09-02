@@ -1,14 +1,14 @@
 package main
 
 import (
+	"encoding/json"
+	"energi.world/core/gen3/core/types"
+	"energi.world/core/gen3/energi/consensus"
+	"energi.world/core/gen3/energi/params"
 	"fmt"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
-
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/energi/params"
-	"energi.world/core/gen3/energi/consensus"
 )
 
 const (
@@ -20,13 +20,13 @@ func addBlockTimes(output *string) (samples []uint64) {
 	rand.Seed(32)
 	samples = make([]uint64, sampleNum)
 	for i := range samples {
-		samples[i] = uint64(int64(params.MinBlockGap)+rand.Int63n(int64(params.TargetBlockGap)))
+		samples[i] = uint64(int64(params.MinBlockGap) + rand.Int63n(int64(params.TargetBlockGap)))
 	}
 
 	*output += "\nvar testDataBlockTimes = []uint64{\n  "
 	for i := range samples {
 		*output += fmt.Sprint(samples[i])
-		if (i+1) % 30 == 0 {
+		if (i+1)%30 == 0 {
 			*output += ",\n  "
 		} else {
 			*output += ","
@@ -41,7 +41,7 @@ func addBlockTimeEMA(samples []uint64, output *string) (ema []uint64) {
 	*output += "\nvar testDataBlockTimeEMA = []uint64{\n  "
 	for i := range ema {
 		*output += fmt.Sprint(ema[i])
-		if (i+1) % 10 == 0 {
+		if (i+1)%10 == 0 {
 			*output += ",\n  "
 		} else {
 			*output += ","
@@ -56,7 +56,7 @@ func addBlockTimeDrift(ema []uint64, output *string) (drift []int64) {
 	*output += "\nvar testDataBlockTimeDrift = []int64{\n  "
 	for i := range drift {
 		*output += fmt.Sprint(drift[i])
-		if (i+1) % 10 == 0 {
+		if (i+1)%10 == 0 {
 			*output += ",\n  "
 		} else {
 			*output += ","
@@ -77,7 +77,7 @@ func addBlockTimeDerivative(drift []int64, output *string) (derivative []int64) 
 	*output += "\nvar testDataBlockTimeDerivative = []int64{\n  "
 	for i := range derivative {
 		*output += fmt.Sprint(derivative[i])
-		if (i+1) % 10 == 0 {
+		if (i+1)%10 == 0 {
 			*output += ",\n  "
 		} else {
 			*output += ","
@@ -88,18 +88,20 @@ func addBlockTimeDerivative(drift []int64, output *string) (derivative []int64) 
 }
 
 func simulateStaking(
-	blockTimesInitial   []uint64,
-	ema                 []uint64,
-	drift               []int64,
-	integral              int64,
-	derivative          []int64,
-	output               *string,
+	blockTimesInitial []uint64,
+	ema []uint64,
+	drift []int64,
+	integral int64,
+	derivative []int64,
+	output *string,
 ) {
 	const (
-		initialDifficulty int64 = 343768608 // mainnet difficulty number
-		simulationBlockCount = 1440*21 // 21 days
-		maxStakeTime uint64 = 10000
+		initialDifficulty    int64  = 343768608 // mainnet difficulty number
+		simulationBlockCount        = 1440 * 21 // 21 days
+		maxStakeTime         uint64 = 10000
 	)
+
+	var result []consensus.PoSDiffV2TestCase
 
 	nrgStaking := int64(5500000)
 	simulationStartBlock := len(blockTimesInitial)
@@ -118,7 +120,7 @@ func simulateStaking(
 	r := rand.New(s)
 
 	// P(blockFound) is nrgStaking / difficulty
-	blockFound := func (r *rand.Rand, diff *big.Int) (bool) {
+	blockFound := func(r *rand.Rand, diff *big.Int) bool {
 		return r.Int63n(diff.Int64()) <= nrgStaking
 	}
 
@@ -139,7 +141,7 @@ func simulateStaking(
 			if blockFound(r, difficulty[blockCount-1]) {
 				// rather than initialize a whole engine let's just build a time target
 				timeTarget := &consensus.TimeTarget{}
-				timeSlice := blockTimes[blockCount-61:blockCount-1]
+				timeSlice := blockTimes[blockCount-61 : blockCount-1]
 				ema := consensus.CalculateBlockTimeEMA(timeSlice, params.BlockTimeEMAPeriod)
 				drift := consensus.CalculateBlockTimeDrift(ema)
 				integral := consensus.CalculateBlockTimeIntegral(drift)
@@ -155,10 +157,18 @@ func simulateStaking(
 				// calculate the difficulty
 				blockTimes[blockCount] = t
 				difficulty[blockCount] = consensus.CalcPoSDifficultyV2(t, parentHeader, timeTarget)
+				result = append(result, consensus.PoSDiffV2TestCase{
+					Time:       t,
+					Parent:     difficulty[blockCount-1].Int64(),
+					Drift:      timeTarget.Drift,
+					Integral:   timeTarget.Integral,
+					Derivative: timeTarget.Derivative,
+					Result:     difficulty[blockCount].Int64(),
+				})
 				break
 			}
 			// timeout - prevent infinite mining loop if simulation difficulty gets too high
-			if t + 1 == maxStakeTime {
+			if t+1 == maxStakeTime {
 				panic("[ERROR]: Stake timeout, something wrong?")
 			}
 		}
@@ -179,6 +189,8 @@ func simulateStaking(
 		csvData += fmt.Sprint(blockTimes[i], ",", emaTimes[i], ",", difficulty[i].Uint64(), "\n")
 	}
 	ioutil.WriteFile("staking_simulation.csv", []byte(csvData), 0660)
+	jsonCases, _ := json.Marshal(result)
+	ioutil.WriteFile("PoSV2_test_cases.json", jsonCases, 0660)
 }
 
 func main() {
