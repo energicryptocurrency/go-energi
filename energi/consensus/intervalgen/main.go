@@ -97,7 +97,7 @@ func simulateStaking(
 ) {
 	const (
 		initialDifficulty    int64  = 343768608 // mainnet difficulty number
-		simulationBlockCount        = 1440 * 21 // 21 days
+		simulationBlockCount        = 60 * 24 * 21 // 21 days
 		maxStakeTime         uint64 = 10000
 	)
 
