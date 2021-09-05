@@ -19,6 +19,7 @@ package service
 import (
 	"context"
 	"math/big"
+	"sync/atomic"
 
 	"energi.world/core/gen3/accounts/abi/bind"
 	"energi.world/core/gen3/common"
@@ -31,6 +32,7 @@ import (
 	"energi.world/core/gen3/rpc"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
+	energi_api "energi.world/core/gen3/energi/api"
 	energi_common "energi.world/core/gen3/energi/common"
 	energi_params "energi.world/core/gen3/energi/params"
 )
@@ -63,7 +65,7 @@ func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
 
 	//initialize Icheckpointregistry for further calls
 	var err error
-	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(c.eth.APIBackend.ChainConfig().Energi.Energi_CheckpointRegistry, c.eth.APIBackend)
+	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(energi_params.Energi_CheckpointRegistry, c.eth.APIBackend)
 	if err != nil {
 		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err);
 		return nil, err
@@ -72,7 +74,7 @@ func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
 	//listen and log downloading/syncing status
 	go c.listenDownloader()
 
-	return r, nil
+	return c, nil
 }
 
 func (c *CheckpointService) Protocols() []p2p.Protocol {
@@ -87,7 +89,7 @@ func (c *CheckpointService) Start(server *p2p.Server) (err error) {
 	/*
 	retrieve last checkpoints and ensure that the last one if valid for the current chain
 	*/
-	oldCheckpoints, err := c.cpRegistry.Checkpoints(c.callOpts)
+	oldCheckpoints, err := c.cpAPI.Checkpoints()
 	if err != nil {
 		log.Error("Failed to get old checkpoints (startup)", "err", err)
 	} else if lc := len(oldCheckpoints); lc > 0 {
@@ -183,7 +185,7 @@ func (c *CheckpointService) loop() {
 
 	defer subscribe.Unsubscribe()
 
-	oldCheckpoints, err := c.cpRegistry.Checkpoints(c.callOpts)
+	oldCheckpoints, err := c.cpAPI.Checkpoints()
 	if err != nil {
 		log.Error("Failed to get old checkpoints", "err", err)
 	} else {
@@ -215,13 +217,13 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 		return
 	}
 
-	info, err := cp.Info(c.callOpts)
+	info, err := cp.Info(&bind.CallOpts{})
 	if err != nil {
 		log.Warn("Failed to get CP info", "addr", cpAddr, "err", err)
 		return
 	}
 
-	cpp_sig, err := cp.Signature(c.callOpts, cppSigner)
+	cpp_sig, err := cp.Signature(&bind.CallOpts{}, cppSigner)
 	if err != nil {
 		log.Debug("Skipping checkpoint with no CPP sig", "addr", cpAddr, "err", err)
 		return
