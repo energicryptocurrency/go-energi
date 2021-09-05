@@ -64,9 +64,14 @@ func NewMigrationAPI(b Backend) *MigrationAPI {
 		backend:    b,
 		coinsCache: energi_common.NewCacheStorage(),
 	}
-	b.OnSyncedHeadUpdates(func() {
-		r.listGen2Coins()
-	})
+	if b != nil {
+		b.OnSyncedHeadUpdates(func() {
+			_, err := r.listGen2Coins()
+			if err != nil {
+				panic(err)
+			}
+		})
+	}
 	return r
 }
 
