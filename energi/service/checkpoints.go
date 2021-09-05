@@ -45,18 +45,33 @@ type CheckpointProposalEvent struct {
 }
 
 type CheckpointService struct {
-	server *p2p.Server
 	eth    *eth.Ethereum
+	ctx context.Context
+	ctxCancel func()
+
+	inSync int32
 
 	cpRegistry *energi_abi.ICheckpointRegistry
-	callOpts   *bind.CallOpts
+	cpAPI *energi_api.CheckpointRegistryAPI
 }
 
 func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
-	r := &CheckpointService{
+	c := &CheckpointService{
 		eth:      ethServ,
-		callOpts: &bind.CallOpts{},
+		cpAPI: energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
 	}
+
+	//initialize Icheckpointregistry for further calls
+	var err error
+	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(c.eth.APIBackend.ChainConfig().Energi.Energi_CheckpointRegistry, c.eth.APIBackend)
+	if err != nil {
+		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err);
+		return nil, err
+	}
+
+	//listen and log downloading/syncing status
+	go c.listenDownloader()
+
 	return r, nil
 }
 
@@ -69,15 +84,9 @@ func (c *CheckpointService) APIs() []rpc.API {
 }
 
 func (c *CheckpointService) Start(server *p2p.Server) (err error) {
-	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(
-		energi_params.Energi_CheckpointRegistry, c.eth.APIBackend)
-	if err != nil {
-		return err
-	}
-
-	c.server = server
-
-	//---
+	/*
+	retrieve last checkpoints and ensure that the last one if valid for the current chain
+	*/
 	oldCheckpoints, err := c.cpRegistry.Checkpoints(c.callOpts)
 	if err != nil {
 		log.Error("Failed to get old checkpoints (startup)", "err", err)
@@ -116,6 +125,36 @@ func (c *CheckpointService) waitDownloader() bool {
 				return true
 			case downloader.FailedEvent:
 				return c.eth.BlockChain().IsRunning()
+			}
+		}
+	}
+}
+
+//log downloading status
+func (c *CheckpointService) listenDownloader() {
+	events := c.eth.EventMux().Subscribe(
+		downloader.StartEvent{},
+		downloader.DoneEvent{},
+		downloader.FailedEvent{},
+	)
+	defer events.Unsubscribe()
+
+	for {
+		select {
+		case <-c.ctx.Done(): // Triggers immediate shutdown.
+			return
+		case ev := <-events.Chan():
+			if ev == nil {
+				return
+			}
+			switch ev.Data.(type) {
+			case downloader.StartEvent:
+				atomic.StoreInt32(&c.inSync, 0)
+				log.Debug("Checkpoint service is not in sync")
+			case downloader.DoneEvent, downloader.FailedEvent:
+				atomic.StoreInt32(&c.inSync, 1)
+				log.Debug("Checkpoint service is in sync")
+				return
 			}
 		}
 	}
