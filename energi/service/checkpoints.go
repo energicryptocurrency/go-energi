@@ -17,6 +17,7 @@
 package service
 
 import (
+	"fmt"
 	"context"
 	"math/big"
 
@@ -83,6 +84,7 @@ func (c *CheckpointService) Start(server *p2p.Server) (err error) {
 	retrieve last checkpoints and ensure that the last one if valid for the current chain
 	*/
 	oldCheckpoints, err := c.cpAPI.Checkpoints()
+
 	if err != nil {
 		log.Error("Failed to get old checkpoints (startup)", "err", err)
 	} else if lc := len(oldCheckpoints); lc > 0 {
@@ -147,6 +149,7 @@ func (c *CheckpointService) watchCheckpoints() {
 	}
 	defer subscribe.Unsubscribe()
 
+	// process existing checkpoints first
 	oldCheckpoints, err := c.cpAPI.Checkpoints()
 	if err != nil {
 		log.Error("Failed to get old checkpoints", "err", err)
@@ -157,6 +160,7 @@ func (c *CheckpointService) watchCheckpoints() {
 		}
 	}
 
+	// listen for incoming new checkpoints
 	for {
 		select {
 		case err = <-subscribe.Err():
@@ -169,6 +173,7 @@ func (c *CheckpointService) watchCheckpoints() {
 	}
 }
 
+// process checkpoint
 func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 	backend := c.eth.APIBackend
 	cppSigner := backend.ChainConfig().Energi.CPPSigner
@@ -200,10 +205,10 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 		core.CheckpointSignature(cpp_sig),
 	}
 
+	// rebroadcast the received checkpoint
 	backend.AddDynamicCheckpoint(info.Since.Uint64(), info.Number.Uint64(), info.Hash, sigs)
 	if live {
 		log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
-
 		c.eth.EventMux().Post(CheckpointProposalEvent{
 			core.Checkpoint{
 				Since:  info.Since.Uint64(),
