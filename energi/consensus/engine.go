@@ -86,7 +86,6 @@ type (
 		peerCountFn          PeerCountFn
 		isMiningFn           IsMiningFn
 		testing              bool
-		now                  func() uint64
 		knownStakes          KnownStakes
 		nextKSPurge          uint64
 		txhashMap            *lru.Cache
