@@ -17,6 +17,7 @@
 package consensus
 
 import (
+	"time"
 	"math/big"
 
 	"energi.world/core/gen3/common"
@@ -118,7 +119,7 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
+func calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 
 	// check if we have already calculated
 	if parent.Hash() == calculatedBlockHash {
@@ -131,7 +132,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 	parentNumber := parent.Number.Uint64()
 
 	// POS-11: Block time restrictions
-	ret.max = e.now() + params.MaxFutureGap
+	ret.max = uint64(time.Now().Unix()) + params.MaxFutureGap
 
 	// POS-11: Block time restrictions
 	ret.min = parentBlockTime + params.MinBlockGap

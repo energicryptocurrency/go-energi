@@ -22,7 +22,6 @@ import (
 	"math/big"
 	"strings"
 	"sync/atomic"
-	"time"
 
 	"energi.world/core/gen3/accounts/abi"
 	"energi.world/core/gen3/common"
@@ -150,7 +149,6 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		xferGas:       0,
 		callGas:       30000,
 		unlimitedGas:  energi_params.UnlimitedGas,
-		now:           func() uint64 { return uint64(time.Now().Unix()) },
 		nextKSPurge:   0,
 		txhashMap:     txhashMap,
 
@@ -235,9 +233,9 @@ func (e *Energi) VerifyHeader(
 
 	// calculate time target based on hf status
 	if isAsgardActive {
-		time_target = e.calcTimeTargetV2(chain, parent)
+		time_target = calcTimeTargetV2(chain, parent)
 	} else {
-		time_target = e.calcTimeTarget(chain, parent)
+		time_target = calcTimeTarget(chain, parent)
 	}
 
 	err = e.checkTime(header, time_target)
@@ -601,7 +599,7 @@ func (e *Energi) PoSPrepareV2(
 	header *types.Header,
 	parent *types.Header,
 ) (timeTarget *TimeTarget, err error) {
-	timeTarget = e.calcTimeTargetV2(chain, parent)
+	timeTarget = calcTimeTargetV2(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
 	if err != nil {
@@ -623,7 +621,7 @@ func (e *Energi) PoSPrepareV1(
 	header *types.Header,
 	parent *types.Header,
 ) (timeTarget *TimeTarget, err error) {
-	timeTarget = e.calcTimeTarget(chain, parent)
+	timeTarget = calcTimeTarget(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
 	if err != nil {
@@ -955,10 +953,10 @@ func (e *Energi) CalcDifficulty(
 	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
 	log.Debug("hard fork", "status", isAsgardActive)
 	if isAsgardActive {
-		time_target := e.calcTimeTargetV2(chain, parent)
+		time_target := calcTimeTargetV2(chain, parent)
 		return CalcPoSDifficultyV2(time, parent, time_target)
 	}
-	time_target := e.calcTimeTarget(chain, parent)
+	time_target := calcTimeTarget(chain, parent)
 	return calcPoSDifficultyV1(time, parent, time_target)
 }
 
