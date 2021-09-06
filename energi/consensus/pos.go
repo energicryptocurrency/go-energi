@@ -194,23 +194,6 @@ func (e *Energi) calcPoSModifier(
 }
 
 /**
- * Implements difficulty consensus
- */
-func (e *Energi) calcPoSDifficulty(
-	chain ChainReader,
-	time uint64,
-	parent *types.Header,
-	tt *TimeTarget,
-) (ret *big.Int) {
-	ret = e.diffFn(time, parent, tt)
-	log.Trace(
-		"PoS difficulty", "block", parent.Number.Uint64()+1, "time", time,
-		"diff", ret,
-	)
-	return ret
-}
-
-/**
  * POS-13: Difficulty algorithm (Proposal v1)
  */
 const (
