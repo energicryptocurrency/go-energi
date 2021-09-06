@@ -17,7 +17,6 @@
 package service
 
 import (
-	"fmt"
 	"context"
 	"math/big"
 
