@@ -35,7 +35,7 @@ const (
 )
 
 var (
-	// optimize blocktarget calculation for same block
+	// optimize blocktarget calculation for same block NOTE not thread safe!
 	calculatedTimeTarget TimeTarget
 	calculatedBlockHash  common.Hash
 )
