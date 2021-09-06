@@ -19,7 +19,6 @@ package service
 import (
 	"context"
 	"math/big"
-	"sync/atomic"
 
 	"energi.world/core/gen3/accounts/abi/bind"
 	"energi.world/core/gen3/common"
@@ -50,9 +49,6 @@ type CheckpointService struct {
 	eth    *eth.Ethereum
 	ctx context.Context
 	ctxCancel func()
-
-	inSync int32
-
 	cpRegistry *energi_abi.ICheckpointRegistry
 	cpAPI *energi_api.CheckpointRegistryAPI
 }
@@ -70,9 +66,6 @@ func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
 		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err);
 		return nil, err
 	}
-
-	//listen and log downloading/syncing status
-	go c.listenDownloader()
 
 	return c, nil
 }
@@ -97,8 +90,8 @@ func (c *CheckpointService) Start(server *p2p.Server) (err error) {
 		c.onCheckpoint(oldCheckpoints[lc-1], false)
 	}
 
-	//---
-	go c.loop()
+	// watch for new checkpoints
+	go c.watchCheckpoints()
 	return nil
 }
 
@@ -122,8 +115,10 @@ func (c *CheckpointService) waitDownloader() bool {
 			}
 			switch ev.Data.(type) {
 			case downloader.StartEvent:
+				log.Debug("Checkpoint service is not in sync")
 				continue
 			case downloader.DoneEvent:
+				log.Debug("Checkpoint service is in sync")
 				return true
 			case downloader.FailedEvent:
 				return c.eth.BlockChain().IsRunning()
@@ -132,43 +127,11 @@ func (c *CheckpointService) waitDownloader() bool {
 	}
 }
 
-//log downloading status
-func (c *CheckpointService) listenDownloader() {
-	events := c.eth.EventMux().Subscribe(
-		downloader.StartEvent{},
-		downloader.DoneEvent{},
-		downloader.FailedEvent{},
-	)
-	defer events.Unsubscribe()
-
-	for {
-		select {
-		case <-c.ctx.Done(): // Triggers immediate shutdown.
-			return
-		case ev := <-events.Chan():
-			if ev == nil {
-				return
-			}
-			switch ev.Data.(type) {
-			case downloader.StartEvent:
-				atomic.StoreInt32(&c.inSync, 0)
-				log.Debug("Checkpoint service is not in sync")
-			case downloader.DoneEvent, downloader.FailedEvent:
-				atomic.StoreInt32(&c.inSync, 1)
-				log.Debug("Checkpoint service is in sync")
-				return
-			}
-		}
-	}
-}
-
-func (c *CheckpointService) loop() {
+func (c *CheckpointService) watchCheckpoints() {
 	if !c.waitDownloader() {
 		return
 	}
-
 	cpChan := make(chan *energi_abi.ICheckpointRegistryCheckpoint, cppChanBufferSize)
-
 	watchOpts := &bind.WatchOpts{
 		Context: context.WithValue(
 			context.Background(),
@@ -238,7 +201,6 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 	}
 
 	backend.AddDynamicCheckpoint(info.Since.Uint64(), info.Number.Uint64(), info.Hash, sigs)
-
 	if live {
 		log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
 

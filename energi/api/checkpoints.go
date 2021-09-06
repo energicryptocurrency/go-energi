@@ -31,7 +31,6 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
-
 type CheckpointAdminAPI struct {
 	backend Backend
 }
@@ -96,7 +95,6 @@ func (b *CheckpointRegistryAPI) CheckpointInfo() (res *AllCheckpointInfo, err er
 
 // lists the existing checkpoint addresses from contract
 func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
-
 	// initialize contract caller
 	registry, callOpts, err := checkpointRegistryCaller(b.backend, b.proxyAddr)
 	if err != nil {
@@ -116,7 +114,6 @@ func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
 
 // returns existing checkpoints' info
 func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error) {
-
 	// get existing checkpoint addresses from contract
 	addresses, err := b.Checkpoints()
 	if err != nil {
@@ -135,13 +132,13 @@ func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error
 			continue
 		}
 
-		info, err := cp.Info(&bind.CallOpts{ Pending:  true, GasLimit: energi_params.UnlimitedGas,})
+		info, err := cp.Info(&bind.CallOpts{ Pending:  true, GasLimit: energi_params.UnlimitedGas})
 		if err != nil {
 			log.Warn("Info error", "cp", addr, "err", err)
 			continue
 		}
 
-		sigs, err := cp.Signatures(&bind.CallOpts{ Pending:  true, GasLimit: energi_params.UnlimitedGas,})
+		sigs, err := cp.Signatures(&bind.CallOpts{ Pending:  true, GasLimit: energi_params.UnlimitedGas})
 		if err != nil {
 			log.Warn("Proposals error", "addr", addr, "err", err)
 			continue
@@ -258,6 +255,7 @@ func (b *CheckpointRegistryAPI) CheckpointPropose(
 	return
 }
 
+// function returns already initialized checkpoint Icheckpoint registry caller
 func checkpointRegistryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.ICheckpointRegistryCaller, *bind.CallOpts, error) {
 	registry, err := energi_abi.NewICheckpointRegistryCaller(proxyAddr, backend.(bind.ContractCaller))
 	if err != nil {
