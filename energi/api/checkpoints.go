@@ -31,6 +31,22 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
+
+type CheckpointAdminAPI struct {
+	backend Backend
+}
+
+func NewCheckpointAdminAPI(b Backend) *CheckpointAdminAPI {
+	return &CheckpointAdminAPI{b}
+}
+
+func (b *CheckpointAdminAPI) CheckpointLocal(
+	number uint64,
+	hash common.Hash,
+) error {
+	return b.backend.AddLocalCheckpoint(number, hash)
+}
+
 type CheckpointRegistryAPI struct {
 	backend Backend
 	cpCache *energi_common.CacheStorage
@@ -53,6 +69,108 @@ const (
 	checkpointCallGas uint64 = 3000000
 )
 
+type CheckpointInfo struct {
+	Number   uint64
+	Hash     common.Hash
+	Since    uint64
+	SigCount uint64
+}
+
+type AllCheckpointInfo struct {
+	Registry []CheckpointInfo
+	Active   []CheckpointInfo
+}
+
+// returns all the checkpoints from cache (or contract)
+func (b *CheckpointRegistryAPI) CheckpointInfo() (res *AllCheckpointInfo, err error) {
+	var data interface{}
+	data, err = b.cpCache.Get(b.backend, b.checkpointInfo)
+	if err != nil || data == nil {
+		log.Error("CheckpointInfo failed", "err", err)
+		return
+	}
+
+	res = data.(*AllCheckpointInfo)
+	return
+}
+
+// lists the existing checkpoint addresses from contract
+func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
+
+	// initialize contract caller
+	registry, callOpts, err := checkpointRegistryCaller(b.backend, b.proxyAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// call "checkpoins" function on contract
+	checkpointAddresses, err := registry.Checkpoints(callOpts)
+	if err != nil {
+		log.Error("CheckpointRegsitryAPI::Checkpoints", "err", err)
+		return nil, err
+	}
+
+	return checkpointAddresses, nil
+}
+
+
+// returns existing checkpoints' info
+func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error) {
+
+	// get existing checkpoint addresses from contract
+	addresses, err := b.Checkpoints()
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return nil, err
+	}
+
+	res := &AllCheckpointInfo{}
+	res.Registry = make([]CheckpointInfo, 0, len(addresses))
+
+	for _, addr := range addresses {
+		cp, err := energi_abi.NewICheckpointV2Caller(
+			addr, b.backend.(bind.ContractCaller))
+		if err != nil {
+			log.Error("Failed", "err", err)
+			continue
+		}
+
+		info, err := cp.Info(&bind.CallOpts{ Pending:  true, GasLimit: energi_params.UnlimitedGas,})
+		if err != nil {
+			log.Warn("Info error", "cp", addr, "err", err)
+			continue
+		}
+
+		sigs, err := cp.Signatures(&bind.CallOpts{ Pending:  true, GasLimit: energi_params.UnlimitedGas,})
+		if err != nil {
+			log.Warn("Proposals error", "addr", addr, "err", err)
+			continue
+		}
+
+		res.Registry = append(res.Registry, CheckpointInfo{
+			Number:   info.Number.Uint64(),
+			Hash:     info.Hash,
+			Since:    info.Since.Uint64(),
+			SigCount: uint64(len(sigs)),
+		})
+	}
+
+	local := b.backend.ListCheckpoints()
+	res.Active = make([]CheckpointInfo, 0, len(local))
+
+	for _, cp := range local {
+		res.Active = append(res.Active, CheckpointInfo{
+			Number:   cp.Number,
+			Hash:     cp.Hash,
+			Since:    cp.Since,
+			SigCount: cp.SigCount,
+		})
+	}
+
+	return res, nil
+}
+
+// initializes registry which is used to propose checkpoint
 func (b *CheckpointRegistryAPI) registry(
 	password *string,
 	from common.Address,
@@ -61,8 +179,7 @@ func (b *CheckpointRegistryAPI) registry(
 	hashsig func(common.Hash) ([]byte, error),
 	err error,
 ) {
-	contract, err := energi_abi.NewICheckpointRegistry(
-		energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractBackend))
+	contract, err := energi_abi.NewICheckpointRegistry(energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -97,119 +214,13 @@ func (b *CheckpointRegistryAPI) registry(
 	return
 }
 
-type CheckpointInfo struct {
-	Number   uint64
-	Hash     common.Hash
-	Since    uint64
-	SigCount uint64
-}
-
-type AllCheckpointInfo struct {
-	Registry []CheckpointInfo
-	Active   []CheckpointInfo
-}
-
-func (b *CheckpointRegistryAPI) CheckpointInfo() (res *AllCheckpointInfo, err error) {
-	var data interface{}
-	data, err = b.cpCache.Get(b.backend, b.checkpointInfo)
-	if err != nil || data == nil {
-		log.Error("CheckpointInfo failed", "err", err)
-		return
-	}
-
-	res = data.(*AllCheckpointInfo)
-	return
-}
-
-// lists the existing checkpoint addresses from contract
-func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
-
-	// initialize contract caller
-	registry, callOpts, err := checkpointRegistryCaller(b.backend, b.proxyAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	// call "checkpoins" function on contract
-	checkpointAddresses, err := registry.Checkpoints(callOpts)
-	if err != nil {
-		log.Error("CheckpointRegsitryAPI::Checkpoints", "err", err)
-		return nil, err
-	}
-
-	return checkpointAddresses, nil
-}
-
-
-func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error) {
-	registry, err := energi_abi.NewICheckpointRegistryCaller(
-		energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractCaller))
-	if err != nil {
-		log.Error("Failed", "err", err)
-		return nil, err
-	}
-
-	call_opts := &bind.CallOpts{
-		Pending:  true,
-		GasLimit: energi_params.UnlimitedGas,
-	}
-	addresses, err := registry.Checkpoints(call_opts)
-	if err != nil {
-		log.Error("Failed", "err", err)
-		return nil, err
-	}
-
-	res := &AllCheckpointInfo{}
-	res.Registry = make([]CheckpointInfo, 0, len(addresses))
-
-	for _, addr := range addresses {
-		cp, err := energi_abi.NewICheckpointV2Caller(
-			addr, b.backend.(bind.ContractCaller))
-		if err != nil {
-			log.Error("Failed", "err", err)
-			continue
-		}
-
-		info, err := cp.Info(call_opts)
-		if err != nil {
-			log.Warn("Info error", "cp", addr, "err", err)
-			continue
-		}
-
-		sigs, err := cp.Signatures(call_opts)
-		if err != nil {
-			log.Warn("Proposals error", "addr", addr, "err", err)
-			continue
-		}
-
-		res.Registry = append(res.Registry, CheckpointInfo{
-			Number:   info.Number.Uint64(),
-			Hash:     info.Hash,
-			Since:    info.Since.Uint64(),
-			SigCount: uint64(len(sigs)),
-		})
-	}
-
-	local := b.backend.ListCheckpoints()
-	res.Active = make([]CheckpointInfo, 0, len(local))
-
-	for _, cp := range local {
-		res.Active = append(res.Active, CheckpointInfo{
-			Number:   cp.Number,
-			Hash:     cp.Hash,
-			Since:    cp.Since,
-			SigCount: cp.SigCount,
-		})
-	}
-
-	return res, nil
-}
-
+// executes command to propose checkpoint
 func (b *CheckpointRegistryAPI) CheckpointPropose(
 	number uint64,
 	hash common.Hash,
 	password *string,
 ) (txhash common.Hash, err error) {
+	// check if proposed block number hash corresponds to the block in current chain
 	if h, _ := b.backend.HeaderByNumber(context.Background(), rpc.BlockNumber(number)); h == nil {
 		log.Error("Block not found on local node", "number", number)
 		return
@@ -260,19 +271,4 @@ func checkpointRegistryCaller(backend Backend, proxyAddr common.Address) (*energ
 	}
 
 	return registry, callOpts, nil
-}
-
-type CheckpointAdminAPI struct {
-	backend Backend
-}
-
-func NewCheckpointAdminAPI(b Backend) *CheckpointAdminAPI {
-	return &CheckpointAdminAPI{b}
-}
-
-func (b *CheckpointAdminAPI) CheckpointLocal(
-	number uint64,
-	hash common.Hash,
-) error {
-	return b.backend.AddLocalCheckpoint(number, hash)
 }

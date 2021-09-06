@@ -182,7 +182,6 @@ func (c *CheckpointService) loop() {
 		log.Error("Failed checkpoint subscription", "err", err)
 		return
 	}
-
 	defer subscribe.Unsubscribe()
 
 	oldCheckpoints, err := c.cpAPI.Checkpoints()
