@@ -91,10 +91,6 @@ type (
 		knownStakes          KnownStakes
 		nextKSPurge          uint64
 		txhashMap            *lru.Cache
-
-		// optimize blocktarget calculation for same block
-		calculatedTimeTarget TimeTarget
-		calculatedBlockHash  common.Hash
 	}
 )
 

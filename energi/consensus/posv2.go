@@ -33,6 +33,12 @@ const (
 	two uint64 = 2
 )
 
+var (
+	// optimize blocktarget calculation for same block
+	calculatedTimeTarget TimeTarget
+	calculatedBlockHash  common.Hash
+)
+
 // CalculateBlockTimeEMA computes the exponential moving average of block times
 // this will return the EMA of block times as microseconds
 // for a description of the EMA algorithm, please see:
@@ -115,8 +121,8 @@ timestamp
 func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 
 	// check if we have already calculated
-	if parent.Hash() == e.calculatedBlockHash {
-		timeTarget := e.calculatedTimeTarget
+	if parent.Hash() == calculatedBlockHash {
+		timeTarget := calculatedTimeTarget
 		return &timeTarget
 	}
 
@@ -171,8 +177,8 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 	)
 
 	// set calculated results for optimization
-	e.calculatedBlockHash = parent.Hash()
-	e.calculatedTimeTarget = *ret
+	calculatedBlockHash = parent.Hash()
+	calculatedTimeTarget = *ret
 
 	return ret
 }
