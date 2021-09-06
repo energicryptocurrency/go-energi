@@ -57,7 +57,6 @@ type TimeTarget struct {
 func calcTimeTarget(
 	chain ChainReader, parent *types.Header,
 ) (ret *TimeTarget) {
-
 	ret = new(TimeTarget)
 	now := uint64(time.Now().Unix())
 	parentNumber := parent.Number.Uint64()
@@ -108,7 +107,6 @@ func calcTimeTarget(
 func (e *Energi) enforceMinTime(
 	header *types.Header, timeTarget *TimeTarget,
 ) error {
-
 	// NOTE: allow Miner to hint already tried period by
 	if header.Time < timeTarget.min {
 		header.Time = timeTarget.min

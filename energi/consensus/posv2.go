@@ -120,7 +120,6 @@ here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
 func calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
-
 	// check if we have already calculated
 	if parent.Hash() == calculatedBlockHash {
 		timeTarget := calculatedTimeTarget
