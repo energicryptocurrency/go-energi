@@ -132,7 +132,7 @@ func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error
 			continue
 		}
 
-		info, err := cp.Info(&bind.CallOpts{Pending:  true, GasLimit: energi_params.UnlimitedGas})
+		info, err := cp.Info(&bind.CallOpts{Pending: true, GasLimit: energi_params.UnlimitedGas})
 		if err != nil {
 			log.Warn("Info error", "cp", addr, "err", err)
 			continue
