@@ -79,7 +79,7 @@ func (c *CheckpointService) APIs() []rpc.API {
 }
 
 func (c *CheckpointService) Start(server *p2p.Server) (err error) {
-	// retrieve last checkpoints and ensure that the last one if valid for the current chain
+	// retrieve last checkpoints and ensure that  the last one if valid for the current chain
 	oldCheckpoints, err := c.cpAPI.Checkpoints()
 
 	if err != nil {
