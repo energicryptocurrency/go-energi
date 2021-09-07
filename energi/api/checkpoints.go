@@ -47,8 +47,8 @@ func (b *CheckpointAdminAPI) CheckpointLocal(
 }
 
 type CheckpointRegistryAPI struct {
-	backend Backend
-	cpCache *energi_common.CacheStorage
+	backend   Backend
+	cpCache   *energi_common.CacheStorage
 	proxyAddr common.Address
 }
 
@@ -168,10 +168,7 @@ func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error
 }
 
 // initializes registry which is used to propose checkpoint
-func (b *CheckpointRegistryAPI) registry(
-	password *string,
-	from common.Address,
-) (
+func (b *CheckpointRegistryAPI) registry(password *string, from common.Address) (
 	session *energi_abi.ICheckpointRegistrySession,
 	hashsig func(common.Hash) ([]byte, error),
 	err error,

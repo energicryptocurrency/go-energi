@@ -46,17 +46,17 @@ type CheckpointProposalEvent struct {
 }
 
 type CheckpointService struct {
-	eth    *eth.Ethereum
-	ctx context.Context
-	ctxCancel func()
+	eth        *eth.Ethereum
+	ctx        context.Context
+	ctxCancel  func()
 	cpRegistry *energi_abi.ICheckpointRegistry
-	cpAPI *energi_api.CheckpointRegistryAPI
+	cpAPI      *energi_api.CheckpointRegistryAPI
 }
 
 func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
 	c := &CheckpointService{
 		eth:      ethServ,
-		cpAPI: energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
+		cpAPI:    energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
 	}
 
 	//initialize Icheckpointregistry for further calls
@@ -79,9 +79,7 @@ func (c *CheckpointService) APIs() []rpc.API {
 }
 
 func (c *CheckpointService) Start(server *p2p.Server) (err error) {
-	/*
-	retrieve last checkpoints and ensure that the last one if valid for the current chain
-	*/
+	// retrieve last checkpoints and ensure that the last one if valid for the current chain
 	oldCheckpoints, err := c.cpAPI.Checkpoints()
 
 	if err != nil {
