@@ -26,7 +26,7 @@ const IProposal = artifacts.require('IProposal');
 const Gen2Migration = artifacts.require('Gen2Migration');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
-const TreasuryV1 = artifacts.require('TreasuryV1');
+const TreasuryV2 = artifacts.require('TreasuryV2');
 const StorageBlacklistRegistryV1 = artifacts.require('StorageBlacklistRegistryV1');
 const MockBlacklistProposalV1 = artifacts.require('MockBlacklistProposalV1');
 
@@ -48,9 +48,9 @@ contract("BlacklistRegistryV1", async accounts => {
         s.mntoken_orig = await MasternodeTokenV1.deployed();
         s.mntoken = await MasternodeTokenV1.at(await s.mntoken_orig.proxy());
 
-        s.treasury_orig = await TreasuryV1.deployed();
-        s.treasury = await TreasuryV1.at(await s.treasury_orig.proxy());
-        
+        s.treasury_orig = await TreasuryV2.deployed();
+        s.treasury = await TreasuryV2.at(await s.treasury_orig.proxy());
+
         s.orig = await BlacklistRegistryV1.deployed();
         s.proxy = await MockProxy.at(await s.orig.proxy());
         s.mnregistry_proxy = await MockProxy.at(await s.orig.mnregistry_proxy());
@@ -290,7 +290,7 @@ contract("BlacklistRegistryV1", async accounts => {
                 assert.fail('It should fail');
             } catch (e) {
                 assert.match(e.message, /Already active \(2\)/);
-            }            
+            }
         });
 
         it('should refuse collect() on enforced', async () => {
@@ -473,4 +473,3 @@ contract("BlacklistRegistryV1", async accounts => {
     //---
     describe('common post', () => common.govPostTests(s) );
 });
-

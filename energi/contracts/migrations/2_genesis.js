@@ -84,7 +84,9 @@ module.exports = async (deployer, network, accounts) => {
 
         await deployer.deploy(Gen2Migration, blacklist_registry, common.chain_id, common.migration_signer);
 
-        const compensation_fund = await TreasuryV1.new(treasury_proxy, mn_registry_proxy, 1);
+        const compensation_fund = await TreasuryV2.new(treasury_proxy, mn_registry_proxy, 1);
+
+
         await deploy_common(BlacklistRegistryV1,
             blacklist_registry, mn_registry_proxy,
             Gen2Migration.address, compensation_fund.address,
