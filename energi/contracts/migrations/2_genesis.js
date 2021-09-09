@@ -37,6 +37,8 @@ const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const SporkRegistryV2 = artifacts.require('SporkRegistryV2');
 const StakerRewardV1 = artifacts.require('StakerRewardV1');
 const TreasuryV1 = artifacts.require('TreasuryV1');
+const TreasuryV2 = artifacts.require('TreasuryV2');
+
 
 const MockProxy = artifacts.require("MockProxy");
 //const MockAutoProxy = artifacts.require("MockAutoProxy");
@@ -109,6 +111,8 @@ module.exports = async (deployer, network, accounts) => {
         await deploy_common(SporkRegistryV2, undefined, mn_registry_proxy, common.emergency_signer);
         await deploy_common(StakerRewardV1, staker_proxy);
         await deploy_common(TreasuryV1, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
+        await deploy_common(TreasuryV2, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
+
         await deploy_common(BlockRewardV1, undefined, [
             staker_proxy,
             backbone_proxy,
