@@ -30,6 +30,7 @@ const contracts = [
     'MasternodeRegistryV1',
     'SporkRegistryV1',
     'StakerRewardV1',
+    'TreasuryV1',
     'TreasuryV2',
     'CheckpointRegistryV3',
     'StorageCheckpointRegistryV2',
