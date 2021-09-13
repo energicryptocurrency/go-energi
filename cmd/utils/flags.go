@@ -806,16 +806,22 @@ func setListenAddress(ctx *cli.Context, cfg *p2p.Config) {
 		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
 			log.Error("Unacceptable port value. Testnet port is being set to 49797.")
 			cfg.ListenAddr = fmt.Sprintf(":%d", 49797)
+		} else if ctx.GlobalIsSet(ListenPortFlag.Name) {
+			cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt64(ListenPortFlag.Name))
 		}
 	} else if ctx.GlobalIsSet(SimnetFlag.Name) {
 		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 49797 {
 			log.Error("Unacceptable port value. Simnet port is being set to 59797.")
 			cfg.ListenAddr = fmt.Sprintf(":%d", 59797)
+		} else if ctx.GlobalIsSet(ListenPortFlag.Name) {
+			cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt64(ListenPortFlag.Name))
 		}
 	} else if ctx.GlobalIsSet(ListenPortFlag.Name) {
 		if ctx.GlobalInt64(ListenPortFlag.Name) == 49797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
 			log.Error("Unacceptable port value. Mainnet port is being set to 39797.")
 			cfg.ListenAddr = fmt.Sprintf(":%d", 39797)
+		} else if ctx.GlobalIsSet(ListenPortFlag.Name) {
+			cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt64(ListenPortFlag.Name))
 		}
 	}
 }
