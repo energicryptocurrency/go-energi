@@ -56,7 +56,6 @@ type HardforkService struct {
 	ctxCancel func()
 
 	inSync int32
-	callOpts   *bind.CallOpts
 
 	hfAPI *energi_api.HardforkRegistryAPI
 	hfRegistry *energi_abi.IHardforkRegistry
