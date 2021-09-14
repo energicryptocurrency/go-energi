@@ -54,7 +54,7 @@ type TimeTarget struct {
  * POS-11: Block time restrictions
  * POS-12: Block interval enforcement
  */
-func calcTimeTarget(
+func calcTimeTargetV1(
 	chain ChainReader, parent *types.Header,
 ) (ret *TimeTarget) {
 	ret = new(TimeTarget)
@@ -517,7 +517,7 @@ func (e *Energi) mine(
 	if isAsgardActive {
 		timeTarget = calcTimeTargetV2(chain, parent)
 	} else {
-		timeTarget = calcTimeTarget(chain, parent)
+		timeTarget = calcTimeTargetV1(chain, parent)
 	}
 	blockTime := timeTarget.min
 

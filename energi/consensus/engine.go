@@ -234,7 +234,7 @@ func (e *Energi) VerifyHeader(
 	if isAsgardActive {
 		time_target = calcTimeTargetV2(chain, parent)
 	} else {
-		time_target = calcTimeTarget(chain, parent)
+		time_target = calcTimeTargetV1(chain, parent)
 	}
 
 	err = e.checkTime(header, time_target)
@@ -620,7 +620,7 @@ func (e *Energi) PoSPrepareV1(
 	header *types.Header,
 	parent *types.Header,
 ) (timeTarget *TimeTarget, err error) {
-	timeTarget = calcTimeTarget(chain, parent)
+	timeTarget = calcTimeTargetV1(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
 	if err != nil {
@@ -955,7 +955,7 @@ func (e *Energi) CalcDifficulty(
 		time_target := calcTimeTargetV2(chain, parent)
 		return CalcPoSDifficultyV2(time, parent, time_target)
 	}
-	time_target := calcTimeTarget(chain, parent)
+	time_target := calcTimeTargetV1(chain, parent)
 	return calcPoSDifficultyV1(time, parent, time_target)
 }
 
