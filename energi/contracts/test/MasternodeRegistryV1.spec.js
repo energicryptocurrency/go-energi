@@ -1015,10 +1015,8 @@ contract("MasternodeRegistryV1", async accounts => {
                     let target = await s.token_abi.validationTarget(masternode1);
 
                     if ((target == masternode2) && !await isTargetChanges(s.token_abi, masternode1)) {
-                        console.log("AAAAA");
                         target = masternode3;
                     } else {
-                        console.log("BBBBBB");
                         target = masternode2;
                     }
 
