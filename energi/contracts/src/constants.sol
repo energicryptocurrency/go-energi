@@ -51,6 +51,13 @@ contract GlobalConstants {
     uint constant internal PERIOD_BUDGET_MAX = 30 days;
     uint constant internal PERIOD_CHECKPOINT = 1 weeks;
     uint constant internal PERIOD_BLACKLIST = 1 weeks;
+    /*
+    QUORUM determines the percentage of active collateral that MUST take participation in
+    proposal acceptance/rejection process to consider the final results valid
+    */
+    uint8 constant internal QUORUM = 10;
+    uint8 constant internal QUORUM_SUPERMAJORITY = 66;
+
 
     uint8 constant internal QUORUM_MIN = 1;
     uint8 constant internal QUORUM_MAJORITY = 51;
