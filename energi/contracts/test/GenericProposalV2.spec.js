@@ -120,6 +120,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 100,
                 60,
+                23,
                 not_owner
             );
 
@@ -128,6 +129,7 @@ contract("GenericProposalV2", async accounts => {
                     mnregistry.address,
                     101,
                     60,
+                    23,
                     not_owner
                 );
                 assert.fail('It must fail');
@@ -148,6 +150,7 @@ contract("GenericProposalV2", async accounts => {
                     mnregistry.address,
                     51,
                     60,
+                    23,
                     not_owner
                 );
                 assert.fail('It must fail');
@@ -165,6 +168,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
+                23,
                 not_owner
             );
 
@@ -202,6 +206,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
+                23
                 not_owner
             );
 
@@ -233,6 +238,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
+                23
                 not_owner
             );
 
@@ -273,6 +279,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 5,
                 60,
+                23
                 not_owner
             );
 
@@ -323,6 +330,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 90,
                 60,
+                23
                 not_owner
             );
 
@@ -364,6 +372,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
+                23,
                 not_owner
             );
 
@@ -389,6 +398,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
+                23,
                 not_owner
             );
 
@@ -409,6 +419,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
+                23,
                 not_owner
             );
 
@@ -428,6 +439,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
+                23,
                 not_owner
             );
             await proposal.voteAccept({from: owner1});
@@ -447,6 +459,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
+                23,
                 not_owner
             );
 
@@ -466,6 +479,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
+                23,
                 not_owner
             );
             await proposal.voteAccept({from: owner1});
@@ -486,6 +500,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
+                23,
                 not_owner
             );
 
@@ -514,6 +529,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
+                23,
                 not_owner
             );
 
@@ -542,6 +558,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
+                23,
                 not_owner
             );
 

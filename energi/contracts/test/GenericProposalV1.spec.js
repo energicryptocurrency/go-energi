@@ -101,7 +101,6 @@ contract("GenericProposalV1", async accounts => {
                     mnregistry.address,
                     0,
                     60,
-                    50,
                     not_owner
                 );
                 assert.fail('It must fail');
