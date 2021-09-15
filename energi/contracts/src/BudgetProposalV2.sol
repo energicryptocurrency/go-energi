@@ -27,7 +27,7 @@ import { GenericProposalV2 } from "./GenericProposalV2.sol";
 import { GlobalConstants } from "./constants.sol";
 
 /**
- * Budget Proposal V1 for Treasury distribution
+ * Budget Proposal V2 for Treasury distribution
  */
 contract BudgetProposalV2 is
     GenericProposalV2,
@@ -49,7 +49,7 @@ contract BudgetProposalV2 is
             _mnregistry_proxy,
             GlobalConstants.QUORUM,
             _period,
-            GlobalConstants.QUORUM_SUPERMAJORITY,  
+            GlobalConstants.QUORUM_SUPERMAJORITY,
             _payout_address
         )
     {

@@ -57,11 +57,11 @@ contract("GenericProposalV2", async accounts => {
         const masternode2 = accounts[8];
         const masternode3 = accounts[7];
 
-        const ip1 = toBN(0x12345678);
+        const ip1 = toBN(0x16645678);
         const ip2 = toBN(0x87654321);
         const ip3 = toBN(0x43218765);
 
-        const enode_common = '123456789012345678901234567890'
+        const enode_common = '166456789016645678901664567890'
         const enode1 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '11')];
         const enode2 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '22')];
         const enode3 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '33')];
@@ -101,7 +101,7 @@ contract("GenericProposalV2", async accounts => {
                     mnregistry.address,
                     0,
                     60,
-                    23,
+                    66,
                     not_owner
                 );
                 assert.fail('It must fail');
@@ -113,7 +113,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -121,7 +121,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 100,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -130,7 +130,7 @@ contract("GenericProposalV2", async accounts => {
                     mnregistry.address,
                     101,
                     60,
-                    23,
+                    66,
                     not_owner
                 );
                 assert.fail('It must fail');
@@ -151,13 +151,89 @@ contract("GenericProposalV2", async accounts => {
                     mnregistry.address,
                     51,
                     60,
-                    23,
+                    66,
                     not_owner
                 );
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Active weight < 1\/2 ever weight/);
             }
+        });
+
+        it('should not accept half-way because of QUORUM_MAJORITY', async () => {
+            mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
+            mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
+            mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
+
+            const proposal = await GenericProposalV2.new(
+                mnregistry.address,
+                51,
+                60,
+                66,
+                not_owner
+            );
+
+            expect(await proposal.canVote(owner2)).true;
+            await proposal.voteAccept({from: owner2});
+            expect(await proposal.canVote(owner2)).false;
+            expect(await proposal.isAccepted()).false;
+            expect(await proposal.isFinished()).false;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.toString());
+
+            expect(await proposal.canVote(owner3)).true;
+            await proposal.voteAccept({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
+            expect(await proposal.isAccepted()).false;
+            expect(await proposal.isFinished()).false;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.add(collateral3).toString());
+
+            expect(await proposal.canVote(owner1)).true;
+            await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
+            expect(await proposal.isAccepted()).true;
+            expect(await proposal.isFinished()).true;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral1.add(collateral2).add(collateral3).toString());
+        });
+
+        it('should accept half-way because of QUORUM_MAJORITY', async () => {
+            mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
+            mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
+            mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
+
+            const proposal = await GenericProposalV2.new(
+                mnregistry.address,
+                51,
+                60,
+                66,
+                not_owner
+            );
+
+            expect(await proposal.canVote(owner2)).true;
+            await proposal.voteAccept({from: owner2});
+            expect(await proposal.canVote(owner2)).false;
+            expect(await proposal.isAccepted()).false;
+            expect(await proposal.isFinished()).false;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.toString());
+
+            expect(await proposal.canVote(owner1)).true;
+            await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
+            expect(await proposal.isAccepted()).true;
+            expect(await proposal.isFinished()).true;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.add(collateral1).toString());
+
+            expect(await proposal.canVote(owner3)).true;
+            await proposal.voteAccept({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
+            expect(await proposal.isAccepted()).true;
+            expect(await proposal.isFinished()).true;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral1.add(collateral2).add(collateral3).toString());
         });
 
         it('should accept half-way', async () => {
@@ -169,7 +245,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -207,7 +283,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -230,6 +306,7 @@ contract("GenericProposalV2", async accounts => {
                 .eql(collateral1.add(collateral2).add(collateral3).toString());
         });
 
+
         it('should not accept half-way', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
@@ -239,7 +316,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -280,10 +357,10 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 5,
                 60,
-                23,
+                66,
                 not_owner
             );
-
+            expect((await proposal.supermajority()).toString()).eql("66")
             expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
             expect(await proposal.canVote(owner1)).false;
@@ -305,6 +382,7 @@ contract("GenericProposalV2", async accounts => {
             expect(await proposal.canVote(owner2)).true;
             await common.moveTime(web3, 70);
             expect(await proposal.canVote(owner2)).false;
+
 
             try {
                 await proposal.voteAccept({from: owner2});
@@ -331,7 +409,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 90,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -373,7 +451,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -399,7 +477,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -420,7 +498,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 51,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -440,7 +518,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                23,
+                66,
                 not_owner
             );
             await proposal.voteAccept({from: owner1});
@@ -460,7 +538,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -480,7 +558,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                23,
+                66,
                 not_owner
             );
             await proposal.voteAccept({from: owner1});
@@ -501,7 +579,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -530,7 +608,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                23,
+                66,
                 not_owner
             );
 
@@ -559,7 +637,7 @@ contract("GenericProposalV2", async accounts => {
                 mnregistry.address,
                 1,
                 60,
-                23,
+                66,
                 not_owner
             );
 
