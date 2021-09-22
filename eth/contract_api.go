@@ -217,25 +217,30 @@ func (b *EthAPIBackend) isFilteredLog(
 	log *types.Log,
 	blockNo *uint64,
 ) bool {
-
-	for _, addr := range q.Addresses {
-		generalProxyHash := energi_common.GeneralProxyHashExtractor(ctx, addr, blockNo)
-		if generalProxyHash != nil && log.Address.Hash() == *generalProxyHash {
-			return true
-		}
-
-		if addr == log.Address {
-			return true
-		}
-	}
-
+	// check if given contract signature is found
+	var topicFound bool
 	for _, queryTopics := range q.Topics {
 		if len(queryTopics) > 0 {
 			for _, foundTopic := range log.Topics {
 				// Check if missed event name topic was returned.
 				if len(foundTopic) > 0 && queryTopics[0] == foundTopic {
-					return true
+					topicFound = true
 				}
+			}
+		}
+	}
+
+	// if topics was not found return false
+	if topicFound {
+		// check if log is coming from our contract address
+		for _, addr := range q.Addresses {
+			generalProxyHash := energi_common.GeneralProxyHashExtractor(ctx, addr, blockNo)
+			if generalProxyHash != nil && log.Address.Hash() == *generalProxyHash {
+				return true
+			}
+
+			if addr == log.Address {
+				return true
 			}
 		}
 	}
