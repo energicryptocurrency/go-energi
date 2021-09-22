@@ -15,6 +15,15 @@ const (
 	sampleNum = 360
 )
 
+type PoSDiffV2TestCase struct {
+	Time       uint64
+	Parent     int64
+	Drift      int64
+	Integral   int64
+	Derivative int64
+	Result     int64
+}
+
 func addBlockTimes(output *string) (samples []uint64) {
 	// generate random block times that average about 60 seconds
 	rand.Seed(32)
@@ -96,12 +105,12 @@ func simulateStaking(
 	output *string,
 ) {
 	const (
-		initialDifficulty    int64  = 343768608 // mainnet difficulty number
+		initialDifficulty    int64  = 343768608    // mainnet difficulty number
 		simulationBlockCount        = 60 * 24 * 21 // 21 days
 		maxStakeTime         uint64 = 10000
 	)
 
-	var result []consensus.PoSDiffV2TestCase
+	var result []PoSDiffV2TestCase
 
 	nrgStaking := int64(5500000)
 	simulationStartBlock := len(blockTimesInitial)
@@ -157,7 +166,7 @@ func simulateStaking(
 				// calculate the difficulty
 				blockTimes[blockCount] = t
 				difficulty[blockCount] = consensus.CalcPoSDifficultyV2(t, parentHeader, timeTarget)
-				result = append(result, consensus.PoSDiffV2TestCase{
+				result = append(result, PoSDiffV2TestCase{
 					Time:       t,
 					Parent:     difficulty[blockCount-1].Int64(),
 					Drift:      timeTarget.Drift,
