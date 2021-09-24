@@ -25,7 +25,7 @@ ifeq ($(shell uname -s), Darwin)
 	@wget -q -O $(SOLC).tmp 'https://github.com/ethereum/solc-bin/raw/gh-pages/macosx-amd64/solc-macosx-amd64-v$(SOLC_VERSION)%2Bcommit.9c3226ce'
 	@chmod +x $(SOLC).tmp
 	@mv -f $(SOLC).tmp $(SOLC)
-else 
+else
 	@mkdir -p $$(dirname $(SOLC))
 	@wget -q -O $(SOLC).tmp 'https://github.com/ethereum/solidity/releases/download/v$(SOLC_VERSION)/solc-static-linux'
 	@test "$$(sha256sum $(SOLC).tmp | cut -f1 -d' ')" = "$(SOLC_SHA256)"
@@ -59,6 +59,7 @@ ENERGI_CONTRACTS := \
   IBudgetProposal.sol \
   ICheckpointV2.sol \
   ICheckpointRegistry.sol \
+  ICheckpointRegistryV2.sol \
   IDelegatedPoS.sol \
   IGovernedProxy.sol \
   IHardforkRegistry.sol \
