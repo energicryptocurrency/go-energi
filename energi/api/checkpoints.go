@@ -18,6 +18,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 
 	"energi.world/core/gen3/accounts"
@@ -113,10 +114,11 @@ func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
 }
 
 // executes command to propose checkpoint
-func (b *CheckpointRegistryAPI) Remove(
+func (b *CheckpointRegistryAPI) CheckpointRemove(
 	number uint64,
 	password *string,
 ) (txhash common.Hash, err error) {
+	fmt.Println("DDDDD");
 	// check if proposed block number hash can be found in local chain
 	var header *types.Header
 	if header, _ = b.backend.HeaderByNumber(context.Background(), rpc.BlockNumber(number)); header == nil {
