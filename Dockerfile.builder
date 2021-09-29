@@ -58,9 +58,14 @@ RUN chown -R "root:root" "/usr/local/${nodejs_spec}"
 RUN rm -rf ${nodejs_filename}*
 ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
 
+# npm packages version
+ARG ganache_version="6.11.0"
+ARG truffle_version="5.4.0"
+
 # install node packages
 RUN npm -g config set user root
-RUN npm install -g yarn ganache-cli truffle
+RUN npm install -g yarn ganache-cli@${ganache_version} truffle@${truffle_version}
+
 
 # /builds/energi/tech/gen3/energi3
 RUN mkdir -p "/builds/energi/tech/gen3"
