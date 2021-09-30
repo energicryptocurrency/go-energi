@@ -53,6 +53,11 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
         CPP_signer = _cpp_signer;
     }
 
+    modifier requireCPPSigner {
+        require(msg.sender == CPP_signer, "Not cpp signer!");
+        _;
+    }
+
     // IGovernedContract
     //---------------------------------
     function _destroy(IGovernedContract _newImpl) internal {
@@ -90,18 +95,9 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
     }
 
     // Remove checkpoint from storage (always succeeds)
-    function remove(uint number, bytes32 hash, bytes calldata signature) external returns(bool deleted) {
-        // Allow to remove checkpoint by any caller as far as signature is correct.
-        // require(_callerAddress() == CPP_signer, "Invalid caller");
-
-        // validation
-        bytes32 sigbase = signatureBase(number, hash);
-        require(signature.length == 65, "Invalid signature length");
-        (bytes32 r, bytes32 s) = abi.decode(signature, (bytes32, bytes32));
-        require(ecrecover(sigbase, uint8(signature[64]), r, s) == CPP_signer, "Invalid signer");
-
+    function remove(uint number, bytes32 hash) external requireCPPSigner returns(bool deleted) {
         // remove checkpoint from storage
-        deleted = v2storage.remove(new CheckpointV2(mnregistry_proxy, number, hash, sigbase, signature));
+        deleted = v2storage.remove(number, hash);
     }
 
     function checkpoints() external view returns(ICheckpoint[] memory) {
