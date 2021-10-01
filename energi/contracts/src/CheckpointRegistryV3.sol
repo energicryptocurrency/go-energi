@@ -54,7 +54,7 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
     }
 
     modifier requireCPPSigner {
-        require(msg.sender == CPP_signer, "Not cpp signer!");
+        require(tx.origin == CPP_signer, "Not cpp signer!");
         _;
     }
 

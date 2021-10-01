@@ -42,8 +42,6 @@ contract StorageCheckpointRegistryV2 is StorageBase {
 
     // push new checkpoint
     function add(ICheckpoint cp) external requireOwner {
-        (uint block_height, bytes32 block_hash, ) = cp.info();
-        this.remove(block_height, block_hash);
         // if queue is full and needs first element to be deleted
         if (size == maxSize)  {
             delete checkpoints[startingKeyIndex];
