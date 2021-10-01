@@ -166,6 +166,7 @@ contract("CheckpointRegistryV3", async accounts => {
                     const cps2 = await s.token_abi.checkpoints();
                     assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
                 } catch (e) {
+                    console.log(e.message);
                     assert.fail("must fail");
                 }
             });

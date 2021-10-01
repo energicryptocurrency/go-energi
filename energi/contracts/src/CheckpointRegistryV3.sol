@@ -53,11 +53,6 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
         CPP_signer = _cpp_signer;
     }
 
-    modifier requireCPPSigner {
-        require(tx.origin == CPP_signer, "Not cpp signer!");
-        _;
-    }
-
     // IGovernedContract
     //---------------------------------
     function _destroy(IGovernedContract _newImpl) internal {
@@ -95,7 +90,8 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
     }
 
     // Remove checkpoint from storage (always succeeds)
-    function remove(uint number, bytes32 hash) external requireCPPSigner returns(bool deleted) {
+    function remove(uint number, bytes32 hash) external returns(bool deleted) {
+        require(tx.origin == CPP_signer, "Not cpp signer!");
         // remove checkpoint from storage
         deleted = v2storage.remove(number, hash);
     }
