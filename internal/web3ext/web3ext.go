@@ -488,6 +488,17 @@ web3._extend({
 			outputFormatter: console.log,
 		}),
 
+		new web3._extend.Method({
+			name: 'checkpointRemove',
+			call: 'energi_checkpointRemove',
+			params: 2
+			inputFormatter: [
+				null,
+				null,
+			],
+			outputFormatter: console.log,
+		}),
+
 		// hardfork registry
 		new web3._extend.Method({
 			name: 'hardforkList'
