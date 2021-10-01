@@ -66,7 +66,7 @@ func (e *Energi) checkDoS(
 	// POS-9: stake throttling
 	//---
 
-	now := e.now()
+	now := uint64(time.Now().Unix())
 
 	ksk := KnownStakeKey{
 		coinbase: header.Coinbase,

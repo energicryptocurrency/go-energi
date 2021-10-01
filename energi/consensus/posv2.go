@@ -17,6 +17,7 @@
 package consensus
 
 import (
+	"time"
 	"math/big"
 
 	"energi.world/core/gen3/common"
@@ -31,6 +32,12 @@ const (
 
 	// just here to avoid extra typecasts in calculation
 	two uint64 = 2
+)
+
+var (
+	// optimize blocktarget calculation for same block NOTE not thread safe!
+	calculatedTimeTarget TimeTarget
+	calculatedBlockHash  common.Hash
 )
 
 // CalculateBlockTimeEMA computes the exponential moving average of block times
@@ -112,11 +119,10 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
-
+func calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 	// check if we have already calculated
-	if parent.Hash() == e.calculatedBlockHash {
-		timeTarget := e.calculatedTimeTarget
+	if parent.Hash() == calculatedBlockHash {
+		timeTarget := calculatedTimeTarget
 		return &timeTarget
 	}
 
@@ -125,7 +131,7 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 	parentNumber := parent.Number.Uint64()
 
 	// POS-11: Block time restrictions
-	ret.max = e.now() + params.MaxFutureGap
+	ret.max = uint64(time.Now().Unix()) + params.MaxFutureGap
 
 	// POS-11: Block time restrictions
 	ret.min = parentBlockTime + params.MinBlockGap
@@ -171,8 +177,8 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 	)
 
 	// set calculated results for optimization
-	e.calculatedBlockHash = parent.Hash()
-	e.calculatedTimeTarget = *ret
+	calculatedBlockHash = parent.Hash()
+	calculatedTimeTarget = *ret
 
 	return ret
 }

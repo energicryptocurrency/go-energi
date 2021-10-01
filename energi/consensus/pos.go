@@ -54,12 +54,11 @@ type TimeTarget struct {
  * POS-11: Block time restrictions
  * POS-12: Block interval enforcement
  */
-func (e *Energi) calcTimeTarget(
+func calcTimeTargetV1(
 	chain ChainReader, parent *types.Header,
 ) (ret *TimeTarget) {
-
 	ret = new(TimeTarget)
-	now := e.now()
+	now := uint64(time.Now().Unix())
 	parentNumber := parent.Number.Uint64()
 	blockNumber := parentNumber + 1
 
@@ -108,7 +107,6 @@ func (e *Energi) calcTimeTarget(
 func (e *Energi) enforceMinTime(
 	header *types.Header, timeTarget *TimeTarget,
 ) error {
-
 	// NOTE: allow Miner to hint already tried period by
 	if header.Time < timeTarget.min {
 		header.Time = timeTarget.min
@@ -194,23 +192,6 @@ func (e *Energi) calcPoSModifier(
 }
 
 /**
- * Implements difficulty consensus
- */
-func (e *Energi) calcPoSDifficulty(
-	chain ChainReader,
-	time uint64,
-	parent *types.Header,
-	tt *TimeTarget,
-) (ret *big.Int) {
-	ret = e.diffFn(time, parent, tt)
-	log.Trace(
-		"PoS difficulty", "block", parent.Number.Uint64()+1, "time", time,
-		"diff", ret,
-	)
-	return ret
-}
-
-/**
  * POS-13: Difficulty algorithm (Proposal v1)
  */
 const (
@@ -250,6 +231,7 @@ func calcPoSDifficultyV1(
 	parent *types.Header,
 	tt *TimeTarget,
 ) (D *big.Int) {
+
 	// Find the target anchor
 	target := (tt.blockTarget + tt.periodTarget) / 2
 	if target < tt.min {
@@ -533,15 +515,15 @@ func (e *Energi) mine(
 	// make time target calculation depending on asgard status
 	var timeTarget *TimeTarget
 	if isAsgardActive {
-		timeTarget = e.calcTimeTargetV2(chain, parent)
+		timeTarget = calcTimeTargetV2(chain, parent)
 	} else {
-		timeTarget = e.calcTimeTarget(chain, parent)
+		timeTarget = calcTimeTargetV1(chain, parent)
 	}
 	blockTime := timeTarget.min
 
 	// Special case due to expected very large gap between Genesis and Migration
 	if header.IsGen2Migration() && !e.testing {
-		blockTime = e.now()
+		blockTime = uint64(time.Now().Unix())
 	}
 
 	// A special workaround to obey target time when migration contract is used
@@ -565,7 +547,7 @@ func (e *Energi) mine(
 
 	//---
 	for ; ; blockTime++ {
-		if maxTime := e.now() + params.MaxFutureGap; blockTime > maxTime {
+		if maxTime := uint64(time.Now().Unix()) + params.MaxFutureGap; blockTime > maxTime {
 			log.Trace("PoS miner is sleeping")
 			select {
 			case <-stop:
