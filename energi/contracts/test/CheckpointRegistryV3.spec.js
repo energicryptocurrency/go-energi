@@ -72,8 +72,8 @@ contract("CheckpointRegistryV3", async accounts => {
         web3.eth.personal.importRawKey("0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878","");
         web3.eth.personal.unlockAccount('0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8','');
         web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from:accounts[0], value: toWei('5000000', 'ether')}).then((value) => {
-          console.log(value);
-          // expected output: "Success!"
+            console.log(value);
+            // expected output: "Success!"
         });
 
         const masternode1 = mnacc1.address;
