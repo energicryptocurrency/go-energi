@@ -91,7 +91,7 @@ contract CheckpointRegistryV3 is GovernedContract, ICheckpointRegistryV2  {
 
     // Remove checkpoint from storage (always succeeds)
     function remove(uint number, bytes32 hash) external returns(bool deleted) {
-        require(tx.origin == CPP_signer, "Not cpp signer!");
+        require(_callerAddress() == CPP_signer, "Not cpp signer!");
         // remove checkpoint from storage
         deleted = v2storage.remove(number, hash);
     }
