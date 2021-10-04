@@ -28,7 +28,7 @@ var (
 )
 
 // ICheckpointRegistryV2ABI is the input ABI used to generate the binding from.
-const ICheckpointRegistryV2ABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"contractICheckpoint\",\"name\":\"checkpoint\",\"type\":\"address\"}],\"name\":\"Checkpoint\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"CPP_signer\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"checkpoints\",\"outputs\":[{\"internalType\":\"contractICheckpoint[]\",\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"propose\",\"outputs\":[{\"internalType\":\"contractICheckpoint\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"remove\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"deleted\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contractICheckpoint\",\"name\":\"checkpoint\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"sign\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"signatureBase\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"sigbase\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
+const ICheckpointRegistryV2ABI = "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"contractICheckpoint\",\"name\":\"checkpoint\",\"type\":\"address\"}],\"name\":\"Checkpoint\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[],\"name\":\"CPP_signer\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"checkpoints\",\"outputs\":[{\"internalType\":\"contractICheckpoint[]\",\"name\":\"\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"propose\",\"outputs\":[{\"internalType\":\"contractICheckpoint\",\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"remove\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"deleted\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"contractICheckpoint\",\"name\":\"checkpoint\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"sign\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"signatureBase\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"sigbase\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]"
 
 // ICheckpointRegistryV2 is an auto generated Go binding around an Ethereum contract.
 type ICheckpointRegistryV2 struct {
@@ -271,25 +271,25 @@ func (_ICheckpointRegistryV2 *ICheckpointRegistryV2TransactorSession) Propose(nu
 	return _ICheckpointRegistryV2.Contract.Propose(&_ICheckpointRegistryV2.TransactOpts, number, hash, signature)
 }
 
-// Remove is a paid mutator transaction binding the contract method 0x082e0c9c.
+// Remove is a paid mutator transaction binding the contract method 0x28b0558b.
 //
-// Solidity: function remove(uint256 number, bytes32 hash, bytes signature) returns(bool deleted)
-func (_ICheckpointRegistryV2 *ICheckpointRegistryV2Transactor) Remove(opts *bind.TransactOpts, number *big.Int, hash [32]byte, signature []byte) (*types.Transaction, error) {
-	return _ICheckpointRegistryV2.contract.Transact(opts, "remove", number, hash, signature)
+// Solidity: function remove(uint256 number, bytes32 hash) returns(bool deleted)
+func (_ICheckpointRegistryV2 *ICheckpointRegistryV2Transactor) Remove(opts *bind.TransactOpts, number *big.Int, hash [32]byte) (*types.Transaction, error) {
+	return _ICheckpointRegistryV2.contract.Transact(opts, "remove", number, hash)
 }
 
-// Remove is a paid mutator transaction binding the contract method 0x082e0c9c.
+// Remove is a paid mutator transaction binding the contract method 0x28b0558b.
 //
-// Solidity: function remove(uint256 number, bytes32 hash, bytes signature) returns(bool deleted)
-func (_ICheckpointRegistryV2 *ICheckpointRegistryV2Session) Remove(number *big.Int, hash [32]byte, signature []byte) (*types.Transaction, error) {
-	return _ICheckpointRegistryV2.Contract.Remove(&_ICheckpointRegistryV2.TransactOpts, number, hash, signature)
+// Solidity: function remove(uint256 number, bytes32 hash) returns(bool deleted)
+func (_ICheckpointRegistryV2 *ICheckpointRegistryV2Session) Remove(number *big.Int, hash [32]byte) (*types.Transaction, error) {
+	return _ICheckpointRegistryV2.Contract.Remove(&_ICheckpointRegistryV2.TransactOpts, number, hash)
 }
 
-// Remove is a paid mutator transaction binding the contract method 0x082e0c9c.
+// Remove is a paid mutator transaction binding the contract method 0x28b0558b.
 //
-// Solidity: function remove(uint256 number, bytes32 hash, bytes signature) returns(bool deleted)
-func (_ICheckpointRegistryV2 *ICheckpointRegistryV2TransactorSession) Remove(number *big.Int, hash [32]byte, signature []byte) (*types.Transaction, error) {
-	return _ICheckpointRegistryV2.Contract.Remove(&_ICheckpointRegistryV2.TransactOpts, number, hash, signature)
+// Solidity: function remove(uint256 number, bytes32 hash) returns(bool deleted)
+func (_ICheckpointRegistryV2 *ICheckpointRegistryV2TransactorSession) Remove(number *big.Int, hash [32]byte) (*types.Transaction, error) {
+	return _ICheckpointRegistryV2.Contract.Remove(&_ICheckpointRegistryV2.TransactOpts, number, hash)
 }
 
 // Sign is a paid mutator transaction binding the contract method 0x51fae959.

@@ -18,7 +18,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 
 	"energi.world/core/gen3/accounts"
@@ -26,7 +25,6 @@ import (
 	"energi.world/core/gen3/common"
 	"energi.world/core/gen3/log"
 	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/core/types"
 
 	energi_abi "energi.world/core/gen3/energi/abi"
 	energi_common "energi.world/core/gen3/energi/common"
@@ -120,31 +118,16 @@ func (b *CheckpointRegistryAPI) CheckpointRemove(
 	password *string,
 ) (txhash common.Hash, err error) {
 	// request registry caller and signer
-	registry, hashsig, err := b.registry(password, b.backend.ChainConfig().Energi.CPPSigner)
+	registry, _, err := b.registry(password, b.backend.ChainConfig().Energi.CPPSigner)
 	if err != nil {
 		return
 	}
 
-	// generate signature base
-	tosig, err := registry.SignatureBase(new(big.Int).SetUint64(number), hash)
-	if err != nil {
-		return
-	}
-
-	sig, err := hashsig(tosig)
-	if err != nil {
-		return
-	}
-
-	// NOTE: compatibility with ecrecover opcode.
-	sig[64] += 27
-
-	tx, err := registry.Remove(new(big.Int).SetUint64(number), hash, sig)
+	tx, err := registry.Remove(new(big.Int).SetUint64(number), hash)
 	if tx != nil {
 		txhash = tx.Hash()
 		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
 	}
-
 	return
 }
 
