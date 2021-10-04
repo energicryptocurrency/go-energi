@@ -116,16 +116,9 @@ func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
 // executes command to propose checkpoint
 func (b *CheckpointRegistryAPI) CheckpointRemove(
 	number uint64,
+	hash common.Hash,
 	password *string,
 ) (txhash common.Hash, err error) {
-	fmt.Println("DDDDD");
-	// check if proposed block number hash can be found in local chain
-	var header *types.Header
-	if header, _ = b.backend.HeaderByNumber(context.Background(), rpc.BlockNumber(number)); header == nil {
-		log.Error("Block not found on local node", "number", number)
-		return
-	}
-
 	// request registry caller and signer
 	registry, hashsig, err := b.registry(password, b.backend.ChainConfig().Energi.CPPSigner)
 	if err != nil {
@@ -133,7 +126,7 @@ func (b *CheckpointRegistryAPI) CheckpointRemove(
 	}
 
 	// generate signature base
-	tosig, err := registry.SignatureBase(new(big.Int).SetUint64(number), header.Hash())
+	tosig, err := registry.SignatureBase(new(big.Int).SetUint64(number), hash)
 	if err != nil {
 		return
 	}
@@ -146,7 +139,7 @@ func (b *CheckpointRegistryAPI) CheckpointRemove(
 	// NOTE: compatibility with ecrecover opcode.
 	sig[64] += 27
 
-	tx, err := registry.Remove(new(big.Int).SetUint64(number), header.Hash(), sig)
+	tx, err := registry.Remove(new(big.Int).SetUint64(number), hash, sig)
 	if tx != nil {
 		txhash = tx.Hash()
 		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())

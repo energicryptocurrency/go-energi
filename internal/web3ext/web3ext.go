@@ -491,8 +491,9 @@ web3._extend({
 		new web3._extend.Method({
 			name: 'checkpointRemove',
 			call: 'energi_checkpointRemove',
-			params: 2
+			params: 3
 			inputFormatter: [
+				null,
 				null,
 				null,
 			],
