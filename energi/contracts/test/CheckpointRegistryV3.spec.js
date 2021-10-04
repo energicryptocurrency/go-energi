@@ -69,9 +69,7 @@ contract("CheckpointRegistryV3", async accounts => {
         const sigacc = web3.eth.accounts.privateKeyToAccount('0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878');
         const mnacc1 = web3.eth.accounts.create();
         const nonmnacc1 = web3.eth.accounts.create();
-        web3.eth.personal.importRawKey("0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878","").then(function(result) {
-           console.log(result)
-        });
+        web3.eth.personal.importRawKey("0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878","").then(function(result) {});
         web3.eth.personal.unlockAccount('0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8','');
         web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from:accounts[0], value: toWei('50000', 'ether')});
 
@@ -166,7 +164,6 @@ contract("CheckpointRegistryV3", async accounts => {
                     const cps2 = await s.token_abi.checkpoints();
                     assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
                 } catch (e) {
-                    console.log(e.message);
                     assert.fail("must fail");
                 }
             });
