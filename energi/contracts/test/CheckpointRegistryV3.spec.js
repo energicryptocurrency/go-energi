@@ -122,7 +122,7 @@ contract("CheckpointRegistryV3", async accounts => {
                 web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from: accounts[0], value: toWei('5000000', 'ether')});
                 common.moveTime(web3, 10);
             } catch (e) {
-                assert.match(e.message, /must fail/);
+                assert.match(e.message, /transfer failed/);
             }
         });
 
