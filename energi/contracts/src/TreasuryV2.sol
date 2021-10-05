@@ -24,7 +24,6 @@ pragma solidity 0.5.16;
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { BudgetProposalV2 } from "./BudgetProposalV2.sol";
 import { IBudgetProposal } from "./ITreasury.sol";
-import { GlobalConstantsV3 } from "./constantsV3.sol";
 import { TreasuryV1, StorageTreasuryV1 }  from "./TreasuryV1.sol";
 
 /**
@@ -32,7 +31,10 @@ import { TreasuryV1, StorageTreasuryV1 }  from "./TreasuryV1.sol";
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract TreasuryV2 is TreasuryV1, GlobalConstantsV3 {
+contract TreasuryV2 is TreasuryV1 {
+    // new budget proposal fee
+    uint constant internal FEE_BUDGET_V2 = 300 ether;
+
     constructor(address _proxy, IGovernedProxy _mnregistry_proxy, uint _superblock_cycle) public TreasuryV1(_proxy, _mnregistry_proxy, _superblock_cycle) {}
 
     // create a new budget proposal

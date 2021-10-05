@@ -24,16 +24,22 @@ pragma solidity 0.5.16;
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IBudgetProposal } from "./ITreasury.sol";
 import { GenericProposalV2 } from "./GenericProposalV2.sol";
-import { GlobalConstantsV3 } from "./constantsV3.sol";
 
 /**
  * Budget Proposal V2 for Treasury distribution
  */
 contract BudgetProposalV2 is
     GenericProposalV2,
-    IBudgetProposal,
-    GlobalConstantsV3
+    IBudgetProposal
 {
+    /*
+    QUORUM determines the percentage of active collateral that MUST take participation in
+    proposal acceptance/rejection process to consider the final results valid
+    */
+    uint8 constant internal QUORUM = 10;
+    uint8 constant internal QUORUM_SUPERMAJORITY = 66;
+
+    // local variables
     uint public paid_amount;
     uint public proposed_amount;
     uint public ref_uuid;
