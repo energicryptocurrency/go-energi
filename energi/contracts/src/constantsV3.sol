@@ -26,6 +26,6 @@ pragma solidity 0.5.16;
  * NOTE: it could be a library, but Solidity does not support such case.
  */
 
-contract GlobalConstantsV2 {
-    uint constant internal MN_COLLATERAL_V2_MIN = 1000 ether;
+contract GlobalConstantsV3 {
+    uint constant internal FEE_BUDGET_V2 = 300 ether;
 }
