@@ -149,7 +149,6 @@ test-go-report:
       - .test-go-report.xml
     reports:
       junit: .test-go-report.xml
-  allow_failure: true
 
 test-solidity:
   stage: test
