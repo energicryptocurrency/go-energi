@@ -39,7 +39,6 @@ contract GlobalConstants {
 
     uint constant internal FEE_UPGRADE_V1 = 10000 ether;
     uint constant internal FEE_BUDGET_V1 = 100 ether;
-    uint constant internal FEE_BUDGET_V2 = 300 ether;
     uint constant internal FEE_CHECKPOINT_V1 = 1000 ether;
     uint constant internal FEE_BLACKLIST_V1 = 1000 ether;
     uint constant internal FEE_BLACKLIST_REVOKE_V1 = 100 ether;
@@ -80,3 +79,4 @@ contract GlobalConstants {
     uint constant internal BUDGET_AMOUNT_MAX = REWARD_TREASURY_V1;
     uint constant internal BUDGET_PROPOSAL_MAX = 100;
 }
+
