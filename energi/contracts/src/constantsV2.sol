@@ -28,4 +28,5 @@ pragma solidity 0.5.16;
 
 contract GlobalConstantsV2 {
     uint constant internal MN_COLLATERAL_V2_MIN = 1000 ether;
+    uint constant internal FEE_BUDGET_V2 = 300 ether;
 }

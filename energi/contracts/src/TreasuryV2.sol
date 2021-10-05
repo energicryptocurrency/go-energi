@@ -24,6 +24,7 @@ pragma solidity 0.5.16;
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { BudgetProposalV1 } from "./BudgetProposalV1.sol";
 import { IBudgetProposal } from "./ITreasury.sol";
+import { GlobalConstantsV2 } from "./constantsV2.sol";
 import { TreasuryV1, StorageTreasuryV1 }  from "./TreasuryV1.sol";
 
 /**
@@ -31,7 +32,7 @@ import { TreasuryV1, StorageTreasuryV1 }  from "./TreasuryV1.sol";
  *
  * NOTE: it MUST NOT change after blockchain launch!
  */
-contract TreasuryV2 is TreasuryV1 {
+contract TreasuryV2 is TreasuryV1, GlobalConstantsV2 {
     constructor(address _proxy, IGovernedProxy _mnregistry_proxy, uint _superblock_cycle) public TreasuryV1(_proxy, _mnregistry_proxy, _superblock_cycle) {}
 
     // create a new budget proposal
@@ -48,7 +49,7 @@ contract TreasuryV2 is TreasuryV1 {
 
         StorageTreasuryV1 store = v1storage;
         address payable payout_address = _callerAddress();
-        
+
         require(address(store.uuid_proposal(_ref_uuid)) == address(0), "UUID in use");
 
         // Find, if proposal slot is available.
