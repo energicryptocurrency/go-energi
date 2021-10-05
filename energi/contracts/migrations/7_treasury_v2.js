@@ -28,12 +28,12 @@ module.exports = async function(deployer, network) {
         console.log("Deploying treasury to " + network);
 
         if (network === "mainnet" || network === "testnet") {
-            deployer.deploy(TreasuryV1,
-                treasury_proxy,
-                mn_registry_proxy,
-                common.superblock_cycles,
-                common.treasury_deploy_opts
-            );
+            // deployer.deploy(TreasuryV2,
+            //     treasury_proxy,
+            //     mn_registry_proxy,
+            //     common.superblock_cycles,
+            //     common.treasury_deploy_opts
+            // );
         } else {
             await deployer.deploy(MockProxy);
             const treasury_mock_proxy = MockProxy.address
