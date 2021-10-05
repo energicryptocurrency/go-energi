@@ -71,7 +71,6 @@ contract("CheckpointRegistryV3", async accounts => {
         const nonmnacc1 = web3.eth.accounts.create();
         web3.eth.personal.importRawKey("0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878","");
         web3.eth.personal.unlockAccount('0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8','');
-        web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from: accounts[0], value: toWei('5000000', 'ether')});
 
         const masternode1 = mnacc1.address;
         const ip1 = toBN(0x12345678);
@@ -118,12 +117,12 @@ contract("CheckpointRegistryV3", async accounts => {
             });
         });
 
-        it('should signer have correct balance', async () => {
+        it('should succeed transfer to signer', async () => {
             try {
-                var balance = await web3.eth.getBalance('0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8');
-                assert.equal(balance, '30649999999903306763200000', "nope");
+                web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from: accounts[0], value: toWei('5000000', 'ether')});
+                common.moveTime(web3, 10);
             } catch (e) {
-                assert.match(e.message, /Invalid signature length/);
+                assert.match(e.message, /transfer failed/);
             }
         });
 
