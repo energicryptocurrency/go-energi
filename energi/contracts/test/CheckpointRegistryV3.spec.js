@@ -120,8 +120,8 @@ contract("CheckpointRegistryV3", async accounts => {
 
         it('should signer have correct balance', async () => {
             try {
-                web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from: accounts[0], value: toWei('5000000', 'ether')}).then((value) =>
-                    assert.equal(value,true,"bla");
+                web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from: accounts[0], value: toWei('5000000', 'ether')}).then((value) =>{
+                    assert.equal(value,true,/bla/);
                     // expected output: "Success!"
                 });
             } catch (e) {
