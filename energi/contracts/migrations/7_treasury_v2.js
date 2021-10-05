@@ -16,6 +16,7 @@
 
 'use strict';
 
+const TreasuryV1 = artifacts.require('TreasuryV1');
 const TreasuryV2 = artifacts.require('TreasuryV2');
 const MockProxy = artifacts.require("MockProxy");
 const common = require('../test/common');
@@ -27,7 +28,7 @@ module.exports = async function(deployer, network) {
         console.log("Deploying to " + network);
 
         if (network === "mainnet" || network === "testnet") {
-            deployer.deploy(TreasuryV2,
+            deployer.deploy(TreasuryV1,
                 treasury_proxy,
                 mn_registry_proxy,
                 common.superblock_cycles,
