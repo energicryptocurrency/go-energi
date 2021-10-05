@@ -24,14 +24,15 @@ pragma solidity 0.5.16;
 import { IGovernedProxy } from "./IGovernedProxy.sol";
 import { IBudgetProposal } from "./ITreasury.sol";
 import { GenericProposalV2 } from "./GenericProposalV2.sol";
-import { GlobalConstants } from "./constants.sol";
+import { GlobalConstantsV3 } from "./constantsV3.sol";
 
 /**
  * Budget Proposal V2 for Treasury distribution
  */
 contract BudgetProposalV2 is
     GenericProposalV2,
-    IBudgetProposal
+    IBudgetProposal,
+    GlobalConstantsV3
 {
     uint public paid_amount;
     uint public proposed_amount;
@@ -47,9 +48,9 @@ contract BudgetProposalV2 is
         public
         GenericProposalV2(
             _mnregistry_proxy,
-            GlobalConstants.QUORUM,
+            QUORUM,
             _period,
-            GlobalConstants.QUORUM_SUPERMAJORITY,
+            QUORUM_SUPERMAJORITY,
             _payout_address
         )
     {

@@ -28,4 +28,11 @@ pragma solidity 0.5.16;
 
 contract GlobalConstantsV3 {
     uint constant internal FEE_BUDGET_V2 = 300 ether;
+    /*
+    QUORUM determines the percentage of active collateral that MUST take participation in
+    proposal acceptance/rejection process to consider the final results valid
+    */
+    uint8 constant internal QUORUM = 10;
+    uint8 constant internal QUORUM_SUPERMAJORITY = 66;
+
 }
