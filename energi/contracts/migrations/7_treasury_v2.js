@@ -16,7 +16,6 @@
 
 'use strict';
 
-const TreasuryV1 = artifacts.require('TreasuryV1');
 const TreasuryV2 = artifacts.require('TreasuryV2');
 const MockProxy = artifacts.require("MockProxy");
 const common = require('../test/common');
