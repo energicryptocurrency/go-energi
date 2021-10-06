@@ -254,7 +254,11 @@ func (e *Energi) VerifyHeader(
 	if isAsgardActive {
 		difficulty = CalcPoSDifficultyV2(header.Time, parent, time_target)
 	} else {
-		difficulty = calcPoSDifficultyV1(header.Time, parent, time_target)
+		if e.testing {
+			difficulty = common.Big1
+		} else {
+			difficulty = calcPoSDifficultyV1(header.Time, parent, time_target)
+		}
 	}
 
 	if header.Difficulty.Cmp(difficulty) != 0 {
@@ -631,7 +635,11 @@ func (e *Energi) PoSPrepareV1(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV1(header.Time, parent, timeTarget)
+	if e.testing {
+		header.Difficulty = common.Big1
+	} else {
+		header.Difficulty = calcPoSDifficultyV1(header.Time, parent, timeTarget)
+	}
 
 	return timeTarget, err
 }
@@ -956,7 +964,11 @@ func (e *Energi) CalcDifficulty(
 		return CalcPoSDifficultyV2(time, parent, time_target)
 	}
 	time_target := calcTimeTargetV1(chain, parent)
-	return calcPoSDifficultyV1(time, parent, time_target)
+	if e.testing {
+		return common.Big1
+	} else {
+		return calcPoSDifficultyV1(time, parent, time_target)
+	}
 }
 
 // APIs returns the RPC APIs this consensus engine provides.

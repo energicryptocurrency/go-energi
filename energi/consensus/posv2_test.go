@@ -182,7 +182,7 @@ func TestPoSChainV2(t *testing.T) {
 		}
 		genesis = gspec.MustCommit(testdb)
 
-		now = engine.now()
+		now = uint64(time.Now().Unix())
 		_   = now
 	)
 	var err error
@@ -400,7 +400,7 @@ func TestPoSChainV2(t *testing.T) {
 
 			t.FailNow()
 		}
-		if !assert.True(t, tt.max <= engine.now()+30) {
+		if !assert.True(t, tt.max <= uint64(time.Now().Unix()) + 30) {
 			log.Debug("failed")
 
 			t.FailNow()

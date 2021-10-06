@@ -82,7 +82,6 @@ func TestPoSDoS(t *testing.T) {
 	base := uint64(1000000)
 	curr_time := base
 	engine := New(nil, nil)
-	engine.now = func() uint64 { return curr_time }
 
 	// POS-8: old fork protection
 	//============================
