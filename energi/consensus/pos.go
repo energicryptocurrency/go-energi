@@ -582,10 +582,12 @@ func (e *Energi) mine(
 				return false, err
 			}
 		}
+
 		// Try smaller amounts first
 		sort.Slice(candidates, func(i, j int) bool {
 			return candidates[i].weight < candidates[j].weight
 		})
+		
 		// Try to match target
 		for i := range candidates {
 			v := &candidates[i]

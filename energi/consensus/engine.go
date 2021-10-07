@@ -17,10 +17,11 @@
 package consensus
 
 import (
-	"errors"
 	"fmt"
-	"math/big"
+	"time"
+  "errors"
 	"strings"
+	"math/big"
 	"sync/atomic"
 
 	"energi.world/core/gen3/accounts/abi"
@@ -85,6 +86,7 @@ type (
 		accountsFn           AccountsFn
 		peerCountFn          PeerCountFn
 		isMiningFn           IsMiningFn
+		now                  func() uint64
 		testing              bool
 		knownStakes          KnownStakes
 		nextKSPurge          uint64
@@ -150,6 +152,7 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		unlimitedGas:  energi_params.UnlimitedGas,
 		nextKSPurge:   0,
 		txhashMap:     txhashMap,
+		now:           func() uint64 { return uint64(time.Now().Unix()) },
 
 		accountsFn:  func() []common.Address { return nil },
 		peerCountFn: func() int { return 0 },
