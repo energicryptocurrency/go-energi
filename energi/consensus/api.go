@@ -18,7 +18,6 @@ package consensus
 
 import (
 	"bytes"
-	"time"
 	"sort"
 
 	"energi.world/core/gen3/common"
@@ -74,7 +73,7 @@ func (a *EngineAPI) StakingStatus() *StakingStatusInfo {
 	for _, acct := range raw_accounts {
 		weight, err := engine.lookupStakeWeight(
 			chain,
-			uint64(time.Now().Unix()),
+			engine.now(),
 			parent,
 			acct,
 		)
