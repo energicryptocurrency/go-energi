@@ -21,7 +21,6 @@ import (
 	"crypto/rand"
 	"math/big"
 	"testing"
-	"time"
 
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
@@ -141,7 +140,7 @@ func TestPoSChainV1(t *testing.T) {
 		}
 		genesis = gspec.MustCommit(testdb)
 
-		now = uint64(time.Now().Unix())
+		now = engine.now()
 	)
 
 	chain, err := core.NewBlockChain(testdb, nil, &chainConfig, engine, vm.Config{}, nil)
@@ -156,6 +155,10 @@ func TestPoSChainV1(t *testing.T) {
 	assert.NotEmpty(t, parent)
 
 	iterCount := 150
+
+	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
+		return common.Big1
+	}
 
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
@@ -249,9 +252,9 @@ func TestPoSChainV1(t *testing.T) {
 
 		// Time tests
 		// ---
-		tt := calcTimeTargetV1(chain, parent)
+		tt := engine.calcTimeTarget(chain, parent)
 		assert.True(t, tt.max >= now)
-		assert.True(t, tt.max <= uint64(time.Now().Unix())+30)
+		assert.True(t, tt.max <= engine.now()+30)
 
 		if i < 60 {
 			assert.Equal(t, header.Time, parent.Time+30)
@@ -472,7 +475,9 @@ func TestPoSMine(t *testing.T) {
 
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	engine.testing = true
-
+	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
+		return common.Big1
+	}
 	engine.SetMinerCB(
 		func() []common.Address {
 			if header.Number.Uint64() == 1 {
@@ -565,7 +570,7 @@ func TestPoSMine(t *testing.T) {
 		fakeChain.headers[header.ParentHash] = parentHeader
 
 		// Test stop works when PoS miner is sleeping
-		engineNow := uint64(time.Now().Unix())
+		engineNow := engine.now
 		timeNow := uint64(1000)
 		engine.now = func() uint64 { timeNow -= 50; return timeNow }
 		stop = make(chan struct{})

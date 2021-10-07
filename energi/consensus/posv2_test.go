@@ -17,11 +17,8 @@
 package consensus
 
 import (
-	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"math/big"
-	"os"
 	"testing"
 
 	"energi.world/core/gen3/common"
@@ -182,7 +179,7 @@ func TestPoSChainV2(t *testing.T) {
 		}
 		genesis = gspec.MustCommit(testdb)
 
-		now = uint64(time.Now().Unix())
+		now = engine.now()
 		_   = now
 	)
 	var err error
@@ -400,7 +397,7 @@ func TestPoSChainV2(t *testing.T) {
 
 			t.FailNow()
 		}
-		if !assert.True(t, tt.max <= uint64(time.Now().Unix()) + 30) {
+		if !assert.True(t, tt.max <= engine.now()+30) {
 			log.Debug("failed")
 
 			t.FailNow()
@@ -408,21 +405,21 @@ func TestPoSChainV2(t *testing.T) {
 
 		if i < 60 {
 			// parent header and current header must be TimeTarget.min apart(30s)
-			if !assert.Equal(t, header.Time, parent.Time+30) {
+			if !assert.Equal(t, header.Time, parent.Time+30){
 				t.FailNow()
 			}
-			if !assert.Equal(t, tt.min, header.Time) {
+			if !assert.Equal(t, tt.min, header.Time){
 				t.FailNow()
 			}
 			// assert.Equal(t, tt.target, header.Time+30)
 		} else if i < 61 {
-			if !assert.Equal(t, header.Time, genesis.Time()+3570) {
+			if !assert.Equal(t, header.Time, genesis.Time()+3570){
 				t.FailNow()
 			}
-			if !assert.Equal(t, header.Time, parent.Time+1800) {
+			if !assert.Equal(t, header.Time, parent.Time+1800){
 				t.FailNow()
 			}
-			if !assert.Equal(t, tt.min, header.Time-1770) {
+			if !assert.Equal(t, tt.min, header.Time-1770){
 				t.FailNow()
 			}
 			// todo: this test is getting different numbers for
@@ -433,7 +430,7 @@ func TestPoSChainV2(t *testing.T) {
 			// 	t.FailNow()
 			// }
 		} else if i < 62 {
-			if !assert.Equal(t, header.Time, genesis.Time()+3600) {
+			if !assert.Equal(t, header.Time, genesis.Time()+3600){
 				t.FailNow()
 			}
 		}
@@ -454,16 +451,14 @@ func TestPoSChainV2(t *testing.T) {
 	}
 }
 
+// TODO: this test case needs to be fixed so it can properly calculate
+// the PID difficulty, currently it lacks the data to do so
 /*
- * Run multiple test cases which are found in intervalgen/PoSV2_test_cases.json
-	* In order to generate a new testcase set
-			cd intervalgen
-			go build main.go
+ * Run multiple test cases
  * Call CalcPoSDifficultyV2, analyzing the result
  * Assertions:
  * - Difficulty is correct
-*/
-
+ */
 func TestPoSDiffV2(t *testing.T) {
 	// t.Parallel()
 	// log.Root().SetHandler(log.StdoutHandler)
@@ -479,47 +474,114 @@ func TestPoSDiffV2(t *testing.T) {
 	// this enables code location printing
 	log.PrintOrigins(true)
 
-	cases := readJsonPoSV2TestCases()
+	type TC struct {
+		parent int64
+		time   uint64
+		min    uint64
+		target uint64
+		result uint64
+	}
 
-	for i, tc := range cases {
+	// the numbers below create an example with 10 second segments both
+	// where target is before progressing to target is after and the
+	// first and last ones are there to show the limit
+	tests := []TC{
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 140,
+			result: 9971,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 130,
+			result: 9971,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 120,
+			result: 9981,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 110,
+			result: 9991,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 100,
+			result: 10000,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 90,
+			result: 10011,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 80,
+			result: 10021,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 70,
+			result: 10031,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 60,
+			result: 10041,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 50,
+			result: 10051,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 40,
+			result: 10061,
+		},
+		{
+			parent: 10000,
+			time:   100,
+			min:    100,
+			target: 30,
+			result: 10061,
+		},
+	}
+
+	for i, tc := range tests {
 		parent := &types.Header{
-			Difficulty: big.NewInt(tc.Parent),
+			Difficulty: big.NewInt(tc.parent),
 		}
 		tt := &TimeTarget{
-			Drift:      tc.Drift,
-			Integral:   tc.Integral,
-			Derivative: tc.Derivative,
+			min: tc.min,
+			blockTarget:  tc.target,
 		}
 
-		res := CalcPoSDifficultyV2(tc.Time, parent, tt).Int64()
-		assert.Equal(t, tc.Result, res, "TC %v", i)
+		res := CalcPoSDifficultyV2(tc.time, parent, tt)
+		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
-}
-
-type PoSDiffV2TestCase struct {
-	Time       uint64
-	Parent     int64
-	Drift      int64
-	Integral   int64
-	Derivative int64
-	Result     int64
-}
-
-func readJsonPoSV2TestCases() (result []PoSDiffV2TestCase) {
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-
-	data, err := ioutil.ReadFile(dir + "/intervalgen/PoSV2_test_cases.json")
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(data, &result)
-	if err != nil {
-		panic(err)
-	}
-
-	return
 }
