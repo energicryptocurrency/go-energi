@@ -252,7 +252,7 @@ func TestPoSChainV1(t *testing.T) {
 
 		// Time tests
 		// ---
-		tt := engine.calcTimeTarget(chain, parent)
+		tt := calcTimeTargetV1(chain, parent)
 		assert.True(t, tt.max >= now)
 		assert.True(t, tt.max <= engine.now()+30)
 
