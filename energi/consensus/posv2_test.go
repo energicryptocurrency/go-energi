@@ -390,7 +390,7 @@ func TestPoSChainV2(t *testing.T) {
 
 		// Time tests
 		// ---
-		tt := calcTimeTargetV2(chain, parent)
+		tt := engine.calcTimeTargetV2(chain, parent)
 		_ = tt
 		if !assert.True(t, tt.max >= now) {
 			log.Debug("failed")

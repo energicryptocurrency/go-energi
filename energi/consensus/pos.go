@@ -54,11 +54,11 @@ type TimeTarget struct {
  * POS-11: Block time restrictions
  * POS-12: Block interval enforcement
  */
-func calcTimeTargetV1(
+func (e *Energi) calcTimeTargetV1(
 	chain ChainReader, parent *types.Header,
 ) (ret *TimeTarget) {
 	ret = new(TimeTarget)
-	now := uint64(time.Now().Unix())
+	now := e.now()
 	parentNumber := parent.Number.Uint64()
 	blockNumber := parentNumber + 1
 
@@ -515,15 +515,15 @@ func (e *Energi) mine(
 	// make time target calculation depending on asgard status
 	var timeTarget *TimeTarget
 	if isAsgardActive {
-		timeTarget = calcTimeTargetV2(chain, parent)
+		timeTarget = e.calcTimeTargetV2(chain, parent)
 	} else {
-		timeTarget = calcTimeTargetV1(chain, parent)
+		timeTarget = e.calcTimeTargetV1(chain, parent)
 	}
 	blockTime := timeTarget.min
 
 	// Special case due to expected very large gap between Genesis and Migration
 	if header.IsGen2Migration() && !e.testing {
-		blockTime = uint64(time.Now().Unix())
+		blockTime = e.now()
 	}
 
 	// A special workaround to obey target time when migration contract is used
@@ -547,7 +547,7 @@ func (e *Energi) mine(
 
 	//---
 	for ; ; blockTime++ {
-		if maxTime := uint64(time.Now().Unix()) + params.MaxFutureGap; blockTime > maxTime {
+		if maxTime := e.now() + params.MaxFutureGap; blockTime > maxTime {
 			log.Trace("PoS miner is sleeping")
 			select {
 			case <-stop:
@@ -587,7 +587,7 @@ func (e *Energi) mine(
 		sort.Slice(candidates, func(i, j int) bool {
 			return candidates[i].weight < candidates[j].weight
 		})
-		
+
 		// Try to match target
 		for i := range candidates {
 			v := &candidates[i]

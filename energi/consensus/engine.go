@@ -237,9 +237,9 @@ func (e *Energi) VerifyHeader(
 
 	// calculate time target based on hf status
 	if isAsgardActive {
-		time_target = calcTimeTargetV2(chain, parent)
+		time_target = e.calcTimeTargetV2(chain, parent)
 	} else {
-		time_target = calcTimeTargetV1(chain, parent)
+		time_target = e.calcTimeTargetV1(chain, parent)
 	}
 
 	err = e.checkTime(header, time_target)
@@ -607,7 +607,7 @@ func (e *Energi) PoSPrepareV2(
 	header *types.Header,
 	parent *types.Header,
 ) (timeTarget *TimeTarget, err error) {
-	timeTarget = calcTimeTargetV2(chain, parent)
+	timeTarget = e.calcTimeTargetV2(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
 	if err != nil {
@@ -629,7 +629,7 @@ func (e *Energi) PoSPrepareV1(
 	header *types.Header,
 	parent *types.Header,
 ) (timeTarget *TimeTarget, err error) {
-	timeTarget = calcTimeTargetV1(chain, parent)
+	timeTarget = e.calcTimeTargetV1(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
 	if err != nil {
@@ -965,15 +965,12 @@ func (e *Energi) CalcDifficulty(
 	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
 	log.Debug("hard fork", "status", isAsgardActive)
 	if isAsgardActive {
-		time_target := calcTimeTargetV2(chain, parent)
+		time_target := e.calcTimeTargetV2(chain, parent)
 		return CalcPoSDifficultyV2(time, parent, time_target)
 	}
-	time_target := calcTimeTargetV1(chain, parent)
-	if e.testing {
-		return common.Big1
-	} else {
-		return calcPoSDifficultyV1(time, parent, time_target)
-	}
+	time_target := e.calcTimeTargetV1(chain, parent)
+	return calcPoSDifficultyV1(time, parent, time_target)
+
 }
 
 // APIs returns the RPC APIs this consensus engine provides.
