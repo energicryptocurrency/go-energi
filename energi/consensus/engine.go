@@ -62,6 +62,7 @@ type (
 	SignerFn    func(common.Address, []byte) ([]byte, error)
 	PeerCountFn func() int
 	IsMiningFn  func() bool
+	DiffFn      func(uint64, *types.Header, *TimeTarget) *big.Int
 
 	// Energi is the state data for Energi Proof of Stake consensus
 	Energi struct {
@@ -87,6 +88,7 @@ type (
 		peerCountFn          PeerCountFn
 		isMiningFn           IsMiningFn
 		now                  func() uint64
+		diffFn               DiffFn
 		testing              bool
 		knownStakes          KnownStakes
 		nextKSPurge          uint64
