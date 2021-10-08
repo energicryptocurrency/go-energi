@@ -93,6 +93,9 @@ type (
 		knownStakes          KnownStakes
 		nextKSPurge          uint64
 		txhashMap            *lru.Cache
+		// optimize blocktarget calculation for same block NOTE not thread safe!
+    calculatedTimeTarget TimeTarget
+    calculatedBlockHash  common.Hash
 	}
 )
 
@@ -259,11 +262,7 @@ func (e *Energi) VerifyHeader(
 	if isAsgardActive {
 		difficulty = CalcPoSDifficultyV2(header.Time, parent, time_target)
 	} else {
-		if e.testing {
-			difficulty = common.Big1
-		} else {
-			difficulty = calcPoSDifficultyV1(header.Time, parent, time_target)
-		}
+		difficulty = calcPoSDifficultyV1(header.Time, parent, time_target)
 	}
 
 	if header.Difficulty.Cmp(difficulty) != 0 {
