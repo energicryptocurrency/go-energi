@@ -20,7 +20,6 @@ import (
 	"flag"
 	"math/big"
 	"testing"
-	"fmt"
 
 	"energi.world/core/gen3/common"
 	eth_consensus "energi.world/core/gen3/consensus"
