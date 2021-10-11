@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"math"
 	"sync"
 	"sync/atomic"
 
@@ -35,7 +36,7 @@ import (
 )
 
 var (
-		Uint64Max = uint64(18446744073709551615)
+		Uint64Max = uint64(math.MaxUint64)
 )
 
 type CheckpointValidateChain interface {
