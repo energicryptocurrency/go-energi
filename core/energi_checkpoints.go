@@ -34,6 +34,10 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
+var (
+		Uint64Max = uint64(18446744073709551615)
+)
+
 type CheckpointValidateChain interface {
 	GetHeaderByNumber(number uint64) *types.Header
 	CurrentHeader() *types.Header
@@ -157,6 +161,17 @@ func (cm *checkpointManager) validate(chain CheckpointValidateChain, num uint64,
 	return nil
 }
 
+// returns the smallest key (blockHeight)
+func oldestCheckpoint(validated map[uint64]validCheckpoint) (uint64) {
+	minHeight := Uint64Max
+	for k, _ := range validated {
+			if k < minHeight {
+				minHeight = k;
+			}
+	}
+	return minHeight
+}
+
 func (bc *BlockChain) AddCheckpoint(
 	cp Checkpoint,
 	sigs []CheckpointSignature,
@@ -226,11 +241,24 @@ func (cm *checkpointManager) addCheckpoint(
 		}
 
 	}
+
 	//only received(non-hardcoded) checkpoints will be stored in validated map
-	cm.validated[cp.Number] = validCheckpoint{
-		Checkpoint: cp,
-		signatures: append([]CheckpointSignature{}, sigs...),
+	if len(cm.validated) == 10 {
+		oldestCheckpointHeight := oldestCheckpoint(cm.validated)
+		if cp.Number > oldestCheckpointHeight {
+			delete(cm.validated, oldestCheckpointHeight);
+			cm.validated[cp.Number] = validCheckpoint{
+				Checkpoint: cp,
+				signatures: append([]CheckpointSignature{}, sigs...),
+			}
+		}
+	} else {
+		cm.validated[cp.Number] = validCheckpoint{
+			Checkpoint: cp,
+			signatures: append([]CheckpointSignature{}, sigs...),
+		}
 	}
+
 
 	log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
 
