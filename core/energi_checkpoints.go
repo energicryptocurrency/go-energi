@@ -36,6 +36,8 @@ import (
 )
 
 var (
+		// max number of checkpoints stored in validated checkpoint map
+	 	MaxCachedCheckpoints = 10
 		Uint64Max = uint64(math.MaxUint64)
 )
 
@@ -244,7 +246,7 @@ func (cm *checkpointManager) addCheckpoint(
 	}
 
 	//only received(non-hardcoded) checkpoints will be stored in validated map
-	if len(cm.validated) == 10 {
+	if len(cm.validated) == MaxCachedCheckpoints {
 		oldestCheckpointHeight := oldestCheckpoint(cm.validated)
 		if cp.Number > oldestCheckpointHeight {
 			delete(cm.validated, oldestCheckpointHeight);
