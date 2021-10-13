@@ -31,6 +31,10 @@ module.exports = async function(deployer, network) {
             checkpointSigner = '0xBD1C57eACcfD1519E342F870C1c551983F839479';
         } else if (network === "testnet") {
             checkpointSigner = '0xb1372ea07f6a92bc86fd5f8cdf468528f79f87ca';
+        } else {
+            // CheckpointRegistryV3 doesn't need to be deployed here for tests
+            // it will be deployed by the CheckpointRegistryV3.spec.js test file
+            return
         }
 
         // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
