@@ -111,6 +111,26 @@ func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
 	return checkpointAddresses, nil
 }
 
+// executes command to propose checkpoint
+func (b *CheckpointRegistryAPI) CheckpointRemove(
+	number uint64,
+	hash common.Hash,
+	password *string,
+) (txhash common.Hash, err error) {
+	// request registry caller and signer
+	registry, _, err := b.registry(password, b.backend.ChainConfig().Energi.CPPSigner)
+	if err != nil {
+		return
+	}
+
+	tx, err := registry.Remove(new(big.Int).SetUint64(number), hash)
+	if tx != nil {
+		txhash = tx.Hash()
+		log.Info("Note: please wait until the proposal TX gets into a block!", "tx", txhash.Hex())
+	}
+	return
+}
+
 
 // returns existing checkpoints' info
 func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error) {
@@ -169,11 +189,11 @@ func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error
 
 // initializes registry which is used to propose checkpoint
 func (b *CheckpointRegistryAPI) registry(password *string, from common.Address) (
-	session *energi_abi.ICheckpointRegistrySession,
+	session *energi_abi.ICheckpointRegistryV2Session,
 	hashsig func(common.Hash) ([]byte, error),
 	err error,
 ) {
-	contract, err := energi_abi.NewICheckpointRegistry(energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractBackend))
+	contract, err := energi_abi.NewICheckpointRegistryV2(energi_params.Energi_CheckpointRegistry, b.backend.(bind.ContractBackend))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -192,7 +212,7 @@ func (b *CheckpointRegistryAPI) registry(password *string, from common.Address) 
 		return wallet.SignHashWithPassphrase(account, *password, h.Bytes())
 	}
 
-	session = &energi_abi.ICheckpointRegistrySession{
+	session = &energi_abi.ICheckpointRegistryV2Session{
 		Contract: contract,
 		CallOpts: bind.CallOpts{
 			Pending:  true,
@@ -253,10 +273,10 @@ func (b *CheckpointRegistryAPI) CheckpointPropose(
 }
 
 // function returns already initialized checkpoint Icheckpoint registry caller
-func checkpointRegistryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.ICheckpointRegistryCaller, *bind.CallOpts, error) {
-	registry, err := energi_abi.NewICheckpointRegistryCaller(proxyAddr, backend.(bind.ContractCaller))
+func checkpointRegistryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.ICheckpointRegistryV2Caller, *bind.CallOpts, error) {
+	registry, err := energi_abi.NewICheckpointRegistryV2Caller(proxyAddr, backend.(bind.ContractCaller))
 	if err != nil {
-		log.Error("Creating NewICheckpointRegistryCaller Failed", "err", err)
+		log.Error("Creating NewICheckpointRegistryV2Caller Failed", "err", err)
 		return nil, nil, err
 	}
 
