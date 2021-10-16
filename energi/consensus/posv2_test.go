@@ -476,8 +476,8 @@ func TestPoSDiffV2(t *testing.T) {
 
 	type TC struct {
 		Drift int64
-		Integral   uint64
-		Derivative    uint64
+		Integral   int64
+		Derivative    int64
 		Result uint64
 	}
 
