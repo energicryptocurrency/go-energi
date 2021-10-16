@@ -475,17 +475,16 @@ func TestPoSDiffV2(t *testing.T) {
 	log.PrintOrigins(true)
 
 	type TC struct {
-		parent int64
-		time   uint64
-		min    uint64
-		target uint64
-		result uint64
+		Drift int64
+		Integral   uint64
+		Derivative    uint64
+		Result uint64
 	}
 
 	// the numbers below create an example with 10 second segments both
 	// where target is before progressing to target is after and the
 	// first and last ones are there to show the limit
-	tests := []TimeTarget{
+	tests := []TC{
 		{ Drift :-59405, Integral :-14277173, Derivative :-21953, Result :343933274},
 		{ Drift :32056, Integral :-11686883, Derivative :55532, Result :344100661},
 		{ Drift :-1025942, Integral :-4376900, Derivative :-1169771, Result :340539746},
@@ -531,7 +530,7 @@ func TestPoSDiffV2(t *testing.T) {
 
 	// look through tests and assert result
 	for i, tc := range tests {
-		res := CalcPoSDifficultyV2(0, &types.Header{Difficulty: big.NewInt(0)}, &tc)
-		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
+		res := CalcPoSDifficultyV2(0, &types.Header{Difficulty: big.NewInt(0)}, &TimeTarget{Drift: tc.Drift, Integral: tc.Integral, Derivative: tc.Derivative})
+		assert.Equal(t, tc.Result, res.Uint64(), "TC %v", i)
 	}
 }
