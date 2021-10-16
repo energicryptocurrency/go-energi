@@ -18,7 +18,6 @@ package consensus
 
 import (
 	"flag"
-	"fmt"
 	"math/big"
 	"testing"
 
