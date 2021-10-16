@@ -485,103 +485,27 @@ func TestPoSDiffV2(t *testing.T) {
 	// the numbers below create an example with 10 second segments both
 	// where target is before progressing to target is after and the
 	// first and last ones are there to show the limit
-	tests := []TC{
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 140,
-			result: 9971,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 130,
-			result: 9971,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 120,
-			result: 9981,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 110,
-			result: 9991,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 100,
-			result: 10000,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 90,
-			result: 10011,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 80,
-			result: 10021,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 70,
-			result: 10031,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 60,
-			result: 10041,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 50,
-			result: 10051,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 40,
-			result: 10061,
-		},
-		{
-			parent: 10000,
-			time:   100,
-			min:    100,
-			target: 30,
-			result: 10061,
-		},
+	tests := []TimeTarget{
+		{ Drift :-59405, Integral :-14277173, Derivative :-21953, Result :343933274},
+		{ Drift :32056, Integral :-11686883, Derivative :55532, Result :344100661},
+		{ Drift :-1025942, Integral :-4376900, Derivative :-1169771, Result :340539746},
+		{ Drift :-1239734, Integral :-10845931, Derivative :-137940, Result :340063186},
+		{ Drift :-1308853, Integral :-12406416, Derivative :-65131, Result :339801488},
+		{ Drift :-2063008, Integral :-14612285, Derivative :-746167, Result :337458821},
+		{ Drift :-2606988, Integral :-12700753, Derivative :-603860, Result :335516009},
+		{ Drift :-2479996, Integral :-11595164, Derivative :75098, Result :335616497},
+		{ Drift :-2355453, Integral :-14054440, Derivative :124543, Result :335871377},
+		{ Drift :-2368705, Integral :-20693478, Derivative :46623, Result :335891373},
+		{ Drift :-2345595, Integral :-29718287, Derivative :118917, Result :336128780},
+		{ Drift :-2776293, Integral :-25209135, Derivative :-530494, Result :334396732},
+		{ Drift :-2530362, Integral :-22598439, Derivative :170086, Result :334778902},
+		{ Drift :-2737470, Integral :-32332974, Derivative :-107312, Result :334317847},
+		{ Drift :-2719512, Integral :-43440964, Derivative :137714, Result :334591996},
 	}
 
+	// look through tests and assert result
 	for i, tc := range tests {
-		parent := &types.Header{
-			Difficulty: big.NewInt(tc.parent),
-		}
-		tt := &TimeTarget{
-			min: tc.min,
-			blockTarget:  tc.target,
-		}
-
-		res := CalcPoSDifficultyV2(tc.time, parent, tt)
+		res := CalcPoSDifficultyV2(tc.time, &types.Header{Difficulty: big.NewInt(0)}, tt)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }
