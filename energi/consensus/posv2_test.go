@@ -476,6 +476,7 @@ func TestPoSDiffV2(t *testing.T) {
 	log.PrintOrigins(true)
 
 	type TC struct {
+		Parent int64
 		Drift int64
 		Integral   int64
 		Derivative    int64
