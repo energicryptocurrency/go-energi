@@ -501,11 +501,37 @@ func TestPoSDiffV2(t *testing.T) {
 		{ Drift :-2530362, Integral :-22598439, Derivative :170086, Result :334778902},
 		{ Drift :-2737470, Integral :-32332974, Derivative :-107312, Result :334317847},
 		{ Drift :-2719512, Integral :-43440964, Derivative :137714, Result :334591996},
+		{ Drift :-926863, Integral :-18026271, Derivative :66445, Result :177251379},
+		{ Drift :-819828, Integral :-5359735, Derivative :-84569, Result :176956308},
+		{ Drift :-675688, Integral :637664, Derivative :48333, Result :177067566},
+		{ Drift :-687738, Integral :753672, Derivative :-24023, Result :176961162},
+		{ Drift :-758523, Integral :-4524429, Derivative :-6916, Result :176902173},
+		{ Drift :-923184, Integral :-11760285, Derivative :-72851, Result :176636644},
+		{ Drift :-703313, Integral :-6448164, Derivative :132052, Result :176997186},
+		{ Drift :-1064498, Integral :-12462120, Derivative :-289334, Result :176075093},
+		{ Drift :-1169752, Integral :-21521993, Derivative :6517, Result :176034661},
+		{ Drift :-1260202, Integral :-31169057, Derivative :29305, Result :176057401},
+		{ Drift :-1141673, Integral :-33534347, Derivative :134495, Result :176401473},
+		{ Drift :-1455286, Integral :-39062850, Derivative :-253730, Result :175564806},
+		{ Drift :-1358670, Integral :-42476335, Derivative :124561, Result :175867605},
+		{ Drift :-1449465, Integral :-48101932, Derivative :-30922, Result :175699025},
+		{ Drift :-1944849, Integral :-50944053, Derivative :-479415, Result :174159999},
+		{ Drift :-1910433, Integral :-55061959, Derivative :66354, Result :174259715},
+		{ Drift :-1892474, Integral :-51388241, Derivative :-61880, Result :173975882},
+		{ Drift :-1787983, Integral :-57188744, Derivative :160379, Result :174363648},
+		{ Drift :-1816202, Integral :-62084121, Derivative :15690, Result :174315596},
+		{ Drift :-1919339, Integral :-64186280, Derivative :-95156, Result :173929703},
+		{ Drift :-1490144, Integral :-32846178, Derivative :-41837, Result :173727403},
+		{ Drift :-1487776, Integral :-42263984, Derivative :114139, Result :173992496},
+		{ Drift :-1817002, Integral :-50908853, Derivative :-229431, Result :173209817},
+		{ Drift :-2031597, Integral :-50387352, Derivative :-250520, Result :172353178},
+		{ Drift :-2362608, Integral :-60569565, Derivative :-215250, Result :171585091},
+		{ Drift :-2116138, Integral :-47112101, Derivative :22932, Result :171544808},
 	}
 
 	// look through tests and assert result
 	for i, tc := range tests {
-		res := CalcPoSDifficultyV2(tc.time, &types.Header{Difficulty: big.NewInt(0)}, tt)
+		res := CalcPoSDifficultyV2(0, &types.Header{Difficulty: big.NewInt(0)}, &tc)
 		assert.Equal(t, tc.result, res.Uint64(), "TC %v", i)
 	}
 }
