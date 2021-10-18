@@ -69,6 +69,9 @@ contract("CheckpointRegistryV3", async accounts => {
         const sigacc = web3.eth.accounts.privateKeyToAccount('0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878');
         const mnacc1 = web3.eth.accounts.create();
         const nonmnacc1 = web3.eth.accounts.create();
+        web3.eth.personal.importRawKey("0x4118811427785a33e8c61303e64b43d0d6b69db3caa4074f2ddbdec0b9d4c878","");
+        web3.eth.personal.unlockAccount('0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8','');
+
         const masternode1 = mnacc1.address;
         const ip1 = toBN(0x12345678);
         const enode_common = '123456789012345678901234567890';
@@ -114,9 +117,18 @@ contract("CheckpointRegistryV3", async accounts => {
             });
         });
 
+        it('should succeed transfer to signer', async () => {
+            try {
+                web3.eth.sendTransaction({to:'0x2d0bc327d0843caf6fd9ae1efab0bf7196fc2fc8', from: accounts[0], value: toWei('5000000', 'ether')});
+                common.moveTime(web3, 10);
+            } catch (e) {
+                assert.match(e.message, /transfer failed/);
+            }
+        });
+
         it('should refuse propose() with invalid signature length', async () => {
             try {
-                await s.token_abi.propose(1, block_hash, block_hash);
+                await s.token_abi.propose(1, block_hash, block_hash, {from : sigacc.address});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Invalid signature length/);
@@ -125,7 +137,7 @@ contract("CheckpointRegistryV3", async accounts => {
 
         it('should refuse propose() from invalid signer', async () => {
             try {
-                await s.token_abi.propose(1, block_hash, await mn_sig_reg(mnacc1, 1, block_hash));
+                await s.token_abi.propose(1, block_hash, await mn_sig_reg(mnacc1, 1, block_hash), {from : sigacc.address});
                 assert.fail('It must fail');
             } catch (e) {
                 assert.match(e.message, /Invalid signer/);
@@ -134,18 +146,19 @@ contract("CheckpointRegistryV3", async accounts => {
 
         it('should refuse remove() from invalid signer', async () => {
             try {
-                await s.token_abi.remove(1, block_hash, await mn_sig_reg(mnacc1, 1, block_hash));
+                await s.token_abi.remove(1, block_hash, {from :accounts[0]});
                 assert.fail('It must fail');
             } catch (e) {
-                assert.match(e.message, /Invalid signer/);
+                assert.match(e.message, /Not cpp signer!/);
             }
         });
+
 
         describe('Primary', () => {
             it('(QUEUE TEST) should propose() and add 5 checkpoints', async () => {
                 for (let i = 0; i < cp_count; i++) {
                     cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
+                    await s.token_abi.propose(i, block_hash, cpp_sig, {from : sigacc.address});
                 }
                 assert.equal((await s.token_abi.checkpoints()).length, 5 , "didnt add checkpoints");
             });
@@ -155,7 +168,7 @@ contract("CheckpointRegistryV3", async accounts => {
                     const cps1 = await s.token_abi.checkpoints();
                     const num = 12831; //some random
                     cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
-                    await s.token_abi.remove(num, block_hash, cpp_sig);
+                    await s.token_abi.remove(num, block_hash, {from : sigacc.address});
                     const cps2 = await s.token_abi.checkpoints();
                     assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
                 } catch (e) {
@@ -169,7 +182,7 @@ contract("CheckpointRegistryV3", async accounts => {
                     const cps1 = await s.token_abi.checkpoints();
                     const num = 3; //some random
                     cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
-                    await s.token_abi.remove(num, block_hash, cpp_sig);
+                    await s.token_abi.remove(num, block_hash, {from : sigacc.address});
                     const cps2 = await s.token_abi.checkpoints();
                     assert.equal(cps1.length - 1, cps2.length,"stored checkpoints should remain same");
                 } catch (e) {
@@ -182,7 +195,7 @@ contract("CheckpointRegistryV3", async accounts => {
                     const cps1 = await s.token_abi.checkpoints();
                     const num = 3; //some random
                     cpp_sig = await mn_sig_reg(sigacc, num, block_hash);
-                    await s.token_abi.remove(num, block_hash, cpp_sig);
+                    await s.token_abi.remove(num, block_hash, {from : sigacc.address});
                     const cps2 = await s.token_abi.checkpoints();
                     assert.equal(cps1.length, cps2.length,"stored checkpoints should remain same");
                 } catch (e) {
@@ -196,7 +209,7 @@ contract("CheckpointRegistryV3", async accounts => {
             it('(QUEUE TEST) should be 10 checkpoints in the end()', async () => {
                 for (let i = 20; i < 100; i++) {
                     cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
+                    await s.token_abi.propose(i, block_hash, cpp_sig, {from : sigacc.address});
                 }
                 cp_list = await s.token_abi.checkpoints();
                 assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
@@ -204,14 +217,14 @@ contract("CheckpointRegistryV3", async accounts => {
 
             it('(QUEUE TEST) should have removed the last element in queue()', async () => {
                 cpp_sig = await mn_sig_reg(sigacc, 99, block_hash);
-                await s.token_abi.remove(99, block_hash, cpp_sig);
+                await s.token_abi.remove(99, block_hash, {from : sigacc.address});
                 cp_list = await s.token_abi.checkpoints();
                 assert.equal(cp_list.length, cp_max_count - 1, "must me 9 checkpoints remaining");
             });
 
             it('(QUEUE TEST) should have removed the first element in queue()', async () => {
                 cpp_sig = await mn_sig_reg(sigacc, 90, block_hash);
-                await s.token_abi.remove(90, block_hash, cpp_sig);
+                await s.token_abi.remove(90, block_hash, {from : sigacc.address});
                 cp_list = await s.token_abi.checkpoints();
                 assert.equal(cp_list.length, cp_max_count - 2, "must me 8 checkpoints remaining");
             });
@@ -219,7 +232,7 @@ contract("CheckpointRegistryV3", async accounts => {
             it('(QUEUE TEST) should be max checkpoints ()', async () => {
                 for (let i = 100; i < 103; i++) {
                     cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
+                    await s.token_abi.propose(i, block_hash, cpp_sig, {from : sigacc.address});
                 }
                 cp_list = await s.token_abi.checkpoints();
                 assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
@@ -227,7 +240,7 @@ contract("CheckpointRegistryV3", async accounts => {
 
             it('(QUEUE TEST) should remove from the middle of the queue()', async () => {
                 cpp_sig = await mn_sig_reg(sigacc, 100, block_hash);
-                await s.token_abi.remove(100, block_hash, cpp_sig);
+                await s.token_abi.remove(100, block_hash, {from : sigacc.address});
                 var cp_list2 = await s.token_abi.checkpoints();
                 assert.equal(cp_list2[0], cp_list[0], "first elements must remain same");
                 assert.equal(cp_list2[cp_list2.length-1], cp_list[cp_list.length-1], "last elements must remain same");
@@ -237,7 +250,7 @@ contract("CheckpointRegistryV3", async accounts => {
             it('(QUEUE TEST) should be max checkpoints ()', async () => {
                 for (let i = 1000; i < 1002; i++) {
                     cpp_sig = await mn_sig_reg(sigacc, i, block_hash);
-                    await s.token_abi.propose(i, block_hash, cpp_sig);
+                    await s.token_abi.propose(i, block_hash, cpp_sig, {from : sigacc.address});
                 }
                 cp_list = await s.token_abi.checkpoints();
                 assert.equal(cp_list.length, cp_max_count, "must me max 10 checkpoints");
@@ -355,7 +368,7 @@ contract("CheckpointRegistryV3", async accounts => {
 
             it('should correctly handle canVote()', async () => {
                 const num = 101;
-                await s.token_abi.propose(num, block_hash, await mn_sig_reg(sigacc, num, block_hash));
+                await s.token_abi.propose(num, block_hash, await mn_sig_reg(sigacc, num, block_hash), {from : sigacc.address});
                 const cps = await s.token_abi.checkpoints();
                 const cpa = cps[cps.length - 1];
                 const cp = await ICheckpointV2.at(cpa);

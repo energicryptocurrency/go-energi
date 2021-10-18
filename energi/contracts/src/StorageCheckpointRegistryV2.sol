@@ -65,14 +65,12 @@ contract StorageCheckpointRegistryV2 is StorageBase {
     }
 
     // for removal we find the checkpoint and move the right part of the queue to the left
-    function remove(ICheckpoint cp) external  requireOwner returns(bool found) {
+    function remove(uint cp_block_number, bytes32 cp_block_hash ) external  requireOwner returns(bool found) {
         uint foundCpIndex;
         found = false;
-        // find the cp in map
-        (uint number_1, bytes32 hash_1,  ) = cp.info();
         for (foundCpIndex = startingKeyIndex; foundCpIndex < startingKeyIndex + size; foundCpIndex++) {
-            (uint number_2, bytes32 hash_2,  ) = checkpoints[foundCpIndex].info();
-            if (number_1 == number_2 && hash_1 == hash_2) {
+            (uint block_number, bytes32 block_hash,  ) = checkpoints[foundCpIndex].info();
+            if (cp_block_number == block_number && cp_block_hash == block_hash) {
                 found = true;
                 break;
             }
