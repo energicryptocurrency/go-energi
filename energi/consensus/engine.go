@@ -19,7 +19,7 @@ package consensus
 import (
 	"fmt"
 	"time"
-  "errors"
+	"errors"
 	"strings"
 	"math/big"
 	"sync/atomic"
@@ -94,8 +94,8 @@ type (
 		nextKSPurge          uint64
 		txhashMap            *lru.Cache
 		// optimize blocktarget calculation for same block NOTE not thread safe!
-    calculatedTimeTarget TimeTarget
-    calculatedBlockHash  common.Hash
+		calculatedTimeTarget TimeTarget
+		calculatedBlockHash  common.Hash
 	}
 )
 
