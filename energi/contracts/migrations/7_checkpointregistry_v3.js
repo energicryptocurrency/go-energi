@@ -1,4 +1,4 @@
-// Copyright 2020 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ module.exports = async function(deployer, network) {
         } else {
             // CheckpointRegistryV3 doesn't need to be deployed here for tests
             // it will be deployed by the CheckpointRegistryV3.spec.js test file
-            return
+            return;
         }
 
         // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
