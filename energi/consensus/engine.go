@@ -639,11 +639,7 @@ func (e *Energi) PoSPrepareV1(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	if e.testing {
-		header.Difficulty = common.Big1
-	} else {
-		header.Difficulty = calcPoSDifficultyV1(header.Time, parent, timeTarget)
-	}
+	header.Difficulty = calcPoSDifficultyV1(header.Time, parent, timeTarget)
 
 	return timeTarget, err
 }
