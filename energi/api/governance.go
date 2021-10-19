@@ -392,6 +392,7 @@ type UpgradeProposals struct {
 	CheckpointRegistry []UpgradeProposalInfo
 	BlacklistRegistry  []UpgradeProposalInfo
 	MasternodeToken    []UpgradeProposalInfo
+	HardforkRegistry   []UpgradeProposalInfo
 }
 
 func (g *GovernanceAPI) UpgradeInfo() *UpgradeProposals {
@@ -445,6 +446,19 @@ func (g *GovernanceAPI) upgradeInfo(num *big.Int) (interface{}, error) {
 	ret.MasternodeToken, err = g.upgradeProposalInfo(num, energi_params.Energi_MasternodeToken)
 	if err != nil {
 		log.Error("MasternodeToken info fetch failed", "err", err)
+	}
+
+	emptyAddr := common.Address{}
+	if g.backend.ChainConfig().Energi.HardforkRegistryProxyAddress != emptyAddr {
+		ret.HardforkRegistry, err = g.upgradeProposalInfo(num, g.backend.ChainConfig().Energi.HardforkRegistryProxyAddress)
+		if err != nil {
+			log.Error("Hardfork Registry info fetch failed", "err", err)
+		}
+	} else {
+		ret.HardforkRegistry, err = g.upgradeProposalInfo(num, energi_params.Energi_HardforkRegistry)
+		if err != nil {
+			log.Error("Hardfork Registry info fetch failed", "err", err)
+		}
 	}
 
 	return ret, nil
