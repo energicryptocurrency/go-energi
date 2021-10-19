@@ -35,11 +35,8 @@ import (
 	energi_params "energi.world/core/gen3/energi/params"
 )
 
-var (
-		// max number of checkpoints stored in validated checkpoint map
-	 	MaxCachedCheckpoints = 10
-		Uint64Max = uint64(math.MaxUint64)
-)
+// max number of checkpoints stored in validated checkpoint map
+const	MaxCachedCheckpoints int = 10
 
 type CheckpointValidateChain interface {
 	GetHeaderByNumber(number uint64) *types.Header
@@ -166,7 +163,7 @@ func (cm *checkpointManager) validate(chain CheckpointValidateChain, num uint64,
 
 // returns the smallest key (blockHeight)
 func oldestCheckpoint(validated map[uint64]validCheckpoint) (uint64) {
-	minHeight := Uint64Max
+	minHeight := uint64(math.MaxUint64)
 	for k, _ := range validated {
 			if k < minHeight {
 				minHeight = k;
