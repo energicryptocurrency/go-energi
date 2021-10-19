@@ -475,11 +475,11 @@ func TestPoSDiffV2(t *testing.T) {
 	log.PrintOrigins(true)
 
 	type TC struct {
-		Parent int64
-		Drift int64
+		Parent     int64
+		Drift      int64
 		Integral   int64
-		Derivative    int64
-		Result uint64
+		Derivative int64
+		Result     uint64
 	}
 
 	// the numbers below create an example with 10 second segments both
