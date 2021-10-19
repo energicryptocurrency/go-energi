@@ -35,7 +35,7 @@ import (
 
 const (
 	proposalCallGas uint64 = 3000000
-	upgradeCallGas  uint64 = 40000000
+	upgradeCallGas  uint64 = 35000000
 )
 
 type GovernanceAPI struct {
