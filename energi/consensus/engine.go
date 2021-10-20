@@ -88,7 +88,6 @@ type (
 		peerCountFn          PeerCountFn
 		isMiningFn           IsMiningFn
 		now                  func() uint64
-		diffFn               DiffFn
 		testing              bool
 		knownStakes          KnownStakes
 		nextKSPurge          uint64
@@ -639,7 +638,11 @@ func (e *Energi) PoSPrepareV1(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = calcPoSDifficultyV1(header.Time, parent, timeTarget)
+	if e.testing {
+		header.Difficulty = common.Big1
+	} else {
+		header.Difficulty = calcPoSDifficultyV1(header.Time, parent, timeTarget)
+	}
 
 	return timeTarget, err
 }

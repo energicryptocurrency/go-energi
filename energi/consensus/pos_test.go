@@ -156,10 +156,6 @@ func TestPoSChainV1(t *testing.T) {
 
 	iterCount := 150
 
-	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
-		return common.Big1
-	}
-
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
 
@@ -475,9 +471,6 @@ func TestPoSMine(t *testing.T) {
 
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	engine.testing = true
-	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
-		return common.Big1
-	}
 	engine.SetMinerCB(
 		func() []common.Address {
 			if header.Number.Uint64() == 1 {
