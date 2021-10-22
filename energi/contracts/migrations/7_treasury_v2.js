@@ -21,31 +21,31 @@ const MockProxy = artifacts.require("MockProxy");
 const common = require('../test/common');
 
 module.exports = async function(deployer, network) {
-    try {
-        const mn_registry_proxy = '0x0000000000000000000000000000000000000302';
-        const treasury_proxy = '0x0000000000000000000000000000000000000301';
-        console.log("Deploying treasury to " + network);
-
-        if (network === "mainnet" || network === "testnet") {
-            deployer.deploy(TreasuryV2,
-                treasury_proxy,
-                mn_registry_proxy,
-                common.superblock_cycles,
-                common.treasury_deploy_opts
-            );
-        } else {
-            await deployer.deploy(MockProxy);
-            const treasury_mock_proxy = MockProxy.address
-
-            deployer.deploy(TreasuryV2,
-                treasury_mock_proxy,
-                mn_registry_proxy,
-                common.superblock_cycles,
-                common.treasury_deploy_opts
-            );
-        }
-    } catch (e) {
-        console.dir(e);
-        throw e;
-    }
+    // try {
+    //     const mn_registry_proxy = '0x0000000000000000000000000000000000000302';
+    //     const treasury_proxy = '0x0000000000000000000000000000000000000301';
+    //     console.log("Deploying treasury to " + network);
+    //
+    //     if (network === "mainnet" || network === "testnet") {
+    //         deployer.deploy(TreasuryV2,
+    //             treasury_proxy,
+    //             mn_registry_proxy,
+    //             common.superblock_cycles,
+    //             common.treasury_deploy_opts
+    //         );
+    //     } else {
+    //         await deployer.deploy(MockProxy);
+    //         const treasury_mock_proxy = MockProxy.address
+    //
+    //         deployer.deploy(TreasuryV2,
+    //             treasury_mock_proxy,
+    //             mn_registry_proxy,
+    //             common.superblock_cycles,
+    //             common.treasury_deploy_opts
+    //         );
+    //     }
+    // } catch (e) {
+    //     console.dir(e);
+    //     throw e;
+    // }
 };
