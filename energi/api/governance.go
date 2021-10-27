@@ -330,7 +330,9 @@ func (g *GovernanceAPI) upgradeProposalInfo(num *big.Int, proxy common.Address) 
 	}
 	proposals, err := proxy_obj.ListUpgradeProposals(call_opts)
 	if err != nil {
-		log.Error("Failed ListUpgradeProposals", "err", err)
+		if err != bind.ErrNoCode {
+			log.Error("Failed ListUpgradeProposals", "err", err)
+		}
 		return nil, err
 	}
 
@@ -448,16 +450,13 @@ func (g *GovernanceAPI) upgradeInfo(num *big.Int) (interface{}, error) {
 		log.Error("MasternodeToken info fetch failed", "err", err)
 	}
 
-	emptyAddr := common.Address{}
-	if g.backend.ChainConfig().Energi.HardforkRegistryProxyAddress != emptyAddr {
-		ret.HardforkRegistry, err = g.upgradeProposalInfo(num, g.backend.ChainConfig().Energi.HardforkRegistryProxyAddress)
-		if err != nil {
+	ret.HardforkRegistry, err = g.upgradeProposalInfo(num, g.backend.ChainConfig().Energi.HardforkRegistryProxyAddress)
+	if err != nil {
+		if err != bind.ErrNoCode {
 			log.Error("Hardfork Registry info fetch failed", "err", err)
-		}
-	} else {
-		ret.HardforkRegistry, err = g.upgradeProposalInfo(num, energi_params.Energi_HardforkRegistry)
-		if err != nil {
-			log.Error("Hardfork Registry info fetch failed", "err", err)
+		} else {
+			ret.HardforkRegistry = make([]UpgradeProposalInfo,0)
+			err = nil
 		}
 	}
 
