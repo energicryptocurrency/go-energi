@@ -27,7 +27,7 @@ module.exports = async function(deployer, network) {
         const treasury_proxy = '0x0000000000000000000000000000000000000301';
         let mnregistry_config_v2_1 = [];
 
-        console.log("Deploying to " + network);
+        console.log("Deploying MasternodeRegistryV2_1 to " + network);
 
         if (network === "mainnet") {
             mnregistry_config_v2_1 = [
