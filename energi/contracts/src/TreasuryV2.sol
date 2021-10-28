@@ -22,7 +22,7 @@ pragma solidity 0.5.16;
 //pragma experimental SMTChecker;
 
 import { IGovernedProxy } from "./IGovernedProxy.sol";
-import { BudgetProposalV1 } from "./BudgetProposalV1.sol";
+import { BudgetProposalV2 } from "./BudgetProposalV2.sol";
 import { IBudgetProposal } from "./ITreasury.sol";
 import { TreasuryV1, StorageTreasuryV1 }  from "./TreasuryV1.sol";
 
@@ -55,7 +55,7 @@ contract TreasuryV2 is TreasuryV1 {
         // Find, if proposal slot is available.
         for (uint i = 0; i < BUDGET_PROPOSAL_MAX; ++i) {
             if (address(active_proposals[i]) == address(0)) {
-                proposal = new BudgetProposalV1(
+                proposal = new BudgetProposalV2(
                     mnregistry_proxy,
                     payout_address,
                     _ref_uuid,
