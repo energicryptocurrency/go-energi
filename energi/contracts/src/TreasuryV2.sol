@@ -44,8 +44,6 @@ contract TreasuryV2 is TreasuryV1 {
         returns(IBudgetProposal proposal)
     {
         require(msg.value == FEE_BUDGET_V2 + (_amount * 2) / 1000, "Invalid fee");
-        require(_amount >= BUDGET_AMOUNT_MIN, "Too small amount");
-        require(_amount <= BUDGET_AMOUNT_MAX, "Too large amount");
         require(_period >= PERIOD_BUDGET_MIN, "Too small period");
         require(_period <= PERIOD_BUDGET_MAX, "Too large period");
 
