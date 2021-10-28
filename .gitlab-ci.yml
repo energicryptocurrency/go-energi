@@ -122,15 +122,17 @@ build-release-windows:
   before_script:
     - pwd
   script:
+
     - make -f Makefile.release release-windows
     - make -f Makefile.release release-upload
   only:
     - tags
+
 #
 # TODO: macos is a native compile, this can't run in docker needs a macos runner
 #release-build-macos:
 #  stage: build
-#  tags: [docker_runner]
+#  tags: [docker_mac_runner]
 #  script:
 #    - make -f Makefile.release release-macos
 #  rules:
@@ -149,6 +151,12 @@ test-go-report:
       - .test-go-report.xml
     reports:
       junit: .test-go-report.xml
+  retry:
+    max: 2
+    when:
+      - script_failure
+      - runner_system_failure
+      - stuck_or_timeout_failure
 
 test-solidity:
   stage: test
@@ -161,6 +169,12 @@ test-solidity:
       - .test-sol-report.xml
     reports:
       junit: .test-sol-report.xml
+  retry:
+    max: 2
+    when:
+      - script_failure
+      - runner_system_failure
+      - stuck_or_timeout_failure
 
 #deploy-release:
 #  stage: deploy
