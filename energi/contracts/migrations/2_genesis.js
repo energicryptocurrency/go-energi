@@ -23,7 +23,6 @@ const CheckpointRegistryV1 = artifacts.require('CheckpointRegistryV1');
 const CheckpointRegistryV2 = artifacts.require('CheckpointRegistryV2');
 const CheckpointRegistryV3 = artifacts.require('CheckpointRegistryV3');
 const StorageCheckpointRegistryV2 = artifacts.require('StorageCheckpointRegistryV2');
-
 const Gen2Migration = artifacts.require('Gen2Migration');
 //const GenericProposalV1 = artifacts.require('GenericProposalV1');
 const GovernedProxy = artifacts.require('GovernedProxy');
@@ -37,7 +36,7 @@ const SporkRegistryV1 = artifacts.require('SporkRegistryV1');
 const SporkRegistryV2 = artifacts.require('SporkRegistryV2');
 const StakerRewardV1 = artifacts.require('StakerRewardV1');
 const TreasuryV1 = artifacts.require('TreasuryV1');
-
+const TreasuryV2 = artifacts.require('TreasuryV2');
 const MockProxy = artifacts.require("MockProxy");
 //const MockAutoProxy = artifacts.require("MockAutoProxy");
 const MockContract = artifacts.require("MockContract");
@@ -81,8 +80,7 @@ module.exports = async (deployer, network, accounts) => {
         };
 
         await deployer.deploy(Gen2Migration, blacklist_registry, common.chain_id, common.migration_signer);
-
-        const compensation_fund = await TreasuryV1.new(treasury_proxy, mn_registry_proxy, 1);
+        const compensation_fund = await TreasuryV2.new(treasury_proxy, mn_registry_proxy, common.superblock_cycles);
         await deploy_common(BlacklistRegistryV1,
             blacklist_registry, mn_registry_proxy,
             Gen2Migration.address, compensation_fund.address,
@@ -109,6 +107,8 @@ module.exports = async (deployer, network, accounts) => {
         await deploy_common(SporkRegistryV2, undefined, mn_registry_proxy, common.emergency_signer);
         await deploy_common(StakerRewardV1, staker_proxy);
         await deploy_common(TreasuryV1, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
+        await deploy_common(TreasuryV2, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
+
         await deploy_common(BlockRewardV1, undefined, [
             staker_proxy,
             backbone_proxy,

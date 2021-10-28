@@ -46,7 +46,7 @@ contract("MasternodeRegistryV1", async accounts => {
         // but there are some issues.
         return (await web3.eth.getBlockNumber() % vperiod === (vperiod - 1))
     };
-    
+
     before(async () => {
         s.orig = await MasternodeRegistryV1.deployed();
         s.proxy = await MockProxy.at(await s.orig.proxy());
@@ -235,7 +235,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 assert.equal(r.valueOf(), 0);
 
                 const count = 3;
-                
+
                 for (let i = count; i > 0; --i) {
                     r = await s.reward_abi.getReward(i);
 
@@ -432,7 +432,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
-                
+
                 const s2 = await s.orig.mn_status(masternode1);
                 expect(s2.last_heartbeat.gt(s1.last_heartbeat)).true;
                 expect(s2.last_heartbeat.gt(b.timestamp)).true;
@@ -520,7 +520,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 }
 
                 await common.moveTime(web3, 2*60*60);
-                
+
                 try {
                     await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
                     assert.fail('It should fail');
@@ -678,14 +678,14 @@ contract("MasternodeRegistryV1", async accounts => {
                 const b = await web3.eth.getBlock(bn);
 
                 await s.token_abi.heartbeat(bn, b.hash, '0', {from: masternode1, ...common.zerofee_callopts});
-                
+
                 const s2 = await s.orig.mn_status(masternode1);
                 expect(s2.last_heartbeat.gt(s1.last_heartbeat)).true;
                 expect(s2.last_heartbeat.gt(b.timestamp)).true;
 
                 const s2o = await s.orig.mn_status(masternode2);
                 expect(s2o.last_heartbeat.eq(s1o.last_heartbeat)).true;
-                
+
                 const evt = await s.orig.getPastEvents('Heartbeat', common.evt_last_block);
                 expect(evt).lengthOf(1);
 
@@ -925,7 +925,7 @@ contract("MasternodeRegistryV1", async accounts => {
                 const owner3_before = toBN(await web3.eth.getBalance(owner3));
                 const count = 18;
                 let sb = false;
-                
+
                 for (let i = count; i > 0; --i) {
                     let r = await s.reward_abi.getReward(i);
                     if (r.eq(toBN(0))) {
@@ -1019,7 +1019,7 @@ contract("MasternodeRegistryV1", async accounts => {
                     } else {
                         target = masternode2;
                     }
-                    
+
                     await s.token_abi.invalidate(target, {from:masternode1, ...common.zerofee_callopts});
                     assert.fail('It must fail');
                 } catch (e) {

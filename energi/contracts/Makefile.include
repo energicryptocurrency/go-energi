@@ -75,6 +75,7 @@ ENERGI_CONTRACTS := \
   SporkRegistryV2.sol \
   StakerRewardV1.sol \
   TreasuryV1.sol \
+  TreasuryV2.sol \
   StorageCheckpointRegistryV2.sol
 
 ENERGI_CONTRACTS_SRC := $(addprefix $(ENERGI_CONTRACT_SRC_DIR)/,$(ENERGI_CONTRACTS))

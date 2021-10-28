@@ -25,7 +25,7 @@ module.exports = async function(deployer, network) {
         var checkpointProxyAddress = '0x0000000000000000000000000000000000000306';
         var masternodeRegistryProxyAddress = '0x0000000000000000000000000000000000000302';
 
-        console.log("Deploying to " + network);
+        console.log("Deploying CheckpointRegistryV3 to " + network);
 
         if (network === "mainnet") {
             checkpointSigner = '0xBD1C57eACcfD1519E342F870C1c551983F839479';

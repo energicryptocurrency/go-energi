@@ -46,6 +46,10 @@ exports.mnreg_deploy_opts = {
     gas: 7000000,
 };
 
+exports.treasury_deploy_opts = {
+    gas: 7000000,
+};
+
 exports.evt_last_block = {
     fromBlock: 'latest',
     toBlock: 'latest',
