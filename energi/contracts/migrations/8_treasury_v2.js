@@ -26,11 +26,11 @@ module.exports = async function(deployer, network) {
         console.log("Deploying TreasuryV2 to " + network);
 
         if (network === "mainnet" || network === "testnet") {
-          // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
-          await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
-          var instance = await TreasuryV2.deployed();
-          var proxyAddress = await instance.proxy();
-          console.log("   > proxy address:       " + proxyAddress);
+            // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
+            await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
+            var instance = await TreasuryV2.deployed();
+            var proxyAddress = await instance.proxy();
+            console.log("   > proxy address:       " + proxyAddress);
         } else {
             return;
         }
