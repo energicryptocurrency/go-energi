@@ -1,4 +1,4 @@
-// Copyright 2019 The Energi Core Authors
+// Copyright 2021 The Energi Core Authors
 // This file is part of the Energi Core library.
 //
 // The Energi Core library is free software: you can redistribute it and/or modify
@@ -18,14 +18,14 @@
 
 'use strict';
 
-const GenericProposalV1 = artifacts.require('GenericProposalV1');
+const GenericProposalV2 = artifacts.require('GenericProposalV2');
 const ITreasury = artifacts.require('ITreasury');
 const MasternodeTokenV1 = artifacts.require('MasternodeTokenV1');
 const MasternodeRegistryV1 = artifacts.require('MasternodeRegistryV1');
 
 const common = require('./common');
 
-contract("GenericProposalV1", async accounts => {
+contract("GenericProposalV2", async accounts => {
     let mntoken;
     let mnregistry;
     let treasury;
@@ -57,11 +57,11 @@ contract("GenericProposalV1", async accounts => {
         const masternode2 = accounts[8];
         const masternode3 = accounts[7];
 
-        const ip1 = toBN(0x12345678);
+        const ip1 = toBN(0x16645678);
         const ip2 = toBN(0x87654321);
         const ip3 = toBN(0x43218765);
 
-        const enode_common = '123456789012345678901234567890'
+        const enode_common = '166456789016645678901664567890'
         const enode1 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '11')];
         const enode2 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '22')];
         const enode3 = [fromAscii(enode_common + '11'), fromAscii(enode_common + '33')];
@@ -97,10 +97,11 @@ contract("GenericProposalV1", async accounts => {
 
         it('should refuse wrong quorum percent', async () => {
             try {
-                await GenericProposalV1.new(
+                await GenericProposalV2.new(
                     mnregistry.address,
                     0,
                     60,
+                    66,
                     not_owner
                 );
                 assert.fail('It must fail');
@@ -108,25 +109,28 @@ contract("GenericProposalV1", async accounts => {
                 assert.match(e.message, /Quorum min/);
             }
 
-            await GenericProposalV1.new(
+            await GenericProposalV2.new(
                 mnregistry.address,
                 1,
                 60,
+                66,
                 not_owner
             );
 
-            await GenericProposalV1.new(
+            await GenericProposalV2.new(
                 mnregistry.address,
                 100,
                 60,
+                66,
                 not_owner
             );
 
             try {
-                await GenericProposalV1.new(
+                await GenericProposalV2.new(
                     mnregistry.address,
                     101,
                     60,
+                    66,
                     not_owner
                 );
                 assert.fail('It must fail');
@@ -143,10 +147,11 @@ contract("GenericProposalV1", async accounts => {
             mnregistry.denounce(masternode2, {from: owner2});
 
             try {
-                await GenericProposalV1.new(
+                await GenericProposalV2.new(
                     mnregistry.address,
                     51,
                     60,
+                    66,
                     not_owner
                 );
                 assert.fail('It must fail');
@@ -155,15 +160,92 @@ contract("GenericProposalV1", async accounts => {
             }
         });
 
+        it('should not accept half-way because of QUORUM_MAJORITY', async () => {
+            mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
+            mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
+            mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
+
+            const proposal = await GenericProposalV2.new(
+                mnregistry.address,
+                51,
+                60,
+                66,
+                not_owner
+            );
+
+            expect(await proposal.canVote(owner2)).true;
+            await proposal.voteAccept({from: owner2});
+            expect(await proposal.canVote(owner2)).false;
+            expect(await proposal.isAccepted()).false;
+            expect(await proposal.isFinished()).false;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.toString());
+
+            expect(await proposal.canVote(owner3)).true;
+            await proposal.voteAccept({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
+            expect(await proposal.isAccepted()).false;
+            expect(await proposal.isFinished()).false;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.add(collateral3).toString());
+
+            expect(await proposal.canVote(owner1)).true;
+            await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
+            expect(await proposal.isAccepted()).true;
+            expect(await proposal.isFinished()).true;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral1.add(collateral2).add(collateral3).toString());
+        });
+
+        it('should accept half-way because of QUORUM_MAJORITY', async () => {
+            mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
+            mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
+            mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
+
+            const proposal = await GenericProposalV2.new(
+                mnregistry.address,
+                51,
+                60,
+                66,
+                not_owner
+            );
+
+            expect(await proposal.canVote(owner2)).true;
+            await proposal.voteAccept({from: owner2});
+            expect(await proposal.canVote(owner2)).false;
+            expect(await proposal.isAccepted()).false;
+            expect(await proposal.isFinished()).false;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.toString());
+
+            expect(await proposal.canVote(owner1)).true;
+            await proposal.voteAccept({from: owner1});
+            expect(await proposal.canVote(owner1)).false;
+            expect(await proposal.isAccepted()).true;
+            expect(await proposal.isFinished()).true;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral2.add(collateral1).toString());
+
+            expect(await proposal.canVote(owner3)).true;
+            await proposal.voteAccept({from: owner3});
+            expect(await proposal.canVote(owner3)).false;
+            expect(await proposal.isAccepted()).true;
+            expect(await proposal.isFinished()).true;
+            expect((await proposal.accepted_weight()).toString())
+                .eql(collateral1.add(collateral2).add(collateral3).toString());
+        });
+
         it('should accept half-way', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
             mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 51,
                 60,
+                66,
                 not_owner
             );
 
@@ -197,10 +279,11 @@ contract("GenericProposalV1", async accounts => {
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
             mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 51,
                 60,
+                66,
                 not_owner
             );
 
@@ -223,15 +306,17 @@ contract("GenericProposalV1", async accounts => {
                 .eql(collateral1.add(collateral2).add(collateral3).toString());
         });
 
+
         it('should not accept half-way', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
             mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 51,
                 60,
+                66,
                 not_owner
             );
 
@@ -268,13 +353,14 @@ contract("GenericProposalV1", async accounts => {
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
             mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 5,
                 60,
+                66,
                 not_owner
             );
-
+            expect((await proposal.supermajority()).toString()).eql("66")
             expect(await proposal.canVote(owner1)).true;
             await proposal.voteAccept({from: owner1});
             expect(await proposal.canVote(owner1)).false;
@@ -297,6 +383,7 @@ contract("GenericProposalV1", async accounts => {
             await common.moveTime(web3, 70);
             expect(await proposal.canVote(owner2)).false;
 
+
             try {
                 await proposal.voteAccept({from: owner2});
                 assert.fail('It must fail');
@@ -318,10 +405,11 @@ contract("GenericProposalV1", async accounts => {
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
             mnregistry.announce(masternode3, ip3, enode3, {from: owner3});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 90,
                 60,
+                66,
                 not_owner
             );
 
@@ -359,10 +447,11 @@ contract("GenericProposalV1", async accounts => {
         it('should refuse vote of not eligible Masternode', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 51,
                 60,
+                66,
                 not_owner
             );
 
@@ -384,10 +473,11 @@ contract("GenericProposalV1", async accounts => {
         it('should refuse already voted Masternode', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 51,
                 60,
+                66,
                 not_owner
             );
 
@@ -404,10 +494,11 @@ contract("GenericProposalV1", async accounts => {
         });
 
         it('should refuse withdraw() unless accepted', async () => {
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 51,
                 60,
+                66,
                 not_owner
             );
 
@@ -423,10 +514,11 @@ contract("GenericProposalV1", async accounts => {
             const bal_before = await web3.eth.getBalance(not_owner);
 
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 1,
                 60,
+                66,
                 not_owner
             );
             await proposal.voteAccept({from: owner1});
@@ -442,10 +534,11 @@ contract("GenericProposalV1", async accounts => {
         });
 
         it('should refuse destroy() unless parent', async () => {
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 1,
                 60,
+                66,
                 not_owner
             );
 
@@ -461,10 +554,11 @@ contract("GenericProposalV1", async accounts => {
             const bal_before = await web3.eth.getBalance(not_owner);
 
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 1,
                 60,
+                66,
                 not_owner
             );
             await proposal.voteAccept({from: owner1});
@@ -481,10 +575,11 @@ contract("GenericProposalV1", async accounts => {
         it('should refuse collect() unless rejected', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 1,
                 60,
+                66,
                 not_owner
             );
 
@@ -509,10 +604,11 @@ contract("GenericProposalV1", async accounts => {
         it('should collect()', async () => {
             expect(await mnregistry.treasury_proxy()).equal(treasury.address);
 
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 1,
                 60,
+                66,
                 not_owner
             );
 
@@ -537,10 +633,11 @@ contract("GenericProposalV1", async accounts => {
         });
 
         it('should refuse payments', async () => {
-            const proposal = await GenericProposalV1.new(
+            const proposal = await GenericProposalV2.new(
                 mnregistry.address,
                 1,
                 60,
+                66,
                 not_owner
             );
 

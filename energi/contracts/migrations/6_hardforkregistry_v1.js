@@ -24,7 +24,7 @@ module.exports = async function(deployer, network) {
         var hf_signer = common.hf_signer;
         var hf_finalization_period = common.hf_finalization_period;
 
-        console.log("Deploying to " + network);
+        console.log("Deploying HardforkRegistryV1 to " + network);
 
         if (network === "mainnet") {
             hf_signer = '0x44D16E845ec2d2D6A99a10fe44EE99DA0541CF31';
