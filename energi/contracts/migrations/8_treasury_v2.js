@@ -33,7 +33,7 @@ module.exports = async function(deployer, network) {
             console.log("   > proxy address:       " + proxyAddress);
         }
 
-        return
+        return;
     } catch (e) {
         console.dir(e);
         throw e;
