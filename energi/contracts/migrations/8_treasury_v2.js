@@ -21,19 +21,19 @@ const common = require('../test/common');
 
 module.exports = async function(deployer, network) {
     try {
-        var treasury_proxy = '0x0000000000000000000000000000000000000301';
-        var mn_registry_proxy = '0x0000000000000000000000000000000000000302';
+        const treasury_proxy = '0x0000000000000000000000000000000000000301';
+        const mn_registry_proxy = '0x0000000000000000000000000000000000000302';
         console.log("Deploying TreasuryV2 to " + network);
 
         if (network === "mainnet" || network === "testnet") {
             // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
             await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, common.superblock_cycles);
-            var instance = await TreasuryV2.deployed();
-            var proxyAddress = await instance.proxy();
+            const instance = await TreasuryV2.deployed();
+            const proxyAddress = await instance.proxy();
             console.log("   > proxy address:       " + proxyAddress);
-        } else {
-            return;
         }
+
+        return
     } catch (e) {
         console.dir(e);
         throw e;
