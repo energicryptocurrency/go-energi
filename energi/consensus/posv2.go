@@ -112,8 +112,7 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
-
+func (e * Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 	// check if we have already calculated
 	if parent.Hash() == e.calculatedBlockHash {
 		timeTarget := e.calculatedTimeTarget

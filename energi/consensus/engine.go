@@ -17,12 +17,12 @@
 package consensus
 
 import (
-	"errors"
 	"fmt"
-	"math/big"
-	"strings"
-	"sync/atomic"
 	"time"
+	"errors"
+	"strings"
+	"math/big"
+	"sync/atomic"
 
 	"energi.world/core/gen3/accounts/abi"
 	"energi.world/core/gen3/common"
@@ -87,14 +87,12 @@ type (
 		accountsFn           AccountsFn
 		peerCountFn          PeerCountFn
 		isMiningFn           IsMiningFn
-		diffFn               DiffFn
-		testing              bool
 		now                  func() uint64
+		testing              bool
 		knownStakes          KnownStakes
 		nextKSPurge          uint64
 		txhashMap            *lru.Cache
-
-		// optimize blocktarget calculation for same block
+		// optimize blocktarget calculation for same block NOTE not thread safe!
 		calculatedTimeTarget TimeTarget
 		calculatedBlockHash  common.Hash
 	}
@@ -156,10 +154,9 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 		xferGas:       0,
 		callGas:       30000,
 		unlimitedGas:  energi_params.UnlimitedGas,
-		diffFn:        calcPoSDifficultyV1,
-		now:           func() uint64 { return uint64(time.Now().Unix()) },
 		nextKSPurge:   0,
 		txhashMap:     txhashMap,
+		now:           func() uint64 { return uint64(time.Now().Unix()) },
 
 		accountsFn:  func() []common.Address { return nil },
 		peerCountFn: func() int { return 0 },
@@ -244,7 +241,7 @@ func (e *Energi) VerifyHeader(
 	if isAsgardActive {
 		time_target = e.calcTimeTargetV2(chain, parent)
 	} else {
-		time_target = e.calcTimeTarget(chain, parent)
+		time_target = e.calcTimeTargetV1(chain, parent)
 	}
 
 	err = e.checkTime(header, time_target)
@@ -264,7 +261,7 @@ func (e *Energi) VerifyHeader(
 	if isAsgardActive {
 		difficulty = CalcPoSDifficultyV2(header.Time, parent, time_target)
 	} else {
-		difficulty = e.calcPoSDifficulty(chain, header.Time, parent, time_target)
+		difficulty = calcPoSDifficultyV1(header.Time, parent, time_target)
 	}
 
 	if header.Difficulty.Cmp(difficulty) != 0 {
@@ -630,7 +627,7 @@ func (e *Energi) PoSPrepareV1(
 	header *types.Header,
 	parent *types.Header,
 ) (timeTarget *TimeTarget, err error) {
-	timeTarget = e.calcTimeTarget(chain, parent)
+	timeTarget = e.calcTimeTargetV1(chain, parent)
 
 	err = e.enforceMinTime(header, timeTarget)
 	if err != nil {
@@ -641,9 +638,11 @@ func (e *Energi) PoSPrepareV1(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = e.calcPoSDifficulty(
-		chain, header.Time, parent, timeTarget,
-	)
+	if e.testing {
+		header.Difficulty = common.Big1
+	} else {
+		header.Difficulty = calcPoSDifficultyV1(header.Time, parent, timeTarget)
+	}
 
 	return timeTarget, err
 }
@@ -967,8 +966,9 @@ func (e *Energi) CalcDifficulty(
 		time_target := e.calcTimeTargetV2(chain, parent)
 		return CalcPoSDifficultyV2(time, parent, time_target)
 	}
-	time_target := e.calcTimeTarget(chain, parent)
-	return e.calcPoSDifficulty(chain, time, parent, time_target)
+	time_target := e.calcTimeTargetV1(chain, parent)
+	return calcPoSDifficultyV1(time, parent, time_target)
+
 }
 
 // APIs returns the RPC APIs this consensus engine provides.
