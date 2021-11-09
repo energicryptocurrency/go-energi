@@ -17,7 +17,6 @@
 'use strict';
 
 const TreasuryV2 = artifacts.require('TreasuryV2');
-const common = require('../test/common');
 
 module.exports = async function(deployer, network) {
     try {
@@ -30,9 +29,9 @@ module.exports = async function(deployer, network) {
         if (network === "mainnet" || network === "testnet") {
             // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
             if (network === "mainnet") {
-              await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, mainnet_superblock_cycle);
+                await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, mainnet_superblock_cycle);
             } else {
-              await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, testnet_superblock_cycle);
+                await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, testnet_superblock_cycle);
             }
             const instance = await TreasuryV2.deployed();
             const proxyAddress = await instance.proxy();
