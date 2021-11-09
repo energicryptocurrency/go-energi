@@ -27,7 +27,6 @@ module.exports = async function(deployer, network) {
         const testnet_superblock_cycle = 60 * 24
 
         if (network === "mainnet" || network === "testnet") {
-            // since this uses GovernedContractAutoProxy, make sure we capture the new proxy address
             if (network === "mainnet") {
                 await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, mainnet_superblock_cycle);
             } else {
