@@ -27,15 +27,15 @@ module.exports = async function(deployer, network) {
         const testnet_superblock_cycle = 60 * 24;
 
         if (network === "mainnet") {
-          await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, mainnet_superblock_cycle);
-          const instance = await TreasuryV2.deployed();
-          const proxyAddress = await instance.proxy();
-          console.log("   > proxy address:       " + proxyAddress);
+            await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, mainnet_superblock_cycle);
+            const instance = await TreasuryV2.deployed();
+            const proxyAddress = await instance.proxy();
+            console.log("   > proxy address:       " + proxyAddress);
         } else if (network === "testnet") {
-          await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, testnet_superblock_cycle);
-          const instance = await TreasuryV2.deployed();
-          const proxyAddress = await instance.proxy();
-          console.log("   > proxy address:       " + proxyAddress);
+            await deployer.deploy(TreasuryV2, treasury_proxy, mn_registry_proxy, testnet_superblock_cycle);
+            const instance = await TreasuryV2.deployed();
+            const proxyAddress = await instance.proxy();
+            console.log("   > proxy address:       " + proxyAddress);
         }
 
         return;
