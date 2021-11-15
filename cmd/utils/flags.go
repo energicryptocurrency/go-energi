@@ -418,7 +418,13 @@ var (
 	}
 	MinerAutocollateralFlag = cli.Uint64Flag{
 		Name:  "miner.autocollateralize",
-		Usage: "Autocollateralize for MN owner addresses (0 - disable, 1 - after MN rewards, 2 - rapid)",
+		Usage: "Deprecated (use miner.autocompounding in future): Autocollateralize for MN owner addresses (0 - disable, 1 - after MN rewards, 2 - rapid)",
+		Value: 1,
+		Hidden: true,
+	}
+	MinerAutoCompondingFlag = cli.Uint64Flag{
+		Name:  "miner.autocompounding",
+		Usage: "Autocompounding for MN owner addresses (0 - disable, 1 - after MN rewards, 2 - rapid)",
 		Value: 1,
 	}
 	// Account settings
@@ -1353,8 +1359,13 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	if ctx.GlobalIsSet(MinerNonceCapFlag.Name) {
 		cfg.MinerNonceCap = ctx.GlobalUint64(MinerNonceCapFlag.Name)
 	}
+	// Support old flag
 	if ctx.GlobalIsSet(MinerAutocollateralFlag.Name) {
-		cfg.MinerAutocollateral = ctx.GlobalUint64(MinerAutocollateralFlag.Name)
+		cfg.MinerAutoCompound = ctx.GlobalUint64(MinerAutocollateralFlag.Name)
+		log.Warn("miner.autocollateralize is being deprecated, please use miner.autocompounding")
+	}
+	if ctx.GlobalIsSet(MinerAutoCompondingFlag.Name) {
+		cfg.MinerAutoCompound = ctx.GlobalUint64(MinerAutoCompondingFlag.Name)
 	}
 	if ctx.GlobalIsSet(VMEnableDebugFlag.Name) {
 		// TODO(fjl): force-enable this in --dev mode

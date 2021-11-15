@@ -58,7 +58,7 @@ var DefaultConfig = Config{
 	MinerRecommit:  3 * time.Second,
 	MinerNonceCap:  0,
 
-	MinerAutocollateral: 1,
+	MinerAutoCompound: 1,
 
 	TxPool: core.DefaultTxPoolConfig,
 	GPO: gasprice.Config{
@@ -125,7 +125,7 @@ type Config struct {
 	MinerMigration string  `toml:",omitempty"`
 	MinerNonceCap  uint64  `toml:"-"`
 
-	MinerAutocollateral uint64 `toml:",omitempty"`
+	MinerAutoCompound uint64 `toml:",omitempty"`
 
 	PublicService bool `toml:",omitempty"`
 

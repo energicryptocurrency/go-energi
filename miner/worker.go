@@ -267,13 +267,13 @@ func (w *worker) setMigration(migration string) {
 	w.migration = migration
 }
 
-func (w *worker) setAutocollateral(autocollateral uint64) {
+func (w *worker) setAutoCompound(autocollateral uint64) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.autocollateral = autocollateral
 }
 
-func (w *worker) getAutocollateral() uint64 {
+func (w *worker) getAutoCompound() uint64 {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.autocollateral
@@ -403,7 +403,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
 			if w.autocollateral != acDisabled {
-				go w.tryAutocollateral()
+				go w.tryAutoCompound()
 			}
 
 		case <-timer.C:
