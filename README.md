@@ -236,6 +236,10 @@ $ energi3 --datadir=path/to/custom/data/folder --bootnodes=<bootnode-enode-url-f
 *Note: Since your network will be completely cut off from the main and test networks, you'll also
 need to configure a miner to process transactions and create new blocks for you.*
 
+#### `truffle build` issues
+
+There is an apparent bug in truffle that causes it to clear the `build`  directory (delete all it's contents), before building the contracts. Please do not use `truffle build` without a way to restore the contents of the build directory (e.g. `git restore`) as needed.
+
 ## License
 
 The Energi Core library (i.e. all code outside of the `cmd` directory) is licensed under the
