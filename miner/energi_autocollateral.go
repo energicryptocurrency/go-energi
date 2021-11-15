@@ -41,7 +41,7 @@ const (
 	acRapid      uint64 = 2
 )
 
-func (w *worker) tryAutocollateral() {
+func (w *worker) tryAutoCompound() {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 

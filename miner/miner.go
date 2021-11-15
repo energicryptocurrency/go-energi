@@ -179,12 +179,12 @@ func (self *Miner) SetMigration(migration string) {
 	self.worker.setMigration(migration)
 }
 
-func (self *Miner) SetMinerAutocollateral(autocollateral uint64) {
-	self.worker.setAutocollateral(autocollateral)
+func (self *Miner) SetMinerAutoCompound(autocollateral uint64) {
+	self.worker.setAutoCompound(autocollateral)
 }
 
-func (self *Miner) GetMinerAutocollateral() uint64 {
-	return self.worker.getAutocollateral()
+func (self *Miner) GetMinerAutoCompound() uint64 {
+	return self.worker.getAutoCompound()
 }
 
 func (self *Miner) SetEthAPIBackend(api bind.ContractBackend) {

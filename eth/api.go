@@ -170,11 +170,11 @@ func (api *PrivateMinerAPI) RemoveDPoS(contract common.Address) bool {
 
 // Updated auto-collateralize mode
 func (api *PrivateMinerAPI) SetAutocollateralize(mode *uint64) (old uint64, err error) {
-	old = api.e.Miner().GetMinerAutocollateral()
+	old = api.e.Miner().GetMinerAutoCompound()
 
 	if mode != nil {
 		if *mode <= 2 {
-			api.e.Miner().SetMinerAutocollateral(*mode)
+			api.e.Miner().SetMinerAutoCompound(*mode)
 		} else {
 			err = fmt.Errorf("Invalid mode %d", *mode)
 		}
