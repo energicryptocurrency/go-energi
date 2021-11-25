@@ -19,13 +19,15 @@ Section "Gen 3 Core Node" GETH_IDX
 
   # Create start menu launcher
   createDirectory "$SMPROGRAMS\${APPNAME}"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Core Node.lnk" "$INSTDIR\energi3.exe" "--cache=512"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Core Node.lnk" "$INSTDIR\energi3.exe" "" "$INSTDIR\energi-icon.ico" 0
   createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\energi3.exe" "attach \\.\pipe\energi3.ipc" "" ""
-  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk" "$INSTDIR\energi3.exe" "--testnet --cache=512 -ipcpath test-energi3.ipc"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk" "$INSTDIR\energi3.exe" "--testnet  -ipcpath test-energi3.ipc" "$INSTDIR\energi-icon.ico" 0
   createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Attach.lnk" "$INSTDIR\energi3.exe" "--testnet attach \\.\pipe\test-energi3.ipc" "" ""
-  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Core Node.lnk" "$INSTDIR\energi3.exe" "--simnet --cache=512 -ipcpath sim-energi3.ipc"
+  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Core Node.lnk" "$INSTDIR\energi3.exe" "--simnet  -ipcpath sim-energi3.ipc" "$INSTDIR\energi-icon.ico" 0
   createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Attach.lnk" "$INSTDIR\energi3.exe" "--simnet attach \\.\pipe\sim-energi3.ipc" "" ""
   createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "" ""
+
+  CreateShortCut "$DESKTOP\Energi Core Node.lnk" "$INSTDIR\energi3.exe" "" "$INSTDIR\energi-icon.ico" 0
 
   # Firewall - remove rules (if exists)
   SimpleFC::AdvRemoveRule "Energi Gen 3 incoming peers (TCP:39797)"

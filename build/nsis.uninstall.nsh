@@ -20,6 +20,9 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\${APPNAME}\Uninstall.lnk"
   rmDir "$SMPROGRAMS\${APPNAME}"
 
+  # Delete desktop icon
+  Delete "$DESKTOP\Energi Core Node.lnk"
+
   # Firewall - remove rules if exists
   SimpleFC::AdvRemoveRule "Energi Gen 3 incoming peers (TCP:39797)"
   SimpleFC::AdvRemoveRule "Energi Gen 3 outgoing peers (TCP:39797)"
