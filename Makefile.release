@@ -123,7 +123,7 @@ release-windows: release-windows-amd64 release-windows-i686
 RELEASE_WINDOWS_COMMON := make -f Makefile.release release-windows-common --no-print-directory
 RELEASE_RENDER_NSIS := sed \
   -e 's,{{.License}},COPYING.txt,g' \
-  -e 's,{{.EnergiCore}},bin/energi3.exe,g'
+  -e 's,{{.EnergiCore}},bin/energi3.exe\n  file energi-icon.ico,g'
 #  -e 's,{{range .DevTools}}file {{.}},file bin/abigen.exe\n  file bin/bootnode.exe\n  file bin/clef.exe\n  file bin/evm.exe\n  file bin/rlpdump.exe,g' \
 #  -e 's,{{range $$}}Delete $$INSTDIR\\{{.}},Delete \$$INSTDIR\abigen.exe\n  Delete \$$INSTDIR\bootnode.exe\n  Delete \$$INSTDIR\clef.exe\n  Delete \$$INSTDIR\evm.exe\n  Delete $$INSTDIR\rlpdump.exe,g' \
 #  -e 's,{{end}},,g'
@@ -133,6 +133,7 @@ release-windows-common:
 	@echo Building $(RELEASE_TARGET)
 	@rm -rf build/release/$(RELEASE_TARGET)
 	@mkdir -p build/release/$(RELEASE_TARGET)
+	@cp energi/common/energi-icon.ico build/release/$(RELEASE_TARGET)/
 	@for t in $(TARGET_TOOLS); do \
 	    export GOCACHE=$(CURDIR)/build/release/$(RELEASE_TARGET)/cache; \
 	    export PREFIX=/usr/$(HOST); \
@@ -160,7 +161,7 @@ release-windows-common:
 	  -DARCH=$(GOARCH) \
 	  build/release/$(RELEASE_TARGET)/energi3.nsi
 	@cd build/release && zip $(RELEASE_TARGET)/$(RELEASE_TARGET).zip \
-	  $(RELEASE_TARGET)/bin/$(RELEASE_MAIN).exe $(RELEASE_TARGET)/COPYING.txt
+	  $(RELEASE_TARGET)/bin/$(RELEASE_MAIN).exe $(RELEASE_TARGET)/COPYING.txt $(RELEASE_TARGET)/energi-icon.ico
 	@cd build/release && zip $(RELEASE_TARGET)/$(RELEASE_TARGET)-alltools.zip \
 	  -r $(RELEASE_TARGET)/bin/ $(RELEASE_TARGET)/COPYING.txt
 	@ls build/release/$(RELEASE_TARGET)/$(RELEASE_TARGET)*.zip \
