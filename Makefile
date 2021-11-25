@@ -9,11 +9,13 @@
 .PHONY: geth-windows geth-windows-386 geth-windows-amd64
 .PHONY: prebuild
 
-include energi/contracts/Makefile.include
-
 GOBIN = $(shell pwd)/build/bin
-GO ?= $(goVer)
+GO ?= $(shell go version | cut -d' ' -f3 | cut -b3-)
 GO ?= latest
+GOPATH ?= ${HOME}/go
+export GOPATH
+
+include energi/contracts/Makefile.include
 
 prebuild:
 
@@ -49,7 +51,7 @@ check: lint test
 test: all test-go test-sol
 
 test-data-submodule:
-	git submodule update --init --recursive
+	git submodule update --init --recursive --jobs 4 --progress
 
 test-go: test-data-submodule
 	build/env.sh go run build/ci.go test
