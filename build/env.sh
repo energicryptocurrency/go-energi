@@ -8,7 +8,7 @@ if [ ! -f "build/env.sh" ]; then
 fi
 
 export GO111MODULE=on
-export GOFLAGS="-mod=vendor -v"
+export GOFLAGS="-v"
 export SKIP_KNOWN_FAIL="1"
 
 # Launch the arguments with the configured environment.

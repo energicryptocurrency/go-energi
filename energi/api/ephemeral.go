@@ -63,7 +63,29 @@ func (ew *EphemeralWallet) Derive(path accounts.DerivationPath, pin bool) (accou
 	return accounts.Account{}, accounts.ErrNotSupported
 }
 
-func (ew *EphemeralWallet) SelfDerive(base accounts.DerivationPath, chain ethereum.ChainStateReader) {}
+func (ew *EphemeralWallet) SelfDerive(bases []accounts.DerivationPath, chain ethereum.ChainStateReader) {
+}
+
+func (ew *EphemeralWallet) SignData(account accounts.Account, mimeType string, data []byte) ([]byte, error) {
+	return ew.SignHash(account, crypto.Keccak256(data))
+}
+
+// SignDataWithPassphrase signs keccak256(data). The mimetype parameter describes the type of data being signed.
+func (ew *EphemeralWallet) SignDataWithPassphrase(account accounts.Account, passphrase, mimeType string, data []byte) ([]byte, error) {
+	return nil, nil
+}
+
+// SignText implements accounts.Wallet, attempting to sign the hash of
+// the given text with the given account.
+func (ew *EphemeralWallet) SignText(account accounts.Account, text []byte) ([]byte, error) {
+	return ew.SignHash(account, accounts.TextHash(text))
+}
+
+// SignTextWithPassphrase implements accounts.Wallet, attempting to sign the
+// hash of the given text with the given account using passphrase as extra authentication.
+func (ew *EphemeralWallet) SignTextWithPassphrase(account accounts.Account, passphrase string, text []byte) ([]byte, error) {
+	return nil, nil
+}
 
 func (ew *EphemeralWallet) SignHash(account accounts.Account, hash []byte) ([]byte, error) {
 	if !ew.Contains(account) {

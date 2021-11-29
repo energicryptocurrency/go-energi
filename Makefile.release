@@ -10,7 +10,8 @@ TARGET_TOOLS += clef
 TARGET_TOOLS += evm
 TARGET_TOOLS += rlpdump
 
-RELEASE_GOFLAGS = -mod=vendor
+RELEASE_GOFLAGS =
+#RELEASE_GOFLAGS = -mod=mod
 #RELEASE_GOFLAGS+=-v
 
 RELEASE_MAIN = energi3

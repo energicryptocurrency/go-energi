@@ -78,4 +78,4 @@ RUN make -f Makefile.release release-tools
 ENV GOPATH="/builds/energi/tech/gen3"
 ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
 ENV GO111MODULE="on"
-ENV GOFLAGS="-mod=vendor -v"
+ENV GOFLAGS="-v"
