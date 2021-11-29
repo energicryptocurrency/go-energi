@@ -1007,8 +1007,11 @@ func (m *Address) GetAddress() string {
 // Response: Contains an Ethereum address derived from device private seed
 // @prev EthereumGetAddress
 type EthereumAddress struct {
-	Address          []byte `protobuf:"bytes,1,req,name=address" json:"address,omitempty"`
-	XXX_unrecognized []byte `json:"-"`
+	AddressBin          []byte `protobuf:"bytes,1,req,name=address" json:"address,omitempty"`
+	AddressHex           *string  `protobuf:"bytes,2,opt,name=addressHex" json:"addressHex,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *EthereumAddress) Reset()                    { *m = EthereumAddress{} }
@@ -1016,12 +1019,27 @@ func (m *EthereumAddress) String() string            { return proto.CompactTextS
 func (*EthereumAddress) ProtoMessage()               {}
 func (*EthereumAddress) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{24} }
 
-func (m *EthereumAddress) GetAddress() []byte {
+// func (m *EthereumAddress) GetAddress() []byte {
+// 	if m != nil {
+// 		return m.Address
+// 	}
+// 	return nil
+// }
+
+func (m *EthereumAddress) GetAddressBin() []byte {
 	if m != nil {
-		return m.Address
+		return m.AddressBin
 	}
 	return nil
 }
+
+func (m *EthereumAddress) GetAddressHex() string {
+	if m != nil && m.AddressHex != nil {
+		return *m.AddressHex
+	}
+	return ""
+}
+
 
 // *
 // Request: Request device to wipe all sensitive data and settings
@@ -2013,7 +2031,8 @@ type EthereumSignTx struct {
 	Nonce            []byte   `protobuf:"bytes,2,opt,name=nonce" json:"nonce,omitempty"`
 	GasPrice         []byte   `protobuf:"bytes,3,opt,name=gas_price,json=gasPrice" json:"gas_price,omitempty"`
 	GasLimit         []byte   `protobuf:"bytes,4,opt,name=gas_limit,json=gasLimit" json:"gas_limit,omitempty"`
-	To               []byte   `protobuf:"bytes,5,opt,name=to" json:"to,omitempty"`
+	ToBin            []byte   `protobuf:"bytes,5,opt,name=toBin" json:"toBin,omitempty"`
+	ToHex            *string  `protobuf:"bytes,11,opt,name=toHex" json:"toHex,omitempty"`
 	Value            []byte   `protobuf:"bytes,6,opt,name=value" json:"value,omitempty"`
 	DataInitialChunk []byte   `protobuf:"bytes,7,opt,name=data_initial_chunk,json=dataInitialChunk" json:"data_initial_chunk,omitempty"`
 	DataLength       *uint32  `protobuf:"varint,8,opt,name=data_length,json=dataLength" json:"data_length,omitempty"`
@@ -2054,9 +2073,16 @@ func (m *EthereumSignTx) GetGasLimit() []byte {
 	return nil
 }
 
-func (m *EthereumSignTx) GetTo() []byte {
+func (m *EthereumSignTx) GetToBin() []byte {
 	if m != nil {
-		return m.To
+		return m.ToBin
+	}
+	return nil
+}
+
+func (m *EthereumSignTx) GetToHex() *string {
+	if m != nil {
+		return m.ToHex
 	}
 	return nil
 }

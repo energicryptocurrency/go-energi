@@ -200,7 +200,7 @@ func init() {
 		removedbCommand,
 		dumpCommand,
 		// See monitorcmd.go:
-		monitorCommand,
+		//monitorCommand,
 		// See accountcmd.go:
 		accountCommand,
 		walletCommand,
@@ -339,7 +339,8 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 				if event.Wallet.URL().Scheme == "ledger" {
 					derivationPath = accounts.DefaultLedgerBaseDerivationPath
 				}
-				event.Wallet.SelfDerive(derivationPath, stateReader)
+				derivationPaths := []accounts.DerivationPath { derivationPath }
+				event.Wallet.SelfDerive(derivationPaths, stateReader)
 
 			case accounts.WalletDropped:
 				log.Info("Old wallet dropped", "url", event.Wallet.URL())

@@ -20,12 +20,13 @@ import (
 	"errors"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"energi.world/core/gen3/accounts"
 	"energi.world/core/gen3/event"
 	"energi.world/core/gen3/log"
-	"github.com/karalabe/hid"
+	hid "github.com/karalabe/usb"
 )
 
 // LedgerScheme is the protocol scheme prefixing account and wallet URLs.
@@ -64,6 +65,7 @@ type Hub struct {
 	// TODO(karalabe): remove if hotplug lands on Windows
 	commsPend int        // Number of operations blocking enumeration
 	commsLock sync.Mutex // Lock protecting the pending counter and enumeration
+	enumFails uint32     // Number of times enumeration has failed
 }
 
 // NewLedgerHub creates a new hardware wallet manager for Ledger devices.
@@ -135,7 +137,21 @@ func (hub *Hub) refreshWallets() {
 			return
 		}
 	}
-	for _, info := range hid.Enumerate(hub.vendorID, 0) {
+
+	infos, err := hid.Enumerate(hub.vendorID, 0)
+	if err != nil {
+		failcount := atomic.AddUint32(&hub.enumFails, 1)
+		if runtime.GOOS == "linux" {
+			// See rationale before the enumeration why this is needed and only on Linux.
+			hub.commsLock.Unlock()
+		}
+		log.Error("Failed to enumerate USB devices", "hub", hub.scheme,
+			"vendor", hub.vendorID, "failcount", failcount, "err", err)
+		return
+	}
+	atomic.StoreUint32(&hub.enumFails, 0)
+	
+	for _, info := range infos {
 		for _, id := range hub.productIDs {
 			if info.ProductID == id && (info.UsagePage == hub.usageID || info.Interface == hub.endpointID) {
 				devices = append(devices, info)
