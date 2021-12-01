@@ -333,6 +333,7 @@ func goToolArch(arch string, cc string, subcmd string, args ...string) *exec.Cmd
 
 func doTest(cmdline []string) {
 	coverage := flag.Bool("coverage", false, "Whether to record code coverage")
+	coverprofile := flag.Bool("coverprofile", false, "Whether to use coverprofile")
 	verbose := flag.Bool("v", false, "Whether to create verbose test output")
 	swarm := flag.Bool("swarm", false, "Whether to test swarm")
 	flag.CommandLine.Parse(cmdline)
@@ -361,6 +362,9 @@ func doTest(cmdline []string) {
 	gotest.Args = append(gotest.Args, "-p", "1", "-timeout", "10m")
 	if *coverage {
 		gotest.Args = append(gotest.Args, "-covermode=atomic", "-cover")
+	}
+	if *coverprofile {
+		gotest.Args = append(gotest.Args, "-coverprofile=.test-go-cover.out")
 	}
 	if *verbose {
 		gotest.Args = append(gotest.Args, "-v")

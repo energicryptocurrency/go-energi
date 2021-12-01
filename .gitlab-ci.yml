@@ -122,7 +122,6 @@ build-release-windows:
   before_script:
     - pwd
   script:
-
     - make -f Makefile.release release-windows
     - make -f Makefile.release release-upload
   only:
@@ -144,13 +143,16 @@ test-go-report:
   stage: test
   extends: .merge-request-job
   script:
-    - make test-go-report
+    - make test-go-cover && tail -n1 .test-go-cover.func
   artifacts:
     when: always
     paths:
       - .test-go-report.xml
+      - .test-go-cover.func
+      - .test-go-cover.html
     reports:
       junit: .test-go-report.xml
+  coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
   retry:
     max: 2
     when:
