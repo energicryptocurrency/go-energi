@@ -22,7 +22,6 @@ import (
 
 	"energi.world/core/gen3/accounts"
 	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/math"
 	"energi.world/core/gen3/core"
 	"energi.world/core/gen3/core/bloombits"
 	"energi.world/core/gen3/core/rawdb"
@@ -106,7 +105,6 @@ func (b *LesApiBackend) GetTd(hash common.Hash) *big.Int {
 }
 
 func (b *LesApiBackend) GetEVM(ctx context.Context, msg core.Message, state *state.StateDB, header *types.Header) (*vm.EVM, func() error, error) {
-	state.SetBalance(msg.From(), math.MaxBig256)
 	context := core.NewEVMContext(msg, header, b.eth.blockchain, nil)
 	return vm.NewEVM(context, state, b.eth.chainConfig, vm.Config{}), state.Error, nil
 }
