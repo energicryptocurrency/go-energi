@@ -10,9 +10,7 @@ TARGET_TOOLS += clef
 TARGET_TOOLS += evm
 TARGET_TOOLS += rlpdump
 
-RELEASE_GOFLAGS =
-#RELEASE_GOFLAGS = -mod=mod
-#RELEASE_GOFLAGS+=-v
+RELEASE_GOFLAGS = -mod=mod
 
 RELEASE_MAIN = energi3
 RELEASE_RAW_VER = $(shell jq -r .version package.json)
