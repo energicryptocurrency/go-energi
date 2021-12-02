@@ -137,8 +137,8 @@ release-windows-common:
 	    export GOCACHE=$(CURDIR)/build/release/$(RELEASE_TARGET)/cache; \
 	    export PREFIX=/usr/$(HOST); \
 	    export PKG_CONFIG_PATH=/usr/$(HOST)/lib/pkgconfig; \
-	    export CC=$(HOST)-gcc-7.3-posix; \
-	    export CXX=$(HOST)-g++-7.3-posix; \
+	    export CC=$(HOST)-gcc-8.3-posix; \
+	    export CXX=$(HOST)-g++-8.3-posix; \
 	    export CGO_CFLAGS="-D_WIN32_WINNT=0x0601"; \
 	    export CGO_CXXFLAGS="$$CGO_CXXFLAGS"; \
 	    export CGO_ENABLED=1; \
