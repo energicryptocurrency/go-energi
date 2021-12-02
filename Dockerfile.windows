@@ -1,5 +1,5 @@
-# Ubuntu 19.04 is our base image for building Windows
-FROM ubuntu:19.04
+# Ubuntu 20.04 is our base image for building Windows
+FROM ubuntu:20.04
 
 # This is required to be able to connect
 ENV GIT_SSL_NO_VERIFY=1
@@ -9,7 +9,7 @@ ENV TZ=GMT
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # update software
-RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
+#RUN sed -i -re 's/([a-z]{2}\.)?archive.ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list
 RUN apt-get update
 RUN apt -y full-upgrade
 RUN apt -y autoremove
