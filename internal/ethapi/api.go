@@ -50,7 +50,6 @@ import (
 )
 
 const (
-	defaultGasPrice     = params.GWei
 	capTraceInputLength = 64 * 1024
 )
 
@@ -728,7 +727,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 	}
 	gasPrice := args.GasPrice.ToInt()
 	if gasPrice.Sign() == 0 {
-		gasPrice = new(big.Int).SetUint64(defaultGasPrice)
+		gasPrice = new(big.Int)
 	}
 	// Create new call message
 	msg := types.NewMessage(addr, args.To, 0, args.Value.ToInt(), gas, gasPrice, args.Data, false)

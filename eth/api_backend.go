@@ -24,7 +24,6 @@ import (
 
 	"energi.world/core/gen3/accounts"
 	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/math"
 	"energi.world/core/gen3/core"
 	"energi.world/core/gen3/core/bloombits"
 	"energi.world/core/gen3/core/state"
@@ -133,7 +132,6 @@ func (b *EthAPIBackend) GetTd(blockHash common.Hash) *big.Int {
 }
 
 func (b *EthAPIBackend) GetEVM(ctx context.Context, msg core.Message, state *state.StateDB, header *types.Header) (*vm.EVM, func() error, error) {
-	state.SetBalance(msg.From(), math.MaxBig256)
 	vmError := func() error { return nil }
 
 	context := core.NewEVMContext(msg, header, b.eth.BlockChain(), nil)
