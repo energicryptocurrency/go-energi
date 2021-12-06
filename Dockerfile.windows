@@ -1,8 +1,6 @@
 # Ubuntu 20.04 is our base image for building Windows
 FROM ubuntu:20.04
 
-# This is required to be able to connect
-ENV GIT_SSL_NO_VERIFY=1
 
 # set up timezone
 ENV TZ=GMT
