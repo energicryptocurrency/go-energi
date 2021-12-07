@@ -1,7 +1,6 @@
 # Ubuntu 20.04 is our base image for building Windows
 FROM ubuntu:20.04
 
-
 # set up timezone
 ENV TZ=GMT
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

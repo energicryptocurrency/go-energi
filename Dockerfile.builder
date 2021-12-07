@@ -66,7 +66,6 @@ ARG truffle_version="5.4.0"
 RUN npm -g config set user root
 RUN npm install -g yarn ganache-cli@${ganache_version} truffle@${truffle_version}
 
-
 # /builds/energi/tech/gen3/energi3
 RUN mkdir -p "/builds/energi/tech/gen3"
 WORKDIR "/builds/energi/tech/gen3"
