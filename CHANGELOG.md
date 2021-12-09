@@ -3,21 +3,21 @@
 # 3.1.1 (Asgard Hard Fork)
 
 ### Added
-- Preimage exception package
+- Preimage exception package which fixes full sync
 - Checkpoint for Asgard hard fork block
 - Checkpoints for testnet
-- New chekpoint registry (allows sync from the genesis block)
 - Icon on Windows
 
 ### Changed
 - Various code optimizations
-- Proposal fee structure: from 100 NRG to 300 NRG + 0.2% of the amount
+- Treasury proposal fee structure: from 100 NRG to 300 NRG + 0.2% of the amount
 - Renamed `autocollateralize` to `autocompounding`
 
 ### Fixed
-- Errors on tests
-- Wrong port on testnet
+- Unit tests
+- Wrong port log message on testnet
 - Balance issue in EVM affecting `msg.sender`
+- Further enhancements to checkpoint registry
 
 ## 3.1.0 (Asgard Hard Fork)
 
