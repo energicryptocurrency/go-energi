@@ -20,6 +20,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4
 	github.com/hashicorp/golang-lru v0.5.4
+	github.com/hashtobewild/go-duktape v0.0.0-20211213115919-1fd03768ffa8
 	github.com/huin/goupnp v1.0.2
 	github.com/influxdata/influxdb v1.9.5
 	github.com/jackpal/go-nat-pmp v1.0.2
@@ -48,7 +49,6 @@ require (
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce
-	gopkg.in/olebedev/go-duktape.v3 v3.0.0-20200619000410-60c24ae608a6
 	gopkg.in/urfave/cli.v1 v1.20.0
 	gotest.tools/v3 v3.0.3 // indirect
 )

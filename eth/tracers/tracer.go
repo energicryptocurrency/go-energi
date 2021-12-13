@@ -31,7 +31,7 @@ import (
 	"energi.world/core/gen3/core/vm"
 	"energi.world/core/gen3/crypto"
 	"energi.world/core/gen3/log"
-	duktape "gopkg.in/olebedev/go-duktape.v3"
+	duktape "github.com/hashtobewild/go-duktape"
 )
 
 // bigIntegerJS is the minified version of https://github.com/peterolson/BigInteger.js.
