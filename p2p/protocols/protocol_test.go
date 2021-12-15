@@ -25,12 +25,12 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/rlp"
 
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	p2ptest "energi.world/core/gen3/p2p/testing"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	p2ptest "github.com/energicryptocurrency/energi/p2p/testing"
 )
 
 // handshake message type

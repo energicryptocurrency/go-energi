@@ -23,15 +23,15 @@ import (
 	"os"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 func BenchmarkInsertChain_empty_memdb(b *testing.B) {

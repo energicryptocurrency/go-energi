@@ -26,17 +26,17 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/swarm/network"
-	"energi.world/core/gen3/swarm/pss"
-	"energi.world/core/gen3/swarm/state"
-	whisper "energi.world/core/gen3/whisper/whisperv6"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/swarm/network"
+	"github.com/energicryptocurrency/energi/swarm/pss"
+	"github.com/energicryptocurrency/energi/swarm/state"
+	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
 )
 
 var (

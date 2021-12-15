@@ -26,8 +26,8 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common/mclock"
-	"energi.world/core/gen3/light"
+	"github.com/energicryptocurrency/energi/common/mclock"
+	"github.com/energicryptocurrency/energi/light"
 )
 
 var (

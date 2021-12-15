@@ -25,8 +25,8 @@ import (
 	"runtime"
 	"testing"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p"
 )
 
 // Tests that datadirs can be successfully created, be them manually configured

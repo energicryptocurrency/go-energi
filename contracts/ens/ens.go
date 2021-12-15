@@ -23,11 +23,11 @@ package ens
 import (
 	"strings"
 
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/contracts/ens/contract"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/contracts/ens/contract"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 var (

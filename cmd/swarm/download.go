@@ -23,10 +23,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/api"
-	swarm "energi.world/core/gen3/swarm/api/client"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

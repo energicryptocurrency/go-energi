@@ -26,15 +26,15 @@ import (
 	"math/big"
 	"reflect"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/accounts/usbwallet"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/accounts/usbwallet"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // numberOfAccountsToDerive For hardware wallets, the number of accounts to derive
@@ -519,7 +519,7 @@ func (api *SignerAPI) SignTransaction(ctx context.Context, args SendTxArgs, meth
 //
 // The key used to calculate the signature is decrypted with the given password.
 //
-// https://energi.world/core/gen3/wiki/Management-APIs#personal_sign
+// https://github.com/energicryptocurrency/energi/wiki/Management-APIs#personal_sign
 func (api *SignerAPI) Sign(ctx context.Context, addr common.MixedcaseAddress, data hexutil.Bytes) (hexutil.Bytes, error) {
 	sighash, msg := SignHash(data)
 	// We make the request prior to looking up if we actually have the account, to prevent

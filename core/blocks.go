@@ -17,7 +17,7 @@
 
 package core
 
-import "energi.world/core/gen3/common"
+import "github.com/energicryptocurrency/energi/common"
 
 // BadHashes represent a set of manually tracked bad hashes (usually hard forks)
 var BadHashes = map[common.Hash]bool{}

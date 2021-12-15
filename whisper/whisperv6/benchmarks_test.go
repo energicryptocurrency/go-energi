@@ -20,7 +20,7 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/crypto"
 	"golang.org/x/crypto/pbkdf2"
 )
 

@@ -25,14 +25,14 @@ import (
 	"net"
 	"os"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p/discover"
-	"energi.world/core/gen3/p2p/discv5"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/nat"
-	"energi.world/core/gen3/p2p/netutil"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p/discover"
+	"github.com/energicryptocurrency/energi/p2p/discv5"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/nat"
+	"github.com/energicryptocurrency/energi/p2p/netutil"
 )
 
 func main() {

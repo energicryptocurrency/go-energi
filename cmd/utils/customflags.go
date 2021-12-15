@@ -27,7 +27,7 @@ import (
 	"path"
 	"strings"
 
-	"energi.world/core/gen3/common/math"
+	"github.com/energicryptocurrency/energi/common/math"
 	"gopkg.in/urfave/cli.v1"
 )
 

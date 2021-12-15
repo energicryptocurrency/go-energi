@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 // TestDB_pullIndex validates the ordering of keys in pull index.

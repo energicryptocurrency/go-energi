@@ -58,9 +58,9 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/internal/build"
-	"energi.world/core/gen3/params"
-	sv "energi.world/core/gen3/swarm/version"
+	"github.com/energicryptocurrency/energi/internal/build"
+	"github.com/energicryptocurrency/energi/params"
+	sv "github.com/energicryptocurrency/energi/swarm/version"
 )
 
 var (
@@ -841,7 +841,7 @@ func doAndroidArchive(cmdline []string) {
 	// Build the Android archive and Maven resources
 	build.MustRun(goTool("get", "golang.org/x/mobile/cmd/gomobile", "golang.org/x/mobile/cmd/gobind"))
 	build.MustRun(gomobileTool("init", "--ndk", os.Getenv("ANDROID_NDK")))
-	build.MustRun(gomobileTool("bind", "-ldflags", "-s -w", "--target", "android", "--javapkg", "org.ethereum", "-v", "energi.world/core/gen3/mobile"))
+	build.MustRun(gomobileTool("bind", "-ldflags", "-s -w", "--target", "android", "--javapkg", "org.ethereum", "-v", "github.com/energicryptocurrency/energi/mobile"))
 
 	if *local {
 		// If we're building locally, copy bundle to build dir and skip Maven
@@ -962,7 +962,7 @@ func doXCodeFramework(cmdline []string) {
 	// Build the iOS XCode framework
 	build.MustRun(goTool("get", "golang.org/x/mobile/cmd/gomobile", "golang.org/x/mobile/cmd/gobind"))
 	build.MustRun(gomobileTool("init"))
-	bind := gomobileTool("bind", "-ldflags", "-s -w", "--target", "ios", "--tags", "ios", "-v", "energi.world/core/gen3/mobile")
+	bind := gomobileTool("bind", "-ldflags", "-s -w", "--target", "ios", "--tags", "ios", "-v", "github.com/energicryptocurrency/energi/mobile")
 
 	if *local {
 		// If we're building locally, use the build folder and stop afterwards

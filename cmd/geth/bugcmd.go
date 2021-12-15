@@ -27,10 +27,10 @@ import (
 	"runtime"
 	"strings"
 
-	"energi.world/core/gen3/cmd/internal/browser"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/cmd/internal/browser"
+	"github.com/energicryptocurrency/energi/params"
 
-	"energi.world/core/gen3/cmd/utils"
+	"github.com/energicryptocurrency/energi/cmd/utils"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -42,7 +42,7 @@ var bugCommand = cli.Command{
 	Category:  "MISCELLANEOUS COMMANDS",
 }
 
-const issueURL = "https://energi.world/core/gen3/issues/new"
+const issueURL = "https://github.com/energicryptocurrency/energi/issues/new"
 
 // reportBug reports a bug by opening a new URL to the go-ethereum GH issue
 // tracker and setting default values as the issue body.

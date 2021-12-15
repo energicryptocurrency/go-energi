@@ -21,8 +21,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // deployFaucet queries the user for various input on deploying a faucet, after

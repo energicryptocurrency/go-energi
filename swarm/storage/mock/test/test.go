@@ -25,9 +25,9 @@ import (
 	"strconv"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
 )
 
 // MockStore creates NodeStore instances from provided GlobalStorer,

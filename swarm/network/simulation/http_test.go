@@ -24,9 +24,9 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 )
 
 func TestSimulationWithHTTPServer(t *testing.T) {

@@ -21,7 +21,7 @@ package keystore
 import (
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 	"github.com/rjeczalik/notify"
 )
 

@@ -26,8 +26,8 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/swarm"
-	"energi.world/core/gen3/swarm/testutil"
+	"github.com/energicryptocurrency/energi/swarm"
+	"github.com/energicryptocurrency/energi/swarm/testutil"
 )
 
 // TestCLISwarmExportImport perform the following test:

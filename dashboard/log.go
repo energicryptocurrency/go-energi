@@ -26,7 +26,7 @@ import (
 	"sort"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 	"github.com/mohae/deepcopy"
 	"github.com/rjeczalik/notify"
 )

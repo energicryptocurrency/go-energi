@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p/simulations"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p/simulations"
 )
 
 // Package defaults.

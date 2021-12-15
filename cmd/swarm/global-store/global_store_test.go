@@ -26,9 +26,9 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/rpc"
-	mockRPC "energi.world/core/gen3/swarm/storage/mock/rpc"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/rpc"
+	mockRPC "github.com/energicryptocurrency/energi/swarm/storage/mock/rpc"
 )
 
 // TestHTTP_InMemory tests in-memory global store that exposes

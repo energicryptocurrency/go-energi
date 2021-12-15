@@ -28,13 +28,13 @@ import (
 
 	cli "gopkg.in/urfave/cli.v1"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/dashboard"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/params"
-	whisper "energi.world/core/gen3/whisper/whisperv6"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/dashboard"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/params"
+	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
 	"github.com/naoina/toml"
 )
 

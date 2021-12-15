@@ -19,11 +19,11 @@ package node
 import (
 	"reflect"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // ServiceContext is a collection of service independent options inherited from

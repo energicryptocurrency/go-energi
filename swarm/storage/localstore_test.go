@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	ch "energi.world/core/gen3/swarm/chunk"
+	ch "github.com/energicryptocurrency/energi/swarm/chunk"
 )
 
 var (

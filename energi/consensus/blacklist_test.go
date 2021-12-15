@@ -23,22 +23,22 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/accounts/abi"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
+	"github.com/energicryptocurrency/energi/accounts/abi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
 
-	// "energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	// "github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 
 	"github.com/stretchr/testify/assert"
 
-	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 func TestBlacklist(t *testing.T) {

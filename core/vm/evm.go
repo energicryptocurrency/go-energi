@@ -22,9 +22,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 // emptyCodeHash is used by create to ensure deployment is disallowed to already

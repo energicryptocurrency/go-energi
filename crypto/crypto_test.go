@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 )
 
 var testAddrHex = "970e8128ab834e8eac17ab8e3812f010678cf791"

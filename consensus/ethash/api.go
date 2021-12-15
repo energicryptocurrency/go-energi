@@ -19,9 +19,9 @@ package ethash
 import (
 	"errors"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 var errEthashStopped = errors.New("ethash stopped")

@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"sync"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/trie"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/trie"
 	lru "github.com/hashicorp/golang-lru"
 )
 

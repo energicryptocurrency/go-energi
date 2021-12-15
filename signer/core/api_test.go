@@ -29,13 +29,13 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 //Used for testing

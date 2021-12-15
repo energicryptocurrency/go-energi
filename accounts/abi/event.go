@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 // Event is an event potentially triggered by the EVM's LOG mechanism. The Event

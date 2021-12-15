@@ -17,9 +17,9 @@
 package runtime
 
 import (
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/vm"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/vm"
 )
 
 func NewEnv(cfg *Config) *vm.EVM {

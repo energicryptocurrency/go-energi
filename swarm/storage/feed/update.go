@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"energi.world/core/gen3/swarm/chunk"
+	"github.com/energicryptocurrency/energi/swarm/chunk"
 )
 
 // ProtocolVersion defines the current version of the protocol that will be included in each update message

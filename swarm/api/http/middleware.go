@@ -24,11 +24,11 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/swarm/api"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/sctx"
-	"energi.world/core/gen3/swarm/spancontext"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/sctx"
+	"github.com/energicryptocurrency/energi/swarm/spancontext"
 	"github.com/pborman/uuid"
 )
 

@@ -29,11 +29,11 @@ import (
 	"os"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/sctx"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/sctx"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 func init() {

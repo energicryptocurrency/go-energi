@@ -24,7 +24,7 @@ import (
 	"math/big"
 	"strings"
 
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // RLPTest is the JSON structure of a single RLP test.

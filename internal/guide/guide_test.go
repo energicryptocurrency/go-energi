@@ -31,8 +31,8 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 // Tests that the account management snippets work correctly.

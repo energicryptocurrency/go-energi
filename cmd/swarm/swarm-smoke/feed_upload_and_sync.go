@@ -29,12 +29,12 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/swarm/storage/feed"
-	"energi.world/core/gen3/swarm/testutil"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/swarm/testutil"
 	"github.com/pborman/uuid"
 	cli "gopkg.in/urfave/cli.v1"
 )

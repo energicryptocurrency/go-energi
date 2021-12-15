@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 

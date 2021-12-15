@@ -25,11 +25,11 @@ import (
 	"io/ioutil"
 	"math/big"
 
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/accounts/abi/bind/backends"
-	"energi.world/core/gen3/contracts/chequebook/contract"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind/backends"
+	"github.com/energicryptocurrency/energi/contracts/chequebook/contract"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 var (

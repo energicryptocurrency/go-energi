@@ -34,7 +34,7 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // Handler is the global debugging handler.

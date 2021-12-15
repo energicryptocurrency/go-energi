@@ -30,8 +30,8 @@ import (
 	"strconv"
 	"strings"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 // Node represents a host on the network.

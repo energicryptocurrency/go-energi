@@ -21,11 +21,11 @@ import (
 	"errors"
 	"fmt"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 // Wrapper for receiving pss messages when using the pss API

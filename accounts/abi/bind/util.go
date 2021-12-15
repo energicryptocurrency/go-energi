@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // WaitMined waits for tx to be mined on the blockchain.

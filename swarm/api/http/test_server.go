@@ -23,9 +23,9 @@ import (
 	"os"
 	"testing"
 
-	"energi.world/core/gen3/swarm/api"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
 )
 
 type TestServer interface {

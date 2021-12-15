@@ -26,7 +26,7 @@ import (
 	"net"
 	"strings"
 
-	"energi.world/core/gen3/p2p/enr"
+	"github.com/energicryptocurrency/energi/p2p/enr"
 )
 
 // Node represents a host on the network.

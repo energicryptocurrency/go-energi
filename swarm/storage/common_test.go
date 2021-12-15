@@ -29,8 +29,8 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/log"
-	ch "energi.world/core/gen3/swarm/chunk"
+	"github.com/energicryptocurrency/energi/log"
+	ch "github.com/energicryptocurrency/energi/swarm/chunk"
 	"github.com/mattn/go-colorable"
 )
 

@@ -18,8 +18,8 @@
 package log
 
 import (
-	l "energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
+	l "github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
 )
 
 const (

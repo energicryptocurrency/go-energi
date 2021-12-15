@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/common/math"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/common/math"
 )
 
 var _ = (*stTransactionMarshaling)(nil)

@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 const (

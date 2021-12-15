@@ -27,8 +27,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
 )
 
 // GlobalStore contains the LevelDB database that is storing

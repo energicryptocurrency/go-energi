@@ -39,12 +39,12 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/swarm/spancontext"
-	"energi.world/core/gen3/swarm/tracing"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/swarm/spancontext"
+	"github.com/energicryptocurrency/energi/swarm/tracing"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

@@ -25,9 +25,9 @@ import (
 
 	"sync"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/log"
 	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/ssh/terminal"
 )

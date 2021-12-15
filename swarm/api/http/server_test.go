@@ -38,17 +38,17 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/api"
-	swarm "energi.world/core/gen3/swarm/api/client"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/feed"
-	"energi.world/core/gen3/swarm/testutil"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/swarm/testutil"
 )
 
 func init() {

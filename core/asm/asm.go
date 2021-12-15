@@ -21,7 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"energi.world/core/gen3/core/vm"
+	"github.com/energicryptocurrency/energi/core/vm"
 )
 
 // Iterator for disassembled EVM instructions

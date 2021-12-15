@@ -26,9 +26,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 const maxParallelFiles = 5

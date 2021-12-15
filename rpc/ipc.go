@@ -20,8 +20,8 @@ import (
 	"context"
 	"net"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p/netutil"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p/netutil"
 )
 
 // ServeListener accepts connections on l, serving JSON-RPC on them.

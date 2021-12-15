@@ -25,14 +25,14 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 // max number of checkpoints stored in validated checkpoint map

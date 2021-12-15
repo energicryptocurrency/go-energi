@@ -20,10 +20,10 @@ package keystore
 import (
 	"math/big"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 // keystoreWallet implements the accounts.Wallet interface for the original

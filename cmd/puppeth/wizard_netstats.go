@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/log"
 	"github.com/olekukonko/tablewriter"
 )
 

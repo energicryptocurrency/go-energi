@@ -20,15 +20,15 @@ import (
 	"context"
 	"math/big"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_common "energi.world/core/gen3/energi/common"
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 type CheckpointAdminAPI struct {

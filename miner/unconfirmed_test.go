@@ -19,8 +19,8 @@ package miner
 import (
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 // noopChainRetriever is an implementation of headerRetriever that always

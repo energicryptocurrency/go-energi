@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // nginxDockerfile is theis the Dockerfile required to build an nginx reverse-

@@ -21,12 +21,12 @@ import (
 	"errors"
 	"fmt"
 
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/network"
-	"energi.world/core/gen3/swarm/spancontext"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/network"
+	"github.com/energicryptocurrency/energi/swarm/spancontext"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

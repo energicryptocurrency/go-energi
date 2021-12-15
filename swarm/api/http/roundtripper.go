@@ -20,17 +20,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 /*
 http roundtripper to register for bzz url scheme
-see https://energi.world/core/gen3/issues/2040
+see https://github.com/energicryptocurrency/energi/issues/2040
 Usage:
 
 import (
- "energi.world/core/gen3/common/httpclient"
- "energi.world/core/gen3/swarm/api/http"
+ "github.com/energicryptocurrency/energi/common/httpclient"
+ "github.com/energicryptocurrency/energi/swarm/api/http"
 )
 client := httpclient.New()
 // for (private) swarm proxy running locally

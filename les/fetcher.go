@@ -22,13 +22,13 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/mclock"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/light"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/mclock"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/light"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 const (

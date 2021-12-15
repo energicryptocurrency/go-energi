@@ -27,8 +27,8 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
 )
 
 // GlobalStore stores all chunk data and also keys and node addresses relations.

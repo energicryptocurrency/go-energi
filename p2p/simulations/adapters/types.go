@@ -25,11 +25,11 @@ import (
 	"os"
 	"strconv"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/rpc"
 	"github.com/docker/docker/pkg/reexec"
 )
 

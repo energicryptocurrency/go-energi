@@ -165,7 +165,7 @@ class Footer extends Component<Props> {
 					{general.commit && (
 						<Typography type='caption' color='inherit'>
 							<span style={commonStyles.light}>{'Commit '}</span>
-							<a href={`https://energi.world/core/gen3/commit/${general.commit}`} target='_blank' style={{color: 'inherit', textDecoration: 'none'}} >
+							<a href={`https://github.com/energicryptocurrency/energi/commit/${general.commit}`} target='_blank' style={{color: 'inherit', textDecoration: 'none'}} >
 								{general.commit.substring(0, 8)}
 							</a>
 						</Typography>

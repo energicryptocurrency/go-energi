@@ -19,7 +19,7 @@
 package fetcher
 
 import (
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/metrics"
 )
 
 var (

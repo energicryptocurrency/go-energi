@@ -25,8 +25,8 @@ import (
 	"errors"
 	"fmt"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 )

@@ -27,11 +27,11 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 const (

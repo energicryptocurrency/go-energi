@@ -22,10 +22,10 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rlp"
 	mapset "github.com/deckarep/golang-set"
 )
 

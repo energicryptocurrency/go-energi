@@ -20,7 +20,7 @@ package lookup_test
 import (
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 )
 
 func TestMarshallers(t *testing.T) {

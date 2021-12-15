@@ -19,7 +19,7 @@ package netutil
 import (
 	"time"
 
-	"energi.world/core/gen3/common/mclock"
+	"github.com/energicryptocurrency/energi/common/mclock"
 )
 
 // IPTracker predicts the external endpoint, i.e. IP address and port, of the local host

@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common/mclock"
+	"github.com/energicryptocurrency/energi/common/mclock"
 )
 
 const (

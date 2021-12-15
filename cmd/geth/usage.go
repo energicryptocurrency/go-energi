@@ -25,8 +25,8 @@ import (
 
 	"strings"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/internal/debug"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/internal/debug"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

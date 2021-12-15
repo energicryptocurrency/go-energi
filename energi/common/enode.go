@@ -19,10 +19,10 @@ package common
 import (
 	"net"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 func MastenodeEnode(ipv4address uint32, pubkey [2][32]byte, cfg *params.ChainConfig) *enode.Node {

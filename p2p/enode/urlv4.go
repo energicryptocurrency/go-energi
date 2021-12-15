@@ -26,9 +26,9 @@ import (
 	"regexp"
 	"strconv"
 
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p/enr"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p/enr"
 )
 
 var incompleteNodeURL = regexp.MustCompile("(?i)^(?:enode://)?([0-9a-f]+)$")

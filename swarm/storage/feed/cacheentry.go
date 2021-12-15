@@ -21,7 +21,7 @@ import (
 	"context"
 	"time"
 
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 const (

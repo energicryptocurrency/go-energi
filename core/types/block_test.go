@@ -23,8 +23,8 @@ import (
 	"reflect"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // from bcValidBlockTest.json, "SimpleTx"

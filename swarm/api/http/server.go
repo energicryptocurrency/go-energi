@@ -35,12 +35,12 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/swarm/api"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
 	"github.com/rs/cors"
 )
 

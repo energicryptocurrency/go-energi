@@ -20,11 +20,11 @@ import (
 	"bytes"
 	"fmt"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // Prove constructs a merkle proof for key. The result contains all encoded nodes

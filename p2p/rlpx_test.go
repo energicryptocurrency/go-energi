@@ -31,10 +31,10 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/crypto/ecies"
-	"energi.world/core/gen3/p2p/simulations/pipes"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/crypto/ecies"
+	"github.com/energicryptocurrency/energi/p2p/simulations/pipes"
+	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/sha3"
 )

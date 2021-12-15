@@ -25,16 +25,16 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/protocols"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/network"
-	"energi.world/core/gen3/swarm/network/stream/intervals"
-	"energi.world/core/gen3/swarm/state"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/protocols"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/network"
+	"github.com/energicryptocurrency/energi/swarm/network/stream/intervals"
+	"github.com/energicryptocurrency/energi/swarm/state"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 const (

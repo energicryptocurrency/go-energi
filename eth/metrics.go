@@ -17,8 +17,8 @@
 package eth
 
 import (
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/p2p"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/p2p"
 )
 
 var (

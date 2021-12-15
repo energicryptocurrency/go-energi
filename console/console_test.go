@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/internal/jsre"
-	"energi.world/core/gen3/node"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/internal/jsre"
+	"github.com/energicryptocurrency/energi/node"
 )
 
 const (

@@ -23,8 +23,8 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	eth_common "energi.world/core/gen3/common"
-	eth_types "energi.world/core/gen3/core/types"
+	eth_common "github.com/energicryptocurrency/energi/common"
+	eth_types "github.com/energicryptocurrency/energi/core/types"
 )
 
 // ErrInvalidData is returned if the CacheQuery function returns a null result

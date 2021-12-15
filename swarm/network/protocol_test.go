@@ -24,11 +24,11 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/protocols"
-	p2ptest "energi.world/core/gen3/p2p/testing"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/protocols"
+	p2ptest "github.com/energicryptocurrency/energi/p2p/testing"
 )
 
 const (

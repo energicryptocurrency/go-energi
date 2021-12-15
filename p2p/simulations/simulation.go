@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"energi.world/core/gen3/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/enode"
 )
 
 // Simulation provides a framework for running actions in a simulated network

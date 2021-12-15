@@ -25,9 +25,9 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/swarm/api"
-	"energi.world/core/gen3/swarm/api/client"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

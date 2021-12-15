@@ -23,12 +23,12 @@ import (
 	"fmt"
 	"math/big"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/accounts/abi"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/event"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/accounts/abi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/event"
 )
 
 // SignerFn is a signer function callback when a contract requires a method to

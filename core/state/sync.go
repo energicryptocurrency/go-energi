@@ -19,9 +19,9 @@ package state
 import (
 	"bytes"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/trie"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/trie"
 )
 
 // NewStateSync create a new state trie download scheduler.

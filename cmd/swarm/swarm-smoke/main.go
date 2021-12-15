@@ -22,13 +22,13 @@ import (
 	"os"
 	"sort"
 
-	"energi.world/core/gen3/cmd/utils"
-	gethmetrics "energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/metrics/influxdb"
-	swarmmetrics "energi.world/core/gen3/swarm/metrics"
-	"energi.world/core/gen3/swarm/tracing"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	gethmetrics "github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/metrics/influxdb"
+	swarmmetrics "github.com/energicryptocurrency/energi/swarm/metrics"
+	"github.com/energicryptocurrency/energi/swarm/tracing"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

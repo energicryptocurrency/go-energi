@@ -25,9 +25,9 @@ import (
 	"fmt"
 	"io"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/bmt"
-	ch "energi.world/core/gen3/swarm/chunk"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/bmt"
+	ch "github.com/energicryptocurrency/energi/swarm/chunk"
 	"golang.org/x/crypto/sha3"
 )
 

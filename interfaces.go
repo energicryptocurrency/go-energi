@@ -22,8 +22,8 @@ import (
 	"errors"
 	"math/big"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 // NotFound is returned by API methods if the requested item does not exist.

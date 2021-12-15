@@ -27,17 +27,17 @@ import (
 	"strings"
 	"sync"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/accounts/usbwallet"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/accounts/usbwallet"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_api "energi.world/core/gen3/energi/api"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
 )
 
 const (

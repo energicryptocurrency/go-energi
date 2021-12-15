@@ -23,21 +23,21 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"energi.world/core/gen3/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	// "energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	// "github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_api "energi.world/core/gen3/energi/api"
-	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_params "energi.world/core/gen3/energi/params"
-	energi_common "energi.world/core/gen3/energi/common"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
 
 
 )

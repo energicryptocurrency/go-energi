@@ -20,7 +20,7 @@ import (
 	"errors"
 	"math/big"
 
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 type (

@@ -21,8 +21,8 @@ import (
 	"container/heap"
 	"errors"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // Iterator is a key-value trie iterator that traverses a Trie.

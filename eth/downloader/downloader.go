@@ -26,15 +26,15 @@ import (
 	"sync/atomic"
 	"time"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/params"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 var (

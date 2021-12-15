@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/energi/consensus"
-	"energi.world/core/gen3/energi/params"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/energi/consensus"
+	"github.com/energicryptocurrency/energi/energi/params"
 	"fmt"
 	"io/ioutil"
 	"math/big"

@@ -19,9 +19,9 @@ package trie
 import (
 	"fmt"
 	"reflect"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/energi/exceptions"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/energi/exceptions"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all

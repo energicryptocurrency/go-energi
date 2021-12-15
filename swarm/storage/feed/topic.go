@@ -21,9 +21,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"energi.world/core/gen3/common/bitutil"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/common/bitutil"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 // TopicLength establishes the max length of a topic string

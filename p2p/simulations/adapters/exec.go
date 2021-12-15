@@ -35,11 +35,11 @@ import (
 	"syscall"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/rpc"
 	"github.com/docker/docker/pkg/reexec"
 	"golang.org/x/net/websocket"
 )

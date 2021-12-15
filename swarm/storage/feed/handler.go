@@ -24,10 +24,10 @@ import (
 	"fmt"
 	"sync"
 
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 type Handler struct {

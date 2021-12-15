@@ -23,9 +23,8 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
-	//cli "gopkg.in/urfave/cli.v1"
-	//	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p"
+
+	"github.com/energicryptocurrency/energi/p2p"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
