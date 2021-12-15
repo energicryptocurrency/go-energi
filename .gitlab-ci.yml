@@ -143,17 +143,14 @@ build-release-windows:
   only:
     - tags
 
-#
-# TODO: macos is a native compile, this can't run in docker needs a macos runner
-#release-build-macos:
-#  stage: build
-#  tags: [docker_mac_runner]
-#  script:
-#    - make -f Makefile.release release-macos
-#  rules:
-#    - only:
-#      - develop
-#      - master
+build-release-macos:
+  stage: build
+  tags: [docker_mac_runner]
+  script:
+    - make -f Makefile.release release-macos
+    - make -f Makefile.release release-upload
+  only:
+    - tags
 
 test-go-report:
   stage: test
@@ -193,13 +190,3 @@ test-solidity:
       - script_failure
       - runner_system_failure
       - stuck_or_timeout_failure
-#deploy-release:
-#  stage: deploy
-#  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder
-#  before_script:
-#    - pwd
-#  script:
-#    - make -f Makefile.release release-upload
-#  only:
-#    - tags
