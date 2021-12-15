@@ -2,12 +2,15 @@ Section "Uninstall"
   # uninstall for all users
   setShellVarContext all
 
-  # Delete (optionally) installed files
+  # Delete (explicitly) installed files
   #{{range $}}Delete $INSTDIR\{{.}}
   #{{end}}
-  Delete $INSTDIR\uninstall.exe
+  Delete $INSTDIR\energi-icon.ico
+  Delete $INSTDIR\bin\energi3.exe
+  Delete $INSTDIR\bin\uninstall.exe
 
   # Delete install directory
+  rmDir "$INSTDIR\bin"
   rmDir $INSTDIR
 
   # Delete start menu launcher
