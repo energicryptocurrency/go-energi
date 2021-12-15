@@ -24,8 +24,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 var testDownloadDir, _ = ioutil.TempDir(os.TempDir(), "bzz-test")

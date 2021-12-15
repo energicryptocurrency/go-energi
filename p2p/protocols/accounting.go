@@ -19,7 +19,7 @@ package protocols
 import (
 	"time"
 
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/metrics"
 )
 
 // define some metrics

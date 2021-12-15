@@ -6,10 +6,10 @@ package contract
 import (
 	"strings"
 
-	"energi.world/core/gen3/accounts/abi"
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/accounts/abi"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 // FIFSRegistrarABI is the input ABI used to generate the binding from.

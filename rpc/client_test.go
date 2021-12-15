@@ -31,7 +31,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -324,7 +324,7 @@ func TestClientSubscribeClose(t *testing.T) {
 	}
 }
 
-// This test reproduces https://energi.world/core/gen3/issues/17837 where the
+// This test reproduces https://github.com/energicryptocurrency/energi/issues/17837 where the
 // client hangs during shutdown when Unsubscribe races with Client.Close.
 func TestClientCloseUnsubscribeRace(t *testing.T) {
 	service := &NotificationTestService{}

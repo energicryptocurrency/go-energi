@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/ethdb"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/ethdb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

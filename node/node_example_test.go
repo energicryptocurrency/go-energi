@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"log"
 
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // SampleService is a trivial network service that can be attached to a node for

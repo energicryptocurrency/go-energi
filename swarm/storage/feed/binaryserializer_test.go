@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"energi.world/core/gen3/common/hexutil"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 )
 
 // KV mocks a key value store

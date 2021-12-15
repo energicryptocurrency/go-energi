@@ -23,9 +23,9 @@ import (
 	"errors"
 	"time"
 
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/protocols"
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/protocols"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 // Generic ping protocol implementation for

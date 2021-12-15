@@ -20,7 +20,7 @@ import (
 	"context"
 	"path"
 
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 type Response struct {

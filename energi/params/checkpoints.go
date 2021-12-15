@@ -17,8 +17,8 @@
 package params
 
 import (
-	"energi.world/core/gen3/common"
-	eth_params "energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	eth_params "github.com/energicryptocurrency/energi/params"
 )
 
 // map Genesis to map of checkpoints

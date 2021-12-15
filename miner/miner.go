@@ -23,17 +23,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 // Backend wraps all methods required for mining.

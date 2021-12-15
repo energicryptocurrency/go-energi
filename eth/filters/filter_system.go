@@ -25,14 +25,14 @@ import (
 	"sync"
 	"time"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rpc"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // Type determines the kind of filter and is used to put the filter in to

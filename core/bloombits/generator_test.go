@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 // Tests that batched bloom bits are correctly rotated from the input bloom

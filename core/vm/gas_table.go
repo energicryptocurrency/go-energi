@@ -17,9 +17,9 @@
 package vm
 
 import (
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 // memoryGasCosts calculates the quadratic gas for memory expansion. It does so

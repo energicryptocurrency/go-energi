@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 func TestPack(t *testing.T) {

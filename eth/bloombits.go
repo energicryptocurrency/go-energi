@@ -20,13 +20,13 @@ import (
 	"context"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/bitutil"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/bloombits"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/ethdb"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/bitutil"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/bloombits"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/ethdb"
 )
 
 const (

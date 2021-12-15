@@ -22,8 +22,8 @@ package node
 import (
 	"reflect"
 
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // NoopService is a trivial implementation of the Service interface.

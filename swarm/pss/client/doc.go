@@ -28,11 +28,11 @@
 //  	"context"
 //  	"fmt"
 //  	"os"
-//  	pss "energi.world/core/gen3/swarm/pss/client"
-//  	"energi.world/core/gen3/p2p/protocols"
-//  	"energi.world/core/gen3/p2p"
-//  	"energi.world/core/gen3/swarm/pot"
-//  	"energi.world/core/gen3/swarm/log"
+//  	pss "github.com/energicryptocurrency/energi/swarm/pss/client"
+//  	"github.com/energicryptocurrency/energi/p2p/protocols"
+//  	"github.com/energicryptocurrency/energi/p2p"
+//  	"github.com/energicryptocurrency/energi/swarm/pot"
+//  	"github.com/energicryptocurrency/energi/swarm/log"
 //  )
 //
 //  type FooMsg struct {

@@ -21,14 +21,14 @@ import (
 	crand "crypto/rand"
 	"math/big"
 
-	ethereum "energi.world/core/gen3"
+	ethereum "github.com/energicryptocurrency/energi"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/event"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/event"
 
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 type EphemeralWallet struct{}

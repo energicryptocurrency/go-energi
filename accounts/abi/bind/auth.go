@@ -22,10 +22,10 @@ import (
 	"io"
 	"io/ioutil"
 
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 // NewTransactor is a utility method to easily create a transaction signer from

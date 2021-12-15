@@ -20,10 +20,10 @@ package simulations
 import (
 	"testing"
 
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/enr"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/enr"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // NoopService is the service that does not do anything

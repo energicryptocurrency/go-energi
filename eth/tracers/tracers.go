@@ -21,7 +21,7 @@ import (
 	"strings"
 	"unicode"
 
-	"energi.world/core/gen3/eth/tracers/internal/tracers"
+	"github.com/energicryptocurrency/energi/eth/tracers/internal/tracers"
 )
 
 // all contains all the built in JavaScript tracers by name.

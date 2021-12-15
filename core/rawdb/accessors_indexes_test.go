@@ -20,9 +20,9 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/ethdb"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/ethdb"
 )
 
 // Tests that positional lookup metadata can be stored and retrieved.

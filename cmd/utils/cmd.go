@@ -27,16 +27,16 @@ import (
 	"strings"
 	"syscall"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/internal/debug"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/internal/debug"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 const (

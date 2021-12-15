@@ -27,10 +27,10 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
 	"github.com/cespare/cp"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 var (

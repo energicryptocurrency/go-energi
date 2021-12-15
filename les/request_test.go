@@ -21,11 +21,11 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/light"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/light"
 )
 
 var testBankSecureTrieKey = secAddr(testBankAddress)

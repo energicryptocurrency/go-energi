@@ -23,7 +23,7 @@ import (
 	"os"
 	"runtime/trace"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // StartGoTrace turns on tracing, writing to the given file.

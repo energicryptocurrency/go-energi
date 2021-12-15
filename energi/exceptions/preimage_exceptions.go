@@ -3,8 +3,8 @@ package exceptions
 import (
 	"math/big"
 	"sync/atomic"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 /*

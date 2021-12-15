@@ -27,9 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/p2p/enode"
-	ch "energi.world/core/gen3/swarm/chunk"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	ch "github.com/energicryptocurrency/energi/swarm/chunk"
 )
 
 var sourcePeerID = enode.HexID("99d8594b52298567d2ca3f4c441a5ba0140ee9245e26460d01102a52773c73b9")

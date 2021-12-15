@@ -21,9 +21,9 @@ import (
 	"context"
 	"sync"
 
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 type StdIOUI struct {

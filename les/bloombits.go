@@ -19,8 +19,8 @@ package les
 import (
 	"time"
 
-	"energi.world/core/gen3/common/bitutil"
-	"energi.world/core/gen3/light"
+	"github.com/energicryptocurrency/energi/common/bitutil"
+	"github.com/energicryptocurrency/energi/light"
 )
 
 const (

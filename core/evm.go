@@ -20,10 +20,10 @@ package core
 import (
 	"math/big"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
 )
 
 // ChainContext supports retrieving headers and consensus parameters from the

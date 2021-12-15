@@ -24,12 +24,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // ChainIndexerBackend defines the methods needed to process chain segments in

@@ -21,7 +21,7 @@ package geth
 import (
 	"errors"
 
-	"energi.world/core/gen3/p2p"
+	"github.com/energicryptocurrency/energi/p2p"
 )
 
 // NodeInfo represents pi short summary of the information known about the host.

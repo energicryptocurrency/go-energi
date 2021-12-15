@@ -23,10 +23,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/tests"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/tests"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

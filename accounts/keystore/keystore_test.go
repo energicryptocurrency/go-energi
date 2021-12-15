@@ -27,9 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/event"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/event"
 )
 
 var testSigData = make([]byte, 32)

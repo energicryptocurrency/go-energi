@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/api"
 )
 
 const (

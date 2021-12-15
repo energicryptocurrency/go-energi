@@ -35,10 +35,10 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

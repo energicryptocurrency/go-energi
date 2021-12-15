@@ -31,9 +31,9 @@ import (
 	"strings"
 	"sync"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/log"
 	"golang.org/x/crypto/ssh/terminal"
 )
 

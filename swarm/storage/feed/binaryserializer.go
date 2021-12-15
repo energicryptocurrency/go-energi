@@ -16,7 +16,7 @@
 
 package feed
 
-import "energi.world/core/gen3/common/hexutil"
+import "github.com/energicryptocurrency/energi/common/hexutil"
 
 type binarySerializer interface {
 	binaryPut(serializedData []byte) error

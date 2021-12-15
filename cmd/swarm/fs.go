@@ -23,10 +23,10 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm/fuse"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm/fuse"
 	"gopkg.in/urfave/cli.v1"
 )
 

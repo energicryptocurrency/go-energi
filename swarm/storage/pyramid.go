@@ -25,8 +25,8 @@ import (
 	"sync"
 	"time"
 
-	ch "energi.world/core/gen3/swarm/chunk"
-	"energi.world/core/gen3/swarm/log"
+	ch "github.com/energicryptocurrency/energi/swarm/chunk"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 /*

@@ -19,9 +19,9 @@ package simulations
 import (
 	"testing"
 
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 )
 
 func newTestNetwork(t *testing.T, nodeCount int) (*Network, []enode.ID) {

@@ -25,7 +25,7 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/core"
+	"github.com/energicryptocurrency/energi/core"
 	"github.com/davecgh/go-spew/spew"
 )
 

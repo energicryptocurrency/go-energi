@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 	"golang.org/x/crypto/pbkdf2"
 )
 

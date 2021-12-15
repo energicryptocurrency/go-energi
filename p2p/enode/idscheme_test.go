@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p/enr"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p/enr"
+	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 // TestDB_collectGarbageWorker tests garbage collection runs

@@ -19,7 +19,7 @@ package rpc
 import (
 	"net"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules

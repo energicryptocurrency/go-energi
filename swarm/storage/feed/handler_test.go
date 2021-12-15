@@ -27,11 +27,11 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/chunk"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/chunk"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 )
 
 var (

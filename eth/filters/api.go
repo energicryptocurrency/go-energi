@@ -25,13 +25,13 @@ import (
 	"sync"
 	"time"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/rpc"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 var (

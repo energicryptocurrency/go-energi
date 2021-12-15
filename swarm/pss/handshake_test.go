@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 // asymmetrical key exchange between two directly connected peers

@@ -22,10 +22,10 @@ import (
 	"math"
 	"math/big"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 var (

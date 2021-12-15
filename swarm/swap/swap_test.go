@@ -26,11 +26,11 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/protocols"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/swarm/state"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/protocols"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/swarm/state"
 	colorable "github.com/mattn/go-colorable"
 )
 

@@ -20,10 +20,10 @@ package core
 import (
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/mclock"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/mclock"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // insertStats tracks and reports on block insertion.

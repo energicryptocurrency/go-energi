@@ -26,7 +26,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 type storedCredential struct {

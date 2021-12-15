@@ -27,13 +27,13 @@ import (
 	"strings"
 	"sync"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/internal/debug"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/internal/debug"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
 	"github.com/prometheus/tsdb/fileutil"
 )
 
@@ -43,7 +43,7 @@ type Node struct {
 	config   *Config
 	accman   *accounts.Manager
 
-	ephemeralKeystore string         // if non-empty, the key directory that will be removed by Stop
+	ephemeralKeystore string            // if non-empty, the key directory that will be removed by Stop
 	instanceDirLock   fileutil.Releaser // prevents concurrent use of instance directory
 
 	serverConfig p2p.Config

@@ -20,9 +20,9 @@ import (
 	"errors"
 	"fmt"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/prque"
-	"energi.world/core/gen3/ethdb"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/prque"
+	"github.com/energicryptocurrency/energi/ethdb"
 )
 
 // ErrNotRequested is returned by the trie sync when it's requested to process a

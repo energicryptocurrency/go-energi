@@ -20,8 +20,8 @@ package http
 import (
 	"context"
 
-	"energi.world/core/gen3/swarm/api"
-	"energi.world/core/gen3/swarm/sctx"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/sctx"
 )
 
 type uriKey struct{}

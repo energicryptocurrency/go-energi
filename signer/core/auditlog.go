@@ -22,11 +22,11 @@ import (
 
 	"encoding/json"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 type AuditLogger struct {

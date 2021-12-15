@@ -21,8 +21,8 @@ package geth
 import (
 	"math/big"
 
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/ethclient"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/ethclient"
 )
 
 // EthereumClient provides access to the Ethereum APIs.

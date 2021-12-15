@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // The values in those tests are from the Transaction Tests

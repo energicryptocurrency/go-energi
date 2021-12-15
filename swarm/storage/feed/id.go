@@ -21,10 +21,10 @@ import (
 	"hash"
 	"strconv"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 // ID uniquely identifies an update on the network.

@@ -25,16 +25,16 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 // So we can deterministically seed different blockchains
@@ -1437,7 +1437,7 @@ func TestEIP161AccountRemoval(t *testing.T) {
 // tests that under weird reorg conditions the blockchain and its internal header-
 // chain return the same latest block/header.
 //
-// https://energi.world/core/gen3/pull/15941
+// https://github.com/energicryptocurrency/energi/pull/15941
 func TestBlockchainHeaderchainReorgConsistency(t *testing.T) {
 	// Generate a canonical chain to act as the main dataset
 	engine := ethash.NewFaker()
@@ -1696,8 +1696,8 @@ func BenchmarkBlockChain_1x1000Executions(b *testing.B) {
 // overtake the 'canon' chain until after it's passed canon by about 200 blocks.
 //
 // Details at:
-//  - https://energi.world/core/gen3/issues/18977
-//  - https://energi.world/core/gen3/pull/18988
+//  - https://github.com/energicryptocurrency/energi/issues/18977
+//  - https://github.com/energicryptocurrency/energi/pull/18988
 func TestLowDiffLongChain(t *testing.T) {
 	// Generate a canonical chain to act as the main dataset
 	engine := ethash.NewFaker()

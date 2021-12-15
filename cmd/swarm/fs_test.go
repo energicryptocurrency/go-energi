@@ -29,8 +29,8 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 type testFile struct {

@@ -22,9 +22,9 @@ import (
 	"sync"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
 )
 
 func newEmptySecure() *SecureTrie {

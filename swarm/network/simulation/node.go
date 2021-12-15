@@ -24,10 +24,10 @@ import (
 	"os"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations"
-	"energi.world/core/gen3/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 )
 
 // NodeIDs returns NodeIDs for all nodes in the network.

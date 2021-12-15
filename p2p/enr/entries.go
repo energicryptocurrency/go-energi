@@ -21,7 +21,7 @@ import (
 	"io"
 	"net"
 
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // Entry is implemented by known node record entry types.

@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 func TestParseURI(t *testing.T) {

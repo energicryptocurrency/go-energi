@@ -27,10 +27,10 @@ import (
 	"errors"
 	"strconv"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/crypto/ecies"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/crypto/ecies"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // MessageParams specifies the exact way a message should be wrapped into an Envelope.

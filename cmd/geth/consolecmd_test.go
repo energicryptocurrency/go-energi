@@ -28,8 +28,8 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 const (

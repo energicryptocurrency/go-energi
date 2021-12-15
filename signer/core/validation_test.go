@@ -22,8 +22,8 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 )
 
 func hexAddr(a string) common.Address { return common.BytesToAddress(common.FromHex(a)) }

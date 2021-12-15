@@ -32,14 +32,14 @@ import (
 	"strings"
 	"sync"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // ProtocolTester is the tester environment used for unit testing protocol

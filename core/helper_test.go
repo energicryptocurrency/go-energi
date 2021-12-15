@@ -19,9 +19,9 @@ package core
 import (
 	"container/list"
 
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
 )
 
 // Implement our EthTest Manager

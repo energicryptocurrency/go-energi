@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 // Forks table defines supported forks and their chain config.

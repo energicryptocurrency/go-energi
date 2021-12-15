@@ -21,9 +21,9 @@ import (
 	"context"
 	"sync"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/shed"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/shed"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 // SubscribePush returns a channel that provides storage chunks with ordering from push syncing index.

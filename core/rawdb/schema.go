@@ -20,8 +20,8 @@ package rawdb
 import (
 	"encoding/binary"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/metrics"
 )
 
 // The fields below define the low level database schema prefixing.

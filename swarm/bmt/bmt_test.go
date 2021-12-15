@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/swarm/testutil"
+	"github.com/energicryptocurrency/energi/swarm/testutil"
 	"golang.org/x/crypto/sha3"
 )
 

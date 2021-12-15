@@ -22,7 +22,7 @@ import (
 	"html/template"
 	"path"
 
-	"energi.world/core/gen3/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/api"
 )
 
 type htmlListData struct {

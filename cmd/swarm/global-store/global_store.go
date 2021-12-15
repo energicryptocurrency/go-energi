@@ -22,11 +22,11 @@ import (
 	"net/http"
 	"os"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm/storage/mock"
-	"energi.world/core/gen3/swarm/storage/mock/db"
-	"energi.world/core/gen3/swarm/storage/mock/mem"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock/db"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock/mem"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

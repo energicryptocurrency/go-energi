@@ -27,8 +27,8 @@ import (
 	"strconv"
 	"strings"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // faucetDockerfile is the Dockerfile required to build a faucet container to

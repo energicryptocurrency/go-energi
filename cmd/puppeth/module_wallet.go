@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // walletDockerfile is the Dockerfile required to run a web wallet.

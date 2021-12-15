@@ -28,13 +28,13 @@ import (
 
 	"net"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/nat"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/nat"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 var keys = []string{

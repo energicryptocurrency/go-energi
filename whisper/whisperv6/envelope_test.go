@@ -22,7 +22,7 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 func TestEnvelopeOpenAcceptsOnlyOneKeyTypeInFilter(t *testing.T) {

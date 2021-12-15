@@ -23,12 +23,12 @@ import (
 	"os"
 	"strings"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/signer/core"
-	"energi.world/core/gen3/signer/rules/deps"
-	"energi.world/core/gen3/signer/storage"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/signer/core"
+	"github.com/energicryptocurrency/energi/signer/rules/deps"
+	"github.com/energicryptocurrency/energi/signer/storage"
 	"github.com/robertkrimen/otto"
 )
 

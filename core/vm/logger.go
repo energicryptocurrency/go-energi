@@ -24,10 +24,10 @@ import (
 	"math/big"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 // Storage represents a contract's storage.

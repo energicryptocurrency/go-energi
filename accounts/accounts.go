@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"math/big"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/event"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/event"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -149,7 +149,7 @@ type Wallet interface {
 	// the needed details via SignHashWithPassphrase, or by other means (e.g. unlock
 	// the account in a keystore).
 	SignHash(account Account, hash []byte) ([]byte, error)
-	
+
 	// SignHashWithPassphrase requests the wallet to sign the given hash with the
 	// given passphrase as extra authentication information.
 	//

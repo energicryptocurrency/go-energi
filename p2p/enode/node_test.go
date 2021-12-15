@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"energi.world/core/gen3/p2p/enr"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/p2p/enr"
+	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/stretchr/testify/assert"
 )
 

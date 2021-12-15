@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"sync"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // Filter represents a Whisper message filter

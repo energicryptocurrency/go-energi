@@ -22,8 +22,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"energi.world/core/gen3/cmd/utils"
-	swarm "energi.world/core/gen3/swarm/api/client"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
 	"gopkg.in/urfave/cli.v1"
 )
 

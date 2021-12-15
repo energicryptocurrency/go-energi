@@ -19,9 +19,9 @@ package rpc
 import (
 	"testing"
 
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm/storage/mock/mem"
-	"energi.world/core/gen3/swarm/storage/mock/test"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock/mem"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock/test"
 )
 
 // TestDBStore is running test for a GlobalStore

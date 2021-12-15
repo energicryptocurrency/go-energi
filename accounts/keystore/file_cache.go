@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 	mapset "github.com/deckarep/golang-set"
 )
 

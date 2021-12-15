@@ -23,7 +23,7 @@ import (
 	"os"
 	"testing"
 
-	"energi.world/core/gen3/internal/cmdtest"
+	"github.com/energicryptocurrency/energi/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
 )
 

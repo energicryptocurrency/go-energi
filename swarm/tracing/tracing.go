@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	cli "gopkg.in/urfave/cli.v1"

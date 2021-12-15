@@ -27,9 +27,9 @@ import (
 	"time"
 	"unsafe"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

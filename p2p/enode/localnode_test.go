@@ -19,8 +19,8 @@ package enode
 import (
 	"testing"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p/enr"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p/enr"
 )
 
 func newLocalNodeForTesting() (*LocalNode, *DB) {

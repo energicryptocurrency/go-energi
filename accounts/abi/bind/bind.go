@@ -18,7 +18,7 @@
 // Package bind generates Ethereum contract Go bindings.
 //
 // Detailed usage document and tutorial available on the go-ethereum Wiki page:
-// https://energi.world/core/gen3/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
+// https://github.com/energicryptocurrency/energi/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
 package bind
 
 import (
@@ -30,7 +30,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"energi.world/core/gen3/accounts/abi"
+	"github.com/energicryptocurrency/energi/accounts/abi"
 )
 
 // Lang is a target programming language selector to generate bindings for.

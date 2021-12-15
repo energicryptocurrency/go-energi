@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 type diffTest struct {

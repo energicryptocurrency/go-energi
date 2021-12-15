@@ -20,7 +20,7 @@ package feed
 import (
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 )
 
 func getTestID() *ID {

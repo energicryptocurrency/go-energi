@@ -19,9 +19,9 @@ package protocols
 import (
 	"testing"
 
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 //dummy Balance implementation

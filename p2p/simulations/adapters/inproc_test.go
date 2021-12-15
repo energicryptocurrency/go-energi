@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/p2p/simulations/pipes"
+	"github.com/energicryptocurrency/energi/p2p/simulations/pipes"
 )
 
 func TestTCPPipe(t *testing.T) {

@@ -23,11 +23,11 @@ import (
 	"fmt"
 	"sync"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/swarm/log"
-	whisper "energi.world/core/gen3/whisper/whisperv6"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
 )
 
 type KeyStore struct {

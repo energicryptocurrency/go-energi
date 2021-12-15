@@ -19,7 +19,7 @@ package intervals
 import (
 	"testing"
 
-	"energi.world/core/gen3/swarm/state"
+	"github.com/energicryptocurrency/energi/swarm/state"
 )
 
 // TestInmemoryStore tests basic functionality of InmemoryStore.

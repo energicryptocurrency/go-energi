@@ -32,7 +32,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 var (

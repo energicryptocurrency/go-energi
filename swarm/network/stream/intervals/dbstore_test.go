@@ -21,7 +21,7 @@ import (
 	"os"
 	"testing"
 
-	"energi.world/core/gen3/swarm/state"
+	"github.com/energicryptocurrency/energi/swarm/state"
 )
 
 // TestDBStore tests basic functionality of DBStore.

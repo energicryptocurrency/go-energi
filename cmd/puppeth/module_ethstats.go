@@ -25,7 +25,7 @@ import (
 	"strings"
 	"text/template"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // ethstatsDockerfile is the Dockerfile required to build an ethstats backend

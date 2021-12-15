@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/davecgh/go-spew/spew"
 )
 

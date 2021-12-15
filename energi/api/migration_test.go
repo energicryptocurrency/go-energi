@@ -17,13 +17,13 @@
 package api
 
 import (
-	"energi.world/core/gen3/common/hexutil"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	// "energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	// "github.com/energicryptocurrency/energi/log"
 
 	"github.com/stretchr/testify/assert"
 )

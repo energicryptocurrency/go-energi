@@ -22,8 +22,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/cmd/utils"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

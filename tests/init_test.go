@@ -30,7 +30,7 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 var (

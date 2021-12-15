@@ -27,7 +27,7 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/p2p/simulations"
+	"github.com/energicryptocurrency/energi/p2p/simulations"
 )
 
 // TestSnapshotCreate is a high level e2e test that tests for snapshot generation.

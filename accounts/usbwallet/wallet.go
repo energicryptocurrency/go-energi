@@ -26,12 +26,12 @@ import (
 	"sync"
 	"time"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
 	hid "github.com/karalabe/usb"
 )
 
@@ -65,7 +65,6 @@ type driver interface {
 	// address located on that path.
 	Derive(path accounts.DerivationPath) (common.Address, error)
 
-	
 	// SignTx sends the transaction to the USB device and waits for the user to confirm
 	// or deny the transaction.
 	SignTx(path accounts.DerivationPath, tx *types.Transaction, chainID *big.Int) (common.Address, *types.Transaction, error)
@@ -82,7 +81,7 @@ type wallet struct {
 	url    *accounts.URL // Textual URL uniquely identifying this wallet
 
 	info   hid.DeviceInfo // Known USB device infos about the wallet
-	device hid.Device    // USB device advertising itself as a hardware wallet
+	device hid.Device     // USB device advertising itself as a hardware wallet
 
 	accounts []accounts.Account                         // List of derive accounts pinned on the hardware wallet
 	paths    map[common.Address]accounts.DerivationPath // Known derivation paths for signing operations

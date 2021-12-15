@@ -26,10 +26,10 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/enr"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/enr"
 	"golang.org/x/crypto/sha3"
 )
 

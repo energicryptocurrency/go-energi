@@ -19,8 +19,8 @@ package vm
 import (
 	"math/big"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/math"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/math"
 )
 
 // calculates the memory size required for a step

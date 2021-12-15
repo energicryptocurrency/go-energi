@@ -29,17 +29,17 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/params"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/trie"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/trie"
 )
 
 // PublicEthereumAPI provides an API to access Ethereum full node-related

@@ -40,7 +40,7 @@ import (
 	"os"
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage/mock/test"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock/test"
 )
 
 // TestDBStore is running a test.MockStore tests

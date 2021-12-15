@@ -21,7 +21,7 @@ import (
 	"sort"
 	"sync"
 
-	"energi.world/core/gen3/event"
+	"github.com/energicryptocurrency/energi/event"
 )
 
 // Manager is an overarching account manager that can communicate with various

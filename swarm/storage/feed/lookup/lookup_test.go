@@ -21,8 +21,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 )
 
 type Data struct {

@@ -23,9 +23,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/nat"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/nat"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 const (

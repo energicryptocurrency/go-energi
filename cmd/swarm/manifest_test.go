@@ -25,9 +25,9 @@ import (
 	"runtime"
 	"testing"
 
-	"energi.world/core/gen3/swarm/api"
-	swarm "energi.world/core/gen3/swarm/api/client"
-	swarmhttp "energi.world/core/gen3/swarm/api/http"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
+	swarmhttp "github.com/energicryptocurrency/energi/swarm/api/http"
 )
 
 // TestManifestChange tests manifest add, update and remove

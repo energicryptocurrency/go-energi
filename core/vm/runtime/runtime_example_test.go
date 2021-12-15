@@ -19,8 +19,8 @@ package runtime_test
 import (
 	"fmt"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/vm/runtime"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/vm/runtime"
 )
 
 func ExampleExecute() {

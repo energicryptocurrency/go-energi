@@ -23,9 +23,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
 	hid "github.com/karalabe/usb"
 )
 
@@ -150,7 +150,7 @@ func (hub *Hub) refreshWallets() {
 		return
 	}
 	atomic.StoreUint32(&hub.enumFails, 0)
-	
+
 	for _, info := range infos {
 		for _, id := range hub.productIDs {
 			if info.ProductID == id && (info.UsagePage == hub.usageID || info.Interface == hub.endpointID) {

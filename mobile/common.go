@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"strings"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 // Hash represents the 32 byte Keccak256 hash of arbitrary data.

@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 func ExampleGenerateChain() {

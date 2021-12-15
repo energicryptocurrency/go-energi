@@ -28,13 +28,13 @@ import (
 	"io"
 	"math/big"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // ledgerOpcode is an enumeration encoding the supported Ledger opcodes.

@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 // Genesis hashes to enforce below configs on.
