@@ -66,8 +66,6 @@ release-linux-common:
 	    export CC=$(HOST)-gcc-7; \
 	    export CXX=$(HOST)-g++-7; \
 	    export CGO_ENABLED=1; \
-	    export CGO_CFLAGS="-Werror"; \
-	    export CGO_CPPFLAGS="-Werror"; \
 	    go build -o build/release/$(RELEASE_TARGET)/bin/$$t $(RELEASE_GOFLAGS) ./cmd/$$t; \
 	done
 	@mv build/release/$(RELEASE_TARGET)/bin/geth build/release/$(RELEASE_TARGET)/bin/$(RELEASE_MAIN)
@@ -142,8 +140,7 @@ release-windows-common:
 	    export PKG_CONFIG_PATH=/usr/$(HOST)/lib/pkgconfig; \
 	    export CC=$(HOST)-gcc-9.3-posix; \
 	    export CXX=$(HOST)-g++-9.3-posix; \
-	    export CGO_CFLAGS="-Werror -D_WIN32_WINNT=0x0601"; \
-	    export CGO_CPPFLAGS="-Werror"; \
+	    export CGO_CFLAGS="-D_WIN32_WINNT=0x0601"; \
 	    export CGO_CXXFLAGS="$$CGO_CXXFLAGS"; \
 	    export CGO_ENABLED=1; \
 	    go build -o build/release/$(RELEASE_TARGET)/bin/$$t.exe $(RELEASE_GOFLAGS) ./cmd/$$t; \
@@ -193,8 +190,7 @@ release-macos-common:
 	    export GOCACHE=$(CURDIR)/build/release/$(RELEASE_TARGET)/cache; \
 	    export CC=clang; \
 	    export CXX=clang++; \
-	    export CGO_CFLAGS="-Werror -mmacosx-version-min=10.11"; \
-	    export CGO_CPPFLAGS="-Werror"; \
+	    export CGO_CFLAGS="-mmacosx-version-min=10.11"; \
 	    export CGO_CXXFLAGS="$$CGO_CXXFLAGS"; \
 	    export CGO_ENABLED=1; \
 	    go build -o build/release/$(RELEASE_TARGET)/bin/$$t $(RELEASE_GOFLAGS) --ldflags="-s" ./cmd/$$t; \

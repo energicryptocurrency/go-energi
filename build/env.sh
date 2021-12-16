@@ -10,8 +10,6 @@ fi
 export GO111MODULE=on
 export GOFLAGS="-v"
 export SKIP_KNOWN_FAIL="1"
-export CGO_CFLAGS="-Werror"
-export CGO_CPPFLAGS="-Werror"
 
 # Launch the arguments with the configured environment.
 exec "$@"
