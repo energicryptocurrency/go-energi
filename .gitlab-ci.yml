@@ -127,9 +127,12 @@ build-release-linux:
     - pwd
   script:
     - make -f Makefile.release release-linux
-    - make -f Makefile.release release-upload
-  only:
-    - tags
+  artifacts:
+    when: always
+    paths:
+      - ./build/release/*/*amd64*.tgz
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-release-windows:
   stage: build
@@ -139,18 +142,25 @@ build-release-windows:
     - pwd
   script:
     - make -f Makefile.release release-windows
-    - make -f Makefile.release release-upload
-  only:
-    - tags
+  artifacts:
+    when: always
+    paths:
+      - ./build/release/*/*-setup.exe
+      - ./build/release/*/*.zip
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-release-macos:
   stage: build
   tags: [docker_mac_runner]
   script:
     - make -f Makefile.release release-macos
-    - make -f Makefile.release release-upload
-  only:
-    - tags
+  artifacts:
+    when: always
+    paths:
+      - ./build/release/*/*.tgz
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 test-go-report:
   stage: test
@@ -190,3 +200,32 @@ test-solidity:
       - script_failure
       - runner_system_failure
       - stuck_or_timeout_failure
+
+deploy-release-linux:
+  stage: build
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder:latest
+  script:
+    - make -f Makefile.release release-linux
+    - make -f Makefile.release release-upload
+  only:
+    - tags
+
+deploy-release-windows:
+  stage: build
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder:20-latest
+  script:
+    - make -f Makefile.release release-windows
+    - make -f Makefile.release release-upload
+  only:
+    - tags
+
+deploy-release-mac:
+  stage: build
+  tags: [docker_mac_runner]
+  script:
+    - make -f Makefile.release release-macos
+    - make -f Makefile.release release-upload
+  only:
+    - tags
