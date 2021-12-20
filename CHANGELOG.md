@@ -1,6 +1,6 @@
 # Core Node Changelog
 
-# 3.1.1 (Asgard Hard Fork)
+# 3.1.1
 
 ### Added
 - Preimage exception package which fixes full sync
