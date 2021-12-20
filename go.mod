@@ -20,7 +20,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/golang/snappy v0.0.4
 	github.com/hashicorp/golang-lru v0.5.4
-	github.com/hashtobewild/go-duktape v0.0.0-20211213115919-1fd03768ffa8
+	github.com/hashtobewild/go-duktape v0.0.0-20211216124909-0c6c21e6d18b
 	github.com/huin/goupnp v1.0.2
 	github.com/influxdata/influxdb v1.9.5
 	github.com/jackpal/go-nat-pmp v1.0.2
