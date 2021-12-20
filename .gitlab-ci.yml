@@ -15,7 +15,7 @@ cache:
 .docker-job:
   tags: [docker_runner]
   before_script:
-    - apk add --no-cache curl unzip python3 py3-pip tree
+    - apk add --no-cache curl unzip python3 py3-pip
     - pip3 install --upgrade pip
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
