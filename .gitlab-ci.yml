@@ -6,17 +6,18 @@ stages:
   - lint
   - build
   - test
+  - buildrelease
   - deploy
 
 cache:
   paths:
-    - node_modules
-    - build
+    - node_modules/
+    - build/
 
 .docker-job:
   tags: [docker_runner]
   before_script:
-    - apk add --no-cache curl unzip python3 py3-pip
+    - apk add --no-cache curl unzip python3 py3-pip tree
     - pip3 install --upgrade pip
     - pip3 install awscli
     - rm -rf /var/cache/apk/*
@@ -104,11 +105,14 @@ build-linux:
   stage: build
   extends: .merge-request-job
   script:
+    - ls -ahl build/
+    - ls -ahl node_modules/
     - git checkout -- .
     - git clean -fdx -e node_modules .
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
-
+    - ls -ahl build/
+    - tree build/
 #build-docker:
 #  stage: build
 #  extends: .docker-job
@@ -120,22 +124,24 @@ build-linux:
 
 # TODO: release-builds should be implemented better
 build-release-linux:
-  stage: build
+  stage: buildrelease
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
   before_script:
     - pwd
   script:
     - make -f Makefile.release release-linux
+    - ls -ahl build
   artifacts:
     when: always
     paths:
-      - ./build/release/*/*amd64*.tgz
+      - ./build/release/*/*.tgz
+    expire_in: 1 day
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-release-windows:
-  stage: build
+  stage: buildrelease
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:20-latest
   before_script:
@@ -147,11 +153,12 @@ build-release-windows:
     paths:
       - ./build/release/*/*-setup.exe
       - ./build/release/*/*.zip
+    expire_in: 1 day
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-release-macos:
-  stage: build
+  stage: buildrelease
   tags: [docker_mac_runner]
   script:
     - make -f Makefile.release release-macos
@@ -159,6 +166,7 @@ build-release-macos:
     when: always
     paths:
       - ./build/release/*/*.tgz
+    expire_in: 1 day
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
@@ -175,6 +183,7 @@ test-go-report:
       - .test-go-cover.html
     reports:
       junit: .test-go-report.xml
+    expire_in: 3 day
   coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
   retry:
     max: 2
@@ -187,13 +196,16 @@ test-solidity:
   stage: test
   extends: .merge-request-job
   script:
+    - ls -ahl build/
+    - sleep 100
     - make test-sol-contracts
   artifacts:
     when: always
     paths:
       - .test-sol-report.xml
     reports:
-      junit: .test-sol-report.xml
+      junit: .test-sol-report.xml 
+    expire_in: 3 day
   retry:
     max: 2
     when:
@@ -202,7 +214,7 @@ test-solidity:
       - stuck_or_timeout_failure
 
 deploy-release-linux:
-  stage: build
+  stage: buildrelease
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
   script:
@@ -212,7 +224,7 @@ deploy-release-linux:
     - tags
 
 deploy-release-windows:
-  stage: build
+  stage: buildrelease
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:20-latest
   script:
@@ -222,7 +234,7 @@ deploy-release-windows:
     - tags
 
 deploy-release-mac:
-  stage: build
+  stage: buildrelease
   tags: [docker_mac_runner]
   script:
     - make -f Makefile.release release-macos
