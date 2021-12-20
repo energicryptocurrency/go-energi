@@ -112,7 +112,6 @@ build-linux:
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
     - ls -ahl build/
-    - tree build/
 #build-docker:
 #  stage: build
 #  extends: .docker-job
