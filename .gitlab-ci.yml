@@ -1,5 +1,3 @@
-variables:
-
 stages:
   - base
   - prepare
@@ -105,13 +103,10 @@ build-linux:
   stage: build
   extends: .merge-request-job
   script:
-    - ls -ahl build/
-    - ls -ahl node_modules/
     - git checkout -- .
     - git clean -fdx -e node_modules .
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
-    - ls -ahl build/
 #build-docker:
 #  stage: build
 #  extends: .docker-job
@@ -130,7 +125,6 @@ build-release-linux:
     - pwd
   script:
     - make -f Makefile.release release-linux
-    - ls -ahl build
   artifacts:
     when: always
     paths:
@@ -195,8 +189,6 @@ test-solidity:
   stage: test
   extends: .merge-request-job
   script:
-    - ls -ahl build/
-    - sleep 100
     - make test-sol-contracts
   artifacts:
     when: always
