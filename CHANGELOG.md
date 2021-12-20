@@ -1,21 +1,40 @@
 # Core Node Changelog
 
+# 3.1.1
+
+### Added
+- Preimage exception package which fixes full sync
+- Checkpoint for Asgard hard fork block
+- Checkpoints for testnet
+- Icon on Windows
+
+### Changed
+- Various code optimizations
+- Treasury proposal fee structure: from 100 NRG to 300 NRG + 0.2% of the amount
+- Renamed `autocollateralize` to `autocompounding`
+
+### Fixed
+- Unit tests
+- Wrong port log message on testnet
+- Balance issue in EVM affecting `msg.sender`
+- Further enhancements to checkpoint registry
+
 ## 3.1.0 (Asgard Hard Fork)
 
 ### Added
-- masternode stats now available through RPC services
-- hardfork registry to enable scheduling and alerting users of upcoming hardforks
-- new optimized version of checkpoint registry
-- preimage hash correction upon detecting damage
+- Masternode stats now available through RPC services
+- Hardfork registry to enable scheduling and alerting users of upcoming hardforks
+- New optimized version of checkpoint registry
+- Preimage hash correction upon detecting damage
 
 ### Changed
-- improved log messages
-- disabled light client
-- disabled usb flag
-- stake cooldown reduced from 60 to 30 minutes
+- Improved log messages
+- Disabled light client
+- Disabled usb flag
+- Stake cooldown reduced from 60 to 30 minutes
 
 ### Fixed
-- data race concerning secKeyBuf buffer
-- difficulty adjustment (based on PID controller)
-- issue syncing on mainnet
-- issue where preimages may become corrupted
+- Data race concerning secKeyBuf buffer
+- Difficulty adjustment (based on PID controller)
+- Issue syncing on mainnet
+- Issue where preimages may become corrupted
