@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build !nopsshandshake
 // +build !nopsshandshake
 
 package pss
@@ -25,7 +26,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/p2p"
@@ -287,7 +287,7 @@ func (ctl *HandshakeController) handler(msg []byte, p *p2p.Peer, asymmetric bool
 				return fmt.Errorf("discarding message using expired key: %s", symkeyid)
 			}
 			ctl.symKeyIndex[symkeyid].count++
-			log.Trace("increment symkey recv use", "symsymkeyid", symkeyid, "count", ctl.symKeyIndex[symkeyid].count, "limit", ctl.symKeyIndex[symkeyid].limit, "receiver", common.ToHex(crypto.FromECDSAPub(ctl.pss.PublicKey())))
+			log.Trace("increment symkey recv use", "symsymkeyid", symkeyid, "count", ctl.symKeyIndex[symkeyid].count, "limit", ctl.symKeyIndex[symkeyid].limit, "receiver", hexutil.Encode(crypto.FromECDSAPub(ctl.pss.PublicKey())))
 		}
 		return nil
 	}
@@ -560,7 +560,7 @@ func (api *HandshakeAPI) SendSym(symkeyid string, topic Topic, msg hexutil.Bytes
 			return errors.New("attempted send with expired key")
 		}
 		api.ctrl.symKeyIndex[symkeyid].count++
-		log.Trace("increment symkey send use", "symkeyid", symkeyid, "count", api.ctrl.symKeyIndex[symkeyid].count, "limit", api.ctrl.symKeyIndex[symkeyid].limit, "receiver", common.ToHex(crypto.FromECDSAPub(api.ctrl.pss.PublicKey())))
+		log.Trace("increment symkey send use", "symkeyid", symkeyid, "count", api.ctrl.symKeyIndex[symkeyid].count, "limit", api.ctrl.symKeyIndex[symkeyid].limit, "receiver", hexutil.Encode(crypto.FromECDSAPub(api.ctrl.pss.PublicKey())))
 	}
 	return err
 }

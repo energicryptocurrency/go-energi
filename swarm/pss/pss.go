@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/energicryptocurrency/energi/p2p"
@@ -39,6 +40,7 @@ import (
 	"github.com/energicryptocurrency/energi/swarm/pot"
 	"github.com/energicryptocurrency/energi/swarm/storage"
 	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
+
 	"golang.org/x/crypto/sha3"
 )
 
@@ -140,7 +142,8 @@ type Pss struct {
 }
 
 func (p *Pss) String() string {
-	return fmt.Sprintf("pss: addr %x, pubkey %v", p.BaseAddr(), common.ToHex(crypto.FromECDSAPub(&p.privateKey.PublicKey)))
+	return fmt.Sprintf("pss: addr %x, pubkey %v", p.BaseAddr(),
+		hexutil.Encode(crypto.FromECDSAPub(&p.privateKey.PublicKey)))
 }
 
 // Creates a new Pss instance.
@@ -224,7 +227,9 @@ func (p *Pss) Start(srv *p2p.Server) error {
 		}
 	}()
 	log.Info("Started Pss")
-	log.Info("Loaded EC keys", "pubkey", common.ToHex(crypto.FromECDSAPub(p.PublicKey())), "secp256", common.ToHex(crypto.CompressPubkey(p.PublicKey())))
+	log.Info("Loaded EC keys", "pubkey",
+		hexutil.Encode(crypto.FromECDSAPub(p.PublicKey())), "secp256",
+		hexutil.Encode(crypto.CompressPubkey(p.PublicKey())))
 	return nil
 }
 
@@ -370,11 +375,14 @@ func (p *Pss) handlePssMsg(ctx context.Context, msg interface{}) error {
 	log.Trace("handler", "self", label(p.Kademlia.BaseAddr()), "topic", label(pssmsg.Payload.Topic[:]))
 	if int64(pssmsg.Expire) < time.Now().Unix() {
 		metrics.GetOrRegisterCounter("pss.expire", nil).Inc(1)
-		log.Warn("pss filtered expired message", "from", common.ToHex(p.Kademlia.BaseAddr()), "to", common.ToHex(pssmsg.To))
+		log.Warn("pss filtered expired message", "from",
+			hexutil.Encode(p.Kademlia.BaseAddr()), "to",
+			hexutil.Encode(pssmsg.To))
 		return nil
 	}
 	if p.checkFwdCache(pssmsg) {
-		log.Trace("pss relay block-cache match (process)", "from", common.ToHex(p.Kademlia.BaseAddr()), "to", (common.ToHex(pssmsg.To)))
+		log.Trace("pss relay block-cache match (process)", "from",
+			hexutil.Encode(p.Kademlia.BaseAddr()), "to", (hexutil.Encode(pssmsg.To)))
 		return nil
 	}
 	p.addFwdCache(pssmsg)
@@ -403,11 +411,13 @@ func (p *Pss) handlePssMsg(ctx context.Context, msg interface{}) error {
 	}
 	isRecipient := p.isSelfPossibleRecipient(pssmsg, isProx)
 	if !isRecipient {
-		log.Trace("pss was for someone else :'( ... forwarding", "pss", common.ToHex(p.BaseAddr()), "prox", isProx)
+		log.Trace("pss was for someone else :'( ... forwarding", "pss",
+			hexutil.Encode(p.BaseAddr()), "prox", isProx)
 		return p.enqueue(pssmsg)
 	}
 
-	log.Trace("pss for us, yay! ... let's process!", "pss", common.ToHex(p.BaseAddr()), "prox", isProx, "raw", isRaw, "topic", label(pssmsg.Payload.Topic[:]))
+	log.Trace("pss for us, yay! ... let's process!", "pss",
+		hexutil.Encode(p.BaseAddr()), "prox", isProx, "raw", isRaw, "topic", label(pssmsg.Payload.Topic[:]))
 	if err := p.process(pssmsg, isRaw, isProx); err != nil {
 		qerr := p.enqueue(pssmsg)
 		if qerr != nil {
@@ -632,7 +642,10 @@ func (p *Pss) send(to []byte, topic Topic, msg []byte, asymmetric bool, key []by
 	if err != nil {
 		return fmt.Errorf("failed to perform whisper encryption: %v", err)
 	}
-	log.Trace("pssmsg whisper done", "env", envelope, "wparams payload", common.ToHex(wparams.Payload), "to", common.ToHex(to), "asym", asymmetric, "key", common.ToHex(key))
+	log.Trace("pssmsg whisper done", "env", envelope, "wparams payload",
+		hexutil.Encode(wparams.Payload), "to",
+		hexutil.Encode(to), "asym", asymmetric, "key",
+		hexutil.Encode(key))
 
 	// prepare for devp2p transport
 	pssMsgParams := &msgParams{

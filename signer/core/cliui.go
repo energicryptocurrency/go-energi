@@ -22,14 +22,14 @@ import (
 	"fmt"
 	"os"
 	"strings"
-
 	"sync"
 
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/internal/ethapi"
 	"github.com/energicryptocurrency/energi/log"
+
 	"github.com/davecgh/go-spew/spew"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 type CommandlineUI struct {
@@ -62,7 +62,7 @@ func (ui *CommandlineUI) readPassword() string {
 	fmt.Printf("Enter password to approve:\n")
 	fmt.Printf("> ")
 
-	text, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	text, err := term.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		log.Crit("Failed to read password", "err", err)
 	}
@@ -76,7 +76,7 @@ func (ui *CommandlineUI) readPassword() string {
 func (ui *CommandlineUI) readPasswordText(inputstring string) string {
 	fmt.Printf("Enter %s:\n", inputstring)
 	fmt.Printf("> ")
-	text, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	text, err := term.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		log.Crit("Failed to read password", "err", err)
 	}
@@ -88,7 +88,7 @@ func (ui *CommandlineUI) OnInputRequired(info UserInputRequest) (UserInputRespon
 	fmt.Println(info.Title)
 	fmt.Println(info.Prompt)
 	if info.IsPassword {
-		text, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		text, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			log.Error("Failed to read password", "err", err)
 		}

@@ -38,9 +38,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
-
 	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/log"
@@ -48,6 +47,7 @@ import (
 	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
 	"github.com/energicryptocurrency/energi/swarm/storage"
 	"github.com/energicryptocurrency/energi/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 	"github.com/energicryptocurrency/energi/swarm/testutil"
 )
 
@@ -141,7 +141,7 @@ func TestBzzWithFeed(t *testing.T) {
 	if err := updateRequest.Sign(signer); err != nil {
 		t.Fatal(err)
 	}
-	log.Info("added data", "data", common.ToHex(manifestAddress))
+	log.Info("added data", "data", hexutil.Encode(manifestAddress))
 
 	// Build the feed update http request:
 	feedUpdateURL, err := url.Parse(fmt.Sprintf("%s/bzz-feed:/", srv.URL))

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rlp"
@@ -155,7 +154,7 @@ func (msg *PssMsg) serialize() []byte {
 
 // String representation of PssMsg
 func (msg *PssMsg) String() string {
-	return fmt.Sprintf("PssMsg: Recipient: %x", common.ToHex(msg.To))
+	return fmt.Sprintf("PssMsg: Recipient: %x", hexutil.Encode(msg.To))
 }
 
 // Signature for a message handler function for a PssMsg

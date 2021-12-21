@@ -706,7 +706,7 @@ func (a *API) UploadTar(ctx context.Context, bodyReader io.ReadCloser, manifestP
 
 		// add the entry under the path from the request
 		manifestPath := path.Join(manifestPath, hdr.Name)
-		contentType := hdr.Xattrs["user.swarm.content-type"]
+		contentType := hdr.PAXRecords["user.swarm.content-type"]
 		if contentType == "" {
 			contentType = mime.TypeByExtension(filepath.Ext(hdr.Name))
 		}
@@ -724,7 +724,7 @@ func (a *API) UploadTar(ctx context.Context, bodyReader io.ReadCloser, manifestP
 			return nil, fmt.Errorf("error adding manifest entry from tar stream: %s", err)
 		}
 		if hdr.Name == defaultPath {
-			contentType := hdr.Xattrs["user.swarm.content-type"]
+			contentType := hdr.PAXRecords["user.swarm.content-type"]
 			if contentType == "" {
 				contentType = mime.TypeByExtension(filepath.Ext(hdr.Name))
 			}
