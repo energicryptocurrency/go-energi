@@ -32,13 +32,12 @@ import (
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/params"
-
 	energi_testutils "github.com/energicryptocurrency/energi/energi/common/testutils"
 	energi "github.com/energicryptocurrency/energi/energi/consensus"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 var (
@@ -85,7 +84,6 @@ type testWorkerBackend struct {
 	db         ethdb.Database
 	txPool     *core.TxPool
 	chain      *core.BlockChain
-	testTxFeed event.Feed
 	uncleBlock *types.Block
 	migration  *energi_testutils.TestGen2Migration
 }

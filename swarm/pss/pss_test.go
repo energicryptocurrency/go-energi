@@ -38,8 +38,6 @@ import (
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
-	"github.com/energicryptocurrency/energi/metrics/influxdb"
 	"github.com/energicryptocurrency/energi/node"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/p2p/enode"
@@ -2099,12 +2097,4 @@ func (apitest *APITest) SetSymKeys(pubkeyid string, recvsymkey []byte, sendsymke
 
 func (apitest *APITest) Clean() (int, error) {
 	return apitest.Pss.cleanKeys(), nil
-}
-
-// enableMetrics is starting InfluxDB reporter so that we collect stats when running tests locally
-func enableMetrics() {
-	metrics.Enabled = true
-	go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 1*time.Second, "http://localhost:8086", "metrics", "admin", "admin", "swarm.", map[string]string{
-		"host": "test",
-	})
 }

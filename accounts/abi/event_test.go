@@ -27,6 +27,7 @@ import (
 
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/crypto"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -352,40 +353,6 @@ func unpackTestEventData(dest interface{}, hexData string, jsonEvent []byte, ass
 	assert.NoError(json.Unmarshal(jsonEvent, &e), "Should be able to unmarshal event ABI")
 	a := ABI{Events: map[string]Event{"e": e}}
 	return a.Unpack(dest, "e", data)
-}
-
-/*
-Taken from
-https://github.com/energicryptocurrency/energi/pull/15568
-*/
-
-type testResult struct {
-	Values [2]*big.Int
-	Value1 *big.Int
-	Value2 *big.Int
-}
-
-type testCase struct {
-	definition string
-	want       testResult
-}
-
-func (tc testCase) encoded(intType, arrayType Type) []byte {
-	var b bytes.Buffer
-	if tc.want.Value1 != nil {
-		val, _ := intType.pack(reflect.ValueOf(tc.want.Value1))
-		b.Write(val)
-	}
-
-	if !reflect.DeepEqual(tc.want.Values, [2]*big.Int{nil, nil}) {
-		val, _ := arrayType.pack(reflect.ValueOf(tc.want.Values))
-		b.Write(val)
-	}
-	if tc.want.Value2 != nil {
-		val, _ := intType.pack(reflect.ValueOf(tc.want.Value2))
-		b.Write(val)
-	}
-	return b.Bytes()
 }
 
 // TestEventUnpackIndexed verifies that indexed field will be skipped by event decoder.

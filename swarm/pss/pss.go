@@ -71,18 +71,9 @@ type pssCacheEntry struct {
 	expiresAt time.Time
 }
 
-// abstraction to enable access to p2p.protocols.Peer.Send
-type senderPeer interface {
-	Info() *p2p.PeerInfo
-	ID() enode.ID
-	Address() []byte
-	Send(context.Context, interface{}) error
-}
-
 // per-key peer related information
 // member `protected` prevents garbage collection of the instance
 type pssPeer struct {
-	lastSeen  time.Time
 	address   PssAddress
 	protected bool
 }

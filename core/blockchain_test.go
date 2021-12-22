@@ -18,7 +18,6 @@
 package core
 
 import (
-	"fmt"
 	"math/big"
 	"math/rand"
 	"sync"
@@ -127,13 +126,6 @@ func testFork(t *testing.T, blockchain *BlockChain, i, n int, full bool, compara
 	comparator(tdPre, tdPost)
 }
 
-func printChain(bc *BlockChain) {
-	for i := bc.CurrentBlock().Number().Uint64(); i > 0; i-- {
-		b := bc.GetBlockByNumber(uint64(i))
-		fmt.Printf("\t%x %v\n", b.Hash(), b.Difficulty())
-	}
-}
-
 // testBlockChainImport tries to process a chain of blocks, writing them into
 // the database if successful.
 func testBlockChainImport(chain types.Blocks, blockchain *BlockChain) error {
@@ -187,15 +179,6 @@ func testHeaderChainImport(chain []*types.Header, blockchain *BlockChain) error 
 		blockchain.mu.Unlock()
 	}
 	return nil
-}
-
-func insertChain(done chan bool, blockchain *BlockChain, chain types.Blocks, t *testing.T) {
-	_, err := blockchain.InsertChain(chain)
-	if err != nil {
-		fmt.Println(err)
-		t.FailNow()
-	}
-	done <- true
 }
 
 func TestLastBlock(t *testing.T) {

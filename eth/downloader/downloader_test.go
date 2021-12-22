@@ -27,7 +27,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi"
+	ethereum "github.com/energicryptocurrency/energi"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/ethdb"
@@ -309,7 +309,6 @@ func (dl *downloadTester) dropPeer(id string) {
 type downloadTesterPeer struct {
 	dl            *downloadTester
 	id            string
-	lock          sync.RWMutex
 	chain         *testChain
 	missingStates map[common.Hash]bool // State entries that fast sync should not return
 }
@@ -428,9 +427,11 @@ func assertOwnForkedChain(t *testing.T, tester *downloadTester, common int, leng
 //func TestCanonicalSynchronisation62(t *testing.T)      { testCanonicalSynchronisation(t, 62, FullSync) }
 //func TestCanonicalSynchronisation63Full(t *testing.T)  { testCanonicalSynchronisation(t, 63, FullSync) }
 //func TestCanonicalSynchronisation63Fast(t *testing.T)  { testCanonicalSynchronisation(t, 63, FastSync) }
-func TestCanonicalSynchronisation70Full(t *testing.T)  { testCanonicalSynchronisation(t, 70, FullSync) }
-func TestCanonicalSynchronisation70Fast(t *testing.T)  { testCanonicalSynchronisation(t, 70, FastSync) }
-func TestCanonicalSynchronisation70Light(t *testing.T) { testCanonicalSynchronisation(t, 70, LightSync) }
+func TestCanonicalSynchronisation70Full(t *testing.T) { testCanonicalSynchronisation(t, 70, FullSync) }
+func TestCanonicalSynchronisation70Fast(t *testing.T) { testCanonicalSynchronisation(t, 70, FastSync) }
+func TestCanonicalSynchronisation70Light(t *testing.T) {
+	testCanonicalSynchronisation(t, 70, LightSync)
+}
 
 func testCanonicalSynchronisation(t *testing.T, protocol int, mode SyncMode) {
 	t.Parallel()

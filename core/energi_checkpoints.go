@@ -19,24 +19,23 @@ package core
 import (
 	"errors"
 	"fmt"
+	"math"
 	"math/big"
 	"sort"
-	"math"
 	"sync"
 	"sync/atomic"
 
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/event"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
-
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 // max number of checkpoints stored in validated checkpoint map
-const	MaxCachedCheckpoints int = 10
+const MaxCachedCheckpoints int = 10
 
 type CheckpointValidateChain interface {
 	GetHeaderByNumber(number uint64) *types.Header
@@ -88,7 +87,6 @@ type validCheckpoint struct {
 
 type futureCheckpoint struct {
 	Checkpoint
-	signatures map[common.Address]CheckpointSignature
 }
 
 type checkpointManager struct {
@@ -162,12 +160,12 @@ func (cm *checkpointManager) validate(chain CheckpointValidateChain, num uint64,
 }
 
 // returns the smallest key (blockHeight)
-func oldestCheckpoint(validated map[uint64]validCheckpoint) (uint64) {
+func oldestCheckpoint(validated map[uint64]validCheckpoint) uint64 {
 	minHeight := uint64(math.MaxUint64)
 	for k, _ := range validated {
-			if k < minHeight {
-				minHeight = k;
-			}
+		if k < minHeight {
+			minHeight = k
+		}
 	}
 	return minHeight
 }
@@ -246,7 +244,7 @@ func (cm *checkpointManager) addCheckpoint(
 	if len(cm.validated) == MaxCachedCheckpoints {
 		oldestCheckpointHeight := oldestCheckpoint(cm.validated)
 		if cp.Number > oldestCheckpointHeight {
-			delete(cm.validated, oldestCheckpointHeight);
+			delete(cm.validated, oldestCheckpointHeight)
 			cm.validated[cp.Number] = validCheckpoint{
 				Checkpoint: cp,
 				signatures: append([]CheckpointSignature{}, sigs...),
@@ -258,7 +256,6 @@ func (cm *checkpointManager) addCheckpoint(
 			signatures: append([]CheckpointSignature{}, sigs...),
 		}
 	}
-
 
 	log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
 

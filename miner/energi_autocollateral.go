@@ -25,20 +25,18 @@ import (
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
-
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi "github.com/energicryptocurrency/energi/energi/consensus"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 const maxAutoCollateralBlockAge = time.Duration(time.Minute)
 
 const (
-	acDisabled   uint64 = 0
-	acPostReward uint64 = 1
-	acRapid      uint64 = 2
+	acDisabled uint64 = 0
+	acRapid    uint64 = 2
 )
 
 func (w *worker) tryAutoCompound() {

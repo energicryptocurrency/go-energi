@@ -47,23 +47,21 @@ type CheckpointProposalEvent struct {
 
 type CheckpointService struct {
 	eth        *eth.Ethereum
-	ctx        context.Context
-	ctxCancel  func()
 	cpRegistry *energi_abi.ICheckpointRegistry
 	cpAPI      *energi_api.CheckpointRegistryAPI
 }
 
 func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
 	c := &CheckpointService{
-		eth:      ethServ,
-		cpAPI:    energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
+		eth:   ethServ,
+		cpAPI: energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
 	}
 
 	//initialize Icheckpointregistry for further calls
 	var err error
 	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(energi_params.Energi_CheckpointRegistry, c.eth.APIBackend)
 	if err != nil {
-		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err);
+		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err)
 		return nil, err
 	}
 

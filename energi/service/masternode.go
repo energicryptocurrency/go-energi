@@ -68,9 +68,8 @@ type MasternodeService struct {
 	owner    common.Address
 	registry *energi_abi.IMasternodeRegistryV2Session
 
-	cpRegistry  *energi_abi.ICheckpointRegistrySession
-	lastCPBlock uint64
-	cpVoteChan  chan *checkpointVote
+	cpRegistry *energi_abi.ICheckpointRegistrySession
+	cpVoteChan chan *checkpointVote
 
 	nextHB   time.Time
 	features *big.Int

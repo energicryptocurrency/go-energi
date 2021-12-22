@@ -40,7 +40,6 @@ import (
 	"github.com/energicryptocurrency/energi/light"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/p2p/discv5"
 	"github.com/energicryptocurrency/energi/params"
 	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/energicryptocurrency/energi/trie"
@@ -103,7 +102,6 @@ type ProtocolManager struct {
 	server      *LesServer
 	serverPool  *serverPool
 	clientPool  *freeClientPool
-	lesTopic    discv5.Topic
 	reqDist     *requestDistributor
 	retriever   *retrieveManager
 
