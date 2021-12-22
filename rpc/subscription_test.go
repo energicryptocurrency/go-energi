@@ -21,13 +21,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"sync"
 	"testing"
 	"time"
 )
 
 type NotificationTestService struct {
-	mu                      sync.Mutex
 	unsubscribed            chan string
 	gotHangSubscriptionReq  chan struct{}
 	unblockHangSubscription chan struct{}

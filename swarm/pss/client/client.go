@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build !noclient && !noprotocol
 // +build !noclient,!noprotocol
 
 package client
@@ -54,8 +55,7 @@ type Client struct {
 	subs []*rpc.ClientSubscription
 
 	// channels
-	topicsC chan []byte
-	quitC   chan struct{}
+	quitC chan struct{}
 
 	poolMu sync.Mutex
 }
@@ -67,7 +67,6 @@ type pssRPCRW struct {
 	msgC     chan []byte
 	addr     pss.PssAddress
 	pubKeyId string
-	lastSeen time.Time
 	closed   bool
 }
 

@@ -34,13 +34,9 @@ import (
 	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
-const (
-	IsActiveHandshake = true
-)
+const IsActiveHandshake = true
 
-var (
-	ctrlSingleton *HandshakeController
-)
+var ctrlSingleton *HandshakeController
 
 const (
 	defaultSymKeyRequestTimeout = 1000 * 8  // max wait ms to receive a response to a handshake symkey request
@@ -264,16 +260,6 @@ func (ctl *HandshakeController) cleanHandshake(pubkeyid string, topic *Topic, in
 		ctl.pss.symKeyPool[keyid][*topic].protected = false
 	}
 	return len(deletes)
-}
-
-// Runs cleanHandshake() on all peers and topics
-func (ctl *HandshakeController) clean() {
-	peerpubkeys := ctl.handshakes
-	for pubkeyid, peertopics := range peerpubkeys {
-		for topic := range peertopics {
-			ctl.cleanHandshake(pubkeyid, &topic, true, true)
-		}
-	}
 }
 
 // Passed as a PssMsg handler for the topic handshake is activated on

@@ -192,20 +192,6 @@ func (h *handler) WithProxBin() *handler {
 	return h
 }
 
-// the stateStore handles saving and loading PSS peers and their corresponding keys
-// it is currently unimplemented
-type stateStore struct {
-	values map[string][]byte
-}
-
-func (store *stateStore) Load(key string) ([]byte, error) {
-	return nil, nil
-}
-
-func (store *stateStore) Save(key string, v []byte) error {
-	return nil
-}
-
 // BytesToTopic hashes an arbitrary length byte slice and truncates it to the length of a topic, using only the first bytes of the digest
 func BytesToTopic(b []byte) Topic {
 	topicHashMutex.Lock()

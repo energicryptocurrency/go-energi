@@ -40,6 +40,7 @@ import (
 	"github.com/energicryptocurrency/energi/crypto/ecies"
 	"github.com/energicryptocurrency/energi/crypto/secp256k1"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/golang/snappy"
 	"golang.org/x/crypto/sha3"
 )
@@ -420,16 +421,6 @@ func (h *encHandshake) makeAuthResp() (msg *authRespV4, err error) {
 	copy(msg.RandomPubkey[:], exportPubkey(&h.randomPrivKey.PublicKey))
 	msg.Version = 4
 	return msg, nil
-}
-
-func (msg *authMsgV4) sealPlain(h *encHandshake) ([]byte, error) {
-	buf := make([]byte, authMsgLen)
-	n := copy(buf, msg.Signature[:])
-	n += copy(buf[n:], crypto.Keccak256(exportPubkey(&h.randomPrivKey.PublicKey)))
-	n += copy(buf[n:], msg.InitiatorPubkey[:])
-	n += copy(buf[n:], msg.Nonce[:])
-	buf[n] = 0 // token-flag
-	return ecies.Encrypt(rand.Reader, h.remote, buf, nil, nil)
 }
 
 func (msg *authMsgV4) decodePlain(input []byte) {

@@ -39,8 +39,6 @@ type testCase struct {
 	expected  []int
 	exclusive bool
 	nFails    int
-	success   bool
-	errors    string
 }
 
 var testCases []testCase
