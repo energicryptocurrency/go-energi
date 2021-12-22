@@ -2,6 +2,8 @@
 # Thanks to https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63#file-go-os-arch-md
 # https://github.com/golang/go/wiki/GoArm
 
+MAKEFLAGS ?= -j4
+
 TARGET_TOOLS =
 TARGET_TOOLS += geth
 TARGET_TOOLS += abigen
@@ -10,7 +12,7 @@ TARGET_TOOLS += clef
 TARGET_TOOLS += evm
 TARGET_TOOLS += rlpdump
 
-RELEASE_GOFLAGS = -mod=mod
+RELEASE_GOFLAGS = -mod=mod -gcflags -dwarf=0 -ldflags "-s -w"
 
 RELEASE_MAIN = energi3
 RELEASE_RAW_VER = $(shell jq -r .version package.json)
