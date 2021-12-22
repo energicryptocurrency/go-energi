@@ -4,13 +4,14 @@ stages:
   - lint
   - build
   - test
-  - buildrelease
-  - deploy
+  - build-release
+  - deploy-release
 
-cache:
+cache: &global_cache_configuration
   paths:
     - node_modules/
     - build/
+  policy: pull-push
 
 .docker-job:
   tags: [docker_runner]
@@ -28,6 +29,8 @@ cache:
 
 build-builder_ubuntu18:
   stage: base
+  cache: []
+  dependencies: []
   extends: .docker-job
   script:
     - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
@@ -44,6 +47,8 @@ build-builder_ubuntu18:
 
 build-builder_ubuntu20:
   stage: base
+  cache: []
+  dependencies: []
   extends: .docker-job
   script:
     - docker build -t energi3_builder:20-${CI_COMMIT_REF_NAME} -f Dockerfile.windows --build-arg repository_remote=${repository_remote} .
@@ -58,9 +63,10 @@ build-builder_ubuntu20:
     - if: $CI_COMMIT_TAG
     - if: '$CI_COMMIT_BRANCH == "develop"'
 
-# make sure our repo does not have any artifacts of previous builds
 clean-repo:
   stage: prepare
+  cache: []
+  dependencies: []
   extends: .merge-request-job
   script:
     - git checkout -- .
@@ -70,12 +76,17 @@ clean-repo:
 # it will also fail for master branch merges
 branch-check:
   stage: prepare
+  cache: []
   extends: .merge-request-job
   script:
     - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
 
 npm-install:
   stage: prepare
+  cache:
+    # inherit all global cache Settings
+    <<: *global_cache_configuration
+    policy: push
   extends: .merge-request-job
   script:
     - npm install
@@ -89,40 +100,48 @@ npm-install:
 
 lint-sol:
   stage: lint
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+    # override the policy
+    policy: pull
   extends: .merge-request-job
   script:
     - make lint-sol
 
 lint-sol-tests:
   stage: lint
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+    # override the policy
+    policy: pull
   extends: .merge-request-job
   script:
     - make lint-sol-tests
 
 build-linux:
   stage: build
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+  dependencies: []
   extends: .merge-request-job
   script:
     - git checkout -- .
     - git clean -fdx -e node_modules .
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
-#build-docker:
-#  stage: build
-#  extends: .docker-job
-#  script:
-#    - docker build -t ${container_registry}/energi3:${CI_COMMIT_REF_NAME} -f Dockerfile .
-#    - docker push ${container_registry}/energi3:${CI_COMMIT_REF_NAME}
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-# TODO: release-builds should be implemented better
 build-release-linux:
-  stage: buildrelease
+  stage: build-release
+  cache: []
+  dependencies: []
+  needs: 
+    - test-go-report
+    - test-solidity
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
-  before_script:
-    - pwd
   script:
     - make -f Makefile.release release-linux
   artifacts:
@@ -134,11 +153,14 @@ build-release-linux:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-release-windows:
-  stage: buildrelease
+  stage: build-release
+  cache: []
+  dependencies: []
+  needs: 
+    - test-go-report
+    - test-solidity
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:20-latest
-  before_script:
-    - pwd
   script:
     - make -f Makefile.release release-windows
   artifacts:
@@ -151,7 +173,12 @@ build-release-windows:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
 build-release-macos:
-  stage: buildrelease
+  stage: build-release
+  cache: []
+  dependencies: []
+  needs: 
+    - test-go-report
+    - test-solidity
   tags: [docker_mac_runner]
   script:
     - make -f Makefile.release release-macos
@@ -165,6 +192,13 @@ build-release-macos:
 
 test-go-report:
   stage: test
+  dependencies: []
+  needs: ["build-linux"]
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+    # override the policy
+    policy: pull
   extends: .merge-request-job
   script:
     - make test-go-cover && tail -n1 .test-go-cover.func
@@ -176,7 +210,7 @@ test-go-report:
       - .test-go-cover.html
     reports:
       junit: .test-go-report.xml
-    expire_in: 3 day
+    expire_in: 2 day
   coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
   retry:
     max: 2
@@ -187,6 +221,13 @@ test-go-report:
 
 test-solidity:
   stage: test
+  dependencies: []
+  needs: ["build-linux"]
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+    # override the policy
+    policy: pull
   extends: .merge-request-job
   script:
     - make test-sol-contracts
@@ -196,7 +237,7 @@ test-solidity:
       - .test-sol-report.xml
     reports:
       junit: .test-sol-report.xml 
-    expire_in: 3 day
+    expire_in: 2 day
   retry:
     max: 2
     when:
@@ -205,7 +246,9 @@ test-solidity:
       - stuck_or_timeout_failure
 
 deploy-release-linux:
-  stage: buildrelease
+  stage: deploy-release
+  cache: []
+  dependencies: []
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
   script:
@@ -215,7 +258,9 @@ deploy-release-linux:
     - tags
 
 deploy-release-windows:
-  stage: buildrelease
+  stage: deploy-release
+  cache: []
+  dependencies: []
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:20-latest
   script:
@@ -225,7 +270,9 @@ deploy-release-windows:
     - tags
 
 deploy-release-mac:
-  stage: buildrelease
+  stage: deploy-release
+  cache: []
+  dependencies: []
   tags: [docker_mac_runner]
   script:
     - make -f Makefile.release release-macos
