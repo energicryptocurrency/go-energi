@@ -30,15 +30,12 @@ import (
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/ethdb"
-
-	// "github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
 
 	"github.com/stretchr/testify/assert"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 func TestBlacklist(t *testing.T) {
@@ -146,7 +143,7 @@ func TestBlacklist(t *testing.T) {
 
 	header.Number.Add(header.Number, common.Big1)
 	header.Time += 2*24*60*60 + 1
-	evm = engine.createEVM(msg, chain, header, blstate)
+	_ = engine.createEVM(msg, chain, header, blstate)
 	//---
 
 	//====================================

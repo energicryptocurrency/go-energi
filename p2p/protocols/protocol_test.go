@@ -25,12 +25,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/rlp"
-
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/p2p/enode"
 	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 	p2ptest "github.com/energicryptocurrency/energi/p2p/testing"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // handshake message type
@@ -306,7 +305,7 @@ func TestProtocolHook(t *testing.T) {
 	}
 
 	testHook.err = fmt.Errorf("dummy error")
-	err = tester.TestExchanges(p2ptest.Exchange{
+	_ = tester.TestExchanges(p2ptest.Exchange{
 		Triggers: []p2ptest.Trigger{
 			{
 				Code: 0,

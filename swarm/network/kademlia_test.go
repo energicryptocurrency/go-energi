@@ -165,7 +165,6 @@ func TestNeighbourhoodDepth(t *testing.T) {
 	if depth != 3 {
 		t.Fatalf("%d expected depth 3, was %d", testNum, depth)
 	}
-	testNum++
 }
 
 // TestHighMinBinSize tests that the saturation function also works

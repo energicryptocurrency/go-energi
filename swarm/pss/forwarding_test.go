@@ -337,7 +337,7 @@ func addPeers(kad *network.Kademlia, addresses []pot.Address) {
 }
 
 func createPss(t *testing.T, kad *network.Kademlia) *Pss {
-	privKey, err := crypto.GenerateKey()
+	privKey, _ := crypto.GenerateKey()
 	pssp := NewPssParams().WithPrivateKey(privKey)
 	ps, err := NewPss(kad, pssp)
 	if err != nil {
