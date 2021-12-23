@@ -20,22 +20,21 @@ import (
 	"context"
 	"math/big"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/bloombits"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/eth/gasprice"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/light"
-	"energi.world/core/gen3/params"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/bloombits"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/eth/gasprice"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/light"
+	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 type LesApiBackend struct {
@@ -106,7 +105,6 @@ func (b *LesApiBackend) GetTd(hash common.Hash) *big.Int {
 }
 
 func (b *LesApiBackend) GetEVM(ctx context.Context, msg core.Message, state *state.StateDB, header *types.Header) (*vm.EVM, func() error, error) {
-	state.SetBalance(msg.From(), math.MaxBig256)
 	context := core.NewEVMContext(msg, header, b.eth.blockchain, nil)
 	return vm.NewEVM(context, state, b.eth.chainConfig, vm.Config{}), state.Error, nil
 }

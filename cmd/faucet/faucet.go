@@ -42,23 +42,23 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/ethclient"
-	"energi.world/core/gen3/ethstats"
-	"energi.world/core/gen3/les"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/discv5"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/nat"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/ethclient"
+	"github.com/energicryptocurrency/energi/ethstats"
+	"github.com/energicryptocurrency/energi/les"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/discv5"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/nat"
+	"github.com/energicryptocurrency/energi/params"
 	"golang.org/x/net/websocket"
 )
 
@@ -450,7 +450,7 @@ func (f *faucet) apiHandler(conn *websocket.Conn) {
 		case *noauthFlag:
 			username, avatar, address, err = authNoAuth(msg.URL)
 		default:
-			err = errors.New("Something funky happened, please open an issue at https://energi.world/core/gen3/issues")
+			err = errors.New("Something funky happened, please open an issue at https://github.com/energicryptocurrency/energi/issues")
 		}
 		if err != nil {
 			if err = sendError(conn, err); err != nil {

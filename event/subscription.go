@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common/mclock"
+	"github.com/energicryptocurrency/energi/common/mclock"
 )
 
 // Subscription represents a stream of events. The carrier of the events is typically a

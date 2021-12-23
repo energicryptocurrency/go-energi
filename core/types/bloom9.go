@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 type bytesBacked interface {

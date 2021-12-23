@@ -17,9 +17,9 @@
 package simulation
 
 import (
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 )
 
 // Service returns a single Service by name on a particular node

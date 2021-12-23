@@ -30,10 +30,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/api"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/testutil"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/testutil"
 	colorable "github.com/mattn/go-colorable"
 )
 

@@ -28,16 +28,16 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/console"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/ethclient"
-	"energi.world/core/gen3/internal/debug"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/node"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/console"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/ethclient"
+	"github.com/energicryptocurrency/energi/internal/debug"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/node"
 	"github.com/elastic/gosigar"
 	cli "gopkg.in/urfave/cli.v1"
 )
@@ -118,6 +118,7 @@ var (
 		utils.MinerMigrationFlag,
 		utils.MinerNonceCapFlag,
 		utils.MinerAutocollateralFlag,
+		utils.MinerAutoCompondingFlag,
 		utils.NATFlag,
 		utils.NoDiscoverFlag,
 		utils.DiscoveryV5Flag,
@@ -199,10 +200,10 @@ func init() {
 		removedbCommand,
 		dumpCommand,
 		// See monitorcmd.go:
-		monitorCommand,
+		//monitorCommand,
 		// See accountcmd.go:
 		accountCommand,
-		//walletCommand,
+		walletCommand,
 		// See consolecmd.go:
 		consoleCommand,
 		attachCommand,
@@ -338,7 +339,8 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 				if event.Wallet.URL().Scheme == "ledger" {
 					derivationPath = accounts.DefaultLedgerBaseDerivationPath
 				}
-				event.Wallet.SelfDerive(derivationPath, stateReader)
+				derivationPaths := []accounts.DerivationPath { derivationPath }
+				event.Wallet.SelfDerive(derivationPaths, stateReader)
 
 			case accounts.WalletDropped:
 				log.Info("Old wallet dropped", "url", event.Wallet.URL())

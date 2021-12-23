@@ -20,8 +20,8 @@
 package geth
 
 import (
-	"energi.world/core/gen3/whisper/shhclient"
-	whisper "energi.world/core/gen3/whisper/whisperv6"
+	"github.com/energicryptocurrency/energi/whisper/shhclient"
+	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
 )
 
 // WhisperClient provides access to the Ethereum APIs.

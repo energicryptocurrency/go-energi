@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 )
 
 // Query is used to specify constraints when performing an update lookup

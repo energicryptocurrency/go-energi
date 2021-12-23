@@ -21,18 +21,22 @@ import (
 	"fmt"
 	"math/big"
 	"sort"
+	"math"
 	"sync"
 	"sync/atomic"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
+
+// max number of checkpoints stored in validated checkpoint map
+const	MaxCachedCheckpoints int = 10
 
 type CheckpointValidateChain interface {
 	GetHeaderByNumber(number uint64) *types.Header
@@ -157,6 +161,17 @@ func (cm *checkpointManager) validate(chain CheckpointValidateChain, num uint64,
 	return nil
 }
 
+// returns the smallest key (blockHeight)
+func oldestCheckpoint(validated map[uint64]validCheckpoint) (uint64) {
+	minHeight := uint64(math.MaxUint64)
+	for k, _ := range validated {
+			if k < minHeight {
+				minHeight = k;
+			}
+	}
+	return minHeight
+}
+
 func (bc *BlockChain) AddCheckpoint(
 	cp Checkpoint,
 	sigs []CheckpointSignature,
@@ -226,11 +241,24 @@ func (cm *checkpointManager) addCheckpoint(
 		}
 
 	}
+
 	//only received(non-hardcoded) checkpoints will be stored in validated map
-	cm.validated[cp.Number] = validCheckpoint{
-		Checkpoint: cp,
-		signatures: append([]CheckpointSignature{}, sigs...),
+	if len(cm.validated) == MaxCachedCheckpoints {
+		oldestCheckpointHeight := oldestCheckpoint(cm.validated)
+		if cp.Number > oldestCheckpointHeight {
+			delete(cm.validated, oldestCheckpointHeight);
+			cm.validated[cp.Number] = validCheckpoint{
+				Checkpoint: cp,
+				signatures: append([]CheckpointSignature{}, sigs...),
+			}
+		}
+	} else {
+		cm.validated[cp.Number] = validCheckpoint{
+			Checkpoint: cp,
+			signatures: append([]CheckpointSignature{}, sigs...),
+		}
 	}
+
 
 	log.Info("Added new checkpoint", "checkpoint", cp, "local", local)
 

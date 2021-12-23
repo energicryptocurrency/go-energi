@@ -21,9 +21,9 @@ import (
 	"path/filepath"
 	"sync"
 
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
 )
 
 type LocalStoreParams struct {

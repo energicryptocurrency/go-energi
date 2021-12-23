@@ -19,8 +19,9 @@ package trie
 import (
 	"fmt"
 	"reflect"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/energi/exceptions"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all
@@ -128,6 +129,11 @@ func (t *SecureTrie) TryDelete(key []byte) error {
 // GetKey returns the sha3 preimage of a hashed key that was
 // previously used to store a value.
 func (t *SecureTrie) GetKey(shaKey []byte) []byte {
+	//retrieve damaged value from preimage exceptions
+	if damagedKey := exceptions.GetPreimage(shaKey); damagedKey != nil {
+		return damagedKey
+	}
+
 	if key, ok := t.getSecKeyCache()[string(shaKey)]; ok {
 		return key
 	}
@@ -136,12 +142,12 @@ func (t *SecureTrie) GetKey(shaKey []byte) []byte {
 		log.Error("error during retrieving key from preimage database with hash - ", common.BytesToHash(shaKey).String(), err.Error())
 	}
 
-	////check if reverse hash of key equals to shaKey
-	//keyCopy := common.CopyBytes(key)
-	//keyHash := t.hashKey(keyCopy)
-	//if reflect.DeepEqual(shaKey, keyHash) == false {
-	//	log.Error("Preimage damage", "key", common.BytesToHash(shaKey).String(), "value", common.BytesToHash(key).String())
-	//}
+	// //check if reverse hash of key equals to shaKey
+	// keyCopy := common.CopyBytes(key)
+	// keyHash := t.hashKey(keyCopy)
+	// if reflect.DeepEqual(shaKey, keyHash) == false {
+	// 	log.Error("Preimage damage", "key", common.BytesToHash(shaKey).String(), "value", common.BytesToHash(key).String())
+	// }
 	return key
 }
 

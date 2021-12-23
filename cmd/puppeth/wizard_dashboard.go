@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // deployDashboard queries the user for various input on deploying a web-service

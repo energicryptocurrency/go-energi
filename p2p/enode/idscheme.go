@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"io"
 
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p/enr"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p/enr"
+	"github.com/energicryptocurrency/energi/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

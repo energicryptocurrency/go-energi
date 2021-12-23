@@ -27,14 +27,14 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/contracts/chequebook"
-	"energi.world/core/gen3/contracts/chequebook/contract"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/services/swap/swap"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/contracts/chequebook"
+	"github.com/energicryptocurrency/energi/contracts/chequebook/contract"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/services/swap/swap"
 )
 
 // SwAP       Swarm Accounting Protocol with

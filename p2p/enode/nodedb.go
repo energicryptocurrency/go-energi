@@ -27,7 +27,7 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/iterator"

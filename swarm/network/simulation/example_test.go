@@ -22,11 +22,11 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/swarm/network"
-	"energi.world/core/gen3/swarm/network/simulation"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/swarm/network"
+	"github.com/energicryptocurrency/energi/swarm/network/simulation"
 )
 
 // Every node can have a Kademlia associated using the node bucket under

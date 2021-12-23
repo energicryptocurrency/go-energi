@@ -29,8 +29,8 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/swarm/log"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"

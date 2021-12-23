@@ -1,5 +1,5 @@
-[submodule "tech/gen3/tests"]
+[submodule "energi-testdata"]
     path = tests/testdata
-    url = ../tests
-    branch = develop
+    url = ../energi-testdata
+    branch = master
 

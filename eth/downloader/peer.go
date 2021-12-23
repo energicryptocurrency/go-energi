@@ -30,9 +30,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 const (

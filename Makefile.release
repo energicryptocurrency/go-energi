@@ -2,6 +2,8 @@
 # Thanks to https://gist.github.com/asukakenji/f15ba7e588ac42795f421b48b8aede63#file-go-os-arch-md
 # https://github.com/golang/go/wiki/GoArm
 
+MAKEFLAGS ?= -j4
+
 TARGET_TOOLS =
 TARGET_TOOLS += geth
 TARGET_TOOLS += abigen
@@ -10,8 +12,7 @@ TARGET_TOOLS += clef
 TARGET_TOOLS += evm
 TARGET_TOOLS += rlpdump
 
-RELEASE_GOFLAGS = -mod=vendor
-#RELEASE_GOFLAGS+=-v
+RELEASE_GOFLAGS = -mod=mod -gcflags -dwarf=0 -ldflags "-s -w"
 
 RELEASE_MAIN = energi3
 RELEASE_RAW_VER = $(shell jq -r .version package.json)
@@ -123,7 +124,8 @@ release-windows: release-windows-amd64 release-windows-i686
 RELEASE_WINDOWS_COMMON := make -f Makefile.release release-windows-common --no-print-directory
 RELEASE_RENDER_NSIS := sed \
   -e 's,{{.License}},COPYING.txt,g' \
-  -e 's,{{.EnergiCore}},bin/energi3.exe,g'
+  -e 's,{{.EnergiCore}},bin/energi3.exe,g' \
+  -e 's,{{.EnergiCoreIcon}},energi-icon.ico,g'
 #  -e 's,{{range .DevTools}}file {{.}},file bin/abigen.exe\n  file bin/bootnode.exe\n  file bin/clef.exe\n  file bin/evm.exe\n  file bin/rlpdump.exe,g' \
 #  -e 's,{{range $$}}Delete $$INSTDIR\\{{.}},Delete \$$INSTDIR\abigen.exe\n  Delete \$$INSTDIR\bootnode.exe\n  Delete \$$INSTDIR\clef.exe\n  Delete \$$INSTDIR\evm.exe\n  Delete $$INSTDIR\rlpdump.exe,g' \
 #  -e 's,{{end}},,g'
@@ -133,12 +135,13 @@ release-windows-common:
 	@echo Building $(RELEASE_TARGET)
 	@rm -rf build/release/$(RELEASE_TARGET)
 	@mkdir -p build/release/$(RELEASE_TARGET)
+	@cp energi/common/energi-icon.ico build/release/$(RELEASE_TARGET)/
 	@for t in $(TARGET_TOOLS); do \
 	    export GOCACHE=$(CURDIR)/build/release/$(RELEASE_TARGET)/cache; \
 	    export PREFIX=/usr/$(HOST); \
 	    export PKG_CONFIG_PATH=/usr/$(HOST)/lib/pkgconfig; \
-	    export CC=$(HOST)-gcc-7.3-posix; \
-	    export CXX=$(HOST)-g++-7.3-posix; \
+	    export CC=$(HOST)-gcc-9.3-posix; \
+	    export CXX=$(HOST)-g++-9.3-posix; \
 	    export CGO_CFLAGS="-D_WIN32_WINNT=0x0601"; \
 	    export CGO_CXXFLAGS="$$CGO_CXXFLAGS"; \
 	    export CGO_ENABLED=1; \
@@ -160,7 +163,7 @@ release-windows-common:
 	  -DARCH=$(GOARCH) \
 	  build/release/$(RELEASE_TARGET)/energi3.nsi
 	@cd build/release && zip $(RELEASE_TARGET)/$(RELEASE_TARGET).zip \
-	  $(RELEASE_TARGET)/bin/$(RELEASE_MAIN).exe $(RELEASE_TARGET)/COPYING.txt
+	  $(RELEASE_TARGET)/bin/$(RELEASE_MAIN).exe $(RELEASE_TARGET)/COPYING.txt $(RELEASE_TARGET)/energi-icon.ico
 	@cd build/release && zip $(RELEASE_TARGET)/$(RELEASE_TARGET)-alltools.zip \
 	  -r $(RELEASE_TARGET)/bin/ $(RELEASE_TARGET)/COPYING.txt
 	@ls build/release/$(RELEASE_TARGET)/$(RELEASE_TARGET)*.zip \

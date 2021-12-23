@@ -25,11 +25,11 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/prque"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/prque"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
 )
 
 var (

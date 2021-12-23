@@ -27,10 +27,10 @@ import (
 	"time"
 	"unsafe"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/bitutil"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/bitutil"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
 	"golang.org/x/crypto/sha3"
 )
 

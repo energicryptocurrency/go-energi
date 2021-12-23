@@ -29,17 +29,17 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/params"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/trie"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/trie"
 )
 
 // PublicEthereumAPI provides an API to access Ethereum full node-related
@@ -170,11 +170,11 @@ func (api *PrivateMinerAPI) RemoveDPoS(contract common.Address) bool {
 
 // Updated auto-collateralize mode
 func (api *PrivateMinerAPI) SetAutocollateralize(mode *uint64) (old uint64, err error) {
-	old = api.e.Miner().GetMinerAutocollateral()
+	old = api.e.Miner().GetMinerAutoCompound()
 
 	if mode != nil {
 		if *mode <= 2 {
-			api.e.Miner().SetMinerAutocollateral(*mode)
+			api.e.Miner().SetMinerAutoCompound(*mode)
 		} else {
 			err = fmt.Errorf("Invalid mode %d", *mode)
 		}

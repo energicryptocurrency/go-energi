@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/enode"
 )
 
 var requestedPeerID = enode.HexID("3431c3939e1ee2a6345e976a8234f9870152d64879f30bc272a074f6859e75e8")

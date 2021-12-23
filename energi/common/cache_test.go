@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
 )
 
 var dummyBlockHash = common.BytesToHash([]byte{1, 3, 4, 5})

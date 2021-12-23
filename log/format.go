@@ -22,7 +22,7 @@ const (
 
 // locationTrims are trimmed for display to avoid unwieldy log lines.
 var locationTrims = []string{
-	"energi.world/core/gen3/",
+	"github.com/energicryptocurrency/energi/",
 }
 
 // PrintOrigins sets or unsets log location (file:line) printing for terminal

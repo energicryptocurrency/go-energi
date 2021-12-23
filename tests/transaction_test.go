@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 func TestTransaction(t *testing.T) {

@@ -25,21 +25,21 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/eth"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/eth"
 
-	// "energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/nat"
-	"energi.world/core/gen3/params"
+	// "github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/nat"
+	"github.com/energicryptocurrency/energi/params"
 	"github.com/stretchr/testify/assert"
 
-	energi_testutils "energi.world/core/gen3/energi/common/testutils"
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_testutils "github.com/energicryptocurrency/energi/energi/common/testutils"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 var sentCheckPoints = &testCheckPoints{}

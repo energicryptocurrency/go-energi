@@ -1,6 +1,6 @@
 package miner
 
-import "energi.world/core/gen3/metrics"
+import "github.com/energicryptocurrency/energi/metrics"
 
 var (
 	difficultyGauge  = metrics.NewRegisteredGauge("energi/consensus/difficulty", nil)

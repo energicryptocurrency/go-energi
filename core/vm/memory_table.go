@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"energi.world/core/gen3/common/math"
+	"github.com/energicryptocurrency/energi/common/math"
 )
 
 func memorySha3(stack *Stack) *big.Int {

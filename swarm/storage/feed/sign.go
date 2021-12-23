@@ -19,8 +19,8 @@ package feed
 import (
 	"crypto/ecdsa"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 const signatureLength = 65

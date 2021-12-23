@@ -22,12 +22,12 @@ import (
 	"errors"
 	"testing"
 
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
 
-	// "energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	// "github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 
 	"github.com/stretchr/testify/assert"
 )

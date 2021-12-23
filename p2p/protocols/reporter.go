@@ -20,8 +20,8 @@ import (
 	"encoding/binary"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
 
 	"github.com/syndtr/goleveldb/leveldb"
 )

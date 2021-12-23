@@ -23,16 +23,16 @@ import (
 	"path/filepath"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/contracts/ens"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/network"
-	"energi.world/core/gen3/swarm/pss"
-	"energi.world/core/gen3/swarm/services/swap"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/contracts/ens"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/network"
+	"github.com/energicryptocurrency/energi/swarm/pss"
+	"github.com/energicryptocurrency/energi/swarm/services/swap"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 const (

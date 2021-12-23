@@ -22,20 +22,20 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	eth_consensus "energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/ethdb"
+	"github.com/energicryptocurrency/energi/common"
+	eth_consensus "github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/ethdb"
 
-	// "energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	// "github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 	"github.com/stretchr/testify/assert"
 
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 type mockChainReader struct {
@@ -156,10 +156,6 @@ func TestPoSChainV1(t *testing.T) {
 
 	iterCount := 150
 
-	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
-		return common.Big1
-	}
-
 	for i := 1; i < iterCount; i++ {
 		number := new(big.Int).Add(parent.Number, common.Big1)
 
@@ -252,7 +248,7 @@ func TestPoSChainV1(t *testing.T) {
 
 		// Time tests
 		// ---
-		tt := engine.calcTimeTarget(chain, parent)
+		tt := engine.calcTimeTargetV1(chain, parent)
 		assert.True(t, tt.max >= now)
 		assert.True(t, tt.max <= engine.now()+30)
 
@@ -475,9 +471,6 @@ func TestPoSMine(t *testing.T) {
 
 	engine := New(&params.EnergiConfig{MigrationSigner: migrationSigner}, testdb)
 	engine.testing = true
-	engine.diffFn = func(uint64, *types.Header, *TimeTarget) *big.Int {
-		return common.Big1
-	}
 	engine.SetMinerCB(
 		func() []common.Address {
 			if header.Number.Uint64() == 1 {

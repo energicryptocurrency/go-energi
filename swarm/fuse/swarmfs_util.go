@@ -24,7 +24,7 @@ import (
 	"os/exec"
 	"runtime"
 
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 func externalUnmount(mountPoint string) error {

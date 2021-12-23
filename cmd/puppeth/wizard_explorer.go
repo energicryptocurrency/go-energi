@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // deployExplorer creates a new block explorer based on some user input.

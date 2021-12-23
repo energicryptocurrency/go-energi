@@ -40,7 +40,7 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 var dumpEnc bool

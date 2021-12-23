@@ -23,14 +23,14 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/p2p/protocols"
-	"energi.world/core/gen3/swarm/log"
-	pq "energi.world/core/gen3/swarm/network/priorityqueue"
-	"energi.world/core/gen3/swarm/network/stream/intervals"
-	"energi.world/core/gen3/swarm/spancontext"
-	"energi.world/core/gen3/swarm/state"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/p2p/protocols"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	pq "github.com/energicryptocurrency/energi/swarm/network/priorityqueue"
+	"github.com/energicryptocurrency/energi/swarm/network/stream/intervals"
+	"github.com/energicryptocurrency/energi/swarm/spancontext"
+	"github.com/energicryptocurrency/energi/swarm/state"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 

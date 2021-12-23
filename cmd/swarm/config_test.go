@@ -26,10 +26,10 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm"
-	"energi.world/core/gen3/swarm/api"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm"
+	"github.com/energicryptocurrency/energi/swarm/api"
 	"github.com/docker/docker/pkg/reexec"
 )
 

@@ -21,8 +21,8 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 var (

@@ -55,8 +55,12 @@ test-go: test-data-submodule
 	build/env.sh go run build/ci.go test
 
 test-go-report: test-data-submodule
-	build/env.sh go run build/ci.go test -v | go-junit-report -set-exit-code -output .test-go-report.xml
+	build/env.sh go run build/ci.go test -v -coverprofile | go-junit-report -set-exit-code -output .test-go-report.xml
 
+test-go-cover: test-go-report
+	build/env.sh go tool cover -func=.test-go-cover.out -o .test-go-cover.func
+	build/env.sh go tool cover -html=.test-go-cover.out -o .test-go-cover.html
+	
 test-sol: lint-sol-tests lint-sol test-sol-contracts
 
 lint: lint-go lint-sol-tests lint-sol

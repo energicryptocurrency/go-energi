@@ -24,12 +24,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"energi.world/core/gen3"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // Client defines typed wrappers for the Ethereum RPC API.

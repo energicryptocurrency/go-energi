@@ -23,8 +23,8 @@ import (
 	"crypto/elliptic"
 	"fmt"
 
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/crypto/secp256k1"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/crypto/secp256k1"
 )
 
 // Ecrecover returns the uncompressed public key that created the given signature.

@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"os"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 	"gopkg.in/urfave/cli.v1"
 )
 

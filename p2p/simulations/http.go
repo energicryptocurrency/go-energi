@@ -29,11 +29,11 @@ import (
 	"strings"
 	"sync"
 
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/rpc"
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/websocket"
 )

@@ -22,9 +22,9 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/swarm/network"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/swarm/network"
 )
 
 func TestWaitTillHealthy(t *testing.T) {

@@ -27,17 +27,17 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/simulations/adapters"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/network"
-	"energi.world/core/gen3/swarm/network/simulation"
-	"energi.world/core/gen3/swarm/state"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/mock"
-	"energi.world/core/gen3/swarm/testutil"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/network"
+	"github.com/energicryptocurrency/energi/swarm/network/simulation"
+	"github.com/energicryptocurrency/energi/swarm/state"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/swarm/testutil"
 )
 
 const dataChunkCount = 200

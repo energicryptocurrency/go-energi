@@ -24,9 +24,9 @@ import (
 	"fmt"
 	"sync"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/shed"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/shed"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 // SubscribePull returns a channel that provides chunk addresses and stored times from pull syncing index.

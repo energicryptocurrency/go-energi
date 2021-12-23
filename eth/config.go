@@ -25,13 +25,13 @@ import (
 	"runtime"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/eth/gasprice"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/eth/gasprice"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 // DefaultConfig contains default settings for use on the Ethereum main net.
@@ -58,7 +58,7 @@ var DefaultConfig = Config{
 	MinerRecommit:  3 * time.Second,
 	MinerNonceCap:  0,
 
-	MinerAutocollateral: 1,
+	MinerAutoCompound: 1,
 
 	TxPool: core.DefaultTxPoolConfig,
 	GPO: gasprice.Config{
@@ -125,7 +125,7 @@ type Config struct {
 	MinerMigration string  `toml:",omitempty"`
 	MinerNonceCap  uint64  `toml:"-"`
 
-	MinerAutocollateral uint64 `toml:",omitempty"`
+	MinerAutoCompound uint64 `toml:",omitempty"`
 
 	PublicService bool `toml:",omitempty"`
 

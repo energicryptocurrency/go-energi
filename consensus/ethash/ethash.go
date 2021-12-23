@@ -34,12 +34,12 @@ import (
 	"time"
 	"unsafe"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/rpc"
 	mmap "github.com/edsrzf/mmap-go"
 	"github.com/hashicorp/golang-lru/simplelru"
 )

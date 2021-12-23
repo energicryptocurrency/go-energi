@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"strings"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
 
-	"energi.world/core/gen3/cmd/utils"
-	swarm "energi.world/core/gen3/swarm/api/client"
-	"energi.world/core/gen3/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
 	"gopkg.in/urfave/cli.v1"
 )
 

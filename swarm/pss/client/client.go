@@ -25,14 +25,14 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/protocols"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/pss"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/protocols"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/pss"
 )
 
 const (

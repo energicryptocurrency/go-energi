@@ -28,11 +28,20 @@ import (
 	"math/big"
 	"os"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/math"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/energi/rlp"
 	"golang.org/x/crypto/sha3"
 )
+
+//SignatureLength indicates the byte length required to carry a signature with recovery id.
+const SignatureLength = 64 + 1 // 64 bytes ECDSA signature + 1 byte recovery id
+
+// RecoveryIDOffset points to the byte offset within the signature that contains the recovery id.
+const RecoveryIDOffset = 64
+
+// DigestLength sets the signature digest exact length
+const DigestLength = 32
 
 var (
 	secp256k1N, _  = new(big.Int).SetString("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16)

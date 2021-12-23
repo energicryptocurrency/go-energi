@@ -24,10 +24,10 @@ import (
 	"strconv"
 	"strings"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/params"
 	"gopkg.in/urfave/cli.v1"
 )
 

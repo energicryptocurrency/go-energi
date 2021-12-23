@@ -22,7 +22,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"energi.world/core/gen3/core/asm"
+	"github.com/energicryptocurrency/energi/core/asm"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

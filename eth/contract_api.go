@@ -21,16 +21,16 @@ import (
 	"errors"
 	"math/big"
 
-	ethereum "energi.world/core/gen3"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/rpc"
+	ethereum "github.com/energicryptocurrency/energi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_common "energi.world/core/gen3/energi/common"
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 func (b *EthAPIBackend) CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error) {
@@ -217,25 +217,30 @@ func (b *EthAPIBackend) isFilteredLog(
 	log *types.Log,
 	blockNo *uint64,
 ) bool {
-
-	for _, addr := range q.Addresses {
-		generalProxyHash := energi_common.GeneralProxyHashExtractor(ctx, addr, blockNo)
-		if generalProxyHash != nil && log.Address.Hash() == *generalProxyHash {
-			return true
-		}
-
-		if addr == log.Address {
-			return true
-		}
-	}
-
+	// check if given contract signature is found
+	var topicFound bool
 	for _, queryTopics := range q.Topics {
 		if len(queryTopics) > 0 {
 			for _, foundTopic := range log.Topics {
 				// Check if missed event name topic was returned.
 				if len(foundTopic) > 0 && queryTopics[0] == foundTopic {
-					return true
+					topicFound = true
 				}
+			}
+		}
+	}
+
+	// if topics was not found return false
+	if topicFound {
+		// check if log is coming from our contract address
+		for _, addr := range q.Addresses {
+			generalProxyHash := energi_common.GeneralProxyHashExtractor(ctx, addr, blockNo)
+			if generalProxyHash != nil && log.Address.Hash() == *generalProxyHash {
+				return true
+			}
+
+			if addr == log.Address {
+				return true
 			}
 		}
 	}

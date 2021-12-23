@@ -19,7 +19,7 @@ package vm
 import (
 	"fmt"
 
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 func makeStackFunc(pop, push int) stackValidationFunc {

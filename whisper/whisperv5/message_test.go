@@ -21,8 +21,8 @@ import (
 	mrand "math/rand"
 	"testing"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 func generateMessageParams() (*MessageParams, error) {

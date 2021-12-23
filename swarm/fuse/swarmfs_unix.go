@@ -30,9 +30,9 @@ import (
 
 	"bazil.org/fuse"
 	"bazil.org/fuse/fs"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/api"
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 var (

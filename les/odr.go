@@ -19,10 +19,10 @@ package les
 import (
 	"context"
 
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/light"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/light"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // LesOdr implements light.OdrBackend

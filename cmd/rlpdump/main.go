@@ -26,7 +26,7 @@ import (
 	"os"
 	"strings"
 
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 var (

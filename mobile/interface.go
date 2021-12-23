@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 // Interface represents a wrapped version of Go's interface{}, with the capacity

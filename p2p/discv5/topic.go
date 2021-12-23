@@ -23,8 +23,8 @@ import (
 	"math/rand"
 	"time"
 
-	"energi.world/core/gen3/common/mclock"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common/mclock"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 const (

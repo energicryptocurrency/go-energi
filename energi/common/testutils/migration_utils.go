@@ -25,8 +25,8 @@ import (
 	"math/big"
 	"os"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 	"github.com/shengdoushi/base58"
 )
 

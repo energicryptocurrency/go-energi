@@ -17,12 +17,13 @@
 package api
 
 import (
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	// "energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	// "github.com/energicryptocurrency/energi/log"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -70,17 +71,17 @@ func TestSearchCoins(t *testing.T) {
 			{
 				ItemID:   77,
 				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount:   big.NewInt(0),
+				Amount:   (*hexutil.Big)(big.NewInt(0)),
 			},
 			{
 				ItemID:   78,
 				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount:   big.NewInt(10),
+				Amount:   (*hexutil.Big)(big.NewInt(10)),
 			},
 			{
 				ItemID:   79,
 				RawOwner: common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
-				Amount:   big.NewInt(10),
+				Amount:   (*hexutil.Big)(big.NewInt(10)),
 			},
 		}, nil
 	}
@@ -102,17 +103,17 @@ func TestSearchCoins(t *testing.T) {
 			{
 				ItemID:   77,
 				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount:   big.NewInt(0),
+				Amount:   (*hexutil.Big)(big.NewInt(0)),
 			},
 			{
 				ItemID:   78,
 				RawOwner: common.HexToAddress("0xC94729d0212C2D1074d858EB6c9ee44Fb19D76e6"),
-				Amount:   big.NewInt(10),
+				Amount:   (*hexutil.Big)(big.NewInt(10)),
 			},
 			{
 				ItemID:   79,
 				RawOwner: common.HexToAddress("0xDB52E60435e09e998b6077eE65e3719836fA0d2e"),
-				Amount:   big.NewInt(10),
+				Amount:   (*hexutil.Big)(big.NewInt(10)),
 			},
 		}, nil
 	}

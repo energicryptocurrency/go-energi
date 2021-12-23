@@ -19,11 +19,11 @@ package common
 import (
 	"context"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/state"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/state"
 
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 // GeneralProxyHashFunc provides the function that helps check for governed

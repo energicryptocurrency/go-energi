@@ -21,16 +21,16 @@ import (
 	"math/big"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 
-	energi_abi "energi.world/core/gen3/energi/abi"
-	energi "energi.world/core/gen3/energi/consensus"
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi "github.com/energicryptocurrency/energi/energi/consensus"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 const maxAutoCollateralBlockAge = time.Duration(time.Minute)
@@ -41,7 +41,7 @@ const (
 	acRapid      uint64 = 2
 )
 
-func (w *worker) tryAutocollateral() {
+func (w *worker) tryAutoCompound() {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 

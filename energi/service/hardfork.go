@@ -23,21 +23,21 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"energi.world/core/gen3/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	// "energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	// "github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_api "energi.world/core/gen3/energi/api"
-	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_params "energi.world/core/gen3/energi/params"
-	energi_common "energi.world/core/gen3/energi/common"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
 
 
 )
@@ -46,7 +46,7 @@ const (
 	//event channel default site
 	EventChanBufferSize = 10
 	//remaining number of blocks where we start logging/notifying user about upcoming pending hardfork
-	lastBlockNumToLogPendingHardforks = int64(-100);
+	lastBlockNumToLogPendingHardforks = int64(100);
 )
 
 // HardforkService defines the hardfork service type.
@@ -56,7 +56,6 @@ type HardforkService struct {
 	ctxCancel func()
 
 	inSync int32
-	callOpts   *bind.CallOpts
 
 	hfAPI *energi_api.HardforkRegistryAPI
 	hfRegistry *energi_abi.IHardforkRegistry
@@ -113,11 +112,11 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	}
 
 	//routine will listen to events thrown when hardfork is created
-	// go hf.listenHardforkCreatedEvents();
+	go hf.listenHardforkCreatedEvents();
 	// //routine will listen to hardfork finalization event
-	// go hf.listenHardforkFinalizedEvents();
+	go hf.listenHardforkFinalizedEvents();
 	//routine will listen to events thrown when hardfork is removed
-	//go hf.listenHardforkRemovedEvents();
+	go hf.listenHardforkRemovedEvents();
 	//logs upcoming pending hardforks notifying users about version change
 	go hf.logUpcomingHardforks();
 
@@ -150,7 +149,7 @@ func (hf *HardforkService) logUpcomingHardforks() {
 
 				// for each hardfork name log the information considering the current block number
 				for _, hardfork := range pendingHardforks {
-					logHardforkInfo(ev.Block.Header().Number, hf.eth.BlockChain().Config().HFFinalizationPeriod, hardfork)
+					logHardforkInfo(ev.Block.Header().Number, hardfork)
 				}
 
 
@@ -284,7 +283,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 			return
 
 		case hardfork := <-hfRemovedChan:
-			log.Info("Hardfork Removed: ",
+			log.Warn("Hardfork Removed: ",
 							 "Hardfork Name",
 							 string(hardfork.Name[:]))
 		}
@@ -298,12 +297,9 @@ func (hf *HardforkService) LogHardForks(hardforks []*energi_api.HardforkInfo)  {
 	currentBlockHeader := hf.eth.BlockChain().CurrentBlock().Header()
 	currentBlockNumber := currentBlockHeader.Number
 
-	//get the hf finalization period parameter from config
-	hfFinalizationPeriod := hf.eth.BlockChain().Config().HFFinalizationPeriod
-
 	//for each hardfork name 	log the information considering the current block number
 	for _, hardfork := range hardforks {
-			 logHardforkInfo(currentBlockNumber, hfFinalizationPeriod, hardfork)
+			 logHardforkInfo(currentBlockNumber, hardfork)
 	}
 
 }
@@ -349,34 +345,27 @@ func (hf *HardforkService) listenDownloader() {
 
 
 //logHardfork logs the information about the provided hardforks.
-func logHardforkInfo(currentBlockNo, period *big.Int, hfInfo *energi_api.HardforkInfo) {
-	logFunc := log.Debug
-	emptyHash := [32]byte{}
+func logHardforkInfo(currentBlockNo *big.Int, hfInfo *energi_api.HardforkInfo) {
 	diff := new(big.Int).Sub(hfInfo.BlockNumber, currentBlockNo)
-
-	if bytes.Compare(hfInfo.BlockHash[:], emptyHash[:]) == 0 {
-		if diff.Cmp(big.NewInt(lastBlockNumToLogPendingHardforks)) > 0 && diff.Cmp(period) <= 0 {
-			// -10 < Currentblock - hfblock <= hfPeriod
-			logFunc = log.Warn
-		}
+	emptyArray := [32]byte{}
+	// check if hf is finalized (block hash set)
+	if bytes.Compare(hfInfo.BlockHash[:], emptyArray[:]) == 0 {
+		// check if hf is active (current block passed hf block)
 		if diff.Cmp(common.Big0) <= 0 {
 			// BlockHash not yet set but hardfork is active
-			logFunc("Active hard fork", "Name",hfInfo.Name, "activated at", hfInfo.BlockNumber.String())
+			log.Warn("Active hard fork", "Name", hfInfo.Name, "activated at", hfInfo.BlockNumber.String())
 		} else {
 			// hardfork is to be activated in the future
 			hours := strconv.FormatInt(diff.Int64()/60, 10)
 			minutes := strconv.FormatInt(diff.Int64()%60, 10)
-			logFunc("Hard fork will activate in approximately " + hours + " hours and " + minutes + " minutes" , "hardfork Name", hfInfo.Name)
+			if diff.Int64() < lastBlockNumToLogPendingHardforks  {
+				log.Warn("Hard fork will activate in approximately " + hours + " hours and " + minutes + " minutes" , "hardfork Name", hfInfo.Name)
+			} else {
+				log.Debug("Hard fork will activate in approximately " + hours + " hours and " + minutes + " minutes" , "hardfork Name", hfInfo.Name)
+			}
 		}
-
 	} else {
-		if diff.Cmp(common.Big0) > 0 && diff.Cmp(period) <= 0 {
-			// 0 < Currentblock - hfblock <= hfPeriod
-			logFunc = log.Info
-		}
 		// BlockHash already set. Hardfork already finalized.
-		logFunc("Hardfork already finalized", "block Number", hfInfo.BlockNumber,
-			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String(),
-		)
+		log.Warn("Hardfork already finalized", "block Number", hfInfo.BlockNumber, "hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String())
 	}
 }

@@ -21,7 +21,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"energi.world/core/gen3/swarm/storage/encryption"
+	"github.com/energicryptocurrency/energi/swarm/storage/encryption"
 	"golang.org/x/crypto/sha3"
 )
 

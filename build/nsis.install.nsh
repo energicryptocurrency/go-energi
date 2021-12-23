@@ -15,17 +15,23 @@ PageExEnd
 # Install energi3 binary
 Section "Gen 3 Core Node" GETH_IDX
   SetOutPath $INSTDIR
+  file {{.EnergiCoreIcon}}
+
+  CreateDirectory "$INSTDIR\bin"
+  SetOutPath "$INSTDIR\bin"
   file {{.EnergiCore}}
 
   # Create start menu launcher
   createDirectory "$SMPROGRAMS\${APPNAME}"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Core Node.lnk" "$INSTDIR\energi3.exe" "--cache=512"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\energi3.exe" "attach \\.\pipe\energi3.ipc" "" ""
-  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk" "$INSTDIR\energi3.exe" "--testnet --cache=512 -ipcpath test-energi3.ipc"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Attach.lnk" "$INSTDIR\energi3.exe" "--testnet attach \\.\pipe\test-energi3.ipc" "" ""
-  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Core Node.lnk" "$INSTDIR\energi3.exe" "--simnet --cache=512 -ipcpath sim-energi3.ipc"
-  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Attach.lnk" "$INSTDIR\energi3.exe" "--simnet attach \\.\pipe\sim-energi3.ipc" "" ""
-  createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Core Node.lnk" "$INSTDIR\bin\energi3.exe" "" "$INSTDIR\energi-icon.ico" 0
+  createShortCut "$SMPROGRAMS\${APPNAME}\Attach.lnk" "$INSTDIR\bin\energi3.exe" "attach \\.\pipe\energi3.ipc" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Core Node.lnk" "$INSTDIR\bin\energi3.exe" "--testnet  -ipcpath test-energi3.ipc" "$INSTDIR\energi-icon.ico" 0
+  createShortCut "$SMPROGRAMS\${APPNAME}\Testnet Attach.lnk" "$INSTDIR\bin\energi3.exe" "--testnet attach \\.\pipe\test-energi3.ipc" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Core Node.lnk" "$INSTDIR\bin\energi3.exe" "--simnet  -ipcpath sim-energi3.ipc" "$INSTDIR\energi-icon.ico" 0
+  createShortCut "$SMPROGRAMS\${APPNAME}\Simnet Attach.lnk" "$INSTDIR\bin\energi3.exe" "--simnet attach \\.\pipe\sim-energi3.ipc" "" ""
+  createShortCut "$SMPROGRAMS\${APPNAME}\Uninstall.lnk" "$INSTDIR\bin\uninstall.exe" "" "" ""
+
+  CreateShortCut "$DESKTOP\Energi Core Node.lnk" "$INSTDIR\bin\energi3.exe" "" "$INSTDIR\energi-icon.ico" 0
 
   # Firewall - remove rules (if exists)
   SimpleFC::AdvRemoveRule "Energi Gen 3 incoming peers (TCP:39797)"
@@ -40,15 +46,15 @@ Section "Gen 3 Core Node" GETH_IDX
 
 
   # Firewall - add rules
-  SimpleFC::AdvAddRule "Energi Gen 3 incoming peers (TCP:39797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 39797 "" "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 outgoing peers (TCP:39797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 UDP discovery (UDP:39797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 39797 "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 Testnet incoming peers (TCP:49797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 49797 "" "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 49797 "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 49797 "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 Simnet incoming peers (TCP:59797)" ""  6 1 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" 59797 "" "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 Simnet outgoing peers (TCP:59797)" ""  6 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 59797 "" ""
-  SimpleFC::AdvAddRule "Energi Gen 3 Simnet UDP discovery (UDP:59797)" "" 17 2 1 2147483647 1 "$INSTDIR\energi3.exe" "" "" "Energi" "" 59797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 incoming peers (TCP:39797)" ""  6 1 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" 39797 "" "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 outgoing peers (TCP:39797)" ""  6 2 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" "" 39797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 UDP discovery (UDP:39797)" "" 17 2 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" "" 39797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Testnet incoming peers (TCP:49797)" ""  6 1 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" 49797 "" "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Testnet outgoing peers (TCP:49797)" ""  6 2 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" "" 49797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Testnet UDP discovery (UDP:49797)" "" 17 2 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" "" 49797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Simnet incoming peers (TCP:59797)" ""  6 1 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" 59797 "" "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Simnet outgoing peers (TCP:59797)" ""  6 2 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" "" 59797 "" ""
+  SimpleFC::AdvAddRule "Energi Gen 3 Simnet UDP discovery (UDP:59797)" "" 17 2 1 2147483647 1 "$INSTDIR\bin\energi3.exe" "" "" "Energi" "" 59797 "" ""
 
   # Set default IPC endpoint (https://github.com/ethereum/EIPs/issues/147)
   ${EnvVarUpdate} $0 "ENERGI3_SOCKET" "R" "HKLM" "\\.\pipe\energi3.ipc"
@@ -94,12 +100,12 @@ FunctionEnd
 function .onInstSuccess
   # Save information in registry in HKEY_LOCAL_MACHINE branch, Windows add/remove functionality depends on this
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "DisplayName" "${GROUPNAME} - ${APPNAME} - ${DESCRIPTION}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "UninstallString" "$\"$INSTDIR\bin\uninstall.exe$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "QuietUninstallString" "$\"$INSTDIR\bin\uninstall.exe$\" /S"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "InstallLocation" "$INSTDIR"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "InstallDate" "${NOW}"
   # Wait for Alex
-  #WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "DisplayIcon" "$\"$INSTDIR\logo.ico$\""
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "DisplayIcon" "$\"$INSTDIR\energi-icon.ico$\""
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "Publisher" "${GROUPNAME}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "HelpLink" "${HELPURL}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "URLUpdateInfo" "${UPDATEURL}"
@@ -116,7 +122,7 @@ function .onInstSuccess
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${GROUPNAME} ${APPNAME}" "EstimatedSize" "$0"
 
   # Create uninstaller
-  writeUninstaller "$INSTDIR\uninstall.exe"
+  writeUninstaller "$INSTDIR\bin\uninstall.exe"
 functionEnd
 
 Page components

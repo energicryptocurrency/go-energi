@@ -24,12 +24,12 @@ import (
 	"net"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/mclock"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/p2p/netutil"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/mclock"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/p2p/netutil"
+	"github.com/energicryptocurrency/energi/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

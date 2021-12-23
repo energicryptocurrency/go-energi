@@ -23,8 +23,8 @@ import (
 	"testing"
 	"time"
 
-	p2ptest "energi.world/core/gen3/p2p/testing"
-	"energi.world/core/gen3/swarm/state"
+	p2ptest "github.com/energicryptocurrency/energi/p2p/testing"
+	"github.com/energicryptocurrency/energi/swarm/state"
 )
 
 func newHiveTester(t *testing.T, params *HiveParams, n int, store state.Store) (*bzzTester, *Hive) {

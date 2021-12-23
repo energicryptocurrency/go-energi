@@ -20,7 +20,7 @@ package storage
 // no need for queueing/caching
 
 import (
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"

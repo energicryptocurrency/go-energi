@@ -20,9 +20,9 @@ import (
 	"hash"
 	"unsafe"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/swarm/storage"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/swarm/storage"
 )
 
 // Feed represents a particular user's stream of updates on a topic

@@ -25,9 +25,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 // Msg defines the structure of a p2p message.

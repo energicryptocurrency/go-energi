@@ -23,13 +23,13 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/protocols"
-	"energi.world/core/gen3/swarm/network"
-	"energi.world/core/gen3/swarm/pot"
-	whisper "energi.world/core/gen3/whisper/whisperv6"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/protocols"
+	"github.com/energicryptocurrency/energi/swarm/network"
+	"github.com/energicryptocurrency/energi/swarm/pot"
+	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
 )
 
 type testCase struct {

@@ -23,11 +23,11 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/allegro/bigcache"
 )
 

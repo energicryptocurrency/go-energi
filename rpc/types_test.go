@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"energi.world/core/gen3/common/math"
+	"github.com/energicryptocurrency/energi/common/math"
 )
 
 func TestBlockNumberJSONUnmarshal(t *testing.T) {

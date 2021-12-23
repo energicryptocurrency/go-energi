@@ -5,7 +5,7 @@ package whisperv6
 import (
 	"encoding/json"
 
-	"energi.world/core/gen3/common/hexutil"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 )
 
 var _ = (*criteriaOverride)(nil)

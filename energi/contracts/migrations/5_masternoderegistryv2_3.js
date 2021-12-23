@@ -29,7 +29,7 @@ module.exports = async function(deployer, network, accounts) {
         const migrate_max_calls = 10;               // how many times we are allowed to call migrateStatusPartial()
         var mnregistry_config_v2_3 = [];
 
-        console.log("Deploying to " + network);
+        console.log("Deploying MasternodeRegistryV2_3 to " + network);
 
         if (network === "mainnet") {
             mnregistry_config_v2_3 = [

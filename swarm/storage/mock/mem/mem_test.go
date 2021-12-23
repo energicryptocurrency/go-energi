@@ -19,7 +19,7 @@ package mem
 import (
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage/mock/test"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock/test"
 )
 
 // TestGlobalStore is running test for a GlobalStore

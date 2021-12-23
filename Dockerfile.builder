@@ -58,9 +58,13 @@ RUN chown -R "root:root" "/usr/local/${nodejs_spec}"
 RUN rm -rf ${nodejs_filename}*
 ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
 
+# npm packages version
+ARG ganache_version="6.11.0"
+ARG truffle_version="5.4.0"
+
 # install node packages
 RUN npm -g config set user root
-RUN npm install -g yarn ganache-cli truffle
+RUN npm install -g yarn ganache-cli@${ganache_version} truffle@${truffle_version}
 
 # /builds/energi/tech/gen3/energi3
 RUN mkdir -p "/builds/energi/tech/gen3"
@@ -73,4 +77,4 @@ RUN make -f Makefile.release release-tools
 ENV GOPATH="/builds/energi/tech/gen3"
 ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
 ENV GO111MODULE="on"
-ENV GOFLAGS="-mod=vendor -v"
+ENV GOFLAGS="-v"

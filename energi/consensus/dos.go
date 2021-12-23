@@ -20,11 +20,11 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common"
-	eth_consensus "energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core/types"
+	"github.com/energicryptocurrency/energi/common"
+	eth_consensus "github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core/types"
 
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 const (

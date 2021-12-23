@@ -17,7 +17,7 @@
 package shed
 
 import (
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

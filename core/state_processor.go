@@ -18,13 +18,14 @@
 package core
 
 import (
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/energi/energi/exceptions"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -39,6 +40,9 @@ type StateProcessor struct {
 
 // NewStateProcessor initialises a new StateProcessor.
 func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consensus.Engine) *StateProcessor {
+	// set exception package network
+	exceptions.SetNetworkID(config.ChainID)
+
 	return &StateProcessor{
 		config: config,
 		bc:     bc,
@@ -63,6 +67,10 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 
 		consensusStarted = false
 	)
+
+	//set current head block for preimage exceptions
+	exceptions.SetCurrentHead(block.Number())
+
 	// Iterate over and process the individual transactions
 	for i, tx := range block.Transactions() {
 		// Energi-specific

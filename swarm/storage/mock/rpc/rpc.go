@@ -26,10 +26,10 @@ package rpc
 import (
 	"fmt"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/rpc"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
 )
 
 // GlobalStore is rpc.Client that connects to a centralized mock store.

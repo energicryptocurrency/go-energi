@@ -24,15 +24,15 @@ import (
 	"os"
 	"testing"
 
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/api"
-	swarm "energi.world/core/gen3/swarm/api/client"
-	swarmhttp "energi.world/core/gen3/swarm/api/http"
-	"energi.world/core/gen3/swarm/storage/feed"
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
-	"energi.world/core/gen3/swarm/testutil"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
+	swarmhttp "github.com/energicryptocurrency/energi/swarm/api/http"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/swarm/testutil"
 )
 
 func TestCLIFeedUpdate(t *testing.T) {

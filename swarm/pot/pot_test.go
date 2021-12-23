@@ -26,7 +26,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 const (

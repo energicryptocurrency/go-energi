@@ -29,7 +29,7 @@ import (
 	"context"
 	"errors"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 var (

@@ -19,10 +19,10 @@ package metrics
 import (
 	"time"
 
-	"energi.world/core/gen3/cmd/utils"
-	gethmetrics "energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/metrics/influxdb"
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	gethmetrics "github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/metrics/influxdb"
+	"github.com/energicryptocurrency/energi/swarm/log"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

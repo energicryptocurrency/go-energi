@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -356,7 +356,7 @@ func unpackTestEventData(dest interface{}, hexData string, jsonEvent []byte, ass
 
 /*
 Taken from
-https://energi.world/core/gen3/pull/15568
+https://github.com/energicryptocurrency/energi/pull/15568
 */
 
 type testResult struct {

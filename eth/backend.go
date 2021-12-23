@@ -26,33 +26,33 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/consensus/clique"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/bloombits"
-	"energi.world/core/gen3/core/rawdb"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/eth/filters"
-	"energi.world/core/gen3/eth/gasprice"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/miner"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/params"
-	"energi.world/core/gen3/rlp"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/consensus/clique"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/bloombits"
+	"github.com/energicryptocurrency/energi/core/rawdb"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/eth/filters"
+	"github.com/energicryptocurrency/energi/eth/gasprice"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/miner"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_api "energi.world/core/gen3/energi/api"
-	energi "energi.world/core/gen3/energi/consensus"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	energi "github.com/energicryptocurrency/energi/energi/consensus"
 )
 
 type LesServer interface {
@@ -205,7 +205,7 @@ func New(ctx *node.ServiceContext, config *Config) (*Ethereum, error) {
 	eth.APIBackend.gpo = gasprice.NewOracle(eth.APIBackend, gpoParams)
 
 	eth.miner.SetEthAPIBackend(eth.APIBackend)
-	eth.miner.SetMinerAutocollateral(config.MinerAutocollateral)
+	eth.miner.SetMinerAutoCompound(config.MinerAutoCompound)
 
 	if energi, ok := eth.engine.(*energi.Energi); ok {
 		energi.SetMinerCB(
@@ -387,7 +387,7 @@ func (s *Ethereum) APIs() []rpc.API {
 		{
 			Namespace: "energi",
 			Version:   "1.0",
-			Service:   energi_api.NewCheckpointAPI(s.APIBackend),
+			Service:   energi_api.NewCheckpointRegistryAPI(s.APIBackend),
 			Public:    true,
 		},
 		{

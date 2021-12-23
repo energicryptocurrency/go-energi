@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"sort"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 type EngineAPI struct {

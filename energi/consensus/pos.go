@@ -23,12 +23,12 @@ import (
 	"sort"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/energi/params"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 
@@ -54,10 +54,9 @@ type TimeTarget struct {
  * POS-11: Block time restrictions
  * POS-12: Block interval enforcement
  */
-func (e *Energi) calcTimeTarget(
+func (e *Energi) calcTimeTargetV1(
 	chain ChainReader, parent *types.Header,
 ) (ret *TimeTarget) {
-
 	ret = new(TimeTarget)
 	now := e.now()
 	parentNumber := parent.Number.Uint64()
@@ -108,7 +107,6 @@ func (e *Energi) calcTimeTarget(
 func (e *Energi) enforceMinTime(
 	header *types.Header, timeTarget *TimeTarget,
 ) error {
-
 	// NOTE: allow Miner to hint already tried period by
 	if header.Time < timeTarget.min {
 		header.Time = timeTarget.min
@@ -194,23 +192,6 @@ func (e *Energi) calcPoSModifier(
 }
 
 /**
- * Implements difficulty consensus
- */
-func (e *Energi) calcPoSDifficulty(
-	chain ChainReader,
-	time uint64,
-	parent *types.Header,
-	tt *TimeTarget,
-) (ret *big.Int) {
-	ret = e.diffFn(time, parent, tt)
-	log.Trace(
-		"PoS difficulty", "block", parent.Number.Uint64()+1, "time", time,
-		"diff", ret,
-	)
-	return ret
-}
-
-/**
  * POS-13: Difficulty algorithm (Proposal v1)
  */
 const (
@@ -250,6 +231,7 @@ func calcPoSDifficultyV1(
 	parent *types.Header,
 	tt *TimeTarget,
 ) (D *big.Int) {
+
 	// Find the target anchor
 	target := (tt.blockTarget + tt.periodTarget) / 2
 	if target < tt.min {
@@ -535,7 +517,7 @@ func (e *Energi) mine(
 	if isAsgardActive {
 		timeTarget = e.calcTimeTargetV2(chain, parent)
 	} else {
-		timeTarget = e.calcTimeTarget(chain, parent)
+		timeTarget = e.calcTimeTargetV1(chain, parent)
 	}
 	blockTime := timeTarget.min
 
@@ -600,10 +582,12 @@ func (e *Energi) mine(
 				return false, err
 			}
 		}
+
 		// Try smaller amounts first
 		sort.Slice(candidates, func(i, j int) bool {
 			return candidates[i].weight < candidates[j].weight
 		})
+
 		// Try to match target
 		for i := range candidates {
 			v := &candidates[i]

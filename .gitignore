@@ -61,3 +61,8 @@ profile.cov
 # testing junit reports
 /.test-go-report.xml
 /.test-sol-report.xml
+
+# Coverage
+/.test-go-cover.out
+/.test-go-cover.html
+/.test-go-cover.func

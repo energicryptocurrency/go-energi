@@ -6,12 +6,12 @@ import (
 	"math/big"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/eth/gasprice"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/eth/gasprice"
 )
 
 var _ = (*configMarshaling)(nil)
@@ -45,6 +45,7 @@ func (c Config) MarshalTOML() (interface{}, error) {
 		MinerMigration          string  `toml:",omitempty"`
 		MinerNonceCap           uint64  `toml:"-"`
 		MinerAutocollateral     uint64  `toml:",omitempty"`
+		MinerAutoCompound       uint64  `toml:",omitempty"`
 		PublicService           bool    `toml:",omitempty"`
 		Ethash                  ethash.Config
 		TxPool                  core.TxPoolConfig
@@ -82,7 +83,8 @@ func (c Config) MarshalTOML() (interface{}, error) {
 	enc.MinerDPoS = c.MinerDPoS
 	enc.MinerMigration = c.MinerMigration
 	enc.MinerNonceCap = c.MinerNonceCap
-	enc.MinerAutocollateral = c.MinerAutocollateral
+	enc.MinerAutocollateral = c.MinerAutoCompound
+	enc.MinerAutoCompound = c.MinerAutoCompound
 	enc.PublicService = c.PublicService
 	enc.Ethash = c.Ethash
 	enc.TxPool = c.TxPool
@@ -125,6 +127,7 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		MinerMigration          *string  `toml:",omitempty"`
 		MinerNonceCap           *uint64  `toml:"-"`
 		MinerAutocollateral     *uint64  `toml:",omitempty"`
+		MinerAutoCompound       *uint64  `toml:",omitempty"`
 		PublicService           *bool    `toml:",omitempty"`
 		Ethash                  *ethash.Config
 		TxPool                  *core.TxPoolConfig
@@ -216,7 +219,10 @@ func (c *Config) UnmarshalTOML(unmarshal func(interface{}) error) error {
 		c.MinerNonceCap = *dec.MinerNonceCap
 	}
 	if dec.MinerAutocollateral != nil {
-		c.MinerAutocollateral = *dec.MinerAutocollateral
+		c.MinerAutoCompound = *dec.MinerAutocollateral
+	}
+	if dec.MinerAutoCompound != nil {
+		c.MinerAutoCompound = *dec.MinerAutoCompound
 	}
 	if dec.PublicService != nil {
 		c.PublicService = *dec.PublicService

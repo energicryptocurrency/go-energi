@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sort"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // deployEthstats queries the user for various input on deploying an ethstats

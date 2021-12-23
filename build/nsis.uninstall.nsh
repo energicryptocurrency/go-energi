@@ -2,12 +2,15 @@ Section "Uninstall"
   # uninstall for all users
   setShellVarContext all
 
-  # Delete (optionally) installed files
+  # Delete (explicitly) installed files
   #{{range $}}Delete $INSTDIR\{{.}}
   #{{end}}
-  Delete $INSTDIR\uninstall.exe
+  Delete $INSTDIR\energi-icon.ico
+  Delete $INSTDIR\bin\energi3.exe
+  Delete $INSTDIR\bin\uninstall.exe
 
   # Delete install directory
+  rmDir "$INSTDIR\bin"
   rmDir $INSTDIR
 
   # Delete start menu launcher
@@ -19,6 +22,9 @@ Section "Uninstall"
   Delete "$SMPROGRAMS\${APPNAME}\Simnet Attach.lnk"
   Delete "$SMPROGRAMS\${APPNAME}\Uninstall.lnk"
   rmDir "$SMPROGRAMS\${APPNAME}"
+
+  # Delete desktop icon
+  Delete "$DESKTOP\Energi Core Node.lnk"
 
   # Firewall - remove rules if exists
   SimpleFC::AdvRemoveRule "Energi Gen 3 incoming peers (TCP:39797)"

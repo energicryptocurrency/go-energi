@@ -25,14 +25,14 @@ import (
 	"sort"
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/feed/lookup"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/swarm/api"
-	swarmhttp "energi.world/core/gen3/swarm/api/http"
-	"energi.world/core/gen3/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/swarm/api"
+	swarmhttp "github.com/energicryptocurrency/energi/swarm/api/http"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed"
 )
 
 func serverFunc(api *api.API) swarmhttp.TestServer {

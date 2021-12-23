@@ -19,9 +19,9 @@ package misc
 import (
 	"fmt"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 // VerifyForkHashes verifies that blocks conforming to network hard-forks do have

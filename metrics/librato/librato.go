@@ -24,7 +24,7 @@ import (
 	"regexp"
 	"time"
 
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/metrics"
 )
 
 // a regexp for extracting the unit from time.Duration.String

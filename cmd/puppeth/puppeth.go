@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/log"
 	"gopkg.in/urfave/cli.v1"
 )
 

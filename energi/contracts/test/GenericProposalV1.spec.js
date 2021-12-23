@@ -154,7 +154,7 @@ contract("GenericProposalV1", async accounts => {
                 assert.match(e.message, /Active weight < 1\/2 ever weight/);
             }
         });
-        
+
         it('should accept half-way', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
@@ -209,7 +209,7 @@ contract("GenericProposalV1", async accounts => {
             expect(await proposal.isFinished()).false;
             expect((await proposal.rejected_weight()).toString())
                 .eql(collateral1.toString());
-            
+
             await proposal.voteReject({from: owner3});
             expect(await proposal.isAccepted()).false;
             expect(await proposal.isFinished()).true;
@@ -222,7 +222,7 @@ contract("GenericProposalV1", async accounts => {
             expect((await proposal.rejected_weight()).toString())
                 .eql(collateral1.add(collateral2).add(collateral3).toString());
         });
-        
+
         it('should not accept half-way', async () => {
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
             mnregistry.announce(masternode2, ip2, enode2, {from: owner2});
@@ -421,7 +421,7 @@ contract("GenericProposalV1", async accounts => {
 
         it('should withdraw()', async () => {
             const bal_before = await web3.eth.getBalance(not_owner);
-            
+
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
             const proposal = await GenericProposalV1.new(
                 mnregistry.address,
@@ -434,7 +434,7 @@ contract("GenericProposalV1", async accounts => {
 
             await proposal.setFee({ from: owner1, value: toWei('2', 'ether')});
             await proposal.setFee({ from: owner1, value: toWei('3', 'ether')});
-            
+
             await proposal.withdraw({from: owner1});
             const bal_after = await web3.eth.getBalance(not_owner);
             expect(toBN(bal_after).sub(toBN(bal_before)).toString())
@@ -459,7 +459,7 @@ contract("GenericProposalV1", async accounts => {
 
         it('should destroy()', async () => {
             const bal_before = await web3.eth.getBalance(not_owner);
-            
+
             mnregistry.announce(masternode1, ip1, enode1, {from: owner1});
             const proposal = await GenericProposalV1.new(
                 mnregistry.address,
@@ -471,7 +471,7 @@ contract("GenericProposalV1", async accounts => {
             await common.moveTime(web3, 70);
 
             await proposal.setFee({ from: owner1, value: toWei('5', 'ether') });
-            
+
             await proposal.destroy({from: owner1});
             const bal_after = await web3.eth.getBalance(not_owner);
             expect(toBN(bal_after).sub(toBN(bal_before)).toString())
@@ -521,7 +521,7 @@ contract("GenericProposalV1", async accounts => {
             await common.moveTime(web3, 70);
 
             const bal_before = await treasury.balance();
-            
+
             try {
                 await proposal.collect({from: not_owner});
                 assert.fail('It must fail');
@@ -535,7 +535,7 @@ contract("GenericProposalV1", async accounts => {
             expect(toBN(bal_after).sub(toBN(bal_before)).toString())
                 .equal(toBN(toWei('5', 'ether')).toString());
         });
-        
+
         it('should refuse payments', async () => {
             const proposal = await GenericProposalV1.new(
                 mnregistry.address,

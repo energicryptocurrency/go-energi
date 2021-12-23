@@ -24,13 +24,13 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/les/flowcontrol"
-	"energi.world/core/gen3/light"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/les/flowcontrol"
+	"github.com/energicryptocurrency/energi/light"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rlp"
 )
 
 var (

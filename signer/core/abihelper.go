@@ -23,8 +23,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"energi.world/core/gen3/accounts/abi"
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/accounts/abi"
+	"github.com/energicryptocurrency/energi/common"
 
 	"bytes"
 	"os"

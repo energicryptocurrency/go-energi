@@ -21,9 +21,9 @@ import (
 	"context"
 	"testing"
 
-	"energi.world/core/gen3/swarm/storage/encryption"
+	"github.com/energicryptocurrency/energi/swarm/storage/encryption"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 func TestHasherStore(t *testing.T) {

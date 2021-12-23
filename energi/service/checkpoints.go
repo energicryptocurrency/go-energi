@@ -20,19 +20,20 @@ import (
 	"context"
 	"math/big"
 
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_common "energi.world/core/gen3/energi/common"
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 const (
@@ -45,19 +46,28 @@ type CheckpointProposalEvent struct {
 }
 
 type CheckpointService struct {
-	server *p2p.Server
-	eth    *eth.Ethereum
-
+	eth        *eth.Ethereum
+	ctx        context.Context
+	ctxCancel  func()
 	cpRegistry *energi_abi.ICheckpointRegistry
-	callOpts   *bind.CallOpts
+	cpAPI      *energi_api.CheckpointRegistryAPI
 }
 
 func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
-	r := &CheckpointService{
+	c := &CheckpointService{
 		eth:      ethServ,
-		callOpts: &bind.CallOpts{},
+		cpAPI:    energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
 	}
-	return r, nil
+
+	//initialize Icheckpointregistry for further calls
+	var err error
+	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(energi_params.Energi_CheckpointRegistry, c.eth.APIBackend)
+	if err != nil {
+		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err);
+		return nil, err
+	}
+
+	return c, nil
 }
 
 func (c *CheckpointService) Protocols() []p2p.Protocol {
@@ -69,16 +79,9 @@ func (c *CheckpointService) APIs() []rpc.API {
 }
 
 func (c *CheckpointService) Start(server *p2p.Server) (err error) {
-	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(
-		energi_params.Energi_CheckpointRegistry, c.eth.APIBackend)
-	if err != nil {
-		return err
-	}
+	// retrieve last checkpoints and ensure that  the last one if valid for the current chain
+	oldCheckpoints, err := c.cpAPI.Checkpoints()
 
-	c.server = server
-
-	//---
-	oldCheckpoints, err := c.cpRegistry.Checkpoints(c.callOpts)
 	if err != nil {
 		log.Error("Failed to get old checkpoints (startup)", "err", err)
 	} else if lc := len(oldCheckpoints); lc > 0 {
@@ -86,8 +89,8 @@ func (c *CheckpointService) Start(server *p2p.Server) (err error) {
 		c.onCheckpoint(oldCheckpoints[lc-1], false)
 	}
 
-	//---
-	go c.loop()
+	// watch for new checkpoints
+	go c.watchCheckpoints()
 	return nil
 }
 
@@ -111,8 +114,10 @@ func (c *CheckpointService) waitDownloader() bool {
 			}
 			switch ev.Data.(type) {
 			case downloader.StartEvent:
+				log.Debug("Checkpoint service is not in sync")
 				continue
 			case downloader.DoneEvent:
+				log.Debug("Checkpoint service is in sync")
 				return true
 			case downloader.FailedEvent:
 				return c.eth.BlockChain().IsRunning()
@@ -121,13 +126,11 @@ func (c *CheckpointService) waitDownloader() bool {
 	}
 }
 
-func (c *CheckpointService) loop() {
+func (c *CheckpointService) watchCheckpoints() {
 	if !c.waitDownloader() {
 		return
 	}
-
 	cpChan := make(chan *energi_abi.ICheckpointRegistryCheckpoint, cppChanBufferSize)
-
 	watchOpts := &bind.WatchOpts{
 		Context: context.WithValue(
 			context.Background(),
@@ -141,10 +144,10 @@ func (c *CheckpointService) loop() {
 		log.Error("Failed checkpoint subscription", "err", err)
 		return
 	}
-
 	defer subscribe.Unsubscribe()
 
-	oldCheckpoints, err := c.cpRegistry.Checkpoints(c.callOpts)
+	// process existing checkpoints first
+	oldCheckpoints, err := c.cpAPI.Checkpoints()
 	if err != nil {
 		log.Error("Failed to get old checkpoints", "err", err)
 	} else {
@@ -154,6 +157,7 @@ func (c *CheckpointService) loop() {
 		}
 	}
 
+	// listen for incoming new checkpoints
 	for {
 		select {
 		case err = <-subscribe.Err():
@@ -166,6 +170,7 @@ func (c *CheckpointService) loop() {
 	}
 }
 
+// process checkpoint
 func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 	backend := c.eth.APIBackend
 	cppSigner := backend.ChainConfig().Energi.CPPSigner
@@ -176,13 +181,13 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 		return
 	}
 
-	info, err := cp.Info(c.callOpts)
+	info, err := cp.Info(&bind.CallOpts{})
 	if err != nil {
 		log.Warn("Failed to get CP info", "addr", cpAddr, "err", err)
 		return
 	}
 
-	cpp_sig, err := cp.Signature(c.callOpts, cppSigner)
+	cpp_sig, err := cp.Signature(&bind.CallOpts{}, cppSigner)
 	if err != nil {
 		log.Debug("Skipping checkpoint with no CPP sig", "addr", cpAddr, "err", err)
 		return
@@ -197,11 +202,10 @@ func (c *CheckpointService) onCheckpoint(cpAddr common.Address, live bool) {
 		core.CheckpointSignature(cpp_sig),
 	}
 
+	// rebroadcast the received checkpoint
 	backend.AddDynamicCheckpoint(info.Since.Uint64(), info.Number.Uint64(), info.Hash, sigs)
-
 	if live {
 		log.Warn("Found new dynamic checkpoint", "num", info.Number, "hash", common.Hash(info.Hash).Hex())
-
 		c.eth.EventMux().Post(CheckpointProposalEvent{
 			core.Checkpoint{
 				Since:  info.Since.Uint64(),

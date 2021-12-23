@@ -19,7 +19,7 @@ package vm
 import (
 	"testing"
 
-	"energi.world/core/gen3/crypto"
+	"github.com/energicryptocurrency/energi/crypto"
 )
 
 func TestJumpDestAnalysis(t *testing.T) {

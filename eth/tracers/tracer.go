@@ -26,12 +26,12 @@ import (
 	"time"
 	"unsafe"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/log"
-	duktape "gopkg.in/olebedev/go-duktape.v3"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/log"
+	duktape "github.com/hashtobewild/go-duktape"
 )
 
 // bigIntegerJS is the minified version of https://github.com/peterolson/BigInteger.js.

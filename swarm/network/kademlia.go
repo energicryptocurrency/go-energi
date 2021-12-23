@@ -25,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/swarm/log"
-	"energi.world/core/gen3/swarm/pot"
-	sv "energi.world/core/gen3/swarm/version"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/pot"
+	sv "github.com/energicryptocurrency/energi/swarm/version"
 )
 
 /*

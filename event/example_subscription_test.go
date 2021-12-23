@@ -19,7 +19,7 @@ package event_test
 import (
 	"fmt"
 
-	"energi.world/core/gen3/event"
+	"github.com/energicryptocurrency/energi/event"
 )
 
 func ExampleNewSubscription() {

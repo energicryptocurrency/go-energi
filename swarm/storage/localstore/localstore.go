@@ -23,10 +23,10 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/shed"
-	"energi.world/core/gen3/swarm/storage"
-	"energi.world/core/gen3/swarm/storage/mock"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/shed"
+	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/mock"
 )
 
 var (

@@ -23,13 +23,13 @@ import (
 	"strings"
 	"testing"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/hexutil"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/internal/ethapi"
-	"energi.world/core/gen3/signer/core"
-	"energi.world/core/gen3/signer/storage"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/internal/ethapi"
+	"github.com/energicryptocurrency/energi/signer/core"
+	"github.com/energicryptocurrency/energi/signer/storage"
 )
 
 const JS = `

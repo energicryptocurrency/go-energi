@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"time"
 
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // In this example, our client wishes to track the latest 'block number'

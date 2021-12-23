@@ -25,21 +25,21 @@ import (
 	"os"
 	"strings"
 
-	"energi.world/core/gen3/accounts/abi"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
-	"energi.world/core/gen3/rlp"
+	"github.com/energicryptocurrency/energi/accounts/abi"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/energi/rlp"
 
 	"github.com/shengdoushi/base58"
 
-	energi_abi "energi.world/core/gen3/energi/abi"
-	energi_common "energi.world/core/gen3/energi/common"
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 const (

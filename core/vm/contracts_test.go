@@ -21,7 +21,7 @@ import (
 	"math/big"
 	"testing"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 // precompiledTest defines the input/output pairs for precompiled contract tests.

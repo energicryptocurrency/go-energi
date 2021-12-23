@@ -92,8 +92,8 @@ package localstore
 import (
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/swarm/shed"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/swarm/shed"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

@@ -20,8 +20,8 @@ package main
 import (
 	"os"
 
-	"energi.world/core/gen3/cmd/utils"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/energi/log"
 	cli "gopkg.in/urfave/cli.v1"
 )
 

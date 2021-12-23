@@ -25,8 +25,8 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/filter"

@@ -16,7 +16,7 @@
 
 package simulation
 
-import "energi.world/core/gen3/p2p/enode"
+import "github.com/energicryptocurrency/energi/p2p/enode"
 
 // BucketKey is the type that should be used for keys in simulation buckets.
 type BucketKey string

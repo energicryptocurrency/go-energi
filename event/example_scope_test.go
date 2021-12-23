@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"energi.world/core/gen3/event"
+	"github.com/energicryptocurrency/energi/event"
 )
 
 // This example demonstrates how SubscriptionScope can be used to control the lifetime of

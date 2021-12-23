@@ -28,7 +28,7 @@ import (
 	"testing"
 	"time"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 // In this test, nodes try to randomly resolve each other.

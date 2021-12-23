@@ -29,7 +29,7 @@ import (
 	"net"
 	"sort"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 const (

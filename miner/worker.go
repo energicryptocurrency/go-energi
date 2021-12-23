@@ -24,19 +24,19 @@ import (
 	"sync/atomic"
 	"time"
 
-	"energi.world/core/gen3/accounts/abi/bind"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	energi_consensus "energi.world/core/gen3/energi/consensus"
-	"energi.world/core/gen3/event"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/params"
+	"github.com/energicryptocurrency/energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	energi_consensus "github.com/energicryptocurrency/energi/energi/consensus"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/params"
 	mapset "github.com/deckarep/golang-set"
 
-	energi_params "energi.world/core/gen3/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 const (
@@ -267,13 +267,13 @@ func (w *worker) setMigration(migration string) {
 	w.migration = migration
 }
 
-func (w *worker) setAutocollateral(autocollateral uint64) {
+func (w *worker) setAutoCompound(autocollateral uint64) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	w.autocollateral = autocollateral
 }
 
-func (w *worker) getAutocollateral() uint64 {
+func (w *worker) getAutoCompound() uint64 {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.autocollateral
@@ -403,7 +403,7 @@ func (w *worker) newWorkLoop(recommit time.Duration) {
 			timestamp = time.Now().Unix()
 			commit(false, commitInterruptNewHead)
 			if w.autocollateral != acDisabled {
-				go w.tryAutocollateral()
+				go w.tryAutoCompound()
 			}
 
 		case <-timer.C:

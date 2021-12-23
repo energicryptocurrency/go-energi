@@ -36,7 +36,7 @@ import (
 	"errors"
 	"io"
 
-	"energi.world/core/gen3/common"
+	"github.com/energicryptocurrency/energi/common"
 )
 
 // ErrNotFound indicates that the chunk is not found.

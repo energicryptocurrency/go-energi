@@ -19,10 +19,10 @@ package consensus
 import (
 	"math/big"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/energi/params"
-	"energi.world/core/gen3/log"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 const (
@@ -112,7 +112,12 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
+func (e * Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
+	// check if we have already calculated
+	if parent.Hash() == e.calculatedBlockHash {
+		timeTarget := e.calculatedTimeTarget
+		return &timeTarget
+	}
 
 	ret := &TimeTarget{}
 	parentBlockTime := parent.Time // Defines the original parent block time.
@@ -163,6 +168,11 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 		"TimeTarget", ret.blockTarget,
 		"averageBlockTimeMicroseconds", ret.periodTarget,
 	)
+
+	// set calculated results for optimization
+	e.calculatedBlockHash = parent.Hash()
+	e.calculatedTimeTarget = *ret
+
 	return ret
 }
 

@@ -29,40 +29,46 @@ import (
 	"strings"
 	"time"
 
-	"energi.world/core/gen3/accounts"
-	"energi.world/core/gen3/accounts/keystore"
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/common/fdlimit"
-	"energi.world/core/gen3/consensus"
-	"energi.world/core/gen3/consensus/clique"
-	"energi.world/core/gen3/consensus/ethash"
-	"energi.world/core/gen3/core"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/vm"
-	"energi.world/core/gen3/crypto"
-	"energi.world/core/gen3/dashboard"
-	"energi.world/core/gen3/eth"
-	"energi.world/core/gen3/eth/downloader"
-	"energi.world/core/gen3/eth/gasprice"
-	"energi.world/core/gen3/ethdb"
-	"energi.world/core/gen3/ethstats"
-	"energi.world/core/gen3/les"
-	"energi.world/core/gen3/log"
-	"energi.world/core/gen3/metrics"
-	"energi.world/core/gen3/metrics/influxdb"
-	"energi.world/core/gen3/node"
-	"energi.world/core/gen3/p2p"
-	"energi.world/core/gen3/p2p/discv5"
-	"energi.world/core/gen3/p2p/enode"
-	"energi.world/core/gen3/p2p/nat"
-	"energi.world/core/gen3/p2p/netutil"
-	"energi.world/core/gen3/params"
-	whisper "energi.world/core/gen3/whisper/whisperv6"
+	"github.com/energicryptocurrency/energi/accounts"
+	"github.com/energicryptocurrency/energi/accounts/keystore"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/fdlimit"
+	"github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/consensus/clique"
+	"github.com/energicryptocurrency/energi/consensus/ethash"
+	"github.com/energicryptocurrency/energi/core"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/dashboard"
+	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/energi/eth/downloader"
+	"github.com/energicryptocurrency/energi/eth/gasprice"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/ethstats"
+	"github.com/energicryptocurrency/energi/les"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/energi/metrics/influxdb"
+	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/energi/p2p/discv5"
+	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/energi/p2p/nat"
+	"github.com/energicryptocurrency/energi/p2p/netutil"
+	"github.com/energicryptocurrency/energi/params"
+	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
 	cli "gopkg.in/urfave/cli.v1"
 
-	energi_common "energi.world/core/gen3/energi/common"
-	energi "energi.world/core/gen3/energi/consensus"
-	energi_svc "energi.world/core/gen3/energi/service"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi "github.com/energicryptocurrency/energi/energi/consensus"
+	energi_svc "github.com/energicryptocurrency/energi/energi/service"
+)
+
+const (
+	mainnetDefaultPort = 39797
+	testnetDefaultPort = 49797
+	simnetDefaultPort  = 59797
 )
 
 var (
@@ -417,8 +423,14 @@ var (
 		Usage: "Cap the maximum PoS Nonce value",
 	}
 	MinerAutocollateralFlag = cli.Uint64Flag{
-		Name:  "miner.autocollateralize",
-		Usage: "Autocollateralize for MN owner addresses (0 - disable, 1 - after MN rewards, 2 - rapid)",
+		Name:   "miner.autocollateralize",
+		Usage:  "Deprecated (use miner.autocompounding in future): Autocollateralize for MN owner addresses (0 - disable, 1 - after MN rewards, 2 - rapid)",
+		Value:  1,
+		Hidden: true,
+	}
+	MinerAutoCompondingFlag = cli.Uint64Flag{
+		Name:  "miner.autocompounding",
+		Usage: "Autocompounding for MN owner addresses (0 - disable, 1 - after MN rewards, 2 - rapid)",
 		Value: 1,
 	}
 	// Account settings
@@ -802,20 +814,45 @@ func setBootstrapNodesV5(ctx *cli.Context, cfg *p2p.Config) {
 // setListenAddress creates a TCP listening address string from set command
 // line flags.
 func setListenAddress(ctx *cli.Context, cfg *p2p.Config) {
+	// set network default values
 	if ctx.GlobalIsSet(TestnetFlag.Name) {
-		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
-			log.Error("Unacceptable port value. Testnet port is being set to 49797.")
-			cfg.ListenAddr = fmt.Sprintf(":%d", 49797)
-		}
+		cfg.ListenAddr = fmt.Sprintf(":%d", testnetDefaultPort)
 	} else if ctx.GlobalIsSet(SimnetFlag.Name) {
-		if ctx.GlobalInt64(ListenPortFlag.Name) == 39797 || ctx.GlobalInt64(ListenPortFlag.Name) == 49797 {
-			log.Error("Unacceptable port value. Simnet port is being set to 59797.")
-			cfg.ListenAddr = fmt.Sprintf(":%d", 59797)
+		cfg.ListenAddr = fmt.Sprintf(":%d", simnetDefaultPort)
+	} else {
+		cfg.ListenAddr = fmt.Sprintf(":%d", mainnetDefaultPort)
+	}
+
+	// listen port is set from user
+	if ctx.GlobalIsSet(ListenPortFlag.Name) {
+		// testnet port conflicts with other network ports
+		if ctx.GlobalIsSet(TestnetFlag.Name) {
+			if ctx.GlobalInt64(ListenPortFlag.Name) == mainnetDefaultPort || ctx.GlobalInt64(ListenPortFlag.Name) == simnetDefaultPort {
+				log.Error("Unacceptable port value. Testnet port is set to 49797.")
+			} else {
+				// set passed value
+				cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt64(ListenPortFlag.Name))
+			}
+			return
 		}
-	} else if ctx.GlobalIsSet(ListenPortFlag.Name) {
-		if ctx.GlobalInt64(ListenPortFlag.Name) == 49797 || ctx.GlobalInt64(ListenPortFlag.Name) == 59797 {
-			log.Error("Unacceptable port value. Mainnet port is being set to 39797.")
-			cfg.ListenAddr = fmt.Sprintf(":%d", 39797)
+
+		// simnet port conflicts with other network ports
+		if ctx.GlobalIsSet(SimnetFlag.Name) {
+			if ctx.GlobalInt64(ListenPortFlag.Name) == mainnetDefaultPort || ctx.GlobalInt64(ListenPortFlag.Name) == testnetDefaultPort {
+				log.Error("Unacceptable port value. Simnet port is set to 59797.")
+			} else {
+				// set passed value
+				cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt64(ListenPortFlag.Name))
+			}
+			return
+		}
+
+		// mainnet port conflicts with other network ports
+		if ctx.GlobalInt64(ListenPortFlag.Name) == testnetDefaultPort || ctx.GlobalInt64(ListenPortFlag.Name) == simnetDefaultPort {
+			log.Error("Unacceptable port value. Mainnet port is set to 39797.")
+		} else {
+			// set passed value
+			cfg.ListenAddr = fmt.Sprintf(":%d", ctx.GlobalInt64(ListenPortFlag.Name))
 		}
 	}
 }
@@ -1347,8 +1384,13 @@ func SetEthConfig(ctx *cli.Context, stack *node.Node, cfg *eth.Config) {
 	if ctx.GlobalIsSet(MinerNonceCapFlag.Name) {
 		cfg.MinerNonceCap = ctx.GlobalUint64(MinerNonceCapFlag.Name)
 	}
+	// Support old flag
 	if ctx.GlobalIsSet(MinerAutocollateralFlag.Name) {
-		cfg.MinerAutocollateral = ctx.GlobalUint64(MinerAutocollateralFlag.Name)
+		cfg.MinerAutoCompound = ctx.GlobalUint64(MinerAutocollateralFlag.Name)
+		log.Warn("miner.autocollateralize is being deprecated, please use miner.autocompounding")
+	}
+	if ctx.GlobalIsSet(MinerAutoCompondingFlag.Name) {
+		cfg.MinerAutoCompound = ctx.GlobalUint64(MinerAutoCompondingFlag.Name)
 	}
 	if ctx.GlobalIsSet(VMEnableDebugFlag.Name) {
 		// TODO(fjl): force-enable this in --dev mode

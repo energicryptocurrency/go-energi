@@ -21,11 +21,11 @@ package consensus
 import (
 	"math/big"
 
-	"energi.world/core/gen3/common"
-	"energi.world/core/gen3/core/state"
-	"energi.world/core/gen3/core/types"
-	"energi.world/core/gen3/params"
-	"energi.world/core/gen3/rpc"
+	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 // ChainReader defines a small collection of methods needed to access the local

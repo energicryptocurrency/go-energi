@@ -21,7 +21,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"energi.world/core/gen3/common/hexutil"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 )
 
 // Tests that data bitset encoding and decoding works and is bijective.

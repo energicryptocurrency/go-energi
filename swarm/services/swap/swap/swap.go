@@ -22,7 +22,7 @@ import (
 	"sync"
 	"time"
 
-	"energi.world/core/gen3/swarm/log"
+	"github.com/energicryptocurrency/energi/swarm/log"
 )
 
 // SwAP Swarm Accounting Protocol with

@@ -29,10 +29,10 @@ import (
 	"strconv"
 	"strings"
 
-	"energi.world/core/gen3/log"
-	swarm "energi.world/core/gen3/swarm/api/client"
+	"github.com/energicryptocurrency/energi/log"
+	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
 
-	"energi.world/core/gen3/cmd/utils"
+	"github.com/energicryptocurrency/energi/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 
