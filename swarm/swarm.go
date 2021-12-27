@@ -364,7 +364,7 @@ func (s *Swarm) Start(srv *p2p.Server) error {
 		}
 		log.Debug(fmt.Sprintf("-> cheque book for SWAP: %v", s.config.Swap.Chequebook()))
 	} else {
-		log.Debug(fmt.Sprintf("SWAP disabled: no cheque book set"))
+		log.Debug("SWAP disabled: no cheque book set")
 	}
 
 	log.Info("Starting bzz service")

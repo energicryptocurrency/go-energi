@@ -103,7 +103,7 @@ func testDefault(toEncrypt bool, t *testing.T) {
 			tmpFileName}
 	}
 	// upload the file with 'swarm up' and expect a hash
-	log.Info(fmt.Sprintf("uploading file with 'swarm up'"))
+	log.Info("uploading file with 'swarm up'")
 	up := runSwarm(t, flags...)
 	_, matches := up.ExpectRegexp(hashRegexp)
 	up.ExpectExit()
@@ -218,7 +218,7 @@ func testRecursive(toEncrypt bool, t *testing.T) {
 			tmpUploadDir}
 	}
 	// upload the file with 'swarm up' and expect a hash
-	log.Info(fmt.Sprintf("uploading file with 'swarm up'"))
+	log.Info("uploading file with 'swarm up'")
 	up := runSwarm(t, flags...)
 	_, matches := up.ExpectRegexp(hashRegexp)
 	up.ExpectExit()

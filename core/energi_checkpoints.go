@@ -162,7 +162,7 @@ func (cm *checkpointManager) validate(chain CheckpointValidateChain, num uint64,
 // returns the smallest key (blockHeight)
 func oldestCheckpoint(validated map[uint64]validCheckpoint) uint64 {
 	minHeight := uint64(math.MaxUint64)
-	for k, _ := range validated {
+	for k := range validated {
 		if k < minHeight {
 			minHeight = k
 		}
