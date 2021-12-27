@@ -27,16 +27,15 @@ import (
 	"github.com/energicryptocurrency/energi/core"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/eth"
 	"github.com/energicryptocurrency/energi/eth/downloader"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/node"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rpc"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 var (
@@ -507,14 +506,14 @@ func (v *peerValidator) validate() {
 			log.Info("MN Invalidation", "mn", v.target)
 
 			// TODO: an excepted, but not seen before problem on scale got identified.
-			log.Warn("Invalidations are temporary disabled.")
+			log.Warn("Invalidations are temporarily disabled.")
 			return
 
-			_, err := mnsvc.registry.Invalidate(v.target)
-			if err != nil {
-				log.Warn("MN Invalidate error", "mn", v.target, "err", err)
-			}
-			return
+			//_, err := mnsvc.registry.Invalidate(v.target)
+			//if err != nil {
+			//	log.Warn("MN Invalidate error", "mn", v.target, "err", err)
+			//}
+			//return
 		}
 	}
 }
