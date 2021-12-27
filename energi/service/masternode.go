@@ -502,7 +502,7 @@ func (v *peerValidator) validate() {
 			}
 			// TODO: validate block availability as per MN-14
 			return
-		case <-time.After(deadline.Sub(time.Now())):
+		case <-time.After(time.Until(deadline)):
 			log.Info("MN Invalidation", "mn", v.target)
 
 			// TODO: an excepted, but not seen before problem on scale got identified.
