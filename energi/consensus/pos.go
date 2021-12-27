@@ -477,10 +477,8 @@ func (e *Energi) mine(
 
 	accounts := e.accountsFn()
 	if len(accounts) == 0 {
-		select {
-		case <-stop:
-			return false, nil
-		}
+		<-stop
+		return false, nil
 	}
 
 	candidates := make([]Candidates, 0, len(accounts))

@@ -175,21 +175,18 @@ func (m *MasternodeService) listenDownloader() {
 	)
 	defer events.Unsubscribe()
 
-	for {
-		select {
-		case ev := <-events.Chan():
-			if ev == nil {
-				return
-			}
-			switch ev.Data.(type) {
-			case downloader.StartEvent:
-				atomic.StoreInt32(&m.inSync, 0)
-				log.Debug("Masternode is not in sync")
-			case downloader.DoneEvent, downloader.FailedEvent:
-				atomic.StoreInt32(&m.inSync, 1)
-				log.Debug("Masternode is in sync")
-				return
-			}
+	for ev := range events.Chan() {
+		if ev == nil {
+			return
+		}
+		switch ev.Data.(type) {
+		case downloader.StartEvent:
+			atomic.StoreInt32(&m.inSync, 0)
+			log.Debug("Masternode is not in sync")
+		case downloader.DoneEvent, downloader.FailedEvent:
+			atomic.StoreInt32(&m.inSync, 1)
+			log.Debug("Masternode is in sync")
+			return
 		}
 	}
 }
