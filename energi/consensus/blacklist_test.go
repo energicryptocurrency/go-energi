@@ -450,6 +450,6 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	err = blstate.Database().TrieDB().Commit(header.Root, true)
 	assert.Empty(t, err)
-	blstate, err = chain.StateAt(header.Root)
+	_, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
 }

@@ -17,9 +17,7 @@
 
 package metrics
 
-import (
-	"testing"
-)
+import "testing"
 
 func BenchmarkRegistry(b *testing.B) {
 	r := NewRegistry()
@@ -287,16 +285,16 @@ func TestChildPrefixedRegistryOfChildRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	err = r2.Register("baz", NewCounter())
+	_ = r2.Register("baz", NewCounter())
 	c := NewCounter()
 	Register("bars", c)
 
 	i := 0
 	r2.Each(func(name string, m interface{}) {
 		i++
-		if name != "prefix.prefix2.baz" {
-			//t.Fatal(name)
-		}
+		//if name != "prefix.prefix2.baz" {
+		//	t.Fatal(name)
+		//}
 	})
 	if i != 1 {
 		t.Fatal(i)
@@ -310,7 +308,7 @@ func TestWalkRegistries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	err = r2.Register("baz", NewCounter())
+	_ = r2.Register("baz", NewCounter())
 	c := NewCounter()
 	Register("bars", c)
 
@@ -318,5 +316,4 @@ func TestWalkRegistries(t *testing.T) {
 	if "prefix.prefix2." != prefix {
 		t.Fatal(prefix)
 	}
-
 }

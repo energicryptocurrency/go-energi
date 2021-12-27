@@ -328,13 +328,14 @@ func TestProxShortCircuit(t *testing.T) {
 	}
 
 	// create kademlia peers, so we have peers both inside and outside minproxlimit
-	var peers []*network.Peer
+	//var peers []*network.Peer
 	proxMessageAddress := pot.RandomAddressAt(localPotAddr, peerCount).Bytes()
 	distantMessageAddress := pot.RandomAddressAt(localPotAddr, 0).Bytes()
 
 	for i := 0; i < peerCount; i++ {
 		rw := &p2p.MsgPipeRW{}
-		ptpPeer := p2p.NewPeer(enode.ID{}, "wanna be with me? [ ] yes [ ] no", []p2p.Cap{})
+		ptpPeer := p2p.NewPeer(enode.ID{}, "wanna be with me? [ ] yes [ ] no",
+			[]p2p.Cap{})
 		protoPeer := protocols.NewPeer(ptpPeer, rw, &protocols.Spec{})
 		peerAddr := pot.RandomAddressAt(localPotAddr, i)
 		bzzPeer := &network.BzzPeer{
@@ -346,7 +347,7 @@ func TestProxShortCircuit(t *testing.T) {
 		}
 		peer := network.NewPeer(bzzPeer, kad)
 		kad.On(peer)
-		peers = append(peers, peer)
+		//peers = append(peers, peer)
 	}
 
 	// register it marking prox capability
@@ -407,7 +408,7 @@ func TestProxShortCircuit(t *testing.T) {
 
 	// try the same prox message with sym and asym send
 	proxAddrPss := PssAddress(proxMessageAddress)
-	symKeyId, err := ps.GenerateSymmetricKey(topic, proxAddrPss, true)
+	symKeyId, _ := ps.GenerateSymmetricKey(topic, proxAddrPss, true)
 	go func() {
 		err := ps.SendSym(symKeyId, topic, []byte("baz"))
 		if err != nil {
@@ -469,7 +470,7 @@ func TestAddressMatchProx(t *testing.T) {
 	}
 
 	// create kademlia peers, so we have peers both inside and outside minproxlimit
-	var peers []*network.Peer
+	//var peers []*network.Peer
 	for i := 0; i < peerCount; i++ {
 		rw := &p2p.MsgPipeRW{}
 		ptpPeer := p2p.NewPeer(enode.ID{}, "362436 call me anytime", []p2p.Cap{})
@@ -484,7 +485,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 		peer := network.NewPeer(bzzPeer, kad)
 		kad.On(peer)
-		peers = append(peers, peer)
+		//peers = append(peers, peer)
 	}
 
 	// TODO: create a test in the network package to make a table with n peers where n-m are proxpeers
