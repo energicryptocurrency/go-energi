@@ -103,7 +103,7 @@ func skipPlaygroundOutputHeaders(out io.Writer, in io.Reader) {
 	if err != nil {
 		return
 	}
-	bufin.UnreadByte()
+	_ = bufin.UnreadByte()
 
 	// Playback header: 0 0 P B <8-byte time> <4-byte data length>
 	head := make([]byte, 4+8+4)

@@ -344,7 +344,7 @@ func TestRlpEncode(t *testing.T) {
 	}
 
 	var decoded Envelope
-	rlp.DecodeBytes(raw, &decoded)
+	err = rlp.DecodeBytes(raw, &decoded)
 	if err != nil {
 		t.Fatalf("RLP decode failed: %s.", err)
 	}

@@ -110,7 +110,7 @@ func (tab *Table) chooseBucketRefreshTarget() common.Hash {
 
 	var target common.Hash
 	binary.BigEndian.PutUint64(target[0:8], targetPrefix)
-	rand.Read(target[8:])
+	_, _ = rand.Read(target[8:])
 	return target
 }
 
@@ -138,7 +138,7 @@ func (tab *Table) readRandomNodes(buf []*Node) (n int) {
 	var i, j int
 	for ; i < len(buf); i, j = i+1, (j+1)%len(buckets) {
 		b := buckets[j]
-		buf[i] = &(*b[0])
+		buf[i] = b[0]
 		buckets[j] = b[1:]
 		if len(b) == 1 {
 			buckets = append(buckets[:j], buckets[j+1:]...)
@@ -155,7 +155,7 @@ func randUint(max uint32) uint32 {
 		return 0
 	}
 	var b [4]byte
-	rand.Read(b[:])
+	_, _ = rand.Read(b[:])
 	return binary.BigEndian.Uint32(b[:]) % max
 }
 
