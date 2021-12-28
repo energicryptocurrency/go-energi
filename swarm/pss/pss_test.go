@@ -128,7 +128,7 @@ func TestTopic(t *testing.T) {
 
 	// json unmarshal of topic
 	var topicjsonin Topic
-	topicjsonin.UnmarshalJSON(topicjsonout)
+	_ = topicjsonin.UnmarshalJSON(topicjsonout)
 	if topicjsonin != topicobj {
 		t.Fatalf("topic json unmarshal mismatch: %x != %x", topicjsonin, topicobj)
 	}
@@ -1455,10 +1455,10 @@ func testNetwork(t *testing.T) {
 		t.Fatal(err)
 	}
 	err = net.Load(&snap)
-	if err != nil {
-		//TODO: Fix p2p simulation framework to not crash when loading 32-nodes
-		//t.Fatal(err)
-	}
+	//if err != nil {
+	//TODO: Fix p2p simulation framework to not crash when loading 32-nodes
+	//t.Fatal(err)
+	//}
 
 	time.Sleep(1 * time.Second)
 
