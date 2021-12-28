@@ -99,7 +99,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 		}
 	)
 
-	switch engine.(type) {
+	switch engine := engine.(type) {
 	case *clique.Clique:
 		gspec.ExtraData = make([]byte, 32+common.AddressLength+65)
 		copy(gspec.ExtraData[32:], testBankAddress[:])
@@ -113,9 +113,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 
 		// Set the migrations signer.
 		gspec.Alloc[energi_params.Energi_MigrationContract] = core.GenesisAccount{Balance: testBankFunds}
-		energiEngine := engine.(*energi.Energi)
-		// energiEngine.testing = true
-		energiEngine.SetMinerCB(
+		engine.SetMinerCB(
 			func() []common.Address {
 				return []common.Address{energi_params.Energi_MigrationContract}
 			},
