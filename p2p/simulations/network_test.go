@@ -504,13 +504,13 @@ func TestNode_UnmarshalJSON(t *testing.T) {
 
 func runNodeUnmarshalJSON(t *testing.T, tests []nodeUnmarshalTestCase) {
 	t.Helper()
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for i := 0; i < len(tests); i++ {
+		t.Run(tests[i].name, func(t *testing.T) {
 			var got Node
-			if err := got.UnmarshalJSON([]byte(tt.marshaled)); err != nil {
-				expectErrorMessageToContain(t, err, tt.wantErr)
+			if err := got.UnmarshalJSON([]byte(tests[i].marshaled)); err != nil {
+				expectErrorMessageToContain(t, err, tests[i].wantErr)
 			}
-			expectNodeEquality(t, got, tt.want)
+			expectNodeEquality(t, &got, &tests[i].want)
 		})
 	}
 }
@@ -542,7 +542,7 @@ func expectErrorMessageToContain(t *testing.T, got error, want string) {
 	}
 }
 
-func expectNodeEquality(t *testing.T, got Node, want Node) {
+func expectNodeEquality(t *testing.T, got *Node, want *Node) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Node.UnmarshalJSON() = %v, want %v", got, want)

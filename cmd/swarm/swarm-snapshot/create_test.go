@@ -18,7 +18,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
@@ -130,14 +129,27 @@ func TestSnapshotCreate(t *testing.T) {
 			// as strings to every node sorted services
 			sort.Strings(wantServices)
 
-			for i, n := range snap.Nodes {
-				gotServices := n.Node.Config.Services
+			for i := 0; i < len(snap.Nodes); i++ {
+				gotServices := snap.Nodes[i].Node.Config.Services
 				sort.Strings(gotServices)
-				if fmt.Sprint(gotServices) != fmt.Sprint(wantServices) {
-					t.Errorf("got services %v for node %v, want %v", gotServices, i, wantServices)
+				if !equalStrSlice(gotServices, wantServices) {
+					t.Errorf("got services %v for node %v, want %v",
+						gotServices, i, wantServices)
 				}
 			}
 
 		})
 	}
+}
+
+func equalStrSlice(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := len(a) - 1; i >= 0; i-- {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
