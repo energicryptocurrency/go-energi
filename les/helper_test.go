@@ -222,7 +222,7 @@ func newTestPeer(t *testing.T, name string, version int, pm *ProtocolManager, sh
 
 	// Generate a random id and create the peer
 	var id enode.ID
-	rand.Read(id[:])
+	_, _ = rand.Read(id[:])
 
 	peer := pm.newPeer(version, NetworkId, p2p.NewPeer(id, name, nil), net)
 

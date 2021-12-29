@@ -73,7 +73,7 @@ func newTester() *downloadTester {
 		ownChainTd:  map[common.Hash]*big.Int{testGenesis.Hash(): testGenesis.Difficulty()},
 	}
 	tester.stateDb = ethdb.NewMemDatabase()
-	tester.stateDb.Put(testGenesis.Root().Bytes(), []byte{0x00})
+	_ = tester.stateDb.Put(testGenesis.Root().Bytes(), []byte{0x00})
 
 	tester.downloader = New(FullSync, 0, tester.stateDb, new(event.TypeMux), tester, tester, nil, tester.dropPeer)
 	return tester
@@ -247,7 +247,7 @@ func (dl *downloadTester) InsertChain(blocks types.Blocks) (i int, err error) {
 		}
 		dl.ownBlocks[block.Hash()] = block
 		dl.ownReceipts[block.Hash()] = make(types.Receipts, 0)
-		dl.stateDb.Put(block.Root().Bytes(), []byte{0x00})
+		_ = dl.stateDb.Put(block.Root().Bytes(), []byte{0x00})
 		dl.ownChainTd[block.Hash()] = new(big.Int).Add(dl.ownChainTd[block.ParentHash()], block.Difficulty())
 	}
 	return len(blocks), nil
@@ -303,7 +303,7 @@ func (dl *downloadTester) dropPeer(id string) {
 	defer dl.lock.Unlock()
 
 	delete(dl.peers, id)
-	dl.downloader.UnregisterPeer(id)
+	_ = dl.downloader.UnregisterPeer(id)
 }
 
 type downloadTesterPeer struct {

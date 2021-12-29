@@ -28,11 +28,11 @@ import (
 	"testing"
 	"testing/quick"
 
-	check "gopkg.in/check.v1"
-
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/ethdb"
+
+	check "gopkg.in/check.v1"
 )
 
 // Tests that updating a state trie does not leak any database writes prior to
@@ -407,7 +407,7 @@ func (test *snapshotTest) checkEqual(state, checkstate *StateDB) error {
 func (s *StateSuite) TestTouchDelete(c *check.C) {
 	s.state.GetOrNewStateObject(common.Address{})
 	root, _ := s.state.Commit(false)
-	s.state.Reset(root)
+	_ = s.state.Reset(root)
 
 	snapshot := s.state.Snapshot()
 	s.state.AddBalance(common.Address{}, new(big.Int))

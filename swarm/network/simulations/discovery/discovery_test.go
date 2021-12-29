@@ -37,6 +37,7 @@ import (
 	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 	"github.com/energicryptocurrency/energi/swarm/network"
 	"github.com/energicryptocurrency/energi/swarm/state"
+
 	colorable "github.com/mattn/go-colorable"
 )
 
@@ -71,8 +72,9 @@ func cleanDbStores() error {
 
 func getDbStore(nodeID string) (*state.DBStore, error) {
 	if _, err := os.Stat(discoveryPersistencePath + "_" + nodeID); os.IsNotExist(err) {
-		log.Info(fmt.Sprintf("directory for nodeID %s does not exist. creating...", nodeID))
-		ioutil.TempDir("", discoveryPersistencePath+"_"+nodeID)
+		log.Info(fmt.Sprintf("directory for nodeID %s does not exist. creating...",
+			nodeID))
+		_, _ = ioutil.TempDir("", discoveryPersistencePath+"_"+nodeID)
 	}
 	log.Info(fmt.Sprintf("opening storage directory for nodeID %s", nodeID))
 	store, err := state.NewDBStore(discoveryPersistencePath + "_" + nodeID)
@@ -295,8 +297,9 @@ func discoverySimulation(nodes, conns int, adapter adapters.NodeAdapter) (*simul
 	return result, nil
 }
 
-func discoveryPersistenceSimulation(nodes, conns int, adapter adapters.NodeAdapter) (*simulations.StepResult, error) {
-	cleanDbStores()
+func discoveryPersistenceSimulation(nodes, conns int, adapter adapters.NodeAdapter) (
+	*simulations.StepResult, error) {
+	_ = cleanDbStores()
 	defer cleanDbStores()
 
 	// create network
@@ -403,7 +406,7 @@ func discoveryPersistenceSimulation(nodes, conns int, adapter adapters.NodeAdapt
 
 		return nil
 	}
-	net.ConnectNodesChain(nil)
+	_ = net.ConnectNodesChain(nil)
 	log.Debug(fmt.Sprintf("nodes: %v", len(addrs)))
 	// construct the peer pot, so that kademlia health can be checked
 	check := func(ctx context.Context, id enode.ID) (bool, error) {

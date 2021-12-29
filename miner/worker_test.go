@@ -204,7 +204,7 @@ func testPendingStateAndBlock(t *testing.T, chainConfig *params.ChainConfig, eng
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	// Trigger processing of the migration tx at block number 1
@@ -255,7 +255,7 @@ func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consens
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	var (
@@ -317,7 +317,7 @@ func TestStreamUncleBlock(t *testing.T) {
 	w, b := newTestWorker(t, ethashChainConfig, ethash, 1)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	var taskCh = make(chan struct{})
