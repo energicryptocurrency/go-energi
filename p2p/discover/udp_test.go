@@ -38,6 +38,7 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/p2p/enode"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -278,7 +279,7 @@ func TestUDP_findnode(t *testing.T) {
 	expected := test.table.closest(testTarget.id(), bucketSize)
 	test.packetIn(nil, findnodePacket, &findnode{Target: testTarget, Expiration: futureExp})
 	waitNeighbors := func(want []*node) {
-		test.waitPacketOut(func(p *neighbors) {
+		_, _, _ = test.waitPacketOut(func(p *neighbors) {
 			if len(p.Nodes) != len(want) {
 				t.Errorf("wrong number of results: got %d, want %d", len(p.Nodes), bucketSize)
 			}
@@ -306,7 +307,7 @@ func TestUDP_findnodeMultiReply(t *testing.T) {
 	defer test.close()
 
 	rid := enode.PubkeyToIDV4(&test.remotekey.PublicKey)
-	test.table.db.UpdateLastPingReceived(rid, test.remoteaddr.IP, time.Now())
+	_ = test.table.db.UpdateLastPingReceived(rid, test.remoteaddr.IP, time.Now())
 
 	// queue a pending findnode request
 	resultc, errc := make(chan []*node), make(chan error)
@@ -322,7 +323,7 @@ func TestUDP_findnodeMultiReply(t *testing.T) {
 
 	// wait for the findnode to be sent.
 	// after it is sent, the transport is waiting for a reply
-	test.waitPacketOut(func(p *findnode) {
+	_, _, _ = test.waitPacketOut(func(p *findnode) {
 		if p.Target != testTarget {
 			t.Errorf("wrong target: got %v, want %v", p.Target, testTarget)
 		}
@@ -378,7 +379,7 @@ func TestUDP_pingMatchIP(t *testing.T) {
 
 	_, hash, _ := test.waitPacketOut(func(*ping) error { return nil })
 	wrongAddr := &net.UDPAddr{IP: net.IP{33, 44, 1, 2}, Port: 30000}
-	test.packetInFrom(errUnsolicitedReply, test.remotekey, wrongAddr, pongPacket, &pong{
+	_ = test.packetInFrom(errUnsolicitedReply, test.remotekey, wrongAddr, pongPacket, &pong{
 		ReplyTok:   hash,
 		To:         testLocalAnnounced,
 		Expiration: futureExp,

@@ -110,7 +110,10 @@ func (rw *pssRPCRW) WriteMsg(msg p2p.Msg) error {
 		return fmt.Errorf("connection closed")
 	}
 	rlpdata := make([]byte, msg.Size)
-	msg.Payload.Read(rlpdata)
+	_, err := msg.Payload.Read(rlpdata)
+	if err != nil {
+		return err
+	}
 	pmsg, err := rlp.EncodeToBytes(pss.ProtocolMsg{
 		Code:    msg.Code,
 		Size:    msg.Size,

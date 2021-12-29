@@ -345,7 +345,7 @@ func TestNoHook(t *testing.T) {
 	}
 	//simulate receiving a message
 	rw.msg = msg
-	peer.handleIncoming(func(ctx context.Context, msg interface{}) error {
+	_ = peer.handleIncoming(func(ctx context.Context, msg interface{}) error {
 		return nil
 	})
 	//all should just work and not result in any error

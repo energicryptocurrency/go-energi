@@ -30,21 +30,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mattn/go-colorable"
-
 	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rpc"
-
 	"github.com/energicryptocurrency/energi/node"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/p2p/enode"
 	"github.com/energicryptocurrency/energi/p2p/simulations"
 	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/energi/rpc"
+
+	"github.com/mattn/go-colorable"
 )
 
-const (
-	content = "123456789"
-)
+const content = "123456789"
 
 var (
 	nodes    = flag.Int("nodes", 30, "number of nodes to create (default 30)")
@@ -297,7 +294,7 @@ func (t *testNode) send() {
 			msg = &perBytesMsgSenderPays{Content: content[:rand.Intn(len(content))]}
 		}
 		log.Debug("send", "from", t.i, "to", whom, "type", reflect.TypeOf(msg), "msg", msg)
-		p.Send(context.TODO(), msg)
+		_ = p.Send(context.TODO(), msg)
 	}
 }
 

@@ -31,12 +31,11 @@ import (
 	"github.com/energicryptocurrency/energi/p2p/protocols"
 	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 	"github.com/energicryptocurrency/energi/swarm/state"
+
 	colorable "github.com/mattn/go-colorable"
 )
 
-var (
-	loglevel = flag.Int("loglevel", 2, "verbosity of logs")
-)
+var loglevel = flag.Int("loglevel", 2, "verbosity of logs")
 
 func init() {
 	testing.Init()
@@ -85,7 +84,7 @@ func TestRepeatedBookings(t *testing.T) {
 	amount := mrand.Intn(100)
 	cnt := 1 + mrand.Intn(10)
 	for i := 0; i < cnt; i++ {
-		swap.Add(int64(amount), testPeer.Peer)
+		_ = swap.Add(int64(amount), testPeer.Peer)
 	}
 	expectedBalance := int64(cnt * amount)
 	realBalance := swap.balances[testPeer.ID()]
@@ -97,7 +96,7 @@ func TestRepeatedBookings(t *testing.T) {
 	amount = mrand.Intn(100)
 	cnt = 1 + mrand.Intn(10)
 	for i := 0; i < cnt; i++ {
-		swap.Add(0-int64(amount), testPeer2.Peer)
+		_ = swap.Add(0-int64(amount), testPeer2.Peer)
 	}
 	expectedBalance = int64(0 - (cnt * amount))
 	realBalance = swap.balances[testPeer2.ID()]
@@ -109,9 +108,9 @@ func TestRepeatedBookings(t *testing.T) {
 	amount1 := mrand.Intn(100)
 	amount2 := mrand.Intn(55)
 	amount3 := mrand.Intn(999)
-	swap.Add(int64(amount1), testPeer2.Peer)
-	swap.Add(int64(0-amount2), testPeer2.Peer)
-	swap.Add(int64(0-amount3), testPeer2.Peer)
+	_ = swap.Add(int64(amount1), testPeer2.Peer)
+	_ = swap.Add(int64(0-amount2), testPeer2.Peer)
+	_ = swap.Add(int64(0-amount3), testPeer2.Peer)
 
 	expectedBalance = expectedBalance + int64(amount1-amount2-amount3)
 	realBalance = swap.balances[testPeer2.ID()]
@@ -136,7 +135,7 @@ func TestRestoreBalanceFromStateStore(t *testing.T) {
 	swap.balances[testPeer.ID()] = -8888
 
 	tmpBalance := swap.balances[testPeer.ID()]
-	swap.stateStore.Put(testPeer.ID().String(), &tmpBalance)
+	_ = swap.stateStore.Put(testPeer.ID().String(), &tmpBalance)
 
 	swap.stateStore.Close()
 	swap.stateStore = nil

@@ -55,15 +55,17 @@ func (n *upnp) ExternalIP() (addr net.IP, err error) {
 	return ip, nil
 }
 
-func (n *upnp) AddMapping(protocol string, extport, intport int, desc string, lifetime time.Duration) error {
+func (n *upnp) AddMapping(protocol string, extport, intport int, desc string,
+	lifetime time.Duration) error {
 	ip, err := n.internalAddress()
 	if err != nil {
 		return nil
 	}
 	protocol = strings.ToUpper(protocol)
 	lifetimeS := uint32(lifetime / time.Second)
-	n.DeleteMapping(protocol, extport, intport)
-	return n.client.AddPortMapping("", uint16(extport), protocol, uint16(intport), ip.String(), true, desc, lifetimeS)
+	_ = n.DeleteMapping(protocol, extport, intport)
+	return n.client.AddPortMapping("", uint16(extport), protocol, uint16(intport),
+		ip.String(), true, desc, lifetimeS)
 }
 
 func (n *upnp) internalAddress() (net.IP, error) {

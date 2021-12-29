@@ -41,6 +41,7 @@ import (
 	"github.com/energicryptocurrency/energi/swarm/log"
 	"github.com/energicryptocurrency/energi/swarm/storage"
 	"github.com/energicryptocurrency/energi/swarm/storage/feed"
+
 	"github.com/rs/cors"
 )
 
@@ -198,10 +199,11 @@ func (s *Server) HandleBzzGet(w http.ResponseWriter, r *http.Request) {
 		if found := path.Base(uri.Path); found != "" && found != "." && found != "/" {
 			fileName = found
 		}
-		w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s.tar\"", fileName))
+		w.Header().Set("Content-Disposition", fmt.Sprintf(
+			"inline; filename=\"%s.tar\"", fileName))
 
 		w.WriteHeader(http.StatusOK)
-		io.Copy(w, reader)
+		_, _ = io.Copy(w, reader)
 		return
 	}
 
@@ -218,7 +220,7 @@ func (s *Server) HandleRootPaths(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "User-agent: *\nDisallow: /")
 	case "/favicon.ico":
 		w.WriteHeader(http.StatusOK)
-		w.Write(faviconBytes)
+		_, _ = w.Write(faviconBytes)
 	default:
 		respondError(w, r, "Not Found", http.StatusNotFound)
 	}
@@ -733,7 +735,7 @@ func (s *Server) HandleGetList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&list)
+	_ = json.NewEncoder(w).Encode(&list)
 }
 
 // HandleGetFile handles a GET request to bzz://<manifest>/<path> and responds

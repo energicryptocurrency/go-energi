@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/energicryptocurrency/energi/p2p"
+
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -36,19 +37,19 @@ func TestTestnetPort(t *testing.T) {
 
 	// set flags
 	globalCtx := cli.NewContext(nil, globalSet, nil)
-	globalCtx.Set("testnet", "23")
+	_ = globalCtx.Set("testnet", "23")
 
 	cfg := &p2p.Config{}
 
 	// check port remains 49797
-	globalCtx.Set("port", "49797")
+	_ = globalCtx.Set("port", "49797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(testnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(testnetDefaultPort))
 	}
 
 	// check port 39797 isn't allowed and port is default
-	globalCtx.Set("port", "39797")
+	_ = globalCtx.Set("port", "39797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(testnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(testnetDefaultPort))
