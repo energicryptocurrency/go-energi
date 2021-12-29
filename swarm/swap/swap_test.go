@@ -146,7 +146,7 @@ func TestRestoreBalanceFromStateStore(t *testing.T) {
 	}
 
 	var newBalance int64
-	stateStore.Get(testPeer.ID().String(), &newBalance)
+	_ = stateStore.Get(testPeer.ID().String(), &newBalance)
 
 	//compare the balances
 	if tmpBalance != newBalance {

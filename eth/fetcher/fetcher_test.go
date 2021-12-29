@@ -406,14 +406,14 @@ func testPendingDeduplication(t *testing.T, protocol int) {
 		// Simulate a long running fetch
 		go func() {
 			time.Sleep(delay)
-			headerFetcher(hash)
+			_ = headerFetcher(hash)
 		}()
 		return nil
 	}
 	// Announce the same block many times until it's fetched (wait for any pending ops)
 	for tester.getBlock(hashes[0]) == nil {
-		_ = tester.fetcher.Notify("repeater", hashes[0], 1, time.Now().Add(-arriveTimeout),
-			headerWrapper, bodyFetcher)
+		_ = tester.fetcher.Notify("repeater", hashes[0], 1,
+			time.Now().Add(-arriveTimeout), headerWrapper, bodyFetcher)
 		time.Sleep(time.Millisecond)
 	}
 	time.Sleep(delay)
@@ -734,9 +734,11 @@ func testHashMemoryExhaustionAttack(t *testing.T, protocol int) {
 	// Feed the tester a huge hashset from the attacker, and a limited from the valid peer
 	for i := 0; i < len(attack); i++ {
 		if i < maxQueueDist {
-			tester.fetcher.Notify("valid", hashes[len(hashes)-2-i], uint64(i+1), time.Now(), validHeaderFetcher, validBodyFetcher)
+			_ = tester.fetcher.Notify("valid", hashes[len(hashes)-2-i], uint64(i+1),
+				time.Now(), validHeaderFetcher, validBodyFetcher)
 		}
-		tester.fetcher.Notify("attacker", attack[i], 1 /* don't distance drop */, time.Now(), attackerHeaderFetcher, attackerBodyFetcher)
+		_ = tester.fetcher.Notify("attacker", attack[i], 1, /* don't distance drop */
+			time.Now(), attackerHeaderFetcher, attackerBodyFetcher)
 	}
 	if count := atomic.LoadInt32(&announces); count != hashLimit+maxQueueDist {
 		t.Fatalf("queued announce count mismatch: have %d, want %d", count, hashLimit+maxQueueDist)
@@ -746,7 +748,8 @@ func testHashMemoryExhaustionAttack(t *testing.T, protocol int) {
 
 	// Feed the remaining valid hashes to ensure DOS protection state remains clean
 	for i := len(hashes) - maxQueueDist - 2; i >= 0; i-- {
-		tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1), time.Now().Add(-arriveTimeout), validHeaderFetcher, validBodyFetcher)
+		_ = tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1),
+			time.Now().Add(-arriveTimeout), validHeaderFetcher, validBodyFetcher)
 		verifyImportEvent(t, imported, true)
 	}
 	verifyImportDone(t, imported)
@@ -800,7 +803,7 @@ func TestBlockMemoryExhaustionAttack(t *testing.T) {
 
 	// Insert the remaining blocks in chunks to ensure clean DOS protection
 	for i := maxQueueDist; i < len(hashes)-1; i++ {
-		tester.fetcher.Enqueue("valid", blocks[hashes[len(hashes)-2-i]])
+		_ = tester.fetcher.Enqueue("valid", blocks[hashes[len(hashes)-2-i]])
 		verifyImportEvent(t, imported, true)
 	}
 	verifyImportDone(t, imported)

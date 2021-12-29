@@ -111,7 +111,7 @@ func testGet(t *testing.T, api *API, bzzhash, path string) *testResponse {
 	if err != io.EOF {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	reader.Seek(0, 0)
+	_, _ = reader.Seek(0, 0)
 	return &testResponse{reader, &Response{mimeType, status, size, string(s)}}
 	// return &testResponse{reader, &Response{mimeType, status, reader.Size(), nil}}
 }

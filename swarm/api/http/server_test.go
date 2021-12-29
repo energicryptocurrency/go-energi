@@ -1154,7 +1154,7 @@ func TestMultiPartUpload(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	form := multipart.NewWriter(buf)
-	form.WriteField("name", "John Doe")
+	_ = form.WriteField("name", "John Doe")
 	file1, _ := form.CreateFormFile("cv", "cv.txt")
 	_, _ = file1.Write([]byte("John Doe's Credentials"))
 	file2, _ := form.CreateFormFile("profile_picture", "profile.jpg")

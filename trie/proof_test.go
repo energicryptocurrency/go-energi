@@ -165,7 +165,7 @@ func BenchmarkProve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		kv := vals[keys[i%len(keys)]]
 		proofs := ethdb.NewMemDatabase()
-		if trie.Prove(kv.k, 0, proofs); len(proofs.Keys()) == 0 {
+		if _ = trie.Prove(kv.k, 0, proofs); len(proofs.Keys()) == 0 {
 			b.Fatalf("zero length proof for %x", kv.k)
 		}
 	}
@@ -179,7 +179,7 @@ func BenchmarkVerifyProof(b *testing.B) {
 	for k := range vals {
 		keys = append(keys, k)
 		proof := ethdb.NewMemDatabase()
-		trie.Prove([]byte(k), 0, proof)
+		_ = trie.Prove([]byte(k), 0, proof)
 		proofs = append(proofs, proof)
 	}
 

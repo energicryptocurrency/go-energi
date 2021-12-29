@@ -198,7 +198,7 @@ func TestDifferenceIterator(t *testing.T) {
 	for _, val := range testdata1 {
 		triea.Update([]byte(val.k), []byte(val.v))
 	}
-	triea.Commit(nil)
+	_, _ = triea.Commit(nil)
 
 	trieb := newEmpty()
 	for _, val := range testdata2 {

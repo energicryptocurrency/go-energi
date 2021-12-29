@@ -582,8 +582,8 @@ func testHeavyForkedSync(t *testing.T, protocol int, mode SyncMode) {
 
 	chainA := testChainForkLightA.shorten(testChainBase.len() + 80)
 	chainB := testChainForkHeavy.shorten(testChainBase.len() + 80)
-	tester.newPeer("light", protocol, chainA)
-	tester.newPeer("heavy", protocol, chainB)
+	_ = tester.newPeer("light", protocol, chainA)
+	_ = tester.newPeer("heavy", protocol, chainB)
 
 	// Synchronise with the peer and make sure all blocks were retrieved
 	if err := tester.sync("light", nil, mode); err != nil {
@@ -616,8 +616,8 @@ func testBoundedForkedSync(t *testing.T, protocol int, mode SyncMode) {
 
 	chainA := testChainForkLightA
 	chainB := testChainForkLightB
-	tester.newPeer("original", protocol, chainA)
-	tester.newPeer("rewriter", protocol, chainB)
+	_ = tester.newPeer("original", protocol, chainA)
+	_ = tester.newPeer("rewriter", protocol, chainB)
 
 	// Synchronise with the peer and make sure all blocks were retrieved
 	if err := tester.sync("original", nil, mode); err != nil {
@@ -650,8 +650,8 @@ func testBoundedHeavyForkedSync(t *testing.T, protocol int, mode SyncMode) {
 	// Create a long enough forked chain
 	chainA := testChainForkLightA
 	chainB := testChainForkHeavy
-	tester.newPeer("original", protocol, chainA)
-	tester.newPeer("heavy-rewriter", protocol, chainB)
+	_ = tester.newPeer("original", protocol, chainA)
+	_ = tester.newPeer("heavy-rewriter", protocol, chainB)
 
 	// Synchronise with the peer and make sure all blocks were retrieved
 	if err := tester.sync("original", nil, mode); err != nil {
@@ -717,7 +717,7 @@ func testCancel(t *testing.T, protocol int, mode SyncMode) {
 	defer tester.terminate()
 
 	chain := testChainBase.shorten(MaxHeaderFetch)
-	tester.newPeer("peer", protocol, chain)
+	_ = tester.newPeer("peer", protocol, chain)
 
 	// Make sure canceling works with a pristine downloader
 	tester.downloader.Cancel()
@@ -754,7 +754,7 @@ func testMultiSynchronisation(t *testing.T, protocol int, mode SyncMode) {
 
 	for i := 0; i < targetPeers; i++ {
 		id := fmt.Sprintf("peer #%d", i)
-		tester.newPeer(id, protocol, chain.shorten(chain.len()/(i+1)))
+		_ = tester.newPeer(id, protocol, chain.shorten(chain.len()/(i+1)))
 	}
 	if err := tester.sync("peer #0", nil, mode); err != nil {
 		t.Fatalf("failed to synchronise blocks: %v", err)
@@ -784,7 +784,7 @@ func testMultiProtoSync(t *testing.T, protocol int, mode SyncMode) {
 	//tester.newPeer("peer 62", 62, chain)
 	//tester.newPeer("peer 63", 63, chain)
 	//tester.newPeer("peer 64", 64, chain)
-	tester.newPeer("peer 70", 70, chain)
+	_ = tester.newPeer("peer 70", 70, chain)
 
 	// Synchronise with the requested peer and make sure all blocks were retrieved
 	if err := tester.sync(fmt.Sprintf("peer %d", protocol), nil, mode); err != nil {
@@ -818,7 +818,7 @@ func testEmptyShortCircuit(t *testing.T, protocol int, mode SyncMode) {
 
 	// Create a block chain to download
 	chain := testChainBase
-	tester.newPeer("peer", protocol, chain)
+	_ = tester.newPeer("peer", protocol, chain)
 
 	// Instrument the downloader to signal body requests
 	bodiesHave, receiptsHave := int32(0), int32(0)
@@ -872,13 +872,13 @@ func testMissingHeaderAttack(t *testing.T, protocol int, mode SyncMode) {
 	chain := testChainBase.shorten(blockCacheItems - 15)
 	brokenChain := chain.shorten(chain.len())
 	delete(brokenChain.headerm, brokenChain.chain[brokenChain.len()/2])
-	tester.newPeer("attack", protocol, brokenChain)
+	_ = tester.newPeer("attack", protocol, brokenChain)
 
 	if err := tester.sync("attack", nil, mode); err == nil {
 		t.Fatalf("succeeded attacker synchronisation")
 	}
 	// Synchronise with the valid peer and make sure sync succeeds
-	tester.newPeer("valid", protocol, chain)
+	_ = tester.newPeer("valid", protocol, chain)
 	if err := tester.sync("valid", nil, mode); err != nil {
 		t.Fatalf("failed to synchronise blocks: %v", err)
 	}
@@ -907,13 +907,13 @@ func testShiftedHeaderAttack(t *testing.T, protocol int, mode SyncMode) {
 	delete(brokenChain.headerm, brokenChain.chain[1])
 	delete(brokenChain.blockm, brokenChain.chain[1])
 	delete(brokenChain.receiptm, brokenChain.chain[1])
-	tester.newPeer("attack", protocol, brokenChain)
+	_ = tester.newPeer("attack", protocol, brokenChain)
 	if err := tester.sync("attack", nil, mode); err == nil {
 		t.Fatalf("succeeded attacker synchronisation")
 	}
 
 	// Synchronise with the valid peer and make sure sync succeeds
-	tester.newPeer("valid", protocol, chain)
+	_ = tester.newPeer("valid", protocol, chain)
 	if err := tester.sync("valid", nil, mode); err != nil {
 		t.Fatalf("failed to synchronise blocks: %v", err)
 	}
@@ -942,7 +942,7 @@ func testInvalidHeaderRollback(t *testing.T, protocol int, mode SyncMode) {
 	missing := fsHeaderSafetyNet + MaxHeaderFetch + 1
 	fastAttackChain := chain.shorten(chain.len())
 	delete(fastAttackChain.headerm, fastAttackChain.chain[missing])
-	tester.newPeer("fast-attack", protocol, fastAttackChain)
+	_ = tester.newPeer("fast-attack", protocol, fastAttackChain)
 
 	if err := tester.sync("fast-attack", nil, mode); err == nil {
 		t.Fatalf("succeeded fast attacker synchronisation")
@@ -958,7 +958,7 @@ func testInvalidHeaderRollback(t *testing.T, protocol int, mode SyncMode) {
 	blockAttackChain := chain.shorten(chain.len())
 	delete(fastAttackChain.headerm, fastAttackChain.chain[missing]) // Make sure the fast-attacker doesn't fill in
 	delete(blockAttackChain.headerm, blockAttackChain.chain[missing])
-	tester.newPeer("block-attack", protocol, blockAttackChain)
+	_ = tester.newPeer("block-attack", protocol, blockAttackChain)
 
 	if err := tester.sync("block-attack", nil, mode); err == nil {
 		t.Fatalf("succeeded block attacker synchronisation")
@@ -976,7 +976,7 @@ func testInvalidHeaderRollback(t *testing.T, protocol int, mode SyncMode) {
 	// fast sync pivot point. This could be a trial to leave the node with a bad
 	// but already imported pivot block.
 	withholdAttackChain := chain.shorten(chain.len())
-	tester.newPeer("withhold-attack", protocol, withholdAttackChain)
+	_ = tester.newPeer("withhold-attack", protocol, withholdAttackChain)
 	tester.downloader.syncInitHook = func(uint64, uint64) {
 		for i := missing; i < withholdAttackChain.len(); i++ {
 			delete(withholdAttackChain.headerm, withholdAttackChain.chain[i])
@@ -999,7 +999,7 @@ func testInvalidHeaderRollback(t *testing.T, protocol int, mode SyncMode) {
 	// should also disable fast syncing for this process, verify that we did a fresh full
 	// sync. Note, we can't assert anything about the receipts since we won't purge the
 	// database of them, hence we can't use assertOwnChain.
-	tester.newPeer("valid", protocol, chain)
+	_ = tester.newPeer("valid", protocol, chain)
 	if err := tester.sync("valid", nil, mode); err != nil {
 		t.Fatalf("failed to synchronise blocks: %v", err)
 	}
@@ -1029,7 +1029,7 @@ func testHighTDStarvationAttack(t *testing.T, protocol int, mode SyncMode) {
 	defer tester.terminate()
 
 	chain := testChainBase.shorten(1)
-	tester.newPeer("attack", protocol, chain)
+	_ = tester.newPeer("attack", protocol, chain)
 	if err := tester.sync("attack", big.NewInt(1000000), mode); err != errStallingPeer {
 		t.Fatalf("synchronisation error mismatch: have %v, want %v", err, errStallingPeer)
 	}
@@ -1122,7 +1122,7 @@ func testSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 	checkProgress(t, tester.downloader, "pristine", ethereum.SyncProgress{})
 
 	// Synchronise half the blocks and check initial progress
-	tester.newPeer("peer-half", protocol, chain.shorten(chain.len()/2))
+	_ = tester.newPeer("peer-half", protocol, chain.shorten(chain.len()/2))
 	pending := new(sync.WaitGroup)
 	pending.Add(1)
 
@@ -1140,7 +1140,7 @@ func testSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 	pending.Wait()
 
 	// Synchronise all the blocks and check continuation progress
-	tester.newPeer("peer-full", protocol, chain)
+	_ = tester.newPeer("peer-full", protocol, chain)
 	pending.Add(1)
 	go func() {
 		defer pending.Done()
@@ -1206,7 +1206,7 @@ func testForkedSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 	checkProgress(t, tester.downloader, "pristine", ethereum.SyncProgress{})
 
 	// Synchronise with one of the forks and check progress
-	tester.newPeer("fork A", protocol, chainA)
+	_ = tester.newPeer("fork A", protocol, chainA)
 	pending := new(sync.WaitGroup)
 	pending.Add(1)
 	go func() {
@@ -1227,7 +1227,7 @@ func testForkedSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 	tester.downloader.syncStatsChainOrigin = tester.downloader.syncStatsChainHeight
 
 	// Synchronise with the second fork and check progress resets
-	tester.newPeer("fork B", protocol, chainB)
+	_ = tester.newPeer("fork B", protocol, chainB)
 	pending.Add(1)
 	go func() {
 		defer pending.Done()
@@ -1285,7 +1285,7 @@ func testFailedSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 	delete(brokenChain.headerm, brokenChain.chain[missing])
 	delete(brokenChain.blockm, brokenChain.chain[missing])
 	delete(brokenChain.receiptm, brokenChain.chain[missing])
-	tester.newPeer("faulty", protocol, brokenChain)
+	_ = tester.newPeer("faulty", protocol, brokenChain)
 
 	pending := new(sync.WaitGroup)
 	pending.Add(1)
@@ -1305,7 +1305,7 @@ func testFailedSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 
 	// Synchronise with a good peer and check that the progress origin remind the same
 	// after a failure
-	tester.newPeer("valid", protocol, chain)
+	_ = tester.newPeer("valid", protocol, chain)
 	pending.Add(1)
 	go func() {
 		defer pending.Done()
@@ -1356,7 +1356,7 @@ func testFakedSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 	for i := brokenChain.len() - 2; i > brokenChain.len()-numMissing; i-- {
 		delete(brokenChain.headerm, brokenChain.chain[i])
 	}
-	tester.newPeer("attack", protocol, brokenChain)
+	_ = tester.newPeer("attack", protocol, brokenChain)
 
 	pending := new(sync.WaitGroup)
 	pending.Add(1)
@@ -1377,7 +1377,7 @@ func testFakedSyncProgress(t *testing.T, protocol int, mode SyncMode) {
 	// Synchronise with a good peer and check that the progress height has been reduced to
 	// the true value.
 	validChain := chain.shorten(chain.len() - numMissing)
-	tester.newPeer("valid", protocol, validChain)
+	_ = tester.newPeer("valid", protocol, validChain)
 	pending.Add(1)
 
 	go func() {
@@ -1433,7 +1433,7 @@ func testDeliverHeadersHang(t *testing.T, protocol int, mode SyncMode) {
 	for i := 0; i < 200; i++ {
 		tester := newTester()
 		tester.peerDb = master.peerDb
-		tester.newPeer("peer", protocol, chain)
+		_ = tester.newPeer("peer", protocol, chain)
 
 		// Whenever the downloader requests headers, flood it with
 		// a lot of unrequested header deliveries.
@@ -1594,7 +1594,7 @@ func testCheckpointEnforcement(t *testing.T, protocol int, mode SyncMode) {
 	chain := testChainBase.shorten(int(tester.downloader.checkpoint) - 1)
 
 	// Attempt to sync with the peer and validate the result
-	tester.newPeer("peer", protocol, chain)
+	_ = tester.newPeer("peer", protocol, chain)
 
 	var expect error
 	if mode == FastSync {

@@ -140,10 +140,13 @@ func TestUDP_packetErrors(t *testing.T) {
 	test := newUDPTest(t)
 	defer test.close()
 
-	test.packetIn(errExpired, pingPacket, &ping{From: testRemote, To: testLocalAnnounced, Version: 4})
-	test.packetIn(errUnsolicitedReply, pongPacket, &pong{ReplyTok: []byte{}, Expiration: futureExp})
-	test.packetIn(errUnknownNode, findnodePacket, &findnode{Expiration: futureExp})
-	test.packetIn(errUnsolicitedReply, neighborsPacket, &neighbors{Expiration: futureExp})
+	_ = test.packetIn(errExpired, pingPacket, &ping{From: testRemote,
+		To: testLocalAnnounced, Version: 4})
+	_ = test.packetIn(errUnsolicitedReply, pongPacket, &pong{ReplyTok: []byte{},
+		Expiration: futureExp})
+	_ = test.packetIn(errUnknownNode, findnodePacket, &findnode{Expiration: futureExp})
+	_ = test.packetIn(errUnsolicitedReply, neighborsPacket,
+		&neighbors{Expiration: futureExp})
 }
 
 func TestUDP_pingTimeout(t *testing.T) {
@@ -273,11 +276,12 @@ func TestUDP_findnode(t *testing.T) {
 	// ensure there's a bond with the test node,
 	// findnode won't be accepted otherwise.
 	remoteID := encodePubkey(&test.remotekey.PublicKey).id()
-	test.table.db.UpdateLastPongReceived(remoteID, test.remoteaddr.IP, time.Now())
+	_ = test.table.db.UpdateLastPongReceived(remoteID, test.remoteaddr.IP, time.Now())
 
 	// check that closest neighbors are returned.
 	expected := test.table.closest(testTarget.id(), bucketSize)
-	test.packetIn(nil, findnodePacket, &findnode{Target: testTarget, Expiration: futureExp})
+	_ = test.packetIn(nil, findnodePacket, &findnode{Target: testTarget,
+		Expiration: futureExp})
 	waitNeighbors := func(want []*node) {
 		_, _, _ = test.waitPacketOut(func(p *neighbors) {
 			if len(p.Nodes) != len(want) {
@@ -340,8 +344,10 @@ func TestUDP_findnodeMultiReply(t *testing.T) {
 	for i := range list {
 		rpclist[i] = nodeToRPC(list[i])
 	}
-	test.packetIn(nil, neighborsPacket, &neighbors{Expiration: futureExp, Nodes: rpclist[:2]})
-	test.packetIn(nil, neighborsPacket, &neighbors{Expiration: futureExp, Nodes: rpclist[2:]})
+	_ = test.packetIn(nil, neighborsPacket, &neighbors{Expiration: futureExp,
+		Nodes: rpclist[:2]})
+	_ = test.packetIn(nil, neighborsPacket, &neighbors{Expiration: futureExp,
+		Nodes: rpclist[2:]})
 
 	// check that the sent neighbors are all returned by findnode
 	select {
@@ -364,18 +370,21 @@ func TestUDP_pingMatch(t *testing.T) {
 	randToken := make([]byte, 32)
 	crand.Read(randToken)
 
-	test.packetIn(nil, pingPacket, &ping{From: testRemote, To: testLocalAnnounced, Version: 4, Expiration: futureExp})
-	test.waitPacketOut(func(*pong) error { return nil })
-	test.waitPacketOut(func(*ping) error { return nil })
-	test.packetIn(errUnsolicitedReply, pongPacket, &pong{ReplyTok: randToken, To: testLocalAnnounced, Expiration: futureExp})
+	_ = test.packetIn(nil, pingPacket, &ping{From: testRemote, To: testLocalAnnounced,
+		Version: 4, Expiration: futureExp})
+	_, _, _ = test.waitPacketOut(func(*pong) error { return nil })
+	_, _, _ = test.waitPacketOut(func(*ping) error { return nil })
+	_ = test.packetIn(errUnsolicitedReply, pongPacket, &pong{ReplyTok: randToken,
+		To: testLocalAnnounced, Expiration: futureExp})
 }
 
 func TestUDP_pingMatchIP(t *testing.T) {
 	test := newUDPTest(t)
 	defer test.close()
 
-	test.packetIn(nil, pingPacket, &ping{From: testRemote, To: testLocalAnnounced, Version: 4, Expiration: futureExp})
-	test.waitPacketOut(func(*pong) error { return nil })
+	_ = test.packetIn(nil, pingPacket, &ping{From: testRemote, To: testLocalAnnounced,
+		Version: 4, Expiration: futureExp})
+	_, _, _ = test.waitPacketOut(func(*pong) error { return nil })
 
 	_, hash, _ := test.waitPacketOut(func(*ping) error { return nil })
 	wrongAddr := &net.UDPAddr{IP: net.IP{33, 44, 1, 2}, Port: 30000}
@@ -396,7 +405,7 @@ func TestUDP_successfulPing(t *testing.T) {
 	go test.packetIn(nil, pingPacket, &ping{From: testRemote, To: testLocalAnnounced, Version: 4, Expiration: futureExp})
 
 	// the ping is replied to.
-	test.waitPacketOut(func(p *pong) {
+	_, _, _ = test.waitPacketOut(func(p *pong) {
 		pinghash := test.sent[0][:macSize]
 		if !bytes.Equal(p.ReplyTok, pinghash) {
 			t.Errorf("got pong.ReplyTok %x, want %x", p.ReplyTok, pinghash)
@@ -428,7 +437,7 @@ func TestUDP_successfulPing(t *testing.T) {
 		}
 		return nil
 	})
-	test.packetIn(nil, pongPacket, &pong{ReplyTok: hash, Expiration: futureExp})
+	_ = test.packetIn(nil, pongPacket, &pong{ReplyTok: hash, Expiration: futureExp})
 
 	// the node should be added to the table shortly after getting the
 	// pong packet.

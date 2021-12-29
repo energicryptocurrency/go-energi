@@ -163,7 +163,7 @@ func TestStart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctrlClient.Subscribe(rsrcName, pubkey, addrbytes, func(s string, b []byte) error {
+	_ = ctrlClient.Subscribe(rsrcName, pubkey, addrbytes, func(s string, b []byte) error {
 		if s != "foo.eth" || !bytes.Equal(updateMsg, b) {
 			t.Fatalf("unexpected result in client handler: '%s':'%x'", s, b)
 		}

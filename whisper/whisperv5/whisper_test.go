@@ -543,7 +543,7 @@ func TestCustomization(t *testing.T) {
 	w := New(&DefaultConfig)
 	defer w.SetMinimumPoW(DefaultMinimumPoW)
 	defer w.SetMaxMessageSize(DefaultMaxMessageSize)
-	w.Start(nil)
+	_ = w.Start(nil)
 	defer w.Stop()
 
 	const smallPoW = 0.00001
@@ -575,7 +575,7 @@ func TestCustomization(t *testing.T) {
 		t.Fatalf("successfully sent envelope with PoW %.06f, false positive (seed %d).", env.PoW(), seed)
 	}
 
-	w.SetMinimumPoW(smallPoW / 2)
+	_ = w.SetMinimumPoW(smallPoW / 2)
 	err = w.Send(env)
 	if err != nil {
 		t.Fatalf("failed to send envelope with seed %d: %s.", seed, err)
@@ -590,13 +590,13 @@ func TestCustomization(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed Wrap with seed %d: %s.", seed, err)
 	}
-	w.SetMaxMessageSize(uint32(env.size() - 1))
+	_ = w.SetMaxMessageSize(uint32(env.size() - 1))
 	err = w.Send(env)
 	if err == nil {
 		t.Fatalf("successfully sent oversized envelope (seed %d): false positive.", seed)
 	}
 
-	w.SetMaxMessageSize(DefaultMaxMessageSize)
+	_ = w.SetMaxMessageSize(DefaultMaxMessageSize)
 	err = w.Send(env)
 	if err != nil {
 		t.Fatalf("failed to send second envelope with seed %d: %s.", seed, err)
@@ -639,7 +639,7 @@ func TestSymmetricSendCycle(t *testing.T) {
 	w := New(&DefaultConfig)
 	defer w.SetMinimumPoW(DefaultMinimumPoW)
 	defer w.SetMaxMessageSize(DefaultMaxMessageSize)
-	w.Start(nil)
+	_ = w.Start(nil)
 	defer w.Stop()
 
 	filter1, err := generateFilter(t, true)
@@ -728,7 +728,7 @@ func TestSymmetricSendWithoutAKey(t *testing.T) {
 	w := New(&DefaultConfig)
 	defer w.SetMinimumPoW(DefaultMinimumPoW)
 	defer w.SetMaxMessageSize(DefaultMaxMessageSize)
-	w.Start(nil)
+	_ = w.Start(nil)
 	defer w.Stop()
 
 	filter, err := generateFilter(t, true)
@@ -796,7 +796,7 @@ func TestSymmetricSendKeyMismatch(t *testing.T) {
 	w := New(&DefaultConfig)
 	defer w.SetMinimumPoW(DefaultMinimumPoW)
 	defer w.SetMaxMessageSize(DefaultMaxMessageSize)
-	w.Start(nil)
+	_ = w.Start(nil)
 	defer w.Stop()
 
 	filter, err := generateFilter(t, true)

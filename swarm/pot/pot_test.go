@@ -575,7 +575,7 @@ func TestPotEachNeighbourAsync(t *testing.T) {
 		if i == 0 {
 			continue
 		}
-		testPotEachNeighbour(n, pof, val, count, remember)
+		_ = testPotEachNeighbour(n, pof, val, count, remember)
 		d := 0
 		forget := func(v Val, po int) {
 			mu.Lock()

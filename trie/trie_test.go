@@ -33,6 +33,7 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/ethdb"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -88,7 +89,7 @@ func testMissingNode(t *testing.T, memonly bool) {
 	updateString(trie, "123456", "asdfasdfasdfasdfasdfasdfasdfasdf")
 	root, _ := trie.Commit(nil)
 	if !memonly {
-		triedb.Commit(root, true)
+		_ = triedb.Commit(root, true)
 	}
 
 	trie, _ = New(root, triedb)
@@ -121,7 +122,7 @@ func testMissingNode(t *testing.T, memonly bool) {
 	if memonly {
 		delete(triedb.dirties, hash)
 	} else {
-		diskdb.Delete(hash[:])
+		_ = diskdb.Delete(hash[:])
 	}
 
 	trie, _ = New(root, triedb)
@@ -197,7 +198,7 @@ func TestGet(t *testing.T) {
 		if i == 1 {
 			return
 		}
-		trie.Commit(nil)
+		_, _ = trie.Commit(nil)
 	}
 }
 
@@ -337,7 +338,7 @@ func TestCacheUnload(t *testing.T) {
 	updateString(trie, key2, "this is the branch of key2.")
 
 	root, _ := trie.Commit(nil)
-	trie.db.Commit(root, true)
+	_ = trie.db.Commit(root, true)
 
 	// Commit the trie repeatedly and access key1.
 	// The branch containing it is loaded from DB exactly two times:
@@ -348,7 +349,7 @@ func TestCacheUnload(t *testing.T) {
 	trie.SetCacheLimit(5)
 	for i := 0; i < 12; i++ {
 		getString(trie, key1)
-		trie.Commit(nil)
+		_, _ = trie.Commit(nil)
 	}
 	// Check that it got loaded two times.
 	for dbkey, count := range diskdb.gets {
@@ -530,7 +531,7 @@ func benchGet(b *testing.B, commit bool) {
 	}
 	binary.LittleEndian.PutUint64(k, benchElemCount/2)
 	if commit {
-		trie.Commit(nil)
+		_, _ = trie.Commit(nil)
 	}
 
 	b.ResetTimer()
@@ -624,6 +625,6 @@ func TestDecodeNode(t *testing.T) {
 	for i := 0; i < 5000000; i++ {
 		rand.Read(hash)
 		rand.Read(elems)
-		decodeNode(hash, elems, 1)
+		_, _ = decodeNode(hash, elems, 1)
 	}
 }

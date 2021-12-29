@@ -982,7 +982,7 @@ func TestRawAllow(t *testing.T) {
 	pssMsg.Payload = &whisper.Envelope{
 		Topic: whisper.TopicType(topic),
 	}
-	ps.handlePssMsg(context.TODO(), pssMsg)
+	_ = ps.handlePssMsg(context.TODO(), pssMsg)
 	if receives > 0 {
 		t.Fatalf("Expected handler not to be executed with raw cap off")
 	}
@@ -998,7 +998,7 @@ func TestRawAllow(t *testing.T) {
 
 	// should work now
 	pssMsg.Payload.Data = []byte("Raw Deal")
-	ps.handlePssMsg(context.TODO(), pssMsg)
+	_ = ps.handlePssMsg(context.TODO(), pssMsg)
 	if receives == 0 {
 		t.Fatalf("Expected handler to be executed with raw cap on")
 	}
@@ -1009,7 +1009,7 @@ func TestRawAllow(t *testing.T) {
 
 	// check that raw messages fail again
 	pssMsg.Payload.Data = []byte("Raw Trump")
-	ps.handlePssMsg(context.TODO(), pssMsg)
+	_ = ps.handlePssMsg(context.TODO(), pssMsg)
 	if receives != prevReceives {
 		t.Fatalf("Expected handler not to be executed when raw handler is retracted")
 	}

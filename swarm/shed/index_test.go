@@ -452,7 +452,7 @@ func TestIndex_Iterate_withPrefix(t *testing.T) {
 	}
 	batch := new(leveldb.Batch)
 	for _, i := range allItems {
-		index.PutInBatch(batch, i)
+		_ = index.PutInBatch(batch, i)
 	}
 	err = db.WriteBatch(batch)
 	if err != nil {
@@ -644,7 +644,7 @@ func TestIndex_count(t *testing.T) {
 	}
 	batch := new(leveldb.Batch)
 	for _, i := range items {
-		index.PutInBatch(batch, i)
+		_ = index.PutInBatch(batch, i)
 	}
 	err = db.WriteBatch(batch)
 	if err != nil {
