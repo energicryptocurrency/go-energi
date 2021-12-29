@@ -594,7 +594,7 @@ func TestHandshakeForwardCompatibility(t *testing.T) {
 	if !bytes.Equal(derived.MAC, wantMAC) {
 		t.Errorf("mac-secret mismatch:\ngot %x\nwant %x", derived.MAC, wantMAC)
 	}
-	io.WriteString(derived.IngressMAC, "foo")
+	_, _ = io.WriteString(derived.IngressMAC, "foo")
 	fooIngressHash := derived.IngressMAC.Sum(nil)
 	if !bytes.Equal(fooIngressHash, wantFooIngressHash) {
 		t.Errorf("ingress-mac('foo') mismatch:\ngot %x\nwant %x", fooIngressHash, wantFooIngressHash)

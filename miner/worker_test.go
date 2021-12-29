@@ -387,7 +387,7 @@ func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, en
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	var taskCh = make(chan struct{})
@@ -463,7 +463,7 @@ func testAdjustInterval(t *testing.T, chainConfig *params.ChainConfig, engine co
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	w.skipSealHook = func(task *task) bool {

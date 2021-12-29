@@ -190,7 +190,7 @@ func TestPrefixedRegistryRegister(t *testing.T) {
 	r := NewPrefixedRegistry("prefix.")
 	err := r.Register("foo", NewCounter())
 	c := NewCounter()
-	Register("bar", c)
+	_ = Register("bar", c)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -238,7 +238,7 @@ func TestPrefixedRegistryUnregister(t *testing.T) {
 func TestPrefixedRegistryGet(t *testing.T) {
 	pr := NewPrefixedRegistry("prefix.")
 	name := "foo"
-	pr.Register(name, NewCounter())
+	_ = pr.Register(name, NewCounter())
 
 	fooCounter := pr.Get(name)
 	if fooCounter == nil {
@@ -250,7 +250,7 @@ func TestPrefixedChildRegistryGet(t *testing.T) {
 	r := NewRegistry()
 	pr := NewPrefixedChildRegistry(r, "prefix.")
 	name := "foo"
-	pr.Register(name, NewCounter())
+	_ = pr.Register(name, NewCounter())
 	fooCounter := pr.Get(name)
 	if fooCounter == nil {
 		t.Fatal(name)
@@ -261,7 +261,7 @@ func TestChildPrefixedRegistryRegister(t *testing.T) {
 	r := NewPrefixedChildRegistry(DefaultRegistry, "prefix.")
 	err := r.Register("foo", NewCounter())
 	c := NewCounter()
-	Register("bar", c)
+	_ = Register("bar", c)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

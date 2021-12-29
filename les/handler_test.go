@@ -431,13 +431,13 @@ func testGetCHTProofs(t *testing.T, protocol int) {
 	switch protocol {
 	case 1:
 		cost := server.tPeer.GetRequestCost(GetHeaderProofsMsg, len(requestsV1))
-		sendRequest(server.tPeer.app, GetHeaderProofsMsg, 42, cost, requestsV1)
+		_ = sendRequest(server.tPeer.app, GetHeaderProofsMsg, 42, cost, requestsV1)
 		if err := expectResponse(server.tPeer.app, HeaderProofsMsg, 42, testBufLimit, proofsV1); err != nil {
 			t.Errorf("proofs mismatch: %v", err)
 		}
 	case 2:
 		cost := server.tPeer.GetRequestCost(GetHelperTrieProofsMsg, len(requestsV2))
-		sendRequest(server.tPeer.app, GetHelperTrieProofsMsg, 42, cost, requestsV2)
+		_ = sendRequest(server.tPeer.app, GetHelperTrieProofsMsg, 42, cost, requestsV2)
 		if err := expectResponse(server.tPeer.app, HelperTrieProofsMsg, 42, testBufLimit, proofsV2); err != nil {
 			t.Errorf("proofs mismatch: %v", err)
 		}
@@ -485,7 +485,7 @@ func TestGetBloombitsProofs(t *testing.T) {
 
 		// Send the proof request and verify the response
 		cost := server.tPeer.GetRequestCost(GetHelperTrieProofsMsg, len(requests))
-		sendRequest(server.tPeer.app, GetHelperTrieProofsMsg, 42, cost, requests)
+		_ = sendRequest(server.tPeer.app, GetHelperTrieProofsMsg, 42, cost, requests)
 		if err := expectResponse(server.tPeer.app, HelperTrieProofsMsg, 42, testBufLimit, proofs); err != nil {
 			t.Errorf("bit %d: proofs mismatch: %v", bit, err)
 		}
@@ -510,10 +510,10 @@ func TestTransactionStatusLes2(t *testing.T) {
 		if send {
 			enc, _ := rlp.EncodeToBytes(types.Transactions{tx})
 			cost := peer.GetTxRelayCost(1, len(enc))
-			sendRequest(peer.app, SendTxV2Msg, reqID, cost, rlp.RawValue(enc))
+			_ = sendRequest(peer.app, SendTxV2Msg, reqID, cost, rlp.RawValue(enc))
 		} else {
 			cost := peer.GetRequestCost(GetTxStatusMsg, 1)
-			sendRequest(peer.app, GetTxStatusMsg, reqID, cost, []common.Hash{tx.Hash()})
+			_ = sendRequest(peer.app, GetTxStatusMsg, reqID, cost, []common.Hash{tx.Hash()})
 		}
 		if err := expectResponse(peer.app, TxStatusMsg, reqID, testBufLimit, []txStatus{expStatus}); err != nil {
 			t.Errorf("transaction status mismatch")
