@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"math/big"
 
@@ -202,8 +203,8 @@ type ProposalInfo struct {
 func getBalance(backend Backend, address common.Address) (*hexutil.Big, error) {
 	curr_block := backend.CurrentBlock()
 
-	state, _, err := backend.StateAndHeaderByNumber(
-		nil, rpc.BlockNumber(curr_block.Number().Int64()))
+	state, _, err := backend.StateAndHeaderByNumber(context.TODO(),
+		rpc.BlockNumber(curr_block.Number().Int64()))
 	if err != nil {
 		log.Error("Failed at state", "err", err)
 		return nil, err

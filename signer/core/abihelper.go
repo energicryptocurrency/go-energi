@@ -183,8 +183,8 @@ func NewAbiDBFromFile(path string) (*AbiDb, error) {
 	return db, nil
 }
 
-// NewAbiDBFromFiles loads both the standard signature database and a custom database. The latter will be used
-// to write new values into if they are submitted via the API
+// NewAbiDBFromFiles loads both the standard signature database and a custom database.
+// The latter will be used to write new values into if they are submitted via the API.
 func NewAbiDBFromFiles(standard, custom string) (*AbiDb, error) {
 
 	db := &AbiDb{make(map[string]string), make(map[string]string), custom}
@@ -194,14 +194,20 @@ func NewAbiDBFromFiles(standard, custom string) (*AbiDb, error) {
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal(raw, &db.db)
+	err = json.Unmarshal(raw, &db.db)
+	if err != nil {
+		return nil, err
+	}
 	// Custom file may not exist. Will be created during save, if needed
 	if _, err := os.Stat(custom); err == nil {
 		raw, err = ioutil.ReadFile(custom)
 		if err != nil {
 			return nil, err
 		}
-		json.Unmarshal(raw, &db.customdb)
+		err = json.Unmarshal(raw, &db.customdb)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil

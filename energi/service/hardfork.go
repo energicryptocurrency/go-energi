@@ -24,42 +24,36 @@ import (
 	"sync/atomic"
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core"
-	// "github.com/energicryptocurrency/energi/core/types"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/eth"
 	"github.com/energicryptocurrency/energi/eth/downloader"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rpc"
-
-	energi_api "github.com/energicryptocurrency/energi/energi/api"
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-
-
 )
 
 const (
 	//event channel default site
 	EventChanBufferSize = 10
 	//remaining number of blocks where we start logging/notifying user about upcoming pending hardfork
-	lastBlockNumToLogPendingHardforks = int64(100);
+	lastBlockNumToLogPendingHardforks = int64(100)
 )
 
 // HardforkService defines the hardfork service type.
 type HardforkService struct {
-	eth *eth.Ethereum
-	ctx context.Context
+	eth       *eth.Ethereum
+	ctx       context.Context
 	ctxCancel func()
 
 	inSync int32
 
-	hfAPI *energi_api.HardforkRegistryAPI
+	hfAPI      *energi_api.HardforkRegistryAPI
 	hfRegistry *energi_abi.IHardforkRegistry
-
 }
 
 // NewHardforkService returns a new HardforkService instance.
@@ -74,7 +68,7 @@ func NewHardforkService(ethServ *eth.Ethereum) (*HardforkService, error) {
 	var err error
 	hf.hfRegistry, err = energi_abi.NewIHardforkRegistry(hf.eth.APIBackend.ChainConfig().Energi.HardforkRegistryProxyAddress, hf.eth.APIBackend)
 	if err != nil {
-		log.Error("Failed to get create NewIHardforkRegistry (startup)", "err", err);
+		log.Error("Failed to get create NewIHardforkRegistry (startup)", "err", err)
 		return nil, err
 	}
 
@@ -98,27 +92,27 @@ func (hf *HardforkService) APIs() []rpc.API {
 // layer was also initialized to spawn any goroutines required by the service.
 func (hf *HardforkService) Start(server *p2p.Server) error {
 	/*
-	Upon startup retrieve all active hardforks and check if the
-	active hardfork version parameter is higher than running core node version
-	then log error to let user know the core node version is behind
+		Upon startup retrieve all active hardforks and check if the
+		active hardfork version parameter is higher than running core node version
+		then log error to let user know the core node version is behind
 	*/
 	activeHardforks, err := hf.hfAPI.HardforkEnumerateActive()
 	if err != nil {
 		if err != bind.ErrNoCode {
-			log.Error("Failed to get active hardforks (startup)", "err", err);
+			log.Error("Failed to get active hardforks (startup)", "err", err)
 		}
 	} else if lc := len(activeHardforks); lc > 0 {
-		hf.LogHardForks(activeHardforks);
+		hf.LogHardForks(activeHardforks)
 	}
 
 	//routine will listen to events thrown when hardfork is created
-	go hf.listenHardforkCreatedEvents();
+	go hf.listenHardforkCreatedEvents()
 	// //routine will listen to hardfork finalization event
-	go hf.listenHardforkFinalizedEvents();
+	go hf.listenHardforkFinalizedEvents()
 	//routine will listen to events thrown when hardfork is removed
-	go hf.listenHardforkRemovedEvents();
+	go hf.listenHardforkRemovedEvents()
 	//logs upcoming pending hardforks notifying users about version change
-	go hf.logUpcomingHardforks();
+	go hf.logUpcomingHardforks()
 
 	return nil
 
@@ -126,41 +120,36 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 
 //logUpcomingHardforks periodically logs upcoming (pending) hardforks
 func (hf *HardforkService) logUpcomingHardforks() {
-	  //create channel and subscribe for new chain events
-		chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
-		headSub := hf.eth.BlockChain().SubscribeChainHeadEvent(chainHeadCh)
-		defer headSub.Unsubscribe()
+	//create channel and subscribe for new chain events
+	chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
+	headSub := hf.eth.BlockChain().SubscribeChainHeadEvent(chainHeadCh)
+	defer headSub.Unsubscribe()
 
-		//listen for blockchain change and notify users about upcoming hardforks
-		for {
-			select {
+	//listen for blockchain change and notify users about upcoming hardforks
+	for {
+		select {
 
-			case <-hf.ctx.Done(): // Triggers immediate shutdown.
-				return
+		case <-hf.ctx.Done(): // Triggers immediate shutdown.
+			return
 
-			case ev := <-chainHeadCh:
-				pendingHardforks, err := hf.hfAPI.HardforkEnumeratePending()
-				if err != nil {
-					if err != bind.ErrNoCode {
-						log.Error("Failed to get pending hardforks from api", "err", err);
-					}
-					break;
+		case ev := <-chainHeadCh:
+			pendingHardforks, err := hf.hfAPI.HardforkEnumeratePending()
+			if err != nil {
+				if err != bind.ErrNoCode {
+					log.Error("Failed to get pending hardforks from api", "err", err)
 				}
-
-				// for each hardfork name log the information considering the current block number
-				for _, hardfork := range pendingHardforks {
-					logHardforkInfo(ev.Block.Header().Number, hardfork)
-				}
-
-
-			// Shutdown
-			case <-headSub.Err():
-				return
+				break
 			}
 
-
+			// for each hardfork name log the information considering the current block number
+			for _, hardfork := range pendingHardforks {
+				logHardforkInfo(ev.Block.Header().Number, hardfork)
+			}
+		// Shutdown
+		case <-headSub.Err():
+			return
 		}
-
+	}
 }
 
 //function is watches newly created hardfork events and logs them
@@ -195,16 +184,15 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 
 		case hardfork := <-hfCreatedChan:
 			log.Warn("New Hardfork  created: ",
-							"block Number",
-							hardfork.BlockNumber.String(),
-							"hardfork Name",
-							string(hardfork.Name[:]),
-							"hardfork SwFeatures",
-							hardfork.SwFeatures.String())
+				"block Number",
+				hardfork.BlockNumber.String(),
+				"hardfork Name",
+				string(hardfork.Name[:]),
+				"hardfork SwFeatures",
+				hardfork.SwFeatures.String())
 		}
 	}
 }
-
 
 //function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkFinalizedEvents() {
@@ -238,19 +226,17 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 
 		case hardfork := <-hfFinalizedChan:
 			log.Warn("New Hardfork Finalized: ",
-							"block Number",
-							hardfork.BlockNumber.String(),
-							"block Hash",
-							common.BytesToHash(hardfork.BlockHash[:]).String(),
-							"hardfork Name",
-							string(hardfork.Name[:]),
-							"hardfork SwFeatures",
-							hardfork.SwFeatures.String())
+				"block Number",
+				hardfork.BlockNumber.String(),
+				"block Hash",
+				common.BytesToHash(hardfork.BlockHash[:]).String(),
+				"hardfork Name",
+				string(hardfork.Name[:]),
+				"hardfork SwFeatures",
+				hardfork.SwFeatures.String())
 		}
 	}
 }
-
-
 
 //function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkRemovedEvents() {
@@ -284,14 +270,13 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 
 		case hardfork := <-hfRemovedChan:
 			log.Warn("Hardfork Removed: ",
-							 "Hardfork Name",
-							 string(hardfork.Name[:]))
+				"Hardfork Name",
+				string(hardfork.Name[:]))
 		}
 	}
 }
 
-
-func (hf *HardforkService) LogHardForks(hardforks []*energi_api.HardforkInfo)  {
+func (hf *HardforkService) LogHardForks(hardforks []*energi_api.HardforkInfo) {
 
 	//atomically read the pointer to the most recent block header
 	currentBlockHeader := hf.eth.BlockChain().CurrentBlock().Header()
@@ -299,7 +284,7 @@ func (hf *HardforkService) LogHardForks(hardforks []*energi_api.HardforkInfo)  {
 
 	//for each hardfork name 	log the information considering the current block number
 	for _, hardfork := range hardforks {
-			 logHardforkInfo(currentBlockNumber, hardfork)
+		logHardforkInfo(currentBlockNumber, hardfork)
 	}
 
 }
@@ -343,13 +328,12 @@ func (hf *HardforkService) listenDownloader() {
 	}
 }
 
-
 //logHardfork logs the information about the provided hardforks.
 func logHardforkInfo(currentBlockNo *big.Int, hfInfo *energi_api.HardforkInfo) {
 	diff := new(big.Int).Sub(hfInfo.BlockNumber, currentBlockNo)
 	emptyArray := [32]byte{}
 	// check if hf is finalized (block hash set)
-	if bytes.Compare(hfInfo.BlockHash[:], emptyArray[:]) == 0 {
+	if bytes.Equal(hfInfo.BlockHash[:], emptyArray[:]) {
 		// check if hf is active (current block passed hf block)
 		if diff.Cmp(common.Big0) <= 0 {
 			// BlockHash not yet set but hardfork is active
@@ -358,14 +342,17 @@ func logHardforkInfo(currentBlockNo *big.Int, hfInfo *energi_api.HardforkInfo) {
 			// hardfork is to be activated in the future
 			hours := strconv.FormatInt(diff.Int64()/60, 10)
 			minutes := strconv.FormatInt(diff.Int64()%60, 10)
-			if diff.Int64() < lastBlockNumToLogPendingHardforks  {
-				log.Warn("Hard fork will activate in approximately " + hours + " hours and " + minutes + " minutes" , "hardfork Name", hfInfo.Name)
+			if diff.Int64() < lastBlockNumToLogPendingHardforks {
+				log.Warn("Hard fork will activate in approximately "+hours+
+					" hours and "+minutes+" minutes", "hardfork Name", hfInfo.Name)
 			} else {
-				log.Debug("Hard fork will activate in approximately " + hours + " hours and " + minutes + " minutes" , "hardfork Name", hfInfo.Name)
+				log.Debug("Hard fork will activate in approximately "+hours+
+					" hours and "+minutes+" minutes", "hardfork Name", hfInfo.Name)
 			}
 		}
 	} else {
 		// BlockHash already set. Hardfork already finalized.
-		log.Warn("Hardfork already finalized", "block Number", hfInfo.BlockNumber, "hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String())
+		log.Warn("Hardfork already finalized", "block Number", hfInfo.BlockNumber,
+			"hardfork Name", hfInfo.Name, "block Hash", hfInfo.BlockHash.String())
 	}
 }

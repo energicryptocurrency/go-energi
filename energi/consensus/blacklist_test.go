@@ -253,7 +253,7 @@ func TestBlacklist(t *testing.T) {
 	// log.Trace("coinbase blacklist")
 	rawdb.WriteHeader(testdb, header)
 
-	header2 := &*header
+	header2 := header
 	header2.ParentHash = header.Hash()
 	header2.Number = new(big.Int).Add(header.Number, common.Big1)
 	header2.Coinbase = blacklist_addr1
