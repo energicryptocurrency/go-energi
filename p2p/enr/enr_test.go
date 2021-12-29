@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -175,7 +176,7 @@ func TestSeq(t *testing.T) {
 	assert.Equal(t, uint64(0), r.Seq())
 	r.Set(UDP(1))
 	assert.Equal(t, uint64(0), r.Seq())
-	signTest([]byte{5}, &r)
+	_ = signTest([]byte{5}, &r)
 	assert.Equal(t, uint64(0), r.Seq())
 	r.Set(UDP(2))
 	assert.Equal(t, uint64(1), r.Seq())

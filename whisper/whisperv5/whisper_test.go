@@ -477,9 +477,9 @@ func TestExpiry(t *testing.T) {
 	InitSingleTest()
 
 	w := New(&DefaultConfig)
-	w.SetMinimumPoW(0.0000001)
+	_ = w.SetMinimumPoW(0.0000001)
 	defer w.SetMinimumPoW(DefaultMinimumPoW)
-	w.Start(nil)
+	_ = w.Start(nil)
 	defer w.Stop()
 
 	params, err := generateMessageParams()

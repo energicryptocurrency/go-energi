@@ -26,6 +26,7 @@ import (
 
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/log"
+
 	"github.com/mattn/go-colorable"
 )
 
@@ -71,7 +72,7 @@ func TestFileStorage(t *testing.T) {
 		filename: fmt.Sprintf("%v/vault.json", d),
 		key:      []byte("AES256Key-32Characters1234567890"),
 	}
-	stored.writeEncryptedStorage(a)
+	_ = stored.writeEncryptedStorage(a)
 	read := &AESEncryptedStorage{
 		filename: fmt.Sprintf("%v/vault.json", d),
 		key:      []byte("AES256Key-32Characters1234567890"),

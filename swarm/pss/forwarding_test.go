@@ -275,7 +275,7 @@ func testForwardMsg(t *testing.T, ps *Pss, c *testCase) {
 	}
 
 	msg := newTestMsg(recipientAddr)
-	ps.forward(msg)
+	_ = ps.forward(msg)
 
 	// check test results
 	var fail bool
