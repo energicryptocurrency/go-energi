@@ -174,7 +174,7 @@ func TestGetFrequentlyAccessedChunkWontGetGarbageCollected(t *testing.T) {
 		time.Sleep(1 * time.Millisecond)
 	}
 
-	store.DbStore.collectGarbage()
+	_ = store.DbStore.collectGarbage()
 	if _, err := store.DbStore.Get(context.Background(), mostAccessed); err != nil {
 		t.Logf("most frequntly accessed chunk not found on disk (key: %v)", mostAccessed)
 		t.Fatal(err)

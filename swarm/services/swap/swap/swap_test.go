@@ -134,11 +134,11 @@ func TestSwap(t *testing.T) {
 	}
 	swap.SetRemote(remote)
 
-	swap.Add(9)
+	_ = swap.Add(9)
 	if proto.drop {
 		t.Fatalf("not expected peer to be dropped")
 	}
-	swap.Add(1)
+	_ = swap.Add(1)
 	if !proto.drop {
 		t.Fatalf("expected peer to be dropped")
 	}

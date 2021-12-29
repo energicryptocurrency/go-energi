@@ -573,7 +573,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 
 		log.Trace("withprox addrs", "local", localAddr, "remote", remoteAddr)
-		ps.handlePssMsg(context.TODO(), pssMsg)
+		_ = ps.handlePssMsg(context.TODO(), pssMsg)
 		if (!expects[i] && prevReceive != receives) || (expects[i] && prevReceive == receives) {
 			t.Fatalf("expected distance %d recipient %v when prox is set for handler", distance, expects[i])
 		}
@@ -604,7 +604,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 
 		log.Trace("withprox addrs", "local", localAddr, "remote", remoteAddr)
-		ps.handlePssMsg(context.TODO(), pssMsg)
+		_ = ps.handlePssMsg(context.TODO(), pssMsg)
 		if (!expects[i] && prevReceive != receives) || (expects[i] && prevReceive == receives) {
 			t.Fatalf("expected distance %d recipient %v when prox is set for handler", distance, expects[i])
 		}
@@ -628,7 +628,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 
 		log.Trace("noprox addrs", "local", localAddr, "remote", remoteAddr)
-		ps.handlePssMsg(context.TODO(), pssMsg)
+		_ = ps.handlePssMsg(context.TODO(), pssMsg)
 		if receives != 0 {
 			t.Fatalf("expected distance %d to not be recipient when prox is not set for handler", distance)
 		}
@@ -789,7 +789,7 @@ func TestKeys(t *testing.T) {
 	copy(addr, network.RandomAddr().Over())
 	outkey := network.RandomAddr().Over()
 	topicobj := BytesToTopic([]byte("foo:42"))
-	ps.SetPeerPublicKey(&theirprivkey.PublicKey, topicobj, addr)
+	_ = ps.SetPeerPublicKey(&theirprivkey.PublicKey, topicobj, addr)
 	outkeyid, err := ps.SetSymmetricKey(outkey, topicobj, addr, false)
 	if err != nil {
 		t.Fatalf("failed to set 'our' outgoing symmetric key")
@@ -925,9 +925,9 @@ func TestPeerCapabilityMismatch(t *testing.T) {
 
 	// add peers to kademlia and activate them
 	// it's safe so don't check errors
-	kad.Register(wrongpsspeer.BzzAddr)
+	_ = kad.Register(wrongpsspeer.BzzAddr)
 	kad.On(wrongpsspeer)
-	kad.Register(nopsspeer.BzzAddr)
+	_ = kad.Register(nopsspeer.BzzAddr)
 	kad.On(nopsspeer)
 
 	// create pss
@@ -941,7 +941,7 @@ func TestPeerCapabilityMismatch(t *testing.T) {
 
 	// run the forward
 	// it is enough that it completes; trying to send to incapable peers would create segfault
-	ps.forward(pssmsg)
+	_ = ps.forward(pssmsg)
 
 }
 
@@ -1358,7 +1358,8 @@ type Job struct {
 
 func worker(id int, jobs <-chan Job, rpcs map[enode.ID]*rpc.Client, pubkeys map[enode.ID]string, topic string) {
 	for j := range jobs {
-		rpcs[j.SendNode].Call(nil, "pss_sendAsym", pubkeys[j.RecvNode], topic, hexutil.Encode(j.Msg))
+		_ = rpcs[j.SendNode].Call(nil, "pss_sendAsym", pubkeys[j.RecvNode],
+			topic, hexutil.Encode(j.Msg))
 	}
 }
 
@@ -1712,11 +1713,11 @@ func benchmarkSymKeySend(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not retrieve symkey: %v", err)
 	}
-	ps.SetSymmetricKey(symkey, topic, to, false)
+	_, _ = ps.SetSymmetricKey(symkey, topic, to, false)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ps.SendSym(symkeyid, topic, msg)
+		_ = ps.SendSym(symkeyid, topic, msg)
 	}
 }
 
@@ -1749,10 +1750,10 @@ func benchmarkAsymKeySend(b *testing.B) {
 	topic := BytesToTopic([]byte("foo"))
 	to := make(PssAddress, 32)
 	copy(to[:], network.RandomAddr().Over())
-	ps.SetPeerPublicKey(&privkey.PublicKey, topic, to)
+	_ = ps.SetPeerPublicKey(&privkey.PublicKey, topic, to)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ps.SendAsym(hexutil.Encode(crypto.FromECDSAPub(&privkey.PublicKey)), topic, msg)
+		_ = ps.SendAsym(hexutil.Encode(crypto.FromECDSAPub(&privkey.PublicKey)), topic, msg)
 	}
 }
 
@@ -2013,7 +2014,7 @@ func newServices(allowRaw bool) adapters.Services {
 				return nil, err
 			}
 			if useHandshake {
-				SetHandshakeController(ps, NewHandshakeParams())
+				_ = SetHandshakeController(ps, NewHandshakeParams())
 			}
 			ps.Register(&PingTopic, &handler{
 				f: pp.Handle,
@@ -2070,7 +2071,7 @@ func newTestPss(privkey *ecdsa.PrivateKey, kad *network.Kademlia, ppextra *PssPa
 	if err != nil {
 		return nil
 	}
-	ps.Start(nil)
+	_ = ps.Start(nil)
 
 	return ps
 }

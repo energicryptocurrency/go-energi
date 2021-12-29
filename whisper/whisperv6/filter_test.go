@@ -708,7 +708,7 @@ func TestWatchers(t *testing.T) {
 	total = 0
 	last := NumFilters - 1
 	tst[last].f = clone
-	filters.Install(clone)
+	_, _ = filters.Install(clone)
 	for i = 0; i < NumFilters; i++ {
 		tst[i].msgCnt = 0
 		count[i] = 0

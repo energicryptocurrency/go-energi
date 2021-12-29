@@ -253,13 +253,14 @@ func newTestPeer(t *testing.T, name string, version int, pm *ProtocolManager, sh
 	return tp, errc
 }
 
-func newTestPeerPair(name string, version int, pm, pm2 *ProtocolManager) (*peer, <-chan error, *peer, <-chan error) {
+func newTestPeerPair(name string, version int, pm, pm2 *ProtocolManager) (
+	*peer, <-chan error, *peer, <-chan error) {
 	// Create a message pipe to communicate through
 	app, net := p2p.MsgPipe()
 
 	// Generate a random id and create the peer
 	var id enode.ID
-	rand.Read(id[:])
+	_, _ = rand.Read(id[:])
 
 	peer := pm.newPeer(version, NetworkId, p2p.NewPeer(id, name, nil), net)
 	peer2 := pm2.newPeer(version, NetworkId, p2p.NewPeer(id, name, nil), app)

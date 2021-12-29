@@ -802,7 +802,7 @@ func testBzzTar(encrypted bool, t *testing.T) {
 	if err != nil {
 		t.Fatalf("error getting tarball: %v", err)
 	}
-	file.Sync()
+	_ = file.Sync()
 	file.Close()
 
 	tarFileHandle, err := os.Open(file.Name())
@@ -1156,9 +1156,9 @@ func TestMultiPartUpload(t *testing.T) {
 	form := multipart.NewWriter(buf)
 	form.WriteField("name", "John Doe")
 	file1, _ := form.CreateFormFile("cv", "cv.txt")
-	file1.Write([]byte("John Doe's Credentials"))
+	_, _ = file1.Write([]byte("John Doe's Credentials"))
 	file2, _ := form.CreateFormFile("profile_picture", "profile.jpg")
-	file2.Write([]byte("imaginethisisjpegdata"))
+	_, _ = file2.Write([]byte("imaginethisisjpegdata"))
 	form.Close()
 
 	headers := map[string]string{

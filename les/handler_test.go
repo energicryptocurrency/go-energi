@@ -301,7 +301,7 @@ func testGetReceipt(t *testing.T, protocol int) {
 	}
 	// Send the hash request and verify the response
 	cost := server.tPeer.GetRequestCost(GetReceiptsMsg, len(hashes))
-	sendRequest(server.tPeer.app, GetReceiptsMsg, 42, cost, hashes)
+	_ = sendRequest(server.tPeer.app, GetReceiptsMsg, 42, cost, hashes)
 	if err := expectResponse(server.tPeer.app, ReceiptsMsg, 42, testBufLimit, receipts); err != nil {
 		t.Errorf("receipts mismatch: %v", err)
 	}
@@ -350,13 +350,13 @@ func testGetProofs(t *testing.T, protocol int) {
 	switch protocol {
 	case 1:
 		cost := server.tPeer.GetRequestCost(GetProofsV1Msg, len(proofreqs))
-		sendRequest(server.tPeer.app, GetProofsV1Msg, 42, cost, proofreqs)
+		_ = sendRequest(server.tPeer.app, GetProofsV1Msg, 42, cost, proofreqs)
 		if err := expectResponse(server.tPeer.app, ProofsV1Msg, 42, testBufLimit, proofsV1); err != nil {
 			t.Errorf("proofs mismatch: %v", err)
 		}
 	case 2:
 		cost := server.tPeer.GetRequestCost(GetProofsV2Msg, len(proofreqs))
-		sendRequest(server.tPeer.app, GetProofsV2Msg, 42, cost, proofreqs)
+		_ = sendRequest(server.tPeer.app, GetProofsV2Msg, 42, cost, proofreqs)
 		if err := expectResponse(server.tPeer.app, ProofsV2Msg, 42, testBufLimit, proofsV2.NodeList()); err != nil {
 			t.Errorf("proofs mismatch: %v", err)
 		}

@@ -107,7 +107,7 @@ func TestIndex(t *testing.T) {
 		}
 
 		batch := new(leveldb.Batch)
-		index.PutInBatch(batch, want)
+		_ = index.PutInBatch(batch, want)
 		err := db.WriteBatch(batch)
 		if err != nil {
 			t.Fatal(err)
@@ -128,8 +128,8 @@ func TestIndex(t *testing.T) {
 			}
 
 			batch := new(leveldb.Batch)
-			index.PutInBatch(batch, want)
-			db.WriteBatch(batch)
+			_ = index.PutInBatch(batch, want)
+			_ = db.WriteBatch(batch)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -150,7 +150,7 @@ func TestIndex(t *testing.T) {
 		address := []byte("put-in-batch-twice-hash")
 
 		// put the first item
-		index.PutInBatch(batch, Item{
+		_ = index.PutInBatch(batch, Item{
 			Address:        address,
 			Data:           []byte("DATA"),
 			StoreTimestamp: time.Now().UTC().UnixNano(),
@@ -163,8 +163,8 @@ func TestIndex(t *testing.T) {
 		}
 		// then put the item that will produce the same key
 		// but different value in the database
-		index.PutInBatch(batch, want)
-		db.WriteBatch(batch)
+		_ = index.PutInBatch(batch, want)
+		_ = db.WriteBatch(batch)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -230,7 +230,7 @@ func TestIndex(t *testing.T) {
 		checkItem(t, got, want)
 
 		batch := new(leveldb.Batch)
-		index.DeleteInBatch(batch, Item{
+		_ = index.DeleteInBatch(batch, Item{
 			Address: want.Address,
 		})
 		err = db.WriteBatch(batch)
@@ -281,7 +281,7 @@ func TestIndex_Iterate(t *testing.T) {
 	}
 	batch := new(leveldb.Batch)
 	for _, i := range items {
-		index.PutInBatch(batch, i)
+		_ = index.PutInBatch(batch, i)
 	}
 	err = db.WriteBatch(batch)
 	if err != nil {

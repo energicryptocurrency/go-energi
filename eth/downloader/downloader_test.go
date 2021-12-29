@@ -441,7 +441,7 @@ func testCanonicalSynchronisation(t *testing.T, protocol int, mode SyncMode) {
 
 	// Create a small enough block chain to download
 	chain := testChainBase.shorten(blockCacheItems - 15)
-	tester.newPeer("peer", protocol, chain)
+	_ = tester.newPeer("peer", protocol, chain)
 
 	// Synchronise with the peer and make sure all relevant data was retrieved
 	if err := tester.sync("peer", nil, mode); err != nil {
@@ -465,7 +465,7 @@ func testThrottling(t *testing.T, protocol int, mode SyncMode) {
 
 	// Create a long block chain to download and the tester
 	targetBlocks := testChainBase.len() - 1
-	tester.newPeer("peer", protocol, testChainBase)
+	_ = tester.newPeer("peer", protocol, testChainBase)
 
 	// Wrap the importer to allow stepping
 	blocked, proceed := uint32(0), make(chan struct{})
@@ -549,8 +549,8 @@ func testForkedSync(t *testing.T, protocol int, mode SyncMode) {
 
 	chainA := testChainForkLightA.shorten(testChainBase.len() + 80)
 	chainB := testChainForkLightB.shorten(testChainBase.len() + 80)
-	tester.newPeer("fork A", protocol, chainA)
-	tester.newPeer("fork B", protocol, chainB)
+	_ = tester.newPeer("fork A", protocol, chainA)
+	_ = tester.newPeer("fork B", protocol, chainB)
 
 	// Synchronise with the peer and make sure all blocks were retrieved
 	if err := tester.sync("fork A", nil, mode); err != nil {
@@ -1087,7 +1087,8 @@ func testBlockHeaderAttackerDropping(t *testing.T, protocol int) {
 		// Simulate a synchronisation and check the required result
 		tester.downloader.synchroniseMock = func(string, common.Hash) error { return tt.result }
 
-		tester.downloader.Synchronise(id, tester.genesis.Hash(), big.NewInt(1000), FullSync)
+		_ = tester.downloader.Synchronise(id, tester.genesis.Hash(),
+			big.NewInt(1000), FullSync)
 		if _, ok := tester.peers[id]; !ok != tt.drop {
 			t.Errorf("test %d: peer drop mismatch for %v: have %v, want %v", i, tt.result, !ok, tt.drop)
 		}
@@ -1471,7 +1472,7 @@ func (ftp *floodingTestPeer) RequestHeadersByNumber(from uint64, count, skip int
 	for i := 0; i < cap(deliveriesDone)-1; i++ {
 		peer := fmt.Sprintf("fake-peer%d", i)
 		go func() {
-			ftp.tester.downloader.DeliverHeaders(peer, []*types.Header{{}, {}, {}, {}})
+			_ = ftp.tester.downloader.DeliverHeaders(peer, []*types.Header{{}, {}, {}, {}})
 			deliveriesDone <- struct{}{}
 		}()
 	}
@@ -1486,7 +1487,7 @@ func (ftp *floodingTestPeer) RequestHeadersByNumber(from uint64, count, skip int
 				// Start delivering the requested headers
 				// after one of the flooding responses has arrived.
 				go func() {
-					ftp.peer.RequestHeadersByNumber(from, count, skip, reverse)
+					_ = ftp.peer.RequestHeadersByNumber(from, count, skip, reverse)
 					deliveriesDone <- struct{}{}
 				}()
 				launched = true
