@@ -121,7 +121,7 @@ func TestBlacklist(t *testing.T) {
 	evm := engine.createEVM(msg, chain, header, blstate)
 	gp := new(core.GasPool).AddGas(engine.callGas)
 	// log.Trace("depositCollateral")
-	core.ApplyMessage(evm, msg, gp)
+	_, _, _, _ = core.ApplyMessage(evm, msg, gp)
 	//---
 	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	callData, err = mnreg_abi.Pack("announce", blacklist_addr1, uint32(130<<24), [2][32]byte{})

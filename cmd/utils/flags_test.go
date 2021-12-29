@@ -56,14 +56,14 @@ func TestTestnetPort(t *testing.T) {
 	}
 
 	// check port 59797 isn't allowed and port is default
-	globalCtx.Set("port", "59797")
+	_ = globalCtx.Set("port", "59797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(testnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(testnetDefaultPort))
 	}
 
 	// check any other port can be set
-	globalCtx.Set("port", "123")
+	_ = globalCtx.Set("port", "123")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(123) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(testnetDefaultPort))
@@ -78,33 +78,33 @@ func TestSimnetPort(t *testing.T) {
 
 	// set flags
 	globalCtx := cli.NewContext(nil, globalSet, nil)
-	globalCtx.Set("simnet", "23")
+	_ = globalCtx.Set("simnet", "23")
 
 	cfg := &p2p.Config{}
 
 	// check port remains 49797
-	globalCtx.Set("port", "49797")
+	_ = globalCtx.Set("port", "49797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(simnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(simnetDefaultPort))
 	}
 
 	// check port 39797 isn't allowed and port is default
-	globalCtx.Set("port", "39797")
+	_ = globalCtx.Set("port", "39797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(simnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(simnetDefaultPort))
 	}
 
 	// check port 59797 isn't allowed and port is default
-	globalCtx.Set("port", "59797")
+	_ = globalCtx.Set("port", "59797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(simnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(simnetDefaultPort))
 	}
 
 	// check any other port can be set
-	globalCtx.Set("port", "123")
+	_ = globalCtx.Set("port", "123")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(123) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(123))
@@ -119,33 +119,33 @@ func TestMainnetPort(t *testing.T) {
 
 	// set flags
 	globalCtx := cli.NewContext(nil, globalSet, nil)
-	globalCtx.Set("mainnet", "23")
+	_ = globalCtx.Set("mainnet", "23")
 
 	cfg := &p2p.Config{}
 
 	// check port remains 49797
-	globalCtx.Set("port", "49797")
+	_ = globalCtx.Set("port", "49797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(mainnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(mainnetDefaultPort))
 	}
 
 	// check port 39797 isn't allowed and port is default
-	globalCtx.Set("port", "59797")
+	_ = globalCtx.Set("port", "59797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(mainnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(mainnetDefaultPort))
 	}
 
 	// check port 59797 isn't allowed and port is default
-	globalCtx.Set("port", "39797")
+	_ = globalCtx.Set("port", "39797")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(mainnetDefaultPort) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(mainnetDefaultPort))
 	}
 
 	// check any other port can be set
-	globalCtx.Set("port", "123")
+	_ = globalCtx.Set("port", "123")
 	setListenAddress(globalCtx, cfg)
 	if cfg.ListenAddr[1:] != strconv.Itoa(123) {
 		t.Errorf("got %s, want %s", cfg.ListenAddr, strconv.Itoa(123))

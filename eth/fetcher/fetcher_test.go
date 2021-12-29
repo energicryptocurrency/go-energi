@@ -291,7 +291,8 @@ func testSequentialAnnouncements(t *testing.T, protocol int) {
 	tester.fetcher.importedHook = func(block *types.Block) { imported <- block }
 
 	for i := len(hashes) - 2; i >= 0; i-- {
-		tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1), time.Now().Add(-arriveTimeout), headerFetcher, bodyFetcher)
+		_ = tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1),
+			time.Now().Add(-arriveTimeout), headerFetcher, bodyFetcher)
 		verifyImportEvent(t, imported, true)
 	}
 	verifyImportDone(t, imported)
@@ -329,9 +330,14 @@ func testConcurrentAnnouncements(t *testing.T, protocol int) {
 	tester.fetcher.importedHook = func(block *types.Block) { imported <- block }
 
 	for i := len(hashes) - 2; i >= 0; i-- {
-		tester.fetcher.Notify("first", hashes[i], uint64(len(hashes)-i-1), time.Now().Add(-arriveTimeout), firstHeaderWrapper, firstBodyFetcher)
-		tester.fetcher.Notify("second", hashes[i], uint64(len(hashes)-i-1), time.Now().Add(-arriveTimeout+time.Millisecond), secondHeaderWrapper, secondBodyFetcher)
-		tester.fetcher.Notify("second", hashes[i], uint64(len(hashes)-i-1), time.Now().Add(-arriveTimeout-time.Millisecond), secondHeaderWrapper, secondBodyFetcher)
+		_ = tester.fetcher.Notify("first", hashes[i], uint64(len(hashes)-i-1),
+			time.Now().Add(-arriveTimeout), firstHeaderWrapper, firstBodyFetcher)
+		_ = tester.fetcher.Notify("second", hashes[i], uint64(len(hashes)-i-1),
+			time.Now().Add(-arriveTimeout+time.Millisecond),
+			secondHeaderWrapper, secondBodyFetcher)
+		_ = tester.fetcher.Notify("second", hashes[i], uint64(len(hashes)-i-1),
+			time.Now().Add(-arriveTimeout-time.Millisecond),
+			secondHeaderWrapper, secondBodyFetcher)
 		verifyImportEvent(t, imported, true)
 	}
 	verifyImportDone(t, imported)
@@ -366,7 +372,8 @@ func testOverlappingAnnouncements(t *testing.T, protocol int) {
 	tester.fetcher.importedHook = func(block *types.Block) { imported <- block }
 
 	for i := len(hashes) - 2; i >= 0; i-- {
-		tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1), time.Now().Add(-arriveTimeout), headerFetcher, bodyFetcher)
+		_ = tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1),
+			time.Now().Add(-arriveTimeout), headerFetcher, bodyFetcher)
 		select {
 		case <-imported:
 		case <-time.After(time.Second):
@@ -405,7 +412,8 @@ func testPendingDeduplication(t *testing.T, protocol int) {
 	}
 	// Announce the same block many times until it's fetched (wait for any pending ops)
 	for tester.getBlock(hashes[0]) == nil {
-		tester.fetcher.Notify("repeater", hashes[0], 1, time.Now().Add(-arriveTimeout), headerWrapper, bodyFetcher)
+		_ = tester.fetcher.Notify("repeater", hashes[0], 1, time.Now().Add(-arriveTimeout),
+			headerWrapper, bodyFetcher)
 		time.Sleep(time.Millisecond)
 	}
 	time.Sleep(delay)
@@ -441,7 +449,8 @@ func testRandomArrivalImport(t *testing.T, protocol int) {
 
 	for i := len(hashes) - 1; i >= 0; i-- {
 		if i != skip {
-			tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1), time.Now().Add(-arriveTimeout), headerFetcher, bodyFetcher)
+			_ = tester.fetcher.Notify("valid", hashes[i], uint64(len(hashes)-i-1),
+				time.Now().Add(-arriveTimeout), headerFetcher, bodyFetcher)
 			time.Sleep(time.Millisecond)
 		}
 	}
@@ -477,7 +486,7 @@ func testQueueGapFill(t *testing.T, protocol int) {
 		}
 	}
 	// Fill the missing block directly as if propagated
-	tester.fetcher.Enqueue("valid", blocks[hashes[skip]])
+	_ = tester.fetcher.Enqueue("valid", blocks[hashes[skip]])
 	verifyImportCount(t, imported, len(hashes)-1)
 }
 
@@ -508,12 +517,13 @@ func testImportDeduplication(t *testing.T, protocol int) {
 	tester.fetcher.importedHook = func(block *types.Block) { imported <- block }
 
 	// Announce the duplicating block, wait for retrieval, and also propagate directly
-	tester.fetcher.Notify("valid", hashes[0], 1, time.Now().Add(-arriveTimeout), headerFetcher, bodyFetcher)
+	_ = tester.fetcher.Notify("valid", hashes[0], 1, time.Now().Add(-arriveTimeout),
+		headerFetcher, bodyFetcher)
 	<-fetching
 
-	tester.fetcher.Enqueue("valid", blocks[hashes[0]])
-	tester.fetcher.Enqueue("valid", blocks[hashes[0]])
-	tester.fetcher.Enqueue("valid", blocks[hashes[0]])
+	_ = tester.fetcher.Enqueue("valid", blocks[hashes[0]])
+	_ = tester.fetcher.Enqueue("valid", blocks[hashes[0]])
+	_ = tester.fetcher.Enqueue("valid", blocks[hashes[0]])
 
 	// Fill the missing block directly as if propagated, and check import uniqueness
 	tester.fetcher.Enqueue("valid", blocks[hashes[1]])

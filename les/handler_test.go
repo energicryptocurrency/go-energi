@@ -167,7 +167,7 @@ func testGetBlockHeaders(t *testing.T, protocol int) {
 		// Send the hash request and verify the response
 		reqID++
 		cost := server.tPeer.GetRequestCost(GetBlockHeadersMsg, int(tt.query.Amount))
-		sendRequest(server.tPeer.app, GetBlockHeadersMsg, reqID, cost, tt.query)
+		_ = sendRequest(server.tPeer.app, GetBlockHeadersMsg, reqID, cost, tt.query)
 		if err := expectResponse(server.tPeer.app, BlockHeadersMsg, reqID, testBufLimit, headers); err != nil {
 			t.Errorf("test %d: headers mismatch: %v", i, err)
 		}
@@ -242,7 +242,7 @@ func testGetBlockBodies(t *testing.T, protocol int) {
 		reqID++
 		// Send the hash request and verify the response
 		cost := server.tPeer.GetRequestCost(GetBlockBodiesMsg, len(hashes))
-		sendRequest(server.tPeer.app, GetBlockBodiesMsg, reqID, cost, hashes)
+		_ = sendRequest(server.tPeer.app, GetBlockBodiesMsg, reqID, cost, hashes)
 		if err := expectResponse(server.tPeer.app, BlockBodiesMsg, reqID, testBufLimit, bodies); err != nil {
 			t.Errorf("test %d: bodies mismatch: %v", i, err)
 		}
@@ -275,7 +275,7 @@ func testGetCode(t *testing.T, protocol int) {
 	}
 
 	cost := server.tPeer.GetRequestCost(GetCodeMsg, len(codereqs))
-	sendRequest(server.tPeer.app, GetCodeMsg, 42, cost, codereqs)
+	_ = sendRequest(server.tPeer.app, GetCodeMsg, 42, cost, codereqs)
 	if err := expectResponse(server.tPeer.app, CodeMsg, 42, testBufLimit, codes); err != nil {
 		t.Errorf("codes mismatch: %v", err)
 	}

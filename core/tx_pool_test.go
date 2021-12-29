@@ -1379,7 +1379,7 @@ func TestTransactionPoolUnderpricing(t *testing.T) {
 
 	// Import the batch and that both pending and queued transactions match up
 	pool.AddRemotes(txs)
-	pool.AddLocal(ltx)
+	_ = pool.AddLocal(ltx)
 
 	pending, queued := pool.Stats()
 	if pending != 3 {
@@ -1826,7 +1826,7 @@ func BenchmarkPoolInsert(b *testing.B) {
 	// Benchmark importing the transactions into the queue
 	b.ResetTimer()
 	for _, tx := range txs {
-		pool.AddRemote(tx)
+		_ = pool.AddRemote(tx)
 	}
 }
 
