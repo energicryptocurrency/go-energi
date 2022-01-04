@@ -164,7 +164,7 @@ func randUint64n(max uint64) uint64 {
 		return 0
 	}
 	var b [8]byte
-	rand.Read(b[:])
+	_, _ = rand.Read(b[:])
 	return binary.BigEndian.Uint64(b[:]) % max
 }
 

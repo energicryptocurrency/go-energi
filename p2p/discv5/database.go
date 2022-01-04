@@ -328,7 +328,7 @@ seek:
 		// random amount each time in order to increase the likelihood
 		// of hitting all existing nodes in very small databases.
 		ctr := id[0]
-		rand.Read(id[:])
+		_, _ = rand.Read(id[:])
 		id[0] = ctr + id[0]%16
 		it.Seek(makeKey(id, nodeDBDiscoverRoot))
 
