@@ -732,6 +732,9 @@ func (e *Energi) govFinalize(
 		)
 	}
 	if err == nil {
+		txs, receipts, err = e.processStakerReward(chain, header, state, txs, receipts)
+	}
+	if err == nil {
 		err = e.processMasternodes(chain, header, state)
 	}
 	if err == nil {
