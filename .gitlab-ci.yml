@@ -81,44 +81,12 @@ branch-check:
   script:
     - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
 
-npm-install:
-  stage: prepare
-  cache:
-    # inherit all global cache Settings
-    <<: *global_cache_configuration
-    policy: push
-  extends: .merge-request-job
-  script:
-    - npm install
-
 #lint-go:
 #  stage: lint
 #  extends: .merge-request-job
 #  script:
 #    - make lint-go
 #  allow_failure: true
-
-lint-sol:
-  stage: lint
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache_configuration
-    # override the policy
-    policy: pull
-  extends: .merge-request-job
-  script:
-    - make lint-sol
-
-lint-sol-tests:
-  stage: lint
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache_configuration
-    # override the policy
-    policy: pull
-  extends: .merge-request-job
-  script:
-    - make lint-sol-tests
 
 build-linux:
   stage: build
@@ -212,32 +180,6 @@ test-go-report:
       junit: .test-go-report.xml
     expire_in: 2 day
   coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
-  retry:
-    max: 2
-    when:
-      - script_failure
-      - runner_system_failure
-      - stuck_or_timeout_failure
-
-test-solidity:
-  stage: test
-  dependencies: []
-  needs: ["build-linux"]
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache_configuration
-    # override the policy
-    policy: pull
-  extends: .merge-request-job
-  script:
-    - make test-sol-contracts
-  artifacts:
-    when: always
-    paths:
-      - .test-sol-report.xml
-    reports:
-      junit: .test-sol-report.xml 
-    expire_in: 2 day
   retry:
     max: 2
     when:
