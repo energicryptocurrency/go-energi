@@ -9,7 +9,6 @@ stages:
 
 cache: &global_cache_configuration
   paths:
-    - node_modules/
     - build/
   policy: pull-push
 
@@ -70,7 +69,7 @@ clean-repo:
   extends: .merge-request-job
   script:
     - git checkout -- .
-    - git clean -fdx -e node_modules .
+    - git clean -fdx .
 
 # TODO: this actually tries to execute the merge, may not be the best way to check this
 # it will also fail for master branch merges
@@ -97,7 +96,7 @@ build-linux:
   extends: .merge-request-job
   script:
     - git checkout -- .
-    - git clean -fdx -e node_modules .
+    - git clean -fdx .
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
 
