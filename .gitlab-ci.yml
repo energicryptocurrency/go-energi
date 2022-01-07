@@ -107,7 +107,6 @@ build-release-linux:
   dependencies: []
   needs: 
     - test-go-report
-    - test-solidity
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
   script:
@@ -126,7 +125,6 @@ build-release-windows:
   dependencies: []
   needs: 
     - test-go-report
-    - test-solidity
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:20-latest
   script:
@@ -146,7 +144,6 @@ build-release-macos:
   dependencies: []
   needs: 
     - test-go-report
-    - test-solidity
   tags: [docker_mac_runner]
   script:
     - make -f Makefile.release release-macos
