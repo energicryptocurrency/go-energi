@@ -15,7 +15,7 @@ TARGET_TOOLS += rlpdump
 RELEASE_GOFLAGS = -mod=mod -gcflags -dwarf=0 -ldflags "-s -w"
 
 RELEASE_MAIN = energi3
-RELEASE_RAW_VER = v3.1.1
+RELEASE_RAW_VER = $(shell git describe HEAD || echo "v0.0.0")
 RELEASE_VER = $(RELEASE_MAIN)-$(RELEASE_RAW_VER)
 
 .PHONY: release release-tools
