@@ -1,5 +1,8 @@
 [submodule "energi-testdata"]
-    path = tests/testdata
-    url = ../energi-testdata
-    branch = master
-
+	path = tests/testdata
+	url = ../energi-testdata
+	branch = master
+[submodule "energi-governance"]
+	path = energi/governance
+	url = ../energi-governance
+	branch = master

@@ -9,8 +9,6 @@
 .PHONY: geth-windows geth-windows-386 geth-windows-amd64
 .PHONY: prebuild
 
-include energi/contracts/Makefile.include
-
 GOBIN = $(shell pwd)/build/bin
 GO ?= $(goVer)
 GO ?= latest
@@ -46,7 +44,7 @@ ios:
 
 check: lint test
 
-test: all test-go test-sol
+test: all test-go
 
 test-data-submodule:
 	git submodule update --init --recursive
@@ -60,19 +58,9 @@ test-go-report: test-data-submodule
 test-go-cover: test-go-report
 	build/env.sh go tool cover -func=.test-go-cover.out -o .test-go-cover.func
 	build/env.sh go tool cover -html=.test-go-cover.out -o .test-go-cover.html
-	
-test-sol: lint-sol-tests lint-sol test-sol-contracts
 
-lint: lint-go lint-sol-tests lint-sol
-
-lint-go:
+lint:
 	build/env.sh go run build/ci.go lint
-
-lint-sol-tests:
-	yarn run eslint energi/contracts/
-
-lint-sol:
-	yarn run solium -d energi/contracts/
 
 clean:
 	./build/clean_go_build_cache.sh
