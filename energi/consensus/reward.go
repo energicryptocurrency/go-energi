@@ -41,11 +41,9 @@ func (e *Energi) processBlockRewards(
 	txs types.Transactions,
 	receipts types.Receipts,
 ) (types.Transactions, types.Receipts, error) {
-	systemFaucet := e.systemFaucet
-
 	// Temporary balance setup & clean up
-	statedb.SetBalance(systemFaucet, BigBalance)
-	defer statedb.SetBalance(systemFaucet, common.Big0)
+	statedb.SetBalance(e.systemFaucet, BigBalance)
+	defer statedb.SetBalance(e.systemFaucet, common.Big0)
 
 	// Common get reward call
 	getRewardData, err := e.rewardAbi.Pack("getReward", header.Number)
@@ -63,7 +61,7 @@ func (e *Energi) processBlockRewards(
 	// GetReward()
 	//====================================
 	msg := types.NewMessage(
-		systemFaucet,
+		e.systemFaucet,
 		&energi_params.Energi_BlockReward,
 		0,
 		common.Big0,
@@ -93,13 +91,13 @@ func (e *Energi) processBlockRewards(
 	// Reward
 	//====================================
 	tx := types.NewTransaction(
-		statedb.GetNonce(systemFaucet),
+		statedb.GetNonce(e.systemFaucet),
 		energi_params.Energi_BlockReward,
 		total_reward,
 		e.xferGas,
 		common.Big0,
 		rewardData)
-	tx = tx.WithConsensusSender(systemFaucet)
+	tx = tx.WithConsensusSender(e.systemFaucet)
 
 	statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
 
@@ -130,31 +128,101 @@ func (e *Energi) processBlockRewards(
 	return append(txs, tx), append(receipts, receipt), nil
 }
 
-func (e *Energi) processStakerReward(
+func (e *Energi) processFeeReward(
 	chain ChainReader,
 	header *types.Header,
 	statedb *state.StateDB,
 	txs types.Transactions,
 	receipts types.Receipts,
 ) (types.Transactions, types.Receipts, error) {
-	systemFaucet := e.systemFaucet
 
 	// Temporary balance setup & clean up
-	statedb.SetBalance(systemFaucet, BigBalance)
-	defer statedb.SetBalance(systemFaucet, common.Big0)
+	statedb.SetBalance(e.systemFaucet, BigBalance)
+	defer statedb.SetBalance(e.systemFaucet, common.Big0)
 
 	// reward amount for coinbase/staker
 	reward := (header.GasUsed * uint64(energi_params.StakerReward)) / Hundred
+	// reward staker
+	stakerRewardTx, stakerRewardReceipts, err := e.processStakerFeeReward(chain, header, statedb, txs, reward)
+	if err != nil {
+		log.Error("Fail to reward staker", "err", err)
+		return txs, receipts, err
+	}
 
+	//mint remaining fees
+	mintRewardTx, mintReceipts, err := e.mintFees(chain, header, statedb, txs, header.GasUsed - reward)
+	if err != nil {
+		log.Error("Fail to mint fees", "err", err)
+		return txs, receipts, err
+	}
+
+	return append(txs, stakerRewardTx, mintRewardTx), append(receipts, stakerRewardReceipts, mintReceipts), nil
+}
+
+
+func (e *Energi) processStakerFeeReward(
+	chain ChainReader,
+	header *types.Header,
+	statedb *state.StateDB,
+	txs types.Transactions,
+	reward uint64,
+) (*types.Transaction, *types.Receipt, error) {
+		// Reward staker
+		tx := types.NewTransaction(
+			statedb.GetNonce(e.systemFaucet),
+			header.Coinbase,
+			new(big.Int).SetUint64(reward),
+			e.xferGas,
+			common.Big0,
+			nil)
+		tx = tx.WithConsensusSender(e.systemFaucet)
+		statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
+
+		msg, err := tx.AsMessage(&ConsensusSigner{})
+		if err != nil {
+			log.Error("Failed in BlockReward AsMessage()", "err", err)
+			return nil, nil, err
+		}
+
+		evm := e.createEVM(msg, chain, header, statedb)
+		gp := core.GasPool(msg.Gas())
+
+		// apply transaction
+		_, usedGas, failed, err := core.ApplyMessage(evm, msg, &gp)
+		if err != nil {
+			log.Error("Failed in reward() call", "err", err)
+			return nil, nil, err
+		}
+
+		// NOTE: it should be Byzantium finalization here...
+		root := statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+		receipt := types.NewReceipt(root.Bytes(), failed, header.GasUsed)
+		receipt.TxHash = tx.Hash()
+		receipt.GasUsed = usedGas
+		receipt.Logs = statedb.GetLogs(tx.Hash())
+		receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+
+		log.Trace("Staker reward", "reward", reward, "gas", usedGas)
+
+		return tx, receipt, nil
+}
+
+func (e *Energi) mintFees(
+	chain ChainReader,
+	header *types.Header,
+	statedb *state.StateDB,
+	txs types.Transactions,
+	reward uint64,
+) (*types.Transaction, *types.Receipt, error) {
 	// Reward staker
 	tx := types.NewTransaction(
-		statedb.GetNonce(systemFaucet),
-		header.Coinbase,
+		statedb.GetNonce(e.systemFaucet),
+		common.Address{},
 		new(big.Int).SetUint64(reward),
 		e.xferGas,
 		common.Big0,
 		nil)
-	tx = tx.WithConsensusSender(systemFaucet)
+	tx = tx.WithConsensusSender(e.systemFaucet)
 	statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
 
 	msg, err := tx.AsMessage(&ConsensusSigner{})
@@ -183,5 +251,5 @@ func (e *Energi) processStakerReward(
 
 	log.Trace("Staker reward", "reward", reward, "gas", usedGas)
 
-	return append(txs, tx), append(receipts, receipt), nil
+	return tx, receipt, nil
 }
