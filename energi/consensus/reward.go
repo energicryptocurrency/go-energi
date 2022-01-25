@@ -167,44 +167,44 @@ func (e *Energi) processStakerFeeReward(
 	txs types.Transactions,
 	reward uint64,
 ) (*types.Transaction, *types.Receipt, error) {
-		// Reward staker
-		tx := types.NewTransaction(
-			statedb.GetNonce(e.systemFaucet),
-			header.Coinbase,
-			new(big.Int).SetUint64(reward),
-			e.xferGas,
-			common.Big0,
-			nil)
-		tx = tx.WithConsensusSender(e.systemFaucet)
-		statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
+	// Reward staker
+	tx := types.NewTransaction(
+		statedb.GetNonce(e.systemFaucet),
+		header.Coinbase,
+		new(big.Int).SetUint64(reward),
+		e.xferGas,
+		common.Big0,
+		nil)
+	tx = tx.WithConsensusSender(e.systemFaucet)
+	statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
 
-		msg, err := tx.AsMessage(&ConsensusSigner{})
-		if err != nil {
-			log.Error("Failed in BlockReward AsMessage()", "err", err)
-			return nil, nil, err
-		}
+	msg, err := tx.AsMessage(&ConsensusSigner{})
+	if err != nil {
+		log.Error("Failed in BlockReward AsMessage()", "err", err)
+		return nil, nil, err
+	}
 
-		evm := e.createEVM(msg, chain, header, statedb)
-		gp := core.GasPool(msg.Gas())
+	evm := e.createEVM(msg, chain, header, statedb)
+	gp := core.GasPool(msg.Gas())
 
-		// apply transaction
-		_, usedGas, failed, err := core.ApplyMessage(evm, msg, &gp)
-		if err != nil {
-			log.Error("Failed in reward() call", "err", err)
-			return nil, nil, err
-		}
+	// apply transaction
+	_, usedGas, failed, err := core.ApplyMessage(evm, msg, &gp)
+	if err != nil {
+		log.Error("Failed in reward() call", "err", err)
+		return nil, nil, err
+	}
 
-		// NOTE: it should be Byzantium finalization here...
-		root := statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
-		receipt := types.NewReceipt(root.Bytes(), failed, header.GasUsed)
-		receipt.TxHash = tx.Hash()
-		receipt.GasUsed = usedGas
-		receipt.Logs = statedb.GetLogs(tx.Hash())
-		receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
+	// NOTE: it should be Byzantium finalization here...
+	root := statedb.IntermediateRoot(chain.Config().IsEIP158(header.Number))
+	receipt := types.NewReceipt(root.Bytes(), failed, header.GasUsed)
+	receipt.TxHash = tx.Hash()
+	receipt.GasUsed = usedGas
+	receipt.Logs = statedb.GetLogs(tx.Hash())
+	receipt.Bloom = types.CreateBloom(types.Receipts{receipt})
 
-		log.Trace("Staker reward", "reward", reward, "gas", usedGas)
+	log.Trace("Staker reward", "reward", reward, "gas", usedGas)
 
-		return tx, receipt, nil
+	return tx, receipt, nil
 }
 
 func (e *Energi) mintFees(
