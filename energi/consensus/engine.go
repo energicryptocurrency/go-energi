@@ -737,7 +737,7 @@ func (e *Energi) govFinalize(
 	isBananaActive, _ = e.hardforkIsActive(chain, header, "Banana")
 	log.Debug("hard fork", "status", isBananaActive)
 	if isBananaActive && err == nil {
-		txs, receipts, err = e.processStakerReward(chain, header, state, txs, receipts)
+		txs, receipts, err = e.processFeeReward(chain, header, state, txs, receipts)
 	}
 
 	if err == nil {
