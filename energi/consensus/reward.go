@@ -44,9 +44,11 @@ func (e *Energi) processBlockRewards(
 	txs types.Transactions,
 	receipts types.Receipts,
 ) (types.Transactions, types.Receipts, error) {
+	systemFaucet := e.systemFaucet
+
 	// Temporary balance setup & clean up
-	statedb.SetBalance(e.systemFaucet, BigBalance)
-	defer statedb.SetBalance(e.systemFaucet, common.Big0)
+	statedb.SetBalance(systemFaucet, BigBalance)
+	defer statedb.SetBalance(systemFaucet, common.Big0)
 
 	// Common get reward call
 	getRewardData, err := e.rewardAbi.Pack("getReward", header.Number)
@@ -64,7 +66,7 @@ func (e *Energi) processBlockRewards(
 	// GetReward()
 	//====================================
 	msg := types.NewMessage(
-		e.systemFaucet,
+		systemFaucet,
 		&energi_params.Energi_BlockReward,
 		0,
 		common.Big0,
@@ -94,13 +96,13 @@ func (e *Energi) processBlockRewards(
 	// Reward
 	//====================================
 	tx := types.NewTransaction(
-		statedb.GetNonce(e.systemFaucet),
+		statedb.GetNonce(systemFaucet),
 		energi_params.Energi_BlockReward,
 		total_reward,
 		e.xferGas,
 		common.Big0,
 		rewardData)
-	tx = tx.WithConsensusSender(e.systemFaucet)
+	tx = tx.WithConsensusSender(systemFaucet)
 
 	statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
 
@@ -138,13 +140,19 @@ func (e *Energi) processFeeReward(
 	txs types.Transactions,
 	receipts types.Receipts,
 ) (types.Transactions, types.Receipts, error) {
+	// check if there is any gas used in the block
+	if header.GasUsed == 0 {
+		return txs, receipts, nil
+	}
 
+	systemFaucet := e.systemFaucet
 	// Temporary balance setup & clean up
-	statedb.SetBalance(e.systemFaucet, BigBalance)
-	defer statedb.SetBalance(e.systemFaucet, common.Big0)
+	statedb.SetBalance(systemFaucet, BigBalance)
+	defer statedb.SetBalance(systemFaucet, common.Big0)
 
 	// reward amount for coinbase/staker
 	reward := (header.GasUsed * uint64(energi_params.StakerReward)) / Hundred
+
 	// reward staker
 	stakerRewardTx, stakerRewardReceipts, err := e.processStakerFeeReward(chain, header, statedb, txs, reward)
 	if err != nil {
@@ -170,15 +178,16 @@ func (e *Energi) processStakerFeeReward(
 	txs types.Transactions,
 	reward uint64,
 ) (*types.Transaction, *types.Receipt, error) {
+	systemFaucet := e.systemFaucet
 	// Reward staker
 	tx := types.NewTransaction(
-		statedb.GetNonce(e.systemFaucet),
+		statedb.GetNonce(systemFaucet),
 		header.Coinbase,
 		new(big.Int).SetUint64(reward),
 		e.xferGas,
 		common.Big0,
 		nil)
-	tx = tx.WithConsensusSender(e.systemFaucet)
+	tx = tx.WithConsensusSender(systemFaucet)
 	statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
 
 	msg, err := tx.AsMessage(&ConsensusSigner{})
@@ -217,15 +226,16 @@ func (e *Energi) mintFees(
 	txs types.Transactions,
 	reward uint64,
 ) (*types.Transaction, *types.Receipt, error) {
+	systemFaucet := e.systemFaucet
 	// Reward staker
 	tx := types.NewTransaction(
-		statedb.GetNonce(e.systemFaucet),
+		statedb.GetNonce(systemFaucet),
 		common.Address{},
 		new(big.Int).SetUint64(reward),
 		e.xferGas,
 		common.Big0,
 		nil)
-	tx = tx.WithConsensusSender(e.systemFaucet)
+	tx = tx.WithConsensusSender(systemFaucet)
 	statedb.Prepare(tx.Hash(), header.Hash(), len(txs))
 
 	msg, err := tx.AsMessage(&ConsensusSigner{})
