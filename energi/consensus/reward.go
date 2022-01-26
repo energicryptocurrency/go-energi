@@ -31,7 +31,10 @@ import (
 
 var (
 	BigBalance = new(big.Int).Div(math.MaxBig256, big.NewInt(2))
-	Hundred    = uint64(100)
+)
+
+const (
+	Hundred = uint64(100)
 )
 
 func (e *Energi) processBlockRewards(
