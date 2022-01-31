@@ -128,7 +128,7 @@ func TestStakerReward(t *testing.T) {
 	assert.Empty(t, err)
 
 	// run staker rewarding
-	txs, receipts, err := engine.processStakerReward(chain, header, statedb, nil, nil)
+	txs, receipts, err := engine.processFeeReward(chain, header, statedb, nil, nil)
 
 	// check it returns the only rewarding transaction
 	assert.Equal(t, 1, len(txs))
