@@ -131,13 +131,13 @@ func TestStakerReward(t *testing.T) {
 	txs, receipts, err := engine.processFeeReward(chain, header, statedb, nil, nil)
 
 	// check it returns the only rewarding transaction
-	assert.Equal(t, 1, len(txs))
+	assert.Equal(t, 2, len(txs))
 
 	// check the rewarded amount is correct
 	assert.Equal(t, (HeaderGas * energi_params.StakerReward) / 100, txs[0].Value().Uint64())
 
 	// check rewarded address is coinbase
-	assert.Equal(t, header.Coinbase, *txs[0].To())
+	assert.Equal(t, header.Coinbase, *txs[1].To())
 
 	// check rewarded is system faucet
 	assert.Equal(t, energi_params.Energi_SystemFaucet, txs[0].ConsensusSender())
