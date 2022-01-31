@@ -141,5 +141,5 @@ func TestStakerReward(t *testing.T) {
 
 	// check rewarded is system faucet
 	assert.Equal(t, energi_params.Energi_SystemFaucet, txs[0].ConsensusSender())
-	assert.Equal(t, 1, len(receipts))
+	assert.Equal(t, 2, len(receipts))
 }
