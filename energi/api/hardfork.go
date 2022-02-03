@@ -20,6 +20,7 @@ package api
 
 import (
 	"bytes"
+	"sync"
 	"math/big"
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
@@ -31,11 +32,53 @@ import (
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
+var (
+	hardforkCache *HardforkCache
+)
+
+func init() {
+	hardforkCache = &HardforkCache{}
+	hardforkCache.cacheLock = &sync.Mutex{}
+}
+
 // HardforkRegistryAPI holds the data required to access the API. It has a
 // cache that temporarily holds regularly accessed data.
 type HardforkRegistryAPI struct {
 	backend   Backend
 	proxyAddr common.Address
+}
+
+// AddActiveHardfork adds a new active hardfork
+func AddHardfork(hardfork *HardforkInfo) {
+	hardforkCache.cacheLock.Lock()
+	defer hardforkCache.cacheLock.Unlock()
+	hardforkCache.hardforks = append(hardforkCache.hardforks, hardfork)
+}
+
+// RemoveActiveHardfork removes hardfork
+func RemoveHardfork(hfName [32]byte) {
+	hardforkCache.cacheLock.Lock()
+	defer hardforkCache.cacheLock.Unlock()
+	for i, activeHardfork := range hardforkCache.hardforks {
+		if string(hfName[:]) == activeHardfork.Name {
+			hardforkCache.hardforks[i] = hardforkCache.hardforks[len(hardforkCache.hardforks)-1] // Copy last element to index i.
+			hardforkCache.hardforks[len(hardforkCache.hardforks)-1] = nil   // Erase last element (write zero value).
+			hardforkCache.hardforks = hardforkCache.hardforks[:len(hardforkCache.hardforks)-1]   // Truncate slice.
+			return
+		}
+	}
+}
+
+// IsHardforkActive checks if given hardfork is active
+func IsHardforkActive(hardforkName string, blockNum uint64) bool {
+	hardforkCache.cacheLock.Lock()
+	defer hardforkCache.cacheLock.Unlock()
+	for _, hardfork := range hardforkCache.hardforks {
+		if hardfork.Name == hardforkName && blockNum >= hardfork.BlockNumber.Uint64() {
+			return true
+		}
+	}
+	return false
 }
 
 // HardforkInfo defines the hardfork payload information returned.
@@ -45,6 +88,12 @@ type HardforkInfo struct {
 	BlockHash   common.Hash `json:"block_hash,omitempty"`
 	SWFeatures  *big.Int    `json:"sw_features"`
 	SWVersion   string      `json:"sw_version"`
+}
+
+// HardforkCache caches currently active hardforks
+type HardforkCache struct {
+	hardforks []*HardforkInfo
+	cacheLock *sync.Mutex
 }
 
 // NewHardforkRegistryAPI returns a new HardforkRegistryAPI instance. It also

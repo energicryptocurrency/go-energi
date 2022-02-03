@@ -111,6 +111,20 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 		hf.LogHardForks(activeHardforks);
 	}
 
+	/*
+	Upon startup retrieve all hardforks and store them in cache
+	*/
+	allHardforks, err := hf.hfAPI.HardforkEnumerate()
+	if err != nil {
+		if err != bind.ErrNoCode {
+			log.Error("Failed to get active hardforks (startup)", "err", err);
+		}
+	} else if lc := len(allHardforks); lc > 0 {
+		for _, hardfork := range allHardforks {
+			energi_api.AddHardfork(hardfork)
+		}
+	}
+
 	//routine will listen to events thrown when hardfork is created
 	go hf.listenHardforkCreatedEvents();
 	// //routine will listen to hardfork finalization event
@@ -283,6 +297,8 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 			return
 
 		case hardfork := <-hfRemovedChan:
+			// remove hardfork from active hardfork cache
+			energi_api.RemoveHardfork(hardfork.Name)
 			log.Warn("Hardfork Removed: ",
 							 "Hardfork Name",
 							 string(hardfork.Name[:]))
