@@ -52,6 +52,7 @@ import (
 	"github.com/energicryptocurrency/energi/rpc"
 
 	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	"github.com/energicryptocurrency/energi/energi/api/hardfork"
 	energi "github.com/energicryptocurrency/energi/energi/consensus"
 )
 
@@ -398,7 +399,7 @@ func (s *Ethereum) APIs() []rpc.API {
 		{
 			Namespace: "energi",
 			Version:   "1.0",
-			Service:   energi_api.NewHardforkRegistryAPI(s.APIBackend),
+			Service:   hardfork.NewHardforkRegistryAPI(s.APIBackend),
 		},
 		{
 			Namespace: "energi",

@@ -34,7 +34,7 @@ import (
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rpc"
 
-	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	hardfork_api "github.com/energicryptocurrency/energi/energi/api/hardfork"
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
@@ -57,7 +57,7 @@ type HardforkService struct {
 
 	inSync int32
 
-	hfAPI *energi_api.HardforkRegistryAPI
+	hfAPI *hardfork_api.HardforkRegistryAPI
 	hfRegistry *energi_abi.IHardforkRegistry
 
 }
@@ -66,7 +66,7 @@ type HardforkService struct {
 func NewHardforkService(ethServ *eth.Ethereum) (*HardforkService, error) {
 	hf := &HardforkService{
 		eth:   ethServ,
-		hfAPI: energi_api.NewHardforkRegistryAPI(ethServ.APIBackend),
+		hfAPI: hardfork_api.NewHardforkRegistryAPI(ethServ.APIBackend),
 	}
 	hf.ctx, hf.ctxCancel = context.WithCancel(context.Background())
 
@@ -121,7 +121,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 		}
 	} else if lc := len(allHardforks); lc > 0 {
 		for _, hardfork := range allHardforks {
-			energi_api.AddHardfork(hardfork)
+			hardfork_api.AddHardfork(hardfork)
 		}
 	}
 
@@ -298,7 +298,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 
 		case hardfork := <-hfRemovedChan:
 			// remove hardfork from active hardfork cache
-			energi_api.RemoveHardfork(hardfork.Name)
+			hardfork_api.RemoveHardfork(hardfork.Name)
 			log.Warn("Hardfork Removed: ",
 							 "Hardfork Name",
 							 string(hardfork.Name[:]))
@@ -307,7 +307,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 }
 
 
-func (hf *HardforkService) LogHardForks(hardforks []*energi_api.HardforkInfo)  {
+func (hf *HardforkService) LogHardForks(hardforks []*hardfork_api.HardforkInfo)  {
 
 	//atomically read the pointer to the most recent block header
 	currentBlockHeader := hf.eth.BlockChain().CurrentBlock().Header()
@@ -361,7 +361,7 @@ func (hf *HardforkService) listenDownloader() {
 
 
 //logHardfork logs the information about the provided hardforks.
-func logHardforkInfo(currentBlockNo *big.Int, hfInfo *energi_api.HardforkInfo) {
+func logHardforkInfo(currentBlockNo *big.Int, hfInfo *hardfork_api.HardforkInfo) {
 	diff := new(big.Int).Sub(hfInfo.BlockNumber, currentBlockNo)
 	emptyArray := [32]byte{}
 	// check if hf is finalized (block hash set)

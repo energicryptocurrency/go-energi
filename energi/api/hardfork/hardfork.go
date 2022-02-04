@@ -16,7 +16,7 @@
 
 // Package ethapi implements the general Ethereum API functions.
 
-package api
+package hardfork
 
 import (
 	"bytes"
@@ -28,6 +28,7 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
@@ -44,7 +45,7 @@ func init() {
 // HardforkRegistryAPI holds the data required to access the API. It has a
 // cache that temporarily holds regularly accessed data.
 type HardforkRegistryAPI struct {
-	backend   Backend
+	backend   energi_api.Backend
 	proxyAddr common.Address
 }
 
@@ -98,7 +99,7 @@ type HardforkCache struct {
 
 // NewHardforkRegistryAPI returns a new HardforkRegistryAPI instance. It also
 // pre-fetches the latest list of the hardforks available in the system.
-func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
+func NewHardforkRegistryAPI(b energi_api.Backend) *HardforkRegistryAPI {
 	r := &HardforkRegistryAPI{
 		backend:   b,
 		proxyAddr: b.ChainConfig().Energi.HardforkRegistryProxyAddress,
@@ -207,7 +208,7 @@ func decodeName(data [32]byte) string {
 	return string(bytes.Trim(data[:], "\x00"))
 }
 
-func registryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.IHardforkRegistryCaller, *bind.CallOpts, error) {
+func registryCaller(backend energi_api.Backend, proxyAddr common.Address) (*energi_abi.IHardforkRegistryCaller, *bind.CallOpts, error) {
 	registry, err := energi_abi.NewIHardforkRegistryCaller(proxyAddr, backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)
