@@ -22,14 +22,11 @@ import (
 	"crypto/sha256"
 	"errors"
 	"io"
-	"bytes"
-	"encoding/json"
 	"math/big"
 	"os"
 	"strings"
 
 	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/accounts/abi"
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/accounts/keystore"
 	"github.com/energicryptocurrency/energi/common"
@@ -37,14 +34,13 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/rpc"
-	"github.com/energicryptocurrency/energi/core/types"
-
 
 	"github.com/shengdoushi/base58"
 	"golang.org/x/crypto/ripemd160"
 
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_consensus "github.com/energicryptocurrency/energi/energi/consensus"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
@@ -602,113 +598,5 @@ func (b *MigrationAdminAPI) ValidateMigration(
 		return false
 	}
 
-	return ValidateMigration(block, migration_file)
-}
-
-
-func ValidateMigration(
-	block *types.Block,
-	migration_file string,
-) bool {
-	file, err := os.Open(migration_file)
-	if err != nil {
-		log.Error("Failed to open snapshot", "err", err)
-		return false
-	}
-	defer file.Close()
-
-	snapshot, err := parseSnapshot(file)
-	if err != nil {
-		log.Error("Failed to parse snapshot", "err", err)
-		return false
-	}
-
-	owners, amounts, blacklist := createSnapshotParams(snapshot)
-	if owners == nil || amounts == nil || blacklist == nil {
-		log.Error("Failed to create arguments")
-		return false
-	}
-
-	migration_abi, err := abi.JSON(strings.NewReader(energi_abi.Gen2MigrationABI))
-	if err != nil {
-		panic(err)
-	}
-
-	callData, err := migration_abi.Pack("setSnapshot", owners, amounts, blacklist)
-	if err != nil {
-		panic(err)
-	}
-
-	txs := block.Transactions()
-	if len(txs) != 2 {
-		log.Error("Invalid transaction count")
-		return false
-	}
-
-	if !bytes.Equal(txs[0].Data(), callData) {
-		log.Error("Migration transaction data mismatch")
-		return false
-	}
-
-	return true
-}
-
-func parseSnapshot(reader io.Reader) (*snapshot, error) {
-	dec := json.NewDecoder(reader)
-	dec.DisallowUnknownFields()
-	ret := &snapshot{}
-	err := dec.Decode(ret)
-	return ret, err
-}
-
-type snapshotItem struct {
-	Owner  string   `json:"owner"`
-	Amount *big.Int `json:"amount"`
-	Atype  string   `json:"type"`
-}
-
-type snapshot struct {
-	Txouts    []snapshotItem `json:"snapshot_utxos"`
-	Blacklist []string       `json:"snapshot_blacklist"`
-	Hash      string         `json:"snapshot_hash"`
-}
-
-func createSnapshotParams(ss *snapshot) (
-	owners []common.Address,
-	amounts []*big.Int,
-	blacklist []common.Address,
-) {
-	owners = make([]common.Address, len(ss.Txouts))
-	amounts = make([]*big.Int, len(ss.Txouts))
-	blacklist = make([]common.Address, len(ss.Blacklist))
-
-	// NOTE: Gen 2 precision is 8, but Gen 3 is 18
-	multiplier := big.NewInt(1e10)
-
-	for i, info := range ss.Txouts {
-		owner, err := base58.Decode(info.Owner, base58.BitcoinAlphabet)
-
-		if err != nil {
-			log.Error("Failed to decode address", "err", err, "address", info.Owner)
-			return nil, nil, nil
-		}
-
-		owner = owner[1 : len(owner)-4]
-		owners[i] = common.BytesToAddress(owner)
-		amounts[i] = new(big.Int).Mul(info.Amount, multiplier)
-	}
-
-	for i, blo := range ss.Blacklist {
-		owner, err := base58.Decode(blo, base58.BitcoinAlphabet)
-
-		if err != nil {
-			log.Error("Failed to decode address", "err", err, "address", blo)
-			return nil, nil, nil
-		}
-
-		owner = owner[1 : len(owner)-4]
-		blacklist[i] = common.BytesToAddress(owner)
-	}
-
-	return
+	return energi_consensus.ValidateMigration(block, migration_file)
 }
