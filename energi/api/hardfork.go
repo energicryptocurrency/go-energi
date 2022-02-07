@@ -16,11 +16,10 @@
 
 // Package ethapi implements the general Ethereum API functions.
 
-package hardfork
+package api
 
 import (
 	"bytes"
-	"sync"
 	"math/big"
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
@@ -28,58 +27,15 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_api "github.com/energicryptocurrency/energi/energi/api"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
-var (
-	hardforkCache *HardforkCache
-)
-
-func init() {
-	hardforkCache = &HardforkCache{}
-	hardforkCache.cacheLock = &sync.Mutex{}
-}
-
 // HardforkRegistryAPI holds the data required to access the API. It has a
 // cache that temporarily holds regularly accessed data.
 type HardforkRegistryAPI struct {
-	backend   energi_api.Backend
+	backend   Backend
 	proxyAddr common.Address
-}
-
-// AddActiveHardfork adds a new active hardfork
-func AddHardfork(hardfork *HardforkInfo) {
-	hardforkCache.cacheLock.Lock()
-	defer hardforkCache.cacheLock.Unlock()
-	hardforkCache.hardforks = append(hardforkCache.hardforks, hardfork)
-}
-
-// RemoveActiveHardfork removes hardfork
-func RemoveHardfork(hfName [32]byte) {
-	hardforkCache.cacheLock.Lock()
-	defer hardforkCache.cacheLock.Unlock()
-	for i, activeHardfork := range hardforkCache.hardforks {
-		if string(hfName[:]) == activeHardfork.Name {
-			hardforkCache.hardforks[i] = hardforkCache.hardforks[len(hardforkCache.hardforks)-1] // Copy last element to index i.
-			hardforkCache.hardforks[len(hardforkCache.hardforks)-1] = nil   // Erase last element (write zero value).
-			hardforkCache.hardforks = hardforkCache.hardforks[:len(hardforkCache.hardforks)-1]   // Truncate slice.
-			return
-		}
-	}
-}
-
-// IsHardforkActive checks if given hardfork is active
-func IsHardforkActive(hardforkName string, blockNum uint64) bool {
-	hardforkCache.cacheLock.Lock()
-	defer hardforkCache.cacheLock.Unlock()
-	for _, hardfork := range hardforkCache.hardforks {
-		if hardfork.Name == hardforkName && blockNum >= hardfork.BlockNumber.Uint64() {
-			return true
-		}
-	}
-	return false
 }
 
 // HardforkInfo defines the hardfork payload information returned.
@@ -91,15 +47,9 @@ type HardforkInfo struct {
 	SWVersion   string      `json:"sw_version"`
 }
 
-// HardforkCache caches currently active hardforks
-type HardforkCache struct {
-	hardforks []*HardforkInfo
-	cacheLock *sync.Mutex
-}
-
 // NewHardforkRegistryAPI returns a new HardforkRegistryAPI instance. It also
 // pre-fetches the latest list of the hardforks available in the system.
-func NewHardforkRegistryAPI(b energi_api.Backend) *HardforkRegistryAPI {
+func NewHardforkRegistryAPI(b Backend) *HardforkRegistryAPI {
 	r := &HardforkRegistryAPI{
 		backend:   b,
 		proxyAddr: b.ChainConfig().Energi.HardforkRegistryProxyAddress,
@@ -208,7 +158,7 @@ func decodeName(data [32]byte) string {
 	return string(bytes.Trim(data[:], "\x00"))
 }
 
-func registryCaller(backend energi_api.Backend, proxyAddr common.Address) (*energi_abi.IHardforkRegistryCaller, *bind.CallOpts, error) {
+func registryCaller(backend Backend, proxyAddr common.Address) (*energi_abi.IHardforkRegistryCaller, *bind.CallOpts, error) {
 	registry, err := energi_abi.NewIHardforkRegistryCaller(proxyAddr, backend.(bind.ContractCaller))
 	if err != nil {
 		log.Error("Creating NewIHardforkRegistryCaller Failed", "err", err)

@@ -44,7 +44,7 @@ import (
 
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/energi/api/hardfork"
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 )
 
 var (
@@ -235,7 +235,7 @@ func (e *Energi) VerifyHeader(
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive := hardfork.IsHardforkActive("Asgard", header.Number.Uint64())
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	// don't check for hard forks being active if we're testing
 	if e.testing {
@@ -505,7 +505,7 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive := hardfork.IsHardforkActive("Asgard", header.Number.Uint64())
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	// don't check for hard forks being active if we're testing
 	if e.testing {
@@ -885,7 +885,7 @@ func (e *Energi) CalcDifficulty(
 	chain ChainReader, time uint64, parent *types.Header,
 ) *big.Int {
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive := hardfork.IsHardforkActive("Asgard", parent.Number.Uint64())
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", parent.Number.Uint64())
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	// don't check for hard forks being active if we're testing
 	if e.testing {
