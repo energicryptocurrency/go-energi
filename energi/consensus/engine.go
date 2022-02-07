@@ -660,7 +660,7 @@ func (e *Energi) govFinalize(
 
 	// check if Banana hardfork is active, if so start rewarding staker
 	var isBananaActive bool
-	isBananaActive, _ = e.hardforkIsActive(chain, header, "Banana")
+	isBananaActive = hfcache.IsHardforkActive("Banana", header.Number.Uint64())
 	log.Debug("hard fork", "status", isBananaActive)
 	if isBananaActive && err == nil {
 		txs, receipts, err = e.processFeeReward(chain, header, state, txs, receipts)
