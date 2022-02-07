@@ -44,6 +44,7 @@ import (
 
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 )
 
 var (
@@ -233,8 +234,13 @@ func (e *Energi) VerifyHeader(
 		return nil
 	}
 
-	// get hf status
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	// check if Asgard hardfork is activated use new difficulty algorithm
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		isAsgardActive = false
+	}
 	var time_target *TimeTarget
 
 	// calculate time target based on hf status
@@ -488,86 +494,6 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	return nil
 }
 
-// checks if hardfork is active
-func (e *Energi) hardforkIsActive(
-	chain ChainReader,
-	header *types.Header,
-	hardforkName string,
-) (bool, error) {
-	// don't check for hard forks being active if we're testing
-	if e.testing {
-		return false, nil
-	}
-
-	// check if parent hash is empty
-	if (header.ParentHash == common.Hash{}) {
-		return false, nil
-	}
-
-	// get state for snapshot
-	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
-	if blockst == nil {
-		log.Error("PoS state root failure", "header", header.ParentHash)
-		return false, eth_consensus.ErrMissingState
-	}
-
-	// get parent
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		log.Error("Failed to get parent", eth_consensus.ErrUnknownAncestor)
-		return false, eth_consensus.ErrUnknownAncestor
-	}
-
-	// create call data
-	var hardforkNameArray [32]byte
-	copy(hardforkNameArray[:], []byte(hardforkName))
-	callData, err := e.hardforkAbi.Pack("get", hardforkNameArray)
-	if err != nil {
-		log.Error("Failed to check if hardfork is active", "err", err)
-		return false, err
-	}
-
-	// construct the contract call message
-	msg := types.NewMessage(
-		e.systemFaucet,
-		&e.config.HardforkRegistryProxyAddress,
-		0,
-		common.Big0,
-		e.callGas,
-		common.Big0,
-		callData,
-		false,
-	)
-
-	// create environment and apply message
-	evm := e.createEVM(msg, chain, parent, blockst)
-	gp := core.GasPool(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
-	if err != nil {
-		log.Error("Failed to get hardfork", "err", err)
-		return false, err
-	}
-
-	// return struct
-	ret := new ( struct {
-			BlockNumber *big.Int
-			BlockHash [32]byte
-			SwFeatures *big.Int
-	} )
-
-	err = e.hardforkAbi.Unpack(ret, "get", output)
-	if err != nil  {
-		if strings.Contains(err.Error(), "no such hard fork") || strings.Contains(err.Error(), "unmarshalling empty output"){
-			return false, nil
-		} else{
-			log.Error("Failed to unpack returned hf", "err", err)
-		}
-		return false, err
-	}
-
-	return header.Number.Uint64() >= ret.BlockNumber.Uint64(), nil
-}
-
 // Prepare initializes the consensus fields of a block header according to the
 // rules of a particular engine. The changes are executed inline.
 func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
@@ -579,12 +505,12 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
-	if err != nil {
-		log.Trace("Asgard hf check failed: " + err.Error())
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		isAsgardActive = false
 	}
-
 	// Clear field to be set in mining
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -968,9 +894,14 @@ func (e *Energi) CalcDifficulty(
 	chain ChainReader, time uint64, parent *types.Header,
 ) *big.Int {
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	var isAsgardActive bool
-	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", parent.Number.Uint64())
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		isAsgardActive = false
+	}
 	log.Debug("hard fork", "status", isAsgardActive)
+
 	if isAsgardActive {
 		time_target := e.calcTimeTargetV2(chain, parent)
 		return CalcPoSDifficultyV2(time, parent, time_target)
