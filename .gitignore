@@ -19,6 +19,7 @@ build/_vendor/pkg
 /swarm-*.*
 /bin
 /build/release/
+/energi/consensus/difficultysim/csv/
 .vagrant
 
 #*
