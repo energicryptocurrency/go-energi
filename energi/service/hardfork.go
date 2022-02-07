@@ -107,6 +107,8 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	if err != nil {
 		if err != bind.ErrNoCode {
 			log.Error("Failed to get active hardforks (startup)", "err", err);
+		} else {
+			log.Warn("Hardfork contract hasn't been deployed yet", "err", err);
 		}
 	} else if lc := len(activeHardforks); lc > 0 {
 		hf.LogHardForks(activeHardforks);
@@ -118,7 +120,9 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	allHardforks, err := hf.hfAPI.HardforkEnumerate()
 	if err != nil {
 		if err != bind.ErrNoCode {
-			log.Error("Failed to get active hardforks (startup)", "err", err);
+			log.Error("Failed to get hardforks (startup)", "err", err);
+		} else {
+			log.Warn("Hardfork contract hasn't been deployed yet", "err", err);
 		}
 	} else if lc := len(allHardforks); lc > 0 {
 		for _, hardfork := range allHardforks {
