@@ -3,7 +3,6 @@ package hfcache
 import (
 	"sync"
 	"math/big"
-  "fmt"
 )
 
 var (
@@ -19,7 +18,6 @@ func init() {
 func AddHardfork(hardfork *Hardfork) {
 	hardforkCache.cacheLock.Lock()
 	defer hardforkCache.cacheLock.Unlock()
-  fmt.Println("adding",hardfork.Name, hardfork.BlockNumber)
 	hardforkCache.hardforks = append(hardforkCache.hardforks, hardfork)
 }
 
