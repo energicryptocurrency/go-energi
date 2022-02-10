@@ -240,7 +240,7 @@ func (b *Bzz) runBzz(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 	if err != nil {
 		return err
 	}
-	msg.Discard()
+	_ = msg.Discard()
 	return errors.New("received multiple handshakes")
 }
 

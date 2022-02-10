@@ -25,6 +25,7 @@ import (
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/ethdb"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"golang.org/x/crypto/sha3"
 )
 
@@ -69,7 +70,7 @@ func TestBodyStorage(t *testing.T) {
 	body := &types.Body{Uncles: []*types.Header{{Extra: []byte("test header")}}}
 
 	hasher := sha3.NewLegacyKeccak256()
-	rlp.Encode(hasher, body)
+	_ = rlp.Encode(hasher, body)
 	hash := common.BytesToHash(hasher.Sum(nil))
 
 	if entry := ReadBody(db, hash, 0); entry != nil {

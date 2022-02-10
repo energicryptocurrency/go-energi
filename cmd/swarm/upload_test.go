@@ -33,6 +33,7 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 	swarmapi "github.com/energicryptocurrency/energi/swarm/api/client"
 	"github.com/energicryptocurrency/energi/swarm/testutil"
+
 	"github.com/mattn/go-colorable"
 )
 
@@ -103,7 +104,7 @@ func testDefault(toEncrypt bool, t *testing.T) {
 			tmpFileName}
 	}
 	// upload the file with 'swarm up' and expect a hash
-	log.Info(fmt.Sprintf("uploading file with 'swarm up'"))
+	log.Info("uploading file with 'swarm up'")
 	up := runSwarm(t, flags...)
 	_, matches := up.ExpectRegexp(hashRegexp)
 	up.ExpectExit()
@@ -218,7 +219,7 @@ func testRecursive(toEncrypt bool, t *testing.T) {
 			tmpUploadDir}
 	}
 	// upload the file with 'swarm up' and expect a hash
-	log.Info(fmt.Sprintf("uploading file with 'swarm up'"))
+	log.Info("uploading file with 'swarm up'")
 	up := runSwarm(t, flags...)
 	_, matches := up.ExpectRegexp(hashRegexp)
 	up.ExpectExit()
@@ -260,7 +261,7 @@ func testRecursive(toEncrypt bool, t *testing.T) {
 					t.Fatalf("encountered an error opening the file returned from the CLI: %v", err)
 				} else {
 					ff := make([]byte, len(data))
-					io.ReadFull(file, ff)
+					_, _ = io.ReadFull(file, ff)
 					buf := bytes.NewBufferString(data)
 
 					if !bytes.Equal(ff, buf.Bytes()) {

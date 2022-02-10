@@ -18,10 +18,7 @@
 
 package whisperv6
 
-import (
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-)
+import "github.com/energicryptocurrency/energi/common/hexutil"
 
 // TopicType represents a cryptographically secure, probabilistic partial
 // classifications of a message, determined as the first (left) 4 bytes of the
@@ -43,7 +40,7 @@ func BytesToTopic(b []byte) (t TopicType) {
 
 // String converts a topic byte array to a string representation.
 func (t *TopicType) String() string {
-	return common.ToHex(t[:])
+	return hexutil.Encode(t[:])
 }
 
 // MarshalText returns the hex representation of t.

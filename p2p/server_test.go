@@ -30,6 +30,7 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/p2p/enode"
 	"github.com/energicryptocurrency/energi/p2p/enr"
+
 	"golang.org/x/crypto/sha3"
 )
 
@@ -454,7 +455,7 @@ func TestServerPeerLimits(t *testing.T) {
 	flags := dynDialedConn
 	dialDest := clientnode
 	conn, _ := net.Pipe()
-	srv.SetupConn(conn, flags, dialDest)
+	_ = srv.SetupConn(conn, flags, dialDest)
 	if tp.closeErr != DiscTooManyPeers {
 		t.Errorf("unexpected close error: %q", tp.closeErr)
 	}
@@ -464,7 +465,7 @@ func TestServerPeerLimits(t *testing.T) {
 
 	// Check that server allows a trusted peer despite being full.
 	conn, _ = net.Pipe()
-	srv.SetupConn(conn, flags, dialDest)
+	_ = srv.SetupConn(conn, flags, dialDest)
 	if tp.closeErr == DiscTooManyPeers {
 		t.Errorf("failed to bypass MaxPeers with trusted node: %q", tp.closeErr)
 	}
@@ -478,7 +479,7 @@ func TestServerPeerLimits(t *testing.T) {
 
 	// Check that server is full again.
 	conn, _ = net.Pipe()
-	srv.SetupConn(conn, flags, dialDest)
+	_ = srv.SetupConn(conn, flags, dialDest)
 	if tp.closeErr != DiscTooManyPeers {
 		t.Errorf("unexpected close error: %q", tp.closeErr)
 	}
@@ -564,7 +565,7 @@ func TestServerSetupConn(t *testing.T) {
 			}
 		}
 		p1, _ := net.Pipe()
-		srv.SetupConn(p1, test.flags, test.dialDest)
+		_ = srv.SetupConn(p1, test.flags, test.dialDest)
 		if !reflect.DeepEqual(test.tt.closeErr, test.wantCloseErr) {
 			t.Errorf("test %d: close error mismatch: got %q, want %q", i, test.tt.closeErr, test.wantCloseErr)
 		}

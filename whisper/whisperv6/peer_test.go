@@ -21,12 +21,11 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	mrand "math/rand"
+	"net"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
-
-	"net"
 
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
@@ -142,12 +141,12 @@ func TestSimulation(t *testing.T) {
 func resetParams(t *testing.T) {
 	// change pow only for node zero
 	masterPow = 7777777.0
-	nodes[0].shh.SetMinimumPoW(masterPow)
+	_ = nodes[0].shh.SetMinimumPoW(masterPow)
 
 	// change bloom for all nodes
 	masterBloomFilter = TopicToBloom(sharedTopic)
 	for i := 0; i < NumNodes; i++ {
-		nodes[i].shh.SetBloomFilter(masterBloomFilter)
+		_ = nodes[i].shh.SetBloomFilter(masterBloomFilter)
 	}
 
 	round++
@@ -181,12 +180,12 @@ func initialize(t *testing.T) {
 		b := make([]byte, BloomFilterSize)
 		copy(b, masterBloomFilter)
 		node.shh = New(&DefaultConfig)
-		node.shh.SetMinimumPoW(masterPow)
-		node.shh.SetBloomFilter(b)
+		_ = node.shh.SetMinimumPoW(masterPow)
+		_ = node.shh.SetBloomFilter(b)
 		if !bytes.Equal(node.shh.BloomFilter(), masterBloomFilter) {
 			t.Fatalf("bloom mismatch on init.")
 		}
-		node.shh.Start(nil)
+		_ = node.shh.Start(nil)
 		topics := make([]TopicType, 0)
 		topics = append(topics, sharedTopic)
 		f := Filter{KeySym: sharedKey}
@@ -242,8 +241,8 @@ func stopServers() {
 	for i := 0; i < NumNodes; i++ {
 		n := nodes[i]
 		if n != nil {
-			n.shh.Unsubscribe(n.filerID)
-			n.shh.Stop()
+			_ = n.shh.Unsubscribe(n.filerID)
+			_ = n.shh.Stop()
 			n.server.Stop()
 		}
 	}

@@ -33,11 +33,11 @@ type testEncoder struct {
 
 func (e *testEncoder) EncodeRLP(w io.Writer) error {
 	if e == nil {
-		w.Write([]byte{0, 0, 0, 0})
+		_, _ = w.Write([]byte{0, 0, 0, 0})
 	} else if e.err != nil {
 		return e.err
 	} else {
-		w.Write([]byte{0, 1, 0, 1, 0, 1, 0, 1, 0, 1})
+		_, _ = w.Write([]byte{0, 1, 0, 1, 0, 1, 0, 1, 0, 1})
 	}
 	return nil
 }
@@ -45,7 +45,7 @@ func (e *testEncoder) EncodeRLP(w io.Writer) error {
 type byteEncoder byte
 
 func (e byteEncoder) EncodeRLP(w io.Writer) error {
-	w.Write(EmptyList)
+	_, _ = w.Write(EmptyList)
 	return nil
 }
 
@@ -328,11 +328,11 @@ func TestEncodeToReaderReturnToPool(t *testing.T) {
 		go func() {
 			for i := 0; i < 1000; i++ {
 				_, r, _ := EncodeToReader("foo")
-				ioutil.ReadAll(r)
-				r.Read(buf)
-				r.Read(buf)
-				r.Read(buf)
-				r.Read(buf)
+				_, _ = ioutil.ReadAll(r)
+				_, _ = r.Read(buf)
+				_, _ = r.Read(buf)
+				_, _ = r.Read(buf)
+				_, _ = r.Read(buf)
 			}
 			wg.Done()
 		}()

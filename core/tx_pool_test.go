@@ -412,7 +412,7 @@ func TestTransactionDoubleNonce(t *testing.T) {
 		t.Errorf("transaction mismatch: have %x, want %x", tx.Hash(), tx2.Hash())
 	}
 	// Add the third transaction and ensure it's not saved (smaller price)
-	pool.add(tx3, false)
+	_, _ = pool.add(tx3, false)
 	pool.promoteExecutables([]common.Address{addr})
 	if pool.pending[addr].Len() != 1 {
 		t.Error("expected 1 pending transactions, got", pool.pending[addr].Len())
@@ -868,8 +868,10 @@ func testTransactionQueueGlobalLimiting(t *testing.T, nolocals bool) {
 //
 // This logic should not hold for local transactions, unless the local tracking
 // mechanism is disabled.
-func TestTransactionQueueTimeLimiting(t *testing.T)         { testTransactionQueueTimeLimiting(t, false) }
-func TestTransactionQueueTimeLimitingNoLocals(t *testing.T) { testTransactionQueueTimeLimiting(t, true) }
+func TestTransactionQueueTimeLimiting(t *testing.T) { testTransactionQueueTimeLimiting(t, false) }
+func TestTransactionQueueTimeLimitingNoLocals(t *testing.T) {
+	testTransactionQueueTimeLimiting(t, true)
+}
 
 func testTransactionQueueTimeLimiting(t *testing.T, nolocals bool) {
 	// Reduce the eviction interval to a testable amount
@@ -975,8 +977,10 @@ func TestTransactionPendingLimiting(t *testing.T) {
 
 // Tests that the transaction limits are enforced the same way irrelevant whether
 // the transactions are added one by one or in batches.
-func TestTransactionQueueLimitingEquivalency(t *testing.T)   { testTransactionLimitingEquivalency(t, 1) }
-func TestTransactionPendingLimitingEquivalency(t *testing.T) { testTransactionLimitingEquivalency(t, 0) }
+func TestTransactionQueueLimitingEquivalency(t *testing.T) { testTransactionLimitingEquivalency(t, 1) }
+func TestTransactionPendingLimitingEquivalency(t *testing.T) {
+	testTransactionLimitingEquivalency(t, 0)
+}
 
 func testTransactionLimitingEquivalency(t *testing.T, origin uint64) {
 	t.Parallel()
@@ -1195,7 +1199,7 @@ func TestTransactionPoolRepricing(t *testing.T) {
 
 	// Import the batch and that both pending and queued transactions match up
 	pool.AddRemotes(txs)
-	pool.AddLocal(ltx)
+	_ = pool.AddLocal(ltx)
 
 	pending, queued := pool.Stats()
 	if pending != 7 {
@@ -1375,7 +1379,7 @@ func TestTransactionPoolUnderpricing(t *testing.T) {
 
 	// Import the batch and that both pending and queued transactions match up
 	pool.AddRemotes(txs)
-	pool.AddLocal(ltx)
+	_ = pool.AddLocal(ltx)
 
 	pending, queued := pool.Stats()
 	if pending != 3 {
@@ -1822,7 +1826,7 @@ func BenchmarkPoolInsert(b *testing.B) {
 	// Benchmark importing the transactions into the queue
 	b.ResetTimer()
 	for _, tx := range txs {
-		pool.AddRemote(tx)
+		_ = pool.AddRemote(tx)
 	}
 }
 

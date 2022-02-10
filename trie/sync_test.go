@@ -49,7 +49,7 @@ func makeTestTrie() (*Database, *Trie, map[string][]byte) {
 			trie.Update(key, val)
 		}
 	}
-	trie.Commit(nil)
+	_, _ = trie.Commit(nil)
 
 	// Return the generated trie
 	return triedb, trie, content
@@ -349,10 +349,10 @@ func TestIncompleteSync(t *testing.T) {
 		key := node.Bytes()
 		value, _ := diskdb.Get(key)
 
-		diskdb.Delete(key)
+		_ = diskdb.Delete(key)
 		if err := checkTrieConsistency(triedb, added[0]); err == nil {
 			t.Fatalf("trie inconsistency not caught, missing: %x", key)
 		}
-		diskdb.Put(key, value)
+		_ = diskdb.Put(key, value)
 	}
 }

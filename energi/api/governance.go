@@ -17,20 +17,20 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"math/big"
-
-	"github.com/pborman/uuid"
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rpc"
-
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rpc"
+
+	"github.com/pborman/uuid"
 )
 
 const (
@@ -203,8 +203,8 @@ type ProposalInfo struct {
 func getBalance(backend Backend, address common.Address) (*hexutil.Big, error) {
 	curr_block := backend.CurrentBlock()
 
-	state, _, err := backend.StateAndHeaderByNumber(
-		nil, rpc.BlockNumber(curr_block.Number().Int64()))
+	state, _, err := backend.StateAndHeaderByNumber(context.TODO(),
+		rpc.BlockNumber(curr_block.Number().Int64()))
 	if err != nil {
 		log.Error("Failed at state", "err", err)
 		return nil, err
@@ -447,16 +447,17 @@ func (g *GovernanceAPI) upgradeInfo(num *big.Int) (interface{}, error) {
 
 	ret.MasternodeToken, err = g.upgradeProposalInfo(num, energi_params.Energi_MasternodeToken)
 	if err != nil {
-		log.Error("MasternodeToken info fetch failed", "err", err)
+		log.Error("MasternodeToken info fetch failed err", err)
 	}
 
-	ret.HardforkRegistry, err = g.upgradeProposalInfo(num, g.backend.ChainConfig().Energi.HardforkRegistryProxyAddress)
+	ret.HardforkRegistry, err = g.upgradeProposalInfo(num,
+		g.backend.ChainConfig().Energi.HardforkRegistryProxyAddress)
 	if err != nil {
 		if err != bind.ErrNoCode {
-			log.Error("Hardfork Registry info fetch failed", "err", err)
+			log.Error("Hardfork Registry info fetch failed err", err)
 		} else {
-			ret.HardforkRegistry = make([]UpgradeProposalInfo,0)
-			err = nil
+			ret.HardforkRegistry = make([]UpgradeProposalInfo, 0)
+			//err = nil
 		}
 	}
 

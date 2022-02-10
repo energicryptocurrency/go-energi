@@ -35,12 +35,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
-	"github.com/energicryptocurrency/energi/metrics/influxdb"
 	"github.com/energicryptocurrency/energi/node"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/p2p/enode"
@@ -131,7 +128,7 @@ func TestTopic(t *testing.T) {
 
 	// json unmarshal of topic
 	var topicjsonin Topic
-	topicjsonin.UnmarshalJSON(topicjsonout)
+	_ = topicjsonin.UnmarshalJSON(topicjsonout)
 	if topicjsonin != topicobj {
 		t.Fatalf("topic json unmarshal mismatch: %x != %x", topicjsonin, topicobj)
 	}
@@ -166,7 +163,7 @@ func TestCache(t *testing.T) {
 	to, _ := hex.DecodeString("08090a0b0c0d0e0f1011121314150001020304050607161718191a1b1c1d1e1f")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	keys, err := wapi.NewKeyPair(ctx)
+	keys, _ := wapi.NewKeyPair(ctx)
 	privkey, err := w.GetPrivateKey(keys)
 	if err != nil {
 		t.Fatal(err)
@@ -186,21 +183,21 @@ func TestCache(t *testing.T) {
 		PoW:      defaultWhisperPoW,
 		Payload:  data,
 	}
-	woutmsg, err := whisper.NewSentMessage(wparams)
-	env, err := woutmsg.Wrap(wparams)
+	woutmsg, _ := whisper.NewSentMessage(wparams)
+	env, _ := woutmsg.Wrap(wparams)
 	msg := &PssMsg{
 		Payload: env,
 		To:      to,
 	}
 	wparams.Payload = datatwo
-	woutmsg, err = whisper.NewSentMessage(wparams)
-	envtwo, err := woutmsg.Wrap(wparams)
+	woutmsg, _ = whisper.NewSentMessage(wparams)
+	envtwo, _ := woutmsg.Wrap(wparams)
 	msgtwo := &PssMsg{
 		Payload: envtwo,
 		To:      to,
 	}
 	wparams.Payload = datathree
-	woutmsg, err = whisper.NewSentMessage(wparams)
+	woutmsg, _ = whisper.NewSentMessage(wparams)
 	envthree, err := woutmsg.Wrap(wparams)
 	msgthree := &PssMsg{
 		Payload: envthree,
@@ -271,7 +268,7 @@ func TestAddressMatch(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Could not generate private key: %v", err)
 	}
-	privkey, err := w.GetPrivateKey(keys)
+	privkey, _ := w.GetPrivateKey(keys)
 	pssp := NewPssParams().WithPrivateKey(privkey)
 	ps, err := NewPss(kad, pssp)
 	if err != nil {
@@ -323,7 +320,7 @@ func TestProxShortCircuit(t *testing.T) {
 	peerCount := kad.MinBinSize + 1
 
 	// set up pss
-	privKey, err := crypto.GenerateKey()
+	privKey, _ := crypto.GenerateKey()
 	pssp := NewPssParams().WithPrivateKey(privKey)
 	ps, err := NewPss(kad, pssp)
 	if err != nil {
@@ -331,13 +328,14 @@ func TestProxShortCircuit(t *testing.T) {
 	}
 
 	// create kademlia peers, so we have peers both inside and outside minproxlimit
-	var peers []*network.Peer
+	//var peers []*network.Peer
 	proxMessageAddress := pot.RandomAddressAt(localPotAddr, peerCount).Bytes()
 	distantMessageAddress := pot.RandomAddressAt(localPotAddr, 0).Bytes()
 
 	for i := 0; i < peerCount; i++ {
 		rw := &p2p.MsgPipeRW{}
-		ptpPeer := p2p.NewPeer(enode.ID{}, "wanna be with me? [ ] yes [ ] no", []p2p.Cap{})
+		ptpPeer := p2p.NewPeer(enode.ID{}, "wanna be with me? [ ] yes [ ] no",
+			[]p2p.Cap{})
 		protoPeer := protocols.NewPeer(ptpPeer, rw, &protocols.Spec{})
 		peerAddr := pot.RandomAddressAt(localPotAddr, i)
 		bzzPeer := &network.BzzPeer{
@@ -349,7 +347,7 @@ func TestProxShortCircuit(t *testing.T) {
 		}
 		peer := network.NewPeer(bzzPeer, kad)
 		kad.On(peer)
-		peers = append(peers, peer)
+		//peers = append(peers, peer)
 	}
 
 	// register it marking prox capability
@@ -410,7 +408,7 @@ func TestProxShortCircuit(t *testing.T) {
 
 	// try the same prox message with sym and asym send
 	proxAddrPss := PssAddress(proxMessageAddress)
-	symKeyId, err := ps.GenerateSymmetricKey(topic, proxAddrPss, true)
+	symKeyId, _ := ps.GenerateSymmetricKey(topic, proxAddrPss, true)
 	go func() {
 		err := ps.SendSym(symKeyId, topic, []byte("baz"))
 		if err != nil {
@@ -464,7 +462,7 @@ func TestAddressMatchProx(t *testing.T) {
 	peerCount := nnPeerCount + 2
 
 	// set up pss
-	privKey, err := crypto.GenerateKey()
+	privKey, _ := crypto.GenerateKey()
 	pssp := NewPssParams().WithPrivateKey(privKey)
 	ps, err := NewPss(kad, pssp)
 	if err != nil {
@@ -472,7 +470,7 @@ func TestAddressMatchProx(t *testing.T) {
 	}
 
 	// create kademlia peers, so we have peers both inside and outside minproxlimit
-	var peers []*network.Peer
+	//var peers []*network.Peer
 	for i := 0; i < peerCount; i++ {
 		rw := &p2p.MsgPipeRW{}
 		ptpPeer := p2p.NewPeer(enode.ID{}, "362436 call me anytime", []p2p.Cap{})
@@ -487,7 +485,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 		peer := network.NewPeer(bzzPeer, kad)
 		kad.On(peer)
-		peers = append(peers, peer)
+		//peers = append(peers, peer)
 	}
 
 	// TODO: create a test in the network package to make a table with n peers where n-m are proxpeers
@@ -575,7 +573,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 
 		log.Trace("withprox addrs", "local", localAddr, "remote", remoteAddr)
-		ps.handlePssMsg(context.TODO(), pssMsg)
+		_ = ps.handlePssMsg(context.TODO(), pssMsg)
 		if (!expects[i] && prevReceive != receives) || (expects[i] && prevReceive == receives) {
 			t.Fatalf("expected distance %d recipient %v when prox is set for handler", distance, expects[i])
 		}
@@ -606,7 +604,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 
 		log.Trace("withprox addrs", "local", localAddr, "remote", remoteAddr)
-		ps.handlePssMsg(context.TODO(), pssMsg)
+		_ = ps.handlePssMsg(context.TODO(), pssMsg)
 		if (!expects[i] && prevReceive != receives) || (expects[i] && prevReceive == receives) {
 			t.Fatalf("expected distance %d recipient %v when prox is set for handler", distance, expects[i])
 		}
@@ -630,7 +628,7 @@ func TestAddressMatchProx(t *testing.T) {
 		}
 
 		log.Trace("noprox addrs", "local", localAddr, "remote", remoteAddr)
-		ps.handlePssMsg(context.TODO(), pssMsg)
+		_ = ps.handlePssMsg(context.TODO(), pssMsg)
 		if receives != 0 {
 			t.Fatalf("expected distance %d to not be recipient when prox is not set for handler", distance)
 		}
@@ -791,7 +789,7 @@ func TestKeys(t *testing.T) {
 	copy(addr, network.RandomAddr().Over())
 	outkey := network.RandomAddr().Over()
 	topicobj := BytesToTopic([]byte("foo:42"))
-	ps.SetPeerPublicKey(&theirprivkey.PublicKey, topicobj, addr)
+	_ = ps.SetPeerPublicKey(&theirprivkey.PublicKey, topicobj, addr)
 	outkeyid, err := ps.SetSymmetricKey(outkey, topicobj, addr, false)
 	if err != nil {
 		t.Fatalf("failed to set 'our' outgoing symmetric key")
@@ -847,7 +845,7 @@ func TestGetPublickeyEntries(t *testing.T) {
 		t.Fatal(err)
 	}
 	remotepubkeybytes := crypto.FromECDSAPub(&remoteprivkey.PublicKey)
-	remotepubkeyhex := common.ToHex(remotepubkeybytes)
+	remotepubkeyhex := hexutil.Encode(remotepubkeybytes)
 
 	pssapi := NewAPI(ps)
 
@@ -908,7 +906,8 @@ func TestPeerCapabilityMismatch(t *testing.T) {
 	}
 	nid := enode.ID{0x01}
 	wrongpsspeer := network.NewPeer(&network.BzzPeer{
-		Peer:    protocols.NewPeer(p2p.NewPeer(nid, common.ToHex(wrongpssaddr.Over()), []p2p.Cap{wrongpsscap}), rw, nil),
+		Peer: protocols.NewPeer(p2p.NewPeer(nid, hexutil.Encode(wrongpssaddr.Over()),
+			[]p2p.Cap{wrongpsscap}), rw, nil),
 		BzzAddr: &network.BzzAddr{OAddr: wrongpssaddr.Over(), UAddr: nil},
 	}, kad)
 
@@ -920,15 +919,15 @@ func TestPeerCapabilityMismatch(t *testing.T) {
 	}
 	nid = enode.ID{0x02}
 	nopsspeer := network.NewPeer(&network.BzzPeer{
-		Peer:    protocols.NewPeer(p2p.NewPeer(nid, common.ToHex(nopssaddr.Over()), []p2p.Cap{nopsscap}), rw, nil),
+		Peer:    protocols.NewPeer(p2p.NewPeer(nid, hexutil.Encode(nopssaddr.Over()), []p2p.Cap{nopsscap}), rw, nil),
 		BzzAddr: &network.BzzAddr{OAddr: nopssaddr.Over(), UAddr: nil},
 	}, kad)
 
 	// add peers to kademlia and activate them
 	// it's safe so don't check errors
-	kad.Register(wrongpsspeer.BzzAddr)
+	_ = kad.Register(wrongpsspeer.BzzAddr)
 	kad.On(wrongpsspeer)
-	kad.Register(nopsspeer.BzzAddr)
+	_ = kad.Register(nopsspeer.BzzAddr)
 	kad.On(nopsspeer)
 
 	// create pss
@@ -942,7 +941,7 @@ func TestPeerCapabilityMismatch(t *testing.T) {
 
 	// run the forward
 	// it is enough that it completes; trying to send to incapable peers would create segfault
-	ps.forward(pssmsg)
+	_ = ps.forward(pssmsg)
 
 }
 
@@ -983,7 +982,7 @@ func TestRawAllow(t *testing.T) {
 	pssMsg.Payload = &whisper.Envelope{
 		Topic: whisper.TopicType(topic),
 	}
-	ps.handlePssMsg(context.TODO(), pssMsg)
+	_ = ps.handlePssMsg(context.TODO(), pssMsg)
 	if receives > 0 {
 		t.Fatalf("Expected handler not to be executed with raw cap off")
 	}
@@ -999,7 +998,7 @@ func TestRawAllow(t *testing.T) {
 
 	// should work now
 	pssMsg.Payload.Data = []byte("Raw Deal")
-	ps.handlePssMsg(context.TODO(), pssMsg)
+	_ = ps.handlePssMsg(context.TODO(), pssMsg)
 	if receives == 0 {
 		t.Fatalf("Expected handler to be executed with raw cap on")
 	}
@@ -1010,7 +1009,7 @@ func TestRawAllow(t *testing.T) {
 
 	// check that raw messages fail again
 	pssMsg.Payload.Data = []byte("Raw Trump")
-	ps.handlePssMsg(context.TODO(), pssMsg)
+	_ = ps.handlePssMsg(context.TODO(), pssMsg)
 	if receives != prevReceives {
 		t.Fatalf("Expected handler not to be executed when raw handler is retracted")
 	}
@@ -1088,13 +1087,13 @@ func testSendRaw(t *testing.T) {
 	lmsgC := make(chan APIMsg)
 	lctx, lcancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer lcancel()
-	lsub, err := clients[0].Subscribe(lctx, "pss", lmsgC, "receive", topic, true, false)
+	lsub, _ := clients[0].Subscribe(lctx, "pss", lmsgC, "receive", topic, true, false)
 	log.Trace("lsub", "id", lsub)
 	defer lsub.Unsubscribe()
 	rmsgC := make(chan APIMsg)
 	rctx, rcancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer rcancel()
-	rsub, err := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, true, false)
+	rsub, _ := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, true, false)
 	log.Trace("rsub", "id", rsub)
 	defer rsub.Unsubscribe()
 
@@ -1187,13 +1186,13 @@ func testSendSym(t *testing.T) {
 	lmsgC := make(chan APIMsg)
 	lctx, lcancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer lcancel()
-	lsub, err := clients[0].Subscribe(lctx, "pss", lmsgC, "receive", topic, false, false)
+	lsub, _ := clients[0].Subscribe(lctx, "pss", lmsgC, "receive", topic, false, false)
 	log.Trace("lsub", "id", lsub)
 	defer lsub.Unsubscribe()
 	rmsgC := make(chan APIMsg)
 	rctx, rcancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer rcancel()
-	rsub, err := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, false, false)
+	rsub, _ := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, false, false)
 	log.Trace("rsub", "id", rsub)
 	defer rsub.Unsubscribe()
 
@@ -1302,13 +1301,13 @@ func testSendAsym(t *testing.T) {
 	lmsgC := make(chan APIMsg)
 	lctx, lcancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer lcancel()
-	lsub, err := clients[0].Subscribe(lctx, "pss", lmsgC, "receive", topic, false, false)
+	lsub, _ := clients[0].Subscribe(lctx, "pss", lmsgC, "receive", topic, false, false)
 	log.Trace("lsub", "id", lsub)
 	defer lsub.Unsubscribe()
 	rmsgC := make(chan APIMsg)
 	rctx, rcancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer rcancel()
-	rsub, err := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, false, false)
+	rsub, _ := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, false, false)
 	log.Trace("rsub", "id", rsub)
 	defer rsub.Unsubscribe()
 
@@ -1359,7 +1358,8 @@ type Job struct {
 
 func worker(id int, jobs <-chan Job, rpcs map[enode.ID]*rpc.Client, pubkeys map[enode.ID]string, topic string) {
 	for j := range jobs {
-		rpcs[j.SendNode].Call(nil, "pss_sendAsym", pubkeys[j.RecvNode], topic, hexutil.Encode(j.Msg))
+		_ = rpcs[j.SendNode].Call(nil, "pss_sendAsym", pubkeys[j.RecvNode],
+			topic, hexutil.Encode(j.Msg))
 	}
 }
 
@@ -1456,10 +1456,10 @@ func testNetwork(t *testing.T) {
 		t.Fatal(err)
 	}
 	err = net.Load(&snap)
-	if err != nil {
-		//TODO: Fix p2p simulation framework to not crash when loading 32-nodes
-		//t.Fatal(err)
-	}
+	//if err != nil {
+	//TODO: Fix p2p simulation framework to not crash when loading 32-nodes
+	//t.Fatal(err)
+	//}
 
 	time.Sleep(1 * time.Second)
 
@@ -1639,7 +1639,7 @@ func TestDeduplication(t *testing.T) {
 	rmsgC := make(chan APIMsg)
 	rctx, cancel := context.WithTimeout(context.Background(), time.Second*1)
 	defer cancel()
-	rsub, err := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, false, false)
+	rsub, _ := clients[1].Subscribe(rctx, "pss", rmsgC, "receive", topic, false, false)
 	log.Trace("rsub", "id", rsub)
 	defer rsub.Unsubscribe()
 
@@ -1696,8 +1696,8 @@ func benchmarkSymKeySend(b *testing.B) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	keys, err := wapi.NewKeyPair(ctx)
-	privkey, err := w.GetPrivateKey(keys)
+	keys, _ := wapi.NewKeyPair(ctx)
+	privkey, _ := w.GetPrivateKey(keys)
 	ps := newTestPss(privkey, nil, nil)
 	defer ps.Stop()
 	msg := make([]byte, msgsize)
@@ -1713,11 +1713,11 @@ func benchmarkSymKeySend(b *testing.B) {
 	if err != nil {
 		b.Fatalf("could not retrieve symkey: %v", err)
 	}
-	ps.SetSymmetricKey(symkey, topic, to, false)
+	_, _ = ps.SetSymmetricKey(symkey, topic, to, false)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ps.SendSym(symkeyid, topic, msg)
+		_ = ps.SendSym(symkeyid, topic, msg)
 	}
 }
 
@@ -1741,8 +1741,8 @@ func benchmarkAsymKeySend(b *testing.B) {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	keys, err := wapi.NewKeyPair(ctx)
-	privkey, err := w.GetPrivateKey(keys)
+	keys, _ := wapi.NewKeyPair(ctx)
+	privkey, _ := w.GetPrivateKey(keys)
 	ps := newTestPss(privkey, nil, nil)
 	defer ps.Stop()
 	msg := make([]byte, msgsize)
@@ -1750,12 +1750,13 @@ func benchmarkAsymKeySend(b *testing.B) {
 	topic := BytesToTopic([]byte("foo"))
 	to := make(PssAddress, 32)
 	copy(to[:], network.RandomAddr().Over())
-	ps.SetPeerPublicKey(&privkey.PublicKey, topic, to)
+	_ = ps.SetPeerPublicKey(&privkey.PublicKey, topic, to)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ps.SendAsym(common.ToHex(crypto.FromECDSAPub(&privkey.PublicKey)), topic, msg)
+		_ = ps.SendAsym(hexutil.Encode(crypto.FromECDSAPub(&privkey.PublicKey)), topic, msg)
 	}
 }
+
 func BenchmarkSymkeyBruteforceChangeaddr(b *testing.B) {
 	for i := 100; i < 100000; i = i * 10 {
 		for j := 32; j < 10000; j = j * 8 {
@@ -1788,8 +1789,8 @@ func benchmarkSymkeyBruteforceChangeaddr(b *testing.B) {
 	var keyid string
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	keys, err := wapi.NewKeyPair(ctx)
-	privkey, err := w.GetPrivateKey(keys)
+	keys, _ := wapi.NewKeyPair(ctx)
+	privkey, _ := w.GetPrivateKey(keys)
 	if cachesize > 0 {
 		ps = newTestPss(privkey, nil, &PssParams{SymKeyCacheCapacity: int(cachesize)})
 	} else {
@@ -1872,8 +1873,8 @@ func benchmarkSymkeyBruteforceSameaddr(b *testing.B) {
 	addr := make([]PssAddress, keycount)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	keys, err := wapi.NewKeyPair(ctx)
-	privkey, err := w.GetPrivateKey(keys)
+	keys, _ := wapi.NewKeyPair(ctx)
+	privkey, _ := w.GetPrivateKey(keys)
 	if cachesize > 0 {
 		ps = newTestPss(privkey, nil, &PssParams{SymKeyCacheCapacity: int(cachesize)})
 	} else {
@@ -1993,8 +1994,8 @@ func newServices(allowRaw bool) adapters.Services {
 
 			ctxlocal, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
-			keys, err := wapi.NewKeyPair(ctxlocal)
-			privkey, err := w.GetPrivateKey(keys)
+			keys, _ := wapi.NewKeyPair(ctxlocal)
+			privkey, _ := w.GetPrivateKey(keys)
 			pssp := NewPssParams().WithPrivateKey(privkey)
 			pssp.AllowRaw = allowRaw
 			pskad := kademlia(ctx.Config.ID)
@@ -2013,7 +2014,7 @@ func newServices(allowRaw bool) adapters.Services {
 				return nil, err
 			}
 			if useHandshake {
-				SetHandshakeController(ps, NewHandshakeParams())
+				_ = SetHandshakeController(ps, NewHandshakeParams())
 			}
 			ps.Register(&PingTopic, &handler{
 				f: pp.Handle,
@@ -2070,7 +2071,7 @@ func newTestPss(privkey *ecdsa.PrivateKey, kad *network.Kademlia, ppextra *PssPa
 	if err != nil {
 		return nil
 	}
-	ps.Start(nil)
+	_ = ps.Start(nil)
 
 	return ps
 }
@@ -2099,12 +2100,4 @@ func (apitest *APITest) SetSymKeys(pubkeyid string, recvsymkey []byte, sendsymke
 
 func (apitest *APITest) Clean() (int, error) {
 	return apitest.Pss.cleanKeys(), nil
-}
-
-// enableMetrics is starting InfluxDB reporter so that we collect stats when running tests locally
-func enableMetrics() {
-	metrics.Enabled = true
-	go influxdb.InfluxDBWithTags(metrics.DefaultRegistry, 1*time.Second, "http://localhost:8086", "metrics", "admin", "admin", "swarm.", map[string]string{
-		"host": "test",
-	})
 }

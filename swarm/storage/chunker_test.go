@@ -25,6 +25,7 @@ import (
 	"testing"
 
 	"github.com/energicryptocurrency/energi/swarm/testutil"
+
 	"golang.org/x/crypto/sha3"
 )
 
@@ -267,7 +268,7 @@ func benchReadAll(reader LazySectionReader) {
 	size, _ := reader.Size(context.TODO(), nil)
 	output := make([]byte, 1000)
 	for pos := int64(0); pos < size; pos += 1000 {
-		reader.ReadAt(output, pos)
+		_, _ = reader.ReadAt(output, pos)
 	}
 }
 

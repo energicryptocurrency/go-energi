@@ -687,6 +687,6 @@ func TestNetStoreFetcherLifeCycleWithTimeout(t *testing.T) {
 
 func randomAddr() Address {
 	addr := make([]byte, 32)
-	rand.Read(addr)
+	_, _ = rand.Read(addr)
 	return Address(addr)
 }

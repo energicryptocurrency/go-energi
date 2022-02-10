@@ -132,7 +132,7 @@ func newTester(t *testing.T, confOverride func(*eth.Config)) *tester {
 	}
 	// Create the final tester and return
 	var ethereum *eth.Ethereum
-	stack.Service(&ethereum)
+	_ = stack.Service(&ethereum)
 
 	return &tester{
 		workspace: workspace,
@@ -187,7 +187,7 @@ func TestEvaluate(t *testing.T) {
 	tester := newTester(t, nil)
 	defer tester.Close(t)
 
-	tester.console.Evaluate("2 + 2")
+	_ = tester.console.Evaluate("2 + 2")
 	if output := tester.output.String(); !strings.Contains(output, "4") {
 		t.Fatalf("statement evaluation failed: have %s, want %s", output, "4")
 	}
@@ -229,7 +229,7 @@ func TestPreload(t *testing.T) {
 	tester := newTester(t, nil)
 	defer tester.Close(t)
 
-	tester.console.Evaluate("preloaded")
+	_ = tester.console.Evaluate("preloaded")
 	if output := tester.output.String(); !strings.Contains(output, "some-preloaded-string") {
 		t.Fatalf("preloaded variable missing: have %s, want %s", output, "some-preloaded-string")
 	}
@@ -240,9 +240,9 @@ func TestExecute(t *testing.T) {
 	tester := newTester(t, nil)
 	defer tester.Close(t)
 
-	tester.console.Execute("exec.js")
+	_ = tester.console.Execute("exec.js")
 
-	tester.console.Evaluate("execed")
+	_ = tester.console.Evaluate("execed")
 	if output := tester.output.String(); !strings.Contains(output, "some-executed-string") {
 		t.Fatalf("execed variable missing: have %s, want %s", output, "some-executed-string")
 	}
@@ -254,7 +254,7 @@ func TestPrettyPrint(t *testing.T) {
 	tester := newTester(t, nil)
 	defer tester.Close(t)
 
-	tester.console.Evaluate("obj = {int: 1, string: 'two', list: [3, 3, 3], obj: {null: null, func: function(){}}}")
+	_ = tester.console.Evaluate("obj = {int: 1, string: 'two', list: [3, 3, 3], obj: {null: null, func: function(){}}}")
 
 	// Define some specially formatted fields
 	var (
@@ -284,7 +284,7 @@ func TestPrettyPrint(t *testing.T) {
 func TestPrettyError(t *testing.T) {
 	tester := newTester(t, nil)
 	defer tester.Close(t)
-	tester.console.Evaluate("throw 'hello'")
+	_ = tester.console.Evaluate("throw 'hello'")
 
 	want := jsre.ErrorColor("hello") + "\n"
 	if output := tester.output.String(); output != want {

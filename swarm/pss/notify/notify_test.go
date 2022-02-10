@@ -149,7 +149,7 @@ func TestStart(t *testing.T) {
 	updateMsg := []byte{}
 	ctrlClient := NewController(psses[rightPub])
 	ctrlNotifier := NewController(psses[leftPub])
-	ctrlNotifier.NewNotifier("foo.eth", 2, updateC)
+	_, _ = ctrlNotifier.NewNotifier("foo.eth", 2, updateC)
 
 	pubkeybytes, err := hexutil.Decode(leftPub)
 	if err != nil {
@@ -163,7 +163,7 @@ func TestStart(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctrlClient.Subscribe(rsrcName, pubkey, addrbytes, func(s string, b []byte) error {
+	_ = ctrlClient.Subscribe(rsrcName, pubkey, addrbytes, func(s string, b []byte) error {
 		if s != "foo.eth" || !bytes.Equal(updateMsg, b) {
 			t.Fatalf("unexpected result in client handler: '%s':'%x'", s, b)
 		}

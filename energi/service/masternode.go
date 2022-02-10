@@ -27,16 +27,15 @@ import (
 	"github.com/energicryptocurrency/energi/core"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/eth"
 	"github.com/energicryptocurrency/energi/eth/downloader"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/node"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rpc"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 var (
@@ -68,9 +67,8 @@ type MasternodeService struct {
 	owner    common.Address
 	registry *energi_abi.IMasternodeRegistryV2Session
 
-	cpRegistry  *energi_abi.ICheckpointRegistrySession
-	lastCPBlock uint64
-	cpVoteChan  chan *checkpointVote
+	cpRegistry *energi_abi.ICheckpointRegistrySession
+	cpVoteChan chan *checkpointVote
 
 	nextHB   time.Time
 	features *big.Int
@@ -177,21 +175,18 @@ func (m *MasternodeService) listenDownloader() {
 	)
 	defer events.Unsubscribe()
 
-	for {
-		select {
-		case ev := <-events.Chan():
-			if ev == nil {
-				return
-			}
-			switch ev.Data.(type) {
-			case downloader.StartEvent:
-				atomic.StoreInt32(&m.inSync, 0)
-				log.Debug("Masternode is not in sync")
-			case downloader.DoneEvent, downloader.FailedEvent:
-				atomic.StoreInt32(&m.inSync, 1)
-				log.Debug("Masternode is in sync")
-				return
-			}
+	for ev := range events.Chan() {
+		if ev == nil {
+			return
+		}
+		switch ev.Data.(type) {
+		case downloader.StartEvent:
+			atomic.StoreInt32(&m.inSync, 0)
+			log.Debug("Masternode is not in sync")
+		case downloader.DoneEvent, downloader.FailedEvent:
+			atomic.StoreInt32(&m.inSync, 1)
+			log.Debug("Masternode is in sync")
+			return
 		}
 	}
 }
@@ -504,18 +499,18 @@ func (v *peerValidator) validate() {
 			}
 			// TODO: validate block availability as per MN-14
 			return
-		case <-time.After(deadline.Sub(time.Now())):
+		case <-time.After(time.Until(deadline)):
 			log.Info("MN Invalidation", "mn", v.target)
 
 			// TODO: an excepted, but not seen before problem on scale got identified.
-			log.Warn("Invalidations are temporary disabled.")
+			log.Warn("Invalidations are temporarily disabled.")
 			return
 
-			_, err := mnsvc.registry.Invalidate(v.target)
-			if err != nil {
-				log.Warn("MN Invalidate error", "mn", v.target, "err", err)
-			}
-			return
+			//_, err := mnsvc.registry.Invalidate(v.target)
+			//if err != nil {
+			//	log.Warn("MN Invalidate error", "mn", v.target, "err", err)
+			//}
+			//return
 		}
 	}
 }

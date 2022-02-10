@@ -17,9 +17,7 @@
 
 package storage
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type Storage interface {
 	// Put stores a value by key. 0-length keys results in no-op
@@ -31,8 +29,7 @@ type Storage interface {
 // EphemeralStorage is an in-memory storage that does
 // not persist values to disk. Mainly used for testing
 type EphemeralStorage struct {
-	data      map[string]string
-	namespace string
+	data map[string]string
 }
 
 func (s *EphemeralStorage) Put(key, value string) {

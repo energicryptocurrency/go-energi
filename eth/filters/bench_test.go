@@ -99,7 +99,7 @@ func benchmarkBloomBits(b *testing.B, sectionSize uint64) {
 			if header == nil {
 				b.Fatalf("Error creating bloomBits data")
 			}
-			bc.AddBloom(uint(i-sectionIdx*sectionSize), header.Bloom)
+			_ = bc.AddBloom(uint(i-sectionIdx*sectionSize), header.Bloom)
 		}
 		sectionHead := rawdb.ReadCanonicalHash(db, (sectionIdx+1)*sectionSize-1)
 		for i := 0; i < types.BloomBitLength; i++ {
@@ -170,7 +170,7 @@ var bloomBitsPrefix = []byte("bloomBits-")
 func clearBloomBits(db ethdb.Database) {
 	fmt.Println("Clearing bloombits data...")
 	forEachKey(db, bloomBitsPrefix, bloomBitsPrefix, func(key []byte) {
-		db.Delete(key)
+		_ = db.Delete(key)
 	})
 }
 
@@ -194,7 +194,7 @@ func BenchmarkNoBloomBits(b *testing.B) {
 	mux := new(event.TypeMux)
 	backend := &testBackend{mux, db, 0, new(event.Feed), new(event.Feed), new(event.Feed), new(event.Feed)}
 	filter := NewRangeFilter(backend, 0, int64(*headNum), []common.Address{{}}, nil)
-	filter.Logs(context.Background())
+	_, _ = filter.Logs(context.Background())
 	d := time.Since(start)
 	fmt.Println("Finished running filter benchmarks")
 	fmt.Println(" ", d, "total  ", d*time.Duration(1000000)/time.Duration(*headNum+1), "per million blocks")

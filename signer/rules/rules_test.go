@@ -277,12 +277,12 @@ func TestForwarding(t *testing.T) {
 	if err = r.Init(js); err != nil {
 		t.Fatalf("Failed to load bootstrap js: %v", err)
 	}
-	r.ApproveSignData(nil)
-	r.ApproveTx(nil)
-	r.ApproveImport(nil)
-	r.ApproveNewAccount(nil)
-	r.ApproveListing(nil)
-	r.ApproveExport(nil)
+	_, _ = r.ApproveSignData(nil)
+	_, _ = r.ApproveTx(nil)
+	_, _ = r.ApproveImport(nil)
+	_, _ = r.ApproveNewAccount(nil)
+	_, _ = r.ApproveListing(nil)
+	_, _ = r.ApproveExport(nil)
 	r.ShowError("test")
 	r.ShowInfo("test")
 

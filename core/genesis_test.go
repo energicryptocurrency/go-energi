@@ -28,6 +28,7 @@ import (
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/ethdb"
 	"github.com/energicryptocurrency/energi/params"
+
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -160,7 +161,7 @@ func TestSetupGenesis(t *testing.T) {
 				defer bc.Stop()
 
 				blocks, _ := GenerateChain(oldcustomg.Config, genesis, ethash.NewFaker(), db, 4, nil)
-				bc.InsertChain(blocks)
+				_, _ = bc.InsertChain(blocks)
 				bc.CurrentBlock()
 				// This should return a compatibility error.
 				return SetupGenesisBlock(db, &customg)

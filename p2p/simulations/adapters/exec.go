@@ -19,7 +19,6 @@ package adapters
 import (
 	"bytes"
 	"context"
-	"crypto/ecdsa"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -40,6 +39,7 @@ import (
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/p2p/enode"
 	"github.com/energicryptocurrency/energi/rpc"
+
 	"github.com/docker/docker/pkg/reexec"
 	"golang.org/x/net/websocket"
 )
@@ -135,7 +135,6 @@ type ExecNode struct {
 	client  *rpc.Client
 	wsAddr  string
 	newCmd  func() *exec.Cmd
-	key     *ecdsa.PrivateKey
 }
 
 // Addr returns the node's enode URL

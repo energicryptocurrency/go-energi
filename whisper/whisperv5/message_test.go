@@ -186,7 +186,7 @@ func TestMessageSeal(t *testing.T) {
 	target := 32.0
 	params.WorkTime = 4
 	params.PoW = target
-	env.Seal(params)
+	_ = env.Seal(params)
 
 	env.calculatePoW(0)
 	pow := env.PoW()
@@ -196,7 +196,7 @@ func TestMessageSeal(t *testing.T) {
 
 	params.WorkTime = 1
 	params.PoW = 1000000000.0
-	env.Seal(params)
+	_ = env.Seal(params)
 	env.calculatePoW(0)
 	pow = env.PoW()
 	if pow < 2*target {
@@ -344,7 +344,7 @@ func TestRlpEncode(t *testing.T) {
 	}
 
 	var decoded Envelope
-	rlp.DecodeBytes(raw, &decoded)
+	err = rlp.DecodeBytes(raw, &decoded)
 	if err != nil {
 		t.Fatalf("RLP decode failed: %s.", err)
 	}

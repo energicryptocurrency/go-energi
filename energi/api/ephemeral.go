@@ -22,19 +22,17 @@ import (
 	"math/big"
 
 	ethereum "github.com/energicryptocurrency/energi"
-
 	"github.com/energicryptocurrency/energi/accounts"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/event"
-
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/event"
 )
 
 type EphemeralWallet struct{}
 
 func (ew *EphemeralWallet) URL() accounts.URL {
-	return accounts.URL{"ephemeral", ""}
+	return accounts.URL{Scheme: "ephemeral"}
 }
 
 func (ew *EphemeralWallet) Status() (string, error) {
@@ -51,7 +49,7 @@ func (ew *EphemeralWallet) Close() error {
 
 func (ew *EphemeralWallet) Accounts() []accounts.Account {
 	return []accounts.Account{
-		{energi_params.Energi_Ephemeral, ew.URL()},
+		{Address: energi_params.Energi_Ephemeral, URL: ew.URL()},
 	}
 }
 

@@ -22,9 +22,8 @@ import (
 	"strconv"
 
 	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
-
 	"github.com/energicryptocurrency/energi/swarm/storage"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 )
 
 // ID uniquely identifies an update on the network.
@@ -71,7 +70,7 @@ func (u *ID) binaryPut(serializedData []byte) error {
 		return err
 	}
 	copy(serializedData[cursor:cursor+lookup.EpochLength], epochBytes[:])
-	cursor += lookup.EpochLength
+	//cursor += lookup.EpochLength
 
 	return nil
 }
@@ -96,7 +95,7 @@ func (u *ID) binaryGet(serializedData []byte) error {
 	if err := u.Epoch.UnmarshalBinary(serializedData[cursor : cursor+lookup.EpochLength]); err != nil {
 		return err
 	}
-	cursor += lookup.EpochLength
+	//cursor += lookup.EpochLength
 
 	return nil
 }

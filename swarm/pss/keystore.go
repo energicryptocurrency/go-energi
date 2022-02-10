@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/energicryptocurrency/energi/swarm/log"
@@ -91,7 +91,7 @@ func (ks *KeyStore) SetPeerPublicKey(pubkey *ecdsa.PublicKey, topic Topic, addre
 	if len(pubkeybytes) == 0 {
 		return fmt.Errorf("invalid public key: %v", pubkey)
 	}
-	pubkeyid := common.ToHex(pubkeybytes)
+	pubkeyid := hexutil.Encode(pubkeybytes)
 	psp := &pssPeer{
 		address: address,
 	}
@@ -196,7 +196,7 @@ func (ks *Pss) processAsym(envelope *whisper.Envelope) (*whisper.ReceivedMessage
 	if !recvmsg.ValidateAndParse() {
 		return nil, "", nil, errors.New("invalid message")
 	}
-	pubkeyid := common.ToHex(crypto.FromECDSAPub(recvmsg.Src))
+	pubkeyid := hexutil.Encode(crypto.FromECDSAPub(recvmsg.Src))
 	var from PssAddress
 	ks.mx.RLock()
 	if ks.pubKeyPool[pubkeyid][Topic(envelope.Topic)] != nil {

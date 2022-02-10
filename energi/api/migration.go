@@ -32,16 +32,15 @@ import (
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_consensus "github.com/energicryptocurrency/energi/energi/consensus"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/rpc"
 
 	"github.com/shengdoushi/base58"
 	"golang.org/x/crypto/ripemd160"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_consensus "github.com/energicryptocurrency/energi/energi/consensus"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 const (
@@ -493,9 +492,7 @@ func (m *MigrationAPI) ClaimGen2CoinsImport(
 			log.Warn("Failed to import private key", "err", err)
 			// Most likely key exists
 		} else {
-			select {
-			case <-sink:
-			}
+			<-sink
 		}
 
 		evtsub.Unsubscribe()
