@@ -35,13 +35,12 @@ import (
 	"github.com/energicryptocurrency/energi/core/state"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/ethdb"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
 	"github.com/energicryptocurrency/energi/rlp"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -455,6 +454,9 @@ func DefaultEnergiTestnetGenesisBlock() *Genesis {
 // file path.
 func DeveloperEnergiGenesisBlock(customGenesisPath string) (*Genesis, error) {
 	file, err := os.Open(customGenesisPath)
+	if err != nil {
+		return nil, err
+	}
 	defer file.Close()
 	if err != nil {
 		return nil, fmt.Errorf("Failed to read genesis file: %v", err)

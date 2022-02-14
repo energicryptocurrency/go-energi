@@ -501,7 +501,7 @@ func (api *SignerAPI) SignTransaction(ctx context.Context, args SendTxArgs, meth
 		return nil, err
 	}
 
-	rlpdata, err := rlp.EncodeToBytes(signedTx)
+	rlpdata, _ := rlp.EncodeToBytes(signedTx)
 	response := ethapi.SignTransactionResult{Raw: rlpdata, Tx: signedTx}
 
 	// Finally, send the signed tx to the UI

@@ -332,7 +332,7 @@ func (msg *ReceivedMessage) extractPadding(end int) (int, bool) {
 
 // SigToPubKey retrieves the public key of the message signer.
 func (msg *ReceivedMessage) SigToPubKey() *ecdsa.PublicKey {
-	defer func() { recover() }() // in case of invalid signature
+	defer func() { _ = recover() }() // in case of invalid signature
 
 	pub, err := crypto.SigToPub(msg.hash(), msg.Signature)
 	if err != nil {

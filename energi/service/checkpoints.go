@@ -23,17 +23,16 @@ import (
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/eth"
 	"github.com/energicryptocurrency/energi/eth/downloader"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/node"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rpc"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_api "github.com/energicryptocurrency/energi/energi/api"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 const (
@@ -47,23 +46,21 @@ type CheckpointProposalEvent struct {
 
 type CheckpointService struct {
 	eth        *eth.Ethereum
-	ctx        context.Context
-	ctxCancel  func()
 	cpRegistry *energi_abi.ICheckpointRegistry
 	cpAPI      *energi_api.CheckpointRegistryAPI
 }
 
 func NewCheckpointService(ethServ *eth.Ethereum) (node.Service, error) {
 	c := &CheckpointService{
-		eth:      ethServ,
-		cpAPI:    energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
+		eth:   ethServ,
+		cpAPI: energi_api.NewCheckpointRegistryAPI(ethServ.APIBackend),
 	}
 
 	//initialize Icheckpointregistry for further calls
 	var err error
 	c.cpRegistry, err = energi_abi.NewICheckpointRegistry(energi_params.Energi_CheckpointRegistry, c.eth.APIBackend)
 	if err != nil {
-		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err);
+		log.Error("Failed to get create NewICheckpointkRegistry (startup)", "err", err)
 		return nil, err
 	}
 
@@ -106,24 +103,22 @@ func (c *CheckpointService) waitDownloader() bool {
 	)
 	defer events.Unsubscribe()
 
-	for {
-		select {
-		case ev := <-events.Chan():
-			if ev == nil {
-				return false
-			}
-			switch ev.Data.(type) {
-			case downloader.StartEvent:
-				log.Debug("Checkpoint service is not in sync")
-				continue
-			case downloader.DoneEvent:
-				log.Debug("Checkpoint service is in sync")
-				return true
-			case downloader.FailedEvent:
-				return c.eth.BlockChain().IsRunning()
-			}
+	for ev := range events.Chan() {
+		if ev == nil {
+			return false
+		}
+		switch ev.Data.(type) {
+		case downloader.StartEvent:
+			log.Debug("Checkpoint service is not in sync")
+			continue
+		case downloader.DoneEvent:
+			log.Debug("Checkpoint service is in sync")
+			return true
+		case downloader.FailedEvent:
+			return c.eth.BlockChain().IsRunning()
 		}
 	}
+	return false
 }
 
 func (c *CheckpointService) watchCheckpoints() {

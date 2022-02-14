@@ -71,7 +71,7 @@ func TestUnsubscribeUnblockPost(t *testing.T) {
 	sub := mux.Subscribe(testEvent(0))
 	unblocked := make(chan bool)
 	go func() {
-		mux.Post(testEvent(5))
+		_ = mux.Post(testEvent(5))
 		unblocked <- true
 	}()
 
@@ -171,7 +171,7 @@ func BenchmarkPost1000(b *testing.B) {
 	// The actual benchmark.
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		mux.Post(testEvent(0))
+		_ = mux.Post(testEvent(0))
 	}
 
 	b.StopTimer()
@@ -189,7 +189,7 @@ func BenchmarkPostConcurrent(b *testing.B) {
 	var wg sync.WaitGroup
 	poster := func() {
 		for i := 0; i < b.N; i++ {
-			mux.Post(testEvent(0))
+			_ = mux.Post(testEvent(0))
 		}
 		wg.Done()
 	}

@@ -21,13 +21,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"sync"
 	"testing"
 	"time"
 )
 
 type NotificationTestService struct {
-	mu                      sync.Mutex
 	unsubscribed            chan string
 	gotHangSubscriptionReq  chan struct{}
 	unblockHangSubscription chan struct{}
@@ -89,7 +87,7 @@ func (s *NotificationTestService) HangSubscription(ctx context.Context, val int)
 	subscription := notifier.CreateSubscription()
 
 	go func() {
-		notifier.Notify(subscription.ID, val)
+		_ = notifier.Notify(subscription.ID, val)
 	}()
 	return subscription, nil
 }

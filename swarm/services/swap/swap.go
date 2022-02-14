@@ -29,6 +29,7 @@ import (
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/contracts/chequebook"
 	"github.com/energicryptocurrency/energi/contracts/chequebook/contract"
 	"github.com/energicryptocurrency/energi/core/types"
@@ -112,7 +113,7 @@ func (lp *LocalProfile) Init(contract common.Address, prvkey *ecdsa.PrivateKey) 
 	pubkey := &prvkey.PublicKey
 
 	lp.PayProfile = &PayProfile{
-		PublicKey:   common.ToHex(crypto.FromECDSAPub(pubkey)),
+		PublicKey:   hexutil.Encode(crypto.FromECDSAPub(pubkey)),
 		Contract:    contract,
 		Beneficiary: crypto.PubkeyToAddress(*pubkey),
 		privateKey:  prvkey,

@@ -26,6 +26,7 @@ import (
 	"sync/atomic"
 
 	"github.com/energicryptocurrency/energi/log"
+
 	mapset "github.com/deckarep/golang-set"
 )
 
@@ -50,10 +51,10 @@ func NewServer() *Server {
 		run:      1,
 	}
 
-	// register a default service which will provide meta information about the RPC service such as the services and
-	// methods it offers.
+	// register a default service which will provide meta information about the RPC
+	// service such as the services and methods it offers.
 	rpcService := &RPCService{server}
-	server.RegisterName(MetadataApi, rpcService)
+	_ = server.RegisterName(MetadataApi, rpcService)
 
 	return server
 }

@@ -107,12 +107,12 @@ func testAccess(t *testing.T, protocol int, fn accessTestFn) {
 	}
 
 	// temporarily remove peer to test odr fails
-	client.peers.Unregister(client.rPeer.id)
+	_ = client.peers.Unregister(client.rPeer.id)
 	time.Sleep(time.Millisecond * 10) // ensure that all peerSetNotify callbacks are executed
 	// expect retrievals to fail (except genesis block) without a les peer
 	test(0)
 
-	client.peers.Register(client.rPeer)
+	_ = client.peers.Register(client.rPeer)
 	time.Sleep(time.Millisecond * 10) // ensure that all peerSetNotify callbacks are executed
 	client.rPeer.lock.Lock()
 	client.rPeer.hasBlock = func(common.Hash, uint64, bool) bool { return true }

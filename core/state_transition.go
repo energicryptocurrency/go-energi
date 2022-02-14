@@ -28,10 +28,7 @@ import (
 	"github.com/energicryptocurrency/energi/params"
 )
 
-var (
-	errInsufficientBalanceForGas = errors.New("insufficient balance to pay for gas")
-	genesisNumber                = big.NewInt(0)
-)
+var errInsufficientBalanceForGas = errors.New("insufficient balance to pay for gas")
 
 /*
 The State Transitioning Model

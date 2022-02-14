@@ -27,15 +27,14 @@ import (
 	"time"
 	"unicode"
 
-	cli "gopkg.in/urfave/cli.v1"
-
 	"github.com/energicryptocurrency/energi/cmd/utils"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/node"
-	"github.com/naoina/toml"
-
 	bzzapi "github.com/energicryptocurrency/energi/swarm/api"
+
+	"github.com/naoina/toml"
+	cli "gopkg.in/urfave/cli.v1"
 )
 
 var (
@@ -74,8 +73,6 @@ const (
 	SWARM_ENV_ENS_API                 = "SWARM_ENS_API"
 	SWARM_ENV_ENS_ADDR                = "SWARM_ENS_ADDR"
 	SWARM_ENV_CORS                    = "SWARM_CORS"
-	SWARM_ENV_BOOTNODES               = "SWARM_BOOTNODES"
-	SWARM_ENV_PSS_ENABLE              = "SWARM_PSS_ENABLE"
 	SWARM_ENV_STORE_PATH              = "SWARM_STORE_PATH"
 	SWARM_ENV_STORE_CAPACITY          = "SWARM_STORE_CAPACITY"
 	SWARM_ENV_STORE_CACHE_CAPACITY    = "SWARM_STORE_CACHE_CAPACITY"
@@ -97,7 +94,8 @@ var tomlSettings = toml.Config{
 	MissingField: func(rt reflect.Type, field string) error {
 		link := ""
 		if unicode.IsUpper(rune(rt.Name()[0])) && rt.PkgPath() != "main" {
-			link = fmt.Sprintf(", check github.com/energicryptocurrency/energi/swarm/api/config.go for available fields")
+			link = ", check github.com/energicryptocurrency/energi/swarm/api/config.go" +
+				" for available fields"
 		}
 		return fmt.Errorf("field '%s' is not defined in %s%s", field, rt.String(), link)
 	},

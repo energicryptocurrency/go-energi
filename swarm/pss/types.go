@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rlp"
@@ -155,7 +154,7 @@ func (msg *PssMsg) serialize() []byte {
 
 // String representation of PssMsg
 func (msg *PssMsg) String() string {
-	return fmt.Sprintf("PssMsg: Recipient: %x", common.ToHex(msg.To))
+	return fmt.Sprintf("PssMsg: Recipient: %x", hexutil.Encode(msg.To))
 }
 
 // Signature for a message handler function for a PssMsg
@@ -191,20 +190,6 @@ func (h *handler) WithRaw() *handler {
 func (h *handler) WithProxBin() *handler {
 	h.caps.prox = true
 	return h
-}
-
-// the stateStore handles saving and loading PSS peers and their corresponding keys
-// it is currently unimplemented
-type stateStore struct {
-	values map[string][]byte
-}
-
-func (store *stateStore) Load(key string) ([]byte, error) {
-	return nil, nil
-}
-
-func (store *stateStore) Save(key string, v []byte) error {
-	return nil
 }
 
 // BytesToTopic hashes an arbitrary length byte slice and truncates it to the length of a topic, using only the first bytes of the digest

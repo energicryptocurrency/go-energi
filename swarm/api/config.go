@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/contracts/ens"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/node"
@@ -116,7 +117,7 @@ func (c *Config) Init(prvKey *ecdsa.PrivateKey) {
 	}
 
 	pubkey := crypto.FromECDSAPub(&prvKey.PublicKey)
-	pubkeyhex := common.ToHex(pubkey)
+	pubkeyhex := hexutil.Encode(pubkey)
 	keyhex := crypto.Keccak256Hash(pubkey).Hex()
 
 	c.PublicKey = pubkeyhex

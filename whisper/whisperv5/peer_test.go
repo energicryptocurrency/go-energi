@@ -111,8 +111,8 @@ func initialize(t *testing.T) {
 	for i := 0; i < NumNodes; i++ {
 		var node TestNode
 		node.shh = New(&DefaultConfig)
-		node.shh.SetMinimumPoW(0.00000001)
-		node.shh.Start(nil)
+		_ = node.shh.SetMinimumPoW(0.00000001)
+		_ = node.shh.Start(nil)
 		topics := make([]TopicType, 0)
 		topics = append(topics, sharedTopic)
 		f := Filter{KeySym: sharedKey}
@@ -158,8 +158,8 @@ func stopServers() {
 	for i := 0; i < NumNodes; i++ {
 		n := nodes[i]
 		if n != nil {
-			n.shh.Unsubscribe(n.filerId)
-			n.shh.Stop()
+			_ = n.shh.Unsubscribe(n.filerId)
+			_ = n.shh.Stop()
 			n.server.Stop()
 		}
 	}

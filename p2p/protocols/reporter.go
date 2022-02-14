@@ -50,8 +50,9 @@ type reporter struct {
 
 //NewMetricsDB creates a new LevelDB instance used to persist metrics defined
 //inside p2p/protocols/accounting.go
-func NewAccountingMetrics(r metrics.Registry, d time.Duration, path string) *AccountingMetrics {
-	var val = make([]byte, 8)
+func NewAccountingMetrics(r metrics.Registry, d time.Duration,
+	path string) *AccountingMetrics {
+	var val []byte
 	var err error
 
 	//Create the LevelDB

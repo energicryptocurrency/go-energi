@@ -25,8 +25,8 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/energicryptocurrency/energi/swarm/testutil"
-	"github.com/pborman/uuid"
 
+	"github.com/pborman/uuid"
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -58,7 +58,6 @@ func slidingWindowCmd(ctx *cli.Context, tuid string) error {
 func slidingWindow(ctx *cli.Context, tuid string) error {
 	hashes := []uploadResult{} //swarm hashes of the uploads
 	nodes := len(hosts)
-	const iterationTimeout = 30 * time.Second
 	log.Info("sliding window test started", "tuid", tuid, "nodes", nodes, "filesize(kb)", filesize, "timeout", timeout)
 	uploadedBytes := 0
 	networkDepth := 0

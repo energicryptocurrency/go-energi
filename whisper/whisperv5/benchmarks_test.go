@@ -24,7 +24,7 @@ import (
 
 func BenchmarkDeriveKeyMaterial(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		deriveKeyMaterial([]byte("test"), 0)
+		_, _ = deriveKeyMaterial([]byte("test"), 0)
 	}
 }
 

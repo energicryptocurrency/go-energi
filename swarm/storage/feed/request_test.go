@@ -226,7 +226,7 @@ func TestUpdateChunkSerializationErrorChecking(t *testing.T) {
 	compareByteSliceToExpectedHex(t, "chunk", chunk.Data(), "0x0000000000000000776f726c64206e657773207265706f72742c20657665727920686f7572000000876a8936a7cd0b79ef0735ad0896c1afe278781ce803000000000019416c206269656e206861636572206a616dc3a173206c652066616c7461207072656d696f5a0ffe0bc27f207cd5b00944c8b9cee93e08b89b5ada777f123ac535189333f174a6a4ca2f43a92c4a477a49d774813c36ce8288552c58e6205b0ac35d0507eb00")
 
 	var recovered Request
-	recovered.fromChunk(chunk)
+	_ = recovered.fromChunk(chunk)
 	if !reflect.DeepEqual(recovered, r) {
 		t.Fatal("Expected recovered feed update request to equal the original one")
 	}

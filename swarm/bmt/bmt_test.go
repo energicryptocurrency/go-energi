@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/energicryptocurrency/energi/swarm/testutil"
+
 	"golang.org/x/crypto/sha3"
 )
 
@@ -522,7 +523,7 @@ func benchmarkRefHasher(t *testing.B, n int) {
 // Hash hashes the data and the span using the bmt hasher
 func syncHash(h *Hasher, span, data []byte) []byte {
 	h.ResetWithLength(span)
-	h.Write(data)
+	_, _ = h.Write(data)
 	return h.Sum(nil)
 }
 

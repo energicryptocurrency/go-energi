@@ -75,18 +75,20 @@ func (v *Validator) validateCallData(msgs *ValidationMessages, data []byte, meth
 	if methodSelector != nil {
 		info, err = testSelector(*methodSelector, data)
 		if err != nil {
-			msgs.warn(fmt.Sprintf("Tx contains data, but provided ABI signature could not be matched: %v", err))
+			msgs.warn(fmt.Sprintf("Tx contains data, but provided ABI signature "+
+				"could not be matched: %v", err))
 		} else {
 			msgs.info(info.String())
 			//Successfull match. add to db if not there already (ignore errors there)
-			v.db.AddSignature(*methodSelector, data[:4])
+			_ = v.db.AddSignature(*methodSelector, data[:4])
 		}
 		return
 	}
 	// Check the db
 	selector, err := v.db.LookupMethodSelector(data[:4])
 	if err != nil {
-		msgs.warn(fmt.Sprintf("Tx contains data, but the ABI signature could not be found: %v", err))
+		msgs.warn(fmt.Sprintf("Tx contains data, but the ABI signature "+
+			"could not be found: %v", err))
 		return
 	}
 	info, err = testSelector(selector, data)

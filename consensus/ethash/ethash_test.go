@@ -89,7 +89,7 @@ func verifyTest(wg *sync.WaitGroup, e *Ethash, workerIndex, epochs int) {
 			block = 0
 		}
 		header := &types.Header{Number: big.NewInt(block), Difficulty: big.NewInt(100)}
-		e.VerifySeal(nil, header)
+		_ = e.VerifySeal(nil, header)
 	}
 }
 
@@ -107,7 +107,7 @@ func TestRemoteSealer(t *testing.T) {
 
 	// Push new work.
 	results := make(chan *consensus.SealResult)
-	ethash.Seal(nil, block, results, nil)
+	_ = ethash.Seal(nil, block, results, nil)
 
 	var (
 		work [4]string
@@ -124,7 +124,7 @@ func TestRemoteSealer(t *testing.T) {
 	header = &types.Header{Number: big.NewInt(1), Difficulty: big.NewInt(1000)}
 	block = types.NewBlockWithHeader(header)
 	sealhash = ethash.SealHash(header)
-	ethash.Seal(nil, block, results, nil)
+	_ = ethash.Seal(nil, block, results, nil)
 
 	if work, err = api.GetWork(); err != nil || work[0] != sealhash.Hex() {
 		t.Error("expect to return the latest pushed work")

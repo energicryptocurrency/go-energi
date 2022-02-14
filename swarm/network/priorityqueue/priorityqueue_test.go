@@ -32,7 +32,7 @@ func TestPriorityQueue(t *testing.T) {
 		results = append(results, v.(string))
 		wg.Done()
 	})
-	pq.Push("2.0", 2)
+	_ = pq.Push("2.0", 2)
 	wg.Wait()
 	if results[0] != "2.0" {
 		t.Errorf("expected first result %q, got %q", "2.0", results[0])

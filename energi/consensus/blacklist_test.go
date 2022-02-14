@@ -30,15 +30,12 @@ import (
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/ethdb"
-
-	// "github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
 
 	"github.com/stretchr/testify/assert"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 func TestBlacklist(t *testing.T) {
@@ -124,7 +121,7 @@ func TestBlacklist(t *testing.T) {
 	evm := engine.createEVM(msg, chain, header, blstate)
 	gp := new(core.GasPool).AddGas(engine.callGas)
 	// log.Trace("depositCollateral")
-	core.ApplyMessage(evm, msg, gp)
+	_, _, _, _ = core.ApplyMessage(evm, msg, gp)
 	//---
 	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	callData, err = mnreg_abi.Pack("announce", blacklist_addr1, uint32(130<<24), [2][32]byte{})
@@ -146,7 +143,7 @@ func TestBlacklist(t *testing.T) {
 
 	header.Number.Add(header.Number, common.Big1)
 	header.Time += 2*24*60*60 + 1
-	evm = engine.createEVM(msg, chain, header, blstate)
+	_ = engine.createEVM(msg, chain, header, blstate)
 	//---
 
 	//====================================
@@ -256,7 +253,7 @@ func TestBlacklist(t *testing.T) {
 	// log.Trace("coinbase blacklist")
 	rawdb.WriteHeader(testdb, header)
 
-	header2 := &*header
+	header2 := header
 	header2.ParentHash = header.Hash()
 	header2.Number = new(big.Int).Add(header.Number, common.Big1)
 	header2.Coinbase = blacklist_addr1
@@ -453,6 +450,6 @@ func TestBlacklist(t *testing.T) {
 	assert.Empty(t, err)
 	err = blstate.Database().TrieDB().Commit(header.Root, true)
 	assert.Empty(t, err)
-	blstate, err = chain.StateAt(header.Root)
+	_, err = chain.StateAt(header.Root)
 	assert.Empty(t, err)
 }
