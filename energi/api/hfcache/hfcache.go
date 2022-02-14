@@ -35,7 +35,7 @@ func IsHardforkActive(hardforkName string, blockNum uint64) bool {
 	hardforkCache.cacheLock.Lock()
 	defer hardforkCache.cacheLock.Unlock()
 	for _, hardfork := range hardforkCache.hardforks {
-		if hardfork.Name == hardforkName && blockNum >= hardfork.BlockNumber.Uint64() {
+		if hardfork.Name == hardforkName && blockNum > hardfork.BlockNumber.Uint64() {
 			return true
 		}
 	}
