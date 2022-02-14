@@ -234,7 +234,7 @@ func (e *Energi) VerifyHeader(
 		return nil
 	}
 
-	// check if Asgard hardfork is activated use new difficulty algorithm
+	// check if Asgard hardfork is activated and use new difficulty algorithm
 	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
 	// don't check for hard forks being active if we're testing

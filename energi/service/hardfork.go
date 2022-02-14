@@ -24,7 +24,6 @@ import (
 	"sync/atomic"
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core"
 	// "github.com/energicryptocurrency/energi/core/types"
@@ -39,8 +38,6 @@ import (
 	energi_api "github.com/energicryptocurrency/energi/energi/api"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
-
-
 )
 
 const (

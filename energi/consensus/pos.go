@@ -29,9 +29,7 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/log"
-
 	"github.com/energicryptocurrency/energi/energi/api/hfcache"
-
 )
 
 
