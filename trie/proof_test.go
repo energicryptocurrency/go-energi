@@ -40,7 +40,7 @@ func makeProvers(trie *Trie) []func(key []byte) *ethdb.MemDatabase {
 	// Create a direct trie based Merkle prover
 	provers = append(provers, func(key []byte) *ethdb.MemDatabase {
 		proof := ethdb.NewMemDatabase()
-		trie.Prove(key, 0, proof)
+		_ = trie.Prove(key, 0, proof)
 		return proof
 	})
 	// Create a leaf iterator based Merkle prover
@@ -48,7 +48,7 @@ func makeProvers(trie *Trie) []func(key []byte) *ethdb.MemDatabase {
 		proof := ethdb.NewMemDatabase()
 		if it := NewIterator(trie.NodeIterator(key)); it.Next() && bytes.Equal(key, it.Key) {
 			for _, p := range it.Prove() {
-				proof.Put(crypto.Keccak256(p), p)
+				_ = proof.Put(crypto.Keccak256(p), p)
 			}
 		}
 		return proof
@@ -108,10 +108,10 @@ func TestBadProof(t *testing.T) {
 			}
 			key := proof.Keys()[mrand.Intn(proof.Len())]
 			val, _ := proof.Get(key)
-			proof.Delete(key)
+			_ = proof.Delete(key)
 
 			mutateByte(val)
-			proof.Put(crypto.Keccak256(val), val)
+			_ = proof.Put(crypto.Keccak256(val), val)
 
 			if _, _, err := VerifyProof(root, kv.k, proof); err == nil {
 				t.Fatalf("prover %d: expected proof to fail for key %x", i, kv.k)
@@ -128,7 +128,7 @@ func TestMissingKeyProof(t *testing.T) {
 
 	for i, key := range []string{"a", "j", "l", "z"} {
 		proof := ethdb.NewMemDatabase()
-		trie.Prove([]byte(key), 0, proof)
+		_ = trie.Prove([]byte(key), 0, proof)
 
 		if proof.Len() != 1 {
 			t.Errorf("test %d: proof should have one element", i)
@@ -165,7 +165,7 @@ func BenchmarkProve(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		kv := vals[keys[i%len(keys)]]
 		proofs := ethdb.NewMemDatabase()
-		if trie.Prove(kv.k, 0, proofs); len(proofs.Keys()) == 0 {
+		if _ = trie.Prove(kv.k, 0, proofs); len(proofs.Keys()) == 0 {
 			b.Fatalf("zero length proof for %x", kv.k)
 		}
 	}
@@ -179,7 +179,7 @@ func BenchmarkVerifyProof(b *testing.B) {
 	for k := range vals {
 		keys = append(keys, k)
 		proof := ethdb.NewMemDatabase()
-		trie.Prove([]byte(k), 0, proof)
+		_ = trie.Prove([]byte(k), 0, proof)
 		proofs = append(proofs, proof)
 	}
 
@@ -213,6 +213,6 @@ func randomTrie(n int) (*Trie, map[string]*kv) {
 
 func randBytes(n int) []byte {
 	r := make([]byte, n)
-	crand.Read(r)
+	_, _ = crand.Read(r)
 	return r
 }

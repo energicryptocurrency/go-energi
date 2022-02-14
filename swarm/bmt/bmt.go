@@ -18,9 +18,7 @@
 package bmt
 
 import (
-	"fmt"
 	"hash"
-	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -193,58 +191,6 @@ func newNode(index int, parent *node, hasher hash.Hash) *node {
 		isLeft: index%2 == 0,
 		hasher: hasher,
 	}
-}
-
-// Draw draws the BMT (badly)
-func (t *tree) draw(hash []byte) string {
-	var left, right []string
-	var anc []*node
-	for i, n := range t.leaves {
-		left = append(left, fmt.Sprintf("%v", hashstr(n.left)))
-		if i%2 == 0 {
-			anc = append(anc, n.parent)
-		}
-		right = append(right, fmt.Sprintf("%v", hashstr(n.right)))
-	}
-	anc = t.leaves
-	var hashes [][]string
-	for l := 0; len(anc) > 0; l++ {
-		var nodes []*node
-		hash := []string{""}
-		for i, n := range anc {
-			hash = append(hash, fmt.Sprintf("%v|%v", hashstr(n.left), hashstr(n.right)))
-			if i%2 == 0 && n.parent != nil {
-				nodes = append(nodes, n.parent)
-			}
-		}
-		hash = append(hash, "")
-		hashes = append(hashes, hash)
-		anc = nodes
-	}
-	hashes = append(hashes, []string{"", fmt.Sprintf("%v", hashstr(hash)), ""})
-	total := 60
-	del := "                             "
-	var rows []string
-	for i := len(hashes) - 1; i >= 0; i-- {
-		var textlen int
-		hash := hashes[i]
-		for _, s := range hash {
-			textlen += len(s)
-		}
-		if total < textlen {
-			total = textlen + len(hash)
-		}
-		delsize := (total - textlen) / (len(hash) - 1)
-		if delsize > len(del) {
-			delsize = len(del)
-		}
-		row := fmt.Sprintf("%v: %v", len(hashes)-i-1, strings.Join(hash, del[:delsize]))
-		rows = append(rows, row)
-
-	}
-	rows = append(rows, strings.Join(left, "  "))
-	rows = append(rows, strings.Join(right, "  "))
-	return strings.Join(rows, "\n") + "\n"
 }
 
 // newTree initialises a tree by building up the nodes of a BMT
@@ -669,15 +615,6 @@ func doSum(h hash.Hash, b []byte, data ...[]byte) []byte {
 		h.Write(v)
 	}
 	return h.Sum(b)
-}
-
-// hashstr is a pretty printer for bytes used in tree.draw
-func hashstr(b []byte) string {
-	end := len(b)
-	if end > 4 {
-		end = 4
-	}
-	return fmt.Sprintf("%x", b[:end])
 }
 
 // calculateDepthFor calculates the depth (number of levels) in the BMT tree

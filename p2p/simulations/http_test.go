@@ -36,6 +36,7 @@ import (
 	"github.com/energicryptocurrency/energi/p2p/enode"
 	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 	"github.com/energicryptocurrency/energi/rpc"
+
 	"github.com/mattn/go-colorable"
 )
 
@@ -277,7 +278,7 @@ func (t *TestAPI) Events(ctx context.Context) (*rpc.Subscription, error) {
 		for {
 			select {
 			case event := <-events:
-				notifier.Notify(rpcSub.ID, event)
+				_ = notifier.Notify(rpcSub.ID, event)
 			case <-sub.Err():
 				return
 			case <-rpcSub.Err():

@@ -98,12 +98,12 @@ func skipPlaygroundOutputHeaders(out io.Writer, in io.Reader) {
 	output, err := bufin.ReadBytes(0)
 	output = bytes.TrimSuffix(output, []byte{0})
 	if len(output) > 0 {
-		out.Write(output)
+		_, _ = out.Write(output)
 	}
 	if err != nil {
 		return
 	}
-	bufin.UnreadByte()
+	_ = bufin.UnreadByte()
 
 	// Playback header: 0 0 P B <8-byte time> <4-byte data length>
 	head := make([]byte, 4+8+4)
@@ -116,11 +116,11 @@ func skipPlaygroundOutputHeaders(out io.Writer, in io.Reader) {
 		}
 		if !bytes.HasPrefix(head, []byte{0x00, 0x00, 'P', 'B'}) {
 			fmt.Fprintf(out, "expected playback header, got %q\n", head)
-			io.Copy(out, bufin)
+			_, _ = io.Copy(out, bufin)
 			return
 		}
 		// Copy data until next header.
 		size := binary.BigEndian.Uint32(head[12:])
-		io.CopyN(out, bufin, int64(size))
+		_, _ = io.CopyN(out, bufin, int64(size))
 	}
 }

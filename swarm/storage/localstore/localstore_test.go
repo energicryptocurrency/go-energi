@@ -31,6 +31,7 @@ import (
 	ch "github.com/energicryptocurrency/energi/swarm/chunk"
 	"github.com/energicryptocurrency/energi/swarm/shed"
 	"github.com/energicryptocurrency/energi/swarm/storage"
+
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -297,7 +298,7 @@ func newRetrieveIndexesTest(db *DB, chunk storage.Chunk, storeTimestamp, accessT
 
 		// access index should not be set
 		wantErr := leveldb.ErrNotFound
-		item, err = db.retrievalAccessIndex.Get(addressToItem(chunk.Address()))
+		_, err = db.retrievalAccessIndex.Get(addressToItem(chunk.Address()))
 		if err != wantErr {
 			t.Errorf("got error %v, want %v", err, wantErr)
 		}

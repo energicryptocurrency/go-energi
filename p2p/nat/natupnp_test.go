@@ -211,14 +211,14 @@ func (dev *fakeIGD) ServeMessage(r *http.Request) {
 		return
 	}
 	defer conn.Close()
-	io.WriteString(conn, dev.replaceListenAddr(dev.ssdpResp))
+	_, _ = io.WriteString(conn, dev.replaceListenAddr(dev.ssdpResp))
 }
 
 // http.Handler
 func (dev *fakeIGD) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if resp, ok := dev.httpResps[r.Method+" "+r.RequestURI]; ok {
 		dev.t.Logf(`HTTP request "%s %s" --> %d`, r.Method, r.RequestURI, 200)
-		io.WriteString(w, dev.replaceListenAddr(resp))
+		_, _ = io.WriteString(w, dev.replaceListenAddr(resp))
 	} else {
 		dev.t.Logf(`HTTP request "%s %s" --> %d`, r.Method, r.RequestURI, 404)
 		w.WriteHeader(http.StatusNotFound)

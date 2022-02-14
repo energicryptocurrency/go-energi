@@ -190,9 +190,7 @@ func (z *zeroFeeProtector) cleanupBySender(
 	sender common.Address,
 	timeMap map[common.Address]time.Time,
 ) {
-	if _, ok := timeMap[sender]; ok {
-		delete(timeMap, sender)
-	}
+	delete(timeMap, sender)
 }
 
 func (z *zeroFeeProtector) cleanupAllBySender(sender common.Address) {

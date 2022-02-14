@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build linux || darwin || freebsd
 // +build linux darwin freebsd
 
 package fuse
@@ -47,7 +48,7 @@ func isFUSEUnsupportedError(err error) bool {
 	if perr, ok := err.(*os.PathError); ok {
 		return perr.Op == "open" && perr.Path == "/dev/fuse"
 	}
-	return err == fuse.ErrOSXFUSENotFound
+	return false
 }
 
 // MountInfo contains information about every active mount
@@ -151,7 +152,7 @@ func (swarmfs *SwarmFS) Mount(mhash, mountpoint string) (*MountInfo, error) {
 		parentDir.files = append(parentDir.files, thisFile)
 	}
 
-	fconn, err := fuse.Mount(cleanedMountPoint, fuse.FSName("swarmfs"), fuse.VolumeName(mhash))
+	fconn, err := fuse.Mount(cleanedMountPoint, fuse.FSName("swarmfs"))
 	if isFUSEUnsupportedError(err) {
 		log.Error("swarmfs error - FUSE not installed", "mountpoint", cleanedMountPoint, "err", err)
 		return nil, err

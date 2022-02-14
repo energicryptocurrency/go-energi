@@ -127,7 +127,7 @@ func BenchmarkMetrics(b *testing.B) {
 
 func Example() {
 	c := NewCounter()
-	Register("money", c)
+	_ = Register("money", c)
 	c.Inc(17)
 
 	// Threadsafe registration

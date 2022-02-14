@@ -101,15 +101,16 @@ func TestPotRemoveNonExisting(t *testing.T) {
 func TestPotRemoveSameBin(t *testing.T) {
 	pof := DefaultPof(8)
 	n := NewPot(newTestAddr("11111111", 0), 0)
-	n, _, _ = testAdd(n, pof, 1, "00000000", "01000000", "01100000", "01110000", "01111000")
+	n, _, _ = testAdd(n, pof, 1, "00000000", "01000000", "01100000",
+		"01110000", "01111000")
 	n, _, _ = Remove(n, newTestAddr("01110000", 0), pof)
-	inds := indexes(n)
+	_ = indexes(n)
 	goti := n.Size()
 	expi := 5
 	if goti != expi {
 		t.Fatalf("incorrect number of elements in Pot. Expected %v, got %v", expi, goti)
 	}
-	inds = indexes(n)
+	inds := indexes(n)
 	got := fmt.Sprintf("%v", inds)
 	exp := "[5 3 2 1 0]"
 	if got != exp {
@@ -123,15 +124,16 @@ func TestPotRemoveSameBin(t *testing.T) {
 func TestPotRemoveDifferentBins(t *testing.T) {
 	pof := DefaultPof(8)
 	n := NewPot(newTestAddr("11111111", 0), 0)
-	n, _, _ = testAdd(n, pof, 1, "00000000", "10000000", "11000000", "11100000", "11110000")
+	n, _, _ = testAdd(n, pof, 1, "00000000", "10000000", "11000000",
+		"11100000", "11110000")
 	n, _, _ = Remove(n, newTestAddr("11100000", 0), pof)
-	inds := indexes(n)
+	_ = indexes(n)
 	goti := n.Size()
 	expi := 5
 	if goti != expi {
 		t.Fatalf("incorrect number of elements in Pot. Expected %v, got %v", expi, goti)
 	}
-	inds = indexes(n)
+	inds := indexes(n)
 	got := fmt.Sprintf("%v", inds)
 	exp := "[1 2 3 5 0]"
 	if got != exp {
@@ -573,7 +575,7 @@ func TestPotEachNeighbourAsync(t *testing.T) {
 		if i == 0 {
 			continue
 		}
-		testPotEachNeighbour(n, pof, val, count, remember)
+		_ = testPotEachNeighbour(n, pof, val, count, remember)
 		d := 0
 		forget := func(v Val, po int) {
 			mu.Lock()

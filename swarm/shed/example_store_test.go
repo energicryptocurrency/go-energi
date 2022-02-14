@@ -28,6 +28,7 @@ import (
 
 	"github.com/energicryptocurrency/energi/swarm/shed"
 	"github.com/energicryptocurrency/energi/swarm/storage"
+
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -41,7 +42,6 @@ type Store struct {
 
 	// fields and indexes
 	schemaName     shed.StringField
-	sizeCounter    shed.Uint64Field
 	accessCounter  shed.Uint64Field
 	retrievalIndex shed.Index
 	accessIndex    shed.Index

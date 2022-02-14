@@ -77,8 +77,8 @@ func testFileStoreRandom(toEncrypt bool, t *testing.T) {
 	if !bytes.Equal(slice, resultSlice) {
 		t.Fatalf("Comparison error.")
 	}
-	ioutil.WriteFile("/tmp/slice.bzz.16M", slice, 0666)
-	ioutil.WriteFile("/tmp/result.bzz.16M", resultSlice, 0666)
+	_ = ioutil.WriteFile("/tmp/slice.bzz.16M", slice, 0666)
+	_ = ioutil.WriteFile("/tmp/result.bzz.16M", resultSlice, 0666)
 	localStore.memStore = NewMemStore(NewDefaultStoreParams(), db)
 	resultReader, isEncrypted = fileStore.Retrieve(context.TODO(), key)
 	if isEncrypted != toEncrypt {

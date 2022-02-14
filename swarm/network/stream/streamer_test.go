@@ -36,6 +36,7 @@ import (
 	"github.com/energicryptocurrency/energi/swarm/network"
 	"github.com/energicryptocurrency/energi/swarm/network/simulation"
 	"github.com/energicryptocurrency/energi/swarm/state"
+
 	"golang.org/x/crypto/sha3"
 )
 
@@ -73,7 +74,7 @@ var (
 	hash2         = sha3.Sum256([]byte{2})
 	hashesTmp     = append(hash0[:], hash1[:]...)
 	hashes        = append(hashesTmp, hash2[:]...)
-	corruptHashes = append(hashes[:40])
+	corruptHashes = hashes[:40]
 )
 
 type testClient struct {

@@ -26,15 +26,12 @@ import (
 	"github.com/energicryptocurrency/energi/core"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/ethdb"
-
-	// "github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
 
 	"github.com/stretchr/testify/assert"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 func TestMasternodeList(t *testing.T) {
@@ -110,7 +107,7 @@ func TestMasternodeList(t *testing.T) {
 	evm := engine.createEVM(msg, chain, header, blstate)
 	gp := new(core.GasPool).AddGas(engine.callGas)
 	// log.Trace("depositCollateral")
-	core.ApplyMessage(evm, msg, gp)
+	_, _, _, _ = core.ApplyMessage(evm, msg, gp)
 	msg = types.NewMessage(
 		owner_addr2,
 		&energi_params.Energi_MasternodeToken,
@@ -124,7 +121,7 @@ func TestMasternodeList(t *testing.T) {
 	evm = engine.createEVM(msg, chain, header, blstate)
 	gp = new(core.GasPool).AddGas(engine.callGas)
 	// log.Trace("depositCollateral")
-	core.ApplyMessage(evm, msg, gp)
+	_, _, _, _ = core.ApplyMessage(evm, msg, gp)
 	//---
 	mnreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.IMasternodeRegistryV2ABI))
 	callData, err = mnreg_abi.Pack("announce", mn_addr1, uint32(130<<24), [2][32]byte{})

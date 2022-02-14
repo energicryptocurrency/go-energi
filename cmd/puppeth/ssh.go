@@ -30,7 +30,7 @@ import (
 
 	"github.com/energicryptocurrency/energi/log"
 	"golang.org/x/crypto/ssh"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // sshClient is a small wrapper around Go's SSH client with a few utility methods
@@ -89,7 +89,7 @@ func dial(server string, pubkey []byte) (*sshClient, error) {
 		key, err := ssh.ParsePrivateKey(buf)
 		if err != nil {
 			fmt.Printf("What's the decryption password for %s? (won't be echoed)\n>", path)
-			blob, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+			blob, err := term.ReadPassword(int(os.Stdin.Fd()))
 			fmt.Println()
 			if err != nil {
 				log.Warn("Couldn't read password", "err", err)
@@ -106,7 +106,7 @@ func dial(server string, pubkey []byte) (*sshClient, error) {
 	}
 	auths = append(auths, ssh.PasswordCallback(func() (string, error) {
 		fmt.Printf("What's the login password for %s at %s? (won't be echoed)\n> ", username, server)
-		blob, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		blob, err := term.ReadPassword(int(os.Stdin.Fd()))
 
 		fmt.Println()
 		return string(blob), err

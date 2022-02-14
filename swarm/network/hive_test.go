@@ -44,7 +44,7 @@ func TestRegisterAndConnect(t *testing.T) {
 
 	node := s.Nodes[0]
 	raddr := NewAddr(node)
-	pp.Register(raddr)
+	_ = pp.Register(raddr)
 
 	// start the hive
 	err := pp.Start(s.Server)
@@ -115,7 +115,7 @@ func TestHiveStatePersistance(t *testing.T) {
 	peers := make(map[string]bool)
 	for _, node := range s.Nodes {
 		raddr := NewAddr(node)
-		pp.Register(raddr)
+		_ = pp.Register(raddr)
 		peers[raddr.String()] = true
 	}
 
@@ -125,7 +125,7 @@ func TestHiveStatePersistance(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pp.Stop()
+	_ = pp.Stop()
 	store.Close()
 
 	// start the hive with an empty dbstore
@@ -137,7 +137,7 @@ func TestHiveStatePersistance(t *testing.T) {
 	s1, pp := newHiveTester(t, params, 0, persistedStore)
 
 	// start the hive and check that we know of all expected peers
-	pp.Start(s1.Server)
+	_ = pp.Start(s1.Server)
 	i := 0
 	pp.Kademlia.EachAddr(nil, 256, func(addr *BzzAddr, po int) bool {
 		delete(peers, addr.String())

@@ -99,7 +99,7 @@ func UnmarshalFixedText(typname string, input, out []byte) error {
 			return ErrSyntax
 		}
 	}
-	hex.Decode(out, raw)
+	_, _ = hex.Decode(out, raw)
 	return nil
 }
 
@@ -120,7 +120,7 @@ func UnmarshalFixedUnprefixedText(typname string, input, out []byte) error {
 			return ErrSyntax
 		}
 	}
-	hex.Decode(out, raw)
+	_, _ = hex.Decode(out, raw)
 	return nil
 }
 
