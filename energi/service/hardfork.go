@@ -26,7 +26,6 @@ import (
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core"
-	// "github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/eth"
 	"github.com/energicryptocurrency/energi/eth/downloader"
 	"github.com/energicryptocurrency/energi/log"
