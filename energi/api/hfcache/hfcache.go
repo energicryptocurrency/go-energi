@@ -6,13 +6,8 @@ import (
 )
 
 var (
-	hardforkCache *HardforkCache
+	hardforkCache = &HardforkCache{cacheLock: &sync.Mutex{}}
 )
-
-func init() {
-	hardforkCache = &HardforkCache{}
-	hardforkCache.cacheLock = &sync.Mutex{}
-}
 
 // AddActiveHardfork adds a new active hardfork
 func AddHardfork(hardfork *Hardfork) {
