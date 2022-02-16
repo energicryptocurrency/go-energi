@@ -153,7 +153,6 @@ func (hf *HardforkService) logUpcomingHardforks() {
 			return
 
 		case ev := <-chainHeadCh:
-			fmt.Println(ev)
 			pendingHardforks, err := hf.hfAPI.HardforkEnumeratePending()
 			if err != nil {
 				if err != bind.ErrNoCode {
