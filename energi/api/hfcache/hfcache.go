@@ -5,6 +5,10 @@ import (
 	"math/big"
 )
 
+const (
+	HfNameLenght = 32
+)
+
 var (
 	hardforkCache = &HardforkCache{cacheLock: &sync.Mutex{}}
 )
@@ -34,8 +38,14 @@ func RemoveHardfork(hfName [32]byte) {
 func IsHardforkActive(hardforkName string, blockNum uint64) bool {
 	hardforkCache.cacheLock.Lock()
 	defer hardforkCache.cacheLock.Unlock()
+	if len(hardforkName) > HfNameLenght {
+		return false
+	}
+
+	var name [32]byte
+	copy(name[:], hardforkName[:])
 	for _, hardfork := range hardforkCache.hardforks {
-		if hardfork.Name == hardforkName && blockNum > hardfork.BlockNumber.Uint64() {
+		if hardfork.Name == string(name[:]) && blockNum >= hardfork.BlockNumber.Uint64() {
 			return true
 		}
 	}

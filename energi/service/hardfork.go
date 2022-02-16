@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"math/big"
+	"fmt"
 	"strconv"
 	"sync/atomic"
 
@@ -120,7 +121,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 		}
 	} else if lc := len(allHardforks); lc > 0 {
 		for _, hardfork := range allHardforks {
-			hfcache.AddHardfork(&hfcache.Hardfork{hardfork.Name, hardfork.BlockNumber})
+			hfcache.AddHardfork(&hfcache.Hardfork{string(hardfork.Name[:]), hardfork.BlockNumber})
 		}
 	}
 
@@ -152,6 +153,7 @@ func (hf *HardforkService) logUpcomingHardforks() {
 			return
 
 		case ev := <-chainHeadCh:
+			fmt.Println(ev)
 			pendingHardforks, err := hf.hfAPI.HardforkEnumeratePending()
 			if err != nil {
 				if err != bind.ErrNoCode {
