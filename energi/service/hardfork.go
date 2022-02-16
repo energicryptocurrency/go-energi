@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"math/big"
-	"fmt"
 	"strconv"
 	"sync/atomic"
 
