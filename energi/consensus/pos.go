@@ -29,6 +29,7 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 )
 
 var (
@@ -145,10 +146,12 @@ func (e *Energi) calcPoSModifier(
 	maturityPeriod := params.MaturityPeriod
 	if !e.testing {
 		// check if Asgard hardfork is activated use new difficulty algorithm
-		isAsgardActive, err := e.hardforkIsActive(chain, parent, "Asgard")
+		// check if Asgard hardfork is activated use new difficulty algorithm
+		isAsgardActive := hfcache.IsHardforkActive("Asgard", parent.Number.Uint64())
 		log.Debug("hf check", "isAsgardActive", isAsgardActive)
-		if err != nil {
-			log.Trace("Asgard hf check failed: " + err.Error())
+		// don't check for hard forks being active if we're testing
+		if e.testing {
+			isAsgardActive = false
 		}
 		if isAsgardActive {
 			maturityPeriod = params.MaturityPeriodAsgard
@@ -375,10 +378,11 @@ func (e *Energi) lookupStakeWeight(
 	maturityPeriod := params.MaturityPeriod
 	if !e.testing {
 		// check if Asgard hardfork is activated use new difficulty algorithm
-		isAsgardActive, err := e.hardforkIsActive(chain, until, "Asgard")
+		isAsgardActive := hfcache.IsHardforkActive("Asgard", until.Number.Uint64())
 		log.Debug("hf check", "isAsgardActive", isAsgardActive)
-		if err != nil {
-			log.Trace("Asgard hf check failed: " + err.Error())
+		// don't check for hard forks being active if we're testing
+		if e.testing {
+			isAsgardActive = false
 		}
 		if isAsgardActive {
 			maturityPeriod = params.MaturityPeriodAsgard
@@ -503,10 +507,11 @@ func (e *Energi) mine(
 	}
 
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
-	if err != nil {
-		log.Trace("Asgard hf check failed: " + err.Error())
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		isAsgardActive = false
 	}
 
 	// make time target calculation depending on asgard status

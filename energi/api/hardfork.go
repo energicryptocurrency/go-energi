@@ -94,7 +94,9 @@ func (hf *HardforkRegistryAPI) HardforkEnumerate() (hardforks []*HardforkInfo, e
 	}
 	names, err := registry.Enumerate(callOpts)
 	if err != nil {
-		log.Error("HardforkRegsitryAPI::Enumerate", "err", err)
+		if err != bind.ErrNoCode {
+			log.Error("HardforkRegsitryAPI::EnumeratePending", "err", err)
+		}
 		return nil, err
 	}
 
