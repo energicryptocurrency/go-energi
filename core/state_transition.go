@@ -26,6 +26,8 @@ import (
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
+
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 )
 
 var errInsufficientBalanceForGas = errors.New("insufficient balance to pay for gas")
@@ -225,7 +227,11 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		}
 	}
 	st.refundGas()
-	st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
+
+	if hfcache.IsHardforkActive("Banana", evm.BlockNumber.Uint64()) == false {
+		// we disable transfer of the used gas to coinbase upon the Banana hf as we have implemented this functionality in Energi consensus rewarding
+		st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
+	}
 
 	return ret, st.gasUsed(), vmerr != nil, err
 }

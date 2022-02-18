@@ -19,14 +19,14 @@ package params
 type ctxKey string
 
 const (
-	MaturityPeriod        uint64 = 60 * 60 // 1 hour PoS cooldown
-	MaturityPeriodAsgard  uint64 = 30 * 60 // 30 minute PoS cooldown for Asgard
-	AveragingWindow       uint64 = 60 // 60 blocks
-	TargetBlockGap        uint64 = 60 // 60 second block time
-	MinBlockGap           uint64 = 30 // 30 seconds minimum before new timestamp
-	MaxFutureGap          uint64 = 3  // only accept blocks this many seconds ahead
-	TargetPeriodGap       uint64 = AveragingWindow * TargetBlockGap
-	BlockTimeEMAPeriod		uint64 = 360
+	MaturityPeriod       uint64 = 60 * 60 // 1 hour PoS cooldown
+	MaturityPeriodAsgard uint64 = 30 * 60 // 30 minute PoS cooldown for Asgard
+	AveragingWindow      uint64 = 60      // 60 blocks
+	TargetBlockGap       uint64 = 60      // 60 second block time
+	MinBlockGap          uint64 = 30      // 30 seconds minimum before new timestamp
+	MaxFutureGap         uint64 = 3       // only accept blocks this many seconds ahead
+	TargetPeriodGap      uint64 = AveragingWindow * TargetBlockGap
+	BlockTimeEMAPeriod   uint64 = 360
 
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
@@ -52,4 +52,7 @@ const (
 	// to calculate the difficulty drop when the newly created block is found long
 	// after block target time. This
 	MaxTimeDifferenceDrop = -30
+
+	// StakerReward defines what percentage of used gas for specific block is rewarded to staker
+	StakerReward = 10
 )
