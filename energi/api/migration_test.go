@@ -17,13 +17,12 @@
 package api
 
 import (
-	"github.com/energicryptocurrency/energi/common/hexutil"
 	"math/big"
 	"testing"
 
 	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
-	// "github.com/energicryptocurrency/energi/log"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -51,13 +50,13 @@ func TestGen2Parse(t *testing.T) {
 		res[0].RawOwner.String())
 	assert.Equal(t,
 		"0x3fb403e4227a129129e9c0f01ba3ed79294f1ae18bbd961e7ad7fa0996680c40",
-		common.ToHex(crypto.FromECDSA(res[0].Key)))
+		hexutil.Encode(crypto.FromECDSA(res[0].Key)))
 	assert.Equal(t,
 		"0xDB52E60435e09e998b6077eE65e3719836fA0d2e",
 		res[1].RawOwner.String())
 	assert.Equal(t,
 		"0x4be146dcb88089732cdbea785bcf5c2c188d67152f0b80329e275c2b553174bc",
-		common.ToHex(crypto.FromECDSA(res[1].Key)))
+		hexutil.Encode(crypto.FromECDSA(res[1].Key)))
 }
 
 func TestSearchCoins(t *testing.T) {

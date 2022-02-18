@@ -154,7 +154,7 @@ func testSyncBetweenNodes(t *testing.T, nodes, chunkCount int, skipCheck bool, p
 				return fmt.Errorf("node %s client: %v", id, err)
 			}
 			sid := nodeIDs[j+1]
-			client.CallContext(ctx, nil, "stream_subscribeStream", sid, NewStream("SYNC", FormatSyncBinKey(1), false), NewRange(0, 0), Top)
+			_ = client.CallContext(ctx, nil, "stream_subscribeStream", sid, NewStream("SYNC", FormatSyncBinKey(1), false), NewRange(0, 0), Top)
 			if err != nil {
 				return err
 			}
@@ -169,7 +169,7 @@ func testSyncBetweenNodes(t *testing.T, nodes, chunkCount int, skipCheck bool, p
 				if err != nil {
 					return fmt.Errorf("fileStore.Store: %v", err)
 				}
-				wait(ctx)
+				_ = wait(ctx)
 			}
 		}
 		// here we distribute chunks of a random file into stores 1...nodes
@@ -190,7 +190,7 @@ func testSyncBetweenNodes(t *testing.T, nodes, chunkCount int, skipCheck bool, p
 				return fmt.Errorf("No DB")
 			}
 			netStore := item.(*storage.NetStore)
-			netStore.Iterator(0, math.MaxUint64, po, func(addr storage.Address, index uint64) bool {
+			_ = netStore.Iterator(0, math.MaxUint64, po, func(addr storage.Address, index uint64) bool {
 				hashes[i] = append(hashes[i], addr)
 				totalHashes++
 				hashCounts[i]++

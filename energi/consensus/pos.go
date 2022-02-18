@@ -29,11 +29,8 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/log"
-
 	"github.com/energicryptocurrency/energi/energi/api/hfcache"
-
 )
-
 
 var (
 	minStake    = big.NewInt(1e18) // 1 NRG
@@ -48,7 +45,7 @@ var (
 
 type TimeTarget struct {
 	min, max, blockTarget, periodTarget uint64
-	Drift, Integral, Derivative int64
+	Drift, Integral, Derivative         int64
 }
 
 /**
@@ -147,7 +144,7 @@ func (e *Energi) calcPoSModifier(
 
 	// maturity period is reduced to 30m in Asgard
 	maturityPeriod := params.MaturityPeriod
-	if ! e.testing {
+	if !e.testing {
 		// check if Asgard hardfork is activated use new difficulty algorithm
 		// check if Asgard hardfork is activated use new difficulty algorithm
 		isAsgardActive := hfcache.IsHardforkActive("Asgard", parent.Number.Uint64())
@@ -379,7 +376,7 @@ func (e *Energi) lookupStakeWeight(
 
 	// maturity period is reduced to 30m in Asgard
 	maturityPeriod := params.MaturityPeriod
-	if ! e.testing {
+	if !e.testing {
 		// check if Asgard hardfork is activated use new difficulty algorithm
 		isAsgardActive := hfcache.IsHardforkActive("Asgard", until.Number.Uint64())
 		log.Debug("hf check", "isAsgardActive", isAsgardActive)
@@ -484,10 +481,8 @@ func (e *Energi) mine(
 
 	accounts := e.accountsFn()
 	if len(accounts) == 0 {
-		select {
-		case <-stop:
-			return false, nil
-		}
+		<-stop
+		return false, nil
 	}
 
 	candidates := make([]Candidates, 0, len(accounts))
@@ -616,6 +611,4 @@ func (e *Energi) mine(
 			}
 		}
 	}
-
-	return false, nil
 }

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build !nopssprotocol
 // +build !nopssprotocol
 
 package pss
@@ -162,11 +163,12 @@ func RegisterProtocol(ps *Pss, topic *Topic, spec *protocols.Spec, targetprotoco
 // Fails if protocol is not valid for the message encryption scheme,
 // if adding a new peer fails, or if the message is not a serialized
 // p2p.Msg (which it always will be if it is sent from this object).
-func (p *Protocol) Handle(msg []byte, peer *p2p.Peer, asymmetric bool, keyid string) error {
-	var vrw *PssReadWriter
+func (p *Protocol) Handle(msg []byte, peer *p2p.Peer, asymmetric bool,
+	keyid string) error {
 	if p.Asymmetric != asymmetric && p.Symmetric == !asymmetric {
 		return fmt.Errorf("invalid protocol encryption")
-	} else if (!p.isActiveSymKey(keyid, *p.topic) && !asymmetric) ||
+	}
+	if (!p.isActiveSymKey(keyid, *p.topic) && !asymmetric) ||
 		(!p.isActiveAsymKey(keyid, *p.topic) && asymmetric) {
 
 		rw, err := p.AddPeer(peer, *p.topic, asymmetric, keyid)
@@ -175,13 +177,14 @@ func (p *Protocol) Handle(msg []byte, peer *p2p.Peer, asymmetric bool, keyid str
 		} else if rw == nil {
 			return fmt.Errorf("handle called on nil MsgReadWriter for new key " + keyid)
 		}
-		vrw = rw.(*PssReadWriter)
+		_ = rw.(*PssReadWriter)
 	}
 
 	pmsg, err := ToP2pMsg(msg)
 	if err != nil {
 		return fmt.Errorf("could not decode pssmsg")
 	}
+	var vrw *PssReadWriter
 	if asymmetric {
 		if p.pubKeyRWPool[keyid] == nil {
 			return fmt.Errorf("handle called on nil MsgReadWriter for key " + keyid)

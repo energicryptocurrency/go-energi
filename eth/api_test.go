@@ -23,6 +23,7 @@ import (
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core/state"
 	"github.com/energicryptocurrency/energi/ethdb"
+
 	"github.com/davecgh/go-spew/spew"
 )
 

@@ -309,7 +309,7 @@ func TestMatchEnvelope(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create new message with seed %d: %s.", seed, err)
 	}
-	env, err := msg.Wrap(params)
+	_, err = msg.Wrap(params)
 	if err != nil {
 		t.Fatalf("failed Wrap with seed %d: %s.", seed, err)
 	}
@@ -322,7 +322,7 @@ func TestMatchEnvelope(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create new message with seed %d: %s.", seed, err)
 	}
-	env, err = msg.Wrap(params)
+	env, err := msg.Wrap(params)
 	if err != nil {
 		t.Fatalf("failed Wrap() with seed %d: %s.", seed, err)
 	}
@@ -708,7 +708,7 @@ func TestWatchers(t *testing.T) {
 	total = 0
 	last := NumFilters - 1
 	tst[last].f = clone
-	filters.Install(clone)
+	_, _ = filters.Install(clone)
 	for i = 0; i < NumFilters; i++ {
 		tst[i].msgCnt = 0
 		count[i] = 0

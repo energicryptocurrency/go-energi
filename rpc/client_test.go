@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"github.com/energicryptocurrency/energi/log"
+
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -211,7 +212,7 @@ func TestClientSubscribeInvalidArg(t *testing.T) {
 				t.Error(string(buf))
 			}
 		}()
-		client.EthSubscribe(context.Background(), arg, "foo_bar")
+		_, _ = client.EthSubscribe(context.Background(), arg, "foo_bar")
 	}
 	check(true, nil)
 	check(true, 1)

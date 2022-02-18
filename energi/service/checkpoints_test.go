@@ -212,10 +212,10 @@ func TestCheckpointsService(t *testing.T) {
 		}
 
 		// trigger external IP Address to be set.
-		srv.NAT.ExternalIP()
+		_, _ = srv.NAT.ExternalIP()
 
 		var ethService *eth.Ethereum
-		data.stack.Service(&ethService)
+		_ = data.stack.Service(&ethService)
 
 		store := data.stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
 		// inject the main node personal account
@@ -233,7 +233,7 @@ func TestCheckpointsService(t *testing.T) {
 	listenToCheckpointsTest(t)
 
 	// Clean Up
-	migrations.CleanUp()
+	_ = migrations.CleanUp()
 
 	// Stop the entire protocol for all nodesInfo.
 	for _, data := range nodesInfo {
@@ -308,10 +308,10 @@ func listenToCheckpointsTest(t *testing.T) {
 	// masternode mn node picked is at index 1.
 	mn := nodesInfo[mnIndex]
 	var mnEthService *eth.Ethereum
-	mn.stack.Service(&mnEthService)
+	_ = mn.stack.Service(&mnEthService)
 
 	var cpServ *CheckpointService
-	mn.stack.Service(&cpServ)
+	_ = mn.stack.Service(&cpServ)
 
 	quitChan := make(chan struct{}, 1)
 	isCPPChan := make(chan struct{}, 1)
@@ -378,7 +378,7 @@ func listenToCheckpointsTest(t *testing.T) {
 	// Add all nodes as peers then start mining in each peer
 	for _, data := range nodesInfo {
 		var ethService *eth.Ethereum
-		data.stack.Service(&ethService)
+		_ = data.stack.Service(&ethService)
 
 		go func() {
 			err := ethService.StartMining(2)
@@ -411,7 +411,7 @@ func listenToCheckpointsTest(t *testing.T) {
 
 	cppsigner := nodesInfo[cpSignerIndex]
 	var ethServ *eth.Ethereum
-	cppsigner.stack.Service(&ethServ)
+	_ = cppsigner.stack.Service(&ethServ)
 
 	fmt.Println(" _______ CHECK TX POOL BEFORE WAITING _____")
 	{

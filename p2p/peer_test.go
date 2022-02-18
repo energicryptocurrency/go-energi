@@ -84,9 +84,9 @@ func TestPeerProtoReadMsg(t *testing.T) {
 	closer, rw, _, errc := testPeer([]Protocol{proto})
 	defer closer()
 
-	Send(rw, baseProtocolLength+2, []uint{1})
-	Send(rw, baseProtocolLength+3, []uint{2})
-	Send(rw, baseProtocolLength+4, []uint{3})
+	_ = Send(rw, baseProtocolLength+2, []uint{1})
+	_ = Send(rw, baseProtocolLength+3, []uint{2})
+	_ = Send(rw, baseProtocolLength+4, []uint{3})
 
 	select {
 	case err := <-errc:

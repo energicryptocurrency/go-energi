@@ -119,7 +119,7 @@ func TestCheckbookFile(t *testing.T) {
 	chbook.sent[addr1] = new(big.Int).SetUint64(42)
 	chbook.balance = new(big.Int).Set(common.Big1)
 
-	chbook.Save()
+	_ = chbook.Save()
 
 	chbook, err = LoadChequebook(path, key0, backend, false)
 	if err != nil {
@@ -231,7 +231,7 @@ func TestDeposit(t *testing.T) {
 	}
 
 	balance := new(big.Int).SetUint64(42)
-	chbook.Deposit(balance)
+	_, _ = chbook.Deposit(balance)
 	backend.Commit()
 	if chbook.Balance().Cmp(balance) != 0 {
 		t.Fatalf("expected balance %v, got %v", balance, chbook.Balance())

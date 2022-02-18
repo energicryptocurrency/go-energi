@@ -19,7 +19,6 @@ package core
 
 import (
 	"context"
-	"sync"
 
 	"github.com/energicryptocurrency/energi/internal/ethapi"
 	"github.com/energicryptocurrency/energi/log"
@@ -28,7 +27,6 @@ import (
 
 type StdIOUI struct {
 	client rpc.Client
-	mu     sync.Mutex
 }
 
 func NewStdIOUI() *StdIOUI {

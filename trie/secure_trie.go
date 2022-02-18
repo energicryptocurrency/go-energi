@@ -19,9 +19,10 @@ package trie
 import (
 	"fmt"
 	"reflect"
+
 	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/energi/exceptions"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all
@@ -163,7 +164,7 @@ func (t *SecureTrie) Commit(onleaf LeafCallback) (root common.Hash, err error) {
 		for hk, key := range t.secKeyCache {
 			//check if reverse hash of key equals to shaKey
 			recomputedHash := t.hashKey(common.CopyBytes(key))
-			if reflect.DeepEqual([]byte(hk), recomputedHash) == false {
+			if !reflect.DeepEqual([]byte(hk), recomputedHash) {
 				log.Error("New Damaged Preimage insertion", "key", common.BytesToHash(common.CopyBytes(key)).String(), "value", common.BytesToHash(([]byte(hk))).String())
 				// the corresponding hash is incorrect at this point so insert correct pair
 				t.trie.db.insertPreimage(common.BytesToHash(recomputedHash), key)

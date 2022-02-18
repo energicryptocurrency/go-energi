@@ -31,6 +31,7 @@ import (
 
 	"github.com/energicryptocurrency/energi/log"
 	ch "github.com/energicryptocurrency/energi/swarm/chunk"
+
 	"github.com/mattn/go-colorable"
 )
 
@@ -207,7 +208,7 @@ func benchmarkStorePut(store ChunkStore, n int, b *testing.B) {
 		return chunk
 	}
 
-	mput(store, n, f)
+	_, _ = mput(store, n, f)
 
 	f = func(dataSize int64) Chunk {
 		chunk := chunks[i]
@@ -220,7 +221,7 @@ func benchmarkStorePut(store ChunkStore, n int, b *testing.B) {
 
 	for j := 0; j < b.N; j++ {
 		i = 0
-		mput(store, n, f)
+		_, _ = mput(store, n, f)
 	}
 }
 

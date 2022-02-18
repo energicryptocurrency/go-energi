@@ -26,6 +26,7 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	mapset "github.com/deckarep/golang-set"
 )
 
@@ -130,7 +131,7 @@ func (peer *Peer) handshake() error {
 		}
 	}
 
-	isRemotePeerLightNode, err := s.Bool()
+	isRemotePeerLightNode, _ := s.Bool()
 	if isRemotePeerLightNode && isLightNode && isRestrictedLightNodeConnection {
 		return fmt.Errorf("peer [%x] is useless: two light client communication restricted", peer.ID())
 	}

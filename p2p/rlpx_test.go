@@ -35,6 +35,7 @@ import (
 	"github.com/energicryptocurrency/energi/crypto/ecies"
 	"github.com/energicryptocurrency/energi/p2p/simulations/pipes"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/crypto/sha3"
 )
@@ -69,7 +70,7 @@ func TestEncHandshake(t *testing.T) {
 	}
 	for i := 0; i < 10; i++ {
 		tok := make([]byte, shaLen)
-		rand.Reader.Read(tok)
+		_, _ = rand.Reader.Read(tok)
 		start := time.Now()
 		if err := testEncHandshake(tok); err != nil {
 			t.Fatalf("i=%d %v", i, err)
@@ -327,7 +328,7 @@ func TestRLPXFrameRW(t *testing.T) {
 		ingressMACinit = make([]byte, 32)
 	)
 	for _, s := range [][]byte{aesSecret, macSecret, egressMACinit, ingressMACinit} {
-		rand.Read(s)
+		_, _ = rand.Read(s)
 	}
 	conn := new(bytes.Buffer)
 
@@ -593,7 +594,7 @@ func TestHandshakeForwardCompatibility(t *testing.T) {
 	if !bytes.Equal(derived.MAC, wantMAC) {
 		t.Errorf("mac-secret mismatch:\ngot %x\nwant %x", derived.MAC, wantMAC)
 	}
-	io.WriteString(derived.IngressMAC, "foo")
+	_, _ = io.WriteString(derived.IngressMAC, "foo")
 	fooIngressHash := derived.IngressMAC.Sum(nil)
 	if !bytes.Equal(fooIngressHash, wantFooIngressHash) {
 		t.Errorf("ingress-mac('foo') mismatch:\ngot %x\nwant %x", fooIngressHash, wantFooIngressHash)

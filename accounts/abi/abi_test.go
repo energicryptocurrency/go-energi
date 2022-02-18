@@ -27,6 +27,7 @@ import (
 	"testing"
 
 	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/crypto"
 )
 
@@ -731,7 +732,8 @@ func TestABI_MethodById(t *testing.T) {
 		}
 		b := fmt.Sprintf("%v", m2)
 		if a != b {
-			t.Errorf("Method %v (id %v) not 'findable' by id in ABI", name, common.ToHex(m.Id()))
+			t.Errorf("Method %v (id %v) not 'findable' by id in ABI",
+				name, hexutil.Encode(m.Id()))
 		}
 	}
 	// Also test empty

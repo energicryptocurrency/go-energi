@@ -131,15 +131,6 @@ func TestSimTopics(t *testing.T) {
 	//printNet.log.printLogs()
 }
 
-/*func testHierarchicalTopics(i int) []Topic {
-	digits := strconv.FormatInt(int64(256+i/4), 4)
-	res := make([]Topic, 5)
-	for i, _ := range res {
-		res[i] = Topic("foo" + digits[1:i+1])
-	}
-	return res
-}*/
-
 func testHierarchicalTopics(i int) []Topic {
 	digits := strconv.FormatInt(int64(128+i/8), 2)
 	res := make([]Topic, 8)
@@ -294,15 +285,6 @@ func (s *simulation) launchNode(log bool) *Network {
 	return net
 }
 
-func (s *simulation) dropNode(id NodeID) {
-	s.mu.Lock()
-	n := s.nodes[id]
-	delete(s.nodes, id)
-	s.mu.Unlock()
-
-	n.Close()
-}
-
 type simTransport struct {
 	joinTime   time.Time
 	sender     NodeID
@@ -356,22 +338,6 @@ func (st *simTransport) sendPing(remote *Node, remoteAddr *net.UDPAddr, topics [
 		},
 	})
 	return hash
-}
-
-func (st *simTransport) sendPong(remote *Node, pingHash []byte) {
-	raddr := remote.addr()
-
-	st.sendPacket(remote.ID, ingressPacket{
-		remoteID:   st.sender,
-		remoteAddr: st.senderAddr,
-		hash:       st.nextHash(),
-		ev:         pongPacket,
-		data: &pong{
-			To:         rpcEndpoint{IP: raddr.IP, UDP: uint16(raddr.Port), TCP: 30303},
-			ReplyTok:   pingHash,
-			Expiration: uint64(time.Now().Unix() + int64(expiration)),
-		},
-	})
 }
 
 func (st *simTransport) sendFindnodeHash(remote *Node, target common.Hash) {

@@ -32,13 +32,12 @@ import (
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/params"
-
 	energi_testutils "github.com/energicryptocurrency/energi/energi/common/testutils"
 	energi "github.com/energicryptocurrency/energi/energi/consensus"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/energi/params"
 )
 
 var (
@@ -85,7 +84,6 @@ type testWorkerBackend struct {
 	db         ethdb.Database
 	txPool     *core.TxPool
 	chain      *core.BlockChain
-	testTxFeed event.Feed
 	uncleBlock *types.Block
 	migration  *energi_testutils.TestGen2Migration
 }
@@ -101,7 +99,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 		}
 	)
 
-	switch engine.(type) {
+	switch engine := engine.(type) {
 	case *clique.Clique:
 		gspec.ExtraData = make([]byte, 32+common.AddressLength+65)
 		copy(gspec.ExtraData[32:], testBankAddress[:])
@@ -115,9 +113,7 @@ func newTestWorkerBackend(t *testing.T, chainConfig *params.ChainConfig, engine 
 
 		// Set the migrations signer.
 		gspec.Alloc[energi_params.Energi_MigrationContract] = core.GenesisAccount{Balance: testBankFunds}
-		energiEngine := engine.(*energi.Energi)
-		// energiEngine.testing = true
-		energiEngine.SetMinerCB(
+		engine.SetMinerCB(
 			func() []common.Address {
 				return []common.Address{energi_params.Energi_MigrationContract}
 			},
@@ -208,7 +204,7 @@ func testPendingStateAndBlock(t *testing.T, chainConfig *params.ChainConfig, eng
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	// Trigger processing of the migration tx at block number 1
@@ -237,7 +233,7 @@ func testPendingStateAndBlock(t *testing.T, chainConfig *params.ChainConfig, eng
 
 	// Ensure the new tx events has been processed
 	time.Sleep(1000 * time.Millisecond)
-	block, state = w.pending()
+	_, state = w.pending()
 	if balance := state.GetBalance(testUserAddress); balance.Cmp(big.NewInt(2000)) != 0 {
 		t.Errorf("account balance mismatch: have %d, want %d", balance, 2000)
 	}
@@ -259,7 +255,7 @@ func testEmptyWork(t *testing.T, chainConfig *params.ChainConfig, engine consens
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	var (
@@ -321,7 +317,7 @@ func TestStreamUncleBlock(t *testing.T) {
 	w, b := newTestWorker(t, ethashChainConfig, ethash, 1)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	var taskCh = make(chan struct{})
@@ -391,7 +387,7 @@ func testRegenerateMiningBlock(t *testing.T, chainConfig *params.ChainConfig, en
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	var taskCh = make(chan struct{})
@@ -467,7 +463,7 @@ func testAdjustInterval(t *testing.T, chainConfig *params.ChainConfig, engine co
 	w, b := newTestWorker(t, chainConfig, engine, 0)
 	defer func() {
 		w.close()
-		b.CleanUp()
+		_ = b.CleanUp()
 	}()
 
 	w.skipSealHook = func(task *task) bool {

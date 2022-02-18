@@ -34,10 +34,10 @@ func TestDiscovery(t *testing.T) {
 
 	node := s.Nodes[0]
 	raddr := NewAddr(node)
-	pp.Register(raddr)
+	_ = pp.Register(raddr)
 
 	// start the hive and wait for the connection
-	pp.Start(s.Server)
+	_ = pp.Start(s.Server)
 	defer pp.Stop()
 
 	// send subPeersMsg to the peer

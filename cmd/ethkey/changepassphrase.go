@@ -24,6 +24,7 @@ import (
 
 	"github.com/energicryptocurrency/energi/accounts/keystore"
 	"github.com/energicryptocurrency/energi/cmd/utils"
+
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -78,7 +79,7 @@ Change the passphrase of a keyfile.`,
 		}
 
 		// Then write the new keyfile in place of the old one.
-		if err := ioutil.WriteFile(keyfilepath, newJson, 600); err != nil {
+		if err := ioutil.WriteFile(keyfilepath, newJson, 0600); err != nil {
 			utils.Fatalf("Error writing new keyfile to disk: %v", err)
 		}
 

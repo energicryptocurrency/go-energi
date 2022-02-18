@@ -37,6 +37,7 @@ import (
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/ethdb"
 	"github.com/energicryptocurrency/energi/event"
 	"github.com/energicryptocurrency/energi/log"
@@ -44,9 +45,8 @@ import (
 	"github.com/energicryptocurrency/energi/params"
 	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/energicryptocurrency/energi/trie"
-	"github.com/hashicorp/golang-lru"
 
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 var (
@@ -127,7 +127,6 @@ type BlockChain struct {
 	chainmu sync.RWMutex // blockchain insertion lock
 	procmu  sync.RWMutex // block processor lock
 
-	checkpoint       int          // checkpoint counts towards the new checkpoint
 	currentBlock     atomic.Value // Current head of the block chain
 	currentFastBlock atomic.Value // Current head of the fast-sync chain (may be above the block chain!)
 
@@ -1685,26 +1684,6 @@ func (bc *BlockChain) InsertHeaderChain(chain []*types.Header, checkFreq int) (i
 	}
 
 	return bc.hc.InsertHeaderChain(chain, whFunc, start)
-}
-
-// writeHeader writes a header into the local chain, given that its parent is
-// already known. If the total difficulty of the newly inserted header becomes
-// greater than the current known TD, the canonical chain is re-routed.
-//
-// Note: This method is not concurrent-safe with inserting blocks simultaneously
-// into the chain, as side effects caused by reorganisations cannot be emulated
-// without the real blocks. Hence, writing headers directly should only be done
-// in two scenarios: pure-header mode of operation (light clients), or properly
-// separated header/block phases (non-archive clients).
-func (bc *BlockChain) writeHeader(header *types.Header) error {
-	bc.wg.Add(1)
-	defer bc.wg.Done()
-
-	bc.mu.Lock()
-	defer bc.mu.Unlock()
-
-	_, err := bc.hc.WriteHeader(header)
-	return err
 }
 
 // CurrentHeader retrieves the current head header of the canonical chain. The

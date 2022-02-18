@@ -35,6 +35,7 @@ import (
 	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/energicryptocurrency/energi/swarm/storage/feed"
 	"github.com/energicryptocurrency/energi/swarm/testutil"
+
 	"github.com/pborman/uuid"
 	cli "gopkg.in/urfave/cli.v1"
 )
@@ -98,7 +99,7 @@ func feedUploadAndSync(c *cli.Context, tuid string) error {
 	var mergedSubTopicHex string
 
 	// generate random topic and subtopic and put a hex on them
-	topicBytes, err := generateRandomData(feed.TopicLength)
+	topicBytes, _ := generateRandomData(feed.TopicLength)
 	topicHex = hexutil.Encode(topicBytes)
 	subTopicBytes, err := generateRandomData(8)
 	subTopicHex = hexutil.Encode(subTopicBytes)

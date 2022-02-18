@@ -32,18 +32,16 @@ import (
 	"github.com/energicryptocurrency/energi/core"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_testutils "github.com/energicryptocurrency/energi/energi/common/testutils"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/eth"
-
-	// "github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/node"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/p2p/nat"
 	"github.com/energicryptocurrency/energi/params"
-	"github.com/stretchr/testify/assert"
 
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_testutils "github.com/energicryptocurrency/energi/energi/common/testutils"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -250,10 +248,10 @@ func TestMasternodeService(t *testing.T) {
 		}
 
 		// trigger external IP Address to be set.
-		srv.NAT.ExternalIP()
+		_, _ = srv.NAT.ExternalIP()
 
 		var ethService *eth.Ethereum
-		data.stack.Service(&ethService)
+		_ = data.stack.Service(&ethService)
 
 		store := data.stack.AccountManager().Backends(keystore.KeyStoreType)[0].(*keystore.KeyStore)
 		// inject the main node personal account
@@ -271,7 +269,7 @@ func TestMasternodeService(t *testing.T) {
 	masternodeCPSigningTest(t)
 
 	// Clean Up
-	migrations.CleanUp()
+	_ = migrations.CleanUp()
 
 	// Stop the entire protocol for all nodesInfo.
 	for _, data := range nodesInfo {
@@ -372,7 +370,7 @@ func SignerCallback(node *node.Node, signerAddrs map[common.Address]*ecdsa.Priva
 		signerKey := signerAddrs[addr]
 
 		var ethServ *eth.Ethereum
-		node.Service(&ethServ)
+		_ = node.Service(&ethServ)
 		chainID := ethServ.APIBackend.ChainConfig().ChainID
 
 		return types.SignTx(tx, types.NewEIP155Signer(chainID), signerKey)
@@ -386,7 +384,7 @@ func cpPropose() (*core.CheckpointInfo, error) {
 	signer := nodesInfo[cpSignerIndex]
 
 	var ethServ *eth.Ethereum
-	signer.stack.Service(&ethServ)
+	_ = signer.stack.Service(&ethServ)
 
 	// Governed Proxy Contract
 	cpRegistry, err := energi_abi.NewCheckpointRegistryV2(
@@ -501,7 +499,7 @@ func mnPrepare(nodes []nodeConfig) error {
 		}
 
 		var ethService *eth.Ethereum
-		n.stack.Service(&ethService)
+		_ = n.stack.Service(&ethService)
 
 		ownerAddr := crypto.PubkeyToAddress(mnAddrToOwners[n.address].PublicKey)
 		transactOpts := bind.TransactOpts{
@@ -528,7 +526,7 @@ func mnPrepare(nodes []nodeConfig) error {
 func sendMoreTxs(mnPrivKey *ecdsa.PrivateKey) error {
 	fromNodeInfo := nodesInfo[txsSenderIndex]
 	var ethService *eth.Ethereum
-	fromNodeInfo.stack.Service(&ethService)
+	_ = fromNodeInfo.stack.Service(&ethService)
 
 	txsCount := 5
 	txs := make([]*types.Transaction, 0, txsCount)
@@ -618,7 +616,7 @@ func isSignedCheckpointTx(tx *types.Transaction) bool {
 			}
 
 			var ethServ *eth.Ethereum
-			node.stack.Service(&ethServ)
+			_ = node.stack.Service(&ethServ)
 
 			signer := types.NewEIP155Signer(ethServ.BlockChain().Config().ChainID)
 			from, err := types.Sender(signer, tx)
@@ -648,7 +646,7 @@ func masternodeCPSigningTest(t *testing.T) {
 	// masternode mn node picked is at index 1.
 	mn := nodesInfo[mnIndex]
 	var mnEthService *eth.Ethereum
-	mn.stack.Service(&mnEthService)
+	_ = mn.stack.Service(&mnEthService)
 
 	quitChan := make(chan struct{}, 1)
 	isCPPChan := make(chan struct{}, 1)
@@ -715,7 +713,7 @@ func masternodeCPSigningTest(t *testing.T) {
 	// Add all nodes as peers then start mining in each peer
 	for _, data := range nodesInfo {
 		var ethService *eth.Ethereum
-		data.stack.Service(&ethService)
+		_ = data.stack.Service(&ethService)
 
 		go func() {
 			err := ethService.StartMining(2)
@@ -748,7 +746,7 @@ func masternodeCPSigningTest(t *testing.T) {
 	fmt.Println(" _______ CHECK TX POOL BEFORE WAITING _____")
 	cppsigner := nodesInfo[cpSignerIndex]
 	var ethServ *eth.Ethereum
-	cppsigner.stack.Service(&ethServ)
+	_ = cppsigner.stack.Service(&ethServ)
 
 	{
 		// Tx pool according to the main masternode before test.

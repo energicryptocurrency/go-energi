@@ -34,6 +34,7 @@ import (
 	"github.com/energicryptocurrency/energi/p2p/enode"
 	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
 	"github.com/energicryptocurrency/energi/rpc"
+
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/websocket"
 )
@@ -439,8 +440,8 @@ func (s *Server) StreamNetworkEvents(w http.ResponseWriter, req *http.Request) {
 			writeErr(err)
 			return
 		}
-		for _, node := range snap.Nodes {
-			event := NewEvent(&node.Node)
+		for i := 0; i < len(snap.Nodes); i++ {
+			event := NewEvent(&snap.Nodes[i].Node)
 			if err := writeEvent(event); err != nil {
 				writeErr(err)
 				return
