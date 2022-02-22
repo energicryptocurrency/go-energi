@@ -18,17 +18,11 @@ package consensus
 
 import (
 	"sync"
-	"time"
 
 	"github.com/energicryptocurrency/energi/common"
 	eth_consensus "github.com/energicryptocurrency/energi/consensus"
 	"github.com/energicryptocurrency/energi/core/types"
-
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
-)
-
-const (
-	oldForkPeriod = time.Duration(15) * time.Minute
 )
 
 type KnownStakeKey struct {

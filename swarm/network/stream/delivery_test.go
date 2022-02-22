@@ -60,7 +60,7 @@ func TestStreamerRetrieveRequest(t *testing.T) {
 		true,
 		&sync.Map{},
 	)
-	streamer.delivery.RequestFromPeers(ctx, req)
+	_, _, _ = streamer.delivery.RequestFromPeers(ctx, req)
 
 	stream := NewStream(swarmChunkServerStreamName, "", true)
 
@@ -112,7 +112,7 @@ func TestStreamerUpstreamRetrieveRequestMsgExchangeWithoutStore(t *testing.T) {
 
 	stream := NewStream(swarmChunkServerStreamName, "", true)
 	//simulate pre-subscription to RETRIEVE_REQUEST stream on peer
-	peer.handleSubscribeMsg(context.TODO(), &SubscribeMsg{
+	_ = peer.handleSubscribeMsg(context.TODO(), &SubscribeMsg{
 		Stream:   stream,
 		History:  nil,
 		Priority: Top,
@@ -182,7 +182,7 @@ func TestStreamerUpstreamRetrieveRequestMsgExchange(t *testing.T) {
 
 	stream := NewStream(swarmChunkServerStreamName, "", true)
 
-	peer.handleSubscribeMsg(context.TODO(), &SubscribeMsg{
+	_ = peer.handleSubscribeMsg(context.TODO(), &SubscribeMsg{
 		Stream:   stream,
 		History:  nil,
 		Priority: Top,

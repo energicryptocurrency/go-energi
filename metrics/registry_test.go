@@ -17,9 +17,7 @@
 
 package metrics
 
-import (
-	"testing"
-)
+import "testing"
 
 func BenchmarkRegistry(b *testing.B) {
 	r := NewRegistry()
@@ -192,7 +190,7 @@ func TestPrefixedRegistryRegister(t *testing.T) {
 	r := NewPrefixedRegistry("prefix.")
 	err := r.Register("foo", NewCounter())
 	c := NewCounter()
-	Register("bar", c)
+	_ = Register("bar", c)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -240,7 +238,7 @@ func TestPrefixedRegistryUnregister(t *testing.T) {
 func TestPrefixedRegistryGet(t *testing.T) {
 	pr := NewPrefixedRegistry("prefix.")
 	name := "foo"
-	pr.Register(name, NewCounter())
+	_ = pr.Register(name, NewCounter())
 
 	fooCounter := pr.Get(name)
 	if fooCounter == nil {
@@ -252,7 +250,7 @@ func TestPrefixedChildRegistryGet(t *testing.T) {
 	r := NewRegistry()
 	pr := NewPrefixedChildRegistry(r, "prefix.")
 	name := "foo"
-	pr.Register(name, NewCounter())
+	_ = pr.Register(name, NewCounter())
 	fooCounter := pr.Get(name)
 	if fooCounter == nil {
 		t.Fatal(name)
@@ -263,7 +261,7 @@ func TestChildPrefixedRegistryRegister(t *testing.T) {
 	r := NewPrefixedChildRegistry(DefaultRegistry, "prefix.")
 	err := r.Register("foo", NewCounter())
 	c := NewCounter()
-	Register("bar", c)
+	_ = Register("bar", c)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -287,16 +285,16 @@ func TestChildPrefixedRegistryOfChildRegister(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	err = r2.Register("baz", NewCounter())
+	_ = r2.Register("baz", NewCounter())
 	c := NewCounter()
 	Register("bars", c)
 
 	i := 0
 	r2.Each(func(name string, m interface{}) {
 		i++
-		if name != "prefix.prefix2.baz" {
-			//t.Fatal(name)
-		}
+		//if name != "prefix.prefix2.baz" {
+		//	t.Fatal(name)
+		//}
 	})
 	if i != 1 {
 		t.Fatal(i)
@@ -310,7 +308,7 @@ func TestWalkRegistries(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
-	err = r2.Register("baz", NewCounter())
+	_ = r2.Register("baz", NewCounter())
 	c := NewCounter()
 	Register("bars", c)
 
@@ -318,5 +316,4 @@ func TestWalkRegistries(t *testing.T) {
 	if "prefix.prefix2." != prefix {
 		t.Fatal(prefix)
 	}
-
 }

@@ -30,6 +30,7 @@ import (
 	"github.com/energicryptocurrency/energi/rpc"
 	"github.com/energicryptocurrency/energi/swarm"
 	"github.com/energicryptocurrency/energi/swarm/api"
+
 	"github.com/docker/docker/pkg/reexec"
 )
 
@@ -176,7 +177,7 @@ func TestConfigFileOverrides(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error writing TOML file in TestFileOverride: %v", err)
 	}
-	f.Sync()
+	_ = f.Sync()
 
 	dir, err := ioutil.TempDir("", "bzztest")
 	if err != nil {
@@ -304,11 +305,11 @@ func TestConfigEnvVars(t *testing.T) {
 	}
 
 	//cmd.InputLine(testPassphrase)
-	io.WriteString(stdin, testPassphrase+"\n")
+	_, _ = io.WriteString(stdin, testPassphrase+"\n")
 	defer func() {
 		if t.Failed() {
 			node.Shutdown()
-			cmd.Process.Kill()
+			_ = cmd.Process.Kill()
 		}
 	}()
 	// wait for the node to start
@@ -350,7 +351,7 @@ func TestConfigEnvVars(t *testing.T) {
 	}
 
 	node.Shutdown()
-	cmd.Process.Kill()
+	_ = cmd.Process.Kill()
 }
 
 func TestConfigCmdLineOverridesFile(t *testing.T) {
@@ -389,7 +390,7 @@ func TestConfigCmdLineOverridesFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error writing TOML file in TestFileOverride: %v", err)
 	}
-	f.Sync()
+	_ = f.Sync()
 
 	dir, err := ioutil.TempDir("", "bzztest")
 	if err != nil {

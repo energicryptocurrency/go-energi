@@ -68,12 +68,12 @@ func TestTripartiteDiffieHellman(t *testing.T) {
 	pa, pb, pc := new(G1), new(G1), new(G1)
 	qa, qb, qc := new(G2), new(G2), new(G2)
 
-	pa.Unmarshal(new(G1).ScalarBaseMult(a).Marshal())
-	qa.Unmarshal(new(G2).ScalarBaseMult(a).Marshal())
-	pb.Unmarshal(new(G1).ScalarBaseMult(b).Marshal())
-	qb.Unmarshal(new(G2).ScalarBaseMult(b).Marshal())
-	pc.Unmarshal(new(G1).ScalarBaseMult(c).Marshal())
-	qc.Unmarshal(new(G2).ScalarBaseMult(c).Marshal())
+	_, _ = pa.Unmarshal(new(G1).ScalarBaseMult(a).Marshal())
+	_, _ = qa.Unmarshal(new(G2).ScalarBaseMult(a).Marshal())
+	_, _ = pb.Unmarshal(new(G1).ScalarBaseMult(b).Marshal())
+	_, _ = qb.Unmarshal(new(G2).ScalarBaseMult(b).Marshal())
+	_, _ = pc.Unmarshal(new(G1).ScalarBaseMult(c).Marshal())
+	_, _ = qc.Unmarshal(new(G2).ScalarBaseMult(c).Marshal())
 
 	k1 := Pair(pb, qc)
 	k1.ScalarMult(k1, a)

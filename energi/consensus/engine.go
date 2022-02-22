@@ -17,16 +17,15 @@
 package consensus
 
 import (
-	"fmt"
-	"time"
 	"errors"
-	"strings"
+	"fmt"
 	"math/big"
+	"strings"
 	"sync/atomic"
+	"time"
 
 	"github.com/energicryptocurrency/energi/accounts/abi"
 	"github.com/energicryptocurrency/energi/common"
-	eth_consensus "github.com/energicryptocurrency/energi/consensus"
 	"github.com/energicryptocurrency/energi/consensus/misc"
 	"github.com/energicryptocurrency/energi/core"
 	"github.com/energicryptocurrency/energi/core/state"
@@ -39,11 +38,13 @@ import (
 	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/energicryptocurrency/energi/rpc"
 
-	lru "github.com/hashicorp/golang-lru"
-	"golang.org/x/crypto/sha3"
-
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	eth_consensus "github.com/energicryptocurrency/energi/consensus"
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
+
+	lru "github.com/hashicorp/golang-lru"
+	"golang.org/x/crypto/sha3"
 )
 
 var (
@@ -70,28 +71,28 @@ type (
 		nonceCap uint64
 
 		// The rest
-		config               *params.EnergiConfig
-		db                   ethdb.Database
-		rewardAbi            abi.ABI
-		dposAbi              abi.ABI
-		blacklistAbi         abi.ABI
-		sporkAbi             abi.ABI
-		mnregAbi             abi.ABI
-		treasuryAbi          abi.ABI
-		hardforkAbi          abi.ABI
-		systemFaucet         common.Address
-		xferGas              uint64
-		callGas              uint64
-		unlimitedGas         uint64
-		signerFn             SignerFn
-		accountsFn           AccountsFn
-		peerCountFn          PeerCountFn
-		isMiningFn           IsMiningFn
-		now                  func() uint64
-		testing              bool
-		knownStakes          KnownStakes
-		nextKSPurge          uint64
-		txhashMap            *lru.Cache
+		config       *params.EnergiConfig
+		db           ethdb.Database
+		rewardAbi    abi.ABI
+		dposAbi      abi.ABI
+		blacklistAbi abi.ABI
+		sporkAbi     abi.ABI
+		mnregAbi     abi.ABI
+		treasuryAbi  abi.ABI
+		hardforkAbi  abi.ABI
+		systemFaucet common.Address
+		xferGas      uint64
+		callGas      uint64
+		unlimitedGas uint64
+		signerFn     SignerFn
+		accountsFn   AccountsFn
+		peerCountFn  PeerCountFn
+		isMiningFn   IsMiningFn
+		now          func() uint64
+		testing      bool
+		knownStakes  KnownStakes
+		nextKSPurge  uint64
+		txhashMap    *lru.Cache
 		// optimize blocktarget calculation for same block NOTE not thread safe!
 		calculatedTimeTarget TimeTarget
 		calculatedBlockHash  common.Hash
@@ -141,22 +142,22 @@ func New(config *params.EnergiConfig, db ethdb.Database) *Energi {
 	}
 
 	return &Energi{
-		config:        config,
-		db:            db,
-		rewardAbi:     rewardAbi,
-		dposAbi:       dposAbi,
-		blacklistAbi:  blacklistAbi,
-		sporkAbi:      sporkAbi,
-		mnregAbi:      mngregAbi,
-		treasuryAbi:   treasuryAbi,
-		hardforkAbi:   hardforkAbi,
-		systemFaucet:  energi_params.Energi_SystemFaucet,
-		xferGas:       0,
-		callGas:       30000,
-		unlimitedGas:  energi_params.UnlimitedGas,
-		nextKSPurge:   0,
-		txhashMap:     txhashMap,
-		now:           func() uint64 { return uint64(time.Now().Unix()) },
+		config:       config,
+		db:           db,
+		rewardAbi:    rewardAbi,
+		dposAbi:      dposAbi,
+		blacklistAbi: blacklistAbi,
+		sporkAbi:     sporkAbi,
+		mnregAbi:     mngregAbi,
+		treasuryAbi:  treasuryAbi,
+		hardforkAbi:  hardforkAbi,
+		systemFaucet: energi_params.Energi_SystemFaucet,
+		xferGas:      0,
+		callGas:      30000,
+		unlimitedGas: energi_params.UnlimitedGas,
+		nextKSPurge:  0,
+		txhashMap:    txhashMap,
+		now:          func() uint64 { return uint64(time.Now().Unix()) },
 
 		accountsFn:  func() []common.Address { return nil },
 		peerCountFn: func() int { return 0 },
@@ -233,8 +234,13 @@ func (e *Energi) VerifyHeader(
 		return nil
 	}
 
-	// get hf status
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	// check if Asgard hardfork is activated and use new difficulty algorithm
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		isAsgardActive = false
+	}
 	var time_target *TimeTarget
 
 	// calculate time target based on hf status
@@ -488,86 +494,6 @@ func (e *Energi) VerifySeal(chain ChainReader, header *types.Header) error {
 	return nil
 }
 
-// checks if hardfork is active
-func (e *Energi) hardforkIsActive(
-	chain ChainReader,
-	header *types.Header,
-	hardforkName string,
-) (bool, error) {
-	// don't check for hard forks being active if we're testing
-	if e.testing {
-		return false, nil
-	}
-
-	// check if parent hash is empty
-	if (header.ParentHash == common.Hash{}) {
-		return false, nil
-	}
-
-	// get state for snapshot
-	blockst := chain.CalculateBlockState(header.ParentHash, header.Number.Uint64()-1)
-	if blockst == nil {
-		log.Error("PoS state root failure", "header", header.ParentHash)
-		return false, eth_consensus.ErrMissingState
-	}
-
-	// get parent
-	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
-	if parent == nil {
-		log.Error("Failed to get parent", eth_consensus.ErrUnknownAncestor)
-		return false, eth_consensus.ErrUnknownAncestor
-	}
-
-	// create call data
-	var hardforkNameArray [32]byte
-	copy(hardforkNameArray[:], []byte(hardforkName))
-	callData, err := e.hardforkAbi.Pack("get", hardforkNameArray)
-	if err != nil {
-		log.Error("Failed to check if hardfork is active", "err", err)
-		return false, err
-	}
-
-	// construct the contract call message
-	msg := types.NewMessage(
-		e.systemFaucet,
-		&e.config.HardforkRegistryProxyAddress,
-		0,
-		common.Big0,
-		e.callGas,
-		common.Big0,
-		callData,
-		false,
-	)
-
-	// create environment and apply message
-	evm := e.createEVM(msg, chain, parent, blockst)
-	gp := core.GasPool(e.callGas)
-	output, _, _, err := core.ApplyMessage(evm, msg, &gp)
-	if err != nil {
-		log.Error("Failed to get hardfork", "err", err)
-		return false, err
-	}
-
-	// return struct
-	ret := new ( struct {
-			BlockNumber *big.Int
-			BlockHash [32]byte
-			SwFeatures *big.Int
-	} )
-
-	err = e.hardforkAbi.Unpack(ret, "get", output)
-	if err != nil  {
-		if strings.Contains(err.Error(), "no such hard fork") || strings.Contains(err.Error(), "unmarshalling empty output"){
-			return false, nil
-		} else{
-			log.Error("Failed to unpack returned hf", "err", err)
-		}
-		return false, err
-	}
-
-	return header.Number.Uint64() >= ret.BlockNumber.Uint64(), nil
-}
-
 // Prepare initializes the consensus fields of a block header according to the
 // rules of a particular engine. The changes are executed inline.
 func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
@@ -578,13 +504,13 @@ func (e *Energi) Prepare(chain ChainReader, header *types.Header) (err error) {
 		return eth_consensus.ErrUnknownAncestor
 	}
 
-	// check if Asgard hardfork is activated use new difficulty algorithm
-	isAsgardActive, err := e.hardforkIsActive(chain, header, "Asgard")
+	// check if Asgard hardfork is activated and use new difficulty algorithm
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", header.Number.Uint64())
 	log.Debug("hf check", "isAsgardActive", isAsgardActive)
-	if err != nil {
-		log.Trace("Asgard hf check failed: " + err.Error())
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		isAsgardActive = false
 	}
-
 	// Clear field to be set in mining
 	header.Coinbase = common.Address{}
 	header.Nonce = types.BlockNonce{}
@@ -761,11 +687,11 @@ func (e *Energi) Seal(
 	stop <-chan struct{},
 ) (err error) {
 	go func() {
-	header := block.Header()
-	txhash := header.TxHash
-	result := eth_consensus.NewSealResult(block, nil, nil)
+		header := block.Header()
+		txhash := header.TxHash
+		result := eth_consensus.NewSealResult(block, nil, nil)
 
-	if header.Number.Cmp(common.Big0) != 0 {
+		if header.Number.Cmp(common.Big0) != 0 {
 			success, err := e.mine(chain, header, stop)
 
 			// NOTE: due to the fact that PoS mining may change Coinbase
@@ -776,40 +702,40 @@ func (e *Energi) Seal(
 				result, err = e.recreateBlock(chain, header, block.Transactions())
 			}
 
-		if err != nil {
-			log.Error("PoS miner error", "err", err)
-			success = false
-		}
+			if err != nil {
+				log.Error("PoS miner error", "err", err)
+				success = false
+			}
 
 			if !success {
-			select {
-			case results <- eth_consensus.NewSealResult(nil, nil, nil):
-			default:
+				select {
+				case results <- eth_consensus.NewSealResult(nil, nil, nil):
+				default:
+				}
+				return
 			}
+
+			header = result.Block.Header()
+		}
+
+		sighash := e.SignatureHash(header)
+		log.Trace("PoS seal hash", "sighash", sighash)
+
+		header.Signature, err = e.signerFn(header.Coinbase, sighash.Bytes())
+		if err != nil {
+			log.Error("PoS miner error", "err", err)
 			return
 		}
 
-		header = result.Block.Header()
-	}
+		result.Block = result.Block.WithSeal(header)
+		e.txhashMap.Add(header.TxHash, txhash)
 
-	sighash := e.SignatureHash(header)
-	log.Trace("PoS seal hash", "sighash", sighash)
-
-	header.Signature, err = e.signerFn(header.Coinbase, sighash.Bytes())
-	if err != nil {
-		log.Error("PoS miner error", "err", err)
-		return
-	}
-
-	result.Block = result.Block.WithSeal(header)
-	e.txhashMap.Add(header.TxHash, txhash)
-
-	select {
-	case results <- result:
+		select {
+		case results <- result:
 			log.Info("PoS seal has submitted solution", "block", result.Block.Hash())
-	default:
+		default:
 			log.Warn("PoS seal is not read by miner", "sealhash", e.SealHash(header))
-	}
+		}
 	}()
 
 	return nil
@@ -959,9 +885,14 @@ func (e *Energi) CalcDifficulty(
 	chain ChainReader, time uint64, parent *types.Header,
 ) *big.Int {
 	// check if Asgard hardfork is activated use new difficulty algorithm
-	var isAsgardActive bool
-	isAsgardActive, _ = e.hardforkIsActive(chain, parent, "Asgard")
+	isAsgardActive := hfcache.IsHardforkActive("Asgard", parent.Number.Uint64())
+	log.Debug("hf check", "isAsgardActive", isAsgardActive)
+	// don't check for hard forks being active if we're testing
+	if e.testing {
+		isAsgardActive = false
+	}
 	log.Debug("hard fork", "status", isAsgardActive)
+
 	if isAsgardActive {
 		time_target := e.calcTimeTargetV2(chain, parent)
 		return CalcPoSDifficultyV2(time, parent, time_target)

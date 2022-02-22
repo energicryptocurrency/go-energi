@@ -33,6 +33,7 @@ import (
 	ch "github.com/energicryptocurrency/energi/swarm/chunk"
 	"github.com/energicryptocurrency/energi/swarm/log"
 	"github.com/energicryptocurrency/energi/swarm/storage/mock/mem"
+
 	ldberrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
@@ -107,7 +108,7 @@ func TestMarkAccessed(t *testing.T) {
 
 	h := GenerateRandomChunk(ch.DefaultSize)
 
-	db.Put(context.Background(), h)
+	_ = db.Put(context.Background(), h)
 
 	var index dpaDBIndex
 	addr := h.Address()
@@ -124,7 +125,7 @@ func TestMarkAccessed(t *testing.T) {
 	}
 
 	db.MarkAccessed(addr)
-	db.writeCurrentBatch()
+	_ = db.writeCurrentBatch()
 
 	idata, err = db.db.Get(idxk)
 	if err != nil {
@@ -423,7 +424,7 @@ func TestLDBStoreAddRemove(t *testing.T) {
 	for i := 0; i < n; i++ {
 		// delete all even index chunks
 		if i%2 == 0 {
-			ldb.Delete(chunks[i].Address())
+			_ = ldb.Delete(chunks[i].Address())
 		}
 	}
 
@@ -521,8 +522,10 @@ func testLDBStoreRemoveThenCollectGarbage(t *testing.T) {
 		}
 		remaining -= putCount
 		for putCount > 0 {
-			ldb.Put(context.TODO(), chunks[puts])
-			log.Debug("ldbstore", "entrycnt", ldb.entryCnt, "accesscnt", ldb.accessCnt, "cap", capacity, "n", n, "puts", puts, "remaining", remaining, "roundtarget", roundTarget)
+			_ = ldb.Put(context.TODO(), chunks[puts])
+			log.Debug("ldbstore", "entrycnt", ldb.entryCnt, "accesscnt", ldb.accessCnt,
+				"cap", capacity, "n", n, "puts", puts, "remaining", remaining,
+				"roundtarget", roundTarget)
 			puts++
 			putCount--
 		}

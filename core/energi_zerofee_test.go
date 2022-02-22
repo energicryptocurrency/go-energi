@@ -28,15 +28,12 @@ import (
 	"github.com/energicryptocurrency/energi/consensus/ethash"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/ethdb"
-
-	// "github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
 
 	"github.com/stretchr/testify/assert"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
 )
 
 func TestIsValidZeroFee(t *testing.T) {
@@ -296,7 +293,7 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	assert.Empty(t, err)
 	invalidateCall, err := mnreg_abi.Pack("invalidate", common.Address{})
 	assert.Empty(t, err)
-	cpreg_abi, err := abi.JSON(strings.NewReader(energi_abi.ICheckpointRegistryABI))
+	cpreg_abi, _ := abi.JSON(strings.NewReader(energi_abi.ICheckpointRegistryABI))
 	cpsignCall, err := cpreg_abi.Pack("sign", common.Address{}, []byte{})
 	assert.Empty(t, err)
 
@@ -447,26 +444,26 @@ func TestZeroFeeProtectorMasternode(t *testing.T) {
 	// Test automatic cleanup
 	signer.sender = mn_inactive
 
-	err = protector.checkDoS(pool, hbtx0)
+	_ = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 2, len(protector.mnHeartbeats))
 	assert.Equal(t, 2, len(protector.mnInvalidations))
 	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
 	adjust_time = time.Duration(21)*time.Minute + time.Second
-	err = protector.checkDoS(pool, hbtx0)
+	_ = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
 	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
 	adjust_time = time.Duration(30) * time.Minute
-	err = protector.checkDoS(pool, hbtx0)
+	_ = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
 	assert.Equal(t, 2, len(protector.mnCheckpoints))
 
 	adjust_time = time.Duration(30)*time.Minute + time.Second
 	protector.nextCleanup = now
-	err = protector.checkDoS(pool, hbtx0)
+	_ = protector.checkDoS(pool, hbtx0)
 	assert.Equal(t, 0, len(protector.mnHeartbeats))
 	assert.Equal(t, 0, len(protector.mnInvalidations))
 	assert.Equal(t, 0, len(protector.mnCheckpoints))

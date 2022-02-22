@@ -38,9 +38,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
-
 	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/log"
@@ -48,6 +47,7 @@ import (
 	swarm "github.com/energicryptocurrency/energi/swarm/api/client"
 	"github.com/energicryptocurrency/energi/swarm/storage"
 	"github.com/energicryptocurrency/energi/swarm/storage/feed"
+	"github.com/energicryptocurrency/energi/swarm/storage/feed/lookup"
 	"github.com/energicryptocurrency/energi/swarm/testutil"
 )
 
@@ -141,7 +141,7 @@ func TestBzzWithFeed(t *testing.T) {
 	if err := updateRequest.Sign(signer); err != nil {
 		t.Fatal(err)
 	}
-	log.Info("added data", "data", common.ToHex(manifestAddress))
+	log.Info("added data", "data", hexutil.Encode(manifestAddress))
 
 	// Build the feed update http request:
 	feedUpdateURL, err := url.Parse(fmt.Sprintf("%s/bzz-feed:/", srv.URL))
@@ -802,7 +802,7 @@ func testBzzTar(encrypted bool, t *testing.T) {
 	if err != nil {
 		t.Fatalf("error getting tarball: %v", err)
 	}
-	file.Sync()
+	_ = file.Sync()
 	file.Close()
 
 	tarFileHandle, err := os.Open(file.Name())
@@ -1154,11 +1154,11 @@ func TestMultiPartUpload(t *testing.T) {
 
 	buf := new(bytes.Buffer)
 	form := multipart.NewWriter(buf)
-	form.WriteField("name", "John Doe")
+	_ = form.WriteField("name", "John Doe")
 	file1, _ := form.CreateFormFile("cv", "cv.txt")
-	file1.Write([]byte("John Doe's Credentials"))
+	_, _ = file1.Write([]byte("John Doe's Credentials"))
 	file2, _ := form.CreateFormFile("profile_picture", "profile.jpg")
-	file2.Write([]byte("imaginethisisjpegdata"))
+	_, _ = file2.Write([]byte("imaginethisisjpegdata"))
 	form.Close()
 
 	headers := map[string]string{

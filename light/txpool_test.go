@@ -111,7 +111,7 @@ func TestTxPool(t *testing.T) {
 		s := sentTx(i - 1)
 		e := sentTx(i)
 		for i := s; i < e; i++ {
-			pool.Add(ctx, testTx[i])
+			_ = pool.Add(ctx, testTx[i])
 			got := <-relay.send
 			exp := 1
 			if got != exp {

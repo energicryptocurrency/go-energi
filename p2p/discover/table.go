@@ -133,7 +133,7 @@ func (tab *Table) self() *enode.Node {
 
 func (tab *Table) seedRand() {
 	var b [8]byte
-	crand.Read(b[:])
+	_, _ = crand.Read(b[:])
 
 	tab.mutex.Lock()
 	tab.rand.Seed(int64(binary.BigEndian.Uint64(b[:])))
@@ -240,7 +240,7 @@ func (tab *Table) Resolve(n *enode.Node) *enode.Node {
 // LookupRandom finds random nodes in the network.
 func (tab *Table) LookupRandom() []*enode.Node {
 	var target encPubkey
-	crand.Read(target[:])
+	_, _ = crand.Read(target[:])
 	return unwrapNodes(tab.lookup(target, true))
 }
 
@@ -431,7 +431,7 @@ func (tab *Table) doRefresh(done chan struct{}) {
 	// We perform a few lookups with a random target instead.
 	for i := 0; i < 3; i++ {
 		var target encPubkey
-		crand.Read(target[:])
+		_, _ = crand.Read(target[:])
 		tab.lookup(target, false)
 	}
 }

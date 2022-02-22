@@ -155,30 +155,24 @@ func (l *StructLogger) CaptureState(env *EVM, pc uint64, op OpCode, gas, cost ui
 			arg_count = 3
 			mem_len_pos = 0
 			mem_off_pos = 1
-			break
 		case CALL, CALLCODE:
 			arg_count = 7
 			mem_len_pos = 2
 			mem_off_pos = 3
-			break
 		case RETURN, REVERT:
 			arg_count = 2
 			mem_len_pos = 0
 			mem_off_pos = 1
-			break
 		case DELEGATECALL, STATICCALL:
 			arg_count = 6
 			mem_len_pos = 2
 			mem_off_pos = 3
-			break
 		case CREATE2:
 			arg_count = 4
 			mem_len_pos = 0
 			mem_off_pos = 1
-			break
 		case SELFDESTRUCT:
 			arg_count = 1
-			break
 		default:
 			return nil
 		}

@@ -136,7 +136,7 @@ func TestJSONRequestParamsParsing(t *testing.T) {
 		}
 
 		var match []interface{}
-		json.Unmarshal([]byte(test.input), &match)
+		_ = json.Unmarshal([]byte(test.input), &match)
 
 		if len(args) != len(test.argTypes) {
 			t.Fatalf("expected %d parsed args, got %d", len(test.argTypes), len(args))

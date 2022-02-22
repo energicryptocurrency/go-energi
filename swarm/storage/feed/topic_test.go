@@ -34,7 +34,7 @@ func TestTopic(t *testing.T) {
 	}
 
 	var topic2 Topic
-	topic2.FromHex(hex)
+	_ = topic2.FromHex(hex)
 	if topic2 != topic {
 		t.Fatal("Expected recovered topic to be equal to original one")
 	}

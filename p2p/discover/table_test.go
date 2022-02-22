@@ -20,7 +20,6 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"math/rand"
-
 	"net"
 	"reflect"
 	"testing"
@@ -623,40 +622,6 @@ func (tn *preminedTestnet) findnode(toid enode.ID, toaddr *net.UDPAddr, target e
 
 func (*preminedTestnet) close()                                        {}
 func (*preminedTestnet) ping(toid enode.ID, toaddr *net.UDPAddr) error { return nil }
-
-// mine generates a testnet struct literal with nodes at
-// various distances to the given target.
-func (tn *preminedTestnet) mine(target encPubkey) {
-	tn.target = target
-	tn.targetSha = tn.target.id()
-	found := 0
-	for found < bucketSize*10 {
-		k := newkey()
-		key := encodePubkey(&k.PublicKey)
-		ld := enode.LogDist(tn.targetSha, key.id())
-		if len(tn.dists[ld]) < bucketSize {
-			tn.dists[ld] = append(tn.dists[ld], key)
-			fmt.Println("found ID with ld", ld)
-			found++
-		}
-	}
-	fmt.Println("&preminedTestnet{")
-	fmt.Printf("	target: %#v,\n", tn.target)
-	fmt.Printf("	targetSha: %#v,\n", tn.targetSha)
-	fmt.Printf("	dists: [%d][]encPubkey{\n", len(tn.dists))
-	for ld, ns := range tn.dists {
-		if len(ns) == 0 {
-			continue
-		}
-		fmt.Printf("		%d: []encPubkey{\n", ld)
-		for _, n := range ns {
-			fmt.Printf("			hexEncPubkey(\"%x\"),\n", n[:])
-		}
-		fmt.Println("		},")
-	}
-	fmt.Println("	},")
-	fmt.Println("}")
-}
 
 // gen wraps quick.Value so it's easier to use.
 // it generates a random value of the given value's type.

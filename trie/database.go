@@ -28,6 +28,7 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/allegro/bigcache"
 )
 
@@ -134,9 +135,11 @@ type rawShortNode struct {
 	Val node
 }
 
-func (n rawShortNode) canUnload(uint16, uint16) bool { panic("this should never end up in a live trie") }
-func (n rawShortNode) cache() (hashNode, bool)       { panic("this should never end up in a live trie") }
-func (n rawShortNode) fstring(ind string) string     { panic("this should never end up in a live trie") }
+func (n rawShortNode) canUnload(uint16, uint16) bool {
+	panic("this should never end up in a live trie")
+}
+func (n rawShortNode) cache() (hashNode, bool)   { panic("this should never end up in a live trie") }
+func (n rawShortNode) fstring(ind string) string { panic("this should never end up in a live trie") }
 
 // cachedNode is all the information we know about a single cached node in the
 // memory database write layer.
@@ -811,46 +814,4 @@ func (db *Database) Size() (common.StorageSize, common.StorageSize) {
 	// counted. For every useful node, we track 2 extra hashes as the flushlist.
 	var flushlistSize = common.StorageSize((len(db.dirties) - 1) * 2 * common.HashLength)
 	return db.dirtiesSize + flushlistSize, db.preimagesSize
-}
-
-// verifyIntegrity is a debug method to iterate over the entire trie stored in
-// memory and check whether every node is reachable from the meta root. The goal
-// is to find any errors that might cause memory leaks and or trie nodes to go
-// missing.
-//
-// This method is extremely CPU and memory intensive, only use when must.
-func (db *Database) verifyIntegrity() {
-	// Iterate over all the cached nodes and accumulate them into a set
-	reachable := map[common.Hash]struct{}{{}: {}}
-
-	for child := range db.dirties[common.Hash{}].children {
-		db.accumulate(child, reachable)
-	}
-	// Find any unreachable but cached nodes
-	unreachable := []string{}
-	for hash, node := range db.dirties {
-		if _, ok := reachable[hash]; !ok {
-			unreachable = append(unreachable, fmt.Sprintf("%x: {Node: %v, Parents: %d, Prev: %x, Next: %x}",
-				hash, node.node, node.parents, node.flushPrev, node.flushNext))
-		}
-	}
-	if len(unreachable) != 0 {
-		panic(fmt.Sprintf("trie cache memory leak: %v", unreachable))
-	}
-}
-
-// accumulate iterates over the trie defined by hash and accumulates all the
-// cached children found in memory.
-func (db *Database) accumulate(hash common.Hash, reachable map[common.Hash]struct{}) {
-	// Mark the node reachable if present in the memory cache
-	node, ok := db.dirties[hash]
-	if !ok {
-		return
-	}
-	reachable[hash] = struct{}{}
-
-	// Iterate over all the children and accumulate them too
-	for _, child := range node.childs() {
-		db.accumulate(child, reachable)
-	}
 }

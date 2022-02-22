@@ -31,7 +31,8 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 )
 
-var testKey, _ = crypto.HexToECDSA("b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
+var testKey, _ = crypto.HexToECDSA(
+	"b71c71a67e1177ad4e901695e1b4b9ee17ae16c6668d313eac2f96dbcda3f291")
 
 var waitDeployedTests = map[string]struct {
 	code        string
@@ -77,7 +78,7 @@ func TestWaitDeployed(t *testing.T) {
 		}()
 
 		// Send and mine the transaction.
-		backend.SendTransaction(ctx, tx)
+		_ = backend.SendTransaction(ctx, tx)
 		backend.Commit()
 
 		select {

@@ -148,13 +148,14 @@ type testPeer struct {
 }
 
 // newTestPeer creates a new peer registered at the given protocol manager.
-func newTestPeer(name string, version int, pm *ProtocolManager, shake bool) (*testPeer, <-chan error) {
+func newTestPeer(name string, version int, pm *ProtocolManager, shake bool) (
+	*testPeer, <-chan error) {
 	// Create a message pipe to communicate through
 	app, net := p2p.MsgPipe()
 
 	// Generate a random id and create the peer
 	var id enode.ID
-	rand.Read(id[:])
+	_, _ = rand.Read(id[:])
 
 	peer := pm.newPeer(version, p2p.NewPeer(id, name, nil), net)
 

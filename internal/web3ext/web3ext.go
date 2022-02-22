@@ -1122,8 +1122,8 @@ web3._extend({
 			outputFormatter: console.log,
 		}),
 		new web3._extend.Method({
-			name: 'setAutoCompoundize',
-			call: 'miner_setAutoCompoundize',
+			name: 'setAutoCompounding',
+			call: 'miner_setAutoCompounding',
 			params: 1,
 			inputFormatter: [null],
 			outputFormatter: console.log,

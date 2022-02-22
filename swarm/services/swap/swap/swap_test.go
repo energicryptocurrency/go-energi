@@ -134,11 +134,11 @@ func TestSwap(t *testing.T) {
 	}
 	swap.SetRemote(remote)
 
-	swap.Add(9)
+	_ = swap.Add(9)
 	if proto.drop {
 		t.Fatalf("not expected peer to be dropped")
 	}
-	swap.Add(1)
+	_ = swap.Add(1)
 	if !proto.drop {
 		t.Fatalf("expected peer to be dropped")
 	}
@@ -147,7 +147,7 @@ func TestSwap(t *testing.T) {
 	}
 	proto.drop = false
 
-	swap.Receive(10, &testPromise{big.NewInt(20)})
+	_ = swap.Receive(10, &testPromise{big.NewInt(20)})
 	if swap.balance != 0 {
 		t.Fatalf("expected zero balance, got %v", swap.balance)
 	}
@@ -156,12 +156,12 @@ func TestSwap(t *testing.T) {
 		t.Fatalf("expected zero balance, got %v", swap.balance)
 	}
 
-	swap.Add(-2)
+	_ = swap.Add(-2)
 	if len(proto.amounts) > 0 {
 		t.Fatalf("expected no payments yet, got %v", proto.amounts)
 	}
 
-	swap.Add(-1)
+	_ = swap.Add(-1)
 	if len(proto.amounts) != 1 {
 		t.Fatalf("expected one payment, got %v", len(proto.amounts))
 	}

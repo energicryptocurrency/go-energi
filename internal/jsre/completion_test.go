@@ -24,7 +24,7 @@ import (
 
 func TestCompleteKeywords(t *testing.T) {
 	re := New("", os.Stdout)
-	re.Run(`
+	_, _ = re.Run(`
 		function theClass() {
 			this.foo = 3;
 			this.gazonk = {xyz: 4};

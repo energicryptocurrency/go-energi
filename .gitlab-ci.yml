@@ -9,7 +9,6 @@ stages:
 
 cache: &global_cache_configuration
   paths:
-    - node_modules/
     - build/
   policy: pull-push
 
@@ -70,7 +69,7 @@ clean-repo:
   extends: .merge-request-job
   script:
     - git checkout -- .
-    - git clean -fdx -e node_modules .
+    - git clean -fdx .
 
 # TODO: this actually tries to execute the merge, may not be the best way to check this
 # it will also fail for master branch merges
@@ -81,44 +80,12 @@ branch-check:
   script:
     - if [[ "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
 
-npm-install:
-  stage: prepare
-  cache:
-    # inherit all global cache Settings
-    <<: *global_cache_configuration
-    policy: push
-  extends: .merge-request-job
-  script:
-    - npm install
-
 #lint-go:
 #  stage: lint
 #  extends: .merge-request-job
 #  script:
 #    - make lint-go
 #  allow_failure: true
-
-lint-sol:
-  stage: lint
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache_configuration
-    # override the policy
-    policy: pull
-  extends: .merge-request-job
-  script:
-    - make lint-sol
-
-lint-sol-tests:
-  stage: lint
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache_configuration
-    # override the policy
-    policy: pull
-  extends: .merge-request-job
-  script:
-    - make lint-sol-tests
 
 build-linux:
   stage: build
@@ -129,7 +96,7 @@ build-linux:
   extends: .merge-request-job
   script:
     - git checkout -- .
-    - git clean -fdx -e node_modules .
+    - git clean -fdx .
     - make all
     - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
 
@@ -139,7 +106,6 @@ build-release-linux:
   dependencies: []
   needs: 
     - test-go-report
-    - test-solidity
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
   script:
@@ -158,7 +124,6 @@ build-release-windows:
   dependencies: []
   needs: 
     - test-go-report
-    - test-solidity
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:20-latest
   script:
@@ -178,7 +143,6 @@ build-release-macos:
   dependencies: []
   needs: 
     - test-go-report
-    - test-solidity
   tags: [docker_mac_runner]
   script:
     - make -f Makefile.release release-macos
@@ -212,32 +176,6 @@ test-go-report:
       junit: .test-go-report.xml
     expire_in: 2 day
   coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
-  retry:
-    max: 2
-    when:
-      - script_failure
-      - runner_system_failure
-      - stuck_or_timeout_failure
-
-test-solidity:
-  stage: test
-  dependencies: []
-  needs: ["build-linux"]
-  cache:
-    # inherit all global cache settings
-    <<: *global_cache_configuration
-    # override the policy
-    policy: pull
-  extends: .merge-request-job
-  script:
-    - make test-sol-contracts
-  artifacts:
-    when: always
-    paths:
-      - .test-sol-report.xml
-    reports:
-      junit: .test-sol-report.xml 
-    expire_in: 2 day
   retry:
     max: 2
     when:

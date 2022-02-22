@@ -37,6 +37,7 @@ import (
 	"github.com/energicryptocurrency/energi/swarm/api"
 	"github.com/energicryptocurrency/energi/swarm/api/client"
 	"github.com/energicryptocurrency/energi/swarm/spancontext"
+
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/pborman/uuid"
 	cli "gopkg.in/urfave/cli.v1"
@@ -53,10 +54,6 @@ func init() {
 
 func httpEndpoint(host string) string {
 	return fmt.Sprintf("http://%s:%d", host, httpPort)
-}
-
-func wsEndpoint(host string) string {
-	return fmt.Sprintf("ws://%s:%d", host, wsPort)
 }
 
 func wrapCliCommand(name string, command func(*cli.Context, string) error) func(*cli.Context) error {
