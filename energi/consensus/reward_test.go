@@ -26,11 +26,9 @@ import (
 	"github.com/energicryptocurrency/energi/core/state"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/ethdb"
-
-	// "github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/params"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -85,8 +83,6 @@ func TestBlockRewards(t *testing.T) {
 
 }
 
-
-
 func TestStakerReward(t *testing.T) {
 	t.Parallel()
 	// log.Root().SetHandler(log.StdoutHandler)
@@ -118,7 +114,7 @@ func TestStakerReward(t *testing.T) {
 			UncleHash:  parent.UncleHash(),
 		}),
 		GasLimit: parent.GasLimit(),
-		GasUsed: HeaderGas,
+		GasUsed:  HeaderGas,
 		Number:   new(big.Int).Add(parent.Number(), common.Big1),
 		Time:     parent.Time(),
 	}
@@ -134,7 +130,7 @@ func TestStakerReward(t *testing.T) {
 	assert.Equal(t, 2, len(txs))
 
 	// check the rewarded amount is correct
-	assert.Equal(t, (HeaderGas * energi_params.StakerReward) / 100, txs[0].Value().Uint64())
+	assert.Equal(t, (HeaderGas*energi_params.StakerReward)/100, txs[0].Value().Uint64())
 
 	// check rewarded address is coinbase
 	assert.Equal(t, header.Coinbase, *txs[1].To())

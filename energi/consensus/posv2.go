@@ -78,7 +78,7 @@ func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
 	sampleSize := len(drift)
 	integral = 0
 	// this is a simplification of the trapezoid rule based on uniform spacing
-	for i := 1; i < sampleSize - 1; i++ {
+	for i := 1; i < sampleSize-1; i++ {
 		integral += drift[i]
 	}
 	integral += (drift[0] + drift[sampleSize-1]) / 2
@@ -90,7 +90,7 @@ func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
 // f'(x) = 1/2h * (f(x+h) - f(x-h))
 func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 	sampleSize := len(drift)
-	derivative = make([]int64, sampleSize - 1)
+	derivative = make([]int64, sampleSize-1)
 
 	for i := 1; i < sampleSize; i++ {
 		derivative[i-1] = (drift[i] - drift[i-1])
@@ -112,7 +112,7 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e * Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
+func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 	// check if we have already calculated
 	if parent.Hash() == e.calculatedBlockHash {
 		timeTarget := e.calculatedTimeTarget

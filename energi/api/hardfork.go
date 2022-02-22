@@ -24,11 +24,10 @@ import (
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/log"
-
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 // HardforkRegistryAPI holds the data required to access the API. It has a

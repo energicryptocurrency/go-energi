@@ -1,8 +1,8 @@
 package hfcache
 
 import (
-	"sync"
 	"math/big"
+	"sync"
 )
 
 const (
@@ -27,7 +27,7 @@ func RemoveHardfork(hfName [32]byte) {
 	for i, activeHardfork := range hardforkCache.hardforks {
 		if string(hfName[:]) == activeHardfork.Name {
 			hardforkCache.hardforks[i] = hardforkCache.hardforks[len(hardforkCache.hardforks)-1] // Copy last element to index i.
-			hardforkCache.hardforks[len(hardforkCache.hardforks)-1] = nil   // Erase last element (write zero value).
+			hardforkCache.hardforks[len(hardforkCache.hardforks)-1] = nil                        // Erase last element (write zero value).
 			hardforkCache.hardforks = hardforkCache.hardforks[:len(hardforkCache.hardforks)-1]   // Truncate slice.
 			return
 		}
@@ -52,12 +52,10 @@ func IsHardforkActive(hardforkName string, blockNum uint64) bool {
 	return false
 }
 
-
-
 // HardforkInfo defines the hardfork payload information returned.
 type Hardfork struct {
-	Name        string      `json:"name"`
-	BlockNumber *big.Int    `json:"block_number"`
+	Name        string   `json:"name"`
+	BlockNumber *big.Int `json:"block_number"`
 }
 
 // HardforkCache caches currently active hardforks

@@ -29,13 +29,11 @@ import (
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/ethdb"
-
-	// "github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
-	"github.com/stretchr/testify/assert"
-
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/energi/params"
+
+	"github.com/stretchr/testify/assert"
 )
 
 type mockChainReader struct {

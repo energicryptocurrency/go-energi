@@ -24,7 +24,7 @@ const (
 	AsgardIsActive bool = true
 
 	// Parameters for difficulty calculations
-	Gain int64 = 50000
-	IntegralTime int64 = 720
+	Gain           int64 = 50000
+	IntegralTime   int64 = 720
 	DerivativeTime int64 = 60
 )

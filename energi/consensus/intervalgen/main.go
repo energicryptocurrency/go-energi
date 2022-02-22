@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/energi/consensus"
-	"github.com/energicryptocurrency/energi/energi/params"
 	"fmt"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
+
+	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/energi/energi/consensus"
+	"github.com/energicryptocurrency/energi/energi/params"
 )
 
 const (

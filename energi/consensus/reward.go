@@ -24,9 +24,8 @@ import (
 	"github.com/energicryptocurrency/energi/core"
 	"github.com/energicryptocurrency/energi/core/state"
 	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/log"
-
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/log"
 )
 
 var (
@@ -161,7 +160,7 @@ func (e *Energi) processFeeReward(
 	}
 
 	//mint remaining fees
-	mintRewardTx, mintReceipts, err := e.mintFees(chain, header, statedb, txs, header.GasUsed - reward)
+	mintRewardTx, mintReceipts, err := e.mintFees(chain, header, statedb, txs, header.GasUsed-reward)
 	if err != nil {
 		log.Error("Fail to mint fees", "err", err)
 		return txs, receipts, err
@@ -169,7 +168,6 @@ func (e *Energi) processFeeReward(
 
 	return append(txs, stakerRewardTx, mintRewardTx), append(receipts, stakerRewardReceipts, mintReceipts), nil
 }
-
 
 func (e *Energi) processStakerFeeReward(
 	chain ChainReader,
