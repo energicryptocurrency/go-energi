@@ -149,7 +149,7 @@ func (e *Energi) processFeeReward(
 	statedb.SetBalance(systemFaucet, BigBalance)
 	defer statedb.SetBalance(systemFaucet, common.Big0)
 
-	// reward amount for coinbase/staker
+	// reward amount for coinbase/staker is StakerReward percent of total GasUsed
 	reward := (header.GasUsed * uint64(energi_params.StakerReward)) / Hundred
 
 	// reward staker
@@ -159,7 +159,7 @@ func (e *Energi) processFeeReward(
 		return txs, receipts, err
 	}
 
-	//mint remaining fees
+	// mint remaining fees
 	mintRewardTx, mintReceipts, err := e.mintFees(chain, header, statedb, txs, header.GasUsed-reward)
 	if err != nil {
 		log.Error("Fail to mint fees", "err", err)
