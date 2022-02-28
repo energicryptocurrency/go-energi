@@ -7,7 +7,7 @@ import (
 )
 
 func TestAddHardfork(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
   AddHardfork(&Hardfork{Name: "Asgard", BlockNumber: new(big.Int).SetUint64(2)})
   AddHardfork(&Hardfork{Name: "Asgard", BlockNumber: new(big.Int).SetUint64(3)})
   assert.Equal(t, IsHardforkActive("Asgard",4),true)
@@ -15,7 +15,7 @@ func TestAddHardfork(t *testing.T) {
 
 
 func TestRemoveHardfork(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
   AddHardfork(&Hardfork{Name: "Asgard", BlockNumber: new(big.Int).SetUint64(2)})
   AddHardfork(&Hardfork{Name: "Banana", BlockNumber: new(big.Int).SetUint64(3)})
 
