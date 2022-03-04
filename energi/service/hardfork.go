@@ -120,7 +120,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 		}
 	} else if lc := len(allHardforks); lc > 0 {
 		for _, hardfork := range allHardforks {
-			hfcache.AddHardfork(&hfcache.Hardfork{string(hardfork.Name[:]), hardfork.BlockNumber})
+			hfcache.AddHardfork(&hfcache.Hardfork{Name: hardfork.Name, BlockNumber: hardfork.BlockNumber})
 		}
 	}
 
@@ -134,7 +134,6 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	go hf.logUpcomingHardforks()
 
 	return nil
-
 }
 
 //logUpcomingHardforks periodically logs upcoming (pending) hardforks
@@ -202,7 +201,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 			return
 
 		case hardfork := <-hfCreatedChan:
-			hfcache.AddHardfork(&hfcache.Hardfork{string(hardfork.Name[:]), hardfork.BlockNumber})
+			hfcache.AddHardfork(&hfcache.Hardfork{Name: string(bytes.Trim(hardfork.Name[:], "\x00")), BlockNumber: hardfork.BlockNumber})
 			log.Warn("New Hardfork  created: ",
 				"block Number",
 				hardfork.BlockNumber.String(),
@@ -290,7 +289,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 
 		case hardfork := <-hfRemovedChan:
 			// remove hardfork from active hardfork cache
-			hfcache.RemoveHardfork(hardfork.Name)
+			hfcache.RemoveHardfork(string(bytes.Trim(hardfork.Name[:], "\x00")))
 			log.Warn("Hardfork Removed: ",
 				"Hardfork Name",
 				string(hardfork.Name[:]))
