@@ -1,5 +1,21 @@
 # Core Node Changelog
 
+# 3.1.2
+
+### Added
+- Governance submodule
+- Hardfork check function
+- Simple PoS simulator
+
+### Removed
+- Swarm functionality
+- Symbols from releases
+
+### Fixed
+- miner.setAutoCompounding()
+- Repeated USB enumeration failures
+- Builds on Mac
+
 # 3.1.1
 
 ### Added
