@@ -201,7 +201,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 			return
 
 		case hardfork := <-hfCreatedChan:
-			hfcache.AddHardfork(&hfcache.Hardfork{Name: string(hardfork.Name[:]), BlockNumber: hardfork.BlockNumber})
+			hfcache.AddHardfork(&hfcache.Hardfork{Name: string(bytes.Trim(hardfork.Name[:], "\x00")), BlockNumber: hardfork.BlockNumber})
 			log.Warn("New Hardfork  created: ",
 				"block Number",
 				hardfork.BlockNumber.String(),
@@ -289,7 +289,7 @@ func (hf *HardforkService) listenHardforkRemovedEvents() {
 
 		case hardfork := <-hfRemovedChan:
 			// remove hardfork from active hardfork cache
-			hfcache.RemoveHardfork(hardfork.Name)
+			hfcache.RemoveHardfork(string(bytes.Trim(hardfork.Name[:], "\x00")))
 			log.Warn("Hardfork Removed: ",
 				"Hardfork Name",
 				string(hardfork.Name[:]))

@@ -21,11 +21,11 @@ func AddHardfork(hardfork *Hardfork) {
 }
 
 // RemoveActiveHardfork removes hardfork
-func RemoveHardfork(hfName [32]byte) {
+func RemoveHardfork(hfName string) {
 	hardforkCache.cacheLock.Lock()
 	defer hardforkCache.cacheLock.Unlock()
 	for i, activeHardfork := range hardforkCache.hardforks {
-		if string(hfName[:]) == activeHardfork.Name {
+		if hfName == activeHardfork.Name {
 			hardforkCache.hardforks[i] = hardforkCache.hardforks[len(hardforkCache.hardforks)-1] // Copy last element to index i.
 			hardforkCache.hardforks[len(hardforkCache.hardforks)-1] = nil                        // Erase last element (write zero value).
 			hardforkCache.hardforks = hardforkCache.hardforks[:len(hardforkCache.hardforks)-1]   // Truncate slice.
@@ -42,10 +42,8 @@ func IsHardforkActive(hardforkName string, blockNum uint64) bool {
 		return false
 	}
 
-	var name [32]byte
-	copy(name[:], hardforkName[:])
 	for _, hardfork := range hardforkCache.hardforks {
-		if hardfork.Name == string(name[:]) && blockNum >= hardfork.BlockNumber.Uint64() {
+		if hardfork.Name == hardforkName && blockNum >= hardfork.BlockNumber.Uint64() {
 			return true
 		}
 	}
