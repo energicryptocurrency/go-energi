@@ -2,6 +2,8 @@
 # with Go source code. If you know what GOPATH is then you probably
 # don't need to bother with make.
 
+MAKEFLAGS ?= -j4
+
 .PHONY: geth android ios geth-cross swarm evm all test clean
 .PHONY: geth-linux geth-linux-386 geth-linux-amd64 geth-linux-mips64 geth-linux-mips64le
 .PHONY: geth-linux-arm geth-linux-arm-5 geth-linux-arm-6 geth-linux-arm-7 geth-linux-arm64
@@ -10,8 +12,10 @@
 .PHONY: prebuild
 
 GOBIN = $(shell pwd)/build/bin
-GO ?= $(goVer)
+GO ?= $(shell go version | cut -d' ' -f3 | cut -b3-)
 GO ?= latest
+GOPATH ?= ${HOME}/go
+export GOPATH
 
 prebuild:
 
@@ -47,7 +51,7 @@ check: lint test
 test: all test-go
 
 test-data-submodule:
-	git submodule update --init --recursive
+	git submodule update --init --recursive --jobs 4 --progress
 
 test-go: test-data-submodule
 	build/env.sh go run build/ci.go test
