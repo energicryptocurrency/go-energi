@@ -422,7 +422,7 @@ try! node?.start();
 										<br/>
 										<p>Puppeth is distributed as part of the <a href="https://www.energi.world/downloads/" target="about:blank">Geth &amp; Tools</a> bundles, but can also be installed separately via:<pre>go get github.com/energicryptocurrency/energi3/cmd/puppeth</pre></p>
 										<br/>
-										<p><em>Copyright 2018-2020 The Energi Core Authors.</em></p>
+										<p><em>Copyright 2018-2022 The Energi Core Authors.</em></p>
 										<p><em>Copyright 2017. The Energi Core Authors.</em></p>
 									</div>
 									<div style="display: inline-block; vertical-align: bottom; width: 217px;">
