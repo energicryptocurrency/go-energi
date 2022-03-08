@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi"
+	ethereum "github.com/energicryptocurrency/energi"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/common/hexutil"
 	"github.com/energicryptocurrency/energi/core/types"
@@ -503,7 +503,7 @@ func (ec *Client) SendTransaction(ctx context.Context, tx *types.Transaction) er
 	if err != nil {
 		return err
 	}
-	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", common.ToHex(data))
+	return ec.c.CallContext(ctx, nil, "eth_sendRawTransaction", hexutil.Encode(data))
 }
 
 func toCallArg(msg ethereum.CallMsg) interface{} {

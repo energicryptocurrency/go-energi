@@ -120,7 +120,7 @@ func TestPasswordMasking(t *testing.T) {
 		var req jsonrpcCall
 		JSON, _ := call.Otto.Object("JSON")
 		reqVal, _ := JSON.Call("stringify", call.Argument(0))
-		json.NewDecoder(strings.NewReader(reqVal.String())).Decode(&req)
+		_ = json.NewDecoder(strings.NewReader(reqVal.String())).Decode(&req)
 
 		resp, _ := call.Otto.Object(`({"jsonrpc":"2.0"})`)
 		resp.Set("id", req.ID)

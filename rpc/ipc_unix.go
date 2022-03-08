@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build darwin || dragonfly || freebsd || linux || nacl || netbsd || openbsd || solaris
 // +build darwin dragonfly freebsd linux nacl netbsd openbsd solaris
 
 package rpc
@@ -41,8 +42,8 @@ import "C"
 // ipcListen will create a Unix socket on the given endpoint.
 func ipcListen(endpoint string) (net.Listener, error) {
 	if len(endpoint) > int(C.max_socket_path_size()) {
-		log.Warn(fmt.Sprintf("The ipc endpoint is longer than %d characters. ", C.max_socket_path_size()),
-			"endpoint", endpoint)
+		log.Warn(fmt.Sprintf("The ipc endpoint is longer than %d characters. ",
+			C.max_socket_path_size()), "endpoint", endpoint)
 	}
 
 	// Ensure the IPC path exists and remove any previous leftover
@@ -54,7 +55,7 @@ func ipcListen(endpoint string) (net.Listener, error) {
 	if err != nil {
 		return nil, err
 	}
-	os.Chmod(endpoint, 0600)
+	_ = os.Chmod(endpoint, 0600)
 	return l, nil
 }
 

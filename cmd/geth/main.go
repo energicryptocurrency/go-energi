@@ -38,6 +38,7 @@ import (
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/metrics"
 	"github.com/energicryptocurrency/energi/node"
+
 	"github.com/elastic/gosigar"
 	cli "gopkg.in/urfave/cli.v1"
 )
@@ -186,7 +187,7 @@ func init() {
 	app.Action = geth
 	app.HideVersion = true // we have a command to print the version
 	app.Copyright = strings.Join([]string{
-		"Copyright 2018-2020 The Energi Core Authors",
+		"Copyright 2018-2022 The Energi Core Authors",
 		"Copyright 2013-2018 The go-ethereum Authors",
 	}, "\n   ")
 	app.Commands = []cli.Command{
@@ -339,7 +340,7 @@ func startNode(ctx *cli.Context, stack *node.Node) {
 				if event.Wallet.URL().Scheme == "ledger" {
 					derivationPath = accounts.DefaultLedgerBaseDerivationPath
 				}
-				derivationPaths := []accounts.DerivationPath { derivationPath }
+				derivationPaths := []accounts.DerivationPath{derivationPath}
 				event.Wallet.SelfDerive(derivationPaths, stateReader)
 
 			case accounts.WalletDropped:

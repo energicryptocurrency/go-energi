@@ -18,9 +18,8 @@ build/_vendor/pkg
 /energi3-*.*
 /swarm-*.*
 /bin
-/node_modules/
-/build/contracts/
 /build/release/
+/energi/consensus/difficultysim/csv/
 .vagrant
 
 #*
@@ -60,7 +59,6 @@ profile.cov
 
 # testing junit reports
 /.test-go-report.xml
-/.test-sol-report.xml
 
 # Coverage
 /.test-go-cover.out

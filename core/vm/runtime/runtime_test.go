@@ -65,7 +65,7 @@ func TestEVM(t *testing.T) {
 		}
 	}()
 
-	Execute([]byte{
+	_, _, _ = Execute([]byte{
 		byte(vm.DIFFICULTY),
 		byte(vm.TIMESTAMP),
 		byte(vm.GASLIMIT),
@@ -144,9 +144,9 @@ func BenchmarkCall(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		for j := 0; j < 400; j++ {
-			Execute(code, cpurchase, nil)
-			Execute(code, creceived, nil)
-			Execute(code, refund, nil)
+			_, _, _ = Execute(code, cpurchase, nil)
+			_, _, _ = Execute(code, creceived, nil)
+			_, _, _ = Execute(code, refund, nil)
 		}
 	}
 }
@@ -181,7 +181,7 @@ func benchmarkEVM_Create(bench *testing.B, code string) {
 	// Warm up the intpools and stuff
 	bench.ResetTimer()
 	for i := 0; i < bench.N; i++ {
-		Call(receiver, []byte{}, &runtimeConfig)
+		_, _, _ = Call(receiver, []byte{}, &runtimeConfig)
 	}
 	bench.StopTimer()
 }

@@ -13,13 +13,7 @@ RUN apt -y clean
 
 # install docker
 RUN apt -y update
-RUN apt -y install curl gnupg lsb-release software-properties-common
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-RUN apt -y install docker-ce docker-ce-cli containerd.io
-
-# install development tools
-RUN apt -y install git vim htop apg jq direnv build-essential wget awscli sudo
+RUN apt -y install curl gnupg lsb-release software-properties-common git build-essential wget awscli sudo
 
 # golang variables
 ARG golang_version="1.15.8"
@@ -41,40 +35,11 @@ ENV GOROOT="/usr/local/go"
 RUN go get -u -v github.com/RyanLucchese/go-junit-report
 ENV PATH="${PATH}:/root/go/bin"
 
-# nodejs variables
-ARG nodejs_version="12.22.1"
-ARG nodejs_hostarch="linux-x64"
-ARG nodejs_spec="node-v${nodejs_version}-${nodejs_hostarch}"
-ARG nodejs_filename="${nodejs_spec}.tar.gz"
-ARG nodejs_url="https://nodejs.org/download/release/v12.22.1/${nodejs_filename}"
-ARG nodejs_sha256="d315c5dea4d96658164cdb257bd8dbb5e44bdd2a7c1d747841f06515f23a0042"
-
-# install nodejs
-RUN wget -nv ${nodejs_url}
-RUN echo "${nodejs_sha256} ${nodejs_filename}" > "${nodejs_filename}.sha256"
-RUN sha256sum -c ${nodejs_filename}.sha256
-RUN tar -C /usr/local -xzf ${nodejs_filename}
-RUN chown -R "root:root" "/usr/local/${nodejs_spec}"
-RUN rm -rf ${nodejs_filename}*
-ENV PATH="${PATH}:/usr/local/${nodejs_spec}/bin"
-
-# npm packages version
-ARG ganache_version="6.11.0"
-ARG truffle_version="5.4.0"
-
-# install node packages
-RUN npm -g config set user root
-RUN npm install -g yarn ganache-cli@${ganache_version} truffle@${truffle_version}
-
-# /builds/energi/tech/gen3/energi3
-RUN mkdir -p "/builds/energi/tech/gen3"
-WORKDIR "/builds/energi/tech/gen3"
-WORKDIR "/builds/energi/tech/gen3/energi3"
+RUN mkdir -p "/energi"
+WORKDIR "/energi"
 ADD Makefile.release Makefile.release
-ADD package.json package.json
-RUN npm install
 RUN make -f Makefile.release release-tools
-ENV GOPATH="/builds/energi/tech/gen3"
-ENV GOBIN="/builds/energi/tech/gen3/energi3/build/bin"
+ENV GOPATH="/energi"
+ENV GOBIN="/energi/bin"
 ENV GO111MODULE="on"
 ENV GOFLAGS="-v"

@@ -31,6 +31,7 @@ import (
 	"github.com/energicryptocurrency/energi/crypto"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
@@ -58,12 +59,11 @@ var (
 	nodeDBVersionKey = []byte("version") // Version of the database to flush if changes
 	nodeDBItemPrefix = []byte("n:")      // Identifier to prefix node entries with
 
-	nodeDBDiscoverRoot          = ":discover"
-	nodeDBDiscoverPing          = nodeDBDiscoverRoot + ":lastping"
-	nodeDBDiscoverPong          = nodeDBDiscoverRoot + ":lastpong"
-	nodeDBDiscoverFindFails     = nodeDBDiscoverRoot + ":findfail"
-	nodeDBDiscoverLocalEndpoint = nodeDBDiscoverRoot + ":localendpoint"
-	nodeDBTopicRegTickets       = ":tickets"
+	nodeDBDiscoverRoot      = ":discover"
+	nodeDBDiscoverPing      = nodeDBDiscoverRoot + ":lastping"
+	nodeDBDiscoverPong      = nodeDBDiscoverRoot + ":lastpong"
+	nodeDBDiscoverFindFails = nodeDBDiscoverRoot + ":findfail"
+	nodeDBTopicRegTickets   = ":tickets"
 )
 
 // newNodeDB creates a new node database for storing and retrieving infos about
@@ -311,20 +311,6 @@ func (db *nodeDB) updateFindFails(id NodeID, fails int) error {
 	return db.storeInt64(makeKey(id, nodeDBDiscoverFindFails), int64(fails))
 }
 
-// localEndpoint returns the last local endpoint communicated to the
-// given remote node.
-func (db *nodeDB) localEndpoint(id NodeID) *rpcEndpoint {
-	var ep rpcEndpoint
-	if err := db.fetchRLP(makeKey(id, nodeDBDiscoverLocalEndpoint), &ep); err != nil {
-		return nil
-	}
-	return &ep
-}
-
-func (db *nodeDB) updateLocalEndpoint(id NodeID, ep rpcEndpoint) error {
-	return db.storeRLP(makeKey(id, nodeDBDiscoverLocalEndpoint), &ep)
-}
-
 // querySeeds retrieves random nodes to be used as potential seed nodes
 // for bootstrapping.
 func (db *nodeDB) querySeeds(n int, maxAge time.Duration) []*Node {
@@ -342,7 +328,7 @@ seek:
 		// random amount each time in order to increase the likelihood
 		// of hitting all existing nodes in very small databases.
 		ctr := id[0]
-		rand.Read(id[:])
+		_, _ = rand.Read(id[:])
 		id[0] = ctr + id[0]%16
 		it.Seek(makeKey(id, nodeDBDiscoverRoot))
 

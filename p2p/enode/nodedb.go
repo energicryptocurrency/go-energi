@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/energicryptocurrency/energi/rlp"
+
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
@@ -40,7 +41,6 @@ import (
 const (
 	dbVersionKey   = "version" // Version of the database to flush if changes
 	dbNodePrefix   = "n:"      // Identifier to prefix node entries with
-	dbLocalPrefix  = "local:"
 	dbDiscoverRoot = "v4"
 
 	// These fields are stored per ID and IP, the full key is "n:<ID>:v4:<IP>:findfail".
@@ -171,14 +171,6 @@ func splitNodeItemKey(key []byte) (id ID, ip net.IP, field string) {
 	// Field is the remainder of key.
 	field = string(key)
 	return id, ip, field
-}
-
-// localItemKey returns the key of a local node item.
-func localItemKey(id ID, field string) []byte {
-	key := append([]byte(dbLocalPrefix), id[:]...)
-	key = append(key, ':')
-	key = append(key, field...)
-	return key
 }
 
 // fetchInt64 retrieves an integer associated with a particular key.

@@ -210,7 +210,7 @@ func testGetBlockHeaders(t *testing.T, protocol int) {
 			headers = append(headers, pm.blockchain.GetBlockByHash(hash).Header())
 		}
 		// Send the hash request and verify the response
-		p2p.Send(peer.app, 0x03, tt.query)
+		_ = p2p.Send(peer.app, 0x03, tt.query)
 		if err := p2p.ExpectMsg(peer.app, 0x04, headers); err != nil {
 			t.Errorf("test %d: headers mismatch: %v", i, err)
 		}
@@ -219,7 +219,7 @@ func testGetBlockHeaders(t *testing.T, protocol int) {
 			if origin := pm.blockchain.GetBlockByNumber(tt.query.Origin.Number); origin != nil {
 				tt.query.Origin.Hash, tt.query.Origin.Number = origin.Hash(), 0
 
-				p2p.Send(peer.app, 0x03, tt.query)
+				_ = p2p.Send(peer.app, 0x03, tt.query)
 				if err := p2p.ExpectMsg(peer.app, 0x04, headers); err != nil {
 					t.Errorf("test %d: headers mismatch: %v", i, err)
 				}
@@ -294,7 +294,7 @@ func testGetBlockBodies(t *testing.T, protocol int) {
 			}
 		}
 		// Send the hash request and verify the response
-		p2p.Send(peer.app, 0x05, hashes)
+		_ = p2p.Send(peer.app, 0x05, hashes)
 		if err := p2p.ExpectMsg(peer.app, 0x06, bodies); err != nil {
 			t.Errorf("test %d: bodies mismatch: %v", i, err)
 		}
@@ -373,7 +373,7 @@ func testGetNodeData(t *testing.T, protocol int) {
 	}
 	statedb := ethdb.NewMemDatabase()
 	for i := 0; i < len(data); i++ {
-		statedb.Put(hashes[i].Bytes(), data[i])
+		_ = statedb.Put(hashes[i].Bytes(), data[i])
 	}
 	accounts := []common.Address{testBank, acc1Addr, acc2Addr}
 	for i := uint64(0); i <= pm.blockchain.CurrentBlock().NumberU64(); i++ {
@@ -448,7 +448,7 @@ func testGetReceipt(t *testing.T, protocol int) {
 		receipts = append(receipts, pm.blockchain.GetReceiptsByHash(block.Hash()))
 	}
 	// Send the hash request and verify the response
-	p2p.Send(peer.app, 0x0f, hashes)
+	_ = p2p.Send(peer.app, 0x0f, hashes)
 	if err := p2p.ExpectMsg(peer.app, 0x10, receipts); err != nil {
 		t.Errorf("receipts mismatch: %v", err)
 	}

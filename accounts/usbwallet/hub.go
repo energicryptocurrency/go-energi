@@ -121,6 +121,10 @@ func (hub *Hub) refreshWallets() {
 	if elapsed < refreshThrottling {
 		return
 	}
+	// If USB enumeration is continually failing, don't keep trying indefinitely
+	if atomic.LoadUint32(&hub.enumFails) > 2 {
+		return
+	}
 	// Retrieve the current list of USB wallet devices
 	var devices []hid.DeviceInfo
 
@@ -153,6 +157,7 @@ func (hub *Hub) refreshWallets() {
 
 	for _, info := range infos {
 		for _, id := range hub.productIDs {
+			// Windows and Macos use UsageID matching, Linux uses Interface matching
 			if info.ProductID == id && (info.UsagePage == hub.usageID || info.Interface == hub.endpointID) {
 				devices = append(devices, info)
 				break

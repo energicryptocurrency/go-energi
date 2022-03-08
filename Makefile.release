@@ -15,7 +15,7 @@ TARGET_TOOLS += rlpdump
 RELEASE_GOFLAGS = -mod=mod -gcflags -dwarf=0 -ldflags "-s -w"
 
 RELEASE_MAIN = energi3
-RELEASE_RAW_VER = $(shell jq -r .version package.json)
+RELEASE_RAW_VER = $(shell git describe HEAD || echo "v0.0.0")
 RELEASE_VER = $(RELEASE_MAIN)-$(RELEASE_RAW_VER)
 
 .PHONY: release release-tools
@@ -192,7 +192,7 @@ release-macos-common:
 	    export GOCACHE=$(CURDIR)/build/release/$(RELEASE_TARGET)/cache; \
 	    export CC=clang; \
 	    export CXX=clang++; \
-	    export CGO_CFLAGS="-mmacosx-version-min=10.11"; \
+	    export CGO_CFLAGS="-mmacosx-version-min=10.15"; \
 	    export CGO_CXXFLAGS="$$CGO_CXXFLAGS"; \
 	    export CGO_ENABLED=1; \
 	    go build -o build/release/$(RELEASE_TARGET)/bin/$$t $(RELEASE_GOFLAGS) --ldflags="-s" ./cmd/$$t; \

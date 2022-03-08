@@ -1,0 +1,64 @@
+{
+  "stakers": [
+    {
+      "name":"Ryan",
+      "accounts":[
+        {
+          "address": "0x20e64b485b6a30f66bbb56696cfed321859a37c7",
+          "balance": 307181,
+          "nonceCap": 0
+        }
+      ]
+    },
+    {
+      "name":"David",
+      "accounts":[
+        {
+          "address": "0xb445e1c6fc5debd141dd6c52653dcaabe839eb5e",
+          "balance": 748489,
+          "nonceCap": 0
+        }
+      ]
+    },
+    {
+      "name":"Jamie",
+      "accounts":[
+        {
+          "address": "0x86beb12e2806ae7af094bd2dd7980f8d5d58027a",
+          "balance": 131844,
+          "nonceCap": 0
+        }
+      ]
+    },
+    {
+      "name":"Mike",
+      "accounts":[
+        {
+          "address": "0xd0c8404a46c8132ad1d1165317443154de4811de",
+          "balance": 1257878,
+          "nonceCap": 0
+        }
+      ]
+    },
+    {
+      "name":"Leon",
+      "accounts":[
+        {
+          "address": "0x16c5074d9fc6afdbc021a8e44c8511d1a090f9ad",
+          "balance": 883332,
+          "nonceCap": 0
+        }
+      ]
+    },
+    {
+      "name":"Serhat",
+      "accounts":[
+        {
+          "address": "0x16d242bb4860559842db347507b537e30eddde0d",
+          "balance": 18335364,
+          "nonceCap": 250000
+        }
+      ]
+    }
+  ]
+}

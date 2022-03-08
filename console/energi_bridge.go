@@ -25,6 +25,7 @@ import (
 	"github.com/energicryptocurrency/energi/internal/jsre"
 	"github.com/energicryptocurrency/energi/internal/web3ext"
 	"github.com/energicryptocurrency/energi/log"
+
 	"github.com/robertkrimen/otto"
 )
 
@@ -195,7 +196,6 @@ func (m *maskingJSRE) vmRun(command string) (otto.Value, error) {
 			}
 		case <-m.vmQuit: // Successfully completed command evaluation.
 		}
-		return
 	}()
 	return m.vmInstance.Run(command)
 }

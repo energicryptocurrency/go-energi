@@ -169,7 +169,7 @@ func (api *PrivateMinerAPI) RemoveDPoS(contract common.Address) bool {
 }
 
 // Updated auto-collateralize mode
-func (api *PrivateMinerAPI) SetAutocollateralize(mode *uint64) (old uint64, err error) {
+func (api *PrivateMinerAPI) SetAutoCompounding(mode *uint64) (old uint64, err error) {
 	old = api.e.Miner().GetMinerAutoCompound()
 
 	if mode != nil {

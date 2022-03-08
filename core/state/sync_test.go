@@ -292,7 +292,7 @@ func TestIncompleteStateSync(t *testing.T) {
 	// Create a random state to copy
 	srcDb, srcRoot, srcAccounts := makeTestState()
 
-	checkTrieConsistency(srcDb.TrieDB().DiskDB().(ethdb.Database), srcRoot)
+	_ = checkTrieConsistency(srcDb.TrieDB().DiskDB().(ethdb.Database), srcRoot)
 
 	// Create a destination state and sync with the scheduler
 	dstDb := ethdb.NewMemDatabase()
@@ -342,10 +342,10 @@ func TestIncompleteStateSync(t *testing.T) {
 		key := node.Bytes()
 		value, _ := dstDb.Get(key)
 
-		dstDb.Delete(key)
+		_ = dstDb.Delete(key)
 		if err := checkStateConsistency(dstDb, added[0]); err == nil {
 			t.Fatalf("trie inconsistency not caught, missing: %x", key)
 		}
-		dstDb.Put(key, value)
+		_ = dstDb.Put(key, value)
 	}
 }

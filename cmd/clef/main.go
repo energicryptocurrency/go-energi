@@ -47,6 +47,7 @@ import (
 	"github.com/energicryptocurrency/energi/signer/core"
 	"github.com/energicryptocurrency/energi/signer/rules"
 	"github.com/energicryptocurrency/energi/signer/storage"
+
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -326,7 +327,7 @@ func initialize(c *cli.Context) error {
 	if c.GlobalBool(stdiouiFlag.Name) {
 		logOutput = os.Stderr
 		// If using the stdioui, we can't do the 'confirm'-flow
-		fmt.Fprintf(logOutput, legalWarning)
+		fmt.Fprint(logOutput, legalWarning)
 	} else {
 		if !confirm(legalWarning) {
 			return fmt.Errorf("aborted by user")
@@ -598,8 +599,8 @@ func checkFile(filename string) error {
 
 // confirm displays a text and asks for user confirmation
 func confirm(text string) bool {
-	fmt.Printf(text)
-	fmt.Printf("\nEnter 'ok' to proceed:\n>")
+	fmt.Print(text)
+	fmt.Print("\nEnter 'ok' to proceed:\n>")
 
 	text, err := bufio.NewReader(os.Stdin).ReadString('\n')
 	if err != nil {
