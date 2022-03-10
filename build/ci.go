@@ -366,39 +366,42 @@ func doTest(cmdline []string) {
 	build.MustRun(gotest)
 }
 
-// runs gometalinter on requested packages
+// doLint runs golangci-lint on requested packages.
 func doLint(cmdline []string) {
+	var (
+		cachedir = flag.String("cachedir", "./build/cache", "directory for caching golangci-lint binary.")
+	)
 	flag.CommandLine.Parse(cmdline)
-
 	packages := []string{"./..."}
 	if len(flag.CommandLine.Args()) > 0 {
 		packages = flag.CommandLine.Args()
 	}
-	// Get metalinter and install all supported linters
-	build.MustRun(goTool("get", "gopkg.in/alecthomas/gometalinter.v2"))
-	build.MustRunCommand(filepath.Join(GOBIN, "gometalinter.v2"), "--install")
 
-	// Run fast linters batched together
-	configs := []string{
-		"--vendor",
-		"--tests",
-		"--deadline=2m",
-		"--disable-all",
-		"--enable=goimports",
-		"--enable=varcheck",
-		"--enable=vet",
-		"--enable=gofmt",
-		"--enable=misspell",
-		"--enable=goconst",
-		"--min-occurrences=6", // for goconst
-	}
-	build.MustRunCommand(filepath.Join(GOBIN, "gometalinter.v2"), append(configs, packages...)...)
+	linter := downloadLinter(*cachedir)
+	lflags := []string{"run", "--config", ".golangci.yml"}
+	build.MustRunCommand(linter, append(lflags, packages...)...)
+	fmt.Println("You have achieved perfection.")
+}
 
-	// Run slow linters one by one
-	for _, linter := range []string{"unconvert", "gosimple"} {
-		configs = []string{"--vendor", "--tests", "--deadline=10m", "--disable-all", "--enable=" + linter}
-		build.MustRunCommand(filepath.Join(GOBIN, "gometalinter.v2"), append(configs, packages...)...)
+// downloadLinter downloads and unpacks golangci-lint.
+func downloadLinter(cachedir string) string {
+	const version = "1.27.0"
+
+	csdb := build.MustLoadChecksums("build/checksums.txt")
+	arch := runtime.GOARCH
+	if arch == "arm" {
+		arch += "v" + os.Getenv("GOARM")
 	}
+	base := fmt.Sprintf("golangci-lint-%s-%s-%s", version, runtime.GOOS, arch)
+	url := fmt.Sprintf("https://github.com/golangci/golangci-lint/releases/download/v%s/%s.tar.gz", version, base)
+	archivePath := filepath.Join(cachedir, base+".tar.gz")
+	if err := csdb.DownloadFile(url, archivePath); err != nil {
+		log.Fatal(err)
+	}
+	if err := build.ExtractArchive(archivePath, cachedir); err != nil {
+		log.Fatal(err)
+	}
+	return filepath.Join(cachedir, base, "golangci-lint")
 }
 
 // Release Packaging
