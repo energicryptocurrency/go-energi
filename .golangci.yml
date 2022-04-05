@@ -14,12 +14,12 @@ linters:
   enable:
     - deadcode
     - goconst
-    - goimports
+    # - goimports
     - gosimple
     - govet
     - ineffassign
     - misspell
-    - staticcheck
+    # - staticcheck
     - unconvert
     - unused
     - varcheck

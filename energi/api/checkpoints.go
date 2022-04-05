@@ -54,8 +54,8 @@ type CheckpointRegistryAPI struct {
 
 func NewCheckpointRegistryAPI(b Backend) *CheckpointRegistryAPI {
 	r := &CheckpointRegistryAPI{
-		backend: b,
-		cpCache: energi_common.NewCacheStorage(),
+		backend:   b,
+		cpCache:   energi_common.NewCacheStorage(),
 		proxyAddr: energi_params.Energi_CheckpointRegistry,
 	}
 	b.OnSyncedHeadUpdates(func() {
@@ -101,7 +101,7 @@ func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
 		return nil, err
 	}
 
-	// call "checkpoins" function on contract
+	// call "checkpoints" function on contract
 	checkpointAddresses, err := registry.Checkpoints(callOpts)
 	if err != nil {
 		log.Error("CheckpointRegsitryAPI::Checkpoints", "err", err)
@@ -130,7 +130,6 @@ func (b *CheckpointRegistryAPI) CheckpointRemove(
 	}
 	return
 }
-
 
 // returns existing checkpoints' info
 func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error) {

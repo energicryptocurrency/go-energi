@@ -64,7 +64,7 @@ test-go-cover: test-go-report
 	build/env.sh go tool cover -html=.test-go-cover.out -o .test-go-cover.html
 
 lint:
-	build/env.sh go run build/ci.go lint
+	build/env.sh go run build/ci.go lint ./energi/...
 
 clean:
 	./build/clean_go_build_cache.sh

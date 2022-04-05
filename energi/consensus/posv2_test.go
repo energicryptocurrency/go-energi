@@ -91,7 +91,7 @@ func TestCalculateBlockTimeDerivative(t *testing.T) {
 	t.Parallel()
 	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
 	// check a known value
-	derivativeExpected58 := int64(testDataBlockTimeDrift[59] - testDataBlockTimeDrift[58])
+	derivativeExpected58 := testDataBlockTimeDrift[59] - testDataBlockTimeDrift[58]
 	if derivative[58] != derivativeExpected58 {
 		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
 		t.FailNow()

@@ -62,7 +62,6 @@ func NewCacheStorage() *CacheStorage {
 	return c
 }
 
-
 // Get returns the cached data
 // The existing data is updated on private calls when the new blockhash is generated
 // othetwise (for publicservice calls) it returns existing data and asynchronously schedules the update

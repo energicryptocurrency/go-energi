@@ -26,16 +26,16 @@ import (
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	energi_api "github.com/energicryptocurrency/energi/energi/api"
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
+	energi_common "github.com/energicryptocurrency/energi/energi/common"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/eth"
 	"github.com/energicryptocurrency/energi/eth/downloader"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/p2p"
 	"github.com/energicryptocurrency/energi/rpc"
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_api "github.com/energicryptocurrency/energi/energi/api"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 )
 
 const (
@@ -100,23 +100,23 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	activeHardforks, err := hf.hfAPI.HardforkEnumerateActive()
 	if err != nil {
 		if err != bind.ErrNoCode {
-			log.Error("Failed to get active hardforks (startup)", "err", err);
+			log.Error("Failed to get active hardforks (startup)", "err", err)
 		} else {
-			log.Debug("Hardfork contract hasn't been deployed yet", "err", err);
+			log.Debug("Hardfork contract hasn't been deployed yet", "err", err)
 		}
 	} else if lc := len(activeHardforks); lc > 0 {
 		hf.LogHardForks(activeHardforks)
 	}
 
 	/*
-	Upon startup retrieve all hardforks and store them in cache
+		Upon startup retrieve all hardforks and store them in cache
 	*/
 	allHardforks, err := hf.hfAPI.HardforkEnumerate()
 	if err != nil {
 		if err != bind.ErrNoCode {
-			log.Error("Failed to get hardforks (startup)", "err", err);
+			log.Error("Failed to get hardforks (startup)", "err", err)
 		} else {
-			log.Debug("Hardfork contract hasn't been deployed yet", "err", err);
+			log.Debug("Hardfork contract hasn't been deployed yet", "err", err)
 		}
 	} else if lc := len(allHardforks); lc > 0 {
 		for _, hardfork := range allHardforks {
