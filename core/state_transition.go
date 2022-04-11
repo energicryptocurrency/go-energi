@@ -227,9 +227,9 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 		}
 	}
 	st.refundGas()
-
+	
+	// we disable transfer of the used gas to coinbase upon the Banana hf as we have implemented this functionality in Energi consensus rewarding
 	if hfcache.IsHardforkActive("Banana", evm.BlockNumber.Uint64()) == false {
-		// we disable transfer of the used gas to coinbase upon the Banana hf as we have implemented this functionality in Energi consensus rewarding
 		st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}
 
