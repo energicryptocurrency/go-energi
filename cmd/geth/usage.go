@@ -22,11 +22,11 @@ package main
 import (
 	"io"
 	"sort"
-
 	"strings"
 
 	"github.com/energicryptocurrency/energi/cmd/utils"
 	"github.com/energicryptocurrency/energi/internal/debug"
+
 	cli "gopkg.in/urfave/cli.v1"
 )
 
@@ -34,7 +34,7 @@ import (
 var AppHelpTemplate = `NAME:
    {{.App.Name}} - {{.App.Usage}}
 
-   Copyright 2018-2020 The Energi Core Authors
+   Copyright 2018-2022 The Energi Core Authors
    Copyright 2013-2018 The go-ethereum Authors
 
 USAGE:
