@@ -26,9 +26,12 @@ func RemoveHardfork(hfName string) {
 	defer hardforkCache.cacheLock.Unlock()
 	for i, activeHardfork := range hardforkCache.hardforks {
 		if hfName == activeHardfork.Name {
-			hardforkCache.hardforks[i] = hardforkCache.hardforks[len(hardforkCache.hardforks)-1] // Copy last element to index i.
-			hardforkCache.hardforks[len(hardforkCache.hardforks)-1] = nil                        // Erase last element (write zero value).
-			hardforkCache.hardforks = hardforkCache.hardforks[:len(hardforkCache.hardforks)-1]   // Truncate slice.
+			// Copy last element to index i.
+			hardforkCache.hardforks[i] = hardforkCache.hardforks[len(hardforkCache.hardforks)-1]
+			// Erase last element (write zero value).
+			hardforkCache.hardforks[len(hardforkCache.hardforks)-1] = nil
+			// Truncate slice.
+			hardforkCache.hardforks = hardforkCache.hardforks[:len(hardforkCache.hardforks)-1]
 			return
 		}
 	}
