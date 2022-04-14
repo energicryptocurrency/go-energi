@@ -32,7 +32,7 @@ ENV PATH="${PATH}:/usr/local/go/bin"
 ENV GOROOT="/usr/local/go"
 
 # install go-junit-report
-RUN go install -v github.com/RyanLucchese/go-junit-report
+RUN go install -v github.com/RyanLucchese/go-junit-report@v0.9.3
 ENV PATH="${PATH}:/root/go/bin"
 
 RUN mkdir -p "/energi"
