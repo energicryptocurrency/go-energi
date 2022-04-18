@@ -1,6 +1,6 @@
 # Core Node Changelog
 
-# 3.1.2
+# 3.1.3
 
 ### Changed
 - Updated Golang version to 1.17
