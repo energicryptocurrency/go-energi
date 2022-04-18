@@ -16,11 +16,11 @@ RUN apt -y update
 RUN apt -y install curl gnupg lsb-release software-properties-common git build-essential wget awscli sudo
 
 # golang variables
-ARG golang_version="1.15.8"
+ARG golang_version="1.17.9"
 ARG golang_hostarch="linux-amd64"
 ARG golang_filename="go${golang_version}.${golang_hostarch}.tar.gz"
 ARG golang_url="https://golang.org/dl/${golang_filename}"
-ARG golang_sha256="d3379c32a90fdf9382166f8f48034c459a8cc433730bc9476d39d9082c94583b"
+ARG golang_sha256="9dacf782028fdfc79120576c872dee488b81257b1c48e9032d122cfdb379cca6"
 
 # install golang
 RUN wget -nv ${golang_url}
@@ -32,7 +32,7 @@ ENV PATH="${PATH}:/usr/local/go/bin"
 ENV GOROOT="/usr/local/go"
 
 # install go-junit-report
-RUN go get -u -v github.com/RyanLucchese/go-junit-report
+RUN go install -v github.com/RyanLucchese/go-junit-report@latest
 ENV PATH="${PATH}:/root/go/bin"
 
 RUN mkdir -p "/energi"
