@@ -2,6 +2,11 @@
 
 # 3.1.2
 
+### Changed
+- Updated Golang version to 1.17
+
+# 3.1.2
+
 ### Added
 - Governance submodule
 - Hardfork check function
