@@ -46,7 +46,7 @@ const (
 	GeneralProxyCtxKey = ctxKey("governedProxyAddressHash")
 
 	// NB: Time difference between the block target and new block time is always
-	// calulated as (blockTargetTime - newBlockTime).
+	// calculated as (blockTargetTime - newBlockTime).
 
 	// MaxTimeDifferenceDrop defines the maximum time difference that can be used
 	// to calculate the difficulty drop when the newly created block is found long

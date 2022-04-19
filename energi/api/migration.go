@@ -557,7 +557,7 @@ func (m *MigrationAPI) claimGen2Coins(
 	copy(r[:], sig[:32])
 	s := [32]byte{}
 	copy(s[:], sig[32:64])
-	v := uint8(sig[64])
+	v := sig[64]
 
 	amt, err := mgrt_contract.VerifyClaim(item, dst, v, r, s)
 	if err != nil {

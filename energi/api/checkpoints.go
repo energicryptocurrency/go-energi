@@ -100,7 +100,7 @@ func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
 		return nil, err
 	}
 
-	// call "checkpoins" function on contract
+	// call "checkpoints" function on contract
 	checkpointAddresses, err := registry.Checkpoints(callOpts)
 	if err != nil {
 		log.Error("CheckpointRegsitryAPI::Checkpoints", "err", err)
