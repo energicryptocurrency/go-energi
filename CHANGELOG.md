@@ -2,8 +2,11 @@
 
 ## 3.2.0 (Banana Hard Fork)
 
-## Fixed
+### Fixed
 - `energi.compensationProcess()` now prints error on wrong input arguments
+
+### New
+- `make lint` now runs golang linting for energi subdirectory
 
 ## 3.1.3
 
