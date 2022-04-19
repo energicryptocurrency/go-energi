@@ -8,6 +8,7 @@
 
 ### New
 - `make lint` now runs golang linting for energi subdirectory
+- upon activating `banana` hardfork 10% of block fees will be sent to coinbase
 
 ## 3.1.3
 
