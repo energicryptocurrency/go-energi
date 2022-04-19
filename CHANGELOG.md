@@ -1,33 +1,35 @@
 # Core Node Changelog
 
-# 3.1.3
+## 3.2.0 (Banana Hard Fork)
+
+### Fixed
+- `energi.compensationProcess()` now prints error on wrong input arguments
+
+### New
+- `make lint` now runs golang linting for energi subdirectory
+
+## 3.1.3
 
 ### Changed
 - Updated Golang version to 1.17
 
-# 3.1.2
+## 3.1.2
 
-### Added
-- Governance submodule
-- Hardfork check function
-- Simple PoS simulator
-
-### Removed
-- Swarm functionality
-- Symbols from releases
+### Changed
+- Removed swarm functionality
+- Removed symbols from releases
 
 ### Fixed
 - miner.setAutoCompounding()
 - Repeated USB enumeration failures
 - Builds on Mac
 
-# 3.1.1
+### New
+- Governance submodule
+- Hardfork check function
+- Simple PoS simulator
 
-### Added
-- Preimage exception package which fixes full sync
-- Checkpoint for Asgard hard fork block
-- Checkpoints for testnet
-- Icon on Windows
+## 3.1.1
 
 ### Changed
 - Various code optimizations
@@ -40,13 +42,13 @@
 - Balance issue in EVM affecting `msg.sender`
 - Further enhancements to checkpoint registry
 
-## 3.1.0 (Asgard Hard Fork)
+### New
+- Preimage exception package which fixes full sync
+- Checkpoint for Asgard hard fork block
+- Checkpoints for testnet
+- Icon on Windows
 
-### Added
-- Masternode stats now available through RPC services
-- Hardfork registry to enable scheduling and alerting users of upcoming hardforks
-- New optimized version of checkpoint registry
-- Preimage hash correction upon detecting damage
+## 3.1.0 (Apple Hard Fork)
 
 ### Changed
 - Improved log messages
@@ -59,3 +61,9 @@
 - Difficulty adjustment (based on PID controller)
 - Issue syncing on mainnet
 - Issue where preimages may become corrupted
+
+### New
+- Masternode stats now available through RPC services
+- Hardfork registry to enable scheduling and alerting users of upcoming hardforks
+- New optimized version of checkpoint registry
+- Preimage hash correction upon detecting damage
