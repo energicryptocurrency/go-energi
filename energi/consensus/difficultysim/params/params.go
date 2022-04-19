@@ -5,7 +5,7 @@ const (
 	MaturityPeriodAsgard uint64 = 30 * 60
 	// MaturityPeriod for diffV1
 	MaturityPeriod uint64 = 60 * 60 // 1 hour PoS cooldown
-	// TargetBlockGap targetted time interval between blocks
+	// TargetBlockGap targeted time interval between blocks
 	TargetBlockGap uint64 = 60
 	// MinBlockGap required time to pass after each block to start mining
 	MinBlockGap uint64 = 30
@@ -24,7 +24,7 @@ const (
 	AsgardIsActive bool = true
 
 	// Parameters for difficulty calculations
-	Gain int64 = 50000
-	IntegralTime int64 = 720
+	Gain           int64 = 50000
+	IntegralTime   int64 = 720
 	DerivativeTime int64 = 60
 )

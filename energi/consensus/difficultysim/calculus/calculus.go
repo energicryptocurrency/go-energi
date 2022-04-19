@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/params"
 	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/params"
 )
 
 var (

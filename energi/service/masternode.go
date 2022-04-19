@@ -309,7 +309,7 @@ func (m *MasternodeService) onCheckpoint(cpe CheckpointProposalEvent) {
 	}
 }
 
-// voteOnCheckpoints recieves the identified checkpoints vote information and
+// voteOnCheckpoints receives the identified checkpoints vote information and
 // attempts to vote them in.
 func (m *MasternodeService) voteOnCheckpoints() {
 	var cpVote *checkpointVote

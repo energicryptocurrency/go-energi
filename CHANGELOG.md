@@ -4,6 +4,7 @@
 
 ### Fixed
 - `energi.compensationProcess()` now prints error on wrong input arguments
+- energi directory contains linting fixes
 
 ### New
 - `make lint` now runs golang linting for energi subdirectory

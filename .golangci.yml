@@ -19,7 +19,7 @@ linters:
     - govet
     - ineffassign
     - misspell
-    - staticcheck
+    # - staticcheck
     - unconvert
     - unused
     - varcheck
