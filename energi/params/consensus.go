@@ -52,4 +52,7 @@ const (
 	// to calculate the difficulty drop when the newly created block is found long
 	// after block target time. This
 	MaxTimeDifferenceDrop = -30
+
+	// StakerReward defines what percentage of used gas for specific block is rewarded to staker
+	StakerReward = 10
 )

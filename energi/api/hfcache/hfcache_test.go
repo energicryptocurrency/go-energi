@@ -1,9 +1,10 @@
 package hfcache
 
 import (
-	"github.com/stretchr/testify/assert"
 	"math/big"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAddHardfork(t *testing.T) {

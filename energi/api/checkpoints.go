@@ -23,12 +23,11 @@ import (
 	"github.com/energicryptocurrency/energi/accounts"
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rpc"
-
 	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
 	energi_common "github.com/energicryptocurrency/energi/energi/common"
 	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/energi/rpc"
 )
 
 type CheckpointAdminAPI struct {

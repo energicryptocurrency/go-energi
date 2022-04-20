@@ -26,22 +26,21 @@ import (
 
 	"github.com/energicryptocurrency/energi/accounts/abi"
 	"github.com/energicryptocurrency/energi/common"
+	eth_consensus "github.com/energicryptocurrency/energi/consensus"
 	"github.com/energicryptocurrency/energi/consensus/misc"
 	"github.com/energicryptocurrency/energi/core"
 	"github.com/energicryptocurrency/energi/core/state"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/core/vm"
 	"github.com/energicryptocurrency/energi/crypto"
+	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
+	energi_params "github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/ethdb"
 	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/params"
 	"github.com/energicryptocurrency/energi/rlp"
 	"github.com/energicryptocurrency/energi/rpc"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	eth_consensus "github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 
 	lru "github.com/hashicorp/golang-lru"
 	"golang.org/x/crypto/sha3"
@@ -657,6 +656,14 @@ func (e *Energi) govFinalize(
 			chain, header, state, txs, receipts,
 		)
 	}
+
+	// check if Banana hardfork is active, if so start rewarding staker
+	isBananaActive := hfcache.IsHardforkActive("Banana", header.Number.Uint64())
+	log.Debug("hard fork", "status", isBananaActive)
+	if isBananaActive && err == nil {
+		txs, receipts, err = e.processFeeReward(chain, header, state, txs, receipts)
+	}
+
 	if err == nil {
 		err = e.processMasternodes(chain, header, state)
 	}

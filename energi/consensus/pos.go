@@ -27,9 +27,9 @@ import (
 	"github.com/energicryptocurrency/energi/consensus"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 	"github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
 )
 
 var (
