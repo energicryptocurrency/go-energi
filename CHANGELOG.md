@@ -3,12 +3,12 @@
 ## 3.2.0 (Banana Hard Fork)
 
 ### Fixed
-- `energi.compensationProcess()` now prints error on wrong input arguments
-- energi directory contains linting fixes
+- `energi.compensationProcess()` now prints an error on wrong input arguments
+- `energi` directory contains linting fixes
 
 ### New
 - `make lint` now runs golang linting for energi subdirectory
-- upon activating `banana` hardfork 10% of block fees will be sent to coinbase as a reward
+- Upon activating `Banana` hardfork, 10% of block fees will be sent to coinbase as a reward
 
 ## 3.1.3
 
