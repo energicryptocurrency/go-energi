@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"math/big"
+	"regexp"
 
 	"github.com/energicryptocurrency/energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/energi/common"
@@ -675,6 +676,15 @@ func treasuryInfo(addr common.Address, backend Backend) (interface{}, error) {
 	return budget, nil
 }
 
+func isStrictUUID4(uuid string) (bool, error) {
+	matcher, err := regexp.Compile("^[0-9A-f]{8}-[0-9A-f]{4}-4[0-9A-f]{3}-[89A-b][0-9A-f]{3}-[0-9A-f]{12}$")
+	if err != nil {
+		return false, err
+	}
+
+	return matcher.MatchString(uuid), nil
+}
+
 func (g *GovernanceAPI) BudgetPropose(
 	amount *hexutil.Big,
 	ref_uuid string,
@@ -710,6 +720,16 @@ func treasuryPropose(
 	ref_uuid_b := uuid.Parse(ref_uuid)
 	if ref_uuid_b == nil {
 		err = errors.New("Failed to parse UUID")
+		log.Error("Failed", "err", err)
+		return
+	}
+
+	strict_uuid, err := isStrictUUID4(ref_uuid_b.String())
+	if err != nil {
+		log.Error("Failed", "err", err)
+		return
+	} else if !strict_uuid {
+		err = errors.New("Non-strict UUID4 provided, only strict UUID4 are allowed")
 		log.Error("Failed", "err", err)
 		return
 	}
