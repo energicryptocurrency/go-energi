@@ -729,7 +729,7 @@ func treasuryPropose(
 		log.Error("Failed", "err", err)
 		return
 	} else if !strict_uuid {
-		err = errors.New("Non-strict UUID4 provided, only strict UUID4 are allowed")
+		err = errors.New("Only strict UUID4 is allowed")
 		log.Error("Failed", "err", err)
 		return
 	}
