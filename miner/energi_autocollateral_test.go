@@ -181,17 +181,3 @@ func testCanAutocollateralize(t *testing.T, chainConfig *params.ChainConfig, eng
 		}
 	}
 }
-
-func TestDoAutocollateralEnergi(t *testing.T) {
-	testDoAutocollateral(t, energiChainConfig, energi.New(energiChainConfig.Energi, ethdb.NewMemDatabase()))
-}
-
-func testDoAutocollateral(t *testing.T, chainConfig *params.ChainConfig, engine consensus.Engine) {
-	defer engine.Close()
-
-	w, b := newTestWorker(t, chainConfig, engine, 0)
-	defer func() {
-		w.close()
-		_ = b.CleanUp()
-	}()
-}
