@@ -224,8 +224,8 @@ func (m *MasternodeAPI) validateAmount(validateType string, amount, minColl *big
 	}
 
 	// Amount should be a multiple of the minimum collateral amount allowed.
-	if new(big.Int).Mod(amount, minColl).Cmp(common.Big0) != 0 {
-		return fmt.Errorf("%v amount should be a multiple of the minimum collateral amount", validateType)
+	if new(big.Int).Sub(amount, minColl).Cmp(common.Big0) == -1 {
+		return fmt.Errorf("%v amount should be greater than or equal to the minimum collateral amount", validateType)
 	}
 
 	return nil
