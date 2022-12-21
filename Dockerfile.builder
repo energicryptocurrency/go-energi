@@ -1,5 +1,5 @@
-# Ubuntu 18.04 is our base image for building
-FROM ubuntu:18.04
+# Ubuntu 20.04 is our base image for building
+FROM ubuntu:20.04
 
 # set up timezone
 ENV TZ=GMT
@@ -16,7 +16,7 @@ RUN apt -y update
 RUN apt -y install curl gnupg lsb-release software-properties-common git build-essential wget awscli sudo
 
 # golang variables
-ARG golang_version="1.17.9"
+ARG golang_version="1.19.4"
 ARG golang_hostarch="linux-amd64"
 ARG golang_filename="go${golang_version}.${golang_hostarch}.tar.gz"
 ARG golang_url="https://golang.org/dl/${golang_filename}"
