@@ -20,7 +20,7 @@ ARG golang_version="1.19.4"
 ARG golang_hostarch="linux-amd64"
 ARG golang_filename="go${golang_version}.${golang_hostarch}.tar.gz"
 ARG golang_url="https://golang.org/dl/${golang_filename}"
-ARG golang_sha256="9dacf782028fdfc79120576c872dee488b81257b1c48e9032d122cfdb379cca6"
+ARG golang_sha256="c9c08f783325c4cf840a94333159cc937f05f75d36a8b307951d5bd959cf2ab8"
 
 # install golang
 RUN wget -nv ${golang_url}
