@@ -28,6 +28,10 @@ const (
 	TargetPeriodGap      uint64 = AveragingWindow * TargetBlockGap
 	BlockTimeEMAPeriod   uint64 = 360
 
+	// Cherry hardfork activation changes
+	TargetBlockGapCherry uint64 = 20
+	MinBlockGapCherry    uint64 = 10
+
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
 	StakeThrottle uint64 = 60
