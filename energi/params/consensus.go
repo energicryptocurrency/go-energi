@@ -55,4 +55,7 @@ const (
 
 	// StakerReward defines what percentage of used gas for specific block is rewarded to staker
 	StakerReward = 10
+
+	// Active stake for creating a new block = Balance - Staked NRG in the last StakeCheckDepth blocks
+	StakeCheckDepth = 0
 )
