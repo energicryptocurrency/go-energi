@@ -29,8 +29,8 @@ const (
 	BlockTimeEMAPeriod   uint64 = 360
 
 	// Cherry hardfork activation changes
-	TargetBlockGapCherry uint64 = 20
-	MinBlockGapCherry    uint64 = 10
+	TargetBlockGapCherry uint64 = 15
+	MinBlockGapCherry    uint64 = 7
 
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
