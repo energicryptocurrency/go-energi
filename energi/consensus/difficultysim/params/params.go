@@ -20,8 +20,13 @@ const (
 	// AveragingWindow average block window
 	AveragingWindow uint64 = 60 // 60 blocks
 	TargetPeriodGap uint64 = AveragingWindow * TargetBlockGap
+
 	// AsgardIsActive determines the difficulty algorithm that is used for minig
 	AsgardIsActive bool = true
+
+	// AppleIsActive changes nonce selection algorithm
+	AppleIsActive bool = true
+	StakeCheckDepth uint64 = 0
 
 	// Parameters for difficulty calculations
 	Gain           int64 = 50000
