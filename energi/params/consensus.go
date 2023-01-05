@@ -28,9 +28,9 @@ const (
 	TargetPeriodGap      uint64 = AveragingWindow * TargetBlockGap
 	BlockTimeEMAPeriod   uint64 = 360
 
-	// Cherry hardfork activation changes
-	TargetBlockGapCherry uint64 = 15
-	MinBlockGapCherry    uint64 = 7
+	// Banana-blocktime hardfork activation changes
+	TargetBlockGapBanana uint64 = 15
+	MinBlockGapBanana    uint64 = 7
 
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
