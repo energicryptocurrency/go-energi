@@ -37,7 +37,7 @@ import (
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
-	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.BlockTimeEMAPeriod)
+	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.BlockTimeEMAPeriod, 60)
 
 	// check a known value
 	emaExpected58 := uint64(59808819)
@@ -57,7 +57,7 @@ func TestCalculateBlockTimeEMA(t *testing.T) {
 
 func TestCalculateBlockTimeDrift(t *testing.T) {
 	t.Parallel()
-	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA)
+	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA, 60)
 
 	// check a known value
 	blockDriftExpected58 := int64(191181)
