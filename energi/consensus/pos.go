@@ -411,8 +411,8 @@ func (e *Energi) lookupStakeWeight(
 	firstRun := true
 	blockState := chain.CalculateBlockState(until.Hash(), until.Number.Uint64())
 
-	// check if Apple hardfork is active, if so change staking algorithm
-	if hfcache.IsHardforkActive("Apple", until.Number.Uint64()) {
+	// check if Banana-pos hardfork is active, if so change staking algorithm
+	if hfcache.IsHardforkActive("Banana-pos", until.Number.Uint64()) {
 		stakeCheckDepth = params.StakeCheckDepth
 	}
 

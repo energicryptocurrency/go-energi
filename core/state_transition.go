@@ -230,7 +230,7 @@ func (st *StateTransition) TransitionDb() (ret []byte, usedGas uint64, failed bo
 
 	// we disable transfer of the used gas to coinbase upon the Banana hf as we have implemented this functionality in Energi consensus rewarding
 	// the coinbase address is usually 0x0 address as it we have implemented "Author" function in our engine to always return common.Address{} (in other words 0 address)
-	if hfcache.IsHardforkActive("Banana", evm.BlockNumber.Uint64()) == false {
+	if hfcache.IsHardforkActive("Banana-txfee", evm.BlockNumber.Uint64()) == false {
 		st.state.AddBalance(st.evm.Coinbase, new(big.Int).Mul(new(big.Int).SetUint64(st.gasUsed()), st.gasPrice))
 	}
 
