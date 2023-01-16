@@ -2,13 +2,19 @@
 
 ## 3.2.0 (Banana Hard Fork)
 
+### Changed
+- Removed testing Interval Generator
+- Updated staking simulator according to Banana hardfork changes
+
 ### Fixed
 - `energi.compensationProcess()` now prints an error on wrong input arguments
 - `energi` directory contains linting fixes
 
 ### New
+- Upon activating `Banana-txfee` hardfork, 10% of block transaction fees will be sent to coinbase as a part of a block reward
+- Upon activating `Banana-blocktime` hardfork, energi network block generation time will be reduced from 60 seconds to 15 seconds
+- Upon activating `Banana-pos` hardfork, new pos algorithm will make block reward distribution proportional to the user's active stake
 - `make lint` now runs golang linting for energi subdirectory
-- Upon activating `Banana` hardfork, 10% of block fees will be sent to coinbase as a reward
 
 ## 3.1.3
 
