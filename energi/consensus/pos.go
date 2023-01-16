@@ -20,6 +20,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"math/big"
+	"math"
 	"sort"
 	"time"
 
@@ -393,9 +394,18 @@ func (e *Energi) lookupStakeWeight(
 
 	// NOTE: Do not set to high initial value due to defensive coding approach!
 	weight = 0
+	stakeCheckDepth := uint64(math.MaxUint64)
 	totalStaked := uint64(0)
 	firstRun := true
 	blockState := chain.CalculateBlockState(until.Hash(), until.Number.Uint64())
+
+	// check if Banana-pos hardfork is active, if so change staking algorithm
+	if hfcache.IsHardforkActive("Banana-pos", until.Number.Uint64()) {
+		stakeCheckDepth = params.StakeCheckDepth
+	}
+
+	// remember current block depth
+	depth := uint64(0)
 
 	// NOTE: we need to ensure at least one iteration with the balance condition
 	for (until.Time > since) || firstRun {
@@ -426,7 +436,7 @@ func (e *Energi) lookupStakeWeight(
 		}
 
 		// POS-22: partial stake amount
-		if until.Coinbase == addr {
+		if until.Coinbase == addr && depth < stakeCheckDepth {
 			totalStaked += until.Nonce.Uint64()
 		}
 
@@ -445,6 +455,7 @@ func (e *Energi) lookupStakeWeight(
 		}
 
 		blockState = chain.CalculateBlockState(curr.ParentHash, parentNumber)
+		depth++
 	}
 
 	if weight < totalStaked {
