@@ -24,9 +24,14 @@ const (
 	// AsgardIsActive determines the difficulty algorithm that is used for minig
 	AsgardIsActive bool = true
 
-	// AppleIsActive changes nonce selection algorithm
-	AppleIsActive bool = true
-	StakeCheckDepth uint64 = 0
+	// BalanaPOSIsActive changes nonce selection algorithm
+	BananaPOSIsActive bool = true
+	BananaStakeCheckDepth uint64 = 0
+
+	// hardfork that activates 15s block time
+	BananaBlockTimeIsActive bool = true
+	BananaTargetBlockGap uint64 = 15
+	BananaMinBlockGap uint64 = 7
 
 	// Parameters for difficulty calculations
 	Gain           int64 = 50000

@@ -119,8 +119,8 @@ func (account *Account) LookupStakeWeight(
 	stakeCheckDepth := uint64(math.MaxUint64)
 	depth := uint64(0)
 
-	if params.AppleIsActive {
-		stakeCheckDepth = params.StakeCheckDepth
+	if params.BananaPOSIsActive {
+		stakeCheckDepth = params.BananaStakeCheckDepth
 	}
 
 	// NOTE: we need to ensure at least one iteration with the balance condition
