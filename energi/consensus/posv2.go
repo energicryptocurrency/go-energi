@@ -19,11 +19,11 @@ package consensus
 import (
 	"math/big"
 
+	"github.com/energicryptocurrency/energi/log"
 	"github.com/energicryptocurrency/energi/common"
 	"github.com/energicryptocurrency/energi/core/types"
 	"github.com/energicryptocurrency/energi/energi/params"
 	"github.com/energicryptocurrency/energi/energi/api/hfcache"
-	"github.com/energicryptocurrency/energi/log"
 )
 
 const (
@@ -225,9 +225,14 @@ func CalcPoSDifficultyV2(
 	newBlockTime uint64, // TODO: maybe we should be recalculating ema/drift/etc with the new time included?
 	parent *types.Header,
 	timeTarget *TimeTarget,
+	testing bool,
 ) *big.Int {
 	// set tuning parameters
+	// check if Banana-difficulty-adjustment hardfork is active, if so use a new gain parameter value
 	gain := big.NewInt(50000)
+	if !testing && hfcache.IsHardforkActive("Banana-difficulty-adjustment", parent.Number.Uint64()) {
+		gain = big.NewInt(params.GainBanana)
+	}
 	integralTime := big.NewInt(720)
 	derivativeTime := big.NewInt(60)
 

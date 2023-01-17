@@ -62,4 +62,7 @@ const (
 
 	// Active stake for creating a new block = Balance - Staked NRG in the last StakeCheckDepth blocks
 	StakeCheckDepth = 0
+
+	// GainBanana parameter is part of difficulty adjustment algorithm that corresponds to the speed of adjustment of the difficulty
+	GainBanana = 20000
 )

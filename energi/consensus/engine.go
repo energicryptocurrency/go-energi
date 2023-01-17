@@ -264,7 +264,7 @@ func (e *Energi) VerifyHeader(
 
 	var difficulty *big.Int
 	if isAsgardActive {
-		difficulty = CalcPoSDifficultyV2(header.Time, parent, time_target)
+		difficulty = CalcPoSDifficultyV2(header.Time, parent, time_target, e.testing)
 	} else {
 		difficulty = calcPoSDifficultyV1(header.Time, parent, time_target)
 	}
@@ -541,7 +541,7 @@ func (e *Energi) PoSPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = CalcPoSDifficultyV2(header.Time, parent, timeTarget)
+	header.Difficulty = CalcPoSDifficultyV2(header.Time, parent, timeTarget, e.testing)
 
 	return timeTarget, err
 }
@@ -902,7 +902,7 @@ func (e *Energi) CalcDifficulty(
 
 	if isAsgardActive {
 		time_target := e.calcTimeTargetV2(chain, parent)
-		return CalcPoSDifficultyV2(time, parent, time_target)
+		return CalcPoSDifficultyV2(time, parent, time_target, e.testing)
 	}
 	time_target := e.calcTimeTargetV1(chain, parent)
 	return calcPoSDifficultyV1(time, parent, time_target)
