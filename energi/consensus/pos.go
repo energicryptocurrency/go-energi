@@ -146,14 +146,10 @@ func (e *Energi) calcPoSModifier(
 	// maturity period is reduced to 30m in Asgard
 	maturityPeriod := params.MaturityPeriod
 	if !e.testing {
-		// check if Asgard hardfork is activated use new difficulty algorithm
-		// check if Asgard hardfork is activated use new difficulty algorithm
+		// check if Asgard hardfork is activated use new maturity period for calculating stake modifier
 		isAsgardActive := hfcache.IsHardforkActive("Asgard", parent.Number.Uint64())
 		log.Debug("hf check", "isAsgardActive", isAsgardActive)
-		// don't check for hard forks being active if we're testing
-		if e.testing {
-			isAsgardActive = false
-		}
+
 		if isAsgardActive {
 			maturityPeriod = params.MaturityPeriodAsgard
 		}
