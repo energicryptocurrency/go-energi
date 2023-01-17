@@ -126,6 +126,9 @@ func CalcPoSDifficultyV2(
 ) *big.Int {
 	// set tuning parameters
 	gain := big.NewInt(params.Gain)
+	if params.BananaDifficultyAdjustment {
+		gain = big.NewInt(params.GainBanana)
+	}
 	integralTime := big.NewInt(params.IntegralTime)
 	derivativeTime := big.NewInt(params.DerivativeTime)
 
