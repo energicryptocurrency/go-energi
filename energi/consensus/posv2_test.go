@@ -519,7 +519,7 @@ func TestPoSDiffV2(t *testing.T) {
 	}
 	// look through tests and assert result
 	for i, tc := range tests {
-		res := CalcPoSDifficultyV2(0, &types.Header{Difficulty: big.NewInt(tc.Parent)}, &TimeTarget{Drift: tc.Drift, Integral: tc.Integral, Derivative: tc.Derivative})
+		res := CalcPoSDifficultyV2(0, &types.Header{Difficulty: big.NewInt(tc.Parent)}, &TimeTarget{Drift: tc.Drift, Integral: tc.Integral, Derivative: tc.Derivative}, true)
 		assert.Equal(t, tc.Result, res.Uint64(), "TC %v", i)
 	}
 }
