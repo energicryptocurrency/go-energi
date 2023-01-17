@@ -28,6 +28,10 @@ const (
 	AppleIsActive bool = true
 	StakeCheckDepth uint64 = 0
 
+	// upon activating BananaDifficultyAdjustment hardfork new gain value will be used
+	BananaDifficultyAdjustment bool = true
+	GainBanana int64 = 20000
+
 	// Parameters for difficulty calculations
 	Gain           int64 = 50000
 	IntegralTime   int64 = 720
