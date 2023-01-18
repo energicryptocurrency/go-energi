@@ -64,5 +64,5 @@ const (
 	StakeCheckDepth = 0
 
 	// GainBanana parameter is part of difficulty adjustment algorithm that corresponds to the speed of adjustment of the difficulty
-	GainBanana = 20000
+	GainBanana = 15000
 )

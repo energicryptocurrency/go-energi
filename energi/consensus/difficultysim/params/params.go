@@ -35,7 +35,7 @@ const (
 
 	// upon activating BananaDifficultyAdjustment hardfork new gain value will be used
 	BananaDifficultyAdjustment bool = true
-	GainBanana int64 = 20000
+	GainBanana int64 = 15000
 
 	// Parameters for difficulty calculations
 	Gain           int64 = 50000
