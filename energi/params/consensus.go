@@ -28,6 +28,10 @@ const (
 	TargetPeriodGap      uint64 = AveragingWindow * TargetBlockGap
 	BlockTimeEMAPeriod   uint64 = 360
 
+	// Banana-blocktime hardfork activation changes
+	TargetBlockGapBanana uint64 = 15
+	MinBlockGapBanana    uint64 = 7
+
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
 	StakeThrottle uint64 = 60
@@ -60,5 +64,5 @@ const (
 	StakeCheckDepth = 0
 
 	// GainBanana parameter is part of difficulty adjustment algorithm that corresponds to the speed of adjustment of the difficulty
-	GainBanana = 20000
+	GainBanana = 15000
 )

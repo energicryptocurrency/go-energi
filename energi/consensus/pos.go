@@ -66,9 +66,17 @@ func (e *Energi) calcTimeTargetV1(
 	// POS-11: Block time restrictions
 	ret.max = now + params.MaxFutureGap
 
+	// if Banana-blocktime active use new block target gap
+	targetBlockGap := params.TargetBlockGap
+	minBlockGap := params.MinBlockGap
+	if hfcache.IsHardforkActive("Banana-blocktime", parent.Number.Uint64()) {
+		targetBlockGap = params.TargetBlockGapBanana
+		minBlockGap = params.MinBlockGapBanana
+	}
+
 	// POS-11: Block time restrictions
-	ret.min = parent.Time + params.MinBlockGap
-	ret.blockTarget = parent.Time + params.TargetBlockGap
+	ret.min = parent.Time + minBlockGap
+	ret.blockTarget = parent.Time + targetBlockGap
 	ret.periodTarget = ret.blockTarget
 
 	// POS-12: Block interval enforcement
@@ -89,7 +97,7 @@ func (e *Energi) calcTimeTargetV1(
 		}
 
 		ret.periodTarget = past.Time + params.TargetPeriodGap
-		periodMinTime := ret.periodTarget - params.MinBlockGap
+		periodMinTime := ret.periodTarget - minBlockGap
 
 		if periodMinTime > ret.min {
 			ret.min = periodMinTime

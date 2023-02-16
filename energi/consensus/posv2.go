@@ -38,7 +38,7 @@ const (
 // this will return the EMA of block times as microseconds
 // for a description of the EMA algorithm, please see:
 // see https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
-func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema []uint64) {
+func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64, targetBlockGap uint64) (ema []uint64) {
 	sampleSize := len(blockTimeDifferences)
 	N := emaPeriod + 1
 	ema = make([]uint64, sampleSize)
@@ -47,7 +47,7 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema
 	// block time difference, but instead we'll set it to the target value so our
 	// EMA will tend toward the target. However we don't include this value in our
 	// EMA series data that we return, we only use it to calculate the first EMA
-	emaPrev := params.TargetBlockGap * microseconds
+	emaPrev := targetBlockGap * microseconds
 	for i := 0; i < sampleSize; i++ {
 		// this formula has a factor of 2/(emaPeriod+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
@@ -62,8 +62,8 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema
 // and the EMA block time. Drift should be a negative value if blocks are too slow
 // and a positive value if blocks are too fast, representing the direction
 // to adjust the difficulty
-func CalculateBlockTimeDrift(ema []uint64) (drift []int64) {
-	target := int64(params.TargetBlockGap * microseconds)
+func CalculateBlockTimeDrift(ema []uint64, targetBlockGap uint64) (drift []int64) {
+	target := int64(targetBlockGap * microseconds)
 	drift = make([]int64, len(ema))
 	for i := range ema {
 		drift[i] = target - int64(ema[i])
@@ -127,9 +127,17 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 	// POS-11: Block time restrictions
 	ret.max = e.now() + params.MaxFutureGap
 
+	// if Banana-blocktime active use new block target gap
+	targetBlockGap := params.TargetBlockGap
+	minBlockGap := params.MinBlockGap
+	if hfcache.IsHardforkActive("Banana-blocktime", parent.Number.Uint64()) {
+		targetBlockGap = params.TargetBlockGapBanana
+		minBlockGap = params.MinBlockGapBanana
+	}
+
 	// POS-11: Block time restrictions
-	ret.min = parentBlockTime + params.MinBlockGap
-	ret.blockTarget = parentBlockTime + params.TargetBlockGap
+	ret.min = parentBlockTime + minBlockGap
+	ret.blockTarget = parentBlockTime + targetBlockGap
 	ret.periodTarget = ret.blockTarget
 
 	// Block interval enforcement
@@ -152,12 +160,12 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 		parent = past
 	}
 
-	ema := CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod)
+	ema := CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod, targetBlockGap)
 
 	ret.periodTarget = ema[len(ema)-1]
 
 	// set up the parameters for PID control (diffV2)
-	drift := CalculateBlockTimeDrift(ema)
+	drift := CalculateBlockTimeDrift(ema, targetBlockGap)
 	integral := CalculateBlockTimeIntegral(drift)
 	derivative := CalculateBlockTimeDerivative(drift)
 	ret.Drift = drift[len(drift)-1]
