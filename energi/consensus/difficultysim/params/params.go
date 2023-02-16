@@ -30,8 +30,8 @@ const (
 
 	// hardfork that activates 15s block time
 	BananaBlockTimeIsActive bool = true
-	BananaTargetBlockGap uint64 = 15
-	BananaMinBlockGap uint64 = 7
+	BananaTargetBlockGap uint64 = 20
+	BananaMinBlockGap uint64 = 10
 
 	// upon activating BananaDifficultyAdjustment hardfork new gain value will be used
 	BananaDifficultyAdjustment bool = true
