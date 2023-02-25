@@ -23,7 +23,7 @@ var (
 
 const (
   // block number when we stop using exception and get back to preimate database
-  exceptionEndBlockNum = 693000
+  exceptionEndBlockNum = 5000000
 )
 
 
