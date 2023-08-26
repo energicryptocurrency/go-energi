@@ -2,6 +2,7 @@ package miner
 
 import (
 	"math/big"
+	"math"
 	"time"
 
 	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/blockchain"
@@ -114,11 +115,19 @@ func (account *Account) LookupStakeWeight(
 	} else {
 		maturityPeriod = params.MaturityPeriod
 	}
+
+	stakeCheckDepth := uint64(math.MaxUint64)
+	depth := uint64(0)
+
+	if params.BananaPOSIsActive {
+		stakeCheckDepth = params.BananaStakeCheckDepth
+	}
+
 	// NOTE: we need to ensure at least one iteration with the balance condition
 	for until.Time > now-maturityPeriod {
 
 		// POS-22: partial stake amount
-		if until.Coinbase == account.Address {
+		if until.Coinbase == account.Address && depth < stakeCheckDepth {
 			totalStaked += until.Nonce
 		}
 
@@ -127,6 +136,7 @@ func (account *Account) LookupStakeWeight(
 			break
 		}
 		until = chain.GetBlock(until.Height - 1)
+		depth++
 	}
 
 	if nonceCap != 0 && nonceCap < account.Balance-totalStaked {

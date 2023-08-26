@@ -28,6 +28,10 @@ const (
 	TargetPeriodGap      uint64 = AveragingWindow * TargetBlockGap
 	BlockTimeEMAPeriod   uint64 = 360
 
+	// Banana-blocktime hardfork activation changes
+	TargetBlockGapBanana uint64 = 20
+	MinBlockGapBanana    uint64 = 10
+
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
 	StakeThrottle uint64 = 60
@@ -55,4 +59,10 @@ const (
 
 	// StakerReward defines what percentage of used gas for specific block is rewarded to staker
 	StakerReward = 10
+
+	// Active stake for creating a new block = Balance - Staked NRG in the last StakeCheckDepth blocks
+	StakeCheckDepth = 0
+
+	// GainBanana parameter is part of difficulty adjustment algorithm that corresponds to the speed of adjustment of the difficulty
+	GainBanana = 15000
 )
