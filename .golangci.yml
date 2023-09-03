@@ -22,7 +22,6 @@ linters:
     # - staticcheck
     - unconvert
     - unused
-    - varcheck
 
 linters-settings:
   gofmt:
