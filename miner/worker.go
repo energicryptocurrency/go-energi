@@ -24,20 +24,20 @@ import (
 	"sync/atomic"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
 	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/energicryptocurrency/go-energi/consensus"
 	"github.com/energicryptocurrency/go-energi/core"
 	"github.com/energicryptocurrency/go-energi/core/state"
 	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
 	energi_consensus "github.com/energicryptocurrency/go-energi/energi/consensus"
 	"github.com/energicryptocurrency/go-energi/event"
 	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
-	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
-	mapset "github.com/deckarep/golang-set"
 
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/go-energi/params"
 )
 
 const (
