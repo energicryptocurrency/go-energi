@@ -42,7 +42,7 @@ import (
 	"fmt"
 	"hash"
 
-	ethcrypto "github.com/energicryptocurrency/energi/crypto"
+	ethcrypto "github.com/energicryptocurrency/go-energi/crypto"
 )
 
 var (

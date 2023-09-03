@@ -19,10 +19,10 @@ package shhclient
 import (
 	"context"
 
-	"github.com/energicryptocurrency/energi"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/rpc"
-	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
+	"github.com/energicryptocurrency/go-energi"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/rpc"
+	whisper "github.com/energicryptocurrency/go-energi/whisper/whisperv6"
 )
 
 // Client defines typed wrappers for the Whisper v6 RPC API.

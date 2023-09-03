@@ -24,15 +24,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts/abi"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/accounts/abi"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/rlp"
 
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 
 const (

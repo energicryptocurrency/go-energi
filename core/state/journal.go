@@ -19,7 +19,7 @@ package state
 import (
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 // journalEntry is a modification entry in the state change journal that can be

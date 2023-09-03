@@ -20,8 +20,8 @@ package trie
 import (
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/ethdb"
 )
 
 // Tests that the trie database returns a missing trie node error if attempting

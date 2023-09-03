@@ -17,9 +17,9 @@
 package core
 
 import (
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/vm"
 )
 
 // Validator is an interface which defines the standard for block validation. It

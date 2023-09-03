@@ -23,7 +23,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/internal/cmdtest"
+	"github.com/energicryptocurrency/go-energi/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
 )
 

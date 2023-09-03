@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/energicryptocurrency/energi/cmd/evm/internal/compiler"
+	"github.com/energicryptocurrency/go-energi/cmd/evm/internal/compiler"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

@@ -24,13 +24,13 @@ import (
 	"sort"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
-	"github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
+	"github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 var (

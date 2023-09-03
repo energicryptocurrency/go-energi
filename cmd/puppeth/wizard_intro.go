@@ -27,7 +27,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // makeWizard creates and returns a new puppeth wizard.

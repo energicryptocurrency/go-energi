@@ -26,7 +26,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 const (

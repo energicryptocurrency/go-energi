@@ -26,9 +26,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // prepare converts an ethash cache or dataset from a byte stream into the internal

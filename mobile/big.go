@@ -22,7 +22,7 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 // A BigInt represents a signed multi-precision integer.

@@ -34,8 +34,8 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 type allocItem struct{ Addr, Balance *big.Int }

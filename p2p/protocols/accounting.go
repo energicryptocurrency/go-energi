@@ -19,7 +19,7 @@ package protocols
 import (
 	"time"
 
-	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/go-energi/metrics"
 )
 
 // define some metrics

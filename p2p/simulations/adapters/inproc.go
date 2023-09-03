@@ -23,13 +23,13 @@ import (
 	"net"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/node"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/p2p/enode"
-	"github.com/energicryptocurrency/energi/p2p/simulations/pipes"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/node"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/simulations/pipes"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 // SimAdapter is a NodeAdapter which creates in-memory simulation nodes and

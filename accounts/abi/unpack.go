@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 var (

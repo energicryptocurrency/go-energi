@@ -29,11 +29,11 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/p2p/enode"
-	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/go-energi/rpc"
 
 	"github.com/julienschmidt/httprouter"
 	"golang.org/x/net/websocket"

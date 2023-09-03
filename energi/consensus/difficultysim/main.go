@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/blockchain"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/common"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/miner"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/stats"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/blockchain"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/common"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/miner"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/stats"
 )
 
 // SimConfig configuration of the simulation

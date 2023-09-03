@@ -20,9 +20,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/energicryptocurrency/energi/core/rawdb"
-	"github.com/energicryptocurrency/energi/eth/downloader"
-	"github.com/energicryptocurrency/energi/light"
+	"github.com/energicryptocurrency/go-energi/core/rawdb"
+	"github.com/energicryptocurrency/go-energi/eth/downloader"
+	"github.com/energicryptocurrency/go-energi/light"
 )
 
 // syncer is responsible for periodically synchronising with the network, both

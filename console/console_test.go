@@ -26,12 +26,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/consensus/ethash"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/eth"
-	"github.com/energicryptocurrency/energi/internal/jsre"
-	"github.com/energicryptocurrency/energi/node"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/consensus/ethash"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/eth"
+	"github.com/energicryptocurrency/go-energi/internal/jsre"
+	"github.com/energicryptocurrency/go-energi/node"
 )
 
 const (

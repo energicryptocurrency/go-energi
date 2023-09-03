@@ -22,7 +22,7 @@ package geth
 import (
 	"errors"
 
-	"github.com/energicryptocurrency/energi/p2p/discv5"
+	"github.com/energicryptocurrency/go-energi/p2p/discv5"
 )
 
 // Enode represents a host on the network.

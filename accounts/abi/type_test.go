@@ -21,7 +21,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/davecgh/go-spew/spew"
 )
 

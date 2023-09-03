@@ -21,15 +21,15 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi "github.com/energicryptocurrency/energi/energi/consensus"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/accounts"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	energi "github.com/energicryptocurrency/go-energi/energi/consensus"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 const maxAutoCollateralBlockAge = time.Duration(time.Minute)
