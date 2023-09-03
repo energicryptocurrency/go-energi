@@ -26,9 +26,8 @@ import (
 	"github.com/energicryptocurrency/go-energi/core/state"
 	"github.com/energicryptocurrency/go-energi/core/types"
 	"github.com/energicryptocurrency/go-energi/core/vm"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 	"github.com/energicryptocurrency/go-energi/ethdb"
-
-	// "github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
 
 	"github.com/stretchr/testify/assert"
@@ -82,4 +81,61 @@ func TestBlockRewards(t *testing.T) {
 		}
 	}
 
+}
+
+func TestStakerReward(t *testing.T) {
+	t.Parallel()
+	// log.Root().SetHandler(log.StdoutHandler)
+	var (
+		testdb = ethdb.NewMemDatabase()
+		gspec  = &core.Genesis{
+			Config: params.EnergiTestnetChainConfig,
+			Xfers:  core.DeployEnergiGovernance(params.EnergiTestnetChainConfig),
+		}
+		parent = gspec.MustCommit(testdb)
+		engine = New(new(params.EnergiConfig), testdb)
+		// define arbitrary number for header gas used
+		HeaderGas = uint64(100)
+	)
+
+	chain, _ := core.NewBlockChain(testdb, nil, params.EnergiTestnetChainConfig, ethash.NewFaker(), vm.Config{}, nil)
+	defer chain.Stop()
+
+	statedb, _ := state.New(parent.Root(), state.NewDatabase(testdb))
+
+	header := &types.Header{
+		Root:       statedb.IntermediateRoot(chain.Config().IsEIP158(parent.Number())),
+		ParentHash: parent.Hash(),
+		Coinbase:   parent.Coinbase(),
+		Difficulty: engine.CalcDifficulty(chain, parent.Time()+10, &types.Header{
+			Number:     parent.Number(),
+			Time:       parent.Time(),
+			Difficulty: parent.Difficulty(),
+			UncleHash:  parent.UncleHash(),
+		}),
+		GasLimit: parent.GasLimit(),
+		GasUsed:  HeaderGas,
+		Number:   new(big.Int).Add(parent.Number(), common.Big1),
+		Time:     parent.Time(),
+	}
+
+	// process consensus gas limits
+	err := engine.processConsensusGasLimits(chain, header, statedb)
+	assert.Empty(t, err)
+
+	// run staker rewarding
+	txs, receipts, err := engine.processFeeReward(chain, header, statedb, nil, nil)
+
+	// check it returns the only rewarding transaction
+	assert.Equal(t, 2, len(txs))
+
+	// check the rewarded amount is correct
+	assert.Equal(t, (HeaderGas*energi_params.StakerReward)/100, txs[0].Value().Uint64())
+
+	// check rewarded address is coinbase
+	assert.Equal(t, header.Coinbase, *txs[1].To())
+
+	// check rewarded is system faucet
+	assert.Equal(t, energi_params.Energi_SystemFaucet, txs[0].ConsensusSender())
+	assert.Equal(t, 2, len(receipts))
 }
