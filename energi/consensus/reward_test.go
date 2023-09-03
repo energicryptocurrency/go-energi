@@ -28,6 +28,7 @@ import (
 	"github.com/energicryptocurrency/go-energi/core/vm"
 	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
 
 	"github.com/stretchr/testify/assert"
@@ -125,6 +126,9 @@ func TestStakerReward(t *testing.T) {
 
 	// run staker rewarding
 	txs, receipts, err := engine.processFeeReward(chain, header, statedb, nil, nil)
+	if err != nil {
+		log.Error("Error processing reward", "err", err)
+	}
 
 	// check it returns the only rewarding transaction
 	assert.Equal(t, 2, len(txs))
