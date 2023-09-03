@@ -20,9 +20,9 @@ import (
 	"container/ring"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // chainRetriever is used by the unconfirmed block set to verify whether a previously

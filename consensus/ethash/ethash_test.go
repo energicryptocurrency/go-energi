@@ -26,10 +26,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // Tests that ethash works correctly in test mode.
@@ -58,7 +58,7 @@ func TestTestMode(t *testing.T) {
 }
 
 // This test checks that cache lru logic doesn't crash under load.
-// It reproduces https://github.com/energicryptocurrency/energi/issues/14943
+// It reproduces https://github.com/energicryptocurrency/go-energi/issues/14943
 func TestCacheFileEvict(t *testing.T) {
 	tmpdir, err := ioutil.TempDir("", "ethash-test")
 	if err != nil {

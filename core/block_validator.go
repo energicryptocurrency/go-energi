@@ -20,10 +20,10 @@ package core
 import (
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 // BlockValidator is responsible for validating block headers, uncles and

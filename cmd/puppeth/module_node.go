@@ -27,8 +27,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // nodeDockerfile is the Dockerfile required to run an Ethereum node.

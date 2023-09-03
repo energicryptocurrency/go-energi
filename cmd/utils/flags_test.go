@@ -24,7 +24,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/go-energi/p2p"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

@@ -19,7 +19,7 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 const (

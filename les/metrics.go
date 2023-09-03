@@ -17,8 +17,8 @@
 package les
 
 import (
-	"github.com/energicryptocurrency/energi/metrics"
-	"github.com/energicryptocurrency/energi/p2p"
+	"github.com/energicryptocurrency/go-energi/metrics"
+	"github.com/energicryptocurrency/go-energi/p2p"
 )
 
 var (

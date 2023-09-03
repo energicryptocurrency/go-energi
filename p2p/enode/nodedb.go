@@ -27,7 +27,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/rlp"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"

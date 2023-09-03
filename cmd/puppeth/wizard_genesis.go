@@ -29,10 +29,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 // makeGenesis creates a new genesis struct based on some user input.

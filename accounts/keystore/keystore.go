@@ -34,11 +34,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/event"
+	"github.com/energicryptocurrency/go-energi/accounts"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/event"
 )
 
 var (

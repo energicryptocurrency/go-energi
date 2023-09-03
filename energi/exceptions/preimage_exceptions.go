@@ -3,8 +3,8 @@ package exceptions
 import (
 	"math/big"
 	"sync/atomic"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 /*

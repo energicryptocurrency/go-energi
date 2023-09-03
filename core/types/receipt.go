@@ -22,9 +22,9 @@ import (
 	"io"
 	"unsafe"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 //go:generate gencodec -type Receipt -field-override receiptMarshaling -out gen_receipt_json.go

@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 var seed int64

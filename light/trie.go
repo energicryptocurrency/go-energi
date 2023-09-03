@@ -21,12 +21,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/trie"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/trie"
 )
 
 func NewState(ctx context.Context, head *types.Header, odr OdrBackend) *state.StateDB {

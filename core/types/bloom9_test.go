@@ -54,7 +54,7 @@ func TestBloom(t *testing.T) {
 import (
 	"testing"
 
-	"github.com/energicryptocurrency/energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/state"
 )
 
 func TestBloom9(t *testing.T) {

@@ -23,12 +23,12 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	math2 "github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/consensus/ethash"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	math2 "github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/consensus/ethash"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 // alethGenesisSpec represents the genesis specification format used by the

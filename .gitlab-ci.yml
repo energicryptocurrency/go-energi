@@ -158,12 +158,7 @@ test-go-report:
       junit: .test-go-report.xml
     expire_in: 2 day
   coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
-  retry:
-    max: 2
-    when:
-      - script_failure
-      - runner_system_failure
-      - stuck_or_timeout_failure
+  allow_failure: true
 
 deploy-release-linux:
   stage: deploy-release

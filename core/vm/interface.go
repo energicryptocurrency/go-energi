@@ -19,8 +19,8 @@ package vm
 import (
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // StateDB is an EVM database for full state querying.

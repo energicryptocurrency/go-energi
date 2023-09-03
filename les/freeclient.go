@@ -24,11 +24,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common/mclock"
-	"github.com/energicryptocurrency/energi/common/prque"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/common/mclock"
+	"github.com/energicryptocurrency/go-energi/common/prque"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 // freeClientPool implements a client database that limits the connection time

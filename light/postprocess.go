@@ -24,16 +24,16 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/bitutil"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/rawdb"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
-	"github.com/energicryptocurrency/energi/rlp"
-	"github.com/energicryptocurrency/energi/trie"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/bitutil"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/rawdb"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/params"
+	"github.com/energicryptocurrency/go-energi/rlp"
+	"github.com/energicryptocurrency/go-energi/trie"
 )
 
 // IndexerConfig includes a set of configs for chain indexers.

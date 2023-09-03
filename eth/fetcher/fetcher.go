@@ -22,11 +22,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/prque"
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/prque"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 const (

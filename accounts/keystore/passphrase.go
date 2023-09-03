@@ -38,9 +38,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/crypto"
 	"github.com/pborman/uuid"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/crypto/scrypt"
@@ -120,7 +120,7 @@ func (ks keyStorePassphrase) StoreKey(filename string, key *Key, auth string) er
 				"This indicates that the keystore is corrupted. \n" +
 				"The corrupted file is stored at \n%v\n" +
 				"Please file a ticket at:\n\n" +
-				"https://github.com/energicryptocurrency/energi/issues." +
+				"https://github.com/energicryptocurrency/go-energi/issues." +
 				"The error was : %s"
 			return fmt.Errorf(msg, tmpName, err)
 		}

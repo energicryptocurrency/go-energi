@@ -21,8 +21,8 @@ package geth
 import (
 	"errors"
 
-	ethereum "github.com/energicryptocurrency/energi"
-	"github.com/energicryptocurrency/energi/common"
+	ethereum "github.com/energicryptocurrency/go-energi"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 // Subscription represents an event subscription where events are

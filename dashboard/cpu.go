@@ -21,7 +21,7 @@ package dashboard
 import (
 	"syscall"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // getProcessCPUTime retrieves the process' CPU time since program startup.

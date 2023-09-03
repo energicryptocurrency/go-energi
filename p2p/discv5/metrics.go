@@ -17,7 +17,7 @@
 
 package discv5
 
-import "github.com/energicryptocurrency/energi/metrics"
+import "github.com/energicryptocurrency/go-energi/metrics"
 
 var (
 	ingressTrafficMeter = metrics.NewRegisteredMeter("discv5/InboundTraffic", nil)

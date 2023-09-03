@@ -40,7 +40,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 const SizeLimit = 300 // maximum encoded size of a node record in bytes

@@ -20,8 +20,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // NOTE: it MUST NOT for untrusted transactions

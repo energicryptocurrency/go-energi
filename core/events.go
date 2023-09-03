@@ -17,8 +17,8 @@
 package core
 
 import (
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // NewTxsEvent is posted when a batch of transactions enter the transaction pool.

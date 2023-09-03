@@ -23,10 +23,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/crypto/secp256k1"
-	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/crypto/secp256k1"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
 )
 
 // node represents a host on the network.

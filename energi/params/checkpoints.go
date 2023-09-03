@@ -17,8 +17,8 @@
 package params
 
 import (
-	"github.com/energicryptocurrency/energi/common"
-	eth_params "github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/common"
+	eth_params "github.com/energicryptocurrency/go-energi/params"
 )
 
 // map Genesis to map of checkpoints

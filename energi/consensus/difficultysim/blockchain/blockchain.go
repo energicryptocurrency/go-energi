@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/calculus"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/params"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/calculus"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/params"
 )
 
 // Block represents each block in the blockchain

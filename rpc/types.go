@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
 	mapset "github.com/deckarep/golang-set"
 )
 

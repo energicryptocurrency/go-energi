@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // explorerDockerfile is the Dockerfile required to run a block explorer.

@@ -21,17 +21,17 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/eth/downloader"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/params"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/accounts"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/eth/downloader"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/params"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 // Backend interface provides the common API services (that are provided by

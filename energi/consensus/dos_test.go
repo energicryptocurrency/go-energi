@@ -19,14 +19,17 @@ package consensus
 import (
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	eth_consensus "github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/common"
+	eth_consensus "github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+
+	// "github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/params"
 
 	"github.com/stretchr/testify/assert"
+
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 
 type fakeDoSChain struct {
@@ -80,7 +83,7 @@ func TestPoSDoS(t *testing.T) {
 	curr_time := base
 	engine := New(nil, nil)
 	engine.now = func() uint64 { return curr_time }
-
+	
 	// POS-8: old fork protection
 	//============================
 
