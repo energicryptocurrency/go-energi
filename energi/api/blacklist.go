@@ -402,8 +402,9 @@ func (m *MigrationAPI) CompensationProcess(
 
 	tx, err := reward_comp_fund.Reward(&comp_fund.TransactOpts)
 	if err != nil {
-		log.Warn("Sent distribute transaction", "tx", tx.Hash().Hex())
+		log.Warn("Could not distribute compensation", "err", err)
 	}
+	log.Info("Sent distribute transaction", "tx", tx.Hash().Hex())
 
 	return err
 }

@@ -6,6 +6,7 @@
 - Removed testing Interval Generator
 - Updated staking simulator according to Banana hardfork changes
 - Bootnodes settings
+- Upgraded Golang version to 1.20
 
 ### Fixed
 - `energi.compensationProcess()` now prints an error on wrong input arguments

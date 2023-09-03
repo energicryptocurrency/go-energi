@@ -1,6 +1,6 @@
 module github.com/energicryptocurrency/go-energi
 
-go 1.17
+go 1.20
 
 require (
 	github.com/Azure/azure-storage-blob-go v0.7.0
