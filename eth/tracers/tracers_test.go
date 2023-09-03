@@ -27,17 +27,17 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/params"
-	"github.com/energicryptocurrency/energi/rlp"
-	"github.com/energicryptocurrency/energi/tests"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/params"
+	"github.com/energicryptocurrency/go-energi/rlp"
+	"github.com/energicryptocurrency/go-energi/tests"
 )
 
 // To generate a new callTracer test, copy paste the makeTest method below into

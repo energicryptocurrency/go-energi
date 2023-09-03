@@ -24,8 +24,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/cmd/utils"
-	"github.com/energicryptocurrency/energi/internal/debug"
+	"github.com/energicryptocurrency/go-energi/cmd/utils"
+	"github.com/energicryptocurrency/go-energi/internal/debug"
 
 	cli "gopkg.in/urfave/cli.v1"
 )

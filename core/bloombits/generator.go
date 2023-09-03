@@ -19,7 +19,7 @@ package bloombits
 import (
 	"errors"
 
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 var (

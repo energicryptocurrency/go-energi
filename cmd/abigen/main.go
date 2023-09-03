@@ -25,8 +25,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common/compiler"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common/compiler"
 )
 
 var (

@@ -21,8 +21,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/mclock"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/mclock"
 )
 
 func TestTopicRadius(t *testing.T) {

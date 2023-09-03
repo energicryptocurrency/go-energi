@@ -19,7 +19,7 @@
 package ethdb_test
 
 import (
-	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/ethdb"
 )
 
 var _ ethdb.Database = &ethdb.LDBDatabase{}

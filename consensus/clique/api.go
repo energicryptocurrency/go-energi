@@ -17,10 +17,10 @@
 package clique
 
 import (
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 // API is a user facing RPC API to allow controlling the signer and voting

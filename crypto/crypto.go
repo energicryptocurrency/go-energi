@@ -28,9 +28,9 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/rlp"
 	"golang.org/x/crypto/sha3"
 )
 

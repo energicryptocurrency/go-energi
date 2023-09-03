@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 func TestWhisperBasic(t *testing.T) {

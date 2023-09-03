@@ -19,13 +19,13 @@ package consensus
 import (
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 var (

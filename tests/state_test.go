@@ -26,8 +26,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/cmd/utils"
-	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/cmd/utils"
+	"github.com/energicryptocurrency/go-energi/core/vm"
 )
 
 func TestState(t *testing.T) {

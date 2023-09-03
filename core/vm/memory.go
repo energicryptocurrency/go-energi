@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/go-energi/common/math"
 )
 
 // Memory implements a simple memory model for the ethereum virtual machine.

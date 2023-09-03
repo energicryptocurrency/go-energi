@@ -19,7 +19,7 @@ package downloader
 import (
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // peerDropFn is a callback type for dropping a peer detected as malicious.

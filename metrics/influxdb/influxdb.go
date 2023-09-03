@@ -22,8 +22,8 @@ import (
 	uurl "net/url"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/metrics"
 	"github.com/influxdata/influxdb/client"
 )
 

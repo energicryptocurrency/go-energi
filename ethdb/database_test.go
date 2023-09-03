@@ -27,7 +27,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/ethdb"
 )
 
 func newTestLDB() (*ethdb.LDBDatabase, func()) {

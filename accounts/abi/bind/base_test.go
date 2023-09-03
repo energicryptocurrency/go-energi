@@ -22,10 +22,10 @@ import (
 	"math/big"
 	"testing"
 
-	ethereum "github.com/energicryptocurrency/energi"
-	"github.com/energicryptocurrency/energi/accounts/abi"
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common"
+	ethereum "github.com/energicryptocurrency/go-energi"
+	"github.com/energicryptocurrency/go-energi/accounts/abi"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 type mockCaller struct {

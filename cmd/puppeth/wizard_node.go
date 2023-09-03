@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts/keystore"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/accounts/keystore"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // deployNode creates a new node configuration based on some user input.

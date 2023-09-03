@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/core/asm"
+	"github.com/energicryptocurrency/go-energi/core/asm"
 )
 
 func Compile(fn string, src []byte, debug bool) (string, error) {

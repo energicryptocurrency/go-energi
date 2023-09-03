@@ -19,7 +19,7 @@
 package downloader
 
 import (
-	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/go-energi/metrics"
 )
 
 var (

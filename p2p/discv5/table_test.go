@@ -26,8 +26,8 @@ import (
 	"testing/quick"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 // func TestTable_pingReplace(t *testing.T) {

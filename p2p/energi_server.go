@@ -16,7 +16,7 @@
 
 package p2p
 
-import "github.com/energicryptocurrency/energi/p2p/enode"
+import "github.com/energicryptocurrency/go-energi/p2p/enode"
 
 // IsPeerActive checks if the specified node is already connected as a peer.
 func (srv *Server) IsPeerActive(node *enode.Node) bool {

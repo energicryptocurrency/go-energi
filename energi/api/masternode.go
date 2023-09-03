@@ -21,15 +21,15 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/crypto"
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/go-energi/energi/common"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
 )
 
 const (

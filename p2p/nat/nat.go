@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/jackpal/go-nat-pmp"
 )
 

@@ -21,16 +21,16 @@ import (
 	"errors"
 	"math/big"
 
-	ethereum "github.com/energicryptocurrency/energi"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/rpc"
+	ethereum "github.com/energicryptocurrency/go-energi"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/rpc"
 
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	energi_common "github.com/energicryptocurrency/go-energi/energi/common"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 
 func (b *EthAPIBackend) CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error) {

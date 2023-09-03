@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
 )
 
 type MyType [5]byte

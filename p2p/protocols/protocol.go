@@ -38,10 +38,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/metrics"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 // error codes used by this  protocol scheme

@@ -19,10 +19,10 @@ package consensus
 import (
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common"
-	eth_consensus "github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/types"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/common"
+	eth_consensus "github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 
 type KnownStakeKey struct {

@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/energicryptocurrency/energi/accounts/keystore"
-	"github.com/energicryptocurrency/energi/cmd/utils"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/accounts/keystore"
+	"github.com/energicryptocurrency/go-energi/cmd/utils"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/crypto"
 	"gopkg.in/urfave/cli.v1"
 )
 
