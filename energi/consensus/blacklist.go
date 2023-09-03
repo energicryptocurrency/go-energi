@@ -21,9 +21,8 @@ import (
 	"github.com/energicryptocurrency/go-energi/core"
 	"github.com/energicryptocurrency/go-energi/core/state"
 	"github.com/energicryptocurrency/go-energi/core/types"
-	"github.com/energicryptocurrency/go-energi/log"
-
 	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 var (

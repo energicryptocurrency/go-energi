@@ -27,6 +27,7 @@ import (
 
 	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
+
 	"github.com/shengdoushi/base58"
 )
 
