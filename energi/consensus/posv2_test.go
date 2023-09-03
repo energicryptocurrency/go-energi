@@ -27,18 +27,21 @@ import (
 	"github.com/energicryptocurrency/go-energi/core/types"
 	"github.com/energicryptocurrency/go-energi/core/vm"
 	"github.com/energicryptocurrency/go-energi/crypto"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 	"github.com/energicryptocurrency/go-energi/ethdb"
 	"github.com/energicryptocurrency/go-energi/log"
-	// "github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
-	"github.com/stretchr/testify/assert"
 
-	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/stretchr/testify/assert"
+)
+
+const (
+	targetBlockTime = 60
 )
 
 func TestCalculateBlockTimeEMA(t *testing.T) {
 	t.Parallel()
-	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.BlockTimeEMAPeriod)
+	emaCalculated := CalculateBlockTimeEMA(testDataBlockTimes, energi_params.BlockTimeEMAPeriod, targetBlockTime)
 
 	// check a known value
 	emaExpected58 := uint64(59808819)
@@ -58,7 +61,7 @@ func TestCalculateBlockTimeEMA(t *testing.T) {
 
 func TestCalculateBlockTimeDrift(t *testing.T) {
 	t.Parallel()
-	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA)
+	blockDrift := CalculateBlockTimeDrift(testDataBlockTimeEMA, targetBlockTime)
 
 	// check a known value
 	blockDriftExpected58 := int64(191181)
@@ -91,7 +94,7 @@ func TestCalculateBlockTimeDerivative(t *testing.T) {
 	t.Parallel()
 	derivative := CalculateBlockTimeDerivative(testDataBlockTimeDrift)
 	// check a known value
-	derivativeExpected58 := int64(testDataBlockTimeDrift[59] - testDataBlockTimeDrift[58])
+	derivativeExpected58 := testDataBlockTimeDrift[59] - testDataBlockTimeDrift[58]
 	if derivative[58] != derivativeExpected58 {
 		t.Log("Block Time Drift mismatch - expected", derivativeExpected58, "got", derivative[58])
 		t.FailNow()
@@ -481,46 +484,46 @@ func TestPoSDiffV2(t *testing.T) {
 	// where target is before progressing to target is after and the
 	// first and last ones are there to show the limit
 	tests := []TC{
-		{ Parent :343768608, Drift :34400, Integral :-9236968, Derivative :77803, Result :344003095 },
-		{ Parent :344003095, Drift :-59405, Integral :-14277173, Derivative :-21953, Result :343933274 },
-		{ Parent :343933274, Drift :32056, Integral :-11686883, Derivative :55532, Result :344100661 },
-		{ Parent :344100661, Drift :-1025942, Integral :-4376900, Derivative :-1169771, Result :340539746 },
-		{ Parent :340539746, Drift :-1239734, Integral :-10845931, Derivative :-137940, Result :340063186},
-		{ Parent :340063186, Drift :-1308853, Integral :-12406416, Derivative :-65131, Result :339801488 },
-		{ Parent :339801488, Drift :-2063008, Integral :-14612285, Derivative :-746167, Result :337458821 },
-		{ Parent :337458821, Drift :-2606988, Integral :-12700753, Derivative :-603860, Result :335516009 },
-		{ Parent :335516009, Drift :-2479996, Integral :-11595164, Derivative :75098, Result :335616497 },
-		{ Parent :335616497, Drift :-2355453, Integral :-14054440, Derivative :124543, Result :335871377 },
-		{ Parent :335871377, Drift :-2368705, Integral :-20693478, Derivative :46623, Result :335891373 },
-		{ Parent :335891373, Drift :-2345595, Integral :-29718287, Derivative :118917, Result :336128780 },
-		{ Parent :336128780, Drift :-2776293, Integral :-25209135, Derivative :-530494, Result :334396732 },
-		{ Parent :334396732, Drift :-2530362, Integral :-22598439, Derivative :170086, Result :334778902 },
-		{ Parent :334778902, Drift :-2737470, Integral :-32332974, Derivative :-107312, Result :334317847 },
-		{ Parent :334317847, Drift :-2719512, Integral :-43440964, Derivative :137714, Result :334591996 },
-		{ Parent :334591996, Drift :-2766783, Integral :-41923727, Derivative :-107148, Result :334129301 },
-		{ Parent :334129301, Drift :-2519335, Integral :-39505900, Derivative :175596, Result :334527378 },
-		{ Parent :334527378, Drift :-2482388, Integral :-41184081, Derivative :24972, Result :334475314 },
-		{ Parent :334475314, Drift :-2673713, Integral :-45788199, Derivative :-163377, Result :333848317 },
-		{ Parent :333848317, Drift :-2629883, Integral :-54615153, Derivative :131643, Result :334107959 },
-		{ Parent :334107959, Drift :-3069606, Integral :-57520300, Derivative :-439723, Result :332631315 },
-		{ Parent :332631315, Drift :-3076595, Integral :-66265696, Derivative :72851, Result :332691436 },
-		{ Parent :332691436, Drift :-3148453, Integral :-75275662, Derivative :11970, Result :332564695 },
-		{ Parent :332564695, Drift :-3317809, Integral :-78723129, Derivative :-165360, Result :331897257 },
-		{ Parent :83004075, Drift :590120, Integral :39700447, Derivative :152702, Result :83494443 },
-		{ Parent :83494443, Drift :473297, Integral :31794414, Derivative :2935, Result :83529120 },
-		{ Parent :83529120, Drift :363760, Integral :30459748, Derivative :-85591, Result :83292650 },
-		{ Parent :83292650, Drift :389924, Integral :23752471, Derivative :125962, Result :83691681 },
-		{ Parent :83691681, Drift :281412, Integral :17273845, Derivative :-12709, Result :83668824 },
-		{ Parent :83668824, Drift :135460, Integral :9666906, Derivative :-34180, Result :83573728 },
-		{ Parent :83573728, Drift :231466, Integral :14327736, Derivative :32137, Result :83682707 },
-		{ Parent :83682707, Drift :249115, Integral :13427618, Derivative :37610, Result :83808925 },
-		{ Parent :83808925, Drift :469733, Integral :40373117, Derivative :-158605, Result :83359400 },
-		{ Parent :83359400, Drift :446190, Integral :32793233, Derivative :92222, Result :83660652 },
-		{ Parent :83660652, Drift :535198, Integral :43628343, Derivative :-58691, Result :83514368 },
+		{Parent: 343768608, Drift: 34400, Integral: -9236968, Derivative: 77803, Result: 344003095},
+		{Parent: 344003095, Drift: -59405, Integral: -14277173, Derivative: -21953, Result: 343933274},
+		{Parent: 343933274, Drift: 32056, Integral: -11686883, Derivative: 55532, Result: 344100661},
+		{Parent: 344100661, Drift: -1025942, Integral: -4376900, Derivative: -1169771, Result: 340539746},
+		{Parent: 340539746, Drift: -1239734, Integral: -10845931, Derivative: -137940, Result: 340063186},
+		{Parent: 340063186, Drift: -1308853, Integral: -12406416, Derivative: -65131, Result: 339801488},
+		{Parent: 339801488, Drift: -2063008, Integral: -14612285, Derivative: -746167, Result: 337458821},
+		{Parent: 337458821, Drift: -2606988, Integral: -12700753, Derivative: -603860, Result: 335516009},
+		{Parent: 335516009, Drift: -2479996, Integral: -11595164, Derivative: 75098, Result: 335616497},
+		{Parent: 335616497, Drift: -2355453, Integral: -14054440, Derivative: 124543, Result: 335871377},
+		{Parent: 335871377, Drift: -2368705, Integral: -20693478, Derivative: 46623, Result: 335891373},
+		{Parent: 335891373, Drift: -2345595, Integral: -29718287, Derivative: 118917, Result: 336128780},
+		{Parent: 336128780, Drift: -2776293, Integral: -25209135, Derivative: -530494, Result: 334396732},
+		{Parent: 334396732, Drift: -2530362, Integral: -22598439, Derivative: 170086, Result: 334778902},
+		{Parent: 334778902, Drift: -2737470, Integral: -32332974, Derivative: -107312, Result: 334317847},
+		{Parent: 334317847, Drift: -2719512, Integral: -43440964, Derivative: 137714, Result: 334591996},
+		{Parent: 334591996, Drift: -2766783, Integral: -41923727, Derivative: -107148, Result: 334129301},
+		{Parent: 334129301, Drift: -2519335, Integral: -39505900, Derivative: 175596, Result: 334527378},
+		{Parent: 334527378, Drift: -2482388, Integral: -41184081, Derivative: 24972, Result: 334475314},
+		{Parent: 334475314, Drift: -2673713, Integral: -45788199, Derivative: -163377, Result: 333848317},
+		{Parent: 333848317, Drift: -2629883, Integral: -54615153, Derivative: 131643, Result: 334107959},
+		{Parent: 334107959, Drift: -3069606, Integral: -57520300, Derivative: -439723, Result: 332631315},
+		{Parent: 332631315, Drift: -3076595, Integral: -66265696, Derivative: 72851, Result: 332691436},
+		{Parent: 332691436, Drift: -3148453, Integral: -75275662, Derivative: 11970, Result: 332564695},
+		{Parent: 332564695, Drift: -3317809, Integral: -78723129, Derivative: -165360, Result: 331897257},
+		{Parent: 83004075, Drift: 590120, Integral: 39700447, Derivative: 152702, Result: 83494443},
+		{Parent: 83494443, Drift: 473297, Integral: 31794414, Derivative: 2935, Result: 83529120},
+		{Parent: 83529120, Drift: 363760, Integral: 30459748, Derivative: -85591, Result: 83292650},
+		{Parent: 83292650, Drift: 389924, Integral: 23752471, Derivative: 125962, Result: 83691681},
+		{Parent: 83691681, Drift: 281412, Integral: 17273845, Derivative: -12709, Result: 83668824},
+		{Parent: 83668824, Drift: 135460, Integral: 9666906, Derivative: -34180, Result: 83573728},
+		{Parent: 83573728, Drift: 231466, Integral: 14327736, Derivative: 32137, Result: 83682707},
+		{Parent: 83682707, Drift: 249115, Integral: 13427618, Derivative: 37610, Result: 83808925},
+		{Parent: 83808925, Drift: 469733, Integral: 40373117, Derivative: -158605, Result: 83359400},
+		{Parent: 83359400, Drift: 446190, Integral: 32793233, Derivative: 92222, Result: 83660652},
+		{Parent: 83660652, Drift: 535198, Integral: 43628343, Derivative: -58691, Result: 83514368},
 	}
 	// look through tests and assert result
 	for i, tc := range tests {
-		res := CalcPoSDifficultyV2(0, &types.Header{Difficulty: big.NewInt(tc.Parent)}, &TimeTarget{Drift: tc.Drift, Integral: tc.Integral, Derivative: tc.Derivative})
+		res := CalcPoSDifficultyV2(0, &types.Header{Difficulty: big.NewInt(tc.Parent)}, &TimeTarget{Drift: tc.Drift, Integral: tc.Integral, Derivative: tc.Derivative}, true)
 		assert.Equal(t, tc.Result, res.Uint64(), "TC %v", i)
 	}
 }

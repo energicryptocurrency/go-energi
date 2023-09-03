@@ -22,7 +22,6 @@ import (
 	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/energicryptocurrency/go-energi/core"
 	"github.com/energicryptocurrency/go-energi/core/state"
-
 	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 

@@ -26,9 +26,8 @@ import (
 	"github.com/energicryptocurrency/go-energi/core/state"
 	"github.com/energicryptocurrency/go-energi/core/types"
 	"github.com/energicryptocurrency/go-energi/core/vm"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 	"github.com/energicryptocurrency/go-energi/ethdb"
-
-	// "github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
 
 	"github.com/stretchr/testify/assert"

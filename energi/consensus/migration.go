@@ -31,15 +31,14 @@ import (
 	"github.com/energicryptocurrency/go-energi/core"
 	"github.com/energicryptocurrency/go-energi/core/state"
 	"github.com/energicryptocurrency/go-energi/core/types"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/go-energi/energi/common"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
 	"github.com/energicryptocurrency/go-energi/rlp"
 
 	"github.com/shengdoushi/base58"
-
-	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
-	energi_common "github.com/energicryptocurrency/go-energi/energi/common"
-	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 
 const (
