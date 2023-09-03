@@ -30,7 +30,7 @@ const (
 
 	// Banana-blocktime hardfork activation changes
 	TargetBlockGapBanana uint64 = 15
-	MinBlockGapBanana    uint64 = 10
+	MinBlockGapBanana    uint64 = 7
 
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
