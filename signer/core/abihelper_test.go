@@ -26,8 +26,8 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/energicryptocurrency/energi/accounts/abi"
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/accounts/abi"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 func verify(t *testing.T, jsondata, calldata string, exp []interface{}) {

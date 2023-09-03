@@ -20,7 +20,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 func TestTransaction(t *testing.T) {

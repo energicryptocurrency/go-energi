@@ -21,9 +21,9 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 var (

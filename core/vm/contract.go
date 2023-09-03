@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 // ContractRef is a reference to the contract's backing object

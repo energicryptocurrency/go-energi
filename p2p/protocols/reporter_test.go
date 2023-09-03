@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 //TestReporter tests that the metrics being collected for p2p accounting

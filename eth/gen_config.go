@@ -6,12 +6,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/consensus/ethash"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/eth/downloader"
-	"github.com/energicryptocurrency/energi/eth/gasprice"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/consensus/ethash"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/eth/downloader"
+	"github.com/energicryptocurrency/go-energi/eth/gasprice"
 )
 
 var _ = (*configMarshaling)(nil)

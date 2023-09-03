@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // deployWallet creates a new web wallet based on some user input.

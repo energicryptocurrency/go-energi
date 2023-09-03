@@ -25,11 +25,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
 
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/metrics"
 )
 
 const (

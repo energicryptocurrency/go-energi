@@ -21,12 +21,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/accounts/abi/bind/backends"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/contracts/ens/contract"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind/backends"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/contracts/ens/contract"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 var (

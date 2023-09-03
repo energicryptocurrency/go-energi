@@ -25,21 +25,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts/keystore"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/eth"
+	"github.com/energicryptocurrency/go-energi/accounts/keystore"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/eth"
 
-	// "github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/node"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/p2p/nat"
-	"github.com/energicryptocurrency/energi/params"
+	// "github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/node"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/p2p/nat"
+	"github.com/energicryptocurrency/go-energi/params"
 	"github.com/stretchr/testify/assert"
 
-	energi_testutils "github.com/energicryptocurrency/energi/energi/common/testutils"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	energi_testutils "github.com/energicryptocurrency/go-energi/energi/common/testutils"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 
 var sentCheckPoints = &testCheckPoints{}

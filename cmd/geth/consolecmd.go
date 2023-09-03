@@ -25,10 +25,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/energicryptocurrency/energi/cmd/utils"
-	"github.com/energicryptocurrency/energi/console"
-	"github.com/energicryptocurrency/energi/node"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/cmd/utils"
+	"github.com/energicryptocurrency/go-energi/console"
+	"github.com/energicryptocurrency/go-energi/node"
+	"github.com/energicryptocurrency/go-energi/rpc"
 	"gopkg.in/urfave/cli.v1"
 )
 
@@ -44,7 +44,7 @@ var (
 		Description: `
 The Energi Core console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://github.com/energicryptocurrency/energi/wiki/JavaScript-Console.`,
+See https://github.com/energicryptocurrency/go-energi/wiki/JavaScript-Console.`,
 	}
 
 	attachCommand = cli.Command{
@@ -57,7 +57,7 @@ See https://github.com/energicryptocurrency/energi/wiki/JavaScript-Console.`,
 		Description: `
 The Energi Core console is an interactive shell for the JavaScript runtime environment
 which exposes a node admin interface as well as the Ðapp JavaScript API.
-See https://github.com/energicryptocurrency/energi/wiki/JavaScript-Console.
+See https://github.com/energicryptocurrency/go-energi/wiki/JavaScript-Console.
 This command allows to open a console on a running energi3 node.`,
 	}
 
@@ -70,7 +70,7 @@ This command allows to open a console on a running energi3 node.`,
 		Category:  "CONSOLE COMMANDS",
 		Description: `
 The JavaScript VM exposes a node admin interface as well as the Ðapp
-JavaScript API. See https://github.com/energicryptocurrency/energi/wiki/JavaScript-Console`,
+JavaScript API. See https://github.com/energicryptocurrency/go-energi/wiki/JavaScript-Console`,
 	}
 )
 

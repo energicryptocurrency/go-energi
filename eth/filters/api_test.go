@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 func TestUnmarshalJSONNewFilterArgs(t *testing.T) {

@@ -20,7 +20,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
 )
 
 var (

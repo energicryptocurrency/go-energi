@@ -25,7 +25,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/go-energi/metrics"
 )
 
 type exp struct {

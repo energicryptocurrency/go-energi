@@ -19,7 +19,7 @@ package whisperv5
 import (
 	"testing"
 
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 func BenchmarkDeriveKeyMaterial(b *testing.B) {

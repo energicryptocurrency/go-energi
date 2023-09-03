@@ -22,12 +22,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/accounts/abi"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/accounts/abi"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 func TestDefaults(t *testing.T) {

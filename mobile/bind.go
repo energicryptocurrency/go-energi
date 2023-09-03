@@ -22,10 +22,10 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/accounts/abi"
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/accounts/abi"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // Signer is an interaface defining the callback when a contract requires a

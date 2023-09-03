@@ -22,9 +22,9 @@ package geth
 import (
 	"encoding/json"
 
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/p2p/discv5"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/p2p/discv5"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 // MainnetGenesis returns the JSON spec to use for the main Ethereum network. It

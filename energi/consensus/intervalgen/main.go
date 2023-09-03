@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/energi/consensus"
-	"github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/energi/consensus"
+	"github.com/energicryptocurrency/go-energi/energi/params"
 	"fmt"
 	"io/ioutil"
 	"math/big"

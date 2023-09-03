@@ -20,7 +20,7 @@ package core
 import (
 	"runtime"
 
-	"github.com/energicryptocurrency/energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/types"
 )
 
 // senderCacher is a concurrent transaction sender recoverer and cacher.

@@ -24,9 +24,9 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
-	"github.com/energicryptocurrency/energi/metrics/exp"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/metrics"
+	"github.com/energicryptocurrency/go-energi/metrics/exp"
 	"github.com/fjl/memsize/memsizeui"
 	colorable "github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"

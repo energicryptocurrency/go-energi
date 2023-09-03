@@ -4,9 +4,9 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/blockchain"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/calculus"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/params"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/blockchain"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/calculus"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/params"
 )
 
 // Staker is individual person mining with accoount(s)

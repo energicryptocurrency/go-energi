@@ -26,8 +26,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common/bitutil"
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/common/bitutil"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 // bloomIndexes represents the bit indexes inside the bloom filter that belong

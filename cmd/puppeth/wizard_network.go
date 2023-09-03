@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // manageServers displays a list of servers the user can disconnect from, and an

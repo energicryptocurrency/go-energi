@@ -34,11 +34,11 @@ import (
 
 	"io"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/params"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/metrics"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/params"
+	"github.com/energicryptocurrency/go-energi/rpc"
 	"github.com/elastic/gosigar"
 	"github.com/mohae/deepcopy"
 	"golang.org/x/net/websocket"

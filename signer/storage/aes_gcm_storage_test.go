@@ -24,8 +24,8 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/log"
 
 	"github.com/mattn/go-colorable"
 )

@@ -28,8 +28,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 const (

@@ -27,8 +27,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/accounts"
+	"github.com/energicryptocurrency/go-energi/common"
 
 	"github.com/cespare/cp"
 	"github.com/davecgh/go-spew/spew"

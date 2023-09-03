@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/energi/exceptions"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/energi/exceptions"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // SecureTrie wraps a trie with key hashing. In a secure trie, all
