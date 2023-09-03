@@ -29,7 +29,7 @@ const (
 	BlockTimeEMAPeriod   uint64 = 360
 
 	// Banana-blocktime hardfork activation changes
-	TargetBlockGapBanana uint64 = 20
+	TargetBlockGapBanana uint64 = 15
 	MinBlockGapBanana    uint64 = 10
 
 	// DoS protection
