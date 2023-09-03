@@ -25,8 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common/mclock"
-	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/common/mclock"
+	"github.com/energicryptocurrency/go-energi/ethdb"
 )
 
 func TestFreeClientPoolL10C100(t *testing.T) {

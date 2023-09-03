@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/params"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/params"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 var (
@@ -126,9 +126,6 @@ func CalcPoSDifficultyV2(
 ) *big.Int {
 	// set tuning parameters
 	gain := big.NewInt(params.Gain)
-	if params.BananaDifficultyAdjustment {
-		gain = big.NewInt(params.GainBanana)
-	}
 	integralTime := big.NewInt(params.IntegralTime)
 	derivativeTime := big.NewInt(params.DerivativeTime)
 

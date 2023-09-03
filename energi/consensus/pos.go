@@ -20,17 +20,16 @@ import (
 	"encoding/binary"
 	"errors"
 	"math/big"
-	"math"
 	"sort"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
-	"github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
 )
 
 var (
@@ -66,17 +65,9 @@ func (e *Energi) calcTimeTargetV1(
 	// POS-11: Block time restrictions
 	ret.max = now + params.MaxFutureGap
 
-	// if Banana-blocktime active use new block target gap
-	targetBlockGap := params.TargetBlockGap
-	minBlockGap := params.MinBlockGap
-	if hfcache.IsHardforkActive("Banana-blocktime", parent.Number.Uint64()) {
-		targetBlockGap = params.TargetBlockGapBanana
-		minBlockGap = params.MinBlockGapBanana
-	}
-
 	// POS-11: Block time restrictions
-	ret.min = parent.Time + minBlockGap
-	ret.blockTarget = parent.Time + targetBlockGap
+	ret.min = parent.Time + params.MinBlockGap
+	ret.blockTarget = parent.Time + params.TargetBlockGap
 	ret.periodTarget = ret.blockTarget
 
 	// POS-12: Block interval enforcement
@@ -97,7 +88,7 @@ func (e *Energi) calcTimeTargetV1(
 		}
 
 		ret.periodTarget = past.Time + params.TargetPeriodGap
-		periodMinTime := ret.periodTarget - minBlockGap
+		periodMinTime := ret.periodTarget - params.MinBlockGap
 
 		if periodMinTime > ret.min {
 			ret.min = periodMinTime
@@ -154,10 +145,14 @@ func (e *Energi) calcPoSModifier(
 	// maturity period is reduced to 30m in Asgard
 	maturityPeriod := params.MaturityPeriod
 	if !e.testing {
-		// check if Asgard hardfork is activated use new maturity period for calculating stake modifier
+		// check if Asgard hardfork is activated use new difficulty algorithm
+		// check if Asgard hardfork is activated use new difficulty algorithm
 		isAsgardActive := hfcache.IsHardforkActive("Asgard", parent.Number.Uint64())
 		log.Debug("hf check", "isAsgardActive", isAsgardActive)
-
+		// don't check for hard forks being active if we're testing
+		if e.testing {
+			isAsgardActive = false
+		}
 		if isAsgardActive {
 			maturityPeriod = params.MaturityPeriodAsgard
 		}
@@ -402,18 +397,9 @@ func (e *Energi) lookupStakeWeight(
 
 	// NOTE: Do not set to high initial value due to defensive coding approach!
 	weight = 0
-	stakeCheckDepth := uint64(math.MaxUint64)
 	totalStaked := uint64(0)
 	firstRun := true
 	blockState := chain.CalculateBlockState(until.Hash(), until.Number.Uint64())
-
-	// check if Banana-pos hardfork is active, if so change staking algorithm
-	if hfcache.IsHardforkActive("Banana-pos", until.Number.Uint64()) {
-		stakeCheckDepth = params.StakeCheckDepth
-	}
-
-	// remember current block depth
-	depth := uint64(0)
 
 	// NOTE: we need to ensure at least one iteration with the balance condition
 	for (until.Time > since) || firstRun {
@@ -444,7 +430,7 @@ func (e *Energi) lookupStakeWeight(
 		}
 
 		// POS-22: partial stake amount
-		if until.Coinbase == addr && depth < stakeCheckDepth {
+		if until.Coinbase == addr {
 			totalStaked += until.Nonce.Uint64()
 		}
 
@@ -463,7 +449,6 @@ func (e *Energi) lookupStakeWeight(
 		}
 
 		blockState = chain.CalculateBlockState(curr.ParentHash, parentNumber)
-		depth++
 	}
 
 	if weight < totalStaked {

@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 
 	"github.com/stretchr/testify/assert"
 )

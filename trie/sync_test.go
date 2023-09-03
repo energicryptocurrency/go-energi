@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/ethdb"
 )
 
 // makeTestTrie create a sample test trie to test node-wise reconstruction.

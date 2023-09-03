@@ -25,7 +25,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 const (

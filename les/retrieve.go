@@ -26,8 +26,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common/mclock"
-	"github.com/energicryptocurrency/energi/light"
+	"github.com/energicryptocurrency/go-energi/common/mclock"
+	"github.com/energicryptocurrency/go-energi/light"
 )
 
 var (

@@ -20,9 +20,9 @@ import (
 	"context"
 	"sync"
 
-	ethereum "github.com/energicryptocurrency/energi"
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/rpc"
+	ethereum "github.com/energicryptocurrency/go-energi"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 // PublicDownloaderAPI provides an API which gives information about the current synchronisation status.

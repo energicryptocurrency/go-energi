@@ -1,4 +1,4 @@
-module github.com/energicryptocurrency/energi
+module github.com/energicryptocurrency/go-energi
 
 go 1.20
 

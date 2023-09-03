@@ -35,11 +35,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common/bitutil"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/crypto/ecies"
-	"github.com/energicryptocurrency/energi/crypto/secp256k1"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/common/bitutil"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/crypto/ecies"
+	"github.com/energicryptocurrency/go-energi/crypto/secp256k1"
+	"github.com/energicryptocurrency/go-energi/rlp"
 
 	"github.com/golang/snappy"
 	"golang.org/x/crypto/sha3"

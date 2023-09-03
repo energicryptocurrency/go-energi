@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common/mclock"
+	"github.com/energicryptocurrency/go-energi/common/mclock"
 )
 
 const rcConst = 1000000

@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/blockchain"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/blockchain"
 )
 
 const (

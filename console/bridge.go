@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts/usbwallet"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/accounts/usbwallet"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/rpc"
 	"github.com/robertkrimen/otto"
 )
 

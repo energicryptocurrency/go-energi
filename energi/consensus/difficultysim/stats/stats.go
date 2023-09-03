@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/blockchain"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/miner"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/blockchain"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/miner"
 )
 
 type AccountStat struct {

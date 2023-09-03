@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/energicryptocurrency/energi"
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 // Verify that Client implements the ethereum interfaces.

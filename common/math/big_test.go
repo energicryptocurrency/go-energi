@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 func TestHexOrDecimal256(t *testing.T) {

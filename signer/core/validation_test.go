@@ -22,8 +22,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
 )
 
 func mixAddr(a string) (*common.MixedcaseAddress, error) {

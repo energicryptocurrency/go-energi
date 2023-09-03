@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/energicryptocurrency/energi/internal/jsre"
-	"github.com/energicryptocurrency/energi/internal/web3ext"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/internal/jsre"
+	"github.com/energicryptocurrency/go-energi/internal/web3ext"
+	"github.com/energicryptocurrency/go-energi/log"
 
 	"github.com/robertkrimen/otto"
 )
