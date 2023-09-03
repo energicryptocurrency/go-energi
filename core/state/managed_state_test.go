@@ -19,8 +19,8 @@ package state
 import (
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/ethdb"
 )
 
 var addr = common.BytesToAddress([]byte("test"))

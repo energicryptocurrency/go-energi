@@ -19,11 +19,10 @@ package consensus
 import (
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 const (
@@ -38,7 +37,7 @@ const (
 // this will return the EMA of block times as microseconds
 // for a description of the EMA algorithm, please see:
 // see https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
-func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64, targetBlockGap uint64) (ema []uint64) {
+func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64) (ema []uint64) {
 	sampleSize := len(blockTimeDifferences)
 	N := emaPeriod + 1
 	ema = make([]uint64, sampleSize)
@@ -47,7 +46,7 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64, targ
 	// block time difference, but instead we'll set it to the target value so our
 	// EMA will tend toward the target. However we don't include this value in our
 	// EMA series data that we return, we only use it to calculate the first EMA
-	emaPrev := targetBlockGap * microseconds
+	emaPrev := params.TargetBlockGap * microseconds
 	for i := 0; i < sampleSize; i++ {
 		// this formula has a factor of 2/(emaPeriod+1) in a couple places. This is our
 		// smoothing coefficient for the EMA, often referred to as alpha. We have
@@ -62,8 +61,8 @@ func CalculateBlockTimeEMA(blockTimeDifferences []uint64, emaPeriod uint64, targ
 // and the EMA block time. Drift should be a negative value if blocks are too slow
 // and a positive value if blocks are too fast, representing the direction
 // to adjust the difficulty
-func CalculateBlockTimeDrift(ema []uint64, targetBlockGap uint64) (drift []int64) {
-	target := int64(targetBlockGap * microseconds)
+func CalculateBlockTimeDrift(ema []uint64) (drift []int64) {
+	target := int64(params.TargetBlockGap * microseconds)
 	drift = make([]int64, len(ema))
 	for i := range ema {
 		drift[i] = target - int64(ema[i])
@@ -79,7 +78,7 @@ func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
 	sampleSize := len(drift)
 	integral = 0
 	// this is a simplification of the trapezoid rule based on uniform spacing
-	for i := 1; i < sampleSize-1; i++ {
+	for i := 1; i < sampleSize - 1; i++ {
 		integral += drift[i]
 	}
 	integral += (drift[0] + drift[sampleSize-1]) / 2
@@ -91,7 +90,7 @@ func CalculateBlockTimeIntegral(drift []int64) (integral int64) {
 // f'(x) = 1/2h * (f(x+h) - f(x-h))
 func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 	sampleSize := len(drift)
-	derivative = make([]int64, sampleSize-1)
+	derivative = make([]int64, sampleSize - 1)
 
 	for i := 1; i < sampleSize; i++ {
 		derivative[i-1] = (drift[i] - drift[i-1])
@@ -113,7 +112,7 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */
-func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
+func (e * Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *TimeTarget {
 	// check if we have already calculated
 	if parent.Hash() == e.calculatedBlockHash {
 		timeTarget := e.calculatedTimeTarget
@@ -127,17 +126,9 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 	// POS-11: Block time restrictions
 	ret.max = e.now() + params.MaxFutureGap
 
-	// if Banana-blocktime active use new block target gap
-	targetBlockGap := params.TargetBlockGap
-	minBlockGap := params.MinBlockGap
-	if hfcache.IsHardforkActive("Banana-blocktime", parent.Number.Uint64()) {
-		targetBlockGap = params.TargetBlockGapBanana
-		minBlockGap = params.MinBlockGapBanana
-	}
-
 	// POS-11: Block time restrictions
-	ret.min = parentBlockTime + minBlockGap
-	ret.blockTarget = parentBlockTime + targetBlockGap
+	ret.min = parentBlockTime + params.MinBlockGap
+	ret.blockTarget = parentBlockTime + params.TargetBlockGap
 	ret.periodTarget = ret.blockTarget
 
 	// Block interval enforcement
@@ -160,12 +151,12 @@ func (e *Energi) calcTimeTargetV2(chain ChainReader, parent *types.Header) *Time
 		parent = past
 	}
 
-	ema := CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod, targetBlockGap)
+	ema := CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod)
 
 	ret.periodTarget = ema[len(ema)-1]
 
 	// set up the parameters for PID control (diffV2)
-	drift := CalculateBlockTimeDrift(ema, targetBlockGap)
+	drift := CalculateBlockTimeDrift(ema)
 	integral := CalculateBlockTimeIntegral(drift)
 	derivative := CalculateBlockTimeDerivative(drift)
 	ret.Drift = drift[len(drift)-1]
@@ -225,14 +216,9 @@ func CalcPoSDifficultyV2(
 	newBlockTime uint64, // TODO: maybe we should be recalculating ema/drift/etc with the new time included?
 	parent *types.Header,
 	timeTarget *TimeTarget,
-	testing bool,
 ) *big.Int {
 	// set tuning parameters
-	// check if Banana-difficulty-adjustment hardfork is active, if so use a new gain parameter value
 	gain := big.NewInt(50000)
-	if !testing && hfcache.IsHardforkActive("Banana-difficulty-adjustment", parent.Number.Uint64()) {
-		gain = big.NewInt(params.GainBanana)
-	}
 	integralTime := big.NewInt(720)
 	derivativeTime := big.NewInt(60)
 

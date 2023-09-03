@@ -26,11 +26,11 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/crypto/ecies"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/crypto/ecies"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 // Envelope represents a clear-text data packet to transmit through the Whisper

@@ -26,7 +26,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/p2p/enr"
+	"github.com/energicryptocurrency/go-energi/p2p/enr"
 )
 
 // Node represents a host on the network.

@@ -24,8 +24,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/p2p/enode"
-	"github.com/energicryptocurrency/energi/p2p/enr"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/enr"
 )
 
 var nullNode *enode.Node

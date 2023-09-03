@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 // Method represents a callable given a `Name` and whether the method is a constant.

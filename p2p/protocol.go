@@ -19,8 +19,8 @@ package p2p
 import (
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/p2p/enode"
-	"github.com/energicryptocurrency/energi/p2p/enr"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/enr"
 )
 
 // Protocol represents a P2P subprotocol implementation.

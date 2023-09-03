@@ -19,7 +19,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // ensureVirtualHost checks whether a reverse-proxy is running on the specified

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/math"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/math"
 )
 
 var _ = (*stEnvMarshaling)(nil)

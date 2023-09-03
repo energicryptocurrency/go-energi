@@ -20,7 +20,7 @@ package tests
 import (
 	"testing"
 
-	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/core/vm"
 )
 
 func TestVM(t *testing.T) {

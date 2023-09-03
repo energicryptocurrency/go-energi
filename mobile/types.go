@@ -24,10 +24,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/rlp"
-	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/rlp"
+	whisper "github.com/energicryptocurrency/go-energi/whisper/whisperv6"
 )
 
 // A Nonce is a 64-bit hash which proves (combined with the mix-hash) that

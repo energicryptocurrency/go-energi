@@ -30,7 +30,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 var (

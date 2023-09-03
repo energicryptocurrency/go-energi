@@ -23,9 +23,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/p2p/enode"
-	"github.com/energicryptocurrency/energi/p2p/enr"
-	"github.com/energicryptocurrency/energi/p2p/netutil"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/enr"
+	"github.com/energicryptocurrency/go-energi/p2p/netutil"
 	"github.com/davecgh/go-spew/spew"
 )
 

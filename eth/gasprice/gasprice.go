@@ -23,11 +23,11 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/internal/ethapi"
-	"github.com/energicryptocurrency/energi/params"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/internal/ethapi"
+	"github.com/energicryptocurrency/go-energi/params"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 var maxPrice = big.NewInt(500 * params.GWei)

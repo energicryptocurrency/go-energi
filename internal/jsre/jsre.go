@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/internal/jsre/deps"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/internal/jsre/deps"
 	"github.com/robertkrimen/otto"
 )
 

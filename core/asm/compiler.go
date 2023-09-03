@@ -22,8 +22,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/common/math"
-	"github.com/energicryptocurrency/energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/common/math"
+	"github.com/energicryptocurrency/go-energi/core/vm"
 )
 
 // Compiler contains information about the parsed source
