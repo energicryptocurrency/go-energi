@@ -1,5 +1,5 @@
-# Ubuntu 18.04 is our base image for building
-FROM ubuntu:18.04
+# Ubuntu 22.04 is our base image for building
+FROM ubuntu:22.04
 
 # set up timezone
 ENV TZ=GMT
@@ -16,11 +16,11 @@ RUN apt -y update
 RUN apt -y install curl gnupg lsb-release software-properties-common git build-essential wget awscli sudo
 
 # golang variables
-ARG golang_version="1.17.9"
+ARG golang_version="1.21.0"
 ARG golang_hostarch="linux-amd64"
 ARG golang_filename="go${golang_version}.${golang_hostarch}.tar.gz"
 ARG golang_url="https://golang.org/dl/${golang_filename}"
-ARG golang_sha256="9dacf782028fdfc79120576c872dee488b81257b1c48e9032d122cfdb379cca6"
+ARG golang_sha256="d0398903a16ba2232b389fb31032ddf57cac34efda306a0eebac34f0965a0742"
 
 # install golang
 RUN wget -nv ${golang_url}

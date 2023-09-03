@@ -26,7 +26,7 @@ cache: &global_cache_configuration
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
-build-builder_ubuntu18:
+build-builder:
   stage: base
   cache: []
   dependencies: []
@@ -41,24 +41,6 @@ build-builder_ubuntu18:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:
         - Dockerfile.builder
-    - if: $CI_COMMIT_TAG
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-
-build-builder_ubuntu20:
-  stage: base
-  cache: []
-  dependencies: []
-  extends: .docker-job
-  script:
-    - docker build -t energi3_builder:20-${CI_COMMIT_REF_NAME} -f Dockerfile.windows --build-arg repository_remote=${repository_remote} .
-    - docker tag energi3_builder:20-${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:20-${CI_COMMIT_REF_NAME}
-    - docker push ${container_registry}/energi3_builder:20-${CI_COMMIT_REF_NAME}
-    - docker tag energi3_builder:20-${CI_COMMIT_REF_NAME} ${container_registry}/energi3_builder:20-latest
-    - docker push ${container_registry}/energi3_builder:20-latest
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      changes:
-        - Dockerfile.windows
     - if: $CI_COMMIT_TAG
     - if: '$CI_COMMIT_BRANCH == "develop"'
 
@@ -125,7 +107,7 @@ branch-check:
 #  needs: 
 #    - test-go-report
 #  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder:20-latest
+#  image: ${container_registry}/energi3_builder:latest
 #  script:
 #    - make -f Makefile.release release-windows
 #  artifacts:
@@ -176,12 +158,7 @@ branch-check:
 #      junit: .test-go-report.xml
 #    expire_in: 2 day
 #  coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
-#  retry:
-#    max: 2
-#    when:
-#      - script_failure
-#      - runner_system_failure
-#      - stuck_or_timeout_failure
+#  allow_failure: true
 #
 #deploy-release-linux:
 #  stage: deploy-release
@@ -200,7 +177,7 @@ branch-check:
 #  cache: []
 #  dependencies: []
 #  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder:20-latest
+#  image: ${container_registry}/energi3_builder:latest
 #  script:
 #    - make -f Makefile.release release-windows
 #    - make -f Makefile.release release-upload

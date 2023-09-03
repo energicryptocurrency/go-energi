@@ -1,12 +1,12 @@
 # Core Node Changelog
 
-## 3.2.0 (Banana Hard Fork)
+## 1.2.0 (Banana Hard Fork)
 
 ### Changed
 - Removed testing Interval Generator
 - Updated staking simulator according to Banana hardfork changes
 - Bootnodes settings
-- Upgraded Golang version to 1.20
+- Upgraded Golang version to 1.21.0
 
 ### Fixed
 - `energi.compensationProcess()` now prints an error on wrong input arguments
@@ -14,17 +14,22 @@
 
 ### New
 - Upon activating `Banana-txfee` hardfork, 10% of block transaction fees will be sent to coinbase as a part of a block reward
-- Upon activating `Banana-blocktime` hardfork, energi network block generation time will be reduced from 60 seconds to 20 seconds
+- Upon activating `Banana-blocktime` hardfork, energi network block generation time will be reduced from 60 seconds to 15 seconds
 - Upon activating `Banana-pos` hardfork, new pos algorithm will make block reward distribution proportional to the user's active stake
 - Upon activating `Banana-difficulty-adjustment` hardfork, new values will be used for difficulty adjustment algorithm
 - `make lint` now runs golang linting for energi subdirectory
 
-## 3.1.3
+## 1.1.4
+
+### Fixed
+- preimages hotfix
+
+## 1.1.3
 
 ### Changed
 - Updated Golang version to 1.17
 
-## 3.1.2
+## 1.1.2
 
 ### Changed
 - Removed swarm functionality
@@ -40,7 +45,7 @@
 - Hardfork check function
 - Simple PoS simulator
 
-## 3.1.1
+## 1.1.1
 
 ### Changed
 - Various code optimizations
@@ -59,7 +64,7 @@
 - Checkpoints for testnet
 - Icon on Windows
 
-## 3.1.0 (Apple Hard Fork)
+## 1.1.0 (Apple Hard Fork)
 
 ### Changed
 - Improved log messages
