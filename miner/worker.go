@@ -37,7 +37,7 @@ import (
 	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/params"
 
-	energi_params "github.com/energicryptocurrency/energi/go-energi/params"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
 )
 
 const (
