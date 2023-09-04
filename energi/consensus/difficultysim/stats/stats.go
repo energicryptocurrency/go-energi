@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/blockchain"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/miner"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/blockchain"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/miner"
 )
 
 type AccountStat struct {
@@ -25,11 +25,15 @@ func PrintAccountStats(chain *blockchain.Blockchain, stakers []miner.Staker) {
 	chain.Locker.Lock()
 	defer chain.Locker.Unlock()
 
+	// sum up total stake
+	totalStake := uint64(0)
+
 	// associating address to owner
 	addressOwner := make(map[string]string)
 	for _, staker := range stakers {
 		for _, account := range staker.Accounts {
 			addressOwner[account.Address] = staker.Name
+			totalStake += account.Balance
 		}
 	}
 
@@ -75,7 +79,7 @@ func PrintAccountStats(chain *blockchain.Blockchain, stakers []miner.Staker) {
 
 	// initial csv file fields
 	stakingData := [][]string{
-		{"Name", "Address", "Balance", "Blocks", "NonceCap", "AverageWeight"},
+		{"Name", "Address", "Balance", "Blocks", "NonceCap", "AverageWeight", "Win Rate", "Stake Share"},
 	}
 
 	// run miners and start mining of the blockchain
@@ -87,7 +91,7 @@ func PrintAccountStats(chain *blockchain.Blockchain, stakers []miner.Staker) {
 				wonBlock = accountStats[account.Address].WonBlocks
 				averageNonce = accountStats[account.Address].AverageNonce
 			}
-			stakingData = append(stakingData, []string{staker.Name, account.Address, strconv.FormatUint(account.Balance, 10), strconv.FormatUint(wonBlock, 10), strconv.FormatUint(account.NonceCap, 10), strconv.FormatUint(averageNonce, 10)})
+			stakingData = append(stakingData, []string{staker.Name, account.Address, strconv.FormatUint(account.Balance, 10), strconv.FormatUint(wonBlock, 10), strconv.FormatUint(account.NonceCap, 10), strconv.FormatUint(averageNonce, 10), fmt.Sprintf("%.2f", float64(wonBlock)/float64(len(chain.Chain))*100), fmt.Sprintf("%.2f", float64(account.Balance)/float64(totalStake)*100)})
 		}
 	}
 
@@ -98,8 +102,8 @@ func PrintAccountStats(chain *blockchain.Blockchain, stakers []miner.Staker) {
 }
 
 /*
-   getFileTime simply takes current time precisely and
-   creates string date-time prefix for each file
+getFileTime simply takes current time precisely and
+creates string date-time prefix for each file
 */
 func getFileTime() string {
 	var logTime string

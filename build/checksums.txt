@@ -1,0 +1,3 @@
+# This file contains sha256 checksums of optional build dependencies.
+
+17c9ca05253efe833d47f38caf670aad2202b5e6515879a99873fabd4c7452b3  golangci-lint-1.54.2-linux-amd64.tar.gz

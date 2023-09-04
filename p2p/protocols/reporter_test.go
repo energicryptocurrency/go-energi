@@ -23,12 +23,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
-//TestReporter tests that the metrics being collected for p2p accounting
-//are being persisted and available after restart of a node.
-//It simulates restarting by just recreating the DB as if the node had restarted.
+// TestReporter tests that the metrics being collected for p2p accounting
+// are being persisted and available after restart of a node.
+// It simulates restarting by just recreating the DB as if the node had restarted.
 func TestReporter(t *testing.T) {
 	//create a test directory
 	dir, err := ioutil.TempDir("", "reporter-test")

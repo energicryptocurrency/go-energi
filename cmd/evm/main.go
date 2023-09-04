@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/energicryptocurrency/energi/cmd/utils"
+	"github.com/energicryptocurrency/go-energi/cmd/utils"
 	"gopkg.in/urfave/cli.v1"
 )
 

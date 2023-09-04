@@ -19,7 +19,7 @@ package ethapi
 import (
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 type AddrLocker struct {

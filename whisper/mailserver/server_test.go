@@ -25,9 +25,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/crypto"
-	whisper "github.com/energicryptocurrency/energi/whisper/whisperv6"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	whisper "github.com/energicryptocurrency/go-energi/whisper/whisperv6"
 )
 
 const powRequirement = 0.00001

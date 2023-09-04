@@ -18,7 +18,7 @@
 // Package bind generates Ethereum contract Go bindings.
 //
 // Detailed usage document and tutorial available on the go-ethereum Wiki page:
-// https://github.com/energicryptocurrency/energi/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
+// https://github.com/energicryptocurrency/go-energi/wiki/Native-DApps:-Go-bindings-to-Ethereum-contracts
 package bind
 
 import (
@@ -30,7 +30,7 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/energicryptocurrency/energi/accounts/abi"
+	"github.com/energicryptocurrency/go-energi/accounts/abi"
 )
 
 // Lang is a target programming language selector to generate bindings for.
@@ -168,9 +168,10 @@ var bindType = map[Lang]func(kind abi.Type) string{
 
 // Helper function for the binding generators.
 // It reads the unmatched characters after the inner type-match,
-//  (since the inner type is a prefix of the total type declaration),
-//  looks for valid arrays (possibly a dynamic one) wrapping the inner type,
-//  and returns the sizes of these arrays.
+//
+//	(since the inner type is a prefix of the total type declaration),
+//	looks for valid arrays (possibly a dynamic one) wrapping the inner type,
+//	and returns the sizes of these arrays.
 //
 // Returned array sizes are in the same order as solidity signatures; inner array size first.
 // Array sizes may also be "", indicating a dynamic array.

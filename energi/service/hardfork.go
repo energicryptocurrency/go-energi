@@ -23,19 +23,19 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/eth"
-	"github.com/energicryptocurrency/energi/eth/downloader"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/rpc"
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_api "github.com/energicryptocurrency/energi/energi/api"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/core"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	energi_api "github.com/energicryptocurrency/go-energi/energi/api"
+	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
+	energi_common "github.com/energicryptocurrency/go-energi/energi/common"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/eth"
+	"github.com/energicryptocurrency/go-energi/eth/downloader"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 const (
@@ -100,23 +100,23 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	activeHardforks, err := hf.hfAPI.HardforkEnumerateActive()
 	if err != nil {
 		if err != bind.ErrNoCode {
-			log.Error("Failed to get active hardforks (startup)", "err", err);
+			log.Error("Failed to get active hardforks (startup)", "err", err)
 		} else {
-			log.Debug("Hardfork contract hasn't been deployed yet", "err", err);
+			log.Debug("Hardfork contract hasn't been deployed yet", "err", err)
 		}
 	} else if lc := len(activeHardforks); lc > 0 {
 		hf.LogHardForks(activeHardforks)
 	}
 
 	/*
-	Upon startup retrieve all hardforks and store them in cache
+		Upon startup retrieve all hardforks and store them in cache
 	*/
 	allHardforks, err := hf.hfAPI.HardforkEnumerate()
 	if err != nil {
 		if err != bind.ErrNoCode {
-			log.Error("Failed to get hardforks (startup)", "err", err);
+			log.Error("Failed to get hardforks (startup)", "err", err)
 		} else {
-			log.Debug("Hardfork contract hasn't been deployed yet", "err", err);
+			log.Debug("Hardfork contract hasn't been deployed yet", "err", err)
 		}
 	} else if lc := len(allHardforks); lc > 0 {
 		for _, hardfork := range allHardforks {
@@ -136,7 +136,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	return nil
 }
 
-//logUpcomingHardforks periodically logs upcoming (pending) hardforks
+// logUpcomingHardforks periodically logs upcoming (pending) hardforks
 func (hf *HardforkService) logUpcomingHardforks() {
 	//create channel and subscribe for new chain events
 	chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
@@ -170,7 +170,7 @@ func (hf *HardforkService) logUpcomingHardforks() {
 	}
 }
 
-//function is watches newly created hardfork events and logs them
+// function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkCreatedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
@@ -213,7 +213,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 	}
 }
 
-//function is watches newly created hardfork events and logs them
+// function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkFinalizedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
@@ -257,7 +257,7 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 	}
 }
 
-//function is watches newly created hardfork events and logs them
+// function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkRemovedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
@@ -319,7 +319,7 @@ func (hf *HardforkService) Stop() error {
 	return nil
 }
 
-//log downloading status
+// log downloading status
 func (hf *HardforkService) listenDownloader() {
 	events := hf.eth.EventMux().Subscribe(
 		downloader.StartEvent{},
@@ -349,7 +349,7 @@ func (hf *HardforkService) listenDownloader() {
 	}
 }
 
-//logHardfork logs the information about the provided hardforks.
+// logHardfork logs the information about the provided hardforks.
 func logHardforkInfo(currentBlockNo *big.Int, hfInfo *energi_api.HardforkInfo) {
 	diff := new(big.Int).Sub(hfInfo.BlockNumber, currentBlockNo)
 	emptyArray := [32]byte{}

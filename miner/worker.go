@@ -24,19 +24,20 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	energi_consensus "github.com/energicryptocurrency/energi/energi/consensus"
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
 	mapset "github.com/deckarep/golang-set"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
+	energi_consensus "github.com/energicryptocurrency/go-energi/energi/consensus"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/params"
 
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	energi_params "github.com/energicryptocurrency/energi/go-energi/params"
 )
 
 const (
@@ -229,13 +230,20 @@ func newWorker(config *params.ChainConfig, engine consensus.Engine, eth Backend,
 
 	// Make sure pending state can be returned for API usage
 	parent := worker.chain.CurrentBlock()
+
+	// get minBlockGap based on banana hardfork activation
+	minBlockGap := energi_params.MinBlockGap
+	if hfcache.IsHardforkActive("Banana-blocktime", parent.NumberU64()) {
+		minBlockGap = energi_params.MinBlockGapBanana
+	}
+
 	num := parent.Number()
 	header := &types.Header{
 		ParentHash: parent.Hash(),
 		Number:     num.Add(num, common.Big1),
 		GasLimit:   core.CalcGasLimit(parent, worker.gasFloor, worker.gasCeil),
 		Extra:      worker.extra,
-		Time:       uint64(parent.Time() + energi_params.MinBlockGap),
+		Time:       uint64(parent.Time() + minBlockGap),
 	}
 	if err := worker.makeCurrent(parent, header); err != nil {
 		panic(err)
@@ -888,13 +896,19 @@ func (w *worker) commitNewWork(interrupt *int32, noempty bool, timestamp int64) 
 	tstart := time.Now()
 	parent := w.chain.CurrentBlock()
 
+	// get minBlockGap based on banana hardfork activation
+	minBlockGap := energi_params.MinBlockGap
+	if hfcache.IsHardforkActive("Banana-blocktime", parent.NumberU64()) {
+		minBlockGap = energi_params.MinBlockGapBanana
+	}
+
 	num := parent.Number()
 	header := &types.Header{
 		ParentHash: parent.Hash(),
 		Number:     num.Add(num, common.Big1),
 		GasLimit:   core.CalcGasLimit(parent, w.gasFloor, w.gasCeil),
 		Extra:      w.extra,
-		Time:       uint64(parent.Time() + energi_params.MinBlockGap),
+		Time:       uint64(parent.Time() + minBlockGap),
 	}
 	// Only set the coinbase if our consensus engine is running (avoid spurious block rewards)
 	if w.isRunning() {

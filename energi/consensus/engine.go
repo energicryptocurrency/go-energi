@@ -24,24 +24,23 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts/abi"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/consensus/misc"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/state"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/crypto"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
-	"github.com/energicryptocurrency/energi/rlp"
-	"github.com/energicryptocurrency/energi/rpc"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	eth_consensus "github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/energi/api/hfcache"
+	"github.com/energicryptocurrency/go-energi/accounts/abi"
+	"github.com/energicryptocurrency/go-energi/common"
+	eth_consensus "github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/consensus/misc"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/state"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/params"
+	"github.com/energicryptocurrency/go-energi/rlp"
+	"github.com/energicryptocurrency/go-energi/rpc"
 
 	lru "github.com/hashicorp/golang-lru"
 	"golang.org/x/crypto/sha3"
@@ -265,7 +264,7 @@ func (e *Energi) VerifyHeader(
 
 	var difficulty *big.Int
 	if isAsgardActive {
-		difficulty = CalcPoSDifficultyV2(header.Time, parent, time_target)
+		difficulty = CalcPoSDifficultyV2(header.Time, parent, time_target, e.testing)
 	} else {
 		difficulty = calcPoSDifficultyV1(header.Time, parent, time_target)
 	}
@@ -542,7 +541,7 @@ func (e *Energi) PoSPrepareV2(
 	header.MixDigest = e.calcPoSModifier(chain, header.Time, parent)
 
 	// Diff
-	header.Difficulty = CalcPoSDifficultyV2(header.Time, parent, timeTarget)
+	header.Difficulty = CalcPoSDifficultyV2(header.Time, parent, timeTarget, e.testing)
 
 	return timeTarget, err
 }
@@ -657,6 +656,14 @@ func (e *Energi) govFinalize(
 			chain, header, state, txs, receipts,
 		)
 	}
+
+	// check if Banana hardfork is active, if so start rewarding staker
+	isBananaActive := hfcache.IsHardforkActive("Banana-txfee", header.Number.Uint64())
+	log.Debug("hard fork", "status", isBananaActive)
+	if isBananaActive && err == nil {
+		txs, receipts, err = e.processFeeReward(chain, header, state, txs, receipts)
+	}
+
 	if err == nil {
 		err = e.processMasternodes(chain, header, state)
 	}
@@ -895,7 +902,7 @@ func (e *Energi) CalcDifficulty(
 
 	if isAsgardActive {
 		time_target := e.calcTimeTargetV2(chain, parent)
-		return CalcPoSDifficultyV2(time, parent, time_target)
+		return CalcPoSDifficultyV2(time, parent, time_target, e.testing)
 	}
 	time_target := e.calcTimeTargetV1(chain, parent)
 	return calcPoSDifficultyV1(time, parent, time_target)

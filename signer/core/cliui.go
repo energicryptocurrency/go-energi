@@ -24,9 +24,9 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/internal/ethapi"
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/internal/ethapi"
+	"github.com/energicryptocurrency/go-energi/log"
 
 	"github.com/davecgh/go-spew/spew"
 	"golang.org/x/term"

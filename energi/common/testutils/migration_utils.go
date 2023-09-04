@@ -25,8 +25,9 @@ import (
 	"math/big"
 	"os"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/params"
+
 	"github.com/shengdoushi/base58"
 )
 

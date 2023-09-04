@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // deployEthstats queries the user for various input on deploying an ethstats

@@ -25,7 +25,6 @@ devp2p subprotocols by abstracting away code standardly shared by protocols.
 * standardise error handling related to communication
 * standardised	handshake negotiation
 * TODO: automatic generation of wire protocol specification for peers
-
 */
 package protocols
 
@@ -38,10 +37,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/metrics"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/metrics"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 // error codes used by this  protocol scheme
@@ -72,11 +71,11 @@ var errorToString = map[int]string{
 Error implements the standard go error interface.
 Use:
 
-  errorf(code, format, params ...interface{})
+	errorf(code, format, params ...interface{})
 
 Prints as:
 
- <description>: <details>
+	<description>: <details>
 
 where description is given by code in errorToString
 and details is fmt.Sprintf(format, params...)
@@ -119,9 +118,9 @@ type WrappedMsg struct {
 	Payload []byte
 }
 
-//For accounting, the design is to allow the Spec to describe which and how its messages are priced
-//To access this functionality, we provide a Hook interface which will call accounting methods
-//NOTE: there could be more such (horizontal) hooks in the future
+// For accounting, the design is to allow the Spec to describe which and how its messages are priced
+// To access this functionality, we provide a Hook interface which will call accounting methods
+// NOTE: there could be more such (horizontal) hooks in the future
 type Hook interface {
 	//A hook for sending messages
 	Send(peer *Peer, size uint32, msg interface{}) error
@@ -339,9 +338,10 @@ func (p *Peer) handleIncoming(handle func(ctx context.Context, msg interface{}) 
 
 // Handshake negotiates a handshake on the peer connection
 // * arguments
-//   * context
-//   * the local handshake to be sent to the remote peer
-//   * function to be called on the remote handshake (can be nil)
+//   - context
+//   - the local handshake to be sent to the remote peer
+//   - function to be called on the remote handshake (can be nil)
+//
 // * expects a remote handshake back of the same type
 // * the dialing peer needs to send the handshake first and then waits for remote
 // * the listening peer waits for the remote handshake and then sends it

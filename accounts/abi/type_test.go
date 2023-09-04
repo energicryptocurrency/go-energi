@@ -21,8 +21,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/common"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/energicryptocurrency/go-energi/common"
 )
 
 // typeWithoutStringer is a alias for the Type type which simply doesn't implement

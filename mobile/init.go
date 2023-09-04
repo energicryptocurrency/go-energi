@@ -22,7 +22,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 func init() {

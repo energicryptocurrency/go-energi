@@ -26,18 +26,18 @@ import (
 	"os"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/accounts/keystore"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/common/hexutil"
-	"github.com/energicryptocurrency/energi/crypto"
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_consensus "github.com/energicryptocurrency/energi/energi/consensus"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/accounts"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/accounts/keystore"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/common/hexutil"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/go-energi/energi/common"
+	energi_consensus "github.com/energicryptocurrency/go-energi/energi/consensus"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/rpc"
 
 	"github.com/shengdoushi/base58"
 	"golang.org/x/crypto/ripemd160"
@@ -557,7 +557,7 @@ func (m *MigrationAPI) claimGen2Coins(
 	copy(r[:], sig[:32])
 	s := [32]byte{}
 	copy(s[:], sig[32:64])
-	v := uint8(sig[64])
+	v := sig[64]
 
 	amt, err := mgrt_contract.VerifyClaim(item, dst, v, r, s)
 	if err != nil {

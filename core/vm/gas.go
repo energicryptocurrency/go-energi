@@ -19,7 +19,7 @@ package vm
 import (
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 // Gas costs

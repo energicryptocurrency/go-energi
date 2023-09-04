@@ -25,11 +25,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/p2p/enode"
-	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
-	p2ptest "github.com/energicryptocurrency/energi/p2p/testing"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/simulations/adapters"
+	p2ptest "github.com/energicryptocurrency/go-energi/p2p/testing"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
 // handshake message type
@@ -46,7 +46,7 @@ type kill struct {
 type drop struct {
 }
 
-/// protoHandshake represents module-independent aspects of the protocol and is
+// / protoHandshake represents module-independent aspects of the protocol and is
 // the first message peers send and receive as part the initial exchange
 type protoHandshake struct {
 	Version   uint   // local and remote peer should have identical version
@@ -188,8 +188,8 @@ func runProtoHandshake(t *testing.T, proto *protoHandshake, errs ...error) {
 	}
 }
 
-//We need to test that if the hook is not defined, then message infrastructure
-//(send,receive) still works
+// We need to test that if the hook is not defined, then message infrastructure
+// (send,receive) still works
 func TestNoHook(t *testing.T) {
 	//create a test spec
 	spec := createTestSpec()
@@ -416,9 +416,9 @@ func XTestMultiplePeersDropOther(t *testing.T) {
 	)
 }
 
-//dummy implementation of a MsgReadWriter
-//this allows for quick and easy unit tests without
-//having to build up the complete protocol
+// dummy implementation of a MsgReadWriter
+// this allows for quick and easy unit tests without
+// having to build up the complete protocol
 type dummyRW struct {
 	msg  interface{}
 	size uint32

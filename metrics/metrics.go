@@ -28,7 +28,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // Enabled is checked by the constructor functions for all of the

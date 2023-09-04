@@ -30,13 +30,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/node"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/p2p/enode"
-	"github.com/energicryptocurrency/energi/p2p/simulations"
-	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/node"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/p2p/enode"
+	"github.com/energicryptocurrency/go-energi/p2p/simulations"
+	"github.com/energicryptocurrency/go-energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/go-energi/rpc"
 
 	"github.com/mattn/go-colorable"
 )
@@ -57,14 +57,14 @@ func init() {
 	log.Root().SetHandler(log.LvlFilterHandler(log.Lvl(*loglevel), log.StreamHandler(colorable.NewColorableStderr(), log.TerminalFormat(!*rawlog))))
 }
 
-//TestAccountingSimulation runs a p2p/simulations simulation
-//It creates a *nodes number of nodes, connects each one with each other,
-//then sends out a random selection of messages up to *msgs amount of messages
-//from the test protocol spec.
-//The spec has some accounted messages defined through the Prices interface.
-//The test does accounting for all the message exchanged, and then checks
-//that every node has the same balance with a peer, but with opposite signs.
-//Balance(AwithB) = 0 - Balance(BwithA) or Abs|Balance(AwithB)| == Abs|Balance(BwithA)|
+// TestAccountingSimulation runs a p2p/simulations simulation
+// It creates a *nodes number of nodes, connects each one with each other,
+// then sends out a random selection of messages up to *msgs amount of messages
+// from the test protocol spec.
+// The spec has some accounted messages defined through the Prices interface.
+// The test does accounting for all the message exchanged, and then checks
+// that every node has the same balance with a peer, but with opposite signs.
+// Balance(AwithB) = 0 - Balance(BwithA) or Abs|Balance(AwithB)| == Abs|Balance(BwithA)|
 func TestAccountingSimulation(t *testing.T) {
 	//setup the balances objects for every node
 	bal := newBalances(*nodes)
@@ -156,7 +156,8 @@ func TestAccountingSimulation(t *testing.T) {
 // A*n + B, while the balance of node B with A is at
 // B*n + A
 // (n entries in the array will not be filled -
-//  the balance of a node with itself)
+//
+//	the balance of a node with itself)
 type matrix struct {
 	n int     //number of nodes
 	m []int64 //array of balances
@@ -239,8 +240,8 @@ func (t *testNode) Add(a int64, p *Peer) error {
 	return t.bal.add(t.i, remote, a)
 }
 
-//run the p2p protocol
-//for every node, represented by testNode, create a remote testPeer
+// run the p2p protocol
+// for every node, represented by testNode, create a remote testPeer
 func (t *testNode) run(p *p2p.Peer, rw p2p.MsgReadWriter) error {
 	spec := createTestSpec()
 	//create accounting hook

@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/crypto"
 )
 
 // Method represents a callable given a `Name` and whether the method is a constant.
@@ -42,7 +42,7 @@ type Method struct {
 //
 // Example
 //
-//     function foo(uint32 a, int b)    =    "foo(uint32,int256)"
+//	function foo(uint32 a, int b)    =    "foo(uint32,int256)"
 //
 // Please note that "int" is substitute for its canonical representation "int256"
 func (method Method) Sig() string {

@@ -19,46 +19,46 @@ package protocols
 import (
 	"testing"
 
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/p2p/simulations/adapters"
-	"github.com/energicryptocurrency/energi/rlp"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/p2p/simulations/adapters"
+	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
-//dummy Balance implementation
+// dummy Balance implementation
 type dummyBalance struct {
 	amount int64
 	peer   *Peer
 }
 
-//dummy Prices implementation
+// dummy Prices implementation
 type dummyPrices struct{}
 
-//a dummy message which needs size based accounting
-//sender pays
+// a dummy message which needs size based accounting
+// sender pays
 type perBytesMsgSenderPays struct {
 	Content string
 }
 
-//a dummy message which needs size based accounting
-//receiver pays
+// a dummy message which needs size based accounting
+// receiver pays
 type perBytesMsgReceiverPays struct {
 	Content string
 }
 
-//a dummy message which is paid for per unit
-//sender pays
+// a dummy message which is paid for per unit
+// sender pays
 type perUnitMsgSenderPays struct{}
 
-//receiver pays
+// receiver pays
 type perUnitMsgReceiverPays struct{}
 
-//a dummy message which has zero as its price
+// a dummy message which has zero as its price
 type zeroPriceMsg struct{}
 
-//a dummy message which has no accounting
+// a dummy message which has no accounting
 type nilPriceMsg struct{}
 
-//return the price for the defined messages
+// return the price for the defined messages
 func (d *dummyPrices) Price(msg interface{}) *Price {
 	switch msg.(type) {
 	//size based message cost, receiver pays
@@ -101,7 +101,7 @@ func (d *dummyPrices) Price(msg interface{}) *Price {
 	return nil
 }
 
-//dummy accounting implementation, only stores values for later check
+// dummy accounting implementation, only stores values for later check
 func (d *dummyBalance) Add(amount int64, peer *Peer) error {
 	d.amount = amount
 	d.peer = peer
@@ -115,7 +115,7 @@ type testCase struct {
 	recvResult int64
 }
 
-//lowest level unit test
+// lowest level unit test
 func TestBalance(t *testing.T) {
 	//create instances
 	balance := &dummyBalance{}
@@ -204,7 +204,7 @@ func checkResults(t *testing.T, err error, balance *dummyBalance, peer *Peer, re
 	}
 }
 
-//create a test spec
+// create a test spec
 func createTestSpec() *Spec {
 	spec := &Spec{
 		Name:       "test",

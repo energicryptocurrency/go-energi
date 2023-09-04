@@ -20,15 +20,14 @@ import (
 	"context"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/accounts/abi/bind"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/log"
-	"github.com/energicryptocurrency/energi/rpc"
-
-	energi_abi "github.com/energicryptocurrency/energi/energi/abi"
-	energi_common "github.com/energicryptocurrency/energi/energi/common"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/accounts"
+	"github.com/energicryptocurrency/go-energi/accounts/abi/bind"
+	"github.com/energicryptocurrency/go-energi/common"
+	energi_abi "github.com/energicryptocurrency/go-energi/energi/abi"
+	energi_common "github.com/energicryptocurrency/go-energi/energi/common"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 type CheckpointAdminAPI struct {
@@ -54,8 +53,8 @@ type CheckpointRegistryAPI struct {
 
 func NewCheckpointRegistryAPI(b Backend) *CheckpointRegistryAPI {
 	r := &CheckpointRegistryAPI{
-		backend: b,
-		cpCache: energi_common.NewCacheStorage(),
+		backend:   b,
+		cpCache:   energi_common.NewCacheStorage(),
 		proxyAddr: energi_params.Energi_CheckpointRegistry,
 	}
 	b.OnSyncedHeadUpdates(func() {
@@ -101,7 +100,7 @@ func (b *CheckpointRegistryAPI) Checkpoints() ([]common.Address, error) {
 		return nil, err
 	}
 
-	// call "checkpoins" function on contract
+	// call "checkpoints" function on contract
 	checkpointAddresses, err := registry.Checkpoints(callOpts)
 	if err != nil {
 		log.Error("CheckpointRegsitryAPI::Checkpoints", "err", err)
@@ -130,7 +129,6 @@ func (b *CheckpointRegistryAPI) CheckpointRemove(
 	}
 	return
 }
-
 
 // returns existing checkpoints' info
 func (b *CheckpointRegistryAPI) checkpointInfo(num *big.Int) (interface{}, error) {

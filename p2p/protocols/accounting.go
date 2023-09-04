@@ -19,7 +19,7 @@ package protocols
 import (
 	"time"
 
-	"github.com/energicryptocurrency/energi/metrics"
+	"github.com/energicryptocurrency/go-energi/metrics"
 )
 
 // define some metrics
@@ -159,8 +159,8 @@ func (ah *Accounting) Receive(peer *Peer, size uint32, msg interface{}) error {
 // this is not an error handling. `err` is returned by both `Send` and `Receive`
 // `err` will only be non-nil if a limit has been violated (overdraft), in which case the peer has been dropped.
 // if the limit has been violated and `err` is thus not nil:
-//   * if the price is positive, local node has been credited; thus `err` implicitly signals the REMOTE has been dropped
-//   * if the price is negative, local node has been debited, thus `err` implicitly signals LOCAL node "overdraft"
+//   - if the price is positive, local node has been credited; thus `err` implicitly signals the REMOTE has been dropped
+//   - if the price is negative, local node has been debited, thus `err` implicitly signals LOCAL node "overdraft"
 func (ah *Accounting) doMetrics(price int64, size uint32, err error) {
 	if price > 0 {
 		mBalanceCredit.Inc(price)

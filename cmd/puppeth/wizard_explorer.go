@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/energicryptocurrency/energi/log"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 // deployExplorer creates a new block explorer based on some user input.

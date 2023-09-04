@@ -25,8 +25,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/energicryptocurrency/energi/core"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/energicryptocurrency/go-energi/core"
 )
 
 // Tests the go-ethereum to Aleth chainspec conversion for the Stureby testnet.

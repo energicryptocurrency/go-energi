@@ -23,21 +23,21 @@ import (
 	"testing"
 	"time"
 
-	"github.com/energicryptocurrency/energi/accounts"
-	"github.com/energicryptocurrency/energi/common"
-	"github.com/energicryptocurrency/energi/consensus"
-	"github.com/energicryptocurrency/energi/consensus/clique"
-	"github.com/energicryptocurrency/energi/consensus/ethash"
-	"github.com/energicryptocurrency/energi/core"
-	"github.com/energicryptocurrency/energi/core/types"
-	"github.com/energicryptocurrency/energi/core/vm"
-	"github.com/energicryptocurrency/energi/crypto"
-	energi_testutils "github.com/energicryptocurrency/energi/energi/common/testutils"
-	energi "github.com/energicryptocurrency/energi/energi/consensus"
-	energi_params "github.com/energicryptocurrency/energi/energi/params"
-	"github.com/energicryptocurrency/energi/ethdb"
-	"github.com/energicryptocurrency/energi/event"
-	"github.com/energicryptocurrency/energi/params"
+	"github.com/energicryptocurrency/go-energi/accounts"
+	"github.com/energicryptocurrency/go-energi/common"
+	"github.com/energicryptocurrency/go-energi/consensus"
+	"github.com/energicryptocurrency/go-energi/consensus/clique"
+	"github.com/energicryptocurrency/go-energi/consensus/ethash"
+	"github.com/energicryptocurrency/go-energi/core"
+	"github.com/energicryptocurrency/go-energi/core/types"
+	"github.com/energicryptocurrency/go-energi/core/vm"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	energi_testutils "github.com/energicryptocurrency/go-energi/energi/common/testutils"
+	energi "github.com/energicryptocurrency/go-energi/energi/consensus"
+	energi_params "github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/ethdb"
+	"github.com/energicryptocurrency/go-energi/event"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 var (
@@ -239,12 +239,13 @@ func testPendingStateAndBlock(t *testing.T, chainConfig *params.ChainConfig, eng
 	}
 }
 
-// func TestEmptyWorkEthash(t *testing.T) {
-// 	testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
-// }
-// func TestEmptyWorkClique(t *testing.T) {
-// 	testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
-// }
+//	func TestEmptyWorkEthash(t *testing.T) {
+//		testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
+//	}
+//
+//	func TestEmptyWorkClique(t *testing.T) {
+//		testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+//	}
 func TestEmptyWorkEnergi(t *testing.T) {
 	testEmptyWork(t, energiChainConfig, energi.New(energiChainConfig.Energi, ethdb.NewMemDatabase()))
 }

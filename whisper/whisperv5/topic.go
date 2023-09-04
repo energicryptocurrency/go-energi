@@ -18,7 +18,7 @@
 
 package whisperv5
 
-import "github.com/energicryptocurrency/energi/common/hexutil"
+import "github.com/energicryptocurrency/go-energi/common/hexutil"
 
 // TopicType represents a cryptographically secure, probabilistic partial
 // classifications of a message, determined as the first (left) 4 bytes of the

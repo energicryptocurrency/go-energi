@@ -1,3 +1,4 @@
+//go:build dummy
 // +build dummy
 
 // This file is part of a workaround for `go mod vendor` which won't vendor
@@ -14,7 +15,7 @@
 package secp256k1
 
 import (
-	_ "github.com/energicryptocurrency/energi/crypto/secp256k1/libsecp256k1/include"
-	_ "github.com/energicryptocurrency/energi/crypto/secp256k1/libsecp256k1/src"
-	_ "github.com/energicryptocurrency/energi/crypto/secp256k1/libsecp256k1/src/modules/recovery"
+	_ "github.com/energicryptocurrency/go-energi/crypto/secp256k1/libsecp256k1/include"
+	_ "github.com/energicryptocurrency/go-energi/crypto/secp256k1/libsecp256k1/src"
+	_ "github.com/energicryptocurrency/go-energi/crypto/secp256k1/libsecp256k1/src/modules/recovery"
 )

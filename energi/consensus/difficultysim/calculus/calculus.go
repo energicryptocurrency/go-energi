@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"math/big"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/params"
-	"github.com/energicryptocurrency/energi/crypto"
+	"github.com/energicryptocurrency/go-energi/crypto"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/params"
 )
 
 var (
@@ -54,7 +54,7 @@ func init() {
 	diffV1_ATable = initDiffTable(diffV1_AMax, 1.05)
 }
 
-//CalcPoSHash  Implements hash consensus
+// CalcPoSHash  Implements hash consensus
 func CalcPoSHash(
 	time uint64,
 	coinbase string,
@@ -126,6 +126,9 @@ func CalcPoSDifficultyV2(
 ) *big.Int {
 	// set tuning parameters
 	gain := big.NewInt(params.Gain)
+	if params.BananaDifficultyAdjustment {
+		gain = big.NewInt(params.GainBanana)
+	}
 	integralTime := big.NewInt(params.IntegralTime)
 	derivativeTime := big.NewInt(params.DerivativeTime)
 

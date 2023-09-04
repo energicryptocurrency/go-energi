@@ -20,19 +20,19 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/energicryptocurrency/energi/node"
-	"github.com/energicryptocurrency/energi/p2p"
-	"github.com/energicryptocurrency/energi/rpc"
+	"github.com/energicryptocurrency/go-energi/node"
+	"github.com/energicryptocurrency/go-energi/p2p"
+	"github.com/energicryptocurrency/go-energi/rpc"
 )
 
 // SampleService is a trivial network service that can be attached to a node for
 // life cycle management.
 //
 // The following methods are needed to implement a node.Service:
-//  - Protocols() []p2p.Protocol - devp2p protocols the service can communicate on
-//  - APIs() []rpc.API           - api methods the service wants to expose on rpc channels
-//  - Start() error              - method invoked when the node is ready to start the service
-//  - Stop() error               - method invoked when the node terminates the service
+//   - Protocols() []p2p.Protocol - devp2p protocols the service can communicate on
+//   - APIs() []rpc.API           - api methods the service wants to expose on rpc channels
+//   - Start() error              - method invoked when the node is ready to start the service
+//   - Stop() error               - method invoked when the node terminates the service
 type SampleService struct{}
 
 func (s *SampleService) Protocols() []p2p.Protocol { return nil }

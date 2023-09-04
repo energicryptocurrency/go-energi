@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/calculus"
-	"github.com/energicryptocurrency/energi/energi/consensus/difficultysim/params"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/calculus"
+	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/params"
 )
 
 // Block represents each block in the blockchain
@@ -88,7 +88,15 @@ func (chain *Blockchain) CalcTimeTargetV1(parent *Block) *calculus.TimeTarget {
 
 	// POS-11: Block time restrictions
 	ret.Min = parent.Time + params.MinBlockGap
-	ret.BlockTarget = parent.Time + params.TargetBlockGap
+
+	var targetBlockGap uint64
+	if params.BananaBlockTimeIsActive {
+		targetBlockGap = params.BananaTargetBlockGap
+	} else {
+		targetBlockGap = params.TargetBlockGap
+	}
+
+	ret.BlockTarget = parent.Time + targetBlockGap
 	ret.PeriodTarget = ret.BlockTarget
 
 	// POS-12: Block interval enforcement
@@ -124,9 +132,18 @@ func (chain *Blockchain) CalcTimeTargetV2(parent *Block) *calculus.TimeTarget {
 	// POS-11: Block time restrictions
 	ret.Max = chain.Now() + params.MaxFutureGap
 
+	var targetBlockGap, minBlockGap uint64
+	if params.BananaBlockTimeIsActive {
+		targetBlockGap = params.BananaTargetBlockGap
+		minBlockGap = params.BananaMinBlockGap
+	} else {
+		targetBlockGap = params.TargetBlockGap
+		minBlockGap = params.MinBlockGap
+	}
+
 	// POS-11: Block time restrictions
-	ret.Min = parentBlockTime + params.MinBlockGap
-	ret.BlockTarget = parentBlockTime + params.TargetBlockGap
+	ret.Min = parentBlockTime + minBlockGap
+	ret.BlockTarget = parentBlockTime + targetBlockGap
 	ret.PeriodTarget = ret.BlockTarget
 
 	// Block interval enforcement
@@ -145,12 +162,12 @@ func (chain *Blockchain) CalcTimeTargetV2(parent *Block) *calculus.TimeTarget {
 		parent = past
 	}
 
-	ema := calculus.CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod, params.TargetBlockGap)
+	ema := calculus.CalculateBlockTimeEMA(timeDiffs, params.BlockTimeEMAPeriod, targetBlockGap)
 
 	ret.PeriodTarget = ema[len(ema)-1]
 
 	// set up the parameters for PID control (diffV2)
-	drift := calculus.CalculateBlockTimeDrift(ema, params.TargetBlockGap)
+	drift := calculus.CalculateBlockTimeDrift(ema, targetBlockGap)
 	integral := calculus.CalculateBlockTimeIntegral(drift)
 	derivative := calculus.CalculateBlockTimeDerivative(drift)
 	ret.Drift = drift[len(drift)-1]

@@ -19,14 +19,18 @@ package params
 type ctxKey string
 
 const (
-	MaturityPeriod        uint64 = 60 * 60 // 1 hour PoS cooldown
-	MaturityPeriodAsgard  uint64 = 30 * 60 // 30 minute PoS cooldown for Asgard
-	AveragingWindow       uint64 = 60 // 60 blocks
-	TargetBlockGap        uint64 = 60 // 60 second block time
-	MinBlockGap           uint64 = 30 // 30 seconds minimum before new timestamp
-	MaxFutureGap          uint64 = 3  // only accept blocks this many seconds ahead
-	TargetPeriodGap       uint64 = AveragingWindow * TargetBlockGap
-	BlockTimeEMAPeriod		uint64 = 360
+	MaturityPeriod       uint64 = 60 * 60 // 1 hour PoS cooldown
+	MaturityPeriodAsgard uint64 = 30 * 60 // 30 minute PoS cooldown for Asgard
+	AveragingWindow      uint64 = 60      // 60 blocks
+	TargetBlockGap       uint64 = 60      // 60 second block time
+	MinBlockGap          uint64 = 30      // 30 seconds minimum before new timestamp
+	MaxFutureGap         uint64 = 3       // only accept blocks this many seconds ahead
+	TargetPeriodGap      uint64 = AveragingWindow * TargetBlockGap
+	BlockTimeEMAPeriod   uint64 = 360
+
+	// Banana-blocktime hardfork activation changes
+	TargetBlockGapBanana uint64 = 15
+	MinBlockGapBanana    uint64 = 7
 
 	// DoS protection
 	OldForkPeriod uint64 = 15 * 60
@@ -46,10 +50,19 @@ const (
 	GeneralProxyCtxKey = ctxKey("governedProxyAddressHash")
 
 	// NB: Time difference between the block target and new block time is always
-	// calulated as (blockTargetTime - newBlockTime).
+	// calculated as (blockTargetTime - newBlockTime).
 
 	// MaxTimeDifferenceDrop defines the maximum time difference that can be used
 	// to calculate the difficulty drop when the newly created block is found long
 	// after block target time. This
 	MaxTimeDifferenceDrop = -30
+
+	// StakerReward defines what percentage of used gas for specific block is rewarded to staker
+	StakerReward = 10
+
+	// Active stake for creating a new block = Balance - Staked NRG in the last StakeCheckDepth blocks
+	StakeCheckDepth = 0
+
+	// GainBanana parameter is part of difficulty adjustment algorithm that corresponds to the speed of adjustment of the difficulty
+	GainBanana = 15000
 )
