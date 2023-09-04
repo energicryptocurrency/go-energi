@@ -26,12 +26,12 @@ import (
 	"sync"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/energicryptocurrency/go-energi/crypto"
 	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/p2p"
 	"github.com/energicryptocurrency/go-energi/rpc"
-	mapset "github.com/deckarep/golang-set"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/sync/syncmap"

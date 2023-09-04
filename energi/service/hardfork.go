@@ -136,7 +136,7 @@ func (hf *HardforkService) Start(server *p2p.Server) error {
 	return nil
 }
 
-//logUpcomingHardforks periodically logs upcoming (pending) hardforks
+// logUpcomingHardforks periodically logs upcoming (pending) hardforks
 func (hf *HardforkService) logUpcomingHardforks() {
 	//create channel and subscribe for new chain events
 	chainHeadCh := make(chan core.ChainHeadEvent, chainHeadChanSize)
@@ -170,7 +170,7 @@ func (hf *HardforkService) logUpcomingHardforks() {
 	}
 }
 
-//function is watches newly created hardfork events and logs them
+// function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkCreatedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
@@ -213,7 +213,7 @@ func (hf *HardforkService) listenHardforkCreatedEvents() {
 	}
 }
 
-//function is watches newly created hardfork events and logs them
+// function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkFinalizedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
@@ -257,7 +257,7 @@ func (hf *HardforkService) listenHardforkFinalizedEvents() {
 	}
 }
 
-//function is watches newly created hardfork events and logs them
+// function is watches newly created hardfork events and logs them
 func (hf *HardforkService) listenHardforkRemovedEvents() {
 
 	//create chan for subscribing to  HardforkCreated events
@@ -319,7 +319,7 @@ func (hf *HardforkService) Stop() error {
 	return nil
 }
 
-//log downloading status
+// log downloading status
 func (hf *HardforkService) listenDownloader() {
 	events := hf.eth.EventMux().Subscribe(
 		downloader.StartEvent{},
@@ -349,7 +349,7 @@ func (hf *HardforkService) listenDownloader() {
 	}
 }
 
-//logHardfork logs the information about the provided hardforks.
+// logHardfork logs the information about the provided hardforks.
 func logHardforkInfo(currentBlockNo *big.Int, hfInfo *energi_api.HardforkInfo) {
 	diff := new(big.Int).Sub(hfInfo.BlockNumber, currentBlockNo)
 	emptyArray := [32]byte{}

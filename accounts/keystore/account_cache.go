@@ -27,10 +27,10 @@ import (
 	"sync"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/energicryptocurrency/go-energi/accounts"
 	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/energicryptocurrency/go-energi/log"
-	mapset "github.com/deckarep/golang-set"
 )
 
 // Minimum amount of time between cache reloads. This limit applies if the platform does

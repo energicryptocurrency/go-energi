@@ -19,8 +19,8 @@ package consensus
 import (
 	"encoding/binary"
 	"errors"
-	"math/big"
 	"math"
+	"math/big"
 	"sort"
 	"time"
 

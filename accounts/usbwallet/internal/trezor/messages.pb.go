@@ -1007,7 +1007,7 @@ func (m *Address) GetAddress() string {
 // Response: Contains an Ethereum address derived from device private seed
 // @prev EthereumGetAddress
 type EthereumAddress struct {
-	AddressBin          []byte `protobuf:"bytes,1,req,name=address" json:"address,omitempty"`
+	AddressBin           []byte   `protobuf:"bytes,1,req,name=address" json:"address,omitempty"`
 	AddressHex           *string  `protobuf:"bytes,2,opt,name=addressHex" json:"addressHex,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1039,7 +1039,6 @@ func (m *EthereumAddress) GetAddressHex() string {
 	}
 	return ""
 }
-
 
 // *
 // Request: Request device to wipe all sensitive data and settings

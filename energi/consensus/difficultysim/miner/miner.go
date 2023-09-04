@@ -1,8 +1,8 @@
 package miner
 
 import (
-	"math/big"
 	"math"
+	"math/big"
 	"time"
 
 	"github.com/energicryptocurrency/go-energi/energi/consensus/difficultysim/blockchain"

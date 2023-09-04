@@ -91,7 +91,7 @@ func PrintAccountStats(chain *blockchain.Blockchain, stakers []miner.Staker) {
 				wonBlock = accountStats[account.Address].WonBlocks
 				averageNonce = accountStats[account.Address].AverageNonce
 			}
-			stakingData = append(stakingData, []string{staker.Name, account.Address, strconv.FormatUint(account.Balance, 10), strconv.FormatUint(wonBlock, 10), strconv.FormatUint(account.NonceCap, 10), strconv.FormatUint(averageNonce, 10), fmt.Sprintf("%.2f", float64(wonBlock)/float64(len(chain.Chain)) * 100), fmt.Sprintf("%.2f", float64(account.Balance)/float64(totalStake) * 100)})
+			stakingData = append(stakingData, []string{staker.Name, account.Address, strconv.FormatUint(account.Balance, 10), strconv.FormatUint(wonBlock, 10), strconv.FormatUint(account.NonceCap, 10), strconv.FormatUint(averageNonce, 10), fmt.Sprintf("%.2f", float64(wonBlock)/float64(len(chain.Chain))*100), fmt.Sprintf("%.2f", float64(account.Balance)/float64(totalStake)*100)})
 		}
 	}
 
@@ -102,8 +102,8 @@ func PrintAccountStats(chain *blockchain.Blockchain, stakers []miner.Staker) {
 }
 
 /*
-   getFileTime simply takes current time precisely and
-   creates string date-time prefix for each file
+getFileTime simply takes current time precisely and
+creates string date-time prefix for each file
 */
 func getFileTime() string {
 	var logTime string

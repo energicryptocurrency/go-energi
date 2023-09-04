@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/energicryptocurrency/go-energi/accounts"
 	"github.com/energicryptocurrency/go-energi/accounts/keystore"
 	"github.com/energicryptocurrency/go-energi/common"
@@ -42,7 +43,6 @@ import (
 	"github.com/energicryptocurrency/go-energi/params"
 	"github.com/energicryptocurrency/go-energi/rlp"
 	"github.com/energicryptocurrency/go-energi/rpc"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 
@@ -430,7 +430,8 @@ func (s *PrivateAccountAPI) SignTransaction(ctx context.Context, args SendTxArgs
 // safely used to calculate a signature from.
 //
 // The hash is calulcated as
-//   keccak256("\x17Energi Signed Message:\n"${message length}${message}).
+//
+//	keccak256("\x17Energi Signed Message:\n"${message length}${message}).
 //
 // This gives context to the signed message and prevents signing of transactions.
 func signHash(data []byte) []byte {

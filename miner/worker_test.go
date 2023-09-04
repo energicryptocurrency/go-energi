@@ -239,12 +239,13 @@ func testPendingStateAndBlock(t *testing.T, chainConfig *params.ChainConfig, eng
 	}
 }
 
-// func TestEmptyWorkEthash(t *testing.T) {
-// 	testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
-// }
-// func TestEmptyWorkClique(t *testing.T) {
-// 	testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
-// }
+//	func TestEmptyWorkEthash(t *testing.T) {
+//		testEmptyWork(t, ethashChainConfig, ethash.NewFaker())
+//	}
+//
+//	func TestEmptyWorkClique(t *testing.T) {
+//		testEmptyWork(t, cliqueChainConfig, clique.New(cliqueChainConfig.Clique, ethdb.NewMemDatabase()))
+//	}
 func TestEmptyWorkEnergi(t *testing.T) {
 	testEmptyWork(t, energiChainConfig, energi.New(energiChainConfig.Energi, ethdb.NewMemDatabase()))
 }

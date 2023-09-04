@@ -54,7 +54,7 @@ func init() {
 	diffV1_ATable = initDiffTable(diffV1_AMax, 1.05)
 }
 
-//CalcPoSHash  Implements hash consensus
+// CalcPoSHash  Implements hash consensus
 func CalcPoSHash(
 	time uint64,
 	coinbase string,

@@ -38,7 +38,7 @@ import (
 	"github.com/energicryptocurrency/go-energi/rlp"
 )
 
-//Used for testing
+// Used for testing
 type HeadlessUI struct {
 	controller chan string
 }

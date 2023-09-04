@@ -270,7 +270,7 @@ func (tx *Transaction) RawSignatureValues() (*big.Int, *big.Int, *big.Int) {
 	return tx.data.V, tx.data.R, tx.data.S
 }
 
-//---
+// ---
 // NOTE: must only be used for presentation purposes!
 func (tx *Transaction) IsConsensus() bool {
 	return (tx.data.V.Sign() != 0) && (tx.data.R.Sign() == 0) && (tx.data.S.Sign() == 0)

@@ -26,13 +26,13 @@ import (
 	"sync"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/energicryptocurrency/go-energi/crypto"
 	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/p2p"
 	"github.com/energicryptocurrency/go-energi/rlp"
 	"github.com/energicryptocurrency/go-energi/rpc"
-	mapset "github.com/deckarep/golang-set"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"golang.org/x/crypto/pbkdf2"
 	"golang.org/x/sync/syncmap"
@@ -277,12 +277,12 @@ func (whisper *Whisper) SetMinimumPowTest(val float64) {
 	whisper.settings.Store(minPowToleranceIdx, val)
 }
 
-//SetLightClientMode makes node light client (does not forward any messages)
+// SetLightClientMode makes node light client (does not forward any messages)
 func (whisper *Whisper) SetLightClientMode(v bool) {
 	whisper.settings.Store(lightClientModeIdx, v)
 }
 
-//LightClientMode indicates is this node is light client (does not forward any messages)
+// LightClientMode indicates is this node is light client (does not forward any messages)
 func (whisper *Whisper) LightClientMode() bool {
 	val, exist := whisper.settings.Load(lightClientModeIdx)
 	if !exist || val == nil {
@@ -292,7 +292,7 @@ func (whisper *Whisper) LightClientMode() bool {
 	return v && ok
 }
 
-//LightClientModeConnectionRestricted indicates that connection to light client in light client mode not allowed
+// LightClientModeConnectionRestricted indicates that connection to light client in light client mode not allowed
 func (whisper *Whisper) LightClientModeConnectionRestricted() bool {
 	val, exist := whisper.settings.Load(restrictConnectionBetweenLightClientsIdx)
 	if !exist || val == nil {
