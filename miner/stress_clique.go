@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the Energi Core library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build none
 // +build none
 
 // This file contains a miner stress test based on the Clique consensus engine.

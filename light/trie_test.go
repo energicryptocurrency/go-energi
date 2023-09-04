@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/energicryptocurrency/go-energi/consensus/ethash"
 	"github.com/energicryptocurrency/go-energi/core"
 	"github.com/energicryptocurrency/go-energi/core/state"
@@ -29,7 +30,6 @@ import (
 	"github.com/energicryptocurrency/go-energi/ethdb"
 	"github.com/energicryptocurrency/go-energi/params"
 	"github.com/energicryptocurrency/go-energi/trie"
-	"github.com/davecgh/go-spew/spew"
 )
 
 func TestNodeIterator(t *testing.T) {

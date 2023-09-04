@@ -25,6 +25,7 @@ import (
 	"runtime"
 	"time"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/energicryptocurrency/go-energi/common/math"
 	"github.com/energicryptocurrency/go-energi/consensus"
@@ -33,7 +34,6 @@ import (
 	"github.com/energicryptocurrency/go-energi/core/types"
 	"github.com/energicryptocurrency/go-energi/params"
 	"github.com/energicryptocurrency/go-energi/rlp"
-	mapset "github.com/deckarep/golang-set"
 	"golang.org/x/crypto/sha3"
 )
 

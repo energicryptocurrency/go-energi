@@ -21,8 +21,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/energicryptocurrency/go-energi/internal/cmdtest"
 	"github.com/docker/docker/pkg/reexec"
+	"github.com/energicryptocurrency/go-energi/internal/cmdtest"
 )
 
 type testEthkey struct {

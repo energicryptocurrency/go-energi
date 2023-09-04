@@ -19,11 +19,11 @@ package consensus
 import (
 	"math/big"
 
-	"github.com/energicryptocurrency/go-energi/log"
 	"github.com/energicryptocurrency/go-energi/common"
 	"github.com/energicryptocurrency/go-energi/core/types"
-	"github.com/energicryptocurrency/go-energi/energi/params"
 	"github.com/energicryptocurrency/go-energi/energi/api/hfcache"
+	"github.com/energicryptocurrency/go-energi/energi/params"
+	"github.com/energicryptocurrency/go-energi/log"
 )
 
 const (
@@ -100,16 +100,17 @@ func CalculateBlockTimeDerivative(drift []int64) (derivative []int64) {
 }
 
 /*
- * Block Time Target Calculation V2
- * @chain Current Chain
- * @parent Parent Block Header
- * @ret Time Target structure
- * Populates ret with an updated Time Target
- * Calculates a Target Block Time based on previous block times in order to maintain a 60 second average time
- * Implements the Exponential Moving Average in calculating the block target time
- * Based on the last 60 elapsed block times
- * A block cannot be created with a time greater than 3 seconds in the future
- * ~~The minimum block time is 30 seconds~~ - This should not be enforced
+  - Block Time Target Calculation V2
+  - @chain Current Chain
+  - @parent Parent Block Header
+  - @ret Time Target structure
+  - Populates ret with an updated Time Target
+  - Calculates a Target Block Time based on previous block times in order to maintain a 60 second average time
+  - Implements the Exponential Moving Average in calculating the block target time
+  - Based on the last 60 elapsed block times
+  - A block cannot be created with a time greater than 3 seconds in the future
+  - ~~The minimum block time is 30 seconds~~ - This should not be enforced
+
 here as an early or late target is for difficulty adjustment not the block
 timestamp
 */

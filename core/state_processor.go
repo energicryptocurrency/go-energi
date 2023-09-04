@@ -24,8 +24,8 @@ import (
 	"github.com/energicryptocurrency/go-energi/core/types"
 	"github.com/energicryptocurrency/go-energi/core/vm"
 	"github.com/energicryptocurrency/go-energi/crypto"
-	"github.com/energicryptocurrency/go-energi/params"
 	"github.com/energicryptocurrency/go-energi/energi/exceptions"
+	"github.com/energicryptocurrency/go-energi/params"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning

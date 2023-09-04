@@ -52,7 +52,7 @@ func (mode SyncMode) MarshalText() ([]byte, error) {
 	case FastSync:
 		return []byte("fast"), nil
 	case LightSync:
-	//	return []byte("light"), nil
+		//	return []byte("light"), nil
 		return nil, fmt.Errorf("disabled sync mode %d", mode)
 	default:
 		return nil, fmt.Errorf("unknown sync mode %d", mode)

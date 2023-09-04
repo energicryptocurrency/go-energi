@@ -553,7 +553,8 @@ func (api *SignerAPI) Sign(ctx context.Context, addr common.MixedcaseAddress, da
 // safely used to calculate a signature from.
 //
 // The hash is calculated as
-//   keccak256("\x17Energi Signed Message:\n"${message length}${message}).
+//
+//	keccak256("\x17Energi Signed Message:\n"${message length}${message}).
 //
 // This gives context to the signed message and prevents signing of transactions.
 func SignHash(data []byte) ([]byte, string) {

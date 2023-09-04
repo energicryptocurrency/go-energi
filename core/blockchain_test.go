@@ -1679,8 +1679,8 @@ func BenchmarkBlockChain_1x1000Executions(b *testing.B) {
 // overtake the 'canon' chain until after it's passed canon by about 200 blocks.
 //
 // Details at:
-//  - https://github.com/energicryptocurrency/go-energi/issues/18977
-//  - https://github.com/energicryptocurrency/go-energi/pull/18988
+//   - https://github.com/energicryptocurrency/go-energi/issues/18977
+//   - https://github.com/energicryptocurrency/go-energi/pull/18988
 func TestLowDiffLongChain(t *testing.T) {
 	// Generate a canonical chain to act as the main dataset
 	engine := ethash.NewFaker()

@@ -36,14 +36,14 @@ import (
 )
 
 type MockContractBackend struct {
-	onCodeAt func(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error)
-	onCallContract func(ctx context.Context, call ethereum.CallMsg, blockNumber *big.Int) ([]byte, error)
-	onPendingCodeAt func(ctx context.Context, account common.Address) ([]byte, error)
-	onPendingNonceAt func(ctx context.Context, account common.Address) (uint64, error)
-	onSuggestGasPrice func(ctx context.Context) (*big.Int, error)
-	onEstimateGas func(ctx context.Context, call ethereum.CallMsg) (gas uint64, err error)
-	onSendTransaction func(ctx context.Context, tx *types.Transaction) error
-	onFilterLogs func(ctx context.Context, query ethereum.FilterQuery) ([]types.Log, error)
+	onCodeAt              func(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error)
+	onCallContract        func(ctx context.Context, call ethereum.CallMsg, blockNumber *big.Int) ([]byte, error)
+	onPendingCodeAt       func(ctx context.Context, account common.Address) ([]byte, error)
+	onPendingNonceAt      func(ctx context.Context, account common.Address) (uint64, error)
+	onSuggestGasPrice     func(ctx context.Context) (*big.Int, error)
+	onEstimateGas         func(ctx context.Context, call ethereum.CallMsg) (gas uint64, err error)
+	onSendTransaction     func(ctx context.Context, tx *types.Transaction) error
+	onFilterLogs          func(ctx context.Context, query ethereum.FilterQuery) ([]types.Log, error)
 	onSubscribeFilterLogs func(ctx context.Context, query ethereum.FilterQuery, ch chan<- types.Log) (ethereum.Subscription, error)
 }
 
@@ -109,13 +109,13 @@ func testCanAutocollateralize(t *testing.T, chainConfig *params.ChainConfig, eng
 		_ = b.CleanUp()
 	}()
 
-	test_cases := []struct{
+	test_cases := []struct {
 		min_limit, max_limit, token_balance, amount, amount_to_deposit *big.Int
 	}{
-		{ new(big.Int).SetUint64(10), new(big.Int).SetUint64(100), new(big.Int).SetUint64(70), new(big.Int).SetUint64(100), new(big.Int).SetUint64(30) },
-		{ new(big.Int).SetUint64(10), new(big.Int).SetUint64(1000), new(big.Int).SetUint64(100), new(big.Int).SetUint64(200), new(big.Int).SetUint64(200) },
-		{ new(big.Int).SetUint64(5), new(big.Int).SetUint64(20), new(big.Int).SetUint64(15), new(big.Int).SetUint64(10), new(big.Int).SetUint64(5) },
-		{ new(big.Int).SetUint64(5), new(big.Int).SetUint64(20), new(big.Int).SetUint64(2), new(big.Int).SetUint64(10), new(big.Int).SetUint64(10) },
+		{new(big.Int).SetUint64(10), new(big.Int).SetUint64(100), new(big.Int).SetUint64(70), new(big.Int).SetUint64(100), new(big.Int).SetUint64(30)},
+		{new(big.Int).SetUint64(10), new(big.Int).SetUint64(1000), new(big.Int).SetUint64(100), new(big.Int).SetUint64(200), new(big.Int).SetUint64(200)},
+		{new(big.Int).SetUint64(5), new(big.Int).SetUint64(20), new(big.Int).SetUint64(15), new(big.Int).SetUint64(10), new(big.Int).SetUint64(5)},
+		{new(big.Int).SetUint64(5), new(big.Int).SetUint64(20), new(big.Int).SetUint64(2), new(big.Int).SetUint64(10), new(big.Int).SetUint64(10)},
 	}
 
 	for _, tc := range test_cases {
@@ -126,12 +126,12 @@ func testCanAutocollateralize(t *testing.T, chainConfig *params.ChainConfig, eng
 				if err != nil {
 					t.Error(err)
 				}
-	
+
 				method, err := parsedAbi.MethodById(call.Data[:4])
 				if err != nil {
 					return nil, err
 				}
-	
+
 				switch method.Name {
 				// When the worker calls for collateral limits for master nodes
 				case "collateralLimits":
@@ -149,12 +149,12 @@ func testCanAutocollateralize(t *testing.T, chainConfig *params.ChainConfig, eng
 				if err != nil {
 					t.Error(err)
 				}
-	
+
 				method, err := parsedAbi.MethodById(call.Data[:4])
 				if err != nil {
 					return nil, err
 				}
-	
+
 				switch method.Name {
 				// When the worker calls for balance of 0x0 address
 				// Return the amount to be passed to the auto collateralize method
