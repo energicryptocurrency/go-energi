@@ -35,11 +35,14 @@ ENV GOROOT="/usr/local/go"
 RUN go install -v github.com/RyanLucchese/go-junit-report@latest
 ENV PATH="${PATH}:/root/go/bin"
 
-RUN mkdir -p "/energi"
-WORKDIR "/energi"
+RUN mkdir -p "/go/src/github.com/energicryptocurrency/go-energi"
+WORKDIR "/go/src/github.com/energicryptocurrency/go-energi"
 ADD Makefile.release Makefile.release
+# this git config supports bind mounting a local repo into a root container
+RUN git config --global --add safe.directory /go/src/github.com/energicryptocurrency/go-energi
+RUN git config --global --add safe.directory /go/src/github.com/energicryptocurrency/go-energi/energi/governance
+RUN git config --global --add safe.directory /go/src/github.com/energicryptocurrency/go-energi/tests/testdata
 RUN make -f Makefile.release release-tools
-ENV GOPATH="/energi"
-ENV GOBIN="/energi/bin"
-ENV GO111MODULE="on"
+ENV GOPATH="/go"
+ENV GOBIN="/go/src/github.com/energicryptocurrency/go-energi/build/bin"
 ENV GOFLAGS="-v"
