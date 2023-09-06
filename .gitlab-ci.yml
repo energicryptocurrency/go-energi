@@ -70,7 +70,7 @@ format-go:
   stage: lint
   extends: .merge-request-job
   script:
-    - if [[ "$(gofmt -s -e -d ./...)" != "" ]]; then echo "[Error] gofmt found unformatted files"; exit 1; fi
+    - if [[ "$(gofmt -s -e -d .)" != "" ]]; then echo "[Error] gofmt found unformatted files"; exit 1; fi
 
 build-linux:
   stage: build
