@@ -7,6 +7,8 @@
 - Updated staking simulator according to Banana hardfork changes
 - Bootnodes settings
 - Upgraded Golang version to 1.21.0
+- Removed armv5 support
+- Removed mips support
 
 ### Fixed
 - `energi.compensationProcess()` now prints an error on wrong input arguments
