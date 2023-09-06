@@ -37,8 +37,6 @@ release-tools:
 	     g++-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
 	    gcc-aarch64-linux-gnu libc6-dev-arm64-cross \
 	     g++-aarch64-linux-gnu \
-	  gcc-multilib-mips-linux-gnu gcc-mips-linux-gnu libc6-dev-mips-cross \
-	     g++-multilib-mips-linux-gnu g++-mips-linux-gnu \
 	    gcc-multilib-mips64-linux-gnuabi64 gcc-mips64-linux-gnuabi64 libc6-dev-mips64-cross \
 	     g++-multilib-mips64-linux-gnuabi64 g++-mips64-linux-gnuabi64 \
 	    gcc-multilib-mipsel-linux-gnu gcc-mipsel-linux-gnu libc6-dev-mipsel-cross \
@@ -100,18 +98,6 @@ release-linux-armv7:
 release-linux-armv8:
 	@RELEASE_TARGET=$(RELEASE_VER)-linux-armv8 \
 	  GOOS=linux GOARCH=arm64 HOST=aarch64-linux-gnu $(RELEASE_LINUX_COMMON)
-release-linux-mips:
-	@RELEASE_TARGET=$(RELEASE_VER)-linux-mips \
-	  GOOS=linux GOARCH=mips HOST=mips-linux-gnu $(RELEASE_LINUX_COMMON)
-release-linux-mipsel:
-	@RELEASE_TARGET=$(RELEASE_VER)-linux-mipsel \
-	  GOOS=linux GOARCH=mipsle HOST=mipsel-linux-gnu $(RELEASE_LINUX_COMMON)
-release-linux-mips64:
-	@RELEASE_TARGET=$(RELEASE_VER)-linux-mips64 \
-	  GOOS=linux GOARCH=mips64 HOST=mips64-linux-gnuabi64 $(RELEASE_LINUX_COMMON)
-release-linux-mips64el:
-	@RELEASE_TARGET=$(RELEASE_VER)-linux-mips64el \
-	  GOOS=linux GOARCH=mips64le HOST=mips64el-linux-gnuabi64 $(RELEASE_LINUX_COMMON)
 
 
 .PHONY: release-windows-common
