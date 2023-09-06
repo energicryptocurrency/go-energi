@@ -21,7 +21,7 @@ RELEASE_VER = $(RELEASE_MAIN)-$(RELEASE_RAW_VER)
 .PHONY: release release-tools
 .PHONY: release-linux release-windows release-macos
 
-release: release-linux release-windows release-macos
+release: release-linux release-windows
 release-tools:
 	-sudo -n dpkg --add-architecture i386
 	-sudo -n apt-get update
