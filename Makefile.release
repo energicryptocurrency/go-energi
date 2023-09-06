@@ -25,16 +25,16 @@ release: release-linux release-windows
 release-tools:
 	-sudo -n dpkg --add-architecture i386
 	-sudo -n apt-get update
-	-sudo -n apt-get -yq --no-install-suggests --no-install-recommends --force-yes install \
+	-sudo -n apt-get -yq --no-install-suggests --no-install-recommends install \
 	  gcc-multilib-i686-linux-gnu gcc-i686-linux-gnu libc6-dev-i386-amd64-cross \
 	   g++-multilib-i686-linux-gnu g++-i686-linux-gnu \
 	  mingw-w64 binutils-mingw-w64 gcc-mingw-w64 \
 	    wine32-development wine64-development wine64-development-tools \
 	    nsis nsis-pluginapi \
-	  gcc-multilib-arm-linux-gnueabi gcc-arm-linux-gnueabi libc6-dev-armel-cross \
-             g++-multilib-arm-linux-gnueabi g++-arm-linux-gnueabi \
-	    gcc-multilib-arm-linux-gnueabihf gcc-arm-linux-gnueabihf libc6-dev-armhf-cross \
-	     g++-multilib-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+	  gcc-arm-linux-gnueabi gcc-arm-linux-gnueabi libc6-dev-armel-cross \
+             g++-arm-linux-gnueabi g++-arm-linux-gnueabi \
+	    gcc-arm-linux-gnueabihf gcc-arm-linux-gnueabihf libc6-dev-armhf-cross \
+	     g++-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
 	    gcc-aarch64-linux-gnu libc6-dev-arm64-cross \
 	     g++-aarch64-linux-gnu \
 	  gcc-multilib-mips-linux-gnu gcc-mips-linux-gnu libc6-dev-mips-cross \
@@ -50,12 +50,10 @@ release-tools:
 
 .PHONY: release-linux-common
 .PHONY: release-linux-amd64 release-linux-i686
-.PHONY: release-linux-armv5 release-linux-armv6 release-linux-armv7 release-linux-armv8
-.PHONY: release-linux-mips release-linux-mipsel release-linux-mips64 release-linux-mips64el
+.PHONY: release-linux-armv6 release-linux-armv7 release-linux-armv8
 
 release-linux: release-linux-amd64 release-linux-i686
-release-linux: release-linux-armv5 release-linux-armv6 release-linux-armv7 release-linux-armv8
-release-linux: release-linux-mips release-linux-mipsel release-linux-mips64 release-linux-mips64el
+release-linux: release-linux-armv6 release-linux-armv7 release-linux-armv8
 
 RELEASE_LINUX_COMMON := make -f Makefile.release release-linux-common --no-print-directory
 release-linux-common:
@@ -65,8 +63,8 @@ release-linux-common:
 	@for t in $(TARGET_TOOLS); do \
 	    export GOCACHE=$(CURDIR)/build/release/$(RELEASE_TARGET)/cache; \
 	    export PKG_CONFIG_PATH=/usr/$(HOST)/lib/pkgconfig; \
-	    export CC=$(HOST)-gcc-7; \
-	    export CXX=$(HOST)-g++-7; \
+	    export CC=$(HOST)-gcc-11; \
+	    export CXX=$(HOST)-g++-11; \
 	    export CGO_ENABLED=1; \
 	    go build -o build/release/$(RELEASE_TARGET)/bin/$$t $(RELEASE_GOFLAGS) ./cmd/$$t; \
 	done
