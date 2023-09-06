@@ -53,8 +53,6 @@ clean-repo:
     - git checkout -- .
     - git clean -fdx .
 
-# TODO: this actually tries to execute the merge, may not be the best way to check this
-# it will also fail for master branch merges
 branch-check:
   stage: prepare
   cache: []
@@ -62,135 +60,68 @@ branch-check:
   script:
     - if [[ "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}" != "master" && "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
 
-#lint-go:
-#  stage: lint
-#  extends: .merge-request-job
-#  script:
-#    - make lint-go
-#  allow_failure: true
-#
-#build-linux:
-#  stage: build
-#  cache:
-#    # inherit all global cache settings
-#    <<: *global_cache_configuration
-#  dependencies: []
-#  extends: .merge-request-job
-#  script:
-#    - git checkout -- .
-#    - git clean -fdx .
-#    - make all
-#    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left #modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
-#
-#build-release-linux:
-#  stage: build-release
-#  cache: []
-#  dependencies: []
-#  needs: 
-#    - test-go-report
-#  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder:latest
-#  script:
-#    - make -f Makefile.release release-linux
-#  artifacts:
-#    when: always
-#    paths:
-#      - ./build/release/*/*.tgz
-#    expire_in: 1 day
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#
-#build-release-windows:
-#  stage: build-release
-#  cache: []
-#  dependencies: []
-#  needs: 
-#    - test-go-report
-#  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder:latest
-#  script:
-#    - make -f Makefile.release release-windows
-#  artifacts:
-#    when: always
-#    paths:
-#      - ./build/release/*/*-setup.exe
-#      - ./build/release/*/*.zip
-#    expire_in: 1 day
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#
-#build-release-macos:
-#  stage: build-release
-#  cache: []
-#  dependencies: []
-#  needs: 
-#    - test-go-report
-#  tags: [docker_mac_runner]
-#  script:
-#    - make -f Makefile.release release-macos
-#  artifacts:
-#    when: always
-#    paths:
-#      - ./build/release/*/*.tgz
-#    expire_in: 1 day
-#  rules:
-#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-#
-#test-go-report:
-#  stage: test
-#  dependencies: []
-#  needs: ["build-linux"]
-#  cache:
-#    # inherit all global cache settings
-#    <<: *global_cache_configuration
-#    # override the policy
-#    policy: pull
-#  extends: .merge-request-job
-#  script:
-#    - make test-go-cover && tail -n1 .test-go-cover.func
-#  artifacts:
-#    when: always
-#    paths:
-#      - .test-go-report.xml
-#      - .test-go-cover.func
-#      - .test-go-cover.html
-#    reports:
-#      junit: .test-go-report.xml
-#    expire_in: 2 day
-#  coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
-#  allow_failure: true
-#
-#deploy-release-linux:
-#  stage: deploy-release
-#  cache: []
-#  dependencies: []
-#  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder:latest
-#  script:
-#    - make -f Makefile.release release-linux
-#    - make -f Makefile.release release-upload
-#  only:
-#    - tags
-#
-#deploy-release-windows:
-#  stage: deploy-release
-#  cache: []
-#  dependencies: []
-#  tags: [docker_runner]
-#  image: ${container_registry}/energi3_builder:latest
-#  script:
-#    - make -f Makefile.release release-windows
-#    - make -f Makefile.release release-upload
-#  only:
-#    - tags
-#
-#deploy-release-mac:
-#  stage: deploy-release
-#  cache: []
-#  dependencies: []
-#  tags: [docker_mac_runner]
-#  script:
-#    - make -f Makefile.release release-macos
-#    - make -f Makefile.release release-upload
-#  only:
-#    - tags
+lint-go:
+  stage: lint
+  extends: .merge-request-job
+  script:
+    - make lint
+
+format-go:
+  stage: lint
+  extends: .merge-request-job
+  script:
+    - if [[ "$(gofmt -s -e -d .)" != "" ]]; then echo "[Error] gofmt found unformatted files"; exit 1; fi
+
+build-linux:
+  stage: build
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+  dependencies: ["lint-go", "format-go"]
+  extends: .merge-request-job
+  script:
+    - git checkout -- .
+    - git clean -fdx .
+    - make all
+    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
+
+test-go-report:
+  stage: test
+  dependencies: []
+  needs: ["build-linux"]
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+    # override the policy
+    policy: pull
+  extends: .merge-request-job
+  script:
+    - make test-go-cover && tail -n1 .test-go-cover.func
+  artifacts:
+    when: always
+    paths:
+      - .test-go-report.xml
+      - .test-go-cover.func
+      - .test-go-cover.html
+    reports:
+      junit: .test-go-report.xml
+    expire_in: 2 day
+  coverage: "/\\(statements\\)\\s+\\d+.?\\d+%/"
+
+build-release:
+  stage: build-release
+  cache: []
+  extends: .merge-request-job
+  dependencies: ["test-go-report"]
+  needs: 
+    - test-go-report
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder:latest
+  script:
+    - make -f Makefile.release release
+    - make -f Makefile.release release-upload
+  artifacts:
+    when: always
+    paths:
+      - ./build/release/*/*.tgz
+    expire_in: 1 day
