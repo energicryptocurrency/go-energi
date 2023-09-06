@@ -64,7 +64,7 @@ lint-go:
   stage: lint
   extends: .merge-request-job
   script:
-    - make lint-go
+    - make lint
 
 format-go:
   stage: lint
