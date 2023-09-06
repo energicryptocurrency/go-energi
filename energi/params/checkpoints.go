@@ -23,7 +23,7 @@ import (
 
 // map Genesis to map of checkpoints
 var EnergiCheckpoints = map[common.Hash]map[uint64]common.Hash{
-	eth_params.MainnetGenesisHash: map[uint64]common.Hash{
+	eth_params.MainnetGenesisHash: {
 		uint64(38283):   common.HexToHash("0xbcdaf97b5fa9041b34afcee7ffa85ce88e8e1a9eada2855b5e3ee55b8153f70d"),
 		uint64(38284):   common.HexToHash("0x2a724c7ae36f26b61f5702b0b2099c37061b105b619f250991b573e8d32d63a0"),
 		uint64(324911):  common.HexToHash("0x6c4d2ec49ebe49135793733b8fb43adf5e0d883d96a8d65dbe98e1debcc77c3a"),
