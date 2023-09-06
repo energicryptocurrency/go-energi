@@ -985,10 +985,26 @@ func TestBindings(t *testing.T) {
 		t.Fatalf("failed to convert binding test to modules: %v\n%s", err, out)
 	}
 	pwd, _ := os.Getwd()
+
+	// go get github.com/energicryptocurrency/go-energi
+	getCmd := exec.Command(gocmd, "get", "github.com/energicryptocurrency/go-energi")
+	getCmd.Dir = pkg
+	if out, err := getCmd.CombinedOutput(); err != nil {
+		t.Fatalf("failed to get go-energi: %v\n%s", err, string(out))
+	}
+
+	// go mod edit -replace ...
 	replacer := exec.Command(gocmd, "mod", "edit", "-replace", "github.com/energicryptocurrency/go-energi="+filepath.Join(pwd, "..", "..", "..")) // Repo root
 	replacer.Dir = pkg
 	if out, err := replacer.CombinedOutput(); err != nil {
 		t.Fatalf("failed to replace binding test dependency to current source tree: %v\n%s", err, out)
+	}
+
+	// go mod tidy
+	tidyCmd := exec.Command(gocmd, "mod", "tidy")
+	tidyCmd.Dir = pkg
+	if out, err := tidyCmd.CombinedOutput(); err != nil {
+		t.Fatalf("failed to get go-energi: %v\n%s", err, string(out))
 	}
 
 	cmd = exec.Command(gocmd, "mod", "vendor")
