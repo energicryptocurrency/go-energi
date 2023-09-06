@@ -37,12 +37,6 @@ release-tools:
 	     g++-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
 	    gcc-aarch64-linux-gnu libc6-dev-arm64-cross \
 	     g++-aarch64-linux-gnu \
-	    gcc-multilib-mips64-linux-gnuabi64 gcc-mips64-linux-gnuabi64 libc6-dev-mips64-cross \
-	     g++-multilib-mips64-linux-gnuabi64 g++-mips64-linux-gnuabi64 \
-	    gcc-multilib-mipsel-linux-gnu gcc-mipsel-linux-gnu libc6-dev-mipsel-cross \
-	     g++-multilib-mipsel-linux-gnu g++-mipsel-linux-gnu \
-	    gcc-multilib-mips64el-linux-gnuabi64 gcc-mips64el-linux-gnuabi64 libc6-dev-mips64el-cross \
-	     g++-multilib-mips64el-linux-gnuabi64 g++-mips64el-linux-gnuabi64 \
 	  zip dos2unix
 
 
