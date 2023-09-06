@@ -83,7 +83,7 @@ build-linux:
     - git checkout -- .
     - git clean -fdx .
     - make all
-    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left #modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
+    - if [[ -z "$(git status --porcelain)" ]]; then echo "Working directory clean"; else echo -e "[Error] compile job left modified files in working directory:\n$(git status --porcelain)"; exit 1; fi
 
 test-go-report:
   stage: test
