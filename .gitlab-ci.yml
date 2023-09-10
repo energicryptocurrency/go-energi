@@ -29,7 +29,6 @@ cache: &global_cache_configuration
 build-builder:
   stage: base
   cache: []
-  dependencies: []
   extends: .docker-job
   script:
     - docker build -t energi3_builder:${CI_COMMIT_REF_NAME} -f Dockerfile.builder --build-arg repository_remote=${repository_remote} .
@@ -42,12 +41,11 @@ build-builder:
       changes:
         - Dockerfile.builder
     - if: $CI_COMMIT_TAG
-    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 clean-repo:
   stage: prepare
   cache: []
-  dependencies: []
   extends: .merge-request-job
   script:
     - git checkout -- .
@@ -70,7 +68,9 @@ build-linux:
   cache:
     # inherit all global cache settings
     <<: *global_cache_configuration
-  dependencies: ["lint-go", "format-go"]
+  needs:
+    - "lint-go"
+    - "format-go"
   extends: .merge-request-job
   script:
     - git checkout -- .
@@ -80,8 +80,8 @@ build-linux:
 
 test-go-report:
   stage: test
-  dependencies: []
-  needs: ["build-linux"]
+  needs:
+    - "build-linux"
   cache:
     # inherit all global cache settings
     <<: *global_cache_configuration
@@ -105,16 +105,29 @@ build-release:
   stage: build-release
   cache: []
   extends: .docker-job
-  dependencies: ["test-go-report"]
-  needs: 
+  needs:
     - test-go-report
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
   script:
     - make -f Makefile.release release
-    - make -f Makefile.release release-upload
   artifacts:
     when: always
     paths:
       - ./build/release/*/*.tgz
+      - ./build/release/*/*-setup.exe
+      - ./build/release/*/*.zip
     expire_in: 1 day
+
+deploy-release:
+  stage: deploy-release
+  cache: []
+  needs:
+    - build-release
+  extends: .docker-job
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder:latest
+  script:
+    - make -f Makefile.release release-upload
+  rules:
+    - if: $CI_COMMIT_TAG
