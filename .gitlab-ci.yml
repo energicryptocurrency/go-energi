@@ -53,13 +53,6 @@ clean-repo:
     - git checkout -- .
     - git clean -fdx .
 
-branch-check:
-  stage: prepare
-  cache: []
-  extends: .merge-request-job
-  script:
-    - if [[ "${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}" != "master" && "$(git merge origin/develop)" != "Already up to date." ]]; then echo "[Error] branch is not up to date with develop"; exit 1; fi
-
 lint-go:
   stage: lint
   extends: .merge-request-job
