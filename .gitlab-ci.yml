@@ -105,8 +105,6 @@ build-release:
   stage: build-release
   cache: []
   extends: .docker-job
-  needs:
-    - test-go-report
   tags: [docker_runner]
   image: ${container_registry}/energi3_builder:latest
   script:
