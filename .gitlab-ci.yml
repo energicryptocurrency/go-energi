@@ -26,6 +26,12 @@ cache: &global_cache_configuration
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
+.tag-job:
+  tags: [docker_runner]
+  image: ${container_registry}/energi3_builder
+  rules:
+    - if: $CI_COMMIT_TAG
+
 build-builder:
   stage: base
   cache: []
@@ -104,9 +110,7 @@ test-go-report:
 build-release:
   stage: build-release
   cache: []
-  extends: .docker-job
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder:latest
+  extends: .tag-job
   script:
     - make -f Makefile.release release
   artifacts:
@@ -116,18 +120,16 @@ build-release:
       - ./build/release/*/*-setup.exe
       - ./build/release/*/*.zip
     expire_in: 1 day
-  rules:
-    - if: $CI_COMMIT_TAG
 
 deploy-release:
   stage: deploy-release
-  cache: []
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache_configuration
+    # override the policy
+    policy: pull
   needs:
     - build-release
-  extends: .docker-job
-  tags: [docker_runner]
-  image: ${container_registry}/energi3_builder:latest
+  extends: .tag-job
   script:
     - make -f Makefile.release release-upload
-  rules:
-    - if: $CI_COMMIT_TAG
