@@ -16,11 +16,11 @@ RUN apt -y update
 RUN apt -y install curl gnupg lsb-release software-properties-common git build-essential wget awscli sudo
 
 # golang variables
-ARG golang_version="1.21.0"
+ARG golang_version="1.21.1"
 ARG golang_hostarch="linux-amd64"
 ARG golang_filename="go${golang_version}.${golang_hostarch}.tar.gz"
 ARG golang_url="https://golang.org/dl/${golang_filename}"
-ARG golang_sha256="d0398903a16ba2232b389fb31032ddf57cac34efda306a0eebac34f0965a0742"
+ARG golang_sha256="b3075ae1ce5dab85f89bc7905d1632de23ca196bd8336afd93fa97434cfa55ae"
 
 # install golang
 RUN wget -nv ${golang_url}
