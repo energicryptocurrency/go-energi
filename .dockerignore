@@ -7,3 +7,6 @@
 build/_workspace
 build/_bin
 tests/testdata
+build/bin
+build/release
+.envrc
