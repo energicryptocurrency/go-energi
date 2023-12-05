@@ -11,6 +11,14 @@
 - Upon activating `Banana-pos` hardfork, new pos algorithm will make block reward distribution proportional to the user's active stake
 - Upon activating `Banana-difficulty-adjustment` hardfork, new values will be used for difficulty adjustment algorithm
 
+## 1.1.7
+
+### Changed
+- bumped golang version to v1.21.4
+
+### Fixed
+- fixes debug_traceBlock methods that were missing governance transaction info
+
 ## 1.1.6
 
 ### Changed
